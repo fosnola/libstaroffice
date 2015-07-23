@@ -1,0 +1,471 @@
+/* -*- Mode: C++; c-default-style: "k&r"; indent-tabs-mode: nil; tab-width: 2; c-basic-offset: 2 -*- */
+
+/* libstaroffice
+* Version: MPL 2.0 / LGPLv2+
+*
+* The contents of this file are subject to the Mozilla Public License Version
+* 2.0 (the "License"); you may not use this file except in compliance with
+* the License or as specified alternatively below. You may obtain a copy of
+* the License at http://www.mozilla.org/MPL/
+*
+* Software distributed under the License is distributed on an "AS IS" basis,
+* WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+* for the specific language governing rights and limitations under the
+* License.
+*
+* Major Contributor(s):
+* Copyright (C) 2002 William Lachance (wrlach@gmail.com)
+* Copyright (C) 2002,2004 Marc Maurer (uwog@uwog.net)
+* Copyright (C) 2004-2006 Fridrich Strba (fridrich.strba@bluewin.ch)
+* Copyright (C) 2006, 2007 Andrew Ziem
+* Copyright (C) 2011, 2012 Alonso Laurent (alonso@loria.fr)
+*
+*
+* All Rights Reserved.
+*
+* For minor contributions see the git repository.
+*
+* Alternatively, the contents of this file may be used under the terms of
+* the GNU Lesser General Public License Version 2 or later (the "LGPLv2+"),
+* in which case the provisions of the LGPLv2+ are applicable
+* instead of those above.
+*/
+
+#include <cmath>
+#include <cstdarg>
+#include <cstdio>
+#include <iomanip>
+#include <string>
+#include <sstream>
+
+#include <ctype.h>
+#include <locale.h>
+
+#include <librevenge-stream/librevenge-stream.h>
+
+#include "libstaroffice_internal.hxx"
+
+/** namespace used to regroup all libwpd functions, enumerations which we have redefined for internal usage */
+namespace libstoff
+{
+uint8_t readU8(librevenge::RVNGInputStream *input)
+{
+  unsigned long numBytesRead;
+  uint8_t const *p = input->read(sizeof(uint8_t), numBytesRead);
+
+  if (!p || numBytesRead != sizeof(uint8_t))
+    throw libstoff::FileException();
+
+  return *p;
+}
+
+void appendUnicode(uint32_t val, librevenge::RVNGString &buffer)
+{
+  uint8_t first;
+  int len;
+  if (val < 0x80) {
+    first = 0;
+    len = 1;
+  }
+  else if (val < 0x800) {
+    first = 0xc0;
+    len = 2;
+  }
+  else if (val < 0x10000) {
+    first = 0xe0;
+    len = 3;
+  }
+  else if (val < 0x200000) {
+    first = 0xf0;
+    len = 4;
+  }
+  else if (val < 0x4000000) {
+    first = 0xf8;
+    len = 5;
+  }
+  else {
+    first = 0xfc;
+    len = 6;
+  }
+
+  uint8_t outbuf[6] = { 0, 0, 0, 0, 0, 0 };
+  int i;
+  for (i = len - 1; i > 0; --i) {
+    outbuf[i] = uint8_t((val & 0x3f) | 0x80);
+    val >>= 6;
+  }
+  outbuf[0] = uint8_t(val | first);
+  for (i = 0; i < len; i++) buffer.append((char)outbuf[i]);
+}
+}
+
+namespace libstoff
+{
+std::string numberingTypeToString(NumberingType type)
+{
+  switch (type) {
+  case ARABIC:
+    return "1";
+  case LOWERCASE:
+    return "a";
+  case UPPERCASE:
+    return "A";
+  case LOWERCASE_ROMAN:
+    return "i";
+  case UPPERCASE_ROMAN:
+    return "I";
+  case NONE:
+  case BULLET:
+  default:
+    break;
+  }
+  STOFF_DEBUG_MSG(("libstoff::numberingTypeToString: must not be called with type %d\n", int(type)));
+  return "1";
+}
+
+std::string numberingValueToString(NumberingType type, int value)
+{
+  std::stringstream ss;
+  std::string s("");
+  switch (type) {
+  case ARABIC:
+    ss << value;
+    return ss.str();
+  case LOWERCASE:
+  case UPPERCASE:
+    if (value <= 0) {
+      STOFF_DEBUG_MSG(("libstoff::numberingValueToString: value can not be negative or null for type %d\n", int(type)));
+      return (type == LOWERCASE) ? "a" : "A";
+    }
+    while (value > 0) {
+      s = char((type == LOWERCASE ? 'a' : 'A')+((value-1)%26))+s;
+      value = (value-1)/26;
+    }
+    return s;
+  case LOWERCASE_ROMAN:
+  case UPPERCASE_ROMAN: {
+    static char const *(romanS[]) = {"M", "CM", "D", "CD", "C", "XC", "L",
+                                     "XL", "X", "IX", "V", "IV", "I"
+                                    };
+    static char const *(romans[]) = {"m", "cm", "d", "cd", "c", "xc", "l",
+                                     "xl", "x", "ix", "v", "iv", "i"
+                                    };
+    static int const(romanV[]) = {1000, 900, 500, 400,  100, 90, 50,
+                                  40, 10, 9, 5, 4, 1
+                                 };
+    if (value <= 0 || value >= 4000) {
+      STOFF_DEBUG_MSG(("libstoff::numberingValueToString: out of range value for type %d\n", int(type)));
+      return (type == LOWERCASE_ROMAN) ? "i" : "I";
+    }
+    for (int p = 0; p < 13; p++) {
+      while (value >= romanV[p]) {
+        ss << ((type == LOWERCASE_ROMAN) ? romans[p] : romanS[p]);
+        value -= romanV[p];
+      }
+    }
+    return ss.str();
+  }
+  case NONE:
+    return "";
+    break;
+  case BULLET:
+  default:
+    STOFF_DEBUG_MSG(("libstoff::numberingValueToString: must not be called with type %d\n", int(type)));
+    break;
+  }
+  return "";
+}
+}
+
+// color function
+STOFFColor STOFFColor::barycenter(float alpha, STOFFColor const &colA,
+                                  float beta, STOFFColor const &colB)
+{
+  uint32_t res = 0;
+  for (int i=0, depl=0; i<4; i++, depl+=8) {
+    float val=alpha*float((colA.m_value>>depl)&0xFF)+beta*float((colB.m_value>>depl)&0xFF);
+    if (val < 0) val=0;
+    if (val > 256) val=256;
+    unsigned char comp= (unsigned char)val;
+    res+=uint32_t(comp<<depl);
+  }
+  return res;
+}
+
+std::ostream &operator<< (std::ostream &o, STOFFColor const &c)
+{
+  const std::streamsize width = o.width();
+  const char fill = o.fill();
+  o << "#" << std::hex << std::setfill('0') << std::setw(6)
+    << (c.m_value&0xFFFFFF)
+    // std::ios::width() takes/returns std::streamsize (long), but
+    // std::setw() takes int. Go figure...
+    << std::dec << std::setfill(fill) << std::setw(static_cast<int>(width));
+  return o;
+}
+
+std::string STOFFColor::str() const
+{
+  std::stringstream stream;
+  stream << *this;
+  return stream.str();
+}
+
+// link function
+bool STOFFLink::addTo(librevenge::RVNGPropertyList &propList) const
+{
+  propList.insert("xlink:type","simple");
+  if (!m_HRef.empty())
+    propList.insert("xlink:href",m_HRef.c_str());
+  return true;
+}
+
+// border function
+int STOFFBorder::compare(STOFFBorder const &orig) const
+{
+  int diff = int(m_style)-int(orig.m_style);
+  if (diff) return diff;
+  diff = int(m_type)-int(orig.m_type);
+  if (diff) return diff;
+  if (m_width < orig.m_width) return -1;
+  if (m_width > orig.m_width) return 1;
+  if (m_color < orig.m_color) return -1;
+  if (m_color > orig.m_color) return 1;
+  return 0;
+}
+bool STOFFBorder::addTo(librevenge::RVNGPropertyList &propList, std::string const which) const
+{
+  std::stringstream stream, field;
+  stream << m_width << "pt ";
+  if (m_type==STOFFBorder::Double || m_type==STOFFBorder::Triple) {
+    static bool first = true;
+    if (first && m_style!=Simple) {
+      STOFF_DEBUG_MSG(("STOFFBorder::addTo: find double or tripe border with complex style\n"));
+      first = false;
+    }
+    stream << "double";
+  }
+  else {
+    switch (m_style) {
+    case Dot:
+    case LargeDot:
+      stream << "dotted";
+      break;
+    case Dash:
+      stream << "dashed";
+      break;
+    case Simple:
+      stream << "solid";
+      break;
+    case None:
+    default:
+      stream << "none";
+      break;
+    }
+  }
+  stream << " " << m_color;
+  field << "fo:border";
+  if (which.length())
+    field << "-" << which;
+  propList.insert(field.str().c_str(), stream.str().c_str());
+  size_t numRelWidth=m_widthsList.size();
+  if (!numRelWidth)
+    return true;
+  if (m_type!=STOFFBorder::Double || numRelWidth!=3) {
+    static bool first = true;
+    if (first) {
+      STOFF_DEBUG_MSG(("STOFFBorder::addTo: relative width is only implemented with double style\n"));
+      first = false;
+    }
+    return true;
+  }
+  double totalWidth=0;
+  for (size_t w=0; w < numRelWidth; w++)
+    totalWidth+=m_widthsList[w];
+  if (totalWidth <= 0) {
+    STOFF_DEBUG_MSG(("STOFFBorder::addTo: can not compute total width\n"));
+    return true;
+  }
+  double factor=m_width/totalWidth;
+  stream.str("");
+  for (size_t w=0; w < numRelWidth; w++) {
+    stream << factor *m_widthsList[w]<< "pt";
+    if (w+1!=numRelWidth)
+      stream << " ";
+  }
+  field.str("");
+  field << "style:border-line-width";
+  if (which.length())
+    field << "-" << which;
+  propList.insert(field.str().c_str(), stream.str().c_str());
+  return true;
+}
+
+std::ostream &operator<< (std::ostream &o, STOFFBorder::Style const &style)
+{
+  switch (style) {
+  case STOFFBorder::None:
+    o << "none";
+    break;
+  case STOFFBorder::Simple:
+    break;
+  case STOFFBorder::Dot:
+    o << "dot";
+    break;
+  case STOFFBorder::LargeDot:
+    o << "large dot";
+    break;
+  case STOFFBorder::Dash:
+    o << "dash";
+    break;
+  default:
+    STOFF_DEBUG_MSG(("STOFFBorder::operator<<: find unknown style\n"));
+    o << "#style=" << int(style);
+    break;
+  }
+  return o;
+}
+
+std::ostream &operator<< (std::ostream &o, STOFFBorder const &border)
+{
+  o << border.m_style << ":";
+  switch (border.m_type) {
+  case STOFFBorder::Single:
+    break;
+  case STOFFBorder::Double:
+    o << "double:";
+    break;
+  case STOFFBorder::Triple:
+    o << "triple:";
+    break;
+  default:
+    STOFF_DEBUG_MSG(("STOFFBorder::operator<<: find unknown type\n"));
+    o << "#type=" << int(border.m_type) << ":";
+    break;
+  }
+  if (border.m_width > 1 || border.m_width < 1) o << "w=" << border.m_width << ":";
+  if (!border.m_color.isBlack())
+    o << "col=" << border.m_color << ":";
+  o << ",";
+  size_t numRelWidth=border.m_widthsList.size();
+  if (numRelWidth) {
+    o << "bordW[rel]=[";
+    for (size_t i=0; i < numRelWidth; i++)
+      o << border.m_widthsList[i] << ",";
+    o << "]:";
+  }
+  o << border.m_extra;
+  return o;
+}
+
+// picture function
+bool STOFFEmbeddedObject::addTo(librevenge::RVNGPropertyList &propList) const
+{
+  bool firstSet=false;
+  librevenge::RVNGPropertyListVector auxiliarVector;
+  for (size_t i=0; i<m_dataList.size(); ++i) {
+    if (m_dataList[i].empty()) continue;
+    std::string type=m_typeList.size() ? m_typeList[i] : "image/pict";
+    if (!firstSet) {
+      propList.insert("librevenge:mime-type", type.c_str());
+      propList.insert("office:binary-data", m_dataList[i]);
+      firstSet=true;
+      continue;
+    }
+    librevenge::RVNGPropertyList auxiList;
+    auxiList.insert("librevenge:mime-type", type.c_str());
+    auxiList.insert("office:binary-data", m_dataList[i]);
+    auxiliarVector.append(auxiList);
+  }
+  if (!auxiliarVector.empty())
+    propList.insert("librevenge:replacement-objects", auxiliarVector);
+  if (!firstSet) {
+    STOFF_DEBUG_MSG(("STOFFEmbeddedObject::addTo: called without picture\n"));
+    return false;
+  }
+  return true;
+}
+
+int STOFFEmbeddedObject::cmp(STOFFEmbeddedObject const &pict) const
+{
+  if (m_typeList.size()!=pict.m_typeList.size())
+    return m_typeList.size()<pict.m_typeList.size() ? -1 : 1;
+  for (size_t i=0; i<m_typeList.size(); ++i) {
+    if (m_typeList[i]<pict.m_typeList[i]) return -1;
+    if (m_typeList[i]>pict.m_typeList[i]) return 1;
+  }
+  if (m_dataList.size()!=pict.m_dataList.size())
+    return m_dataList.size()<pict.m_dataList.size() ? -1 : 1;
+  for (size_t i=0; i<m_dataList.size(); ++i) {
+    if (m_dataList[i].size() < pict.m_dataList[i].size()) return 1;
+    if (m_dataList[i].size() > pict.m_dataList[i].size()) return -1;
+
+    const unsigned char *ptr=m_dataList[i].getDataBuffer();
+    const unsigned char *aPtr=pict.m_dataList[i].getDataBuffer();
+    if (!ptr || !aPtr) continue; // must only appear if the two buffers are empty
+    for (unsigned long h=0; h < m_dataList[i].size(); ++h, ++ptr, ++aPtr) {
+      if (*ptr < *aPtr) return 1;
+      if (*ptr > *aPtr) return -1;
+    }
+  }
+  return 0;
+}
+
+std::ostream &operator<<(std::ostream &o, STOFFEmbeddedObject const &pict)
+{
+  if (pict.isEmpty()) return o;
+  o << "[";
+  for (size_t i=0; i<pict.m_typeList.size(); ++i) {
+    if (pict.m_typeList[i].empty())
+      o << "_,";
+    else
+      o << pict.m_typeList[i] << ",";
+  }
+  o << "],";
+  return o;
+}
+
+// a little geometry
+namespace libstoff
+{
+STOFFVec2f rotatePointAroundCenter(STOFFVec2f const &point, STOFFVec2f const &center, float angle)
+{
+  float angl=float(M_PI/180.)*angle;
+  STOFFVec2f pt = point-center;
+  return center + STOFFVec2f(std::cos(angl)*pt[0]-std::sin(angl)*pt[1],
+                             std::sin(angl)*pt[0]+std::cos(angl)*pt[1]);
+}
+
+STOFFBox2f rotateBoxFromCenter(STOFFBox2f const &box, float angle)
+{
+  STOFFVec2f center=box.center();
+  STOFFVec2f minPt, maxPt;
+  for (int p=0; p<4; ++p) {
+    STOFFVec2f pt=rotatePointAroundCenter(STOFFVec2f(box[p<2?0:1][0],box[(p%2)?0:1][1]), center, angle);
+    if (p==0) {
+      minPt=maxPt=pt;
+      continue;
+    }
+    for (int c=0; c<2; ++c) {
+      if (pt[c]<minPt[c])
+        minPt[c]=pt[c];
+      else if (pt[c]>maxPt[c])
+        maxPt[c]=pt[c];
+    }
+  }
+  return STOFFBox2f(minPt,maxPt);
+}
+
+// debug message
+#ifdef DEBUG
+void printDebugMsg(const char *format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  std::vfprintf(stderr, format, args);
+  va_end(args);
+}
+#endif
+}
+
+// vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

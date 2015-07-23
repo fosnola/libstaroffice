@@ -1,0 +1,101 @@
+INSTALLATION
+
+General
+=======
+
+Since libstaroffice was based on librevenge code (for convenience), you need to install
+librevenge in order to build libstaroffice. You can get librevenge from:
+
+- librevenge <http://libwpd.sourceforge.net/download.html>
+
+
+Unix/Linux
+==========
+
+Installation on Unix/Linux should be simple. Simply execute the following 
+sequence of commands:
+
+./configure ; make ; su -c 'make install'
+
+Extensive installation instructions can be found in the INSTALL file.
+
+
+Windows - Microsoft(tm) Visual Studio/C++
+=========================================
+
+A workspace for MSVC6 can be found in the ./build/win32/ directory.
+This workspace contains a projects file to compile a release version or 
+a debug version of libstaroffice. 
+
+NOTE: Using the MSVC build system will result in a static library only. 
+No dll can be created yet using this build system. If you want to create 
+a dll, please use the MingW build system (see below for details).
+
+
+Windows - MinGW
+===============
+
+First of all, in order to use librevenge in your application, you do not need
+to build it yourself. If you have access to a binary distribution, you
+are encouraged to use it. If for whatever reason you still want to build
+librevenge using MinGW, read following instructions.
+
+
+* Build environment and dependencies
+
+In order to build librevenge, you have to have installed MinGW distribution from
+http://www.mingw.org. Because the build system of libstaroffice uses autotools, you
+must install also the MSys packages. It is advisable to install all recent
+packages into a path that does not contain spaces. Besides the MinGW
+distribution, you have to install the _runtime_ and _development_ packages of
+libstaroffice dependency librevenge from libwpd.sourceforge.net/download.html. The packages
+you need are librevenge-{version}-MinGW.zip and librevenge-devel-{version}-MinGW.zip
+
+
+* Build procedure
+
+1. Unpack the source code by running:
+
+  gunzip -dc libstaroffice-{version}.tar.gz | tar xpf
+
+You can also use WinZip or any other GUI compression tool.
+
+2. Next, run:
+
+  export ACLOCAL_FLAGS='-I <pkg-config installation prefix>/share/aclocal'; \
+  ./autogen.sh
+
+Some versions of libtool have bug that prevents MinGW from creating shared
+libraries. The autogen.sh script "libtoolizes" the package using the libtool
+included with MinGW distribution. Like that you are sure that your libtool is
+able to create DLLs.
+The ACLOCAL_FLAGS variable is there in order to allow the auto* scripts to find
+the pkg.m4 macro that is part of the pkg-config distribution. If this macro is
+not found, the generated configure script will be ending with an error.
+
+3. Time to configure libstaroffice; run:
+
+  ./configure [--prefix=<target>] [--enable-static] [--disable-shared]
+
+By default, the configure script uses as prefix "/usr/local" and configures to
+create only shared libraries. Myself, I build using following options:
+"./configure --prefix=/target --enable-static --enable-shared"
+
+4. Nearly done. Make sure you have a clean build by running:
+ 
+  make clean all
+
+5. And last but not least, compile and install librevenge by running:
+
+  make install [-i]
+
+If you configure using "--enable-static --disable-shared" (pure static
+library creation), the libtool import libraries are not created. Make
+will try to install them and will stop with error. The "-i" option
+makes it to report the error, but not to stop. Like that the
+installation will succeed.
+
+That's all folks! While no mailing exists, for more information, ask
+questions directly to osnola@users.sourceforge.net. Remember that
+Uncle Google can also be of big help especially when the problem is
+not with libstaroffice, but with one of its dependencies.

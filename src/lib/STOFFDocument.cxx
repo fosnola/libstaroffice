@@ -1,0 +1,305 @@
+/* -*- Mode: C++; c-default-style: "k&r"; indent-tabs-mode: nil; tab-width: 2; c-basic-offset: 2 -*- */
+
+/* libstaroffice
+* Version: MPL 2.0 / LGPLv2+
+*
+* The contents of this file are subject to the Mozilla Public License Version
+* 2.0 (the "License"); you may not use this file except in compliance with
+* the License or as specified alternatively below. You may obtain a copy of
+* the License at http://www.mozilla.org/MPL/
+*
+* Software distributed under the License is distributed on an "AS IS" basis,
+* WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+* for the specific language governing rights and limitations under the
+* License.
+*
+* Major Contributor(s):
+* Copyright (C) 2002 William Lachance (wrlach@gmail.com)
+* Copyright (C) 2002,2004 Marc Maurer (uwog@uwog.net)
+* Copyright (C) 2004-2006 Fridrich Strba (fridrich.strba@bluewin.ch)
+* Copyright (C) 2006, 2007 Andrew Ziem
+* Copyright (C) 2011, 2012 Alonso Laurent (alonso@loria.fr)
+*
+*
+* All Rights Reserved.
+*
+* For minor contributions see the git repository.
+*
+* Alternatively, the contents of this file may be used under the terms of
+* the GNU Lesser General Public License Version 2 or later (the "LGPLv2+"),
+* in which case the provisions of the LGPLv2+ are applicable
+* instead of those above.
+*/
+
+/** \file STOFFDocument.cxx
+ * libstoff API: implementation of main interface functions
+ */
+
+#include "SDWParser.hxx"
+
+#include "STOFFHeader.hxx"
+#include "STOFFGraphicDecoder.hxx"
+#include "STOFFParser.hxx"
+#include "STOFFPropertyHandler.hxx"
+#include "STOFFSpreadsheetDecoder.hxx"
+
+#include <libstaroffice/libstaroffice.hxx>
+
+/** small namespace use to define private class/method used by STOFFDocument */
+namespace STOFFDocumentInternal
+{
+shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header);
+STOFFHeader *getHeader(STOFFInputStreamPtr &input, bool strict);
+bool checkHeader(STOFFInputStreamPtr &input, STOFFHeader &header, bool strict);
+}
+
+STOFFDocument::Confidence STOFFDocument::isFileFormatSupported(librevenge::RVNGInputStream *input, Kind &kind)
+try
+{
+  kind = STOFF_K_UNKNOWN;
+
+  if (!input) {
+    STOFF_DEBUG_MSG(("STOFFDocument::isFileFormatSupported(): no input\n"));
+    return STOFF_C_NONE;
+  }
+
+  STOFFInputStreamPtr ip(new STOFFInputStream(input, false));
+  shared_ptr<STOFFHeader> header;
+#ifdef DEBUG
+  header.reset(STOFFDocumentInternal::getHeader(ip, false));
+#else
+  header.reset(STOFFDocumentInternal::getHeader(ip, true));
+#endif
+
+  if (!header.get())
+    return STOFF_C_NONE;
+  kind = (STOFFDocument::Kind)header->getKind();
+  return STOFF_C_EXCELLENT;
+}
+catch (...)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::isFileFormatSupported: exception catched\n"));
+  kind = STOFF_K_UNKNOWN;
+  return STOFF_C_NONE;
+}
+
+STOFFDocument::Result STOFFDocument::parse(librevenge::RVNGInputStream */*input*/, librevenge::RVNGDrawingInterface */*documentInterface*/, char const *)
+try
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse[drawing]: is not implemented\n"));
+  return STOFF_R_UNKNOWN_ERROR;
+}
+catch (libstoff::FileException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: File exception trapped\n"));
+  return STOFF_R_FILE_ACCESS_ERROR;
+}
+catch (libstoff::ParseException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: Parse exception trapped\n"));
+  return STOFF_R_PARSE_ERROR;
+}
+catch (...)
+{
+  //fixme: too generic
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: Unknown exception trapped\n"));
+  return STOFF_R_UNKNOWN_ERROR;
+}
+
+STOFFDocument::Result STOFFDocument::parse(librevenge::RVNGInputStream */*input*/, librevenge::RVNGPresentationInterface */*documentInterface*/, char const *)
+try
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse[presentation]: is not implemented\n"));
+  return STOFF_R_UNKNOWN_ERROR;
+}
+catch (libstoff::FileException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: File exception trapped\n"));
+  return STOFF_R_FILE_ACCESS_ERROR;
+}
+catch (libstoff::ParseException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: Parse exception trapped\n"));
+  return STOFF_R_PARSE_ERROR;
+}
+catch (...)
+{
+  //fixme: too generic
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: Unknown exception trapped\n"));
+  return STOFF_R_UNKNOWN_ERROR;
+}
+
+STOFFDocument::Result STOFFDocument::parse(librevenge::RVNGInputStream */*input*/, librevenge::RVNGSpreadsheetInterface */*documentInterface*/, char const *)
+try
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse[spreadsheet]: is not implemented\n"));
+  return STOFF_R_UNKNOWN_ERROR;
+}
+catch (libstoff::FileException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: File exception trapped\n"));
+  return STOFF_R_FILE_ACCESS_ERROR;
+}
+catch (libstoff::ParseException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: Parse exception trapped\n"));
+  return STOFF_R_PARSE_ERROR;
+}
+catch (...)
+{
+  //fixme: too generic
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: Unknown exception trapped\n"));
+  return STOFF_R_UNKNOWN_ERROR;
+}
+
+STOFFDocument::Result STOFFDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *documentInterface, char const * /*password*/)
+try
+{
+  if (!input)
+    return STOFF_R_UNKNOWN_ERROR;
+
+  STOFFInputStreamPtr ip(new STOFFInputStream(input, false));
+  shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
+
+  if (!header.get()) return STOFF_R_UNKNOWN_ERROR;
+  shared_ptr<STOFFTextParser> parser=STOFFDocumentInternal::getTextParserFromHeader(ip, header.get());
+  if (!parser) return STOFF_R_UNKNOWN_ERROR;
+  parser->parse(documentInterface);
+
+  return STOFF_R_OK;
+}
+catch (libstoff::FileException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: File exception trapped\n"));
+  return STOFF_R_FILE_ACCESS_ERROR;
+}
+catch (libstoff::ParseException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: Parse exception trapped\n"));
+  return STOFF_R_PARSE_ERROR;
+}
+catch (...)
+{
+  //fixme: too generic
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: Unknown exception trapped\n"));
+  return STOFF_R_UNKNOWN_ERROR;
+}
+
+bool STOFFDocument::decodeGraphic(librevenge::RVNGBinaryData const &binary, librevenge::RVNGDrawingInterface *paintInterface)
+try
+{
+  if (!paintInterface || !binary.size()) {
+    STOFF_DEBUG_MSG(("STOFFDocument::decodeGraphic: called with no data or no converter\n"));
+    return false;
+  }
+  STOFFGraphicDecoder tmpHandler(paintInterface);
+  if (!tmpHandler.checkData(binary) || !tmpHandler.readData(binary)) return false;
+  return true;
+}
+catch (...)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::decodeGraphic: unknown error\n"));
+  return false;
+}
+
+bool STOFFDocument::decodeSpreadsheet(librevenge::RVNGBinaryData const &binary, librevenge::RVNGSpreadsheetInterface *sheetInterface)
+try
+{
+  if (!sheetInterface || !binary.size()) {
+    STOFF_DEBUG_MSG(("STOFFDocument::decodeSpreadsheet: called with no data or no converter\n"));
+    return false;
+  }
+  STOFFSpreadsheetDecoder tmpHandler(sheetInterface);
+  if (!tmpHandler.checkData(binary) || !tmpHandler.readData(binary)) return false;
+  return true;
+}
+catch (...)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::decodeSpreadsheet: unknown error\n"));
+  return false;
+}
+
+bool STOFFDocument::decodeText(librevenge::RVNGBinaryData const &, librevenge::RVNGTextInterface *)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::decodeText: unimplemented\n"));
+  return false;
+}
+
+namespace STOFFDocumentInternal
+{
+/** return the header corresponding to an input. Or 0L if no input are found */
+STOFFHeader *getHeader(STOFFInputStreamPtr &ip, bool strict)
+try
+{
+  std::vector<STOFFHeader> listHeaders;
+
+  if (!ip.get()) return 0L;
+
+  if (ip->size() < 10) return 0L;
+
+  ip->seek(0, librevenge::RVNG_SEEK_SET);
+  ip->setReadInverted(false);
+
+  listHeaders = STOFFHeader::constructHeader(ip);
+  size_t numHeaders = listHeaders.size();
+  if (numHeaders==0) return 0L;
+
+  for (size_t i = 0; i < numHeaders; i++) {
+    if (!STOFFDocumentInternal::checkHeader(ip, listHeaders[i], strict))
+      continue;
+    return new STOFFHeader(listHeaders[i]);
+  }
+  return 0L;
+}
+catch (libstoff::FileException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocumentInternal::STOFFDocument[getHeader]:File exception trapped\n"));
+  return 0L;
+}
+catch (libstoff::ParseException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocumentInternal::getHeader:Parse exception trapped\n"));
+  return 0L;
+}
+catch (...)
+{
+  //fixme: too generic
+  STOFF_DEBUG_MSG(("STOFFDocumentInternal::getHeader:Unknown exception trapped\n"));
+  return 0L;
+}
+
+/** Factory wrapper to construct a parser corresponding to an text header */
+shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header)
+{
+  shared_ptr<STOFFTextParser> parser;
+  if (!header)
+    return parser;
+#ifndef DEBUG
+  if (header->getKind()!=STOFFDocument::STOFF_K_TEXT)
+    return parser;
+#endif
+  try {
+    parser.reset(new SDWParser(input, header));
+  }
+  catch (...) {
+  }
+  return parser;
+}
+
+/** Wrapper to check a basic header of a mac file */
+bool checkHeader(STOFFInputStreamPtr &input, STOFFHeader &header, bool strict)
+try
+{
+  shared_ptr<STOFFParser> parser=getTextParserFromHeader(input, &header);
+  if (!parser)
+    return false;
+  return parser->checkHeader(&header, strict);
+}
+catch (...)
+{
+  STOFF_DEBUG_MSG(("STOFFDocumentInternal::checkHeader:Unknown exception trapped\n"));
+  return false;
+}
+
+}
+// vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

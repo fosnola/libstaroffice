@@ -1,0 +1,10 @@
+.deps
+.libs
+*.lo
+*.la
+*.o
+Makefile
+Makefile.in
+sdw2html
+*.rc
+*.exe

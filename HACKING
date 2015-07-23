@@ -1,0 +1,36 @@
+libstaroffice coding style
+-------------------
+
+Indentation/spacing: We indent with tabs. Not spaces. This decision is, of
+course, rather contentious, but it does have the force of inertia going for
+it. Try to keep lines less than 120 columns wide. Please run
+
+    astyle -HU -A3 -k3 -y -n -s2 -r \*.cpp \*.h \*.?xx
+
+Naming: Version-specific classes, enumerations, and defines should be prefixed 
+with a clear abreviation of the format 'ClarisWks', 'MacWrt', ...
+Generic classes (this includes utility abstractions like streams and strings) 
+should be prefixed with STOFF.
+
+For better worse, we have decided on using the 'm_' prefix for naming class and struct
+variables (i.e.: my_class->m_var). Short-hand for variable names is allowed,
+but don't overdo it (m_var->len() instead of m_variable->length() is ok,
+m_nam instead of m_name is stupid).
+
+Memory allocation: Use the C++ standard operations for this (new, delete) and shared_ptr (boost, c++11, ...). 
+
+Data structures: Use the C++ standard library wherever appropriate and 
+convenient. It should almost never be necessary to roll your own data 
+structure.
+
+Strings: You may use either the C++ standard strings or our very own 
+UTF8-compliant RVNGString. Hand-allocated char *'s are discouraged.
+
+Further information: The OpenOffice.org (http://tools.openoffice.org/coding.html)
+and AbiWord (cvs://cvs.abisource.com/abi/docs/AbiSourceCodeGuidelines.abw) 
+contain lots of useful information that will make you a better C++ coder. 
+Follow their advice religiously, except when they contradict something in this 
+document.
+
+Fun: Remember, the important thing is to have fun. :-) These rules are a means,
+not an end. Happy hacking!

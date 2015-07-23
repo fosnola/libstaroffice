@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# Build runtime and developer zipfiles for libstaroffice on Win32.
+
+ZIP=libstaroffice-@STAROFFICE_VERSION@-MinGW.zip
+DEVZIP=libstaroffice-devel-@STAROFFICE_VERSION@-MinGW.zip
+TOOLSZIP=libstaroffice-tools-@STAROFFICE_VERSION@.zip
+
+cd $DESTDIR@prefix@
+
+DLLDIR=lib
+[ -f bin/libstaroffice-@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@.dll ] && \
+DLLDIR=bin
+
+@STRIP@ --strip-all \
+$DLLDIR/libstaroffice-@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@.dll \
+bin/sdw2html.exe \
+bin/sdw2raw.exe \
+bin/sdw2text.exe
+
+upx -qqq --best \
+$DLLDIR/libstaroffice-@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@.dll \
+bin/sdw2html.exe \
+bin/sdw2raw.exe \
+bin/sdw2text.exe
+
+rm $ZIP
+zip -q $ZIP -@ <<EOF
+$DLLDIR/libstaroffice-@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@.dll
+EOF
+
+rm $DEVZIP
+zip -q -r $DEVZIP -@ <<EOF
+include/libstaroffice-@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@
+lib/libstaroffice-@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@.dll.a
+lib/libstaroffice-@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@.a
+lib/pkgconfig/libstaroffice-@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@.pc
+EOF
+
+rm $TOOLSZIP
+zip -q -j $TOOLSZIP -@ <<EOF
+bin/sdw2html.exe
+bin/sdw2raw.exe
+bin/sdw2text.exe
+EOF
