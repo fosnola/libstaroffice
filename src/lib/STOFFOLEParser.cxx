@@ -303,7 +303,7 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
     //      -> dir="MatOST/MatadorObject1", base="Ole10Native"
     std::string::size_type pos = name.find_last_of('/');
 
-    std::string dir, base;
+    std::string dir(""), base;
     if (pos == std::string::npos) base = name;
     else if (pos == 0) base = name.substr(1);
     else {
@@ -401,10 +401,7 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
           hasData = true;
           newConfidence = 3;
         }
-        else if (readPersists(ole, dOle.m_base, asciiFile) ||
-                 readDocumentInformation(ole, dOle.m_base, asciiFile) ||
-                 readSfxWindows(ole, dOle.m_base, asciiFile) ||
-                 readSummaryInformation(ole, dOle.m_base, asciiFile));
+        else if (readSummaryInformation(ole, dOle.m_base, asciiFile));
         else
           ok = false;
       }
@@ -412,14 +409,6 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
         ok = false;
       }
       if (!ok) {
-        // REMOVEME
-        libstoff::DebugStream f;
-        if (dOle.m_base=="Star Framework Config File")
-          f << "Entries(StarFrameworkConfigFile):";
-        else
-          f << "Entries(" << dOle.m_base << "):";
-        asciiFile.addPos(0);
-        asciiFile.addNote(f.str().c_str());
         m_unknownOLEs.push_back(dOle.m_name);
         asciiFile.reset();
         continue;
@@ -506,245 +495,6 @@ bool STOFFOLEParser::readOle(STOFFInputStreamPtr ip, std::string const &oleName,
   return true;
 }
 
-bool STOFFOLEParser::readPersists(STOFFInputStreamPtr input, std::string const &oleName,
-                                  libstoff::DebugFile &ascii)
-{
-  if (oleName!="persist elements") return false;
-  input->seek(0, librevenge::RVNG_SEEK_SET);
-  libstoff::DebugStream f;
-  f << "Entries(Persists):";
-
-  if (input->size()<21 || input->readLong(1)!=2) {
-    STOFF_DEBUG_MSG(("STOFFOLEParser::readPersists: data seems bad\n"));
-    f << "###";
-    ascii.addPos(0);
-    ascii.addNote(f.str().c_str());
-    return true;
-  }
-  int hasElt=(int) input->readLong(1);
-  if (hasElt==1) {
-    if (input->size()<29) {
-      STOFF_DEBUG_MSG(("STOFFOLEParser::readPersists: flag hasData, but zone seems too short\n"));
-      f << "###";
-      hasElt=0;
-    }
-    f << "hasData,";
-  }
-  else if (hasElt) {
-    STOFF_DEBUG_MSG(("STOFFOLEParser::readPersists: flag hasData seems bad\n"));
-    f << "#hasData=" << hasElt << ",";
-    hasElt=0;
-  }
-  int val;
-  int N=0;
-  long endDataPos=0;
-  if (hasElt) {
-    val=(int) input->readULong(1); // always 80?
-    if (val!=0x80) f << "#f0=" << std::hex << val << std::dec << ",";
-    long dSz=(int) input->readULong(4);
-    N=(int) input->readULong(4);
-    f << "dSz=" << dSz << ",N=" << N << ",";
-    if (!dSz || 7+dSz+18>input->size()) {
-      STOFF_DEBUG_MSG(("STOFFOLEParser::readPersists: data size seems bad\n"));
-      f << "###dSz";
-      dSz=0;
-      N=0;
-    }
-    endDataPos=7+dSz;
-  }
-  ascii.addPos(0);
-  ascii.addNote(f.str().c_str());
-  for (int i=0; i<N; ++i) {
-    long pos=input->tell();
-    f.str("");
-    f << "Persists-A" << i << ":";
-    val=(int) input->readULong(1); // 60|70
-    if (val) f << "f0=" << std::hex << val << std::dec << ",";
-    long id;
-    if (pos+10+37>endDataPos || !input->readCompressedLong(id)) {
-      STOFF_DEBUG_MSG(("STOFFOLEParser::readPersists: data %d seems bad\n", i));
-      f << "###";
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      break;
-    }
-    if (id!=i+1) f << "id=" << id << ",";
-    for (int j=0; j<2; ++j) { // f1=[2f|30|33]82 : another compressed long + ?
-      val=(int) input->readULong(2);
-      if (val) f << "f" << j+1 << "=" << std::hex << val << std::dec << ",";
-    }
-    val=(int) input->readULong(1); // always 0
-    if (val) f << "f3=" << val << ",";
-    int decalSz=(int) input->readULong(1);
-    int textSz=(int) input->readULong(2);
-    long endZPos=input->tell()+textSz+decalSz+36;
-    if (endZPos>endDataPos) {
-      STOFF_DEBUG_MSG(("STOFFOLEParser::readPersists: data %d seems bad\n", i));
-      f << "###textSz=" << textSz << ",";
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      break;
-    }
-    std::string text("");
-    for (int c=0; c<textSz; ++c) text += (char) input->readULong(1);
-    f << text << ",";
-    ascii.addDelimiter(input->tell(),'|');
-    input->seek(endZPos, librevenge::RVNG_SEEK_SET);
-    ascii.addPos(pos);
-    ascii.addNote(f.str().c_str());
-  }
-  input->seek(-18, librevenge::RVNG_SEEK_END);
-  long pos=input->tell();
-  f.str("");
-  f << "Persists-B:";
-  int dim[4];
-  for (int i=0; i<4; ++i) dim[i]=(int) input->readLong(4);
-  f << "dim=" << STOFFBox2i(STOFFVec2i(dim[0],dim[1]), STOFFVec2i(dim[2],dim[3])) << ",";
-  val=(int) input->readLong(2); // 0|9
-  if (val) f << "f0=" << val << ",";
-  ascii.addPos(pos);
-  ascii.addNote(f.str().c_str());
-  return true;
-}
-
-bool STOFFOLEParser::readDocumentInformation(STOFFInputStreamPtr input, std::string const &oleName,
-    libstoff::DebugFile &ascii)
-{
-  if (oleName!="SfxDocumentInfo") return false;
-  // see sfx2_docinf.cxx
-  input->seek(0, librevenge::RVNG_SEEK_SET);
-  libstoff::DebugStream f;
-  f << "Entries(DocInfo):";
-  int sSz=(int) input->readULong(2);
-  if (2+sSz>input->size()) {
-    STOFF_DEBUG_MSG(("STOFFOLEParser::readDocumentInformation: header seems bad\n"));
-    f << "###sSz=" << sSz << ",";
-    ascii.addPos(0);
-    ascii.addNote(f.str().c_str());
-    return true;
-  }
-  std::string text("");
-  for (int i=0; i<sSz; ++i) text+=(char) input->readULong(1);
-  if (text!="SfxDocumentInfo") {
-    STOFF_DEBUG_MSG(("STOFFOLEParser::readDocumentInformation: header seems bad\n"));
-    f << "###text=" << text << ",";
-    ascii.addPos(0);
-    ascii.addNote(f.str().c_str());
-    return true;
-  }
-  int val=(int) input->readULong(2);
-  if (val)
-    f << "vers=" << val << ",";
-  val=(int) input->readULong(1);
-  if (val==1)
-    f << "passwd,";
-  else if (val)
-    f << "passwd=" << val << ",";
-  f << "charSet=" << input->readULong(2) << ",";
-  for (int i=0; i<2; ++i) {
-    val=(int) input->readULong(1);
-    if (!val) continue;
-    f << (i==0 ? "graph[portable]" : "template");
-    if (val==1)
-      f <<",";
-    else if (val)
-      f << "=" << val << ",";
-  }
-  ascii.addPos(0);
-  ascii.addNote(f.str().c_str());
-
-  for (int i=0; i<17; ++i) {
-    long pos=input->tell();
-    f.str("");
-    f << "DocInfo-A" << i << ":";
-    int dSz=(int) input->readULong(2);
-    int expectedSz= i < 3 ? 33 : i < 5 ? 65 : i==5 ? 257 : i==6 ? 129 : i<15 ? 21 : 2;
-    static char const *(wh[])={
-      "time[creation]","time[mod]","time[print]","title","subject","comment","keyword",
-      "user0[name]", "user0[data]","user1[name]", "user1[data]","user2[name]", "user2[data]","user3[name]", "user3[data]",
-      "template[name]", "template[filename]"
-    };
-    f << wh[i] << ",";
-    if (dSz+2>expectedSz) {
-      if (i<15)
-        expectedSz+=0x10000;
-      else
-        expectedSz=2+dSz;
-    }
-    if (pos+expectedSz+(i<3 ? 8 : 0)>input->size()) {
-      STOFF_DEBUG_MSG(("STOFFOLEParser::readDocumentInformation: can not read string %d\n", i));
-      f << "###";
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      return true;
-    }
-    text="";
-    for (int c=0; c<dSz; ++c) text+=(char) input->readULong(1);
-    f << text << ",";
-    input->seek(pos+expectedSz, librevenge::RVNG_SEEK_SET);
-    if (i<3) {
-      f << "date=" << input->readULong(4) << ",";
-      f << "time=" << input->readULong(4) << ",";
-    }
-    ascii.addPos(pos);
-    ascii.addNote(f.str().c_str());
-  }
-
-  long pos=input->tell();
-  f.str("");
-  f << "DocInfo-B:";
-  if (pos+8>input->size()) {
-    STOFF_DEBUG_MSG(("STOFFOLEParser::readDocumentInformation: last zone seems too short\n"));
-    f << "###";
-    ascii.addPos(pos);
-    ascii.addNote(f.str().c_str());
-    return true;
-  }
-  f << "date=" << input->readULong(4) << ","; // YYYYMMDD
-  f << "time=" << input->readULong(4) << ","; // HHMMSS00
-  if (!input->isEnd()) // [MailAddr], lTime, ...
-    ascii.addDelimiter(input->tell(),'|');
-  ascii.addPos(pos);
-  ascii.addNote(f.str().c_str());
-  
-  return true;
-}
-
-bool STOFFOLEParser::readSfxWindows(STOFFInputStreamPtr input, std::string const &oleName,
-                                    libstoff::DebugFile &ascii)
-{
-  if (oleName!="SfxWindows") return false;
-  input->seek(0, librevenge::RVNG_SEEK_SET);
-  libstoff::DebugStream f;
-  f << "Entries(SfWindows):";
-  // see sc_docsh.cxx
-  ascii.addPos(0);
-  ascii.addNote(f.str().c_str());
-  while (!input->isEnd()) {
-    long pos=input->tell();
-    if (!input->checkPosition(pos+2))
-      break;
-    int dSz=(int) input->readULong(2);
-    if (!input->checkPosition(pos+2+dSz)) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    f.str("");
-    f << "SfWindows:";
-    std::string text("");
-    for (int i=0; i<dSz; ++i) text+=(char) input->readULong(1);
-    f << text;
-    ascii.addPos(pos);
-    ascii.addNote(f.str().c_str());
-  }
-  if (!input->isEnd()) {
-    STOFF_DEBUG_MSG(("STOFFOLEParser::readSfxWindows: find extra data\n"));
-    ascii.addPos(input->tell());
-    ascii.addNote("SfWindows:extra###");
-  }
-  return true;
-}
-
 bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::string const &oleName,
     libstoff::DebugFile &ascii)
 {
@@ -778,7 +528,7 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
   }
   for (int i=0; i<4; ++i) {
     val=(int) input->readULong(4);
-    static int const expected[]={(int) 0xf29f85e0,0x10684ff9,0x891ab,(int)0xd9b3272b};
+    static int const expected[]= {(int) 0xf29f85e0,0x10684ff9,0x891ab,(int)0xd9b3272b};
     if (val==expected[i]) continue;
     STOFF_DEBUG_MSG(("STOFFOLEParser::readSummaryInformation: fmid is bad\n"));
     f << "###fmid" << i << "=" << std::hex << val << std::dec << ",";

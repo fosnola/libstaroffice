@@ -73,7 +73,8 @@ std::vector<STOFFHeader> STOFFHeader::constructHeader(STOFFInputStreamPtr input)
     res.push_back(STOFFHeader(1, STOFFDocument::STOFF_K_CHART));
     return res;
   }
-  if (input->getSubStreamByName("StarDrawDocument3")) { // also StarDrawDocument ?
+  if (input->getSubStreamByName("StarDrawDocument") ||
+      input->getSubStreamByName("StarDrawDocument3")) {
     STOFF_DEBUG_MSG(("STOFFHeader::constructHeader: find a star draw document\n"));
     res.push_back(STOFFHeader(1, STOFFDocument::STOFF_K_DRAW));
   }

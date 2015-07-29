@@ -18,6 +18,12 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_LDFLAGS =
 libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES = \
 	SDWParser.cxx				\
 	SDWParser.hxx				\
+	SWAttributeManager.cxx			\
+	SWAttributeManager.hxx			\
+	SWFieldManager.cxx			\
+	SWFieldManager.hxx			\
+	SWZone.cxx				\
+	SWZone.hxx				\
 	STOFFDebug.cxx				\
 	STOFFDebug.hxx				\
 	STOFFDocument.cxx			\

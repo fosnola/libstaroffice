@@ -51,6 +51,9 @@ namespace SDWParserInternal
 struct State;
 }
 
+class SWAttributeManager;
+class SWZone;
+
 /** \brief the main class to read a StarOffice sdw file
  *
  *
@@ -58,6 +61,7 @@ struct State;
  */
 class SDWParser : public STOFFTextParser
 {
+  friend class SWAttributeManager;
 public:
   //! constructor
   SDWParser(STOFFInputStreamPtr input, STOFFHeader *header);
@@ -77,11 +81,48 @@ protected:
   //! creates the listener which will be associated to the document
   void createDocument(librevenge::RVNGTextInterface *documentInterface);
 
+  //! parses the different OLE, ...
+  bool createZones();
+
   //
   // low level
   //
 
+  //!  the "persist elements" small structure: the list of object
+  static bool readPersists(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
+  //! the document information
+  static bool readDocumentInformation(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
+  //! the windows information
+  static bool readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
+
+  //! the page style
+  bool readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
+  //! the rulers?
+  bool readSwNumRuleList(STOFFInputStreamPtr input, std::string const &fileName);
+
+  //! the main zone
+  bool readWriterDocument(STOFFInputStreamPtr input, std::string const &fileName);
+
 protected:
+  //! try a list of bookmark field : 'a'
+  bool readSWBookmarkList(SWZone &zone);
+  //! try to read some content : 'N'
+  bool readSWContent(SWZone &zone);
+  //! try to read a format zone : 'l' or 'o' or 'r'
+  bool readSWFormatDef(SWZone &zone, char kind);
+  //! try to read a number format zone : 'n'
+  bool readSWNumberFormat(SWZone &zone);
+  //! try to read a number formatter type : 'q'
+  bool readSWNumberFormatterList(SWZone &zone);
+  //! a simple rule : '0' or 'R'
+  bool readSWNumRule(SWZone &zone, char kind);
+  //! try to read a list of page style : 'p'
+  bool readSWPageDef(SWZone &zone);
+  //! try to read a list of redline : 'V' (list of 'R' list of 'D')
+  bool readSWRedlineList(SWZone &zone);
+  //! try to read some content : 'T'
+  bool readSWTextZone(SWZone &zone);
+
   //
   // data
   //

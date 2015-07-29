@@ -133,6 +133,8 @@ public:
   // get data
   //
 
+  //! returns the value of the next caracters or -1, but does not increment the position counter
+  int peek();
   //! returns a uint8, uint16, uint32 readed from actualPos
   unsigned long readULong(int num)
   {
@@ -140,15 +142,18 @@ public:
   }
   //! return a int8, int16, int32 readed from actualPos
   long readLong(int num);
+  //! try to read a color
+  bool readColor(STOFFColor &color);
   //! read a compressed long (pstm.cxx:ReadCompressed)
   bool readCompressedLong(long &res);
+  //! read a compressed unsigned long (sw_sw3imp.cxx Sw3IoImp::InULong)
+  bool readCompressedULong(unsigned long &res);
   //! try to read a double of size 8: 1.5 bytes exponent, 6.5 bytes mantisse
   bool readDouble8(double &res, bool &isNotANumber);
   //! try to read a double of size 8: 6.5 bytes mantisse, 1.5 bytes exponent
   bool readDoubleReverted8(double &res, bool &isNotANumber);
   //! try to read a double of size 10: 2 bytes exponent, 8 bytes mantisse
   bool readDouble10(double &res, bool &isNotANumber);
-
   /**! reads numbytes data, WITHOUT using any endian or section consideration
    * \return a pointer to the read elements
    */

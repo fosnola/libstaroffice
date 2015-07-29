@@ -96,7 +96,7 @@ public:
   bool parse(STOFFInputStreamPtr fileInput);
 
   //! returns the list of unknown ole
-  std::vector<std::string> const &getNotParse() const
+  std::vector<std::string> const &getUnparsedOLEZones() const
   {
     return m_unknownOLEs;
   }
@@ -132,22 +132,10 @@ public:
                  std::string const &type);
 
 protected:
-  //!  the "persist elements" small structure: the list of object
-  static bool readPersists(STOFFInputStreamPtr input, std::string const &oleName,
-                           libstoff::DebugFile &ascii);
-  //! the document information
-  static bool readDocumentInformation(STOFFInputStreamPtr input, std::string const &oleName,
-                                      libstoff::DebugFile &ascii);
   //! the summary information
   static bool readSummaryInformation(STOFFInputStreamPtr input, std::string const &oleName,
                                      libstoff::DebugFile &ascii);
-  //! the windows information
-  static bool readSfxWindows(STOFFInputStreamPtr input, std::string const &oleName,
-                             libstoff::DebugFile &ascii);
-  //! the page style
-  static bool readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &oleName,
-                                  libstoff::DebugFile &ascii);
-  
+
   //!  the "Ole" small structure : unknown contain
   static bool readOle(STOFFInputStreamPtr ip, std::string const &oleName,
                       libstoff::DebugFile &ascii);

@@ -210,6 +210,112 @@ uint8_t STOFFInputStream::readU8(librevenge::RVNGInputStream *stream)
   return *(uint8_t const *)(p);
 }
 
+int STOFFInputStream::peek()
+{
+  if (isEnd()) return -1;
+  int res=(int) readULong(1);
+  seek(-1, librevenge::RVNG_SEEK_CUR);
+  return res;
+}
+
+bool STOFFInputStream::readColor(STOFFColor &color)
+{
+  if (!m_stream || !checkPosition(tell()+2)) return false;
+  int colId=(int) readULong(2);
+  if (colId & 0x8000) {
+    if (!checkPosition(tell()+6)) return false;
+    unsigned char col[3];
+    for (int i=0; i<3; ++i) col[i]=(unsigned char)(readULong(2)>>8);
+    color=STOFFColor(col[0],col[1],col[2]);
+    return true;
+  }
+  static uint32_t const(listColors[]) = {
+    0,                          // COL_BLACK
+    0x000080,                           // COL_BLUE
+    0x008000,                          // COL_GREEN
+    0x008080,                           // COL_CYAN
+    0x800000,                            // COL_RED
+    0x800080,                        // COL_MAGENTA
+    0x808000,                          // COL_BROWN
+    0x808080,                           // COL_GRAY
+    0xc0c0c0,                      // COL_LIGHTGRAY
+    0x0000ff,                      // COL_LIGHTBLUE
+    0x00ff00,                     // COL_LIGHTGREEN
+    0x00ffff,                      // COL_LIGHTCYAN
+    0xff0000,                       // COL_LIGHTRED
+    0xff00ff,                   // COL_LIGHTMAGENTA
+    0xffff00,                         // COL_YELLOW
+    0xffffff,                          // COL_WHITE
+    0xffffff,                          // COL_MENUBAR
+    0,                          // COL_MENUBARTEXT
+    0xffffff,                          // COL_POPUPMENU
+    0,                          // COL_POPUPMENUTEXT
+    0,                          // COL_WINDOWTEXT
+    0xffffff,                          // COL_WINDOWWORKSPACE
+    0,                          // COL_HIGHLIGHT
+    0xffffff,                          // COL_HIGHLIGHTTEXT
+    0,                          // COL_3DTEXT
+    0xc0c0c0,                      // COL_3DFACE
+    0xffffff,                          // COL_3DLIGHT
+    0x808080,                           // COL_3DSHADOW
+    0xc0c0c0,                      // COL_SCROLLBAR
+    0xffffff,                          // COL_FIELD
+    0                           // COL_FIELDTEXT
+  };
+  if (colId>=int(sizeof(listColors)/sizeof(uint32_t))) {
+    STOFF_DEBUG_MSG(("STOFFInputStream::readColor: can not find color %d\n", colId));
+    return false;
+  }
+  color=STOFFColor(listColors[colId]);
+  return true;
+}
+
+bool STOFFInputStream::readCompressedULong(unsigned long &res)
+{
+  if (!m_stream)
+    return false;
+
+  unsigned long numBytesRead;
+  uint8_t const *p = m_stream->read(sizeof(uint8_t), numBytesRead);
+
+  if (!p || numBytesRead != sizeof(uint8_t))
+    return false;
+  if ((p[0]&0x80)==0) {
+    res=p[0]&0x7f;
+    return true;
+  }
+  if ((p[0]&0xC0)==0x80) {
+    res=(p[0]&0x3f);
+    if (!p || numBytesRead != sizeof(uint8_t))
+      return false;
+    res=(res<<8)|p[0];
+    return true;
+  }
+  if ((p[0]&0xe0)==0xc0) {
+    res=p[0]&0x1f;
+    p = m_stream->read(2*sizeof(uint8_t), numBytesRead);
+
+    if (!p || numBytesRead != 2*sizeof(uint8_t))
+      return false;
+    res= (res<<16)|(unsigned long)(p[1]<<8)|p[0];//checkme
+    return true;
+  }
+  if ((p[0]&0xf0)==0xe0) {
+    res=p[0]&0xf;
+    p = m_stream->read(3*sizeof(uint8_t), numBytesRead);
+
+    if (!p || numBytesRead != 3*sizeof(uint8_t))
+      return false;
+    res=(res<<24)|(unsigned long)(p[0]<<16)|(unsigned long)(p[2]<<8)|p[1];//checkme
+    return true;
+  }
+  if ((p[0]&0xf8)==0xf0) {
+    res=readULong(4);
+    return true;
+  }
+  return false;
+}
+
 bool STOFFInputStream::readCompressedLong(long &res)
 {
   if (!m_stream)
@@ -220,10 +326,6 @@ bool STOFFInputStream::readCompressedLong(long &res)
 
   if (!p || numBytesRead != sizeof(uint8_t))
     return false;
-  if (p[0]&0x80) {
-    res=p[0]&0x7f;
-    return true;
-  }
   if (p[0]&0x80) {
     res=p[0]&0x7f;
     return true;
@@ -243,7 +345,7 @@ bool STOFFInputStream::readCompressedLong(long &res)
 
     if (!p || numBytesRead != 3*sizeof(uint8_t))
       return false;
-    res=(res<<24)|(p[0]<<16)|(p[2]<<8)||p[1];//checkme
+    res=(res<<24)|(p[0]<<16)|(p[2]<<8)|p[1];//checkme
     return true;
   }
   else if (p[0]==0x10) {
