@@ -87,19 +87,7 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\..\src\lib\libstaroffice_internal.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\libstaroffice_tools_win.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\STOFFCell.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\STOFFContentListener.cxx
+SOURCE=..\..\src\lib\SDWParser.cxx
 # End Source File
 # Begin Source File
 
@@ -111,15 +99,7 @@ SOURCE=..\..\src\lib\STOFFDocument.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\STOFFFont.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\STOFFGraphicShape.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\STOFFGraphicStyle.cxx
+SOURCE=..\..\src\lib\STOFFGraphicDecoder.cxx
 # End Source File
 # Begin Source File
 
@@ -127,7 +107,7 @@ SOURCE=..\..\src\lib\STOFFHeader.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\STOFFList.cxx
+SOURCE=..\..\src\lib\STOFFInputStream.cxx
 # End Source File
 # Begin Source File
 
@@ -135,15 +115,15 @@ SOURCE=..\..\src\lib\STOFFOLEParser.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\STOFFPageSpan.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\STOFFParagraph.cxx
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\src\lib\STOFFParser.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFPropertyHandler.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFSpreadsheetDecoder.cxx
 # End Source File
 # Begin Source File
 
@@ -151,15 +131,22 @@ SOURCE=..\..\src\lib\STOFFSubDocument.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\STOFFTable.cxx
+SOURCE=..\..\src\lib\SWAttributeManager.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\STOFFTextParser.cxx
+SOURCE=..\..\src\lib\SWFieldManager.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\STOFFTextSubDocument.cxx
+SOURCE=..\..\src\lib\SWFormatManager.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\SWZone.cxx
+# Begin Source File
+
+SOURCE=..\..\src\lib\libstaroffice_internal.cxx
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -171,19 +158,11 @@ SOURCE=..\..\inc\libstaroffice\libstaroffice.hxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\libstaroffice_internal.hxx
+SOURCE=..\..\inc\libstaroffice\STOFFDocument.hxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\libstaroffice_tools_win.hxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\STOFFCell.hxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\STOFFContentListener.hxx
+SOURCE=..\..\src\lib\SDWParser.hxx
 # End Source File
 # Begin Source File
 
@@ -191,23 +170,11 @@ SOURCE=..\..\src\lib\STOFFDebug.hxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\inc\libstaroffice\STOFFDocument.hxx
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\src\lib\STOFFEntry.hxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\STOFFFont.hxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\STOFFGraphicShape.hxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\STOFFGraphicStyle.hxx
+SOURCE=..\..\src\lib\STOFFGraphicDecoder.hxx
 # End Source File
 # Begin Source File
 
@@ -215,19 +182,11 @@ SOURCE=..\..\src\lib\STOFFHeader.hxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\STOFFList.hxx
+SOURCE=..\..\src\lib\STOFFInputStream.hxx
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFOLEParser.hxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\STOFFPageSpan.hxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\STOFFParagraph.hxx
 # End Source File
 # Begin Source File
 
@@ -239,19 +198,35 @@ SOURCE=..\..\src\lib\STOFFPosition.hxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFPropertyHandler.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFSpreadsheetDecoder.hxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFSubDocument.hxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\STOFFTable.hxx
+SOURCE=..\..\src\lib\SWAttributeManager.hxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\STOFFTextParser.hxx
+SOURCE=..\..\src\lib\SWFieldManager.hxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\STOFFTextSubDocument.hxx
+SOURCE=..\..\src\lib\SWFormatManager.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\SWZone.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\libstaroffice_internal.hxx
 # End Source File
 # End Group
 # End Target
