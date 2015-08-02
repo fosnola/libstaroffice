@@ -44,8 +44,8 @@
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SWZone::SWZone(STOFFInputStreamPtr input, std::string const &ascName, std::string const &zoneName) :
-  m_input(input), m_ascii(input), m_version(0), m_documentVersion(0), m_encoding(0), m_asciiName(ascName), m_zoneName(zoneName),
+SWZone::SWZone(STOFFInputStreamPtr inputStream, std::string const &ascName, std::string const &zoneName) :
+  m_input(inputStream), m_ascii(inputStream), m_version(0), m_documentVersion(0), m_encoding(0), m_asciiName(ascName), m_zoneName(zoneName),
   m_typeStack(), m_positionStack(), m_beginToEndMap(), m_flagEndZone(), m_poolList()
 {
 }
@@ -259,13 +259,13 @@ bool SWZone::readHeader()
   f << "date=" << m_input->readULong(4) << ",";
   f << "time=" << m_input->readULong(4) << ",";
   if (hSz==0x2e +64 && (fFlags&2)) {
-    std::string name("");
+    std::string string("");
     for (int i=0; i<64; ++i) {
       char c=(char) m_input->readULong(1);
       if (!c) break;
-      name+=c;
+      string+=c;
     }
-    f << name;
+    f << string;
     m_input->seek(8+0x2e +64, librevenge::RVNG_SEEK_SET);
   }
   if (m_input->tell()!=8+hSz) {
@@ -291,6 +291,10 @@ bool SWZone::openRecord(char &type)
   if (!m_input->checkPosition(pos)) return false;
   unsigned long val=m_input->readULong(4);
   type=(char)(val&0xff);
+  if (!type) {
+    STOFF_DEBUG_MSG(("SWZone::openRecord: type can not be null\n"));
+    return false;
+  }
   unsigned long sz=(val>>8);
   long endPos=0;
 
@@ -303,11 +307,21 @@ bool SWZone::openRecord(char &type)
     }
   }
   else {
-    endPos=pos+(long)sz;
-    if (!m_input->checkPosition(endPos)) {
-      STOFF_DEBUG_MSG(("SWZone::openRecord: endPosition is bad\n"));
+    if (sz<4) {
+      STOFF_DEBUG_MSG(("SWZone::openRecord: size can be less than 4\n"));
       return false;
     }
+    endPos=pos+(long)sz;
+  }
+  // check the position is in the file
+  if (endPos && !m_input->checkPosition(endPos)) {
+    STOFF_DEBUG_MSG(("SWZone::openRecord: endPosition is bad\n"));
+    return false;
+  }
+  // check the position ends in the current group (if a group is open)
+  if (!m_positionStack.empty() && endPos>m_positionStack.top() && m_positionStack.top()) {
+    STOFF_DEBUG_MSG(("SWZone::openRecord: argh endPosition is not in the current group\n"));
+    return false;
   }
   m_typeStack.push(type);
   m_positionStack.push(endPos);
@@ -327,12 +341,12 @@ bool SWZone::closeRecord(char type)
     if (!pos)
       return true;
     if (m_input->tell()>pos) {
-      STOFF_DEBUG_MSG(("SWZone::openRecord: oops, we read to much data\n"));
+      STOFF_DEBUG_MSG(("SWZone::closeRecord: oops, we read to much data\n"));
     }
     m_input->seek(pos, librevenge::RVNG_SEEK_SET);
     return true;
   }
-  STOFF_DEBUG_MSG(("SWZone::openRecord: oops, can not find type %d\n", (int) type));
+  STOFF_DEBUG_MSG(("SWZone::closeRecord: oops, can not find type %d\n", (int) type));
   return false;
 }
 

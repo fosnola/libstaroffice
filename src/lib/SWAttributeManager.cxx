@@ -41,6 +41,7 @@
 
 #include "SDWParser.hxx"
 #include "SWFieldManager.hxx"
+#include "SWFormatManager.hxx"
 #include "SWZone.hxx"
 
 #include "SWAttributeManager.hxx"
@@ -86,9 +87,8 @@ bool SWAttributeManager::readAttribute(SWZone &zone, SDWParser &manager)
   f << "Entries(SWAttributeDef)[" << zone.getRecordLevel() << "]:";
   int fl=zone.openFlagZone();
   int nWhich=(int) input->readULong(2);
-  if (nWhich>0x6001 && zone.getDocumentVersion()!=0x0219) { // bug correction 0x95500
+  if (nWhich>0x6001 && zone.getDocumentVersion()!=0x0219) // bug correction 0x95500
     nWhich+=15;
-  }
   f << "wh=" << std::hex << nWhich << std::dec << ",";
   int nVers=(int) input->readULong(2);
   if (nVers) f << "nVers=" << nVers << ",";
@@ -522,10 +522,11 @@ bool SWAttributeManager::readAttribute(SWZone &zone, SDWParser &manager)
   }
   case 0x3001: {
     f << "textAtrFlycnt,";
+    SWFormatManager formatManager;
     if (input->peek()=='o')
-      manager.readSWFormatDef(zone,'o');
+      formatManager.readSWFormatDef(zone,'o', manager);
     else
-      manager.readSWFormatDef(zone,'l');
+      formatManager.readSWFormatDef(zone,'l', manager);
     break;
   }
   case 0x3002: {
@@ -754,7 +755,8 @@ bool SWAttributeManager::readAttribute(SWZone &zone, SDWParser &manager)
     long actPos=input->tell();
     if (actPos==lastPos)
       break;
-    manager.readSWFormatDef(zone,'r');
+    SWFormatManager formatManager;
+    formatManager.readSWFormatDef(zone,'r',manager);
     break;
   }
   case 0x500a:
@@ -898,18 +900,10 @@ bool SWAttributeManager::readAttribute(SWZone &zone, SDWParser &manager)
   case 0x5016:
     f << "keep=" << input->readULong(1) << ",";
     break;
-  case 0x5017: { // checkme
+  case 0x5017:
     f << "url,";
-    long actPos=input->tell();
-    if (input->peek()!='X' || !zone.openRecord(type)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the imageMap zone\n"));
-      f << "###imageMap,";
+    if (!manager.readSWImageMap(zone))
       break;
-    }
-    STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: reading imageMap zone is not implemented\n"));
-    ascFile.addPos(actPos);
-    ascFile.addNote("Entries(SWImageMap):###");
-    zone.closeRecord(type);
     if (nVers>=1) {
       librevenge::RVNGString text;
       if (!zone.readString(text)) {
@@ -921,7 +915,6 @@ bool SWAttributeManager::readAttribute(SWZone &zone, SDWParser &manager)
         f << "name1=" << text.cstr() << ",";
     }
     break;
-  }
   case 0x5018:
     f << "editInReadOnly=" << input->readULong(1) << ",";
     break;
@@ -978,6 +971,105 @@ bool SWAttributeManager::readAttribute(SWZone &zone, SDWParser &manager)
   case 0x5022: // ok, no data
     f << "frmAtrDummy9,";
     break;
+  // graphic attribute
+  case 0x6000:
+    f << "grfMirrorGrf=" << input->readULong(1) << ",";
+    if (nVers>0) f << "nToggle=" << input->readULong(1) << ",";
+    break;
+  case 0x6001:
+    f << "grfCropGrf,";
+    f << "top=" << input->readLong(4) << ",";
+    f << "left=" << input->readLong(4) << ",";
+    f << "right=" << input->readLong(4) << ",";
+    f << "bottom=" << input->readLong(4) << ",";
+    break;
+  // no saved ?
+  case 0x6002:
+    f << "grfRotation,";
+    break;
+  case 0x6003:
+    f << "grfLuminance,";
+    break;
+  case 0x6004:
+    f << "grfContrast,";
+    break;
+  case 0x6005:
+    f << "grfChannelR,";
+    break;
+  case 0x6006:
+    f << "grfChannelG,";
+    break;
+  case 0x6007:
+    f << "grfChannelB,";
+    break;
+  case 0x6008:
+    f << "grfGamma,";
+    break;
+  case 0x6009:
+    f << "grfInvert,";
+    break;
+  case 0x600a:
+    f << "grfTransparency,";
+    break;
+  case 0x600b:
+    f << "grfDrawMode,";
+    break;
+  case 0x600c: // ok no data
+    f << "grfDummy1,";
+    break;
+  case 0x600d: // ok no data
+    f << "grfDummy2,";
+    break;
+  case 0x600e: // ok no data
+    f << "grfDummy3,";
+    break;
+  case 0x600f: // ok no data
+    f << "grfDummy4,";
+    break;
+  case 0x6010: // ok no data
+    f << "grfDummy5,";
+    break;
+
+  case 0x6011:
+    f << "boxFormat=" << input->readULong(1) << ",";
+    f << "nTmp=" << input->readULong(4) << ",";
+    break;
+  case 0x6012: {
+    f << "boxFormula,";
+    librevenge::RVNGString text;
+    if (!zone.readString(text)) {
+      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the formula\n"));
+      f << "###formula,";
+      break;
+    }
+    else if (!text.empty())
+      f << "formula=" << text.cstr() << ",";
+    break;
+  }
+  case 0x6013:
+    f << "boxAtrValue,";
+    if (nVers==0) {
+      librevenge::RVNGString text;
+      if (!zone.readString(text)) {
+        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the dValue\n"));
+        f << "###dValue,";
+        break;
+      }
+      else if (!text.empty())
+        f << "dValue=" << text.cstr() << ",";
+    }
+    else {
+      double res;
+      bool isNan;
+      if (!input->readDoubleReverted8(res, isNan)) {
+        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not read a double\n"));
+        f << "##value,";
+      }
+      else if (res<0||res>0)
+        f << "value=" << res << ",";
+    }
+    break;
+
   default:
     STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: reading not format attribute is not implemented\n"));
     f << "#unimplemented,";

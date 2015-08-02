@@ -87,11 +87,11 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
     f << "Entries(SWFieldType)[" << zone.getRecordLevel() << "]:";
   int fieldType=(int) input->readULong(cKind=='Y' ? 1 : 2);
   if (cKind!='Y') {
-    if (zone.isCompatibleWith(0x0202)) {
+    if (zone.isCompatibleWith(0x202)) {
       f << "fldFmt=" << input->readULong(4) << ",";
       f << "subType=" << input->readULong(2) << ",";
     }
-    else if (zone.isCompatibleWith(0x0200))
+    else if (zone.isCompatibleWith(0x200))
       f << "fldFmt=" << input->readULong(4) << ",";
     else
       f << "fldFmt=" << input->readULong(2) << ",";
@@ -121,8 +121,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
           f << poolName.cstr() << ",";
       }
       if (cKind=='Y') {
-        if ((zone.isCompatibleWith(0x10) && !zone.isCompatibleWith(0x22)) ||
-            zone.isCompatibleWith(0x101)) {
+        if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
           val=(int) input->readULong(2);
           if (!zone.getPoolName(val, poolName))
             f << "###nDbName=" << val << ",";
@@ -141,8 +140,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
         f << "expand=" << name.cstr() << ",";
       if (zone.isCompatibleWith(0xa))
         f << "cFlag=" << std::hex << input->readULong(1) << std::dec << ",";
-      if ((zone.isCompatibleWith(0x10) && !zone.isCompatibleWith(0x22)) ||
-          zone.isCompatibleWith(0x101)) {
+      if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
         val=(int) input->readULong(2);
         if (!zone.getPoolName(val, poolName))
           f << "###nDbName=" << val << ",";
@@ -168,7 +166,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
     if (cFlag&1) {
       double res;
       bool isNan;
-      if (!input->readDouble8(res, isNan)) {
+      if (!input->readDoubleReverted8(res, isNan)) {
         STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a double\n"));
         f << "##value,";
       }
@@ -223,7 +221,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
     else {
       double res;
       bool isNan;
-      if (!input->readDouble8(res, isNan)) {
+      if (!input->readDoubleReverted8(res, isNan)) {
         STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a double\n"));
         f << "##value,";
         break;
@@ -252,8 +250,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
     f << "dbNameField,";
     if (cKind=='Y') break;
     // lcl_sw3io_InDBNameField
-    if ((zone.isCompatibleWith(0x10) && !zone.isCompatibleWith(0x22)) ||
-        zone.isCompatibleWith(0x101)) {
+    if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
       val=(int) input->readULong(2);
       if (!zone.getPoolName(val, poolName))
         f << "###nDbName=" << val << ",";
@@ -285,7 +282,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
       }
       else if (!name.empty())
         f << "userString=" << name.cstr() << ",";
-      if (zone.isCompatibleWith(0x14) && !zone.isCompatibleWith(0x22) && (nSub==1 || nSub==2))
+      if (zone.isCompatibleWith(0x14,0x22) && (nSub==1 || nSub==2))
         f << "nOff=" << input->readLong(2) << ",";
       break;
     }
@@ -464,7 +461,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
     }
     else if (!name.empty())
       f << "expand=" << name.cstr() << ",";
-    if (zone.isCompatibleWith(0x21) && !zone.isCompatibleWith(0x22)) {
+    if (zone.isCompatibleWith(0x21,0x22)) {
       f << "fmt=" << input->readULong(2) << ",";
       f << "subType=" << input->readULong(2) << ",";
       f << "nSeqNo=" << input->readULong(2) << ",";
@@ -670,7 +667,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
       if (flag&1) {
         double res;
         bool isNan;
-        if (!input->readDouble8(res, isNan)) {
+        if (!input->readDoubleReverted8(res, isNan)) {
           STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a double\n"));
           f << "##value,";
           break;
@@ -702,8 +699,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
     }
     else if (!name.empty())
       f << "aName=" << name.cstr() << ",";
-    if ((zone.isCompatibleWith(0x10) && !zone.isCompatibleWith(0x22)) ||
-        zone.isCompatibleWith(0x101)) {
+    if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
       val=(int) input->readULong(2);
       if (!zone.getPoolName(val, poolName))
         f << "###nPoolId=" << val << ",";
@@ -715,7 +711,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
     f << "inDbNumSetField,";
     if (cKind=='Y') break;
     // lcl_sw3io_InDBNumSetField
-    bool inverted=(zone.isCompatibleWith(0x22) && !zone.isCompatibleWith(0x101));
+    bool inverted=(zone.isCompatibleWith(0x22,0x101));
     if (!zone.readString(name)) {
       f << "###string,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
@@ -730,8 +726,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
     }
     else if (!name.empty())
       f << (inverted ? "aCond=" : "aNumber=") << name.cstr() << ",";
-    if ((zone.isCompatibleWith(0x10) && !zone.isCompatibleWith(0x22)) ||
-        zone.isCompatibleWith(0x101)) {
+    if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
       val=(int) input->readULong(2);
       if (!zone.getPoolName(val, poolName))
         f << "###nPoolId=" << val << ",";
@@ -745,8 +740,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
     if (cKind=='Y') break;
     // lcl_sw3io_InDBSetNumberField
     f << "n=" << input->readULong(4) << ",";
-    if ((zone.isCompatibleWith(0x10) && !zone.isCompatibleWith(0x22)) ||
-        zone.isCompatibleWith(0x101)) {
+    if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
       val=(int) input->readULong(2);
       if (!zone.getPoolName(val, poolName))
         f << "###nPoolId=" << val << ",";
@@ -814,7 +808,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
     }
     else if (!name.empty())
       f << "text=" << name.cstr() << ",";
-    if (zone.isCompatibleWith(0x11) && !zone.isCompatibleWith(0x22)) {
+    if (zone.isCompatibleWith(0x11,0x22)) {
       if (!zone.readString(name)) {
         f << "###string,";
         STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
@@ -823,7 +817,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
       else if (!name.empty())
         f << "target=" << name.cstr() << ",";
     }
-    if (zone.isCompatibleWith(0x11) && !zone.isCompatibleWith(0x13)) {
+    if (zone.isCompatibleWith(0x11,0x13)) {
       int nCnt=(int) input->readULong(2);
       f << "N=" << nCnt << ",";
       f << "libMac=[";
@@ -899,7 +893,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
     // lcl_sw3io_InDateTimeField
     double res;
     bool isNan;
-    if (!input->readDouble8(res, isNan)) {
+    if (!input->readDoubleReverted8(res, isNan)) {
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a double\n"));
       f << "##value,";
       break;

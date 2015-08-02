@@ -73,6 +73,23 @@ public:
   {
     return m_documentVersion>=vers;
   }
+  //! checks if the document is compatible with vers1 and not vers2
+  int isCompatibleWith(int vers1, int vers2) const
+  {
+    return m_documentVersion>=vers1 && m_documentVersion<vers2;
+  }
+  //! checks if the document is compatible with vers1 and not vers2 or vers3
+  int isCompatibleWith(int vers1, int vers2, int vers3) const
+  {
+    return (m_documentVersion>=vers1 && m_documentVersion<vers2) ||
+           m_documentVersion>=vers3;
+  }
+  //! checks if the document is compatible with vers1 and not vers2 or vers3 and not vers4
+  int isCompatibleWith(int vers1, int vers2, int vers3, int vers4) const
+  {
+    return (m_documentVersion>=vers1 && m_documentVersion<vers2) ||
+           (m_documentVersion>=vers3 && m_documentVersion<vers4);
+  }
 
   //! try to open a record
   bool openRecord(char &type);

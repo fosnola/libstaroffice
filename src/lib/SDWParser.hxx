@@ -94,6 +94,8 @@ protected:
   static bool readDocumentInformation(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
   //! the windows information
   static bool readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
+  //! try to read the Star Framework Config file
+  bool readFrameworkConfigFile(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
 
   //! the page style
   bool readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
@@ -108,21 +110,50 @@ protected:
   bool readSWBookmarkList(SWZone &zone);
   //! try to read some content : 'N'
   bool readSWContent(SWZone &zone);
-  //! try to read a format zone : 'l' or 'o' or 'r'
-  bool readSWFormatDef(SWZone &zone, char kind);
-  //! try to read a number format zone : 'n'
-  bool readSWNumberFormat(SWZone &zone);
-  //! try to read a number formatter type : 'q'
-  bool readSWNumberFormatterList(SWZone &zone);
+  //! try to read a DBName zone : 'D'
+  bool readSWDBName(SWZone &zone);
+  //! try to read a dictionary table : 'j'
+  bool readSWDictionary(SWZone &zone);
+  //! try to read a endnode node : '4'
+  bool readSWEndNoteInfo(SWZone &zone);
+  //! try to read a footnode node : '1'
+  bool readSWFootNoteInfo(SWZone &zone);
+  //! try to read a OLE node : 'g'
+  bool readSWGraphNode(SWZone &zone);
+  //! try to read a image map zone : 'X'
+  bool readSWImageMap(SWZone &zone);
+  //! try to read a zone setup : 'J'
+  bool readSWJobSetUp(SWZone &zone);
+  //! try to read a layout information zone : 'Y'
+  bool readSWLayoutInfo(SWZone &zone);
+  //! try to read a layout subinformation zone : 0xd2 or 0xd7
+  bool readSWLayoutSub(SWZone &zone);
+  //! try to read a macro table : 'M' (list of 'm')
+  bool readSWMacroTable(SWZone &zone);
+  //! try to read a node redline : 'v'
+  bool readSWNodeRedline(SWZone &zone);
   //! a simple rule : '0' or 'R'
   bool readSWNumRule(SWZone &zone, char kind);
+  //! try to read a OLE node : 'O'
+  bool readSWOLENode(SWZone &zone);
   //! try to read a list of page style : 'p'
   bool readSWPageDef(SWZone &zone);
   //! try to read a list of redline : 'V' (list of 'R' list of 'D')
   bool readSWRedlineList(SWZone &zone);
+  //! try to read a section : 'I'
+  bool readSWSection(SWZone &zone);
+  //! try to read a table : 'E'
+  bool readSWTable(SWZone &zone);
+  //! try to read a table box : 't'
+  bool readSWTableBox(SWZone &zone);
+  //! try to read a table line : 'L'
+  bool readSWTableLine(SWZone &zone);
   //! try to read some content : 'T'
   bool readSWTextZone(SWZone &zone);
-
+  //! try to read a list of TOX : 'u' ( list of 'x')
+  bool readSWTOXList(SWZone &zone);
+  //! try to read a list of TOX51 : 'y' ( list of 'x')
+  bool readSWTOX51List(SWZone &zone);
   //
   // data
   //

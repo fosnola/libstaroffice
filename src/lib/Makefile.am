@@ -22,6 +22,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	SWAttributeManager.hxx			\
 	SWFieldManager.cxx			\
 	SWFieldManager.hxx			\
+	SWFormatManager.cxx			\
+	SWFormatManager.hxx			\
 	SWZone.cxx				\
 	SWZone.hxx				\
 	STOFFDebug.cxx				\
