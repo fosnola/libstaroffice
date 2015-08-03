@@ -135,6 +135,10 @@ SOURCE=..\..\src\lib\StarFileManager.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarZone.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\SWAttributeManager.cxx
 # End Source File
 # Begin Source File
@@ -145,9 +149,6 @@ SOURCE=..\..\src\lib\SWFieldManager.cxx
 
 SOURCE=..\..\src\lib\SWFormatManager.cxx
 # End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\SWZone.cxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\libstaroffice_internal.cxx
@@ -218,6 +219,10 @@ SOURCE=..\..\src\lib\StarFileManager.hxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarZone.hxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\SWAttributeManager.hxx
 # End Source File
 # Begin Source File
@@ -227,10 +232,6 @@ SOURCE=..\..\src\lib\SWFieldManager.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\SWFormatManager.hxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\SWZone.hxx
 # End Source File
 # Begin Source File
 

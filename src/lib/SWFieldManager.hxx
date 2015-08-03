@@ -49,7 +49,7 @@ namespace SWFieldManagerInternal
 struct State;
 }
 
-class SWZone;
+class StarZone;
 
 /** \brief the main class to read/.. a StarOffice sdw field
  *
@@ -66,7 +66,7 @@ public:
 
 
   //! try to read a field type
-  bool readField(SWZone &zone, char cKind='_');
+  bool readField(StarZone &zone, char cKind='_');
 
   //
   // data

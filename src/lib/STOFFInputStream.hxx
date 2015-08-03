@@ -181,8 +181,10 @@ public:
   STOFFInputStream &operator>>(double &res)
   {
     bool isNan;
+    long pos=tell();
     if (!readDoubleReverted8(res, isNan)) {
       STOFF_DEBUG_MSG(("STOFFInputStream::operator>>: can not read a double\n"));
+      seek(pos+8, librevenge::RVNG_SEEK_SET);
       res=0;
     }
     return *this;

@@ -929,11 +929,14 @@ bool STOFFOLEParser::readOle10Native(STOFFInputStreamPtr ip,
   ip->seek(0,librevenge::RVNG_SEEK_SET);
   long fSize = ip->readLong(4);
   f << "fSize=" << fSize;
-
+  if (ip->readULong(4)==0x10001) { // TODO: check if the OLE is a old StarMathDocument 2.0
+    STOFF_DEBUG_MSG(("STOFFOLEParser::readOle10Native: find an OLE which can be a StarMathDocument\n"));
+  }
   ascii.addPos(0);
   ascii.addNote(f.str().c_str());
 
   data.clear();
+  ip->seek(4, librevenge::RVNG_SEEK_SET);
   if (!ip->readDataBlock(fSize, data)) return false;
 
   if (!ip->isEnd()) {

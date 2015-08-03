@@ -39,7 +39,7 @@
 
 #include <librevenge/librevenge.h>
 
-#include "SWZone.hxx"
+#include "StarZone.hxx"
 
 #include "SWAttributeManager.hxx"
 #include "SWFormatManager.hxx"
@@ -69,7 +69,7 @@ SWFormatManager::~SWFormatManager()
 {
 }
 
-bool SWFormatManager::readSWFormatDef(SWZone &zone, char kind, SDWParser &manager)
+bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, SDWParser &manager)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -152,7 +152,7 @@ bool SWFormatManager::readSWFormatDef(SWZone &zone, char kind, SDWParser &manage
   return true;
 }
 
-bool SWFormatManager::readSWNumberFormat(SWZone &zone)
+bool SWFormatManager::readSWNumberFormat(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -216,7 +216,7 @@ bool SWFormatManager::readSWNumberFormat(SWZone &zone)
   return true;
 }
 
-bool SWFormatManager::readSWNumberFormatterList(SWZone &zone)
+bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -419,7 +419,7 @@ bool SWFormatManager::readSWNumberFormatterList(SWZone &zone)
   return true;
 }
 
-bool SWFormatManager::readSWFlyFrameList(SWZone &zone, SDWParser &manager)
+bool SWFormatManager::readSWFlyFrameList(StarZone &zone, SDWParser &manager)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -448,7 +448,7 @@ bool SWFormatManager::readSWFlyFrameList(SWZone &zone, SDWParser &manager)
   return true;
 }
 
-bool SWFormatManager::readSWPatternLCL(SWZone &zone)
+bool SWFormatManager::readSWPatternLCL(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();

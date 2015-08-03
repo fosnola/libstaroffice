@@ -78,6 +78,11 @@ std::vector<STOFFHeader> STOFFHeader::constructHeader(STOFFInputStreamPtr input)
     STOFF_DEBUG_MSG(("STOFFHeader::constructHeader: find a star draw document\n"));
     res.push_back(STOFFHeader(1, STOFFDocument::STOFF_K_DRAW));
   }
+  if (input->getSubStreamByName("StarImageDocument") || input->getSubStreamByName("StarImageDocument 4.0")) {
+    STOFF_DEBUG_MSG(("STOFFHeader::constructHeader: find a star image document, unimplemented\n"));
+    res.push_back(STOFFHeader(1, STOFFDocument::STOFF_K_BITMAP));
+    return res;
+  }
   if (input->getSubStreamByName("StarMathDocument")) {
     STOFF_DEBUG_MSG(("STOFFHeader::constructHeader: find a star math document, unimplemented\n"));
     res.push_back(STOFFHeader(1, STOFFDocument::STOFF_K_MATH));

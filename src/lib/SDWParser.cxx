@@ -45,7 +45,7 @@
 #include "SWAttributeManager.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
-#include "SWZone.hxx"
+#include "StarZone.hxx"
 
 #include "SDWParser.hxx"
 
@@ -145,6 +145,15 @@ bool SDWParser::createZones()
       readSwPageStyleSheets(ole,name);
       continue;
     }
+    if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
+      librevenge::RVNGBinaryData data;
+      fileManager.readImageDocument(ole,data,name);
+      continue;
+    }
+    if (base=="StarMathDocument") {
+      fileManager.readMathDocument(ole,name);
+      continue;
+    }
     if (base=="StarWriterDocument") {
       readWriterDocument(ole,name);
       continue;
@@ -161,7 +170,7 @@ bool SDWParser::createZones()
       ok=fileManager.readSfxWindows(ole, asciiFile);
     else if (base=="Star Framework Config File")
       ok=fileManager.readStarFrameworkConfigFile(ole, asciiFile);
-
+    /** TODO "Ole-Object" "OutPlace Object" */
     if (!ok) {
       libstoff::DebugStream f;
       if (base=="Standard") // can be Standard or STANDARD
@@ -194,8 +203,8 @@ void SDWParser::createDocument(librevenge::RVNGTextInterface *documentInterface)
 ////////////////////////////////////////////////////////////
 bool SDWParser::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &name)
 {
-  SWZone zone(input, name, "SWNumRuleList");
-  if (!zone.readHeader()) {
+  StarZone zone(input, name, "SWNumRuleList");
+  if (!zone.readSWHeader()) {
     STOFF_DEBUG_MSG(("SDWParser::readSwNumRuleList: can not read the header\n"));
     return false;
   }
@@ -264,8 +273,8 @@ bool SDWParser::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &
 
 bool SDWParser::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &name)
 {
-  SWZone zone(input, name, "SWPageStyleSheets");
-  if (!zone.readHeader()) {
+  StarZone zone(input, name, "SWPageStyleSheets");
+  if (!zone.readSWHeader()) {
     STOFF_DEBUG_MSG(("SDWParser::readSwPageStyleSheets: can not read the header\n"));
     return false;
   }
@@ -330,7 +339,7 @@ bool SDWParser::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string con
   return true;
 }
 
-bool SDWParser::readSWPageDef(SWZone &zone)
+bool SDWParser::readSWPageDef(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -421,7 +430,7 @@ bool SDWParser::readSWPageDef(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWBookmarkList(SWZone &zone)
+bool SDWParser::readSWBookmarkList(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -493,7 +502,7 @@ bool SDWParser::readSWBookmarkList(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWContent(SWZone &zone)
+bool SDWParser::readSWContent(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -581,7 +590,7 @@ bool SDWParser::readSWContent(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWDBName(SWZone &zone)
+bool SDWParser::readSWDBName(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -658,7 +667,7 @@ bool SDWParser::readSWDBName(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWDictionary(SWZone &zone)
+bool SDWParser::readSWDictionary(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -696,7 +705,7 @@ bool SDWParser::readSWDictionary(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWEndNoteInfo(SWZone &zone)
+bool SDWParser::readSWEndNoteInfo(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -746,7 +755,7 @@ bool SDWParser::readSWEndNoteInfo(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWFootNoteInfo(SWZone &zone)
+bool SDWParser::readSWFootNoteInfo(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -834,7 +843,7 @@ bool SDWParser::readSWFootNoteInfo(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWGraphNode(SWZone &zone)
+bool SDWParser::readSWGraphNode(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -944,7 +953,7 @@ bool SDWParser::readSWGraphNode(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWImageMap(SWZone &zone)
+bool SDWParser::readSWImageMap(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1028,7 +1037,7 @@ bool SDWParser::readSWImageMap(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWJobSetUp(SWZone &zone)
+bool SDWParser::readSWJobSetUp(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1138,7 +1147,7 @@ bool SDWParser::readSWJobSetUp(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWLayoutInfo(SWZone &zone)
+bool SDWParser::readSWLayoutInfo(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1181,7 +1190,7 @@ bool SDWParser::readSWLayoutInfo(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWLayoutSub(SWZone &zone)
+bool SDWParser::readSWLayoutSub(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1237,7 +1246,7 @@ bool SDWParser::readSWLayoutSub(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWMacroTable(SWZone &zone)
+bool SDWParser::readSWMacroTable(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1283,7 +1292,7 @@ bool SDWParser::readSWMacroTable(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWNodeRedline(SWZone &zone)
+bool SDWParser::readSWNodeRedline(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1308,7 +1317,7 @@ bool SDWParser::readSWNodeRedline(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWNumRule(SWZone &zone, char cKind)
+bool SDWParser::readSWNumRule(StarZone &zone, char cKind)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1375,7 +1384,7 @@ bool SDWParser::readSWNumRule(SWZone &zone, char cKind)
   return true;
 }
 
-bool SDWParser::readSWOLENode(SWZone &zone)
+bool SDWParser::readSWOLENode(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1418,7 +1427,7 @@ bool SDWParser::readSWOLENode(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWRedlineList(SWZone &zone)
+bool SDWParser::readSWRedlineList(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1490,7 +1499,7 @@ bool SDWParser::readSWRedlineList(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWSection(SWZone &zone)
+bool SDWParser::readSWSection(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1542,7 +1551,7 @@ bool SDWParser::readSWSection(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWTable(SWZone &zone)
+bool SDWParser::readSWTable(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1597,7 +1606,7 @@ bool SDWParser::readSWTable(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWTableBox(SWZone &zone)
+bool SDWParser::readSWTableBox(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1633,7 +1642,7 @@ bool SDWParser::readSWTableBox(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWTableLine(SWZone &zone)
+bool SDWParser::readSWTableLine(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1669,7 +1678,7 @@ bool SDWParser::readSWTableLine(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWTextZone(SWZone &zone)
+bool SDWParser::readSWTextZone(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1806,7 +1815,7 @@ bool SDWParser::readSWTextZone(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWTOXList(SWZone &zone)
+bool SDWParser::readSWTOXList(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1945,7 +1954,7 @@ bool SDWParser::readSWTOXList(SWZone &zone)
   return true;
 }
 
-bool SDWParser::readSWTOX51List(SWZone &zone)
+bool SDWParser::readSWTOX51List(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -2047,8 +2056,8 @@ bool SDWParser::readSWTOX51List(SWZone &zone)
 ////////////////////////////////////////////////////////////
 bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const &name)
 {
-  SWZone zone(input, name, "SWWriterDocument");
-  if (!zone.readHeader()) {
+  StarZone zone(input, name, "SWWriterDocument");
+  if (!zone.readSWHeader()) {
     STOFF_DEBUG_MSG(("SDWParser::readWriterDocument: can not read the header\n"));
     return false;
   }

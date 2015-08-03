@@ -41,14 +41,14 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFSubDocument.hxx			\
 	StarFileManager.cxx			\
 	StarFileManager.hxx			\
+	StarZone.cxx				\
+	StarZone.hxx				\
 	SWAttributeManager.cxx			\
 	SWAttributeManager.hxx			\
 	SWFieldManager.cxx			\
 	SWFieldManager.hxx			\
 	SWFormatManager.cxx			\
 	SWFormatManager.hxx			\
-	SWZone.cxx				\
-	SWZone.hxx				\
 	libstaroffice_internal.cxx		\
 	libstaroffice_internal.hxx
 

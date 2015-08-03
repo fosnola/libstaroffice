@@ -39,28 +39,28 @@
 
 #include <librevenge/librevenge.h>
 
-#include "SWZone.hxx"
+#include "StarZone.hxx"
 
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SWZone::SWZone(STOFFInputStreamPtr inputStream, std::string const &ascName, std::string const &zoneName) :
+StarZone::StarZone(STOFFInputStreamPtr inputStream, std::string const &ascName, std::string const &zoneName) :
   m_input(inputStream), m_ascii(inputStream), m_version(0), m_documentVersion(0), m_encoding(0), m_asciiName(ascName), m_zoneName(zoneName),
   m_typeStack(), m_positionStack(), m_beginToEndMap(), m_flagEndZone(), m_poolList()
 {
 }
 
-SWZone::~SWZone()
+StarZone::~StarZone()
 {
   m_ascii.reset();
 }
 
-bool SWZone::readString(librevenge::RVNGString &string, int /*encoding*/) const
+bool StarZone::readString(librevenge::RVNGString &string, int /*encoding*/) const
 {
   int sSz=(int) m_input->readULong(2);
   string="";
   if (!m_input->checkPosition(m_input->tell()+sSz)) {
-    STOFF_DEBUG_MSG(("SWZone::readString: the sSz seems bad\n"));
+    STOFF_DEBUG_MSG(("StarZone::readString: the sSz seems bad\n"));
     return false;
   }
   // fixme use encoding
@@ -68,7 +68,7 @@ bool SWZone::readString(librevenge::RVNGString &string, int /*encoding*/) const
   return true;
 }
 
-bool SWZone::readStringsPool()
+bool StarZone::readStringsPool()
 {
   long pos=m_input->tell();
   char type;
@@ -99,7 +99,7 @@ bool SWZone::readStringsPool()
       f.str("");
       f << "SWPoolList-" << i << ":";
       if (!readString(string, encoding) || m_input->tell()>lastPos) {
-        STOFF_DEBUG_MSG(("SWZone::readStringsPool: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarZone::readStringsPool: can not read a string\n"));
         m_input->seek(pos, librevenge::RVNG_SEEK_SET);
         break;
       }
@@ -125,7 +125,7 @@ bool SWZone::readStringsPool()
       int nId=(int) m_input->readULong(2);
       f << "nId=" << nId << ",";
       if (!readString(string, encoding)) {
-        STOFF_DEBUG_MSG(("SWZone::readStringsPool: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarZone::readStringsPool: can not read a string\n"));
         m_input->seek(pos, librevenge::RVNG_SEEK_SET);
         break;
       }
@@ -141,7 +141,7 @@ bool SWZone::readStringsPool()
   return true;
 }
 
-bool SWZone::readHeader()
+bool StarZone::readSWHeader()
 {
   m_ascii.open(m_asciiName);
 
@@ -150,7 +150,7 @@ bool SWZone::readHeader()
 
   // sw_sw3doc.cxx: Sw3IoImp::InHeader
   if (m_input->size()<0x36) {
-    STOFF_DEBUG_MSG(("SWZone::readHeader: the zone is too short\n"));
+    STOFF_DEBUG_MSG(("StarZone::readSWHeader: the zone is too short\n"));
     f << "###";
     m_ascii.addPos(0);
     m_ascii.addNote(f.str().c_str());
@@ -163,7 +163,7 @@ bool SWZone::readHeader()
   if (val==0x5357)
     m_input->setReadInverted(!m_input->readInverted());
   else if (val!=0x5753) {
-    STOFF_DEBUG_MSG(("SWZone::readHeader: can not set the endian\n"));
+    STOFF_DEBUG_MSG(("StarZone::readSWHeader: can not set the endian\n"));
     f << "###";
     m_ascii.addPos(0);
     m_ascii.addNote(f.str().c_str());
@@ -177,7 +177,7 @@ bool SWZone::readHeader()
     static char const(expected[])= {'S','W',(char)0,'H', 'D', 'R', (char)0};
     if (c==expected[i]) continue;
     if (i!=2) {
-      STOFF_DEBUG_MSG(("SWZone::readHeader: can not read the header\n"));
+      STOFF_DEBUG_MSG(("StarZone::readSWHeader: can not read the header\n"));
       f << "###";
       m_ascii.addPos(0);
       m_ascii.addNote(f.str().c_str());
@@ -185,7 +185,7 @@ bool SWZone::readHeader()
       return false;
     }
     if (c<'3' || c>'5') {
-      STOFF_DEBUG_MSG(("SWZone::readZoneHeader: find unexpected version number\n"));
+      STOFF_DEBUG_MSG(("StarZone::readZoneHeader: find unexpected version number\n"));
       f << "##version=" << (int) c << ",";
     }
     else {
@@ -195,7 +195,7 @@ bool SWZone::readHeader()
   }
   int hSz=(int) m_input->readULong(1);
   if (hSz<0x2e || !m_input->checkPosition(8+hSz)) {
-    STOFF_DEBUG_MSG(("SWZone::readHeader: the header seems bad\n"));
+    STOFF_DEBUG_MSG(("StarZone::readSWHeader: the header seems bad\n"));
     f << "###hSz";
     m_ascii.addPos(0);
     m_ascii.addNote(f.str().c_str());
@@ -210,7 +210,7 @@ bool SWZone::readHeader()
   if (fFlags&0x100) f << "hasPGNums,";
   if (fFlags&0x8000) {
     f << "#badFile,";
-    STOFF_DEBUG_MSG(("SWZone::readHeader: bad file is set\n"));
+    STOFF_DEBUG_MSG(("StarZone::readSWHeader: bad file is set\n"));
 
     m_ascii.addPos(0);
     m_ascii.addNote(f.str().c_str());
@@ -265,7 +265,7 @@ bool SWZone::readHeader()
   }
   if (m_input->tell()!=8+hSz) {
     m_ascii.addDelimiter(m_input->tell(),'|');
-    STOFF_DEBUG_MSG(("SWZone::readZoneHeader: find extra data\n"));
+    STOFF_DEBUG_MSG(("StarZone::readZoneHeader: find extra data\n"));
     f << "###extra";
   }
   m_ascii.addPos(0);
@@ -280,14 +280,14 @@ bool SWZone::readHeader()
 ////////////////////////////////////////////////////////////
 // record: open/close, read size
 ////////////////////////////////////////////////////////////
-bool SWZone::openRecord(char &type)
+bool StarZone::openRecord(char &type)
 {
   long pos=m_input->tell();
   if (!m_input->checkPosition(pos)) return false;
   unsigned long val=m_input->readULong(4);
   type=(char)(val&0xff);
   if (!type) {
-    STOFF_DEBUG_MSG(("SWZone::openRecord: type can not be null\n"));
+    STOFF_DEBUG_MSG(("StarZone::openRecord: type can not be null\n"));
     return false;
   }
   unsigned long sz=(val>>8);
@@ -298,24 +298,24 @@ bool SWZone::openRecord(char &type)
     if (m_beginToEndMap.find(pos)!=m_beginToEndMap.end())
       endPos=m_beginToEndMap.find(pos)->second;
     else {
-      STOFF_DEBUG_MSG(("SWZone::openRecord: can not find size for a zone, we may have some problem\n"));
+      STOFF_DEBUG_MSG(("StarZone::openRecord: can not find size for a zone, we may have some problem\n"));
     }
   }
   else {
     if (sz<4) {
-      STOFF_DEBUG_MSG(("SWZone::openRecord: size can be less than 4\n"));
+      STOFF_DEBUG_MSG(("StarZone::openRecord: size can be less than 4\n"));
       return false;
     }
     endPos=pos+(long)sz;
   }
   // check the position is in the file
   if (endPos && !m_input->checkPosition(endPos)) {
-    STOFF_DEBUG_MSG(("SWZone::openRecord: endPosition is bad\n"));
+    STOFF_DEBUG_MSG(("StarZone::openRecord: endPosition is bad\n"));
     return false;
   }
   // check the position ends in the current group (if a group is open)
   if (!m_positionStack.empty() && endPos>m_positionStack.top() && m_positionStack.top()) {
-    STOFF_DEBUG_MSG(("SWZone::openRecord: argh endPosition is not in the current group\n"));
+    STOFF_DEBUG_MSG(("StarZone::openRecord: argh endPosition is not in the current group\n"));
     return false;
   }
   m_typeStack.push(type);
@@ -323,7 +323,7 @@ bool SWZone::openRecord(char &type)
   return true;
 }
 
-bool SWZone::closeRecord(char type, std::string const &debugName)
+bool StarZone::closeRecord(char type, std::string const &debugName)
 {
   m_flagEndZone=0;
   while (!m_typeStack.empty()) {
@@ -338,9 +338,9 @@ bool SWZone::closeRecord(char type, std::string const &debugName)
     long actPos=m_input->tell();
     if (actPos!=pos) {
       if (actPos>pos)
-        STOFF_DEBUG_MSG(("SWZone::closeRecord: oops, we read to much data\n"));
+        STOFF_DEBUG_MSG(("StarZone::closeRecord: oops, we read to much data\n"));
       else if (actPos<pos)
-        STOFF_DEBUG_MSG(("SWZone::closeRecord: oops, some data have been ignored\n"));
+        STOFF_DEBUG_MSG(("StarZone::closeRecord: oops, some data have been ignored\n"));
       libstoff::DebugStream f;
       f << debugName << ":###extra";
       m_ascii.addPos(actPos);
@@ -350,37 +350,37 @@ bool SWZone::closeRecord(char type, std::string const &debugName)
     m_input->seek(pos, librevenge::RVNG_SEEK_SET);
     return true;
   }
-  STOFF_DEBUG_MSG(("SWZone::closeRecord: oops, can not find type %d\n", (int) type));
+  STOFF_DEBUG_MSG(("StarZone::closeRecord: oops, can not find type %d\n", (int) type));
   return false;
 }
 
-unsigned char SWZone::openFlagZone()
+unsigned char StarZone::openFlagZone()
 {
   unsigned char cFlags=(unsigned char) m_input->readULong(1);
   m_flagEndZone=m_input->tell()+long(cFlags&0xf);
   return cFlags;
 }
 
-void SWZone::closeFlagZone()
+void StarZone::closeFlagZone()
 {
   if (!m_flagEndZone) {
-    STOFF_DEBUG_MSG(("SWZone::closeFlagZone: oops, can not find end position\n"));
+    STOFF_DEBUG_MSG(("StarZone::closeFlagZone: oops, can not find end position\n"));
     return;
   }
   if (m_flagEndZone>m_input->tell()) {
-    STOFF_DEBUG_MSG(("SWZone::closeFlagZone: oops, we have read too much data\n"));
+    STOFF_DEBUG_MSG(("StarZone::closeFlagZone: oops, we have read too much data\n"));
     m_ascii.addPos(m_input->tell());
     m_ascii.addNote("Entries(BadFlagZone):###");
   }
   else if (m_flagEndZone<m_input->tell()) {
-    STOFF_DEBUG_MSG(("SWZone::closeFlagZone: oops, we have read all data\n"));
+    STOFF_DEBUG_MSG(("StarZone::closeFlagZone: oops, we have read all data\n"));
     m_ascii.addPos(m_input->tell());
     m_ascii.addNote("Entries(BadFlagZone):#");
   }
   m_input->seek(m_flagEndZone, librevenge::RVNG_SEEK_SET);
 }
 
-bool SWZone::readRecordSizes(long pos)
+bool StarZone::readRecordSizes(long pos)
 {
   if (!pos || !isCompatibleWith('%'))
     return true;
@@ -393,7 +393,7 @@ bool SWZone::readRecordSizes(long pos)
   char type;
   bool ok=openRecord(type);
   if (!ok || type!='%') {
-    STOFF_DEBUG_MSG(("SWZone::readRecordSizes: can not open the record(recsize)\n"));
+    STOFF_DEBUG_MSG(("StarZone::readRecordSizes: can not open the record(recsize)\n"));
     f << "###extra";
     m_ascii.addPos(pos);
     m_ascii.addNote(f.str().c_str());
@@ -408,7 +408,7 @@ bool SWZone::readRecordSizes(long pos)
   closeFlagZone();
 
   if (!m_input->checkPosition(m_input->tell()+8*nCount)) {
-    STOFF_DEBUG_MSG(("SWZone::readRecordSizes: endCPos seems bad\n"));
+    STOFF_DEBUG_MSG(("StarZone::readRecordSizes: endCPos seems bad\n"));
     f << "###badN,";
 
     m_ascii.addPos(pos);

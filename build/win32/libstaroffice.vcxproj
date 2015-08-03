@@ -150,6 +150,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\..\src\lib\StarZone.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\src\lib\SWAttributeManager.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -159,10 +163,6 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\src\lib\SWFormatManager.cxx">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="..\..\src\lib\SWZone.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -185,10 +185,10 @@
     <ClInclude Include="..\..\src\lib\STOFFSpreadsheetDecoder.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFSubDocument.hxx" />
     <ClInclude Include="..\..\src\lib\StarFileManager.hxx" />
+    <ClInclude Include="..\..\src\lib\StarZone.hxx" />
     <ClInclude Include="..\..\src\lib\SWAttributeManager.hxx" />
     <ClInclude Include="..\..\src\lib\SWFieldManager.hxx" />
     <ClInclude Include="..\..\src\lib\SWFormatManager.hxx" />
-    <ClInclude Include="..\..\src\lib\SWZone.hxx" />
     <ClInclude Include="..\..\src\lib\libstaroffice_internal.hxx" />
     <ClInclude Include="..\..\inc\libstaroffice\STOFFDocument.hxx" />
     <ClInclude Include="..\..\inc\libstaroffice\libstaroffice.hxx" />

@@ -49,7 +49,7 @@ namespace StarFileManagerInternal
 struct State;
 }
 
-class SWZone;
+class StarZone;
 
 /** \brief the main class to read/.. some basic StarOffice OLEs
  *
@@ -75,6 +75,10 @@ public:
   //! try to read the "Star Framework Config File"
   static bool readStarFrameworkConfigFile(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
 
+  //! try tor read a image zone: "StarImageDocument" or "StarImageDocument 4.0
+  static bool readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName);
+  //! try tor read a math zone: "StarMathDocument" (v 3 or v4)
+  static bool readMathDocument(STOFFInputStreamPtr input, std::string const &fileName);
 
   //
   // data

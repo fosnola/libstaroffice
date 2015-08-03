@@ -65,6 +65,7 @@ public:
   /** an enum to define the kind of document */
   enum Kind {
     STOFF_K_UNKNOWN=0 /**< unknown*/,
+    STOFF_K_BITMAP /** bitmap/image */,
     STOFF_K_CHART /** chart */,
     STOFF_K_DATABASE /** database */,
     STOFF_K_DRAW /** vectorized graphic*/,

@@ -49,7 +49,7 @@ namespace SWFormatManagerInternal
 struct State;
 }
 
-class SWZone;
+class StarZone;
 
 /** \brief the main class to read/.. a StarOffice sdw format
  *
@@ -65,15 +65,15 @@ public:
   virtual ~SWFormatManager();
 
   //! try to read a format zone : 'f' or 'l' or 'o' or 'r'
-  bool readSWFormatDef(SWZone &zone, char kind, SDWParser &manager);
+  bool readSWFormatDef(StarZone &zone, char kind, SDWParser &manager);
   //! try to read a number format zone : 'n'
-  bool readSWNumberFormat(SWZone &zone);
+  bool readSWNumberFormat(StarZone &zone);
   //! try to read a number formatter type : 'q'
-  bool readSWNumberFormatterList(SWZone &zone);
+  bool readSWNumberFormatterList(StarZone &zone);
   //! try to read a fly frame list : 'F' (list of 'l' or 'o')
-  bool readSWFlyFrameList(SWZone &zone, SDWParser &manager);
+  bool readSWFlyFrameList(StarZone &zone, SDWParser &manager);
   //! try to read a format pattern LCL : 'P' (list of 'D') (child of a TOXs)
-  bool readSWPatternLCL(SWZone &zone);
+  bool readSWPatternLCL(StarZone &zone);
 
   //
   // data

@@ -49,7 +49,7 @@ namespace SWAttributeManagerInternal
 struct State;
 }
 
-class SWZone;
+class StarZone;
 class SDWParser;
 
 /** \brief the main class to read/.. a StarOffice sdw attribute
@@ -67,9 +67,9 @@ public:
 
 
   //! try to read a attribute: 'A'
-  bool readAttribute(SWZone &zone, SDWParser &manager);
+  bool readAttribute(StarZone &zone, SDWParser &manager);
   //! try to read a attribute list: 'S'
-  bool readAttributeList(SWZone &zone, SDWParser &manager);
+  bool readAttributeList(StarZone &zone, SDWParser &manager);
 
   //
   // data

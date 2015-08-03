@@ -42,7 +42,7 @@
 #include "SDWParser.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
-#include "SWZone.hxx"
+#include "StarZone.hxx"
 
 #include "SWAttributeManager.hxx"
 
@@ -71,7 +71,7 @@ SWAttributeManager::~SWAttributeManager()
 {
 }
 
-bool SWAttributeManager::readAttribute(SWZone &zone, SDWParser &manager)
+bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -86,24 +86,20 @@ bool SWAttributeManager::readAttribute(SWZone &zone, SDWParser &manager)
   libstoff::DebugStream f;
   f << "Entries(SWAttributeDef)[" << zone.getRecordLevel() << "]:";
   int fl=zone.openFlagZone();
-  int nWhich=(int) input->readULong(2);
+  uint16_t nWhich, nVers, nBegin=0xFFFF, nEnd=0xFFFF;
+  *input >> nWhich >> nVers; 
+  if (fl&0x10) *input >> nBegin;
+  if (fl&0x20) *input >> nEnd;
   if (nWhich>0x6001 && zone.getDocumentVersion()!=0x0219) // bug correction 0x95500
     nWhich+=15;
   f << "wh=" << std::hex << nWhich << std::dec << ",";
-  int nVers=(int) input->readULong(2);
   if (nVers) f << "nVers=" << nVers << ",";
-  int val;
-  if (fl&0x10) {
-    val=(int) input->readULong(2);
-    if (val) f << "nBgin=" << val << ",";
-  }
-  if (fl&0x20) {
-    val=(int) input->readULong(2);
-    if (val) f << "nEnd=" << val << ",";
-  }
+  if (nBegin!=0xFFFF) f << "nBgin=" << nBegin << ",";
+  if (nEnd!=0xFFFF) f << "nEnd=" << nEnd << ",";
   zone.closeFlagZone();
 
   long lastPos=zone.getRecordLastPosition();
+  int val;
   switch (nWhich) {
   case 0x1000: // no data
     f << "chrAtrCaseMap,";
@@ -1081,7 +1077,7 @@ bool SWAttributeManager::readAttribute(SWZone &zone, SDWParser &manager)
 
 }
 
-bool SWAttributeManager::readAttributeList(SWZone &zone, SDWParser &manager)
+bool SWAttributeManager::readAttributeList(StarZone &zone, SDWParser &manager)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();

@@ -39,7 +39,7 @@
 
 #include <librevenge/librevenge.h>
 
-#include "SWZone.hxx"
+#include "StarZone.hxx"
 
 #include "SWFieldManager.hxx"
 
@@ -68,7 +68,7 @@ SWFieldManager::~SWFieldManager()
 {
 }
 
-bool SWFieldManager::readField(SWZone &zone, char cKind)
+bool SWFieldManager::readField(StarZone &zone, char cKind)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();

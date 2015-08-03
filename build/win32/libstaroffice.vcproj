@@ -265,6 +265,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\StarZone.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\SWAttributeManager.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -282,14 +290,6 @@
 				</FileConfiguration>
 			</File>
 			<File RelativePath="..\..\src\lib\SWFormatManager.cxx">
-				<FileConfiguration Name="Release|Win32">
-					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
-				</FileConfiguration>
-				<FileConfiguration Name="Debug|Win32">
-					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File RelativePath="..\..\src\lib\SWZone.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
 				</FileConfiguration>
@@ -333,13 +333,13 @@
 			</File>
 			<File RelativePath="..\..\src\lib\StarFileManager.hxx">
 			</File>
+			<File RelativePath="..\..\src\lib\StarZone.hxx">
+			</File>
 			<File RelativePath="..\..\src\lib\SWAttributeManager.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\SWFieldManager.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\SWFormatManager.hxx">
-			</File>
-			<File RelativePath="..\..\src\lib\SWZone.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\libstaroffice_internal.hxx">
 			</File>

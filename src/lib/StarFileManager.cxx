@@ -39,7 +39,7 @@
 
 #include <librevenge/librevenge.h>
 
-#include "SWZone.hxx"
+#include "StarZone.hxx"
 
 #include "SWAttributeManager.hxx"
 #include "StarFileManager.hxx"
@@ -404,6 +404,178 @@ bool StarFileManager::readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugF
     STOFF_DEBUG_MSG(("StarFileManager::readSfxWindows: find extra data\n"));
     ascii.addPos(input->tell());
     ascii.addNote("SfWindows:extra###");
+  }
+  return true;
+}
+
+#ifndef DEBUG_WITH_FILES
+bool StarFileManager::readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &)
+#else
+bool StarFileManager::readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName)
+#endif
+{
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  data.clear();
+  if (!input->readEndDataBlock(data)) {
+    STOFF_DEBUG_MSG(("StarFileManager::readImageDocument: can not read image content\n"));
+    return false;
+  }
+#ifdef DEBUG_WITH_FILES
+  libstoff::Debug::dumpFile(data, (fileName+".ppm").c_str());
+#endif
+  return true;
+}
+
+bool StarFileManager::readMathDocument(STOFFInputStreamPtr input, std::string const &fileName)
+{
+  StarZone zone(input, fileName, "MathDocument"); // use encoding RTL_TEXTENCODING_MS_1252
+  libstoff::DebugFile &ascii=zone.ascii();
+  ascii.open(fileName);
+  
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  libstoff::DebugStream f;
+  f << "Entries(SMMathDocument):";
+  // starmath_document.cxx Try3x
+  uint32_t lIdent, lVersion;
+  *input >> lIdent;
+  if (lIdent==0x534d3330 || lIdent==0x30333034) {
+    input->setReadInverted(input->readInverted());
+    input->seek(0, librevenge::RVNG_SEEK_SET);
+    *input >> lIdent;    
+  }
+  if (lIdent!=0x30334d53L && lIdent!=0x34303330L) {
+    STOFF_DEBUG_MSG(("StarFileManager::readMathDocument: find unexpected header\n"));
+    f << "###header";
+    ascii.addPos(0);
+    ascii.addNote(f.str().c_str());
+    return true;
+  }
+  *input >> lVersion;
+  f << "vers=" << std::hex << lVersion << std::dec << ",";
+  ascii.addPos(0);
+  ascii.addNote(f.str().c_str());
+  librevenge::RVNGString text;
+  while (!input->isEnd()) {
+    long pos=input->tell();
+    int8_t cTag;
+    *input>>cTag;
+    f.str("");
+    f << "SMMathDocument[" << char(cTag) << "]:";
+    bool done=true, isEnd=false;;
+    switch (cTag) {
+    case 0:
+      isEnd=true;
+      break;
+    case 'T':
+      if (!zone.readString(text)) {
+        done=false;
+        break;
+      }
+      f << text.cstr();
+      break;
+    case 'D':
+      for (int i=0; i<4; ++i) {
+        if (!zone.readString(text)) {
+          STOFF_DEBUG_MSG(("StarFileManager::readMathDocument: can not read a string\n"));
+          f << "###string" << i << ",";
+          done=false;
+          break;
+        }
+        if (!text.empty()) f << "str" << i << "=" << text.cstr() << ",";
+        if (i==1 || i==2) {
+          uint32_t date, time;
+          *input >> date >> time;
+          f << "date" << i << "=" << date << ",";
+          f << "time" << i << "=" << time << ",";
+        }
+      }
+      break;
+    case 'F': {
+      // starmath_format.cxx operator>>
+      uint16_t n, vLeftSpace, vRightSpace, vTopSpace, vDist, vSize;
+      *input>>n>>vLeftSpace>>vRightSpace;
+      f << "baseHeight=" << (n&0xff) << ",";
+      if (n&0x100) f << "isTextMode,";
+      if (n&0x200) f << "bScaleNormalBracket,";
+      if (vLeftSpace) f << "vLeftSpace=" << vLeftSpace << ",";
+      if (vRightSpace) f << "vRightSpace=" << vRightSpace << ",";
+      f << "size=[";
+      for (int i=0; i<=4; ++i) {
+        *input>>vSize;
+        f << vSize << ",";
+      }
+      f << "],";
+      *input>>vTopSpace;
+      if (vTopSpace) f << "vTopSpace=" << vTopSpace << ",";
+      f << "fonts=[";
+      for (int i=0; i<=6; ++i) {
+        // starmath_utility.cxx operator>>(..., SmFace)
+        uint32_t nData1, nData2, nData3, nData4;
+        f << "[";
+        if (input->isEnd() || !zone.readString(text)) {
+          STOFF_DEBUG_MSG(("StarFileManager::readMathDocument: can not read a font string\n"));
+          f << "###string,";
+          done=false;
+          break;
+        }
+        f << text.cstr() << ",";
+        *input >> nData1 >> nData2 >> nData3 >> nData4;
+        if (nData1) f << "familly=" << nData1 << ",";
+        if (nData2) f << "encoding=" << nData2 << ",";
+        if (nData3) f << "weight=" << nData3 << ",";
+        if (nData4) f << "bold=" << nData4 << ",";
+        f << "],";
+      }
+      f << "],";
+      if (!done) break;
+      if (input->tell()+21*2 > input->size()) {
+        STOFF_DEBUG_MSG(("StarFileManager::readMathDocument: zone is too short\n"));
+        f << "###short,";
+        done=false;
+        break;
+      }
+      f << "vDist=[";
+      for (int i=0; i<=18; ++i) {
+        *input >> vDist;
+        if (vDist)
+          f << vDist << ",";
+        else
+          f << "_,";
+      }
+      f << "],";
+      *input >> n >> vDist;
+      f << "vers=" << (n>>8) << ",";
+      f << "eHorAlign=" << (n&0xFF) << ",";
+      if (vDist) f << "bottomSpace=" << vDist << ",";
+      break;
+    }
+    case 'S': {
+      if (!zone.readString(text)) {
+        STOFF_DEBUG_MSG(("StarFileManager::readMathDocument: can not read a string\n"));
+        f << "###string,";
+        done=false;
+        break;
+      }
+      f << text.cstr() << ",";
+      uint16_t n;
+      *input>>n;
+      if (n) f << "n=" << n << ",";
+      break;
+    }
+    default:
+      STOFF_DEBUG_MSG(("StarFileManager::readMathDocument: find unexpected type\n"));
+      f << "###type,";
+      done=false;
+      break;
+    }
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    if (!done) {
+      ascii.addDelimiter(input->tell(),'|');
+      break;
+    }
+    if (isEnd)
+      break;
   }
   return true;
 }

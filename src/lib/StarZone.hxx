@@ -32,31 +32,31 @@
 */
 
 /*
- * SWZone zone of StarOffice document
+ * StarZone zone of StarOffice document
  *
  */
-#ifndef SW_ZONE
-#  define SW_ZONE
+#ifndef STAR_ZONE
+#  define STAR_ZONE
 
 #include <vector>
 #include <stack>
 
 #include "STOFFDebug.hxx"
 
-/** \brief a SW zone in a StarOffice file
+/** \brief a zone in a StarOffice file
  *
  *
  *
  */
-class SWZone
+class StarZone
 {
 public:
   //! constructor
-  SWZone(STOFFInputStreamPtr input, std::string const &ascName, std::string const &zoneName);
+  StarZone(STOFFInputStreamPtr input, std::string const &ascName, std::string const &zoneName);
   //! destructor
-  virtual ~SWZone();
-  //! read the zone header
-  bool readHeader();
+  virtual ~StarZone();
+  //! read the zone header present in a SW file
+  bool readSWHeader();
 
   //! returns the StarOffice version: 3-5
   int getVersion() const
@@ -104,7 +104,7 @@ public:
   long getRecordLastPosition() const
   {
     if (m_positionStack.empty()) {
-      STOFF_DEBUG_MSG(("SWZone::getRecordLastPosition: can not find last position\n"));
+      STOFF_DEBUG_MSG(("StarZone::getRecordLastPosition: can not find last position\n"));
       return 0;
     }
     return m_positionStack.top();
@@ -133,7 +133,7 @@ public:
       return true;
     }
     if (poolId==0xFFF0) return true;
-    STOFF_DEBUG_MSG(("SWZone::getPoolName: can not find pool name for %d\n", poolId));
+    STOFF_DEBUG_MSG(("StarZone::getPoolName: can not find pool name for %d\n", poolId));
     return false;
   }
   //! return the zone input
