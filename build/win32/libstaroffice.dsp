@@ -131,6 +131,10 @@ SOURCE=..\..\src\lib\STOFFSubDocument.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarFileManager.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\SWAttributeManager.cxx
 # End Source File
 # Begin Source File
@@ -207,6 +211,10 @@ SOURCE=..\..\src\lib\STOFFSpreadsheetDecoder.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFSubDocument.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarFileManager.hxx
 # End Source File
 # Begin Source File
 

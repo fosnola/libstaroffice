@@ -94,7 +94,7 @@ public:
   //! try to open a record
   bool openRecord(char &type);
   //! try to close a record
-  bool closeRecord(char type);
+  bool closeRecord(char type, std::string const &debugName);
   //! returns the record level
   int getRecordLevel() const
   {

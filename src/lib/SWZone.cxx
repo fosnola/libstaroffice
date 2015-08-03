@@ -135,12 +135,7 @@ bool SWZone::readStringsPool()
       m_ascii.addNote(f.str().c_str());
     }
   }
-  if (m_input->tell()!=lastPos) {
-    STOFF_DEBUG_MSG(("SWZone::readStringsPool: find extra data\n"));
-    m_ascii.addPos(m_input->tell());
-    m_ascii.addNote("SWPoolList:###extra");
-  }
-  closeRecord(type);
+  closeRecord(type, "SWPoolList");
   m_ascii.addPos(pos);
   m_ascii.addNote(f.str().c_str());
   return true;
@@ -328,7 +323,7 @@ bool SWZone::openRecord(char &type)
   return true;
 }
 
-bool SWZone::closeRecord(char type)
+bool SWZone::closeRecord(char type, std::string const &debugName)
 {
   m_flagEndZone=0;
   while (!m_typeStack.empty()) {
@@ -340,9 +335,18 @@ bool SWZone::closeRecord(char type)
     if (typ!=type) continue;
     if (!pos)
       return true;
-    if (m_input->tell()>pos) {
-      STOFF_DEBUG_MSG(("SWZone::closeRecord: oops, we read to much data\n"));
+    long actPos=m_input->tell();
+    if (actPos!=pos) {
+      if (actPos>pos)
+        STOFF_DEBUG_MSG(("SWZone::closeRecord: oops, we read to much data\n"));
+      else if (actPos<pos)
+        STOFF_DEBUG_MSG(("SWZone::closeRecord: oops, some data have been ignored\n"));
+      libstoff::DebugStream f;
+      f << debugName << ":###extra";
+      m_ascii.addPos(actPos);
+      m_ascii.addNote(f.str().c_str());
     }
+
     m_input->seek(pos, librevenge::RVNG_SEEK_SET);
     return true;
   }
@@ -409,7 +413,7 @@ bool SWZone::readRecordSizes(long pos)
 
     m_ascii.addPos(pos);
     m_ascii.addNote(f.str().c_str());
-    closeRecord('%');
+    closeRecord('%',m_zoneName);
     if (oldPos!=pos)
       m_input->seek(oldPos, librevenge::RVNG_SEEK_SET);
     return true;
@@ -423,7 +427,7 @@ bool SWZone::readRecordSizes(long pos)
   }
   f << "],";
 
-  closeRecord('%');
+  closeRecord('%',m_zoneName);
   if (oldPos!=pos)
     m_input->seek(oldPos, librevenge::RVNG_SEEK_SET);
 

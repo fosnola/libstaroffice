@@ -18,14 +18,6 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_LDFLAGS =
 libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES = \
 	SDWParser.cxx				\
 	SDWParser.hxx				\
-	SWAttributeManager.cxx			\
-	SWAttributeManager.hxx			\
-	SWFieldManager.cxx			\
-	SWFieldManager.hxx			\
-	SWFormatManager.cxx			\
-	SWFormatManager.hxx			\
-	SWZone.cxx				\
-	SWZone.hxx				\
 	STOFFDebug.cxx				\
 	STOFFDebug.hxx				\
 	STOFFDocument.cxx			\
@@ -47,6 +39,16 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFSpreadsheetDecoder.hxx		\
 	STOFFSubDocument.cxx			\
 	STOFFSubDocument.hxx			\
+	StarFileManager.cxx			\
+	StarFileManager.hxx			\
+	SWAttributeManager.cxx			\
+	SWAttributeManager.hxx			\
+	SWFieldManager.cxx			\
+	SWFieldManager.hxx			\
+	SWFormatManager.cxx			\
+	SWFormatManager.hxx			\
+	SWZone.cxx				\
+	SWZone.hxx				\
 	libstaroffice_internal.cxx		\
 	libstaroffice_internal.hxx
 

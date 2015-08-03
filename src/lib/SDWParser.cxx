@@ -41,6 +41,7 @@
 
 #include "STOFFOLEParser.hxx"
 
+#include "StarFileManager.hxx"
 #include "SWAttributeManager.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
@@ -117,6 +118,7 @@ bool SDWParser::createZones()
   // send the final data
   std::vector<std::string> unparsedOLEs=oleParser.getUnparsedOLEZones();
   size_t numUnparsed = unparsedOLEs.size();
+  StarFileManager fileManager;
   for (size_t i = 0; i < numUnparsed; i++) {
     std::string const &name = unparsedOLEs[i];
     STOFFInputStreamPtr ole = getInput()->getSubStreamByName(name.c_str());
@@ -152,13 +154,13 @@ bool SDWParser::createZones()
 
     bool ok=false;
     if (base=="persist elements")
-      ok=readPersists(ole, asciiFile);
+      ok=fileManager.readPersistElements(ole, asciiFile);
     else if (base=="SfxDocumentInfo")
-      ok=readDocumentInformation(ole, asciiFile);
+      ok=fileManager.readSfxDocumentInformation(ole, asciiFile);
     else if (base=="SfxWindows")
-      ok=readSfxWindows(ole, asciiFile);
+      ok=fileManager.readSfxWindows(ole, asciiFile);
     else if (base=="Star Framework Config File")
-      ok=readFrameworkConfigFile(ole, asciiFile);
+      ok=fileManager.readStarFrameworkConfigFile(ole, asciiFile);
 
     if (!ok) {
       libstoff::DebugStream f;
@@ -190,330 +192,6 @@ void SDWParser::createDocument(librevenge::RVNGTextInterface *documentInterface)
 // Intermediate level
 //
 ////////////////////////////////////////////////////////////
-bool SDWParser::readPersists(STOFFInputStreamPtr input, libstoff::DebugFile &ascii)
-{
-  input->seek(0, librevenge::RVNG_SEEK_SET);
-  libstoff::DebugStream f;
-  f << "Entries(Persists):";
-  // persist.cxx: SvPersist::LoadContent
-  if (input->size()<21 || input->readLong(1)!=2) {
-    STOFF_DEBUG_MSG(("SDWParser::readPersists: data seems bad\n"));
-    f << "###";
-    ascii.addPos(0);
-    ascii.addNote(f.str().c_str());
-    return true;
-  }
-  int hasElt=(int) input->readLong(1);
-  if (hasElt==1) {
-    if (input->size()<29) {
-      STOFF_DEBUG_MSG(("SDWParser::readPersists: flag hasData, but zone seems too short\n"));
-      f << "###";
-      hasElt=0;
-    }
-    f << "hasData,";
-  }
-  else if (hasElt) {
-    STOFF_DEBUG_MSG(("SDWParser::readPersists: flag hasData seems bad\n"));
-    f << "#hasData=" << hasElt << ",";
-    hasElt=0;
-  }
-  int val;
-  int N=0;
-  long endDataPos=0;
-  if (hasElt) {
-    val=(int) input->readULong(1); // always 80?
-    if (val!=0x80) f << "#f0=" << std::hex << val << std::dec << ",";
-    long dSz=(int) input->readULong(4);
-    N=(int) input->readULong(4);
-    f << "dSz=" << dSz << ",N=" << N << ",";
-    if (!dSz || 7+dSz+18>input->size()) {
-      STOFF_DEBUG_MSG(("SDWParser::readPersists: data size seems bad\n"));
-      f << "###dSz";
-      dSz=0;
-      N=0;
-    }
-    endDataPos=7+dSz;
-  }
-  ascii.addPos(0);
-  ascii.addNote(f.str().c_str());
-  for (int i=0; i<N; ++i) {
-    long pos=input->tell();
-    f.str("");
-    f << "Persists-A" << i << ":";
-    val=(int) input->readULong(1); // 60|70
-    if (val) f << "f0=" << std::hex << val << std::dec << ",";
-    long id;
-    if (pos+10>endDataPos || !input->readCompressedLong(id)) {
-      STOFF_DEBUG_MSG(("SDWParser::readPersists: data %d seems bad\n", i));
-      f << "###";
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      break;
-    }
-    if (id!=i+1) f << "id=" << id << ",";
-    val=(int) input->readULong(1); // another compressed long ?
-    if (val) f << "f1=" << val << ",";
-    long dSz=(long) input->readULong(4);
-    long endZPos=input->tell()+dSz;
-    if (dSz<16 || endZPos>endDataPos) {
-      STOFF_DEBUG_MSG(("SDWParser::readPersists: dSz seems bad\n"));
-      f << "###dSz=" << dSz << ",";
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      break;
-    }
-    int decalSz=(int) input->readULong(1);
-    if (decalSz) f << "decal=" << decalSz << ",";
-    int textSz=(int) input->readULong(2);
-    bool oddHeader=false;
-    if (textSz==0) {
-      f << "#odd,";
-      oddHeader=true;
-      textSz=(int) input->readULong(2);
-    }
-    if (input->tell()+textSz>endZPos) {
-      STOFF_DEBUG_MSG(("SDWParser::readPersists: data %d seems bad\n", i));
-      f << "###textSz=" << textSz << ",";
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      input->seek(endZPos, librevenge::RVNG_SEEK_SET);
-      continue;
-    }
-    std::string text("");
-    for (int c=0; c<textSz; ++c) text += (char) input->readULong(1);
-    f << text << ",";
-    if (!oddHeader) { // always 0?
-      val=(int) input->readLong(2);
-      if (val) f << "f2=" << val << ",";
-    }
-    ascii.addDelimiter(input->tell(),'|');
-    input->seek(endZPos, librevenge::RVNG_SEEK_SET);
-    ascii.addPos(pos);
-    ascii.addNote(f.str().c_str());
-  }
-  input->seek(-18, librevenge::RVNG_SEEK_END);
-  long pos=input->tell();
-  f.str("");
-  f << "Persists-B:";
-  int dim[4];
-  for (int i=0; i<4; ++i) dim[i]=(int) input->readLong(4);
-  f << "dim=" << STOFFBox2i(STOFFVec2i(dim[0],dim[1]), STOFFVec2i(dim[2],dim[3])) << ",";
-  val=(int) input->readLong(2); // 0|9
-  if (val) f << "f0=" << val << ",";
-  ascii.addPos(pos);
-  ascii.addNote(f.str().c_str());
-  return true;
-}
-
-bool SDWParser::readDocumentInformation(STOFFInputStreamPtr input, libstoff::DebugFile &ascii)
-{
-  // see sfx2_docinf.cxx
-  input->seek(0, librevenge::RVNG_SEEK_SET);
-  libstoff::DebugStream f;
-  f << "Entries(DocInfo):";
-  int sSz=(int) input->readULong(2);
-  if (2+sSz>input->size()) {
-    STOFF_DEBUG_MSG(("SDWParser::readDocumentInformation: header seems bad\n"));
-    f << "###sSz=" << sSz << ",";
-    ascii.addPos(0);
-    ascii.addNote(f.str().c_str());
-    return true;
-  }
-  std::string text("");
-  for (int i=0; i<sSz; ++i) text+=(char) input->readULong(1);
-  if (text!="SfxDocumentInfo") {
-    STOFF_DEBUG_MSG(("SDWParser::readDocumentInformation: header seems bad\n"));
-    f << "###text=" << text << ",";
-    ascii.addPos(0);
-    ascii.addNote(f.str().c_str());
-    return true;
-  }
-  int val=(int) input->readULong(2);
-  if (val)
-    f << "vers=" << val << ",";
-  val=(int) input->readULong(1);
-  if (val==1)
-    f << "passwd,";
-  else if (val)
-    f << "passwd=" << val << ",";
-  f << "charSet=" << input->readULong(2) << ",";
-  for (int i=0; i<2; ++i) {
-    val=(int) input->readULong(1);
-    if (!val) continue;
-    f << (i==0 ? "graph[portable]" : "template");
-    if (val==1)
-      f <<",";
-    else if (val)
-      f << "=" << val << ",";
-  }
-  ascii.addPos(0);
-  ascii.addNote(f.str().c_str());
-
-  for (int i=0; i<17; ++i) {
-    long pos=input->tell();
-    f.str("");
-    f << "DocInfo-A" << i << ":";
-    int dSz=(int) input->readULong(2);
-    int expectedSz= i < 3 ? 33 : i < 5 ? 65 : i==5 ? 257 : i==6 ? 129 : i<15 ? 21 : 2;
-    static char const *(wh[])= {
-      "time[creation]","time[mod]","time[print]","title","subject","comment","keyword",
-      "user0[name]", "user0[data]","user1[name]", "user1[data]","user2[name]", "user2[data]","user3[name]", "user3[data]",
-      "template[name]", "template[filename]"
-    };
-    f << wh[i] << ",";
-    if (dSz+2>expectedSz) {
-      if (i<15)
-        expectedSz+=0x10000;
-      else
-        expectedSz=2+dSz;
-    }
-    if (pos+expectedSz+(i<3 ? 8 : 0)>input->size()) {
-      STOFF_DEBUG_MSG(("SDWParser::readDocumentInformation: can not read string %d\n", i));
-      f << "###";
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      return true;
-    }
-    text="";
-    for (int c=0; c<dSz; ++c) text+=(char) input->readULong(1);
-    f << text << ",";
-    input->seek(pos+expectedSz, librevenge::RVNG_SEEK_SET);
-    if (i<3) {
-      f << "date=" << input->readULong(4) << ",";
-      f << "time=" << input->readULong(4) << ",";
-    }
-    ascii.addPos(pos);
-    ascii.addNote(f.str().c_str());
-  }
-
-  long pos=input->tell();
-  f.str("");
-  f << "DocInfo-B:";
-  if (pos+8>input->size()) {
-    STOFF_DEBUG_MSG(("SDWParser::readDocumentInformation: last zone seems too short\n"));
-    f << "###";
-    ascii.addPos(pos);
-    ascii.addNote(f.str().c_str());
-    return true;
-  }
-  f << "date=" << input->readULong(4) << ","; // YYYYMMDD
-  f << "time=" << input->readULong(4) << ","; // HHMMSS00
-  if (!input->isEnd()) // [MailAddr], lTime, ...
-    ascii.addDelimiter(input->tell(),'|');
-  ascii.addPos(pos);
-  ascii.addNote(f.str().c_str());
-
-  return true;
-}
-
-bool SDWParser::readFrameworkConfigFile(STOFFInputStreamPtr input, libstoff::DebugFile &asciiFile)
-{
-  input->seek(0, librevenge::RVNG_SEEK_SET);
-  libstoff::DebugStream f;
-  f << "Entries(StarFrameworkConfig):";
-  // see sfx2_cfgimex SfxConfigManagerImExport_Impl::Import
-  std::string header("");
-  for (int i=0; i<26; ++i) header+=(char) input->readULong(1);
-  if (!input->checkPosition(33)||header!="Star Framework Config File") {
-    STOFF_DEBUG_MSG(("SDWParser::readFrameworkConfigFile: the header seems bad\n"));
-    f << "###" << header;
-    asciiFile.addPos(0);
-    asciiFile.addNote(f.str().c_str());
-    return true;
-  }
-  int val=(int) input->readULong(1); // cCtrlZ
-  if (val!=26) f << "f0=" << val << ",";
-  val=(int) input->readULong(2); // 26: normal version
-  if (val!=26) f << "vers=" << input->readULong(2) << ",";
-  long pos=(long) input->readULong(4);
-  if (!input->checkPosition(pos+2)) {
-    STOFF_DEBUG_MSG(("SDWParser::readFrameworkConfigFile: dir pos is bad\n"));
-    f << "###dirPos" << pos << ",";
-    asciiFile.addPos(0);
-    asciiFile.addNote(f.str().c_str());
-    return true;
-  }
-  if (input->tell()!=pos) asciiFile.addDelimiter(input->tell(),'|');
-  asciiFile.addPos(0);
-  asciiFile.addNote(f.str().c_str());
-
-  input->seek(pos, librevenge::RVNG_SEEK_SET);
-  f.str("");
-  f << "StarFrameworkConfig:";
-  int N=(int) input->readULong(2);
-  f << "N=" << N << ",";
-  for (int i=0; i<N; ++i) {
-    f << "item" << i << "=[";
-    f << "nType=" << input->readULong(2) << ",";
-    long lPos=input->readLong(4);
-    if (lPos!=-1) {
-      f << "lPos=" << input->readLong(4) << ",";
-      if (!input->checkPosition(lPos)) {
-        STOFF_DEBUG_MSG(("SDWParser::readFrameworkConfigFile: a item position seems bad\n"));
-        f << "###";
-      }
-      else {
-        static bool first=true;
-        if (first) {
-          STOFF_DEBUG_MSG(("SDWParser::readFrameworkConfigFile: Ohhh find some item\n"));
-          first=true;
-        }
-        asciiFile.addPos(lPos);
-        asciiFile.addNote("StarFrameworkConfig[Item]:###");
-        // see SfxConfigManagerImExport_Impl::ImportItem, if needed
-      }
-    }
-    f << "lLength=" << input->readLong(4) << ",";
-    int strSz=(int) input->readULong(2);
-    if (!input->checkPosition(input->tell()+strSz)) {
-      STOFF_DEBUG_MSG(("SDWParser::readFrameworkConfigFile: a item seems bad\n"));
-      f << "###item,";
-      break;
-    }
-    std::string name("");
-    for (int c=0; c<strSz; ++c) name+=(char) input->readULong(1);
-    f << name << ",";
-    f << "],";
-  }
-  asciiFile.addPos(pos);
-  asciiFile.addNote(f.str().c_str());
-
-  return true;
-}
-
-bool SDWParser::readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugFile &ascii)
-{
-  input->seek(0, librevenge::RVNG_SEEK_SET);
-  libstoff::DebugStream f;
-  f << "Entries(SfWindows):";
-  // see sc_docsh.cxx
-  ascii.addPos(0);
-  ascii.addNote(f.str().c_str());
-  while (!input->isEnd()) {
-    long pos=input->tell();
-    if (!input->checkPosition(pos+2))
-      break;
-    int dSz=(int) input->readULong(2);
-    if (!input->checkPosition(pos+2+dSz)) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    f.str("");
-    f << "SfWindows:";
-    std::string text("");
-    for (int i=0; i<dSz; ++i) text+=(char) input->readULong(1);
-    f << text;
-    ascii.addPos(pos);
-    ascii.addNote(f.str().c_str());
-  }
-  if (!input->isEnd()) {
-    STOFF_DEBUG_MSG(("SDWParser::readSfxWindows: find extra data\n"));
-    ascii.addPos(input->tell());
-    ascii.addNote("SfWindows:extra###");
-  }
-  return true;
-}
-
 bool SDWParser::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &name)
 {
   SWZone zone(input, name, "SWNumRuleList");
@@ -566,7 +244,7 @@ bool SDWParser::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &
       f << "###type,";
       break;
     }
-    if (!zone.closeRecord(type)) {
+    if (!zone.closeRecord(type, "SWNumRuleList")) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -632,7 +310,7 @@ bool SDWParser::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string con
       f << "###";
       break;
     }
-    if (!zone.closeRecord(type)) {
+    if (!zone.closeRecord(type, "SWPageStyleSheets")) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -702,9 +380,7 @@ bool SDWParser::readSWPageDef(SWZone &zone)
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     f.str("");
     if (!zone.openRecord(type)) {
-      STOFF_DEBUG_MSG(("SDWParser::readSwPageDef: find extra data\n"));
-      ascFile.addPos(pos);
-      ascFile.addNote("SWPageDef:###extra");
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
     f << "SWPageDef[" << type << "-" << zone.getRecordLevel() << "]:";
@@ -739,9 +415,9 @@ bool SDWParser::readSWPageDef(SWZone &zone)
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type);
+    zone.closeRecord(type, "SWPageDef");
   }
-  zone.closeRecord('p');
+  zone.closeRecord('p', "SWPageDef");
   return true;
 }
 
@@ -767,10 +443,7 @@ bool SDWParser::readSWBookmarkList(SWZone &zone)
     f.str("");
     f << "SWBookmark:";
     if (input->peek()!='B' || !zone.openRecord(type)) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWBookmarkList: find extra data\n"));
-      f << "###";
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
 
@@ -799,15 +472,24 @@ bool SDWParser::readSWBookmarkList(SWZone &zone)
       val=(int) input->readULong(2);
       if (val) f << "nMod=" << val << ",";
       zone.closeFlagZone();
-
-      // we may still have some macros: start:aMac, aLib, end:aMac, aLib
+    }
+    if (ok && input->tell()<zone.getRecordLastPosition()) {
+      for (int i=0; i<4; ++i) { // start[aMac:aLib],end[aMac:Alib]
+        if (!zone.readString(text)) {
+          STOFF_DEBUG_MSG(("SDWParser::readSWBookmarkList: can not read macro name\n"));
+          f << "###macro";
+          break;
+        }
+        else if (!text.empty())
+          f << "macro" << i << "=" << text.cstr();
+      }
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type);
+    zone.closeRecord(type, "SWBookmark");
   }
 
-  zone.closeRecord('a');
+  zone.closeRecord('a', "SWBookmark");
   return true;
 }
 
@@ -893,14 +575,9 @@ bool SDWParser::readSWContent(SWZone &zone)
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type);
+    zone.closeRecord(type, "SWContent");
   }
-  if (input->tell()<lastPos) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWContent: find extra data\n"));
-    ascFile.addPos(pos);
-    ascFile.addNote("SWContent:###extra");
-  }
-  zone.closeRecord('N');
+  zone.closeRecord('N', "SWContent");
   return true;
 }
 
@@ -923,7 +600,7 @@ bool SDWParser::readSWDBName(SWZone &zone)
     f << "###string";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord('D');
+    zone.closeRecord('D', "SWDBName");
     return true;
   }
   if (!text.empty())
@@ -934,7 +611,7 @@ bool SDWParser::readSWDBName(SWZone &zone)
       f << "###SQL";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('D');
+      zone.closeRecord('D', "SWDBName");
       return true;
     }
     if (!text.empty())
@@ -946,7 +623,7 @@ bool SDWParser::readSWDBName(SWZone &zone)
       f << "###tableName";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('D');
+      zone.closeRecord('D', "SWDBName");
       return true;
     }
     if (!text.empty())
@@ -975,13 +652,9 @@ bool SDWParser::readSWDBName(SWZone &zone)
       f << "],";
     }
   }
-  if (input->tell()<zone.getRecordLastPosition()) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWDBName: find extra data\n"));
-    f << "###";
-  }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('D');
+  zone.closeRecord('D', "SWDBName");
   return true;
 }
 
@@ -1016,14 +689,10 @@ bool SDWParser::readSWDictionary(SWZone &zone)
     f << "c=" << input->readULong(1) << ",";
     f << "],";
   }
-  if (input->tell()<lastPos) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWDictionary: find extra data\n"));
-    f << "###";
-  }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  zone.closeRecord('j');
+  zone.closeRecord('j', "SWDictionary");
   return true;
 }
 
@@ -1060,7 +729,7 @@ bool SDWParser::readSWEndNoteInfo(SWZone &zone)
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        zone.closeRecord('4');
+        zone.closeRecord('4', "SWEndNoteInfo");
         return true;
       }
       if (!text.empty())
@@ -1073,7 +742,7 @@ bool SDWParser::readSWEndNoteInfo(SWZone &zone)
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('4');
+  zone.closeRecord('4', "SWEndNoteInfo");
   return true;
 }
 
@@ -1099,7 +768,7 @@ bool SDWParser::readSWFootNoteInfo(SWZone &zone)
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        zone.closeRecord('1');
+        zone.closeRecord('1', "SWFootNoteInfo");
       }
       if (!text.empty())
         f << (i==0 ? "quoVadis":"ergoSum") << "=" << text.cstr() << ",";
@@ -1129,7 +798,7 @@ bool SDWParser::readSWFootNoteInfo(SWZone &zone)
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        zone.closeRecord('1');
+        zone.closeRecord('1', "SWFootNoteInfo");
         return true;
       }
       if (!text.empty())
@@ -1148,7 +817,7 @@ bool SDWParser::readSWFootNoteInfo(SWZone &zone)
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        zone.closeRecord('1');
+        zone.closeRecord('1', "SWFootNoteInfo");
         return true;
       }
       if (!text.empty())
@@ -1161,7 +830,7 @@ bool SDWParser::readSWFootNoteInfo(SWZone &zone)
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('1');
+  zone.closeRecord('1', "SWFootNoteInfo");
   return true;
 }
 
@@ -1191,7 +860,7 @@ bool SDWParser::readSWGraphNode(SWZone &zone)
       f << "###string";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('G');
+      zone.closeRecord('G', "SWGraphNode");
       return true;
     }
     if (!text.empty())
@@ -1203,7 +872,7 @@ bool SDWParser::readSWGraphNode(SWZone &zone)
       f << "###textRepl";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('G');
+      zone.closeRecord('G', "SWGraphNode");
       return true;
     }
     if (!text.empty())
@@ -1268,16 +937,10 @@ bool SDWParser::readSWGraphNode(SWZone &zone)
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type);
-  }
-  if (input->tell()!=lastPos) {
-    ascFile.addDelimiter(input->tell(),'|');
-    STOFF_DEBUG_MSG(("SDWParser::readSWGraphNode: extra data\n"));
-    ascFile.addPos(input->tell());
-    ascFile.addNote("SWGraphNode:###extra");
+    zone.closeRecord(type, "SWGraphNode");
   }
 
-  zone.closeRecord('G');
+  zone.closeRecord('G', "SWGraphNode");
   return true;
 }
 
@@ -1305,7 +968,7 @@ bool SDWParser::readSWImageMap(SWZone &zone)
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
 
-    zone.closeRecord('X');
+    zone.closeRecord('X', "SWImageMap");
     return true;
   }
   if (!string.empty())
@@ -1318,7 +981,7 @@ bool SDWParser::readSWImageMap(SWZone &zone)
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
 
-        zone.closeRecord('X');
+        zone.closeRecord('X', "SWImageMap");
         return true;
       }
       if (string.empty()) continue;
@@ -1342,7 +1005,7 @@ bool SDWParser::readSWImageMap(SWZone &zone)
           ascFile.addPos(pos);
           ascFile.addNote(f.str().c_str());
 
-          zone.closeRecord('X');
+          zone.closeRecord('X', "SWImageMap");
           return true;
         }
         if (!string.empty())
@@ -1359,14 +1022,9 @@ bool SDWParser::readSWImageMap(SWZone &zone)
       }
     }
   }
-  if (input->tell()!=zone.getRecordLastPosition()) {
-    ascFile.addDelimiter(input->tell(),'|');
-    STOFF_DEBUG_MSG(("SDWParser::readSWImageMap: extra data\n"));
-    f << "###extra:";
-  }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('X');
+  zone.closeRecord('X', "SWImageMap");
   return true;
 }
 
@@ -1391,13 +1049,9 @@ bool SDWParser::readSWJobSetUp(SWZone &zone)
   int len=(int) input->readULong(2);
   f << "nLen=" << len << ",";
   if (len==0) {
-    if (input->tell()<lastPos) {
-      f << "###extra,";
-      STOFF_DEBUG_MSG(("SDWParser::readSWJobSetUp: find extra data\n"));
-    }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord('J');
+    zone.closeRecord('J', "SWJobSetUp");
     return true;
   }
   bool ok=false;
@@ -1426,8 +1080,9 @@ bool SDWParser::readSWJobSetUp(SWZone &zone)
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
 
-    ascFile.addPos(input->tell());
-    ascFile.addNote("SWJobSetUp:driverData");
+    pos=input->tell();
+    f.str("");
+    f << "SWJobSetUp:driverData,";
     input->seek(lastPos, librevenge::RVNG_SEEK_SET);
   }
   else if (ok && input->tell()+22<=lastPos) {
@@ -1440,8 +1095,6 @@ bool SDWParser::readSWJobSetUp(SWZone &zone)
     f << "nPaperFormat=" << input->readULong(2) << ",";
     f << "nPaperWidth=" << input->readULong(4) << ",";
     f << "nPaperHeight=" << input->readULong(4) << ",";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
 
     if (driverDataLen && input->tell()+driverDataLen<=lastPos) {
       ascFile.addPos(input->tell());
@@ -1451,6 +1104,8 @@ bool SDWParser::readSWJobSetUp(SWZone &zone)
     else if (driverDataLen)
       ok=false;
     if (ok) {
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
       pos=input->tell();
       f.str("");
       f << "SWJobSetUp[values]:";
@@ -1468,10 +1123,6 @@ bool SDWParser::readSWJobSetUp(SWZone &zone)
           if (!ok)
             break;
         }
-        if (ok) {
-          ascFile.addPos(pos);
-          ascFile.addNote(f.str().c_str());
-        }
       }
       else if (input->tell()<lastPos) {
         ascFile.addPos(input->tell());
@@ -1480,16 +1131,10 @@ bool SDWParser::readSWJobSetUp(SWZone &zone)
       }
     }
   }
-  else
-    ok=false;
 
-  if (!ok || input->tell()<lastPos) {
-    f << "###extra,";
-    STOFF_DEBUG_MSG(("SDWParser::readSWJobSetUp: find extra data\n"));
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-  }
-  zone.closeRecord('J');
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  zone.closeRecord('J', "SWJobSetUp");
   return true;
 }
 
@@ -1528,16 +1173,11 @@ bool SDWParser::readSWLayoutInfo(SWZone &zone)
     f << "SWLayoutInfo[" << std::hex << int((unsigned char)type) << std::dec << "]:";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type);
+    zone.closeRecord(type, "SWLayoutInfo");
     break;
   }
 
-  if (input->tell()<lastPos) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWLayoutInfo: find extra data\n"));
-    ascFile.addPos(input->tell());
-    ascFile.addNote("SWLayoutInfo:###");
-  }
-  zone.closeRecord('U');
+  zone.closeRecord('U', "SWLayoutInfo");
   return true;
 }
 
@@ -1571,7 +1211,7 @@ bool SDWParser::readSWLayoutSub(SWZone &zone)
     f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(char(0xd2));
+    zone.closeRecord(char(0xd2), "SWLayoutSub");
     return true;
   }
   ascFile.addDelimiter(input->tell(),'|');
@@ -1589,15 +1229,11 @@ bool SDWParser::readSWLayoutSub(SWZone &zone)
     f << "SWLayoutSub[" << std::hex << int((unsigned char)type) << std::dec << "]:";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type);
+    input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+    zone.closeRecord(type, "SWLayoutSub");
   }
 
-  if (input->tell()<lastPos) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWLayoutSub: find extra data\n"));
-    ascFile.addPos(input->tell());
-    ascFile.addNote("SWLayoutSub:###");
-  }
-  zone.closeRecord(char(rType));
+  zone.closeRecord(char(rType), "SWLayoutSub");
   return true;
 }
 
@@ -1641,14 +1277,9 @@ bool SDWParser::readSWMacroTable(SWZone &zone)
       f << "scriptType=" << input->readULong(2) << ",";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type);
+    zone.closeRecord(type, "SWMacroTable");
   }
-  if (input->tell()<lastPos) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWMacroTable: find extra data\n"));
-    ascFile.addPos(pos);
-    ascFile.addNote("SWMacroTable:###extra");
-  }
-  zone.closeRecord('M');
+  zone.closeRecord('M', "SWMacroTable");
   return true;
 }
 
@@ -1671,13 +1302,9 @@ bool SDWParser::readSWNodeRedline(SWZone &zone)
   f << "nNodeOf=" << input->readULong(2) << ",";
   zone.closeFlagZone();
 
-  if (input->tell()!=zone.getRecordLastPosition()) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWNodeRedline: find extra data\n"));
-    f << "###extra";
-  }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('v');
+  zone.closeRecord('v', "SWNodeRedline");
   return true;
 }
 
@@ -1725,7 +1352,7 @@ bool SDWParser::readSWNumRule(SWZone &zone, char cKind)
     f << "###,";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(cKind);
+    zone.closeRecord(cKind, "SWNumRuleDef");
     return true;
   }
   f << "lvl=[";
@@ -1744,15 +1371,7 @@ bool SDWParser::readSWNumRule(SWZone &zone, char cKind)
     break;
   }
 
-  if (input->tell()!=lastPos) {
-    STOFF_DEBUG_MSG(("SDWParser::readSwNumRule: find extra data for %d zones\n", type));
-    f.str("");
-    f << "SWNumRuleDef[R]:###extra:";
-    ascFile.addPos(input->tell());
-    ascFile.addNote(f.str().c_str());
-  }
-
-  zone.closeRecord(cKind);
+  zone.closeRecord(cKind, "SWNumRuleDef");
   return true;
 }
 
@@ -1776,7 +1395,7 @@ bool SDWParser::readSWOLENode(SWZone &zone)
     f << "###objName";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord('O');
+    zone.closeRecord('O', "SWOLENode");
     return true;
   }
   if (!text.empty())
@@ -1787,20 +1406,15 @@ bool SDWParser::readSWOLENode(SWZone &zone)
       f << "###textRepl";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('O');
+      zone.closeRecord('O', "SWOLENode");
       return true;
     }
     if (!text.empty())
       f << "textRepl=" << text.cstr() << ",";
   }
-  if (input->tell()!=zone.getRecordLastPosition()) {
-    ascFile.addDelimiter(input->tell(),'|');
-    STOFF_DEBUG_MSG(("SDWParser::readSWOLENode: extra data\n"));
-    f << "###extra:";
-  }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('O');
+  zone.closeRecord('O', "SWOLENode");
   return true;
 }
 
@@ -1868,11 +1482,11 @@ bool SDWParser::readSWRedlineList(SWZone &zone)
         f << text.cstr();
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('D');
+      zone.closeRecord('D', "SWRedline");
     }
-    zone.closeRecord('R');
+    zone.closeRecord('R', "SWRedline");
   }
-  zone.closeRecord('V');
+  zone.closeRecord('V', "SWRedline");
   return true;
 }
 
@@ -1897,7 +1511,7 @@ bool SDWParser::readSWSection(SWZone &zone)
       f << "###string";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('I');
+      zone.closeRecord('I', "SWSection");
       return true;
     }
     if (text.empty()) continue;
@@ -1916,19 +1530,15 @@ bool SDWParser::readSWSection(SWZone &zone)
       f << "###linkName";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('I');
+      zone.closeRecord('I', "SWSection");
       return true;
     }
     else if (!text.empty())
       f << "linkName=" << text.cstr() << ",";
   }
-  if (input->tell()!=zone.getRecordLastPosition()) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWSection: find extra data\n"));
-    f << "###extra";
-  }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('I');
+  zone.closeRecord('I', "SWSection");
   return true;
 }
 
@@ -1970,7 +1580,7 @@ bool SDWParser::readSWTable(SWZone &zone)
     STOFF_DEBUG_MSG(("SDWParser::readSWTable: can not read a red line\n"));
     ascFile.addPos(pos);
     ascFile.addNote("SWTableDef:###redline");
-    zone.closeRecord('E');
+    zone.closeRecord('E',"SWTableDef");
     return true;
   }
 
@@ -1983,12 +1593,7 @@ bool SDWParser::readSWTable(SWZone &zone)
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
-  if (input->tell()!=lastPos) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWTable: find extra data\n"));
-    ascFile.addPos(input->tell());
-    ascFile.addNote("SWTableDef:###extra");
-  }
-  zone.closeRecord('E');
+  zone.closeRecord('E',"SWTableDef");
   return true;
 }
 
@@ -2024,12 +1629,7 @@ bool SDWParser::readSWTableBox(SWZone &zone)
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
-  if (input->tell()!=lastPos) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWTableBox: find extra data\n"));
-    ascFile.addPos(input->tell());
-    ascFile.addNote("SWTableBox:###extra");
-  }
-  zone.closeRecord('t');
+  zone.closeRecord('t', "SWTableBox");
   return true;
 }
 
@@ -2065,12 +1665,7 @@ bool SDWParser::readSWTableLine(SWZone &zone)
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
-  if (input->tell()!=lastPos) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWTableLine: find extra data\n"));
-    ascFile.addPos(input->tell());
-    ascFile.addNote("SWTableLine:###extra");
-  }
-  zone.closeRecord('L');
+  zone.closeRecord('L', "SWTableLine");
   return true;
 }
 
@@ -2107,7 +1702,7 @@ bool SDWParser::readSWTextZone(SWZone &zone)
     f << "###text";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord('T');
+    zone.closeRecord('T', "SWText");
     return true;
   }
   else if (!text.empty())
@@ -2205,14 +1800,9 @@ bool SDWParser::readSWTextZone(SWZone &zone)
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type);
+    zone.closeRecord(type, "SWText");
   }
-  if (input->tell()!=lastPos) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWTextZone: find extra data\n"));
-    ascFile.addPos(input->tell());
-    ascFile.addNote("SWText:###extra");
-  }
-  zone.closeRecord('T');
+  zone.closeRecord('T', "SWText");
   return true;
 }
 
@@ -2256,7 +1846,7 @@ bool SDWParser::readSWTOXList(SWZone &zone)
       f << "###aName";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord(type);
+      zone.closeRecord(type, "SWTOXList");
       continue;
     }
     if (!string.empty())
@@ -2266,7 +1856,7 @@ bool SDWParser::readSWTOXList(SWZone &zone)
       f << "###aTitle";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord(type);
+      zone.closeRecord(type, "SWTOXList");
       continue;
     }
     if (!string.empty())
@@ -2281,7 +1871,7 @@ bool SDWParser::readSWTOXList(SWZone &zone)
         f << "###aDummy";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        zone.closeRecord(type);
+        zone.closeRecord(type, "SWTOXList");
         continue;
       }
       if (!string.empty())
@@ -2302,7 +1892,7 @@ bool SDWParser::readSWTOXList(SWZone &zone)
     if (!ok) {
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord(type);
+      zone.closeRecord(type, "SWTOXList");
       continue;
     }
     N=(int) input->readULong(1);
@@ -2339,7 +1929,7 @@ bool SDWParser::readSWTOXList(SWZone &zone)
     if (!ok) {
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord(type);
+      zone.closeRecord(type, "SWTOXList");
       continue;
     }
     fl=zone.openFlagZone();
@@ -2347,21 +1937,11 @@ bool SDWParser::readSWTOXList(SWZone &zone)
     if (fl&0x10) f << "nTitleLen=" << input->readULong(4) << ",";
     zone.closeFlagZone();
 
-    if (input->tell()!=lastRecordPos) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWTOXList: find extra data\n"));
-      f << "###extra,";
-      ascFile.addDelimiter(input->tell(),'|');
-    }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type);
+    zone.closeRecord(type, "SWTOXList");
   }
-  if (input->tell()<lastPos) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWTOXList: find extra data\n"));
-    ascFile.addPos(pos);
-    ascFile.addNote("SWTOXList:###extra");
-  }
-  zone.closeRecord('u');
+  zone.closeRecord('u', "SWTOXList");
   return true;
 }
 
@@ -2402,7 +1982,7 @@ bool SDWParser::readSWTOX51List(SWZone &zone)
         f << "###typeName";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        zone.closeRecord(type);
+        zone.closeRecord(type, "SWTOX51List");
         continue;
       }
       if (!string.empty())
@@ -2413,7 +1993,7 @@ bool SDWParser::readSWTOX51List(SWZone &zone)
       f << "###aTitle";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord(type);
+      zone.closeRecord(type, "SWTOX51List");
       continue;
     }
     if (!string.empty())
@@ -2442,7 +2022,7 @@ bool SDWParser::readSWTOX51List(SWZone &zone)
     if (!ok) {
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord(type);
+      zone.closeRecord(type, "SWTOX51List");
       continue;
     }
     N=(int) input->readULong(1);
@@ -2453,22 +2033,12 @@ bool SDWParser::readSWTOX51List(SWZone &zone)
     f << "],";
 
     f << "nInf=" << input->readULong(2) << ",";
-    if (input->tell()!=zone.getRecordLastPosition()) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWTOX51List: find extra data\n"));
-      f << "###extra,";
-      ascFile.addDelimiter(input->tell(),'|');
-    }
 
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type);
+    zone.closeRecord(type, "SWTOX51List");
   }
-  if (input->tell()<lastPos) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWTOX51List: find extra data\n"));
-    ascFile.addPos(pos);
-    ascFile.addNote("SWTOX51List:###extra");
-  }
-  zone.closeRecord('y');
+  zone.closeRecord('y', "SWTOX51List");
   return true;
 }
 
@@ -2580,14 +2150,17 @@ bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const 
       else if (!string.empty())
         f << string.cstr();
       break;
-    case '5':
+    case '5': {
       // sw_sw3misc.cxx InLineNumberInfo
+      int fl=zone.openFlagZone();
+      if (fl&0xf0) f << "fl=" << (fl>>4) << ",";
       f << "linenumberInfo=" << input->readULong(1) << ",";
       f << "nPos=" << input->readULong(1) << ",";
       f << "nChrIdx=" << input->readULong(2) << ",";
       f << "nPosFromLeft=" << input->readULong(2) << ",";
       f << "nCountBy=" << input->readULong(2) << ",";
       f << "nDividerCountBy=" << input->readULong(2) << ",";
+      zone.closeFlagZone();
       if (!zone.readString(string)) {
         STOFF_DEBUG_MSG(("SDWParser::readWriterDocument: can not read sDivider string\n"));
         f << "###sDivider";
@@ -2596,6 +2169,7 @@ bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const 
       else if (!string.empty())
         f << string.cstr();
       break;
+    }
     case '6':
       // sw_sw3misc.cxx InDocDummies
       f << "docDummies,";
@@ -2652,6 +2226,7 @@ bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const 
       }
       f << "nWord=" << input->readULong(4) << ",";
       f << "nChar=" << input->readULong(4) << ",";
+      f << "nModified=" << input->readULong(1) << ",";
       break;
     case 'C': { // ignored by LibreOffice
       std::string comment("");
@@ -2681,7 +2256,7 @@ bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const 
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type);
+    zone.closeRecord(type, "SWWriterDocument");
     if (endZone)
       break;
   }

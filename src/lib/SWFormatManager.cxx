@@ -113,7 +113,7 @@ bool SWFormatManager::readSWFormatDef(SWZone &zone, char kind, SDWParser &manage
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
 
-      zone.closeRecord(kind);
+      zone.closeRecord(kind, "SWFormatDef");
       return true;
     }
     else if (!string.empty())
@@ -137,22 +137,18 @@ bool SWFormatManager::readSWFormatDef(SWZone &zone, char kind, SDWParser &manage
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
-    if (!zone.openRecord(type)) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readSWFormatDef: find extra data\n"));
-      ascFile.addPos(pos);
-      ascFile.addNote("SWFormatDef:###");
+    if (!zone.openRecord(type))
       break;
-    }
     f.str("");
     f << "SWFormatDef[" << type << "-" << zone.getRecordLevel() << "]:";
     STOFF_DEBUG_MSG(("SWFormatManager::readSwFormatDef: find unexpected type\n"));
     f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type);
+    zone.closeRecord(type, "SWFormatDef");
   }
 
-  zone.closeRecord(kind);
+  zone.closeRecord(kind, "SWFormatDef");
   return true;
 }
 
@@ -177,7 +173,7 @@ bool SWFormatManager::readSWNumberFormat(SWZone &zone)
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
 
-      zone.closeRecord('n');
+      zone.closeRecord('n', "SWNumbFormat");
       return true;
     }
     if (string.empty()) continue;
@@ -214,13 +210,9 @@ bool SWFormatManager::readSWNumberFormat(SWZone &zone)
       if (cF&2) f << "nVer[vertOrient]=" << input->readULong(2) << ",";
     }
   }
-  if (input->tell()!=zone.getRecordLastPosition()) {
-    STOFF_DEBUG_MSG(("SWFormatManager::readSwNumberFormat: find extra data\n"));
-    f << "###extra:";
-  }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('n');
+  zone.closeRecord('n', "SWNumbFormat");
   return true;
 }
 
@@ -243,7 +235,7 @@ bool SWFormatManager::readSWNumberFormatterList(SWZone &zone)
     f << "###dataSz";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type);
+    zone.closeRecord(type, "SWNumberFormatter");
     return true;
   }
   ascFile.addPos(pos);
@@ -295,13 +287,11 @@ bool SWFormatManager::readSWNumberFormatterList(SWZone &zone)
     if (pos==endDataPos) break;
     if (pos>endDataPos) {
       STOFF_DEBUG_MSG(("SWFormatManager::readSWNumberFormatterList: data size seems bad\n"));
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
       break;
     }
 
     f.str("");
-    f << "SWNumberFormatter-A" << n << ":";
+    f << "SWNumberFormatter-A" << n << ":nPos=" << nPos << ",";
 
     input->seek(2, librevenge::RVNG_SEEK_CUR);
     val=(int) input->readULong(2);
@@ -416,11 +406,16 @@ bool SWFormatManager::readSWNumberFormatterList(SWZone &zone)
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
 
-    if (endFieldPos==endDataPos) break;
+    if (endFieldPos+4>endDataPos) {
+      input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
+      break;
+    }
     input->seek(endFieldPos, librevenge::RVNG_SEEK_SET);
     nPos=(unsigned long) input->readULong(4);
   }
-  zone.closeRecord(type);
+  if (input->tell()+4>=endDataPos)
+    input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+  zone.closeRecord(type, "SWNumberFormatter");
   return true;
 }
 
@@ -449,12 +444,7 @@ bool SWFormatManager::readSWFlyFrameList(SWZone &zone, SDWParser &manager)
 
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  if (input->tell()!=lastPos) {
-    STOFF_DEBUG_MSG(("SWFormatManager::readSWPatternLCL: find extra data\n"));
-    ascFile.addPos(pos);
-    ascFile.addNote("SWFlyFrames:###extra");
-  }
-  zone.closeRecord('F');
+  zone.closeRecord('F', "SWFlyFrames");
   return true;
 }
 
@@ -548,20 +538,11 @@ bool SWFormatManager::readSWPatternLCL(SWZone &zone)
       f << "###type,";
       break;
     }
-    if (input->tell()!=zone.getRecordLastPosition()) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readSWPatternLCL: find extra data in token\n"));
-      f << "###extra";
-    }
-    zone.closeRecord('D');
+    zone.closeRecord('D', "SWPatternLCL");
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
   }
-  if (input->tell()!=lastPos) {
-    STOFF_DEBUG_MSG(("SWFormatManager::readSWPatternLCL: find extra data\n"));
-    ascFile.addPos(pos);
-    ascFile.addNote("SWPatternLCL:###extra");
-  }
-  zone.closeRecord('P');
+  zone.closeRecord('P', "SWPatternLCL");
   return true;
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

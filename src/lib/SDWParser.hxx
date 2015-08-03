@@ -88,15 +88,6 @@ protected:
   // low level
   //
 
-  //!  the "persist elements" small structure: the list of object
-  static bool readPersists(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
-  //! the document information
-  static bool readDocumentInformation(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
-  //! the windows information
-  static bool readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
-  //! try to read the Star Framework Config file
-  bool readFrameworkConfigFile(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
-
   //! the page style
   bool readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
   //! the rulers?

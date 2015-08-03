@@ -933,7 +933,7 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
 
       char authType;
       libstoff::DebugStream f2;
-      f2<<"Field[auth-A" << i << "]:";
+      f2<<"SWFieldType[auth-A" << i << "]:";
       if (input->peek()!='E' || !zone.openRecord(authType)) {
         STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read an authority zone\n"));
 
@@ -944,12 +944,12 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
       }
       ascFile.addPos(actPos);
       ascFile.addNote(f2.str().c_str());
-      zone.closeRecord(authType);
+      zone.closeRecord(authType, "SWFieldType");
     }
     if (!ok || !nSort) break;
     long actPos=input->tell();
     libstoff::DebugStream f2;
-    f2<<"Field[auth-B]:";
+    f2<<"SWFieldType[auth-B]:";
     if (input->tell()+3*nSort>zone.getRecordLastPosition()) {
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read sort data\n"));
       f2 << "###";
@@ -978,18 +978,16 @@ bool SWFieldManager::readField(SWZone &zone, char cKind)
     break;
   }
 
-  if (input->tell()!=zone.getRecordLastPosition()) {
+  if (input->tell()!=zone.getRecordLastPosition() && cKind=='_') {
     STOFF_DEBUG_MSG(("SWFieldManager::readField: find extra data\n"));
     f << "###extra";
     ascFile.addDelimiter(input->tell(),'|');
-    if (cKind=='_')
-      input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
   if (cKind!='_')
-    zone.closeRecord(cKind);
+    zone.closeRecord(cKind, "SWFieldType");
   return true;
 }
 

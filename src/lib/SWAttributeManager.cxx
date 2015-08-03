@@ -1074,14 +1074,9 @@ bool SWAttributeManager::readAttribute(SWZone &zone, SDWParser &manager)
     STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: reading not format attribute is not implemented\n"));
     f << "#unimplemented,";
   }
-  if (input->tell()!= lastPos) {
-    STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: find extra data\n"));
-    f << "###extra,";
-    ascFile.addDelimiter(input->tell(),'|');
-  }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('A');
+  zone.closeRecord('A', "SWAttributeDef");
   return true;
 
 }
@@ -1104,12 +1099,10 @@ bool SWAttributeManager::readAttributeList(SWZone &zone, SDWParser &manager)
   while (input->tell() < zone.getRecordLastPosition()) { // normally only 2
     pos=input->tell();
     if (readAttribute(zone, manager) && input->tell()>pos) continue;
-    STOFF_DEBUG_MSG(("SWAttributeManager::readAttributeList: find extra data\n"));
-    ascFile.addPos(pos);
-    ascFile.addNote("SWAttributeList:###extra");
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
-  zone.closeRecord('S');
+  zone.closeRecord('S', "SWAttributeList");
   return true;
 }
 
