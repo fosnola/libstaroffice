@@ -408,12 +408,13 @@ bool StarFileManager::readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugF
   return true;
 }
 
-#ifndef DEBUG_WITH_FILES
-bool StarFileManager::readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &)
-#else
 bool StarFileManager::readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName)
-#endif
 {
+  // see this Ole with classic bitmap format
+  libstoff::DebugFile ascii(input);
+  ascii.open(fileName);
+  ascii.skipZone(0, input->size());
+
   input->seek(0, librevenge::RVNG_SEEK_SET);
   data.clear();
   if (!input->readEndDataBlock(data)) {
@@ -426,12 +427,99 @@ bool StarFileManager::readImageDocument(STOFFInputStreamPtr input, librevenge::R
   return true;
 }
 
+bool StarFileManager::readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName)
+{
+  // see this Ole with classic bitmap format
+  libstoff::DebugFile ascii(input);
+  ascii.open(fileName);
+  data.clear();
+  // impgraph.cxx: ImpGraphic::ImplReadEmbedded
+
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  libstoff::DebugStream f;
+  f << "Entries(EmbeddedPicture):";
+  uint32_t nId;
+  int32_t nLen;
+
+  *input>>nId;
+  if (nId==0x35465347 || nId==0x47534635) { // CHECKME: order
+    int32_t nType;
+    uint16_t nMapMode;
+    int32_t nOffsX, nOffsY, nScaleNumX, nScaleDenomX, nScaleNumY, nScaleDenomY;
+    bool mbSimple;
+    *input >> nType >> nLen;
+    if (nType) f << "type=" << nType << ",";
+    // mapmod.cxx: operator>>(..., ImplMapMode& )
+    *input >> nMapMode >> nOffsX>> nOffsY;
+    if (nMapMode) f << "mapMode=" << nMapMode << ",";
+    *input >> nScaleNumX >> nScaleDenomX >> nScaleNumY >> nScaleDenomY >> mbSimple;
+    f << "scaleX=" << nScaleNumX << "/" << nScaleDenomX << ",";
+    f << "scaleY=" << nScaleNumY << "/" << nScaleDenomY << ",";
+    if (mbSimple) f << "simple,";
+  }
+  else {
+    if (nId>0x100) {
+      input->seek(0, librevenge::RVNG_SEEK_SET);
+      input->setReadInverted(!input->readInverted());
+      *input>>nId;
+    }
+    if (nId) f << "type=" << nId << ",";
+    int32_t nWidth, nHeight, nMapMode, nScaleNumX, nScaleDenomX, nScaleNumY, nScaleDenomY, nOffsX, nOffsY;
+    *input >> nLen >> nWidth >> nHeight >> nMapMode;
+    f << "size=" << nWidth << "x" << nHeight << ",";
+    if (nMapMode) f << "mapMode=" << nMapMode << ",";
+    *input >> nScaleNumX >> nScaleDenomX >> nScaleNumY >> nScaleDenomY;
+    f << "scaleX=" << nScaleNumX << "/" << nScaleDenomX << ",";
+    f << "scaleY=" << nScaleNumY << "/" << nScaleDenomY << ",";
+    *input >> nOffsX >> nOffsY;
+    f << "offset=" << nOffsX << "x" << nOffsY << ",";
+  }
+  ascii.addDelimiter(input->tell(),'|');
+  if (nLen<10 || input->size()!=input->tell()+nLen) {
+    f << "###";
+    STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: the length seems bad\n"));
+    ascii.addPos(0);
+    ascii.addNote(f.str().c_str());
+    return false;
+  }
+  ascii.addPos(0);
+  ascii.addNote(f.str().c_str());
+  ascii.skipZone(input->tell()+4, input->size());
+  if (!input->readEndDataBlock(data)) {
+    STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: can not read image content\n"));
+    return true;
+  }
+#ifdef DEBUG_WITH_FILES
+  libstoff::Debug::dumpFile(data, (fileName+".pict").c_str());
+#endif
+  return true;
+}
+
+bool StarFileManager::readOleObject(STOFFInputStreamPtr input, std::string const &fileName)
+{
+  // see this Ole only once with PaintBrush data ?
+  libstoff::DebugFile ascii(input);
+  ascii.open(fileName);
+  ascii.skipZone(0, input->size());
+
+#ifdef DEBUG_WITH_FILES
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  librevenge::RVNGBinaryData data;
+  if (!input->readEndDataBlock(data)) {
+    STOFF_DEBUG_MSG(("StarFileManager::readOleObject: can not read image content\n"));
+    return false;
+  }
+  libstoff::Debug::dumpFile(data, (fileName+".ole").c_str());
+#endif
+  return true;
+}
+
 bool StarFileManager::readMathDocument(STOFFInputStreamPtr input, std::string const &fileName)
 {
   StarZone zone(input, fileName, "MathDocument"); // use encoding RTL_TEXTENCODING_MS_1252
   libstoff::DebugFile &ascii=zone.ascii();
   ascii.open(fileName);
-  
+
   input->seek(0, librevenge::RVNG_SEEK_SET);
   libstoff::DebugStream f;
   f << "Entries(SMMathDocument):";
@@ -441,7 +529,7 @@ bool StarFileManager::readMathDocument(STOFFInputStreamPtr input, std::string co
   if (lIdent==0x534d3330 || lIdent==0x30333034) {
     input->setReadInverted(input->readInverted());
     input->seek(0, librevenge::RVNG_SEEK_SET);
-    *input >> lIdent;    
+    *input >> lIdent;
   }
   if (lIdent!=0x30334d53L && lIdent!=0x34303330L) {
     STOFF_DEBUG_MSG(("StarFileManager::readMathDocument: find unexpected header\n"));
@@ -580,4 +668,32 @@ bool StarFileManager::readMathDocument(STOFFInputStreamPtr input, std::string co
   return true;
 }
 
+bool StarFileManager::readOutPlaceObject(STOFFInputStreamPtr input, libstoff::DebugFile &ascii)
+{
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  libstoff::DebugStream f;
+  f << "Entries(OutPlaceObject):";
+  // see outplace.cxx SvOutPlaceObject::SaveCompleted
+  if (input->size()<7) {
+    STOFF_DEBUG_MSG(("StarFileManager::readOutPlaceObject: file is too short\n"));
+    f << "###";
+  }
+  else {
+    uint16_t len;
+    uint32_t dwAspect;
+    bool setExtent;
+    *input>>len >> dwAspect >> setExtent;
+    if (len!=7) f << "length=" << len << ",";
+    if (dwAspect) f << "dwAspect=" << dwAspect << ",";
+    if (setExtent) f << setExtent << ",";
+    if (!input->isEnd()) {
+      STOFF_DEBUG_MSG(("StarFileManager::readOutPlaceObject: find extra data\n"));
+      f << "###extra";
+      ascii.addDelimiter(input->tell(),'|');
+    }
+  }
+  ascii.addPos(0);
+  ascii.addNote(f.str().c_str());
+  return true;
+}
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

@@ -41,6 +41,7 @@
 
 #include "STOFFOLEParser.hxx"
 
+#include "SDCParser.hxx"
 #include "StarFileManager.hxx"
 #include "SWAttributeManager.hxx"
 #include "SWFieldManager.hxx"
@@ -145,6 +146,11 @@ bool SDWParser::createZones()
       readSwPageStyleSheets(ole,name);
       continue;
     }
+    if (base=="StarChartDocument") {
+      SDCParser sdcParser;
+      sdcParser.readChartDocument(ole,name);
+      continue;
+    }
     if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
       librevenge::RVNGBinaryData data;
       fileManager.readImageDocument(ole,data,name);
@@ -156,6 +162,16 @@ bool SDWParser::createZones()
     }
     if (base=="StarWriterDocument") {
       readWriterDocument(ole,name);
+      continue;
+    }
+    if (base.compare(0,3,"Pic")==0) {
+      librevenge::RVNGBinaryData data;
+      fileManager.readEmbeddedPicture(ole,data,name);
+      continue;
+    }
+    // other
+    if (base=="Ole-Object") {
+      fileManager.readOleObject(ole,name);
       continue;
     }
     libstoff::DebugFile asciiFile(ole);
@@ -170,7 +186,9 @@ bool SDWParser::createZones()
       ok=fileManager.readSfxWindows(ole, asciiFile);
     else if (base=="Star Framework Config File")
       ok=fileManager.readStarFrameworkConfigFile(ole, asciiFile);
-    /** TODO "Ole-Object" "OutPlace Object" */
+    // other
+    else if (base=="OutPlace Object")
+      ok=fileManager.readOutPlaceObject(ole, asciiFile);
     if (!ok) {
       libstoff::DebugStream f;
       if (base=="Standard") // can be Standard or STANDARD
@@ -1330,19 +1348,21 @@ bool SDWParser::readSWNumRule(StarZone &zone, char cKind)
   // sw_sw3num.cxx::Sw3IoImp::InNumRule
   libstoff::DebugStream f;
   f << "Entries(SWNumRuleDef)[" << cKind << "-" << zone.getRecordLevel() << "]:";
-  int cFlags=0x20, nPoolId=-1;
+  int cFlags=0x20, nPoolId=-1, nStringId=0xFFFF;
   int val;
   if (zone.isCompatibleWith(0x201)) {
     cFlags=(int) zone.openFlagZone();
-    val=(int) input->readULong(2);
-    if (val) f << "nStringId=" << val << ",";
+    nStringId=(int) input->readULong(2);
+    librevenge::RVNGString poolName;
+    if (nStringId==0xFFFF)
+      ;
+    else if (!zone.getPoolName(nStringId, poolName))
+      f << "###nStringId=" << nStringId << ",";
+    else if (!poolName.empty())
+      f << poolName.cstr() << ",";
     if (cFlags&0x10) {
       nPoolId=(int) input->readULong(2);
-      librevenge::RVNGString poolName;
-      if (!zone.getPoolName(nPoolId, poolName))
-        f << "###nPoolId=" << nPoolId << ",";
-      else if (!poolName.empty())
-        f << poolName.cstr() << ",";
+      f << "PoolId=" << nPoolId << ",";
       val=(int) input->readULong(2);
       if (val) f << "poolHelpId=" << val << ",";
       val=(int) input->readULong(1);
@@ -1765,11 +1785,11 @@ bool SDWParser::readSWTextZone(StarZone &zone)
       int cFlag=zone.openFlagZone();
       int nLevel=(int) input->readULong(1);
       if (nLevel!=201)
-        f << "nLevel=" << input->readULong(1) << ",";
+        f << "nLevel=" << nLevel<< ",";
       if (cFlag&0x20) f << "nSetValue=" << input->readULong(2) << ",";
       zone.closeFlagZone();
       if (nLevel!=201) {
-        int N=int(lastPos-input->tell())/2;
+        int N=int(zone.getRecordLastPosition()-input->tell())/2;
         f << "level=[";
         for (int i=0; i<N; ++i)
           f << input->readULong(2) << ",";
@@ -1793,7 +1813,7 @@ bool SDWParser::readSWTextZone(StarZone &zone)
       f << "nEndInc=" << input->readULong(2) << ",";
       zone.closeFlagZone();
       int N =(int) input->readULong(2);
-      if (input->tell()+4*N>lastPos) {
+      if (input->tell()+4*N>zone.getRecordLastPosition()) {
         STOFF_DEBUG_MSG(("SDWParser::readSWTextZone: find bad count\n"));
         f << "###N=" << N << ",";
         break;
@@ -1834,7 +1854,8 @@ bool SDWParser::readSWTOXList(StarZone &zone)
   librevenge::RVNGString string;
   while (input->tell()<lastPos) {
     pos=input->tell();
-    if (input->peek()!='x' || !zone.openRecord(type)) {
+    int rType=input->peek();
+    if (rType!='x' || !zone.openRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -1847,6 +1868,7 @@ bool SDWParser::readSWTOXList(StarZone &zone)
     f << "nCreateType=" << input->readULong(2) << ",";
     f << "nCaptionDisplay=" << input->readULong(2) << ",";
     f << "nStrIdx=" << input->readULong(2) << ",";
+    f << "nSeqStrIdx=" << input->readULong(2) << ",";
     f << "nData=" << input->readULong(2) << ",";
     f << "cFormFlags=" << input->readULong(1) << ",";
     zone.closeFlagZone();
@@ -1946,6 +1968,15 @@ bool SDWParser::readSWTOXList(StarZone &zone)
     if (fl&0x10) f << "nTitleLen=" << input->readULong(4) << ",";
     zone.closeFlagZone();
 
+    if ((fl&0x10)) {
+      while (input->tell()<zone.getRecordLastPosition() && input->peek()=='s') {
+        if (!formatManager.readSWFormatDef(zone,'s', *this)) {
+          STOFF_DEBUG_MSG(("SDWParser::readSWTOXList: can not read some format\n"));
+          f << "###format,";
+          break;
+        }
+      }
+    }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
     zone.closeRecord(type, "SWTOXList");

@@ -899,6 +899,7 @@ bool STOFFOLEParser::readOlePres(STOFFInputStreamPtr ip, librevenge::RVNGBinaryD
 //
 //  Ole10Native: basic Windows picture, with no size
 //          - in general used to store a bitmap
+//          - may also store some Math StarOffice document
 //
 //////////////////////////////////////////////////
 

@@ -367,13 +367,13 @@ void StarZone::closeFlagZone()
     STOFF_DEBUG_MSG(("StarZone::closeFlagZone: oops, can not find end position\n"));
     return;
   }
-  if (m_flagEndZone>m_input->tell()) {
+  if (m_flagEndZone<m_input->tell()) {
     STOFF_DEBUG_MSG(("StarZone::closeFlagZone: oops, we have read too much data\n"));
     m_ascii.addPos(m_input->tell());
     m_ascii.addNote("Entries(BadFlagZone):###");
   }
-  else if (m_flagEndZone<m_input->tell()) {
-    STOFF_DEBUG_MSG(("StarZone::closeFlagZone: oops, we have read all data\n"));
+  else if (m_flagEndZone>m_input->tell()) {
+    STOFF_DEBUG_MSG(("StarZone::closeFlagZone: oops, we do not have read all data\n"));
     m_ascii.addPos(m_input->tell());
     m_ascii.addNote("Entries(BadFlagZone):#");
   }

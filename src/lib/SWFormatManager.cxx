@@ -479,7 +479,7 @@ bool SWFormatManager::readSWPatternLCL(StarZone &zone)
     f.str("");
     f << "SWPatternLCL[token-" << zone.getRecordLevel() << "]:";
     zone.openFlagZone();
-    int nType=(int) input->readULong(1);
+    int nType=(int) input->readULong(2);
     f << "nType=" << nType << ",";
     f << "nStrIdx=" << input->readULong(2) << ",";
     zone.closeFlagZone();

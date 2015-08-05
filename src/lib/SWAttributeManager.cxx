@@ -87,7 +87,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
   f << "Entries(SWAttributeDef)[" << zone.getRecordLevel() << "]:";
   int fl=zone.openFlagZone();
   uint16_t nWhich, nVers, nBegin=0xFFFF, nEnd=0xFFFF;
-  *input >> nWhich >> nVers; 
+  *input >> nWhich >> nVers;
   if (fl&0x10) *input >> nBegin;
   if (fl&0x20) *input >> nEnd;
   if (nWhich>0x6001 && zone.getDocumentVersion()!=0x0219) // bug correction 0x95500
@@ -197,8 +197,8 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
       f << "chrAtrCJKFontSize,";
     else
       f << "chrAtrCTLFontSize,";
-    f << "size=" << input->readULong(2);
-    f << "nProp=" << input->readULong((nVers>=1) ? 2 : 1);
+    f << "size=" << input->readULong(2) << ",";
+    f << "nProp=" << input->readULong((nVers>=1) ? 2 : 1) << ",";
     if (nVers>=2) f << "nPropUnit=" << input->readULong(2) << ",";
     break;
   case 0x1008:
@@ -527,8 +527,8 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
   }
   case 0x3002: {
     f << "textAtrFtn,";
-    // SwFmtFtn::Create
-    f << "number1=" << input->readULong(1);
+    // sw_sw3npool.cxx SwFmtFtn::Create
+    f << "number1=" << input->readULong(2) << ",";
     librevenge::RVNGString string;
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the aNumber\n"));
@@ -537,6 +537,22 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     }
     if (!string.empty())
       f << "aNumber=" << string.cstr() << ",";
+    // no sure, find this attribute once with a content here, so ...
+    if (!manager.readSWContent(zone)) {
+      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the content\n"));
+      f << "###aContent,";
+      break;
+    }
+    if (nVers>=1) {
+      uint16_t nSeqNo;
+      *input >> nSeqNo;
+      if (nSeqNo) f << "nSeqNo=" << nSeqNo << ",";
+    }
+    if (nVers>=1) {
+      uint8_t nFlags;
+      *input >> nFlags;
+      if (nFlags) f << "nFlags=" << nFlags << ",";
+    }
     break;
   }
   case 0x3003: // ok no data
@@ -853,11 +869,42 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     f << "style=" << input->readULong(1) << ",";
     break;
   }
-  case 0x5014: // svt_macitem.cxx
+  case 0x5014: { // macitem.cxx SvxMacroTableDtor::Read
     f << "frmMacro,";
-    STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: read a macros is not implemented\n"));
-    f << "###unimplemented,";
+    if (nVers>=1) {
+      nVers=(uint16_t) input->readULong(2);
+      f << "nVersion=" << nVers << ",";
+    }
+    int16_t nMacros;
+    *input>>nMacros;
+    f << "macros=[";
+    for (int16_t i=0; i<nMacros; ++i) {
+      uint16_t nCurKey, eType;
+      bool ok=true;
+      f << "[";
+      *input>>nCurKey;
+      if (nCurKey) f << "nCurKey=" << nCurKey << ",";
+      for (int j=0; j<2; ++j) {
+        librevenge::RVNGString text;
+        if (!zone.readString(text)) {
+          STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find a macro string\n"));
+          f << "###string" << j << ",";
+          ok=false;
+          break;
+        }
+        else if (!text.empty())
+          f << (j==0 ? "lib" : "mac") << "=" << text.cstr() << ",";
+      }
+      if (!ok) break;
+      if (nVers>=1) {
+        *input>>eType;
+        if (eType) f << "eType=" << eType << ",";
+      }
+      f << "],";
+    }
+    f << "],";
     break;
+  }
   case 0x5015: {
     f << "col,";
     f << "nLineAdj=" << input->readULong(1) << ",";

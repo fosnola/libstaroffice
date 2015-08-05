@@ -32,11 +32,11 @@
 */
 
 /*
- * FormatManager to read/parse SW StarOffice format
+ * Parser to convert sdc StarOffice document
  *
  */
-#ifndef SW_FORMATMANAGER
-#  define SW_FORMATMANAGER
+#ifndef SDC_PARSER
+#  define SDC_PARSER
 
 #include <vector>
 
@@ -44,43 +44,39 @@
 #include "STOFFEntry.hxx"
 #include "STOFFInputStream.hxx"
 
-namespace SWFormatManagerInternal
+#include "STOFFParser.hxx"
+
+namespace SDCParserInternal
 {
 struct State;
 }
 
+class SWAttributeManager;
 class StarZone;
 
-/** \brief the main class to read/.. a StarOffice sdw format
+/** \brief the main class to read a StarOffice sdc file
  *
  *
  *
  */
-class SWFormatManager
+class SDCParser
 {
 public:
   //! constructor
-  SWFormatManager();
+  SDCParser();
   //! destructor
-  virtual ~SWFormatManager();
+  virtual ~SDCParser();
 
-  //! try to read a format zone : 'f' or 'l' or 'o' or 'r' or 's'(in TOCX)
-  bool readSWFormatDef(StarZone &zone, char kind, SDWParser &manager);
-  //! try to read a number format zone : 'n'
-  bool readSWNumberFormat(StarZone &zone);
-  //! try to read a number formatter type : 'q'
-  bool readSWNumberFormatterList(StarZone &zone);
-  //! try to read a fly frame list : 'F' (list of 'l' or 'o')
-  bool readSWFlyFrameList(StarZone &zone, SDWParser &manager);
-  //! try to read a format pattern LCL : 'P' (list of 'D') (child of a TOXs)
-  bool readSWPatternLCL(StarZone &zone);
+  //! try to read a chart zone: StarChartDocument .sd?
+  bool readChartDocument(STOFFInputStreamPtr input, std::string const &fileName);
 
+protected:
   //
   // data
   //
-private:
+
   //! the state
-  shared_ptr<SWFormatManagerInternal::State> m_state;
+  shared_ptr<SDCParserInternal::State> m_state;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

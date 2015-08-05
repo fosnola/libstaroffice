@@ -75,10 +75,20 @@ public:
   //! try to read the "Star Framework Config File"
   static bool readStarFrameworkConfigFile(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
 
-  //! try tor read a image zone: "StarImageDocument" or "StarImageDocument 4.0
+  //! try to read a image zone: "StarImageDocument" or "StarImageDocument 4.0
   static bool readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName);
-  //! try tor read a math zone: "StarMathDocument" (v 3 or v4)
+  //! try to read a math zone: "StarMathDocument" (v 3 or v4) .sdf
   static bool readMathDocument(STOFFInputStreamPtr input, std::string const &fileName);
+
+  //! try to read a embedded picture file: Embedded/PicXXXXXX
+  static bool readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName);
+
+  // other
+
+  //! try to read a "Ole-Object" zone
+  static bool readOleObject(STOFFInputStreamPtr input, std::string const &fileName);
+  //! try to read the "OutPlace Object"
+  static bool readOutPlaceObject(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
 
   //
   // data
