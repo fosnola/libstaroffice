@@ -113,8 +113,6 @@ protected:
   bool readSWGraphNode(StarZone &zone);
   //! try to read a image map zone : 'X'
   bool readSWImageMap(StarZone &zone);
-  //! try to read a zone setup : 'J'
-  bool readSWJobSetUp(StarZone &zone);
   //! try to read a layout information zone : 'Y'
   bool readSWLayoutInfo(StarZone &zone);
   //! try to read a layout subinformation zone : 0xd2 or 0xd7

@@ -85,10 +85,18 @@ public:
 
   // other
 
+  //! try to read a "VCPool" zone
+  static bool readVCPool(STOFFInputStreamPtr input, libstoff::DebugFile &ascii, long endPos=-1);
   //! try to read a "Ole-Object" zone
   static bool readOleObject(STOFFInputStreamPtr input, std::string const &fileName);
   //! try to read the "OutPlace Object"
   static bool readOutPlaceObject(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
+
+  //! try to read a SW zone setup : 'J' or a chart printer zone
+  static bool readJobSetUp(StarZone &zone, char cKind);
+
+  //! try to read a SfxItemList(TODO)
+  static bool readSfxItemList(StarZone &zone);
 
   //
   // data

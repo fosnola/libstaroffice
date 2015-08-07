@@ -485,6 +485,7 @@ bool StarFileManager::readEmbeddedPicture(STOFFInputStreamPtr input, librevenge:
   ascii.addPos(0);
   ascii.addNote(f.str().c_str());
   ascii.skipZone(input->tell()+4, input->size());
+  // CHECKME: compressed, SVGD
   if (!input->readEndDataBlock(data)) {
     STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: can not read image content\n"));
     return true;
@@ -511,6 +512,75 @@ bool StarFileManager::readOleObject(STOFFInputStreamPtr input, std::string const
   }
   libstoff::Debug::dumpFile(data, (fileName+".ole").c_str());
 #endif
+  return true;
+}
+
+bool StarFileManager::readVCPool(STOFFInputStreamPtr input, libstoff::DebugFile &ascii, long endPos)
+{
+  if (endPos<=0) endPos=input->size();
+  // do not find any source, let's improvise
+  libstoff::DebugStream f;
+  f << "Entries(VCPool):";
+  long pos=input->tell();
+  if (pos+40>endPos) {
+    STOFF_DEBUG_MSG(("StarFileManager::readVCPool: the zone seems too short\n"));
+    return false;
+  }
+  uint16_t valU16;
+  int8_t nType, val8;
+  *input >> valU16 >> nType >> val8;
+  int const expectedSize=nType==1 ? 40 : 74;
+  if ((nType!=1 && nType!=2) || (pos+expectedSize>endPos)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  f << "f0=" << std::hex << valU16 << std::dec << ","; // 1111, bbbb
+  if (val8) f << "f1=" << int(val8) << ","; // find 2 for nType==2 and 0 for nType==1
+  int16_t val;
+  if (nType==1) {
+    *input >> val; // always 0
+    if (val) f << "f2=" << val << ",";
+  }
+  else {
+    for (int i=0; i<8; ++i) {
+      *input >> val;
+      static int16_t const expected[]= {-1,0,0,0x3c01,0,0xe10,0,0};
+      if (val!=expected[i]) f << "f" << i+2 << "=" << val << ",";
+    }
+  }
+  int sSz=(int) input->readULong(2);
+  if (sSz!=10) { // too dangerous
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  std::string text("");
+  for (int i=0; i<10; ++i) text+=(char) input->readULong(1);
+  if (text!="VCControls") f << text << ",";
+  if (nType==1) {
+    for (int i=0; i<11; ++i) {
+      *input >> valU16;
+      static uint16_t const expected[]= {8,0,0x2222,0,0x4444,0,0x3333,0,0,0xeeee,0xeeee};
+      if (valU16!=expected[i]) f << "f" << i+2 << "=" << valU16 << ",";
+    }
+  }
+  else {
+    f << "unkn=[";
+    for (int i=0; i<3; ++i) {
+      f << "[";
+      for (int j=0; j<7; ++j) { // find [a00,_,[48],[235]0,_,small number, _]
+        *input >> valU16;
+        if (valU16)
+          f << std::hex << valU16 << std::dec << ",";
+        else
+          f << "_,";
+      }
+      f << "],";
+    }
+    f << "],";
+  }
+  input->seek(pos+expectedSize, librevenge::RVNG_SEEK_SET);
+  ascii.addPos(pos);
+  ascii.addNote(f.str().c_str());
   return true;
 }
 
@@ -696,4 +766,156 @@ bool StarFileManager::readOutPlaceObject(STOFFInputStreamPtr input, libstoff::De
   ascii.addNote(f.str().c_str());
   return true;
 }
+
+////////////////////////////////////////////////////////////
+// small zone
+////////////////////////////////////////////////////////////
+bool StarFileManager::readJobSetUp(StarZone &zone, char cKind)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  char type;
+  long pos=input->tell();
+  if (cKind!=' ' && (input->peek()!='J' || !zone.openRecord(type))) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  // sw_sw3misc.cxx: InJobSetup
+  libstoff::DebugStream f;
+  f << "Entries(JobSetUp)[" << zone.getRecordLevel() << "]:";
+  if (cKind!=' ') {
+    zone.openFlagZone();
+    zone.closeFlagZone();
+  }
+  // sfx2_printer.cxx: SfxPrinter::Create
+  // jobset.cxx: JobSetup operator>>
+  long lastPos=zone.getRecordLastPosition();
+  int len=(int) input->readULong(2);
+  f << "nLen=" << len << ",";
+  if (len==0) {
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    zone.closeRecord('J', "JobSetUp");
+    return true;
+  }
+  bool ok=false;
+  int nSystem=0;
+  if (input->tell()+2+64+3*32<=lastPos) {
+    nSystem=(int) input->readULong(2);
+    f << "system=" << nSystem << ",";
+    for (int i=0; i<4; ++i) {
+      long actPos=input->tell();
+      int const length=(i==0 ? 64 : 32);
+      std::string name("");
+      for (int c=0; c<length; ++c) {
+        char ch=(char)input->readULong(1);
+        if (ch==0) break;
+        name+=ch;
+      }
+      if (!name.empty()) {
+        static char const *(wh[])= { "printerName", "deviceName", "portName", "driverName" };
+        f << wh[i] << "=" << name << ",";
+      }
+      input->seek(actPos+length, librevenge::RVNG_SEEK_SET);
+    }
+    ok=true;
+  }
+  if (ok && nSystem<0xffffe) {
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+    pos=input->tell();
+    f.str("");
+    f << "JobSetUp:driverData,";
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  }
+  else if (ok && input->tell()+22<=lastPos) {
+    int driverDataLen=0;
+    f << "nSize2=" << input->readULong(2) << ",";
+    f << "nSystem2=" << input->readULong(2) << ",";
+    driverDataLen=(int) input->readULong(4);
+    f << "nOrientation=" << input->readULong(2) << ",";
+    f << "nPaperBin=" << input->readULong(2) << ",";
+    f << "nPaperFormat=" << input->readULong(2) << ",";
+    f << "nPaperWidth=" << input->readULong(4) << ",";
+    f << "nPaperHeight=" << input->readULong(4) << ",";
+
+    if (driverDataLen && input->tell()+driverDataLen<=lastPos) {
+      ascFile.addPos(input->tell());
+      ascFile.addNote("JobSetUp:driverData");
+      input->seek(driverDataLen, librevenge::RVNG_SEEK_CUR);
+    }
+    else if (driverDataLen)
+      ok=false;
+    if (ok) {
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      pos=input->tell();
+      f.str("");
+      f << "JobSetUp[values]:";
+      if (nSystem==0xfffe) {
+        librevenge::RVNGString text;
+        while (input->tell()<lastPos) {
+          for (int i=0; i<2; ++i) {
+            if (!zone.readString(text)) {
+              f << "###string,";
+              ok=false;
+              break;
+            }
+            f << text.cstr() << (i==0 ? ':' : ',');
+          }
+          if (!ok)
+            break;
+        }
+      }
+      else if (input->tell()<lastPos) {
+        ascFile.addPos(input->tell());
+        ascFile.addNote("JobSetUp:driverData");
+        input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+      }
+    }
+  }
+
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  if (cKind!=' ')
+    zone.closeRecord('J', "JobSetUp");
+  return true;
+}
+
+bool StarFileManager::readSfxItemList(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+
+  f << "Entries(SfxItemList):";
+  // itemset.cxx: SfxItemSet::Load (ncount)
+  uint16_t n;
+  *input >> n;
+  f << "N=" << n << ",";
+  if (input->tell()+6*n > zone.getRecordLastPosition()) {
+    STOFF_DEBUG_MSG(("StarFileManager::readSfxItemList: can not read a SfxItemList\n"));
+    f << "###,";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+    return false;
+  }
+  if (n) {
+    // TODO poolio.cxx SfxItemPool::LoadItem
+    static bool first=true;
+    if (first) {
+      STOFF_DEBUG_MSG(("StarFileManager::readSfxItemList: reading a SfxItem is not implemented\n"));
+      first=false;
+    }
+    f << "##";
+    input->seek(pos+2+6*n, librevenge::RVNG_SEEK_SET);
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return true;
+}
+
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

@@ -227,16 +227,34 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
     return false;
   }
   libstoff::DebugStream f;
-  f << "Entries(SWNumberFormatter)[" << zone.getRecordLevel() << "]:";
+  if (input->tell()==zone.getRecordLastPosition()) // empty
+    f << "Entries(NumberFormatter)[" << zone.getRecordLevel() << "]:";
+  else {
+    f << "NumberFormatter[container-" << zone.getRecordLevel() << "]:";
+    readNumberFormatter(zone);
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  zone.closeRecord(type, "NumberFormatter[container]");
+  return true;
+
+}
+bool SWFormatManager::readNumberFormatter(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  long pos=input->tell();
+  libstoff::DebugStream f;
+  f << "Entries(NumberFormatter)[" << zone.getRecordLevel() << "]:";
   long dataSz=(int) input->readULong(4);
   long lastPos=zone.getRecordLastPosition();
   if (input->tell()+dataSz+6>lastPos) {
-    STOFF_DEBUG_MSG(("SWFormatManager::readSWNumberFormatterList: data size seems bad\n"));
+    STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: data size seems bad\n"));
     f << "###dataSz";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type, "SWNumberFormatter");
-    return true;
+    return false;
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -245,32 +263,35 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
   long actPos=input->tell();
   long endDataPos=input->tell()+dataSz;
   f.str("");
-  f << "SWNumberFormatter-T:";
+  f << "NumberFormatter-T:";
   input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
   int val=(int) input->readULong(2);
   if (val) f << "nId=" << val << ",";
   long nSizeTableLen=(long) input->readULong(4);
   f << "nTableSize=" << nSizeTableLen << ","; // copy in pMemStream
+  long lastZonePos=input->tell()+nSizeTableLen;
   std::vector<long> fieldSize;
-  if (input->tell()+nSizeTableLen>lastPos) {
-    STOFF_DEBUG_MSG(("SWFormatManager::readSWNumberFormatterList: the table length seems bad\n"));
+  if (lastZonePos>lastPos) {
+    STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: the table length seems bad\n"));
     f << "###";
-    nSizeTableLen=lastPos-input->tell();
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
   }
+
   f << "listSize=[";
   for (long i=0; i<nSizeTableLen/4; ++i) {
     fieldSize.push_back((long) input->readULong(4));
     f << std::hex << fieldSize.back() << std::dec << ",";
   }
   f << "],";
-  if (nSizeTableLen) ascFile.addDelimiter(input->tell(),'|');
   ascFile.addPos(endDataPos);
   ascFile.addNote(f.str().c_str());
 
   // svt_zforList::Load
   input->seek(actPos, librevenge::RVNG_SEEK_SET);
   f.str("");
-  f << "SWNumberFormatter:";
+  f << "NumberFormatter:";
   int nVers=(int) input->readULong(2);
   f << "vers=" << nVers << ",";
   val=(int) input->readULong(2);
@@ -286,19 +307,19 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
     pos=input->tell();
     if (pos==endDataPos) break;
     if (pos>endDataPos) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readSWNumberFormatterList: data size seems bad\n"));
+      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: data size seems bad\n"));
       break;
     }
 
     f.str("");
-    f << "SWNumberFormatter-A" << n << ":nPos=" << nPos << ",";
+    f << "NumberFormatter-A" << n << ":nPos=" << nPos << ",";
 
     input->seek(2, librevenge::RVNG_SEEK_CUR);
     val=(int) input->readULong(2);
     if (val) f << "eLge=" << val << ",";
 
     if (n>=fieldSize.size()||input->tell()+fieldSize[n]>endDataPos) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readSWNumberFormatterList: can not find end of field\n"));
+      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not find end of field\n"));
       f << "###unknownN";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -308,7 +329,7 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
 
     librevenge::RVNGString text;
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readSWNumberFormatterList: can not read the format string\n"));
+      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not read the format string\n"));
       f << "###string";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -321,7 +342,7 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
       double res;
       bool isNan;
       if (!input->readDoubleReverted8(res, isNan)) {
-        STOFF_DEBUG_MSG(("SWFormatManager::readSWNumberFormatterList: can not read a double\n"));
+        STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not read a double\n"));
         f << "##limit" << i << ",";
       }
       else if (res<0||res>0)
@@ -344,7 +365,7 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
       if (input->tell()+4*N>endFieldPos) break;
       for (int c=0; c<N; ++c) {
         if (!zone.readString(text)) {
-          STOFF_DEBUG_MSG(("SWFormatManager::readSWNumberFormatterList: can not read the format string\n"));
+          STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not read the format string\n"));
           f << "###SvNumFor" << c;
           ok=false;
           break;
@@ -365,7 +386,7 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
       val=(int) input->readULong(2);
       if (val) f << "nCntExp=" << val << ",";
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("SWFormatManager::readSWNumberFormatterList: can not read the color name\n"));
+        STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not read the color name\n"));
         f << "###colorname";
         ok=false;
         break;
@@ -375,12 +396,12 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
       f << "],";
     }
     if (input->tell()>endFieldPos) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readSWNumberFormatterList: we read too much\n"));
+      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: we read too much\n"));
       f << "###pos";
       ok=false;
     }
     if (ok && input->tell()!=endFieldPos && !zone.readString(text)) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readSWNumberFormatterList: can not read the comment\n"));
+      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not read the comment\n"));
       f << "###comment";
       ok=false;
     }
@@ -413,9 +434,9 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
     input->seek(endFieldPos, librevenge::RVNG_SEEK_SET);
     nPos=(unsigned long) input->readULong(4);
   }
+
   if (input->tell()+4>=endDataPos)
-    input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
-  zone.closeRecord(type, "SWNumberFormatter");
+    input->seek(lastZonePos, librevenge::RVNG_SEEK_SET);
   return true;
 }
 

@@ -189,6 +189,10 @@ bool SDWParser::createZones()
     // other
     else if (base=="OutPlace Object")
       ok=fileManager.readOutPlaceObject(ole, asciiFile);
+    else if (base=="VCPool") {
+      ole->seek(0, librevenge::RVNG_SEEK_SET);
+      ok=fileManager.readVCPool(ole,asciiFile);
+    }
     if (!ok) {
       libstoff::DebugStream f;
       if (base=="Standard") // can be Standard or STANDARD
@@ -1052,116 +1056,6 @@ bool SDWParser::readSWImageMap(StarZone &zone)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   zone.closeRecord('X', "SWImageMap");
-  return true;
-}
-
-bool SDWParser::readSWJobSetUp(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='J' || !zone.openRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3misc.cxx: InJobSetup
-  libstoff::DebugStream f;
-  f << "Entries(SWJobSetUp)[" << zone.getRecordLevel() << "]:";
-  zone.openFlagZone();
-  zone.closeFlagZone();
-  // sfx2_printer.cxx: SfxPrinter::Create
-  // jobset.cxx: JobSetup operator>>
-  long lastPos=zone.getRecordLastPosition();
-  int len=(int) input->readULong(2);
-  f << "nLen=" << len << ",";
-  if (len==0) {
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    zone.closeRecord('J', "SWJobSetUp");
-    return true;
-  }
-  bool ok=false;
-  int nSystem=0;
-  if (input->tell()+2+64+3*32<=lastPos) {
-    nSystem=(int) input->readULong(2);
-    f << "system=" << nSystem << ",";
-    for (int i=0; i<4; ++i) {
-      long actPos=input->tell();
-      int const length=(i==0 ? 64 : 32);
-      std::string name("");
-      for (int c=0; c<length; ++c) {
-        char ch=(char)input->readULong(1);
-        if (ch==0) break;
-        name+=ch;
-      }
-      if (!name.empty()) {
-        static char const *(wh[])= { "printerName", "deviceName", "portName", "driverName" };
-        f << wh[i] << "=" << name << ",";
-      }
-      input->seek(actPos+length, librevenge::RVNG_SEEK_SET);
-    }
-    ok=true;
-  }
-  if (ok && nSystem<0xffffe) {
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-
-    pos=input->tell();
-    f.str("");
-    f << "SWJobSetUp:driverData,";
-    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
-  }
-  else if (ok && input->tell()+22<=lastPos) {
-    int driverDataLen=0;
-    f << "nSize2=" << input->readULong(2) << ",";
-    f << "nSystem2=" << input->readULong(2) << ",";
-    driverDataLen=(int) input->readULong(4);
-    f << "nOrientation=" << input->readULong(2) << ",";
-    f << "nPaperBin=" << input->readULong(2) << ",";
-    f << "nPaperFormat=" << input->readULong(2) << ",";
-    f << "nPaperWidth=" << input->readULong(4) << ",";
-    f << "nPaperHeight=" << input->readULong(4) << ",";
-
-    if (driverDataLen && input->tell()+driverDataLen<=lastPos) {
-      ascFile.addPos(input->tell());
-      ascFile.addNote("SWJobSetUp:driverData");
-      input->seek(driverDataLen, librevenge::RVNG_SEEK_CUR);
-    }
-    else if (driverDataLen)
-      ok=false;
-    if (ok) {
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      pos=input->tell();
-      f.str("");
-      f << "SWJobSetUp[values]:";
-      if (nSystem==0xfffe) {
-        librevenge::RVNGString text;
-        while (input->tell()<lastPos) {
-          for (int i=0; i<2; ++i) {
-            if (!zone.readString(text)) {
-              f << "###string,";
-              ok=false;
-              break;
-            }
-            f << text.cstr() << (i==0 ? ':' : ',');
-          }
-          if (!ok)
-            break;
-        }
-      }
-      else if (input->tell()<lastPos) {
-        ascFile.addPos(input->tell());
-        ascFile.addNote("SWJobSetUp:driverData");
-        input->seek(lastPos, librevenge::RVNG_SEEK_SET);
-      }
-    }
-  }
-
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  zone.closeRecord('J', "SWJobSetUp");
   return true;
 }
 
@@ -2095,6 +1989,7 @@ bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const 
   libstoff::DebugFile &ascFile=zone.ascii();
   // sw_sw3doc.cxx Sw3IoImp::LoadDocContents
   SWFieldManager fieldManager;
+  StarFileManager fileManager;
   SWFormatManager formatManager;
   while (!input->isEnd()) {
     long pos=input->tell();
@@ -2121,7 +2016,7 @@ bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const 
       done=formatManager.readSWFlyFrameList(zone, *this);
       break;
     case 'J':
-      done=readSWJobSetUp(zone);
+      done=fileManager.readJobSetUp(zone,'J');
       break;
     case 'M':
       done=readSWMacroTable(zone);

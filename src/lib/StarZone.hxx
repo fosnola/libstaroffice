@@ -58,6 +58,16 @@ public:
   //! read the zone header present in a SW file
   bool readSWHeader();
 
+  //! open a zone header present in a SDR file
+  bool openSDRHeader(std::string &magic);
+  //! close a zone header
+  bool closeSDRHeader(std::string const &debugName);
+
+  //! open a zone header present in a SCH file
+  bool openSCHHeader();
+  //! close a zone header
+  bool closeSCHHeader(std::string const &debugName);
+
   //! returns the StarOffice version: 3-5
   int getVersion() const
   {
@@ -67,6 +77,16 @@ public:
   int getDocumentVersion() const
   {
     return m_documentVersion;
+  }
+  //! returns the StarOffice header version (sch zone)
+  int getSCHVersion() const
+  {
+    return m_headerVersionStack.empty() ? 0 : m_headerVersionStack.top();
+  }
+  //! returns the StarOffice header version (sdr zone)
+  int getSDRVersion() const
+  {
+    return m_headerVersionStack.empty() ? 0 : m_headerVersionStack.top();
   }
   //! checks if the document is compatible with vers
   int isCompatibleWith(int vers) const
@@ -91,10 +111,27 @@ public:
            (m_documentVersion>=vers3 && m_documentVersion<vers4);
   }
 
-  //! try to open a record
+  //
+  // basic
+  //
+
+  //! try to open a classic record: size (32 bytes)
+  bool openRecord();
+  //! try to close a record
+  bool closeRecord(std::string const &debugName)
+  {
+    return closeRecord(' ', debugName);
+  }
+
+  //
+  // sw record
+  //
+
+  //! try to open a SW record: type + size (24 bytes)
   bool openRecord(char &type);
   //! try to close a record
   bool closeRecord(char type, std::string const &debugName);
+
   //! returns the record level
   int getRecordLevel() const
   {
@@ -171,6 +208,8 @@ protected:
   int m_version;
   //! the document version
   int m_documentVersion;
+  //! the header version (for SDR zone)
+  std::stack<int> m_headerVersionStack;
   //! the zone encoding
   int m_encoding;
   //! the file ascii name

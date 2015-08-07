@@ -45,7 +45,7 @@
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
 StarZone::StarZone(STOFFInputStreamPtr inputStream, std::string const &ascName, std::string const &zoneName) :
-  m_input(inputStream), m_ascii(inputStream), m_version(0), m_documentVersion(0), m_encoding(0), m_asciiName(ascName), m_zoneName(zoneName),
+  m_input(inputStream), m_ascii(inputStream), m_version(0), m_documentVersion(0), m_headerVersionStack(), m_encoding(0), m_asciiName(ascName), m_zoneName(zoneName),
   m_typeStack(), m_positionStack(), m_beginToEndMap(), m_flagEndZone(), m_poolList()
 {
 }
@@ -278,12 +278,113 @@ bool StarZone::readSWHeader()
 }
 
 ////////////////////////////////////////////////////////////
+// sdrheader: open/close
+////////////////////////////////////////////////////////////
+bool StarZone::openSCHHeader()
+{
+  long pos=m_input->tell();
+  if (!m_input->checkPosition(pos+6)) return false;
+  // schiocmp.cxx: SchIOHeader::SchIOHeader
+  long len=(long) m_input->readULong(4);
+  m_headerVersionStack.push((int) m_input->readULong(2));
+  long endPos=pos+len;
+  if (len<6 || !m_input->checkPosition(endPos)) {
+    m_headerVersionStack.pop();
+    m_input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  // check the position ends in the current group (if a group is open)
+  if (!m_positionStack.empty() && endPos>m_positionStack.top() && m_positionStack.top()) {
+    STOFF_DEBUG_MSG(("StarZone::openSCHHeader: argh endPosition is not in the current group\n"));
+    m_headerVersionStack.pop();
+    m_input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  m_typeStack.push('@');
+  m_positionStack.push(endPos);
+  return true;
+}
+
+bool StarZone::closeSCHHeader(std::string const &debugName)
+{
+  if (!m_headerVersionStack.empty()) m_headerVersionStack.pop();
+  return closeRecord('@', debugName);
+}
+
+bool StarZone::openSDRHeader(std::string &magic)
+{
+  long pos=m_input->tell();
+  if (!m_input->checkPosition(pos+4)) return false;
+  // svdio.cxx: SdrIOHeader::Read
+  magic="";
+  for (int i=0; i<4; ++i) magic+=(char) m_input->readULong(1);
+  // special case: ok to have only magic if ...
+  if (magic=="DrXX") {
+    m_typeStack.push('_');
+    m_positionStack.push(m_input->tell());
+    return true;
+  }
+  m_headerVersionStack.push((int) m_input->readULong(2));
+  long len=(long) m_input->readULong(4);
+  long endPos=pos+len;
+  if (len<10 || magic.compare(0,2,"Dr")!=0 || !m_input->checkPosition(endPos)) {
+    m_headerVersionStack.pop();
+    m_input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  // check the position ends in the current group (if a group is open)
+  if (!m_positionStack.empty() && endPos>m_positionStack.top() && m_positionStack.top()) {
+    STOFF_DEBUG_MSG(("StarZone::openSDRHeader: argh endPosition is not in the current group\n"));
+    m_headerVersionStack.pop();
+    m_input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  m_typeStack.push('_');
+  m_positionStack.push(endPos);
+  return true;
+}
+
+bool StarZone::closeSDRHeader(std::string const &debugName)
+{
+  if (!m_headerVersionStack.empty()) m_headerVersionStack.pop();
+  return closeRecord('_', debugName);
+}
+
+////////////////////////////////////////////////////////////
 // record: open/close, read size
 ////////////////////////////////////////////////////////////
+bool StarZone::openRecord()
+{
+  long pos=m_input->tell();
+  if (!m_input->checkPosition(pos+4)) return false;
+  unsigned long sz=m_input->readULong(4);
+  long endPos=0;
+
+  m_flagEndZone=0;
+  if (sz<4) {
+    STOFF_DEBUG_MSG(("StarZone::openRecord: size can be less than 4\n"));
+    return false;
+  }
+  endPos=pos+(long)sz;
+  // check the position is in the file
+  if (endPos && !m_input->checkPosition(endPos)) {
+    STOFF_DEBUG_MSG(("StarZone::openRecord: endPosition is bad\n"));
+    return false;
+  }
+  // check the position ends in the current group (if a group is open)
+  if (!m_positionStack.empty() && endPos>m_positionStack.top() && m_positionStack.top()) {
+    STOFF_DEBUG_MSG(("StarZone::openRecord: argh endPosition is not in the current group\n"));
+    return false;
+  }
+  m_typeStack.push(' ');
+  m_positionStack.push(endPos);
+  return true;
+}
+
 bool StarZone::openRecord(char &type)
 {
   long pos=m_input->tell();
-  if (!m_input->checkPosition(pos)) return false;
+  if (!m_input->checkPosition(pos+4)) return false;
   unsigned long val=m_input->readULong(4);
   type=(char)(val&0xff);
   if (!type) {

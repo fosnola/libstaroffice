@@ -74,6 +74,25 @@ protected:
   //
   // data
   //
+  //! try to read the chart attributes
+  bool readSCHAttributes(StarZone &zone);
+  //! try to read the memchart data
+  bool readSCHMemChart(StarZone &zone);
+
+  //! try to read a SdrModel zone: "DrMd"
+  bool readSdrModel(StarZone &zone);
+  //! try to read a SdrLayer zone: "DrLy'
+  bool readSdrLayer(StarZone &zone);
+  //! try to read a SdrLayerSet zone: "DrLS'
+  bool readSdrLayerSet(StarZone &zone);
+  //! try to read a object zone: "DrOb'
+  bool readSdrObject(StarZone &zone);
+  //! try to read a Page/MasterPage zone: "DrPg'
+  bool readSdrPage(StarZone &zone);
+  //! try to read a Master Page descriptor zone: "DrMP'
+  bool readSdrMPageDesc(StarZone &zone);
+  //! try to read a list of Master Page zone: "DrML'
+  bool readSdrMPageDescList(StarZone &zone);
 
   //! the state
   shared_ptr<SDCParserInternal::State> m_state;
