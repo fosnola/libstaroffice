@@ -91,7 +91,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
   if (fl&0x10) *input >> nBegin;
   if (fl&0x20) *input >> nEnd;
   if (nWhich>0x6001 && zone.getDocumentVersion()!=0x0219) // bug correction 0x95500
-    nWhich+=15;
+    nWhich=uint16_t(nWhich+15);
   f << "wh=" << std::hex << nWhich << std::dec << ",";
   if (nVers) f << "nVers=" << nVers << ",";
   if (nBegin!=0xFFFF) f << "nBgin=" << nBegin << ",";
