@@ -75,7 +75,7 @@ bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, SDWParser &mana
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!=kind || !zone.openRecord(type)) {
+  if (input->peek()!=kind || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -113,7 +113,7 @@ bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, SDWParser &mana
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
 
-      zone.closeRecord(kind, "SWFormatDef");
+      zone.closeSWRecord(kind, "SWFormatDef");
       return true;
     }
     else if (!string.empty())
@@ -137,7 +137,7 @@ bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, SDWParser &mana
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
-    if (!zone.openRecord(type))
+    if (!zone.openSWRecord(type))
       break;
     f.str("");
     f << "SWFormatDef[" << type << "-" << zone.getRecordLevel() << "]:";
@@ -145,10 +145,10 @@ bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, SDWParser &mana
     f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type, "SWFormatDef");
+    zone.closeSWRecord(type, "SWFormatDef");
   }
 
-  zone.closeRecord(kind, "SWFormatDef");
+  zone.closeSWRecord(kind, "SWFormatDef");
   return true;
 }
 
@@ -158,7 +158,7 @@ bool SWFormatManager::readSWNumberFormat(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='n' || !zone.openRecord(type)) {
+  if (input->peek()!='n' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -173,7 +173,7 @@ bool SWFormatManager::readSWNumberFormat(StarZone &zone)
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
 
-      zone.closeRecord('n', "SWNumbFormat");
+      zone.closeSWRecord('n', "SWNumbFormat");
       return true;
     }
     if (string.empty()) continue;
@@ -212,7 +212,7 @@ bool SWFormatManager::readSWNumberFormat(StarZone &zone)
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('n', "SWNumbFormat");
+  zone.closeSWRecord('n', "SWNumbFormat");
   return true;
 }
 
@@ -222,7 +222,7 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='q' || !zone.openRecord(type)) {
+  if (input->peek()!='q' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -236,10 +236,10 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  zone.closeRecord(type, "NumberFormatter[container]");
+  zone.closeSWRecord(type, "NumberFormatter[container]");
   return true;
-
 }
+
 bool SWFormatManager::readNumberFormatter(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -446,7 +446,7 @@ bool SWFormatManager::readSWFlyFrameList(StarZone &zone, SDWParser &manager)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='F' || !zone.openRecord(type)) {
+  if (input->peek()!='F' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -465,7 +465,7 @@ bool SWFormatManager::readSWFlyFrameList(StarZone &zone, SDWParser &manager)
 
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('F', "SWFlyFrames");
+  zone.closeSWRecord('F', "SWFlyFrames");
   return true;
 }
 
@@ -475,7 +475,7 @@ bool SWFormatManager::readSWPatternLCL(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='P' || !zone.openRecord(type)) {
+  if (input->peek()!='P' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -493,7 +493,7 @@ bool SWFormatManager::readSWPatternLCL(StarZone &zone)
   librevenge::RVNGString string;
   while (input->tell()<lastPos) {
     pos=input->tell();
-    if (input->peek()!='D' || !zone.openRecord(type)) {
+    if (input->peek()!='D' || !zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -559,11 +559,11 @@ bool SWFormatManager::readSWPatternLCL(StarZone &zone)
       f << "###type,";
       break;
     }
-    zone.closeRecord('D', "SWPatternLCL");
+    zone.closeSWRecord('D', "SWPatternLCL");
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
   }
-  zone.closeRecord('P', "SWPatternLCL");
+  zone.closeSWRecord('P', "SWPatternLCL");
   return true;
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

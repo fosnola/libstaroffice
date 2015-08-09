@@ -72,7 +72,7 @@ bool StarZone::readStringsPool()
 {
   long pos=m_input->tell();
   char type;
-  if (m_input->peek()!='!' || !openRecord(type)) {
+  if (m_input->peek()!='!' || !openSWRecord(type)) {
     m_input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -135,7 +135,7 @@ bool StarZone::readStringsPool()
       m_ascii.addNote(f.str().c_str());
     }
   }
-  closeRecord(type, "SWPoolList");
+  closeSWRecord(type, "SWPoolList");
   m_ascii.addPos(pos);
   m_ascii.addNote(f.str().c_str());
   return true;
@@ -381,14 +381,38 @@ bool StarZone::openRecord()
   return true;
 }
 
-bool StarZone::openRecord(char &type)
+bool StarZone::openSCRecord()
+{
+  long pos=m_input->tell();
+  if (!m_input->checkPosition(pos+4)) return false;
+  unsigned long sz=m_input->readULong(4);
+  long endPos=0;
+
+  m_flagEndZone=0;
+  endPos=pos+4+(long)sz;
+  // check the position is in the file
+  if (endPos && !m_input->checkPosition(endPos)) {
+    STOFF_DEBUG_MSG(("StarZone::openSCRecord: endPosition is bad\n"));
+    return false;
+  }
+  // check the position ends in the current group (if a group is open)
+  if (!m_positionStack.empty() && endPos>m_positionStack.top() && m_positionStack.top()) {
+    STOFF_DEBUG_MSG(("StarZone::openSCRecord: argh endPosition is not in the current group\n"));
+    return false;
+  }
+  m_typeStack.push('_');
+  m_positionStack.push(endPos);
+  return true;
+}
+
+bool StarZone::openSWRecord(char &type)
 {
   long pos=m_input->tell();
   if (!m_input->checkPosition(pos+4)) return false;
   unsigned long val=m_input->readULong(4);
   type=(char)(val&0xff);
   if (!type) {
-    STOFF_DEBUG_MSG(("StarZone::openRecord: type can not be null\n"));
+    STOFF_DEBUG_MSG(("StarZone::openSWRecord: type can not be null\n"));
     return false;
   }
   unsigned long sz=(val>>8);
@@ -399,24 +423,52 @@ bool StarZone::openRecord(char &type)
     if (m_beginToEndMap.find(pos)!=m_beginToEndMap.end())
       endPos=m_beginToEndMap.find(pos)->second;
     else {
-      STOFF_DEBUG_MSG(("StarZone::openRecord: can not find size for a zone, we may have some problem\n"));
+      STOFF_DEBUG_MSG(("StarZone::openSWRecord: can not find size for a zone, we may have some problem\n"));
     }
   }
   else {
     if (sz<4) {
-      STOFF_DEBUG_MSG(("StarZone::openRecord: size can be less than 4\n"));
+      STOFF_DEBUG_MSG(("StarZone::openSWRecord: size can be less than 4\n"));
       return false;
     }
     endPos=pos+(long)sz;
   }
   // check the position is in the file
   if (endPos && !m_input->checkPosition(endPos)) {
-    STOFF_DEBUG_MSG(("StarZone::openRecord: endPosition is bad\n"));
+    STOFF_DEBUG_MSG(("StarZone::openSWRecord: endPosition is bad\n"));
     return false;
   }
   // check the position ends in the current group (if a group is open)
   if (!m_positionStack.empty() && endPos>m_positionStack.top() && m_positionStack.top()) {
-    STOFF_DEBUG_MSG(("StarZone::openRecord: argh endPosition is not in the current group\n"));
+    STOFF_DEBUG_MSG(("StarZone::openSWRecord: argh endPosition is not in the current group\n"));
+    return false;
+  }
+  m_typeStack.push(type);
+  m_positionStack.push(endPos);
+  return true;
+}
+
+bool StarZone::openSfxRecord(char &type)
+{
+  long pos=m_input->tell();
+  if (!m_input->checkPosition(pos+4)) return false;
+  // filerec.cxx SfxMiniRecordReader::SfxMiniRecordReader
+  unsigned long val=m_input->readULong(4);
+  type=(char)(val&0xff);
+  // checkme: can type be null
+  unsigned long sz=(val>>8);
+  long endPos=0;
+
+  m_flagEndZone=0;
+  endPos=pos+4+(long)sz;
+  // check the position is in the file
+  if (endPos && !m_input->checkPosition(endPos)) {
+    STOFF_DEBUG_MSG(("StarZone::openSfxRecord: endPosition is bad\n"));
+    return false;
+  }
+  // check the position ends in the current group (if a group is open)
+  if (!m_positionStack.empty() && endPos>m_positionStack.top() && m_positionStack.top()) {
+    STOFF_DEBUG_MSG(("StarZone::openSfxRecord: argh endPosition is not in the current group\n"));
     return false;
   }
   m_typeStack.push(type);
@@ -492,7 +544,7 @@ bool StarZone::readRecordSizes(long pos)
   libstoff::DebugStream f;
   f << m_zoneName << "[RecSize]:";
   char type;
-  bool ok=openRecord(type);
+  bool ok=openSWRecord(type);
   if (!ok || type!='%') {
     STOFF_DEBUG_MSG(("StarZone::readRecordSizes: can not open the record(recsize)\n"));
     f << "###extra";
@@ -514,7 +566,7 @@ bool StarZone::readRecordSizes(long pos)
 
     m_ascii.addPos(pos);
     m_ascii.addNote(f.str().c_str());
-    closeRecord('%',m_zoneName);
+    closeSWRecord('%',m_zoneName);
     if (oldPos!=pos)
       m_input->seek(oldPos, librevenge::RVNG_SEEK_SET);
     return true;
@@ -528,7 +580,7 @@ bool StarZone::readRecordSizes(long pos)
   }
   f << "],";
 
-  closeRecord('%',m_zoneName);
+  closeSWRecord('%',m_zoneName);
   if (oldPos!=pos)
     m_input->seek(oldPos, librevenge::RVNG_SEEK_SET);
 

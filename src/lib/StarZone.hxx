@@ -115,7 +115,7 @@ public:
   // basic
   //
 
-  //! try to open a classic record: size (32 bytes)
+  //! try to open a classic record: size (32 bytes) +  size-4 bytes
   bool openRecord();
   //! try to close a record
   bool closeRecord(std::string const &debugName)
@@ -124,13 +124,40 @@ public:
   }
 
   //
+  // sc record
+  //
+
+  //! try to open a SW record: size (32 bytes) + size bytes
+  bool openSCRecord();
+  //! try to close a record
+  bool closeSCRecord(std::string const &debugName)
+  {
+    return closeRecord('_', debugName);
+  }
+
+  //
   // sw record
   //
 
   //! try to open a SW record: type + size (24 bytes)
-  bool openRecord(char &type);
+  bool openSWRecord(char &type);
   //! try to close a record
-  bool closeRecord(char type, std::string const &debugName);
+  bool closeSWRecord(char type, std::string const &debugName)
+  {
+    return closeRecord(type, debugName);
+  }
+
+  //
+  // sfx record
+  //
+
+  //! try to open a Sfx record: type + size (24 bytes)
+  bool openSfxRecord(char &type);
+  //! try to close a record
+  bool closeSfxRecord(char type, std::string const &debugName)
+  {
+    return closeRecord(type, debugName);
+  }
 
   //! returns the record level
   int getRecordLevel() const
@@ -195,6 +222,8 @@ protected:
 
   //! try to read the record sizes
   bool readRecordSizes(long pos);
+  //! try to close a record
+  bool closeRecord(char type, std::string const &debugName);
 
   //
   // data

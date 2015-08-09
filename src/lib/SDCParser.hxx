@@ -67,8 +67,10 @@ public:
   //! destructor
   virtual ~SDCParser();
 
-  //! try to read a chart zone: StarChartDocument .sd?
+  //! try to read a chart zone: StarChartDocument .sds
   bool readChartDocument(STOFFInputStreamPtr input, std::string const &fileName);
+  //! try to read a spreadshet style zone: SfxStyleSheets
+  bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
 
 protected:
   //

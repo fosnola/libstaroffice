@@ -48,6 +48,206 @@
 namespace StarFileManagerInternal
 {
 ////////////////////////////////////////
+//! Internal: a structure use to read SfxMultiRecord zone of a StarFileManager
+struct SfxMultiRecord {
+  //! constructor
+  SfxMultiRecord(StarZone &zone) : m_zone(zone), m_zoneType(0), m_zoneOpened(false), m_headerType(0), m_headerVersion(0), m_headerTag(0),
+    m_actualRecord(0), m_numRecord(0), m_contentSize(0),
+    m_startPos(0), m_endPos(0), m_offsetList(), m_extra("")
+  {
+  }
+  //! try to open a zone
+  bool open()
+  {
+    if (m_zoneOpened) {
+      STOFF_DEBUG_MSG(("StarFileManagerInternal::SfxMultiRecord: oops a record has been opened\n"));
+      return false;
+    }
+    m_actualRecord=m_numRecord=0;
+    m_headerType=m_headerVersion=0;
+    m_headerTag=0;
+    m_contentSize=0;
+    m_offsetList.clear();
+
+    STOFFInputStreamPtr input=m_zone.input();
+    long pos=input->tell();
+    if (!m_zone.openSfxRecord(m_zoneType)) {
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+      return false;
+    }
+    if (m_zoneType==char(0xff)) {
+      STOFF_DEBUG_MSG(("StarFileManagerInternal::SfxMultiRecord: oops end header\n"));
+      m_extra="###emptyZone,";
+      return true; /* empty zone*/
+    }
+    if (m_zoneType!=0) {
+      STOFF_DEBUG_MSG(("StarFileManagerInternal::SfxMultiRecord: find unknown header\n"));
+      m_extra="###badZoneType,";
+      return true;
+    }
+
+    m_zoneOpened=true;
+    m_endPos=m_zone.getRecordLastPosition();
+    // filerec.cxx: SfxSingleRecordReader::FindHeader_Impl
+    if (input->tell()+10>m_endPos) {
+      STOFF_DEBUG_MSG(("StarFileManagerInternal::SfxMultiRecord::open: oops the zone seems too short\n"));
+      m_extra="###zoneShort,";
+      return true;
+    }
+    *input >> m_headerType >> m_headerVersion >> m_headerTag;
+    // filerec.cxx: SfxMultiRecordReader::ReadHeader_Impl
+    *input >> m_numRecord >> m_contentSize;
+    m_startPos=input->tell();
+    std::stringstream s;
+    if (m_headerType==2) {
+      // fixed size
+      if (m_startPos+m_numRecord*m_contentSize > m_endPos) {
+        STOFF_DEBUG_MSG(("StarFileManagerInternal::SfxMultiRecord::open: oops the number of record seems bad\n"));
+        s << "##numRecord=" << m_numRecord << ",";
+        if (m_contentSize && m_endPos>m_startPos)
+          m_numRecord=uint16_t((m_endPos-m_startPos)/m_contentSize);
+        else
+          m_numRecord=0;
+      }
+      m_extra=s.str();
+      return true;
+    }
+
+    long debOffsetList=((m_headerType==3 || m_headerType==7) ? m_startPos : 0) + m_contentSize;
+    if (debOffsetList<m_startPos || debOffsetList+4*m_numRecord > m_endPos) {
+      STOFF_DEBUG_MSG(("StarFileManagerInternal::SfxMultiRecord::open: can not find the version map offset\n"));
+      s << "###contentCount";
+      m_numRecord=0;
+      m_extra=s.str();
+      return true;
+    }
+    m_endPos=debOffsetList;
+    input->seek(debOffsetList, librevenge::RVNG_SEEK_SET);
+    for (uint16_t i=0; i<m_numRecord; ++i) {
+      uint32_t offset;
+      *input >> offset;
+      m_offsetList.push_back(offset);
+    }
+    input->seek(m_startPos, librevenge::RVNG_SEEK_SET);
+    return true;
+  }
+  //! try to close a zone
+  void close(std::string const &wh)
+  {
+    if (!m_zoneOpened) {
+      STOFF_DEBUG_MSG(("StarFileManagerInternal::SfxMultiRecord::close: can not find any opened zone\n"));
+      return;
+    }
+    m_zoneOpened=false;
+    STOFFInputStreamPtr input=m_zone.input();
+    if (input->tell()<m_endPos && input->tell()+4>=m_endPos) { // small diff is possible
+      m_zone.ascii().addDelimiter(input->tell(),'|');
+      input->seek(m_zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+    }
+    else if (input->tell()==m_endPos)
+      input->seek(m_zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+    m_zone.closeSfxRecord(m_zoneType, wh);
+  }
+  //! returns the header tag or -1
+  int getHeaderTag() const
+  {
+    return !m_zoneOpened ? -1 : int(m_headerTag);
+  }
+  //! try to go to the new content positon
+  bool getNewContent()
+  {
+    // SfxMultiRecordReader::GetContent
+    long newPos=getLastContentPosition();
+    if (newPos>=m_endPos) return false;
+    STOFFInputStreamPtr input=m_zone.input();
+    ++m_actualRecord;
+    if (input->tell()<newPos && input->tell()+4>=newPos) { // small diff is possible
+      m_zone.ascii().addDelimiter(input->tell(),'|');
+      input->seek(newPos, librevenge::RVNG_SEEK_SET);
+    }
+    else if (input->tell()!=newPos) {
+      STOFF_DEBUG_MSG(("StarFileManagerInternal::SfxMultiRecord::getNewContent: find extra data\n"));
+      m_zone.ascii().addPos(input->tell());
+      m_zone.ascii().addNote("Entries(BadPos):###extra");
+      input->seek(newPos, librevenge::RVNG_SEEK_SET);
+    }
+    if (m_headerType==7 || m_headerType==8) {
+      // TODO: readtag
+      input->seek(2, librevenge::RVNG_SEEK_CUR);
+    }
+    return true;
+  }
+  //! returns the last content position
+  long getLastContentPosition() const
+  {
+    if (m_actualRecord >= m_numRecord) return m_endPos;
+    if (m_headerType==2) return m_startPos+m_actualRecord*m_contentSize;
+    if (m_actualRecord >= uint16_t(m_offsetList.size())) {
+      STOFF_DEBUG_MSG(("StarFileManagerInternal::SfxMultiRecord::getLastContentPosition: argh, find unexpected index\n"));
+      return m_endPos;
+    }
+    return m_startPos+(m_offsetList[size_t(m_actualRecord)]>>8)-14;
+  }
+
+  //! basic operator<< ; print header data
+  friend std::ostream &operator<<(std::ostream &o, SfxMultiRecord const &r)
+  {
+    if (!r.m_zoneOpened) {
+      o << r.m_extra;
+      return o;
+    }
+    if (r.m_headerType) o << "type=" << int(r.m_headerType) << ",";
+    if (r.m_headerVersion) o << "version=" << int(r.m_headerVersion) << ",";
+    if (r.m_headerTag) o << "tag=" << r.m_headerTag << ",";
+    if (r.m_numRecord) o << "num[record]=" << r.m_numRecord << ",";
+    if (r.m_contentSize) o << "content[size/pos]=" << r.m_contentSize << ",";
+    if (!r.m_offsetList.empty()) {
+      o << "offset=[";
+      for (size_t i=0; i<r.m_offsetList.size(); ++i) {
+        uint32_t off=r.m_offsetList[i];
+        if (off&0xff)
+          o << (off>>8) << ":" << (off&0xff) << ",";
+        else
+          o << (off>>8) << ",";
+      }
+      o << "],";
+    }
+    o << r.m_extra;
+    return o;
+  }
+protected:
+  //! the main zone
+  StarZone &m_zone;
+  //! the zone type
+  char m_zoneType;
+  //! true if a SfxRecord has been opened
+  bool m_zoneOpened;
+  //! the record type
+  uint8_t m_headerType;
+  //! the header version
+  uint8_t m_headerVersion;
+  //! the header tag
+  uint16_t m_headerTag;
+  //! the actual record
+  uint16_t m_actualRecord;
+  //! the number of record
+  uint16_t m_numRecord;
+  //! the record/content/pos size
+  uint32_t m_contentSize;
+  //! the start of data position
+  long m_startPos;
+  //! the end of data position
+  long m_endPos;
+  //! the list of (offset + type)
+  std::vector<uint32_t> m_offsetList;
+  //! extra data
+  std::string m_extra;
+private:
+  SfxMultiRecord(SfxMultiRecord const &orig);
+  SfxMultiRecord &operator=(SfxMultiRecord const &orig);
+};
+
+////////////////////////////////////////
 //! Internal: the state of a StarFileManager
 struct State {
   //! constructor
@@ -515,70 +715,533 @@ bool StarFileManager::readOleObject(STOFFInputStreamPtr input, std::string const
   return true;
 }
 
-bool StarFileManager::readVCPool(STOFFInputStreamPtr input, libstoff::DebugFile &ascii, long endPos)
+bool StarFileManager::readPool(StarZone &zone)
 {
-  if (endPos<=0) endPos=input->size();
-  // do not find any source, let's improvise
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascii=zone.ascii();
+  long endPos=zone.getRecordLevel()>0 ?  zone.getRecordLastPosition() : input->size();
   libstoff::DebugStream f;
-  f << "Entries(VCPool):";
+  f << "Entries(PoolDef):";
   long pos=input->tell();
-  if (pos+40>endPos) {
-    STOFF_DEBUG_MSG(("StarFileManager::readVCPool: the zone seems too short\n"));
+  if (pos+18>endPos) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPool: the zone seems too short\n"));
     return false;
   }
-  uint16_t valU16;
-  int8_t nType, val8;
-  *input >> valU16 >> nType >> val8;
-  int const expectedSize=nType==1 ? 40 : 74;
-  if ((nType!=1 && nType!=2) || (pos+expectedSize>endPos)) {
+  uint16_t tag;
+  // poolio.cxx SfxItemPool::Load
+  uint8_t nMajorVers, nMinorVers;
+  *input >> tag >> nMajorVers >> nMinorVers;
+  if (tag==0x1111)
+    f << "v4,";
+  else if (tag==0xbbbb)
+    f << "v5,";
+  else {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
-  f << "f0=" << std::hex << valU16 << std::dec << ","; // 1111, bbbb
-  if (val8) f << "f1=" << int(val8) << ","; // find 2 for nType==2 and 0 for nType==1
+
+  if (nMajorVers==1) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return readPoolV1(zone);
+  }
+  if (nMajorVers!=2) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  f << "version=" << int(nMajorVers) << ",";
+  if (nMinorVers) f << "vers[minor]=" << int(nMinorVers) << ",";
+  *input>>tag;
+  if (tag!=0xffff) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  input->seek(4, librevenge::RVNG_SEEK_CUR); // 0,0
+
+  char type; // always 1?
+  if (!zone.openSfxRecord(type)) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPool: can not open the sfx record\n"));
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  if (type!=1) f << "type=" << int(type) << ",";
+
+  endPos=zone.getRecordLastPosition();
+  if (input->tell()==endPos) {
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    zone.closeSfxRecord(type, "PoolDef");
+    return true;
+  }
+  // string part
+  char type1;
+  if (!zone.openSfxRecord(type1)) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPool: can not open the string sfx record\n"));
+    f << "###openString";
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    zone.closeSfxRecord(type, "PoolDef");
+    return true;
+  }
+  if (type!=16) f << "type1=" << int(type1) << ",";
   int16_t val;
-  if (nType==1) {
-    *input >> val; // always 0
-    if (val) f << "f2=" << val << ",";
+  *input >> val;
+  if (val) f << "loadingVersion=" << val << ",";
+  librevenge::RVNGString string;
+  if (!zone.readString(string)) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPool: can not read the name\n"));
+    f << "###name";
   }
-  else {
-    for (int i=0; i<8; ++i) {
-      *input >> val;
-      static int16_t const expected[]= {-1,0,0,0x3c01,0,0xe10,0,0};
-      if (val!=expected[i]) f << "f" << i+2 << "=" << val << ",";
+  if (!string.empty())
+    f << "name[ext]=" << string.cstr() << ",";
+  zone.closeSfxRecord(type1, "PoolDef");
+
+  ascii.addPos(pos);
+  ascii.addNote(f.str().c_str());
+
+  pos=input->tell();
+  f.str("");
+  f << "PoolDef[versMap]:";
+  StarFileManagerInternal::SfxMultiRecord mRecord(zone);
+  if (!mRecord.open()) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPool: can not open the versionMap sfx record\n"));
+    f << "###openVersionMap";
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    zone.closeSfxRecord(type, "PoolDef");
+    return true;
+  }
+  f << mRecord;
+  bool ok=true;
+  if (mRecord.getHeaderTag()!=0x20) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPool: can not find the version map tag\n"));
+    f << "###tag";
+    ok=false;
+  }
+  ascii.addPos(pos);
+  ascii.addNote(f.str().c_str());
+  int n=0;
+  while (ok && mRecord.getNewContent()) {
+    pos=input->tell();
+    f.str("");
+    f << "PoolDef[versMap-" << n++ << "]:";
+    uint16_t nVers, nStart, nEnd;
+    *input >> nVers >> nStart >> nEnd;
+    f << "vers=" << nVers << "," << nStart << "<->" << nEnd << ",";
+    if (nStart>nEnd || input->tell()+2*(nEnd-nStart+1) > mRecord.getLastContentPosition()) {
+      STOFF_DEBUG_MSG(("StarFileManager::readPool: can not find start|end pos\n"));
+      f << "###badStartEnd";
+      ok=false;
+      ascii.addPos(pos);
+      ascii.addNote(f.str().c_str());
+      break;
     }
-  }
-  int sSz=(int) input->readULong(2);
-  if (sSz!=10) { // too dangerous
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  std::string text("");
-  for (int i=0; i<10; ++i) text+=(char) input->readULong(1);
-  if (text!="VCControls") f << text << ",";
-  if (nType==1) {
-    for (int i=0; i<11; ++i) {
-      *input >> valU16;
-      static uint16_t const expected[]= {8,0,0x2222,0,0x4444,0,0x3333,0,0,0xeeee,0xeeee};
-      if (valU16!=expected[i]) f << "f" << i+2 << "=" << valU16 << ",";
-    }
-  }
-  else {
-    f << "unkn=[";
-    for (int i=0; i<3; ++i) {
-      f << "[";
-      for (int j=0; j<7; ++j) { // find [a00,_,[48],[235]0,_,small number, _]
-        *input >> valU16;
-        if (valU16)
-          f << std::hex << valU16 << std::dec << ",";
-        else
-          f << "_,";
-      }
-      f << "],";
+    f << "pos=[";
+    for (uint16_t i=nStart; i<=nEnd; ++i) {
+      uint16_t nPos;
+      *input>>nPos;
+      f << nPos << ",";
     }
     f << "],";
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
   }
-  input->seek(pos+expectedSize, librevenge::RVNG_SEEK_SET);
+  mRecord.close("PoolDef");
+
+  pos=input->tell();
+  f.str("");
+  f << "PoolDef[attrib]:";
+  if (!mRecord.open()) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPool: can not open the attrib sfx record\n"));
+    f << "###attrib";
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    zone.closeSfxRecord(type, "PoolDef");
+    return true;
+  }
+  f << mRecord;
+  ok=true;
+  if (mRecord.getHeaderTag()!=0x30) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPool: can not find the pool which tag\n"));
+    f << "###tag";
+    ok=false;
+  }
+  ascii.addPos(pos);
+  ascii.addNote(f.str().c_str());
+
+  n=0;
+  while (ok && mRecord.getNewContent()) {
+    pos=input->tell();
+    f.str("");
+    f << "PoolDef[attrib-" << n++ << "]:";
+    uint16_t nWhich, nVersion, nCount;
+    *input >> nWhich >> nVersion >> nCount;
+    f << "wh=" << nWhich << ", vers=" << nVersion << ", count=" << nCount << ",";
+    static bool first=true;
+    if (first) {
+      STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: reading attribute is not implemented\n"));
+      first=false;
+    }
+    f << "##";
+    input->seek(mRecord.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+  }
+  mRecord.close("PoolDef");
+
+  pos=input->tell();
+  f.str("");
+  f << "PoolDef[default]:";
+  if (!mRecord.open()) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPool: can not open the default sfx record\n"));
+    f << "###default";
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    zone.closeSfxRecord(type, "PoolDef");
+    return true;
+  }
+  f << mRecord;
+  ok=true;
+  if (mRecord.getHeaderTag()!=0x50) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPool: can not find the pool which tag\n"));
+    f << "###tag";
+    ok=false;
+  }
+  ascii.addPos(pos);
+  ascii.addNote(f.str().c_str());
+  n=0;
+  while (ok && mRecord.getNewContent()) {
+    pos=input->tell();
+    f.str("");
+    f << "PoolDef[default-" << n++ << "]:";
+    uint16_t nWhich, nVersion;
+    *input >> nWhich >> nVersion;
+    f << "wh=" << nWhich << ", vers=" << nVersion << ",";
+    f << "##";
+    input->seek(mRecord.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+  }
+  mRecord.close("PoolDef");
+
+  zone.closeSfxRecord(type, "PoolDef");
+  return true;
+}
+
+bool StarFileManager::readPoolV1(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascii=zone.ascii();
+  long endPos=zone.getRecordLevel()>0 ?  zone.getRecordLastPosition() : input->size();
+  libstoff::DebugStream f;
+  f << "Entries(PoolDef):";
+  long pos=input->tell();
+  if (pos+18>endPos) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: the zone seems too short\n"));
+    return false;
+  }
+  uint16_t tag;
+  // poolio.cxx SfxItemPool::Load
+  uint8_t nMajorVers, nMinorVers;
+  *input >> tag >> nMajorVers >> nMinorVers;
+  if (tag==0x1111)
+    f << "v4,";
+  else if (tag==0xbbbb)
+    f << "v5,";
+  else {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+
+  if (nMajorVers!=1) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  f << "version=" << int(nMajorVers) << ",vers[minor]=" << int(nMinorVers) << ",";
+  if (nMinorVers>=3) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: find a minor version >= 3\n"));
+    f << "###";
+  }
+
+  // SfxItemPool::Load1_Impl
+  if (nMinorVers>=2) {
+    int16_t nLoadingVersion;
+    *input >> nLoadingVersion;
+    if (nLoadingVersion) f << "vers[loading]=" << nLoadingVersion << ",";
+  }
+  librevenge::RVNGString string;
+  if (!zone.readString(string)) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: can not read the name\n"));
+    f << "###name";
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  if (!string.empty())
+    f << "name[ext]=" << string.cstr() << ",";
+  uint32_t attribSize;
+  *input>>attribSize;
+  long attribPos=input->tell();
+  if (attribPos+attribSize+10>endPos) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: attribSize is bad\n"));
+    f << "###";
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  else if (attribSize) {
+    f << "attr[sz]=" << attribSize << ",";
+    input->seek(attribSize, librevenge::RVNG_SEEK_CUR);
+  }
+  else {
+    STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: attribSize\n"));
+    f << "###attrib[sz]==0,";
+  }
+
+  *input >> tag;
+  if (tag!=0x3333) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: can not find tag size\n"));
+    f << "###tag=" << std::hex << tag << std::dec;
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  uint32_t tableSize;
+  *input>>tableSize;
+  long tablePos=input->tell();
+  long beginEndPos=tablePos+tableSize;
+  if (beginEndPos+4>endPos) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: tableSize is bad\n"));
+    f << "###";
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  else if (tableSize)
+    f << "table[sz]=" << tableSize << ",";
+  else if (nMinorVers>=3) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: tableSize is null for version 3\n"));
+    f << "###table[sz]==0,";
+  }
+  ascii.addPos(pos);
+  ascii.addNote(f.str().c_str());
+
+  long endTablePos=tablePos+tableSize;
+  if (nMinorVers>=3 && tableSize>=4) { // CHECKME: never seens
+    input->seek(tablePos+tableSize-4, librevenge::RVNG_SEEK_SET);
+    pos=(long) input->readULong(4);
+    endTablePos-=4;
+    if (pos<tablePos || pos>=endTablePos) {
+      STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: arrgh can not find versionmap position\n"));
+    }
+    else {
+      long lastVersMapPos=endTablePos;
+      endTablePos=pos;
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+      f.str("");
+      f << "PoolDef[versionMap]:";
+      uint16_t nVerCount;
+      *input >> nVerCount;
+      ascii.addPos(pos);
+      ascii.addNote(f.str().c_str());
+      for (int i=0; i<int(nVerCount); ++i) {
+        pos=input->tell();
+        f.str("");
+        f << "PoolDef[versionMap" << i << "]:";
+        uint16_t nVers, nStart, nEnd;
+        *input >> nVers >> nStart >> nEnd;
+        f << "vers=" << nVers << "," << nStart << "-" << nEnd << ",";
+        int N=int(nEnd)+1-int(nStart);
+        if (N<0 || pos+6+2*N>lastVersMapPos) {
+          STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: arrgh nBytes is bad\n"));
+          f << "###";
+          ascii.addPos(pos);
+          ascii.addNote(f.str().c_str());
+          break;
+        }
+        f << "val=[";
+        for (int j=0; j<N; ++j) {
+          uint16_t val;
+          *input >> val;
+          if (val) f << val << ",";
+          else
+            f << "_,";
+        }
+        f << "],";
+        ascii.addPos(pos);
+        ascii.addNote(f.str().c_str());
+      }
+    }
+  }
+
+  // now read the table
+  input->seek(tablePos, librevenge::RVNG_SEEK_SET);
+  pos=input->tell();
+  f.str("");
+  f << "PoolDef[table]:";
+  std::vector<uint32_t> sizeAttr;
+  f << "size=[";
+  while (input->tell()+4<=endTablePos) {
+    uint32_t sz;
+    *input>>sz;
+    sizeAttr.push_back(sz);
+    f << sz << ",";
+  }
+  f << "],";
+  ascii.addPos(tablePos-6);
+  ascii.addNote(f.str().c_str());
+
+  // now read the attribute
+  input->seek(attribPos, librevenge::RVNG_SEEK_SET);
+  pos=input->tell();
+  long endDataPos=attribPos+attribSize;
+  f.str("");
+  f << "PoolDef[attrib]:";
+  bool ok=false;
+  if (attribSize!=0)  {
+    *input >> tag;
+    if (tag!=0x2222) {
+      STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: tag is bad \n"));
+      f << "###tag=" << std::hex << tag << std::dec;
+    }
+    else
+      ok=true;
+  }
+  ascii.addPos(attribPos-4);
+  ascii.addNote(f.str().c_str());
+  size_t n=0;
+  while (ok) {
+    pos=input->tell();
+    f.str("");
+    f << "PoolDef[attrib" << n << "]:";
+    if (pos+2 > endDataPos) {
+      ok=false;
+
+      STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: can not find last attrib\n"));
+      f << "###noLast,";
+      ascii.addPos(pos);
+      ascii.addNote(f.str().c_str());
+      break;
+    }
+    uint16_t nWhich;
+    *input >> nWhich;
+    if (nWhich==0) {
+      ascii.addPos(pos);
+      ascii.addNote(f.str().c_str());
+      break;
+    }
+
+    static bool first=true;
+    if (first) {
+      STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: reading attribute is not implemented\n"));
+      first=false;
+    }
+    uint16_t nSlot, nVersion, nCount;
+    *input >> nSlot >> nVersion >> nCount;
+    f << "wh=" << nWhich << "[" << std::hex << nSlot << std::dec << "], vers=" << nVersion << ", count=" << nCount << ",";
+    f << "sz=[";
+    long actPos=input->tell();
+    for (int i=0; i<nCount; ++i) {
+      if (n >= sizeAttr.size() || actPos+sizeAttr[n]>endDataPos) {
+        ok=false;
+
+        STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: can not find attrib size\n"));
+        f << "###badSize,";
+        ascii.addPos(pos);
+        ascii.addNote(f.str().c_str());
+        break;
+      }
+      if (sizeAttr[n]) {
+        ascii.addDelimiter(actPos,'|');
+        f << sizeAttr[n] << ",";
+        actPos+=sizeAttr[n];
+      }
+      else
+        f << "_,";
+      ++n;
+    }
+    if (!ok) break;
+    f << "],";
+    input->seek(actPos, librevenge::RVNG_SEEK_SET);
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+  }
+  if (ok) {
+    pos=input->tell();
+    f.str("");
+    f << "PoolDef[default]:";
+    if (nMinorVers>0) {
+      *input>>tag;
+      if (tag!=0x4444) {
+        STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: default tag is bad \n"));
+        f << "###tag=" << std::hex << tag << std::dec;
+        ascii.addPos(pos);
+        ascii.addNote(f.str().c_str());
+        ok=false;
+      }
+    }
+  }
+  if (ok) {
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+  }
+
+  while (ok) {
+    pos=input->tell();
+    f.str("");
+    f << "PoolDef[default" << n << "]:";
+    if (pos+2 > endDataPos) {
+      ok=false;
+
+      STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: can not find last attrib\n"));
+      f << "###noLast,";
+      ascii.addPos(pos);
+      ascii.addNote(f.str().c_str());
+      break;
+    }
+    uint16_t nWhich;
+    *input >> nWhich;
+    if (nWhich==0) {
+      ascii.addPos(pos);
+      ascii.addNote(f.str().c_str());
+      break;
+    }
+    uint16_t nSlot, nVersion;
+    *input >> nSlot >> nVersion;
+    f << "wh=" << nWhich << "[" << std::hex << nSlot << std::dec << "], vers=" << nVersion << ",";
+    if (n >= sizeAttr.size() || sizeAttr[n]<6 || pos+sizeAttr[n]>endDataPos) {
+      ok=false;
+
+      STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: can not find attrib size\n"));
+      f << "###badSize,";
+      ascii.addPos(pos);
+      ascii.addNote(f.str().c_str());
+      break;
+    }
+    if (sizeAttr[n]>6) ascii.addDelimiter(input->tell(),'|');
+    input->seek(pos+sizeAttr[n++], librevenge::RVNG_SEEK_SET);
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+  }
+
+  input->seek(beginEndPos, librevenge::RVNG_SEEK_SET);
+  pos=input->tell();
+  f.str("");
+  f << "PoolDef[end]:";
+  uint16_t tag1;
+  *input >> tag >> tag1;
+  if (tag!=0xeeee || tag1!=0xeeee) {
+    STOFF_DEBUG_MSG(("StarFileManager::readPoolV1: can not find end tag\n"));
+    f << "###tag=" << std::hex << tag << std::dec;
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+
   ascii.addPos(pos);
   ascii.addNote(f.str().c_str());
   return true;
@@ -770,23 +1433,14 @@ bool StarFileManager::readOutPlaceObject(STOFFInputStreamPtr input, libstoff::De
 ////////////////////////////////////////////////////////////
 // small zone
 ////////////////////////////////////////////////////////////
-bool StarFileManager::readJobSetUp(StarZone &zone, char cKind)
+bool StarFileManager::readJobSetUp(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
   long pos=input->tell();
-  if (cKind!=' ' && (input->peek()!='J' || !zone.openRecord(type))) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
   // sw_sw3misc.cxx: InJobSetup
   libstoff::DebugStream f;
   f << "Entries(JobSetUp)[" << zone.getRecordLevel() << "]:";
-  if (cKind!=' ') {
-    zone.openFlagZone();
-    zone.closeFlagZone();
-  }
   // sfx2_printer.cxx: SfxPrinter::Create
   // jobset.cxx: JobSetup operator>>
   long lastPos=zone.getRecordLastPosition();
@@ -795,7 +1449,6 @@ bool StarFileManager::readJobSetUp(StarZone &zone, char cKind)
   if (len==0) {
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord('J', "JobSetUp");
     return true;
   }
   bool ok=false;
@@ -878,8 +1531,6 @@ bool StarFileManager::readJobSetUp(StarZone &zone, char cKind)
 
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  if (cKind!=' ')
-    zone.closeRecord('J', "JobSetUp");
   return true;
 }
 

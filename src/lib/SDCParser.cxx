@@ -113,11 +113,11 @@ bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &
   ascFile.addNote(f.str().c_str());
   long pos=input->tell(), lastPos= zone.getRecordLastPosition();
   StarFileManager fileManager;
-  if (!fileManager.readVCPool(input, ascFile,lastPos))
+  if (!fileManager.readPool(zone))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
 
   pos=input->tell();
-  if (pos!=lastPos && !fileManager.readJobSetUp(zone, ' '))
+  if (pos!=lastPos && !fileManager.readJobSetUp(zone))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
 
   zone.closeRecord("SCChartDocument");
@@ -167,6 +167,98 @@ bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &
 
   return true;
 }
+
+bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name)
+{
+  StarZone zone(input, name, "SfxStyleSheets");
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  libstoff::DebugFile &ascFile=zone.ascii();
+  ascFile.open(name);
+
+  StarFileManager fileManager;
+  // first check for calc: sc_docsh.cxx ScDocShell::LoadCalc and sc_document.cxx: ScDocument::LoadPool
+  uint16_t nId;
+  *input >> nId;
+  if (nId==0x4210 || nId==0x4213) {
+    long pos=0;
+    libstoff::DebugStream f;
+    f << "Entries(SfxStyleSheets):id=" << std::hex << nId << std::dec << ",calc,";
+    if (!zone.openSCRecord()) {
+      STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: can not open main zone\n"));
+      f << "###";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+    }
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    long lastPos=zone.getRecordLastPosition();
+    while (input->tell()+6 < lastPos) {
+      pos=input->tell();
+      f.str("");
+      *input >> nId;
+      f << "SfxStyleSheets-1:id=" << std::hex << nId << std::dec << ",";
+      if (!zone.openSCRecord()) {
+        STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: can not open second zone\n"));
+        f << "###";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        break;
+      }
+      switch (nId) {
+      case 0x4211:
+      case 0x4214:
+        f << (nId==0x411 ? "pool" : "pool[edit]") << ",";
+        if (!fileManager.readPool(zone)) {
+          STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: can not readPoolZone\n"));
+          f << "###";
+          input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+          break;
+        }
+        break;
+      case 0x422c: {
+        uint8_t cSet, cGUI;
+        *input >> cGUI >> cSet;
+        f << "charset=" << int(cSet) << ",";
+        if (cGUI) f << "gui=" << int(cGUI) << ",";
+        break;
+      }
+      default:
+        input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+        f << "###";
+        break;
+      }
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      zone.closeSCRecord("SfxStyleSheets");
+    }
+    zone.closeSCRecord("SfxStyleSheets");
+
+    if (!input->isEnd()) {
+      STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: find extra data\n"));
+      ascFile.addPos(input->tell());
+      ascFile.addNote("SfxStyleSheets:###extra");
+    }
+    return true;
+  }
+
+  // check for chart sch_docshell.cxx SchChartDocShell::Load
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  while (!input->isEnd()) {
+    long pos=input->tell();
+    if (fileManager.readPool(zone))
+      continue;
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    break;
+  }
+  if (input->isEnd()) return true;
+  long pos=input->tell();
+  libstoff::DebugStream f;
+  f << "Entries(SfxStyleSheets):";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return true;
+}
+
 ////////////////////////////////////////////////////////////
 //
 // Low level

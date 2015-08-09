@@ -77,7 +77,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='A' || !zone.openRecord(type)) {
+  if (input->peek()!='A' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1119,7 +1119,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('A', "SWAttributeDef");
+  zone.closeSWRecord('A', "SWAttributeDef");
   return true;
 
 }
@@ -1130,7 +1130,7 @@ bool SWAttributeManager::readAttributeList(StarZone &zone, SDWParser &manager)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='S' || !zone.openRecord(type)) {
+  if (input->peek()!='S' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1145,7 +1145,7 @@ bool SWAttributeManager::readAttributeList(StarZone &zone, SDWParser &manager)
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
-  zone.closeRecord('S', "SWAttributeList");
+  zone.closeSWRecord('S', "SWAttributeList");
   return true;
 }
 

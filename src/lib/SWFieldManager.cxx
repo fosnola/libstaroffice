@@ -74,7 +74,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (cKind!='_' && (input->peek()!=cKind || !zone.openRecord(type))) {
+  if (cKind!='_' && (input->peek()!=cKind || !zone.openSWRecord(type))) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -934,7 +934,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       char authType;
       libstoff::DebugStream f2;
       f2<<"SWFieldType[auth-A" << i << "]:";
-      if (input->peek()!='E' || !zone.openRecord(authType)) {
+      if (input->peek()!='E' || !zone.openSWRecord(authType)) {
         STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read an authority zone\n"));
 
         f2<< "###";
@@ -944,7 +944,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       }
       ascFile.addPos(actPos);
       ascFile.addNote(f2.str().c_str());
-      zone.closeRecord(authType, "SWFieldType");
+      zone.closeSWRecord(authType, "SWFieldType");
     }
     if (!ok || !nSort) break;
     long actPos=input->tell();
@@ -987,7 +987,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
   ascFile.addNote(f.str().c_str());
 
   if (cKind!='_')
-    zone.closeRecord(cKind, "SWFieldType");
+    zone.closeSWRecord(cKind, "SWFieldType");
   return true;
 }
 

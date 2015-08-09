@@ -151,6 +151,11 @@ bool SDWParser::createZones()
       sdcParser.readChartDocument(ole,name);
       continue;
     }
+    if (base=="SfxStyleSheets") {
+      SDCParser sdcParser;
+      sdcParser.readSfxStyleSheets(ole,name);
+      continue;
+    }
     if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
       librevenge::RVNGBinaryData data;
       fileManager.readImageDocument(ole,data,name);
@@ -174,6 +179,13 @@ bool SDWParser::createZones()
       fileManager.readOleObject(ole,name);
       continue;
     }
+    else if (base=="VCPool") {
+      StarZone zone(ole, name, "VCPool");
+      zone.ascii().open(name);
+      ole->seek(0, librevenge::RVNG_SEEK_SET);
+      fileManager.readPool(zone);
+      continue;
+    }
     libstoff::DebugFile asciiFile(ole);
     asciiFile.open(name);
 
@@ -182,6 +194,7 @@ bool SDWParser::createZones()
       ok=fileManager.readPersistElements(ole, asciiFile);
     else if (base=="SfxDocumentInfo")
       ok=fileManager.readSfxDocumentInformation(ole, asciiFile);
+    // TODO SfxPreview: GetPreviewMetaFile()
     else if (base=="SfxWindows")
       ok=fileManager.readSfxWindows(ole, asciiFile);
     else if (base=="Star Framework Config File")
@@ -189,10 +202,6 @@ bool SDWParser::createZones()
     // other
     else if (base=="OutPlace Object")
       ok=fileManager.readOutPlaceObject(ole, asciiFile);
-    else if (base=="VCPool") {
-      ole->seek(0, librevenge::RVNG_SEEK_SET);
-      ok=fileManager.readVCPool(ole,asciiFile);
-    }
     if (!ok) {
       libstoff::DebugStream f;
       if (base=="Standard") // can be Standard or STANDARD
@@ -240,7 +249,7 @@ bool SDWParser::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &
       continue;
     char type;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
-    if (!zone.openRecord(type)) {
+    if (!zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -275,7 +284,7 @@ bool SDWParser::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &
       f << "###type,";
       break;
     }
-    if (!zone.closeRecord(type, "SWNumRuleList")) {
+    if (!zone.closeSWRecord(type, "SWNumRuleList")) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -314,7 +323,7 @@ bool SDWParser::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string con
   while (!input->isEnd()) {
     long pos=input->tell();
     char type;
-    if (!zone.openRecord(type)) {
+    if (!zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -341,7 +350,7 @@ bool SDWParser::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string con
       f << "###";
       break;
     }
-    if (!zone.closeRecord(type, "SWPageStyleSheets")) {
+    if (!zone.closeSWRecord(type, "SWPageStyleSheets")) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -367,7 +376,7 @@ bool SDWParser::readSWPageDef(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='p' || !zone.openRecord(type)) {
+  if (input->peek()!='p' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -410,7 +419,7 @@ bool SDWParser::readSWPageDef(StarZone &zone)
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     f.str("");
-    if (!zone.openRecord(type)) {
+    if (!zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -446,9 +455,9 @@ bool SDWParser::readSWPageDef(StarZone &zone)
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type, "SWPageDef");
+    zone.closeSWRecord(type, "SWPageDef");
   }
-  zone.closeRecord('p', "SWPageDef");
+  zone.closeSWRecord('p', "SWPageDef");
   return true;
 }
 
@@ -458,7 +467,7 @@ bool SDWParser::readSWBookmarkList(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='a' || !zone.openRecord(type)) {
+  if (input->peek()!='a' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -473,7 +482,7 @@ bool SDWParser::readSWBookmarkList(StarZone &zone)
     pos=input->tell();
     f.str("");
     f << "SWBookmark:";
-    if (input->peek()!='B' || !zone.openRecord(type)) {
+    if (input->peek()!='B' || !zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -517,10 +526,10 @@ bool SDWParser::readSWBookmarkList(StarZone &zone)
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type, "SWBookmark");
+    zone.closeSWRecord(type, "SWBookmark");
   }
 
-  zone.closeRecord('a', "SWBookmark");
+  zone.closeSWRecord('a', "SWBookmark");
   return true;
 }
 
@@ -530,7 +539,7 @@ bool SDWParser::readSWContent(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='N' || !zone.openRecord(type)) {
+  if (input->peek()!='N' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -588,7 +597,7 @@ bool SDWParser::readSWContent(StarZone &zone)
     }
     if (done) continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
-    if (!zone.openRecord(type)) {
+    if (!zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -606,9 +615,9 @@ bool SDWParser::readSWContent(StarZone &zone)
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type, "SWContent");
+    zone.closeSWRecord(type, "SWContent");
   }
-  zone.closeRecord('N', "SWContent");
+  zone.closeSWRecord('N', "SWContent");
   return true;
 }
 
@@ -618,7 +627,7 @@ bool SDWParser::readSWDBName(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='D' || !zone.openRecord(type)) {
+  if (input->peek()!='D' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -631,7 +640,7 @@ bool SDWParser::readSWDBName(StarZone &zone)
     f << "###string";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord('D', "SWDBName");
+    zone.closeSWRecord('D', "SWDBName");
     return true;
   }
   if (!text.empty())
@@ -642,7 +651,7 @@ bool SDWParser::readSWDBName(StarZone &zone)
       f << "###SQL";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('D', "SWDBName");
+      zone.closeSWRecord('D', "SWDBName");
       return true;
     }
     if (!text.empty())
@@ -654,7 +663,7 @@ bool SDWParser::readSWDBName(StarZone &zone)
       f << "###tableName";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('D', "SWDBName");
+      zone.closeSWRecord('D', "SWDBName");
       return true;
     }
     if (!text.empty())
@@ -685,7 +694,7 @@ bool SDWParser::readSWDBName(StarZone &zone)
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('D', "SWDBName");
+  zone.closeSWRecord('D', "SWDBName");
   return true;
 }
 
@@ -695,7 +704,7 @@ bool SDWParser::readSWDictionary(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='j' || !zone.openRecord(type)) {
+  if (input->peek()!='j' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -723,7 +732,7 @@ bool SDWParser::readSWDictionary(StarZone &zone)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  zone.closeRecord('j', "SWDictionary");
+  zone.closeSWRecord('j', "SWDictionary");
   return true;
 }
 
@@ -733,7 +742,7 @@ bool SDWParser::readSWEndNoteInfo(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='4' || !zone.openRecord(type)) {
+  if (input->peek()!='4' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -760,7 +769,7 @@ bool SDWParser::readSWEndNoteInfo(StarZone &zone)
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        zone.closeRecord('4', "SWEndNoteInfo");
+        zone.closeSWRecord('4', "SWEndNoteInfo");
         return true;
       }
       if (!text.empty())
@@ -773,7 +782,7 @@ bool SDWParser::readSWEndNoteInfo(StarZone &zone)
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('4', "SWEndNoteInfo");
+  zone.closeSWRecord('4', "SWEndNoteInfo");
   return true;
 }
 
@@ -783,7 +792,7 @@ bool SDWParser::readSWFootNoteInfo(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='1' || !zone.openRecord(type)) {
+  if (input->peek()!='1' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -799,7 +808,7 @@ bool SDWParser::readSWFootNoteInfo(StarZone &zone)
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        zone.closeRecord('1', "SWFootNoteInfo");
+        zone.closeSWRecord('1', "SWFootNoteInfo");
       }
       if (!text.empty())
         f << (i==0 ? "quoVadis":"ergoSum") << "=" << text.cstr() << ",";
@@ -829,7 +838,7 @@ bool SDWParser::readSWFootNoteInfo(StarZone &zone)
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        zone.closeRecord('1', "SWFootNoteInfo");
+        zone.closeSWRecord('1', "SWFootNoteInfo");
         return true;
       }
       if (!text.empty())
@@ -848,7 +857,7 @@ bool SDWParser::readSWFootNoteInfo(StarZone &zone)
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        zone.closeRecord('1', "SWFootNoteInfo");
+        zone.closeSWRecord('1', "SWFootNoteInfo");
         return true;
       }
       if (!text.empty())
@@ -861,7 +870,7 @@ bool SDWParser::readSWFootNoteInfo(StarZone &zone)
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('1', "SWFootNoteInfo");
+  zone.closeSWRecord('1', "SWFootNoteInfo");
   return true;
 }
 
@@ -871,7 +880,7 @@ bool SDWParser::readSWGraphNode(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='G' || !zone.openRecord(type)) {
+  if (input->peek()!='G' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -891,7 +900,7 @@ bool SDWParser::readSWGraphNode(StarZone &zone)
       f << "###string";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('G', "SWGraphNode");
+      zone.closeSWRecord('G', "SWGraphNode");
       return true;
     }
     if (!text.empty())
@@ -903,7 +912,7 @@ bool SDWParser::readSWGraphNode(StarZone &zone)
       f << "###textRepl";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('G', "SWGraphNode");
+      zone.closeSWRecord('G', "SWGraphNode");
       return true;
     }
     if (!text.empty())
@@ -931,7 +940,7 @@ bool SDWParser::readSWGraphNode(StarZone &zone)
     if (done)
       continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
-    if (!zone.openRecord(type)) {
+    if (!zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -968,10 +977,10 @@ bool SDWParser::readSWGraphNode(StarZone &zone)
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type, "SWGraphNode");
+    zone.closeSWRecord(type, "SWGraphNode");
   }
 
-  zone.closeRecord('G', "SWGraphNode");
+  zone.closeSWRecord('G', "SWGraphNode");
   return true;
 }
 
@@ -981,7 +990,7 @@ bool SDWParser::readSWImageMap(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='X' || !zone.openRecord(type)) {
+  if (input->peek()!='X' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -999,7 +1008,7 @@ bool SDWParser::readSWImageMap(StarZone &zone)
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
 
-    zone.closeRecord('X', "SWImageMap");
+    zone.closeSWRecord('X', "SWImageMap");
     return true;
   }
   if (!string.empty())
@@ -1012,7 +1021,7 @@ bool SDWParser::readSWImageMap(StarZone &zone)
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
 
-        zone.closeRecord('X', "SWImageMap");
+        zone.closeSWRecord('X', "SWImageMap");
         return true;
       }
       if (string.empty()) continue;
@@ -1036,7 +1045,7 @@ bool SDWParser::readSWImageMap(StarZone &zone)
           ascFile.addPos(pos);
           ascFile.addNote(f.str().c_str());
 
-          zone.closeRecord('X', "SWImageMap");
+          zone.closeSWRecord('X', "SWImageMap");
           return true;
         }
         if (!string.empty())
@@ -1055,7 +1064,35 @@ bool SDWParser::readSWImageMap(StarZone &zone)
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('X', "SWImageMap");
+  zone.closeSWRecord('X', "SWImageMap");
+  return true;
+}
+
+bool SDWParser::readSWJobSetUp(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  char type;
+  long pos=input->tell();
+  if (input->peek()!='J' || !zone.openSWRecord(type)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+
+  libstoff::DebugStream f;
+  zone.openFlagZone();
+  zone.closeFlagZone();
+  if (input->tell()==zone.getRecordLastPosition()) // empty
+    f << "Entries(JobSetUp)[" << zone.getRecordLevel() << "]:";
+  else {
+    f << "JobSetUp[container-" << zone.getRecordLevel() << "]:";
+    StarFileManager fileManager;
+    fileManager.readJobSetUp(zone);
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  zone.closeSWRecord(type, "JobSetUp[container]");
   return true;
 }
 
@@ -1065,7 +1102,7 @@ bool SDWParser::readSWLayoutInfo(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='U' || !zone.openRecord(type)) {
+  if (input->peek()!='U' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1086,7 +1123,7 @@ bool SDWParser::readSWLayoutInfo(StarZone &zone)
     pos=input->tell();
     if (readSWLayoutSub(zone)) continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
-    if (!zone.openRecord(type)) {
+    if (!zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -1094,11 +1131,11 @@ bool SDWParser::readSWLayoutInfo(StarZone &zone)
     f << "SWLayoutInfo[" << std::hex << int((unsigned char)type) << std::dec << "]:";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type, "SWLayoutInfo");
+    zone.closeSWRecord(type, "SWLayoutInfo");
     break;
   }
 
-  zone.closeRecord('U', "SWLayoutInfo");
+  zone.closeSWRecord('U', "SWLayoutInfo");
   return true;
 }
 
@@ -1109,7 +1146,7 @@ bool SDWParser::readSWLayoutSub(StarZone &zone)
   char type;
   long pos=input->tell();
   int rType=input->peek();
-  if ((rType!=0xd2&&rType!=0xd7) || !zone.openRecord(type)) {
+  if ((rType!=0xd2&&rType!=0xd7) || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1132,7 +1169,7 @@ bool SDWParser::readSWLayoutSub(StarZone &zone)
     f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(char(0xd2), "SWLayoutSub");
+    zone.closeSWRecord(char(0xd2), "SWLayoutSub");
     return true;
   }
   ascFile.addDelimiter(input->tell(),'|');
@@ -1142,7 +1179,7 @@ bool SDWParser::readSWLayoutSub(StarZone &zone)
 
   while (input->tell()<lastPos) {
     pos=input->tell();
-    if (!zone.openRecord(type)) {
+    if (!zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -1151,10 +1188,10 @@ bool SDWParser::readSWLayoutSub(StarZone &zone)
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
     input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
-    zone.closeRecord(type, "SWLayoutSub");
+    zone.closeSWRecord(type, "SWLayoutSub");
   }
 
-  zone.closeRecord(char(rType), "SWLayoutSub");
+  zone.closeSWRecord(char(rType), "SWLayoutSub");
   return true;
 }
 
@@ -1164,7 +1201,7 @@ bool SDWParser::readSWMacroTable(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='M' || !zone.openRecord(type)) {
+  if (input->peek()!='M' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1177,7 +1214,7 @@ bool SDWParser::readSWMacroTable(StarZone &zone)
   librevenge::RVNGString string;
   while (input->tell()<lastPos) {
     pos=input->tell();
-    if (input->peek()!='m' || !zone.openRecord(type)) {
+    if (input->peek()!='m' || !zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -1198,9 +1235,9 @@ bool SDWParser::readSWMacroTable(StarZone &zone)
       f << "scriptType=" << input->readULong(2) << ",";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type, "SWMacroTable");
+    zone.closeSWRecord(type, "SWMacroTable");
   }
-  zone.closeRecord('M', "SWMacroTable");
+  zone.closeSWRecord('M', "SWMacroTable");
   return true;
 }
 
@@ -1210,7 +1247,7 @@ bool SDWParser::readSWNodeRedline(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='v' || !zone.openRecord(type)) {
+  if (input->peek()!='v' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1225,7 +1262,7 @@ bool SDWParser::readSWNodeRedline(StarZone &zone)
 
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('v', "SWNodeRedline");
+  zone.closeSWRecord('v', "SWNodeRedline");
   return true;
 }
 
@@ -1235,7 +1272,7 @@ bool SDWParser::readSWNumRule(StarZone &zone, char cKind)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!=cKind || !zone.openRecord(type)) {
+  if (input->peek()!=cKind || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1275,7 +1312,7 @@ bool SDWParser::readSWNumRule(StarZone &zone, char cKind)
     f << "###,";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(cKind, "SWNumRuleDef");
+    zone.closeSWRecord(cKind, "SWNumRuleDef");
     return true;
   }
   f << "lvl=[";
@@ -1294,7 +1331,7 @@ bool SDWParser::readSWNumRule(StarZone &zone, char cKind)
     break;
   }
 
-  zone.closeRecord(cKind, "SWNumRuleDef");
+  zone.closeSWRecord(cKind, "SWNumRuleDef");
   return true;
 }
 
@@ -1304,7 +1341,7 @@ bool SDWParser::readSWOLENode(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='O' || !zone.openRecord(type)) {
+  if (input->peek()!='O' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1318,7 +1355,7 @@ bool SDWParser::readSWOLENode(StarZone &zone)
     f << "###objName";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord('O', "SWOLENode");
+    zone.closeSWRecord('O', "SWOLENode");
     return true;
   }
   if (!text.empty())
@@ -1329,7 +1366,7 @@ bool SDWParser::readSWOLENode(StarZone &zone)
       f << "###textRepl";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('O', "SWOLENode");
+      zone.closeSWRecord('O', "SWOLENode");
       return true;
     }
     if (!text.empty())
@@ -1337,7 +1374,7 @@ bool SDWParser::readSWOLENode(StarZone &zone)
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('O', "SWOLENode");
+  zone.closeSWRecord('O', "SWOLENode");
   return true;
 }
 
@@ -1347,7 +1384,7 @@ bool SDWParser::readSWRedlineList(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='V' || !zone.openRecord(type)) {
+  if (input->peek()!='V' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1361,7 +1398,7 @@ bool SDWParser::readSWRedlineList(StarZone &zone)
     pos=input->tell();
     f.str("");
     f << "SWRedline:";
-    if (input->peek()!='R' || !zone.openRecord(type)) {
+    if (input->peek()!='R' || !zone.openSWRecord(type)) {
       STOFF_DEBUG_MSG(("SDWParser::readSWRedlineList: find extra data\n"));
       f << "###";
       ascFile.addPos(pos);
@@ -1379,7 +1416,7 @@ bool SDWParser::readSWRedlineList(StarZone &zone)
       pos=input->tell();
       f.str("");
       f << "SWRedline-" << i << ":";
-      if (input->peek()!='D' || !zone.openRecord(type)) {
+      if (input->peek()!='D' || !zone.openSWRecord(type)) {
         STOFF_DEBUG_MSG(("SDWParser::readSWRedlineList: can not read a redline\n"));
         f << "###";
         ascFile.addPos(pos);
@@ -1405,11 +1442,11 @@ bool SDWParser::readSWRedlineList(StarZone &zone)
         f << text.cstr();
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('D', "SWRedline");
+      zone.closeSWRecord('D', "SWRedline");
     }
-    zone.closeRecord('R', "SWRedline");
+    zone.closeSWRecord('R', "SWRedline");
   }
-  zone.closeRecord('V', "SWRedline");
+  zone.closeSWRecord('V', "SWRedline");
   return true;
 }
 
@@ -1419,7 +1456,7 @@ bool SDWParser::readSWSection(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='I' || !zone.openRecord(type)) {
+  if (input->peek()!='I' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1434,7 +1471,7 @@ bool SDWParser::readSWSection(StarZone &zone)
       f << "###string";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('I', "SWSection");
+      zone.closeSWRecord('I', "SWSection");
       return true;
     }
     if (text.empty()) continue;
@@ -1453,7 +1490,7 @@ bool SDWParser::readSWSection(StarZone &zone)
       f << "###linkName";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord('I', "SWSection");
+      zone.closeSWRecord('I', "SWSection");
       return true;
     }
     else if (!text.empty())
@@ -1461,7 +1498,7 @@ bool SDWParser::readSWSection(StarZone &zone)
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeRecord('I', "SWSection");
+  zone.closeSWRecord('I', "SWSection");
   return true;
 }
 
@@ -1471,7 +1508,7 @@ bool SDWParser::readSWTable(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='E' || !zone.openRecord(type)) {
+  if (input->peek()!='E' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1503,7 +1540,7 @@ bool SDWParser::readSWTable(StarZone &zone)
     STOFF_DEBUG_MSG(("SDWParser::readSWTable: can not read a red line\n"));
     ascFile.addPos(pos);
     ascFile.addNote("SWTableDef:###redline");
-    zone.closeRecord('E',"SWTableDef");
+    zone.closeSWRecord('E',"SWTableDef");
     return true;
   }
 
@@ -1516,7 +1553,7 @@ bool SDWParser::readSWTable(StarZone &zone)
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
-  zone.closeRecord('E',"SWTableDef");
+  zone.closeSWRecord('E',"SWTableDef");
   return true;
 }
 
@@ -1526,7 +1563,7 @@ bool SDWParser::readSWTableBox(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='t' || !zone.openRecord(type)) {
+  if (input->peek()!='t' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1552,7 +1589,7 @@ bool SDWParser::readSWTableBox(StarZone &zone)
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
-  zone.closeRecord('t', "SWTableBox");
+  zone.closeSWRecord('t', "SWTableBox");
   return true;
 }
 
@@ -1562,7 +1599,7 @@ bool SDWParser::readSWTableLine(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='L' || !zone.openRecord(type)) {
+  if (input->peek()!='L' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1588,7 +1625,7 @@ bool SDWParser::readSWTableLine(StarZone &zone)
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
-  zone.closeRecord('L', "SWTableLine");
+  zone.closeSWRecord('L', "SWTableLine");
   return true;
 }
 
@@ -1598,7 +1635,7 @@ bool SDWParser::readSWTextZone(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='T' || !zone.openRecord(type)) {
+  if (input->peek()!='T' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1625,7 +1662,7 @@ bool SDWParser::readSWTextZone(StarZone &zone)
     f << "###text";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord('T', "SWText");
+    zone.closeSWRecord('T', "SWText");
     return true;
   }
   else if (!text.empty())
@@ -1666,7 +1703,7 @@ bool SDWParser::readSWTextZone(StarZone &zone)
     if (done)
       continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
-    if (!zone.openRecord(type)) {
+    if (!zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -1723,9 +1760,9 @@ bool SDWParser::readSWTextZone(StarZone &zone)
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type, "SWText");
+    zone.closeSWRecord(type, "SWText");
   }
-  zone.closeRecord('T', "SWText");
+  zone.closeSWRecord('T', "SWText");
   return true;
 }
 
@@ -1735,7 +1772,7 @@ bool SDWParser::readSWTOXList(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='u' || !zone.openRecord(type)) {
+  if (input->peek()!='u' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1749,7 +1786,7 @@ bool SDWParser::readSWTOXList(StarZone &zone)
   while (input->tell()<lastPos) {
     pos=input->tell();
     int rType=input->peek();
-    if (rType!='x' || !zone.openRecord(type)) {
+    if (rType!='x' || !zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -1771,7 +1808,7 @@ bool SDWParser::readSWTOXList(StarZone &zone)
       f << "###aName";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord(type, "SWTOXList");
+      zone.closeSWRecord(type, "SWTOXList");
       continue;
     }
     if (!string.empty())
@@ -1781,7 +1818,7 @@ bool SDWParser::readSWTOXList(StarZone &zone)
       f << "###aTitle";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord(type, "SWTOXList");
+      zone.closeSWRecord(type, "SWTOXList");
       continue;
     }
     if (!string.empty())
@@ -1796,7 +1833,7 @@ bool SDWParser::readSWTOXList(StarZone &zone)
         f << "###aDummy";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        zone.closeRecord(type, "SWTOXList");
+        zone.closeSWRecord(type, "SWTOXList");
         continue;
       }
       if (!string.empty())
@@ -1817,7 +1854,7 @@ bool SDWParser::readSWTOXList(StarZone &zone)
     if (!ok) {
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord(type, "SWTOXList");
+      zone.closeSWRecord(type, "SWTOXList");
       continue;
     }
     N=(int) input->readULong(1);
@@ -1854,7 +1891,7 @@ bool SDWParser::readSWTOXList(StarZone &zone)
     if (!ok) {
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord(type, "SWTOXList");
+      zone.closeSWRecord(type, "SWTOXList");
       continue;
     }
     fl=zone.openFlagZone();
@@ -1873,9 +1910,9 @@ bool SDWParser::readSWTOXList(StarZone &zone)
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type, "SWTOXList");
+    zone.closeSWRecord(type, "SWTOXList");
   }
-  zone.closeRecord('u', "SWTOXList");
+  zone.closeSWRecord('u', "SWTOXList");
   return true;
 }
 
@@ -1885,7 +1922,7 @@ bool SDWParser::readSWTOX51List(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  if (input->peek()!='y' || !zone.openRecord(type)) {
+  if (input->peek()!='y' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -1898,7 +1935,7 @@ bool SDWParser::readSWTOX51List(StarZone &zone)
   librevenge::RVNGString string;
   while (input->tell()<lastPos) {
     pos=input->tell();
-    if (input->peek()!='x' || !zone.openRecord(type)) {
+    if (input->peek()!='x' || !zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -1916,7 +1953,7 @@ bool SDWParser::readSWTOX51List(StarZone &zone)
         f << "###typeName";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        zone.closeRecord(type, "SWTOX51List");
+        zone.closeSWRecord(type, "SWTOX51List");
         continue;
       }
       if (!string.empty())
@@ -1927,7 +1964,7 @@ bool SDWParser::readSWTOX51List(StarZone &zone)
       f << "###aTitle";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord(type, "SWTOX51List");
+      zone.closeSWRecord(type, "SWTOX51List");
       continue;
     }
     if (!string.empty())
@@ -1956,7 +1993,7 @@ bool SDWParser::readSWTOX51List(StarZone &zone)
     if (!ok) {
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      zone.closeRecord(type, "SWTOX51List");
+      zone.closeSWRecord(type, "SWTOX51List");
       continue;
     }
     N=(int) input->readULong(1);
@@ -1970,9 +2007,9 @@ bool SDWParser::readSWTOX51List(StarZone &zone)
 
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type, "SWTOX51List");
+    zone.closeSWRecord(type, "SWTOX51List");
   }
-  zone.closeRecord('y', "SWTOX51List");
+  zone.closeSWRecord('y', "SWTOX51List");
   return true;
 }
 
@@ -2016,7 +2053,7 @@ bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const 
       done=formatManager.readSWFlyFrameList(zone, *this);
       break;
     case 'J':
-      done=fileManager.readJobSetUp(zone,'J');
+      done=readSWJobSetUp(zone);
       break;
     case 'M':
       done=readSWMacroTable(zone);
@@ -2057,7 +2094,7 @@ bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const 
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     char type;
-    if (!zone.openRecord(type)) {
+    if (!zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
@@ -2191,7 +2228,7 @@ bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const 
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeRecord(type, "SWWriterDocument");
+    zone.closeSWRecord(type, "SWWriterDocument");
     if (endZone)
       break;
   }
