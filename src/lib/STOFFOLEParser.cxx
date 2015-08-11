@@ -92,151 +92,145 @@
 /** Low level: namespace used to define/store the data used by STOFFOLEParser */
 namespace STOFFOLEParserInternal
 {
-/** Internal: internal method to compobj definition */
-class CompObj
-{
-public:
-  //! the constructor
-  CompObj() : m_mapCls()
+//! the state of a STOFFOLEParser
+struct State {
+  //! constructor
+  State() : m_oleList(), m_unknownOLEs(), m_mapCls()
   {
-    initCLSMap();
   }
-
-  /** return the CLS Name corresponding to an identifier */
-  char const *getCLSName(unsigned long v)
+  //! returns a CLSName if knwon
+  std::string getCLSName(unsigned long id) const
   {
-    if (m_mapCls.find(v) == m_mapCls.end()) return 0L;
-    return m_mapCls[v];
+    if (m_mapCls.empty())
+      const_cast<State *>(this)->initCLSMap();
+    if (m_mapCls.find(id) == m_mapCls.end()) return "";
+    return m_mapCls.find(id)->second;
   }
-
+  //! the ole list
+  std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > m_oleList;
+  //! list of ole which can not be parsed
+  std::vector<std::string> m_unknownOLEs;
 protected:
+  /** initialise a map CLSId <-> name */
+  void initCLSMap();
   /** map CLSId <-> name */
   std::map<unsigned long, char const *> m_mapCls;
-
-  /** initialise a map CLSId <-> name */
-  void initCLSMap()
-  {
-    // source: binfilter/bf_so3/source/inplace/embobj.cxx
-    m_mapCls[0x00000319]="Picture"; // addon Enhanced Metafile ( find in some file)
-
-    m_mapCls[0x000212F0]="MSWordArt"; // or MSWordArt.2
-    m_mapCls[0x00021302]="MSWorksWPDoc"; // addon
-
-    // MS Apps
-    m_mapCls[0x00030000]= "ExcelWorksheet";
-    m_mapCls[0x00030001]= "ExcelChart";
-    m_mapCls[0x00030002]= "ExcelMacrosheet";
-    m_mapCls[0x00030003]= "WordDocument";
-    m_mapCls[0x00030004]= "MSPowerPoint";
-    m_mapCls[0x00030005]= "MSPowerPointSho";
-    m_mapCls[0x00030006]= "MSGraph";
-    m_mapCls[0x00030007]= "MSDraw"; // find also with ca003 ?
-    m_mapCls[0x00030008]= "Note-It";
-    m_mapCls[0x00030009]= "WordArt";
-    m_mapCls[0x0003000a]= "PBrush";
-    m_mapCls[0x0003000b]= "Equation"; // "Microsoft Equation Editor"
-    m_mapCls[0x0003000c]= "Package";
-    m_mapCls[0x0003000d]= "SoundRec";
-    m_mapCls[0x0003000e]= "MPlayer";
-    // MS Demos
-    m_mapCls[0x0003000f]= "ServerDemo"; // "OLE 1.0 Server Demo"
-    m_mapCls[0x00030010]= "Srtest"; // "OLE 1.0 Test Demo"
-    m_mapCls[0x00030011]= "SrtInv"; //  "OLE 1.0 Inv Demo"
-    m_mapCls[0x00030012]= "OleDemo"; //"OLE 1.0 Demo"
-
-    // Coromandel / Dorai Swamy / 718-793-7963
-    m_mapCls[0x00030013]= "CoromandelIntegra";
-    m_mapCls[0x00030014]= "CoromandelObjServer";
-
-    // 3-d Visions Corp / Peter Hirsch / 310-325-1339
-    m_mapCls[0x00030015]= "StanfordGraphics";
-
-    // Deltapoint / Nigel Hearne / 408-648-4000
-    m_mapCls[0x00030016]= "DGraphCHART";
-    m_mapCls[0x00030017]= "DGraphDATA";
-
-    // Corel / Richard V. Woodend / 613-728-8200 x1153
-    m_mapCls[0x00030018]= "PhotoPaint"; // "Corel PhotoPaint"
-    m_mapCls[0x00030019]= "CShow"; // "Corel Show"
-    m_mapCls[0x0003001a]= "CorelChart";
-    m_mapCls[0x0003001b]= "CDraw"; // "Corel Draw"
-
-    // Inset Systems / Mark Skiba / 203-740-2400
-    m_mapCls[0x0003001c]= "HJWIN1.0"; // "Inset Systems"
-
-    // Mark V Systems / Mark McGraw / 818-995-7671
-    m_mapCls[0x0003001d]= "ObjMakerOLE"; // "MarkV Systems Object Maker"
-
-    // IdentiTech / Mike Gilger / 407-951-9503
-    m_mapCls[0x0003001e]= "FYI"; // "IdentiTech FYI"
-    m_mapCls[0x0003001f]= "FYIView"; // "IdentiTech FYI Viewer"
-
-    // Inventa Corporation / Balaji Varadarajan / 408-987-0220
-    m_mapCls[0x00030020]= "Stickynote";
-
-    // ShapeWare Corp. / Lori Pearce / 206-467-6723
-    m_mapCls[0x00030021]= "ShapewareVISIO10";
-    m_mapCls[0x00030022]= "ImportServer"; // "Spaheware Import Server"
-
-    // test app SrTest
-    m_mapCls[0x00030023]= "SrvrTest"; // "OLE 1.0 Server Test"
-
-    // test app ClTest.  Doesn't really work as a server but is in reg db
-    m_mapCls[0x00030025]= "Cltest"; // "OLE 1.0 Client Test"
-
-    // Microsoft ClipArt Gallery   Sherry Larsen-Holmes
-    m_mapCls[0x00030026]= "MS_ClipArt_Gallery";
-    // Microsoft Project  Cory Reina
-    m_mapCls[0x00030027]= "MSProject";
-
-    // Microsoft Works Chart
-    m_mapCls[0x00030028]= "MSWorksChart";
-
-    // Microsoft Works Spreadsheet
-    m_mapCls[0x00030029]= "MSWorksSpreadsheet";
-
-    // AFX apps - Dean McCrory
-    m_mapCls[0x0003002A]= "MinSvr"; // "AFX Mini Server"
-    m_mapCls[0x0003002B]= "HierarchyList"; // "AFX Hierarchy List"
-    m_mapCls[0x0003002C]= "BibRef"; // "AFX BibRef"
-    m_mapCls[0x0003002D]= "MinSvrMI"; // "AFX Mini Server MI"
-    m_mapCls[0x0003002E]= "TestServ"; // "AFX Test Server"
-
-    // Ami Pro
-    m_mapCls[0x0003002F]= "AmiProDocument";
-
-    // WordPerfect Presentations For Windows
-    m_mapCls[0x00030030]= "WPGraphics";
-    m_mapCls[0x00030031]= "WPCharts";
-
-    // MicroGrafx Charisma
-    m_mapCls[0x00030032]= "Charisma";
-    m_mapCls[0x00030033]= "Charisma_30"; // v 3.0
-    m_mapCls[0x00030034]= "CharPres_30"; // v 3.0 Pres
-    // MicroGrafx Draw
-    m_mapCls[0x00030035]= "Draw"; //"MicroGrafx Draw"
-    // MicroGrafx Designer
-    m_mapCls[0x00030036]= "Designer_40"; // "MicroGrafx Designer 4.0"
-
-    // STAR DIVISION
-    //m_mapCls[0x000424CA]= "StarMath"; // "StarMath 1.0"
-    m_mapCls[0x00043AD2]= "FontWork"; // "Star FontWork"
-    //m_mapCls[0x000456EE]= "StarMath2"; // "StarMath 2.0"
-  }
 };
 
-/** Internal: internal method to keep ole definition */
-struct OleDef {
-  OleDef() : m_id(-1), m_subId(-1), m_base(""), m_name("") { }
-  int m_id /**main id*/, m_subId /**subsversion id */ ;
-  std::string m_base/**the base name*/, m_name/**the complete name*/;
-};
+void State::initCLSMap()
+{
+  // source: binfilter/bf_so3/source/inplace/embobj.cxx
+  m_mapCls[0x00000319]="Picture"; // addon Enhanced Metafile ( find in some file)
+
+  m_mapCls[0x000212F0]="MSWordArt"; // or MSWordArt.2
+  m_mapCls[0x00021302]="MSWorksWPDoc"; // addon
+
+  // MS Apps
+  m_mapCls[0x00030000]= "ExcelWorksheet";
+  m_mapCls[0x00030001]= "ExcelChart";
+  m_mapCls[0x00030002]= "ExcelMacrosheet";
+  m_mapCls[0x00030003]= "WordDocument";
+  m_mapCls[0x00030004]= "MSPowerPoint";
+  m_mapCls[0x00030005]= "MSPowerPointSho";
+  m_mapCls[0x00030006]= "MSGraph";
+  m_mapCls[0x00030007]= "MSDraw"; // find also with ca003 ?
+  m_mapCls[0x00030008]= "Note-It";
+  m_mapCls[0x00030009]= "WordArt";
+  m_mapCls[0x0003000a]= "PBrush";
+  m_mapCls[0x0003000b]= "Equation"; // "Microsoft Equation Editor"
+  m_mapCls[0x0003000c]= "Package";
+  m_mapCls[0x0003000d]= "SoundRec";
+  m_mapCls[0x0003000e]= "MPlayer";
+  // MS Demos
+  m_mapCls[0x0003000f]= "ServerDemo"; // "OLE 1.0 Server Demo"
+  m_mapCls[0x00030010]= "Srtest"; // "OLE 1.0 Test Demo"
+  m_mapCls[0x00030011]= "SrtInv"; //  "OLE 1.0 Inv Demo"
+  m_mapCls[0x00030012]= "OleDemo"; //"OLE 1.0 Demo"
+
+  // Coromandel / Dorai Swamy / 718-793-7963
+  m_mapCls[0x00030013]= "CoromandelIntegra";
+  m_mapCls[0x00030014]= "CoromandelObjServer";
+
+  // 3-d Visions Corp / Peter Hirsch / 310-325-1339
+  m_mapCls[0x00030015]= "StanfordGraphics";
+
+  // Deltapoint / Nigel Hearne / 408-648-4000
+  m_mapCls[0x00030016]= "DGraphCHART";
+  m_mapCls[0x00030017]= "DGraphDATA";
+
+  // Corel / Richard V. Woodend / 613-728-8200 x1153
+  m_mapCls[0x00030018]= "PhotoPaint"; // "Corel PhotoPaint"
+  m_mapCls[0x00030019]= "CShow"; // "Corel Show"
+  m_mapCls[0x0003001a]= "CorelChart";
+  m_mapCls[0x0003001b]= "CDraw"; // "Corel Draw"
+
+  // Inset Systems / Mark Skiba / 203-740-2400
+  m_mapCls[0x0003001c]= "HJWIN1.0"; // "Inset Systems"
+
+  // Mark V Systems / Mark McGraw / 818-995-7671
+  m_mapCls[0x0003001d]= "ObjMakerOLE"; // "MarkV Systems Object Maker"
+
+  // IdentiTech / Mike Gilger / 407-951-9503
+  m_mapCls[0x0003001e]= "FYI"; // "IdentiTech FYI"
+  m_mapCls[0x0003001f]= "FYIView"; // "IdentiTech FYI Viewer"
+
+  // Inventa Corporation / Balaji Varadarajan / 408-987-0220
+  m_mapCls[0x00030020]= "Stickynote";
+
+  // ShapeWare Corp. / Lori Pearce / 206-467-6723
+  m_mapCls[0x00030021]= "ShapewareVISIO10";
+  m_mapCls[0x00030022]= "ImportServer"; // "Spaheware Import Server"
+
+  // test app SrTest
+  m_mapCls[0x00030023]= "SrvrTest"; // "OLE 1.0 Server Test"
+
+  // test app ClTest.  Doesn't really work as a server but is in reg db
+  m_mapCls[0x00030025]= "Cltest"; // "OLE 1.0 Client Test"
+
+  // Microsoft ClipArt Gallery   Sherry Larsen-Holmes
+  m_mapCls[0x00030026]= "MS_ClipArt_Gallery";
+  // Microsoft Project  Cory Reina
+  m_mapCls[0x00030027]= "MSProject";
+
+  // Microsoft Works Chart
+  m_mapCls[0x00030028]= "MSWorksChart";
+
+  // Microsoft Works Spreadsheet
+  m_mapCls[0x00030029]= "MSWorksSpreadsheet";
+
+  // AFX apps - Dean McCrory
+  m_mapCls[0x0003002A]= "MinSvr"; // "AFX Mini Server"
+  m_mapCls[0x0003002B]= "HierarchyList"; // "AFX Hierarchy List"
+  m_mapCls[0x0003002C]= "BibRef"; // "AFX BibRef"
+  m_mapCls[0x0003002D]= "MinSvrMI"; // "AFX Mini Server MI"
+  m_mapCls[0x0003002E]= "TestServ"; // "AFX Test Server"
+
+  // Ami Pro
+  m_mapCls[0x0003002F]= "AmiProDocument";
+
+  // WordPerfect Presentations For Windows
+  m_mapCls[0x00030030]= "WPGraphics";
+  m_mapCls[0x00030031]= "WPCharts";
+
+  // MicroGrafx Charisma
+  m_mapCls[0x00030032]= "Charisma";
+  m_mapCls[0x00030033]= "Charisma_30"; // v 3.0
+  m_mapCls[0x00030034]= "CharPres_30"; // v 3.0 Pres
+  // MicroGrafx Draw
+  m_mapCls[0x00030035]= "Draw"; //"MicroGrafx Draw"
+  // MicroGrafx Designer
+  m_mapCls[0x00030036]= "Designer_40"; // "MicroGrafx Designer 4.0"
+
+  // STAR DIVISION
+  //m_mapCls[0x000424CA]= "StarMath"; // "StarMath 1.0"
+  m_mapCls[0x00043AD2]= "FontWork"; // "Star FontWork"
+  //m_mapCls[0x000456EE]= "StarMath2"; // "StarMath 2.0"
+}
+
 }
 
 // constructor/destructor
-STOFFOLEParser::STOFFOLEParser(std::string mainName)
-  : m_avoidOLE(mainName), m_unknownOLEs(),
-    m_objects(), m_objectsPosition(), m_objectsId(), m_objectsType(), m_compObjIdName()
+STOFFOLEParser::STOFFOLEParser() : m_state(new STOFFOLEParserInternal::State)
 {
 }
 
@@ -244,45 +238,27 @@ STOFFOLEParser::~STOFFOLEParser()
 {
 }
 
-bool STOFFOLEParser::getObject(int id, librevenge::RVNGBinaryData &obj, STOFFPosition &pos, std::string &type)  const
+std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > &STOFFOLEParser::getDirectoryList()
 {
-  for (size_t i = 0; i < m_objectsId.size(); i++) {
-    if (m_objectsId[i] != id) continue;
-    obj = m_objects[i];
-    pos = m_objectsPosition[i];
-    type = m_objectsType[i];
-    return true;
-  }
-  obj.clear();
-  return false;
+  return m_state->m_oleList;
 }
 
-void STOFFOLEParser::setObject(int id, librevenge::RVNGBinaryData const &obj, STOFFPosition const &pos,
-                               std::string const &type)
+shared_ptr<STOFFOLEParser::OleDirectory> STOFFOLEParser::getDirectory(std::string const &dir)
 {
-  for (size_t i = 0; i < m_objectsId.size(); i++) {
-    if (m_objectsId[i] != id) continue;
-    m_objects[i] = obj;
-    m_objectsPosition[i] = pos;
-    m_objectsType[i] = type;
-    return;
+  std::string dirName(dir);
+  if (!dir.empty() && *dir.rbegin()=='/')
+    dirName=dir.substr(0, dir.size()-1);
+  for (size_t i=0; i<m_state->m_oleList.size(); ++i) {
+    if (m_state->m_oleList[i] && m_state->m_oleList[i]->m_dir==dirName)
+      return m_state->m_oleList[i];
   }
-  m_objects.push_back(obj);
-  m_objectsPosition.push_back(pos);
-  m_objectsId.push_back(id);
-  m_objectsType.push_back(type);
+  return shared_ptr<STOFFOLEParser::OleDirectory>();
 }
 
 // parsing
 bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
 {
-  if (!m_compObjIdName)
-    m_compObjIdName.reset(new STOFFOLEParserInternal::CompObj);
-
-  m_unknownOLEs.resize(0);
-  m_objects.resize(0);
-  m_objectsId.resize(0);
-  m_objectsType.resize(0);
+  m_state.reset(new STOFFOLEParserInternal::State);
 
   if (!file.get()) return false;
 
@@ -292,8 +268,7 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
   //
   // we begin by grouping the Ole by their potential main id
   //
-  std::multimap<int, STOFFOLEParserInternal::OleDef> listsById;
-  std::vector<int> listIds;
+  std::map<std::string, shared_ptr<STOFFOLEParser::OleDirectory> > listsByDir;
   for (unsigned i = 0; i < numSubStreams; ++i) {
     std::string const &name = file->subStreamName(i);
     if (name.empty() || name[name.length()-1]=='/') continue;
@@ -310,145 +285,81 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
       dir = name.substr(0,pos);
       base = name.substr(pos+1);
     }
-    if (dir == "" && base == m_avoidOLE) continue;
 
 #define PRINT_OLE_NAME
 #if defined(PRINT_OLE_NAME)
     STOFF_DEBUG_MSG(("OLEName=%s\n", name.c_str()));
 #endif
-    STOFFOLEParserInternal::OleDef data;
-    data.m_name = name;
-    data.m_base = base;
-
-    // try to retrieve the identificator stored in the directory
-    //  MatOST/MatadorObject1/ -> 1, -1
-    //  Object 2/ -> 2, -1
-    dir+='/';
-    pos = dir.find('/');
-    int id[2] = { -1, -1};
-    while (pos != std::string::npos) {
-      if (pos >= 1 && dir[pos-1] >= '0' && dir[pos-1] <= '9') {
-        std::string::size_type idP = pos-1;
-        while (idP >=1 && dir[idP-1] >= '0' && dir[idP-1] <= '9')
-          idP--;
-        int val = std::atoi(dir.substr(idP, idP-pos).c_str());
-        if (id[0] == -1) id[0] = val;
-        else {
-          id[1] = val;
-          break;
-        }
-      }
-      pos = dir.find('/', pos+1);
+    if (listsByDir.find(dir)==listsByDir.end() || !listsByDir.find(dir)->second) {
+      shared_ptr<STOFFOLEParser::OleDirectory> newDir(new STOFFOLEParser::OleDirectory(dir));
+      listsByDir[dir]=newDir;
+      m_state->m_oleList.push_back(newDir);
     }
-    data.m_id = id[0];
-    data.m_subId = id[1];
-    if (listsById.find(data.m_id) == listsById.end())
-      listIds.push_back(data.m_id);
-    listsById.insert(std::multimap<int, STOFFOLEParserInternal::OleDef>::value_type(data.m_id, data));
+    listsByDir.find(dir)->second->addNewBase(base);
   }
-  for (size_t i = 0; i < listIds.size(); i++) {
-    int id = listIds[i];
-
-    std::multimap<int, STOFFOLEParserInternal::OleDef>::iterator pos =
-      listsById.lower_bound(id);
-
-    // try to find a representation for each id
-    // FIXME: maybe we must also find some for each subid
-    int confidence = -1000;
-    STOFFPosition actualPos, potentialSize;
-    librevenge::RVNGBinaryData pict;
-
-    while (pos != listsById.end()) {
-      STOFFOLEParserInternal::OleDef const &dOle = pos->second;
-      if (pos++->first != id) break;
-
-      STOFFInputStreamPtr ole = file->getSubStreamByName(dOle.m_name);
+  for (size_t dir=0; dir<m_state->m_oleList.size(); ++dir) {
+    if (!m_state->m_oleList[dir]) continue;
+    STOFFOLEParser::OleDirectory &dOle = *m_state->m_oleList[dir];
+    if (dOle.m_hasCompObj) {
+      STOFFInputStreamPtr ole = file->getSubStreamByName(dOle.m_dir+"/CompObj");
       if (!ole.get()) {
-        STOFF_DEBUG_MSG(("STOFFOLEParser::parse: error: can not find OLE part: \"%s\"\n", dOle.m_name.c_str()));
+        STOFF_DEBUG_MSG(("STOFFOLEParser::parse: error: can not find CompObj in directory: \"%s\"\n", dOle.m_dir.c_str()));
+      }
+      else
+        readCompObj(ole, dOle);
+    }
+    for (size_t i=0; i< dOle.m_contentList.size(); ++i) {
+      STOFFOLEParser::OleContent &content = dOle.m_contentList[i];
+      std::string base=content.getBaseName();
+      std::string oleName=content.getOleName();
+      STOFFInputStreamPtr ole = file->getSubStreamByName(oleName);
+      if (!ole.get()) {
+        STOFF_DEBUG_MSG(("STOFFOLEParser::parse: error: can not find OLE part: \"%s\"\n", oleName.c_str()));
         continue;
       }
-      libstoff::DebugFile asciiFile(ole);
-      asciiFile.open(dOle.m_name);
-
-      librevenge::RVNGBinaryData data;
-      bool hasData = false;
-      int newConfidence = -2000;
-      bool ok = true;
-      STOFFPosition pictPos;
 
       ole->setReadInverted(true);
+      if (isOlePres(ole, base) && readOlePres(ole, content))
+        continue;
+      if (isOle10Native(ole, base) && readOle10Native(ole, content))
+        // small size can be a symptom that this is a link
+        continue;
+      if (readContents(ole, content) || readCONTENTS(ole, content))
+        continue;
+      libstoff::DebugFile asciiFile(ole);
+      asciiFile.open(oleName);
+
+      bool ok = true;
       try {
-        if (readObjInfo(ole, dOle.m_base, asciiFile));
-        else if (readOle(ole, dOle.m_base, asciiFile));
-        else if (isOlePres(ole, dOle.m_base) &&
-                 readOlePres(ole, data, pictPos, asciiFile)) {
-          hasData = true;
-          newConfidence = 2;
-        }
-        else if (isOle10Native(ole, dOle.m_base) &&
-                 readOle10Native(ole, data, asciiFile)) {
-          hasData = true;
-          // small size can be a symptom that this is a link to a
-          // basic msworks data file, so we reduce confidence
-          newConfidence = data.size() > 1000 ? 4 : 2;
-        }
-        else if (readCompObj(ole, dOle.m_base, asciiFile));
-        else if (readContents(ole, dOle.m_base, data, pictPos, asciiFile)) {
-          hasData = true;
-          newConfidence = 3;
-        }
-        else if (readCONTENTS(ole, dOle.m_base, data, pictPos, asciiFile)) {
-          hasData = true;
-          newConfidence = 3;
-        }
-        else if (readSummaryInformation(ole, dOle.m_base, asciiFile));
+        if (readObjInfo(ole, base, asciiFile));
+        else if (readOle(ole, base, asciiFile));
+        else if (readSummaryInformation(ole, base, asciiFile));
         else
           ok = false;
       }
       catch (...) {
         ok = false;
       }
-      if (!ok) {
-        m_unknownOLEs.push_back(dOle.m_name);
-        asciiFile.reset();
-        continue;
-      }
-
-      if (hasData && data.size()) {
-        // probably only a subs data
-        if (dOle.m_subId != -1) newConfidence -= 10;
-
-        if (newConfidence > confidence ||
-            (newConfidence == confidence && pict.size() < data.size())) {
-          confidence = newConfidence;
-          pict = data;
-          actualPos = pictPos;
-        }
-
-        if (actualPos.naturalSize().x() > 0 && actualPos.naturalSize().y() > 0)
-          potentialSize = actualPos;
-#ifdef DEBUG_WITH_FILES
-        libstoff::Debug::dumpFile(data, dOle.m_name.c_str());
-#endif
-      }
-
+      content.setParsed(ok);
       asciiFile.reset();
+      if (ok) continue;
 
-#ifndef DEBUG
-      if (confidence >= 3) break;
-#endif
-    }
-
-    if (pict.size()) {
-      m_objects.push_back(pict);
-      if (actualPos.naturalSize().x() <= 0. || actualPos.naturalSize().y() <= 0.) {
-        STOFFVec2f size = potentialSize.naturalSize();
-        if (size.x() > 0 && size.y() > 0)
-          actualPos.setNaturalSize(actualPos.getInvUnitScale(potentialSize.unit())*size);
+      m_state->m_unknownOLEs.push_back(oleName);
+      if (base.compare(0,4,"Star")==0) {
+        // times to update the
+        if (base=="StarCalcDocument")
+          dOle.m_kind=STOFFDocument::STOFF_K_SPREADSHEET;
+        else if (base=="StarChartDocument")
+          dOle.m_kind=STOFFDocument::STOFF_K_CHART;
+        else if (base=="StarDrawDocument" || base=="StarDrawDocument3")
+          dOle.m_kind=STOFFDocument::STOFF_K_DRAW;
+        else if (base=="StarImageDocument")
+          dOle.m_kind=STOFFDocument::STOFF_K_BITMAP;
+        else if (base=="StarMathDocument")
+          dOle.m_kind=STOFFDocument::STOFF_K_MATH;
+        else if (base=="StarWriterDocument")
+          dOle.m_kind=STOFFDocument::STOFF_K_TEXT;
       }
-      m_objectsPosition.push_back(actualPos);
-      m_objectsId.push_back(id);
-      m_objectsType.push_back("object/ole");
     }
   }
 
@@ -634,11 +545,16 @@ bool STOFFOLEParser::readObjInfo(STOFFInputStreamPtr input, std::string const &o
   return true;
 }
 
-bool STOFFOLEParser::readCompObj(STOFFInputStreamPtr ip, std::string const &oleName, libstoff::DebugFile &ascii)
+bool STOFFOLEParser::readCompObj(STOFFInputStreamPtr ip, STOFFOLEParser::OleDirectory &directory)
 {
-  if (strncmp(oleName.c_str(), "CompObj", 7) != 0) return false;
+  libstoff::DebugFile ascii(ip);
+  if (directory.m_dir.empty())
+    ascii.open("CompObj");
+  else
+    ascii.open(directory.m_dir+"/CompObj");
 
   // check minimal size
+  ip->setReadInverted(true);
   const int minSize = 12 + 14+ 16 + 12; // size of header, clsid, footer, 3 string size
   if (ip->seek(minSize,librevenge::RVNG_SEEK_SET) != 0 || ip->tell() != minSize) return false;
 
@@ -664,9 +580,9 @@ bool STOFFOLEParser::readCompObj(STOFFInputStreamPtr ip, std::string const &oleN
   f << "@@CompObj(CLSID):";
   if (clsData[1] == 0 && clsData[2] == 0xC0 && clsData[3] == 0x46000000L) {
     // normally, a referenced object
-    char const *clsName = m_compObjIdName->getCLSName(clsData[0]);
-    if (clsName)
-      f << "'" << clsName << "'";
+    directory.m_clsName = m_state->getCLSName(clsData[0]);
+    if (!directory.m_clsName.empty())
+      f << "'" << directory.m_clsName << "'";
     else {
       STOFF_DEBUG_MSG(("STOFFOLEParser::readCompObj: unknown clsid=%ld\n", (long) clsData[0]));
       f << "unknCLSID='" << std::hex << clsData[0] << "'";
@@ -711,6 +627,7 @@ bool STOFFOLEParser::readCompObj(STOFFInputStreamPtr ip, std::string const &oleN
       break;
     case 1:
       f << "ClipName=";
+      directory.m_clipName=st;
       break;
     case 2:
       f << "ProgIdName=";
@@ -799,15 +716,12 @@ bool STOFFOLEParser::isOlePres(STOFFInputStreamPtr ip, std::string const &oleNam
   return true;
 }
 
-bool STOFFOLEParser::readOlePres(STOFFInputStreamPtr ip, librevenge::RVNGBinaryData &data, STOFFPosition &pos,
-                                 libstoff::DebugFile &ascii)
+bool STOFFOLEParser::readOlePres(STOFFInputStreamPtr ip, STOFFOLEParser::OleContent &content)
 {
-  data.clear();
   if (!isOlePres(ip, "OlePres")) return false;
-
-  pos = STOFFPosition();
-  pos.setUnit(librevenge::RVNG_POINT);
-  pos.setRelativePosition(STOFFPosition::Char);
+  content.setParsed(true);
+  libstoff::DebugFile ascii(ip);
+  ascii.open(content.getOleName());
   libstoff::DebugStream f;
   f << "Entries(OlePress)(header): ";
   ip->seek(0,librevenge::RVNG_SEEK_SET);
@@ -824,7 +738,7 @@ bool STOFFOLEParser::readOlePres(STOFFInputStreamPtr ip, librevenge::RVNGBinaryD
   ascii.addNote(f.str().c_str());
 
   long endHPos = actPos+hSize;
-  if (!ip->checkPosition(endHPos+28)) return false;
+  if (!ip->checkPosition(endHPos+28)) return true;
   if (hSize!=4) {
     bool ok = true;
     f.str("");
@@ -860,7 +774,7 @@ bool STOFFOLEParser::readOlePres(STOFFInputStreamPtr ip, librevenge::RVNGBinaryD
   }
 
   if (!ip->checkPosition(endHPos+28))
-    return false;
+    return true;
 
   ip->seek(endHPos, librevenge::RVNG_SEEK_SET);
 
@@ -874,17 +788,27 @@ bool STOFFOLEParser::readOlePres(STOFFInputStreamPtr ip, librevenge::RVNGBinaryD
   // dim in TWIP ?
   long extendX = (long) ip->readULong(4);
   long extendY = (long)ip->readULong(4);
-  if (extendX > 0 && extendY > 0) pos.setNaturalSize(STOFFVec2f(float(extendX)/20.f, float(extendY)/20.f));
+  if (extendX > 0 && extendY > 0) {
+    STOFFPosition pos;
+    pos.setUnit(librevenge::RVNG_POINT);
+    pos.setRelativePosition(STOFFPosition::Char);
+    pos.setNaturalSize(STOFFVec2f(float(extendX)/20.f, float(extendY)/20.f));
+    content.setPosition(pos);
+  }
   long fSize = ip->readLong(4);
   f << "extendX="<< extendX << ", extendY=" << extendY << ", fSize=" << fSize;
 
   ascii.addPos(actPos);
   ascii.addNote(f.str().c_str());
 
-  if (fSize == 0) return ip->isEnd();
+  if (fSize == 0) return true;
 
-  data.clear();
-  if (!ip->readDataBlock(fSize, data)) return false;
+  librevenge::RVNGBinaryData data;
+  if (!ip->readDataBlock(fSize, data)) return true;
+  content.setImageData(data,"object/ole");
+#ifdef DEBUG_WITH_FILES
+  libstoff::Debug::dumpFile(data, content.getOleName().c_str());
+#endif
 
   if (!ip->isEnd()) {
     ascii.addPos(ip->tell());
@@ -919,12 +843,13 @@ bool STOFFOLEParser::isOle10Native(STOFFInputStreamPtr ip, std::string const &ol
   return true;
 }
 
-bool STOFFOLEParser::readOle10Native(STOFFInputStreamPtr ip,
-                                     librevenge::RVNGBinaryData &data,
-                                     libstoff::DebugFile &ascii)
+bool STOFFOLEParser::readOle10Native(STOFFInputStreamPtr ip, STOFFOLEParser::OleContent &content)
 {
   if (!isOle10Native(ip, "Ole10Native")) return false;
 
+  content.setParsed(true);
+  libstoff::DebugFile ascii(ip);
+  ascii.open(content.getOleName());
   libstoff::DebugStream f;
   f << "Entries(Ole10Native)(Header): ";
   ip->seek(0,librevenge::RVNG_SEEK_SET);
@@ -936,9 +861,13 @@ bool STOFFOLEParser::readOle10Native(STOFFInputStreamPtr ip,
   ascii.addPos(0);
   ascii.addNote(f.str().c_str());
 
-  data.clear();
+  librevenge::RVNGBinaryData data;
   ip->seek(4, librevenge::RVNG_SEEK_SET);
   if (!ip->readDataBlock(fSize, data)) return false;
+  content.setImageData(data,"object/ole");
+#ifdef DEBUG_WITH_FILES
+  libstoff::Debug::dumpFile(data, content.getOleName().c_str());
+#endif
 
   if (!ip->isEnd()) {
     ascii.addPos(ip->tell());
@@ -960,18 +889,14 @@ bool STOFFOLEParser::readOle10Native(STOFFInputStreamPtr ip,
 //        or OO/filter/sources/msfilter/msdffimp.cxx ?
 //
 ////////////////////////////////////////////////////////////////
-bool STOFFOLEParser::readContents(STOFFInputStreamPtr input,
-                                  std::string const &oleName,
-                                  librevenge::RVNGBinaryData &pict, STOFFPosition &pos,
-                                  libstoff::DebugFile &ascii)
+bool STOFFOLEParser::readContents(STOFFInputStreamPtr input, STOFFOLEParser::OleContent &content)
 {
-  pict.clear();
-  if (oleName!="Contents") return false;
+  if (content.getBaseName()!="Contents") return false;
 
+  content.setParsed(true);
+  libstoff::DebugFile ascii(input);
+  ascii.open(content.getOleName());
   libstoff::DebugStream f;
-  pos = STOFFPosition();
-  pos.setUnit(librevenge::RVNG_POINT);
-  pos.setRelativePosition(STOFFPosition::Char);
   input->seek(0, librevenge::RVNG_SEEK_SET);
   f << "Entries(Contents):";
 
@@ -1000,6 +925,9 @@ bool STOFFOLEParser::readContents(STOFFInputStreamPtr input,
     STOFF_DEBUG_MSG(("STOFFOLEParser: warning: Contents header length\n"));
     return false;
   }
+  STOFFPosition pos;
+  pos.setUnit(librevenge::RVNG_POINT);
+  pos.setRelativePosition(STOFFPosition::Char);
   if (dim[0] > 0 && dim[0] < 3000 &&
       dim[1] > 0 && dim[1] < 3000)
     pos.setSize(STOFFVec2f(float(dim[0]),float(dim[1])));
@@ -1012,6 +940,7 @@ bool STOFFOLEParser::readContents(STOFFInputStreamPtr input,
   else {
     STOFF_DEBUG_MSG(("STOFFOLEParser: warning: Contents odd naturalsize : %ld %ld\n", naturalSize[0], naturalSize[1]));
   }
+  content.setPosition(pos);
 
   long actPos = input->tell();
   long size = (long) input->readULong(4);
@@ -1034,8 +963,14 @@ bool STOFFOLEParser::readContents(STOFFInputStreamPtr input,
   input->seek(actPos+4, librevenge::RVNG_SEEK_SET);
 
   if (ok) {
-    if (input->readDataBlock(size, pict))
+    librevenge::RVNGBinaryData pict;
+    if (input->readDataBlock(size, pict)) {
+      content.setImageData(pict,"object/ole");
+#ifdef DEBUG_WITH_FILES
+      libstoff::Debug::dumpFile(pict, content.getOleName().c_str());
+#endif
       ascii.skipZone(actPos+4, actPos+size+4-1);
+    }
     else {
       input->seek(actPos+4, librevenge::RVNG_SEEK_SET);
       ok = false;
@@ -1050,7 +985,7 @@ bool STOFFOLEParser::readContents(STOFFInputStreamPtr input,
   if (!ok) {
     STOFF_DEBUG_MSG(("STOFFOLEParser: warning: read ole Contents: failed\n"));
   }
-  return ok;
+  return true;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1059,19 +994,15 @@ bool STOFFOLEParser::readContents(STOFFInputStreamPtr input,
 // we seem to contain the header of a EMF and then the EMF file
 //
 ////////////////////////////////////////////////////////////////
-bool STOFFOLEParser::readCONTENTS(STOFFInputStreamPtr input,
-                                  std::string const &oleName,
-                                  librevenge::RVNGBinaryData &pict, STOFFPosition &pos,
-                                  libstoff::DebugFile &ascii)
+bool STOFFOLEParser::readCONTENTS(STOFFInputStreamPtr input, STOFFOLEParser::OleContent &content)
 {
-  pict.clear();
-  if (oleName!="CONTENTS") return false;
+  if (content.getBaseName()!="CONTENTS") return false;
 
+  content.setParsed(true);
+  libstoff::DebugFile ascii(input);
+  ascii.open(content.getOleName());
   libstoff::DebugStream f;
 
-  pos = STOFFPosition();
-  pos.setUnit(librevenge::RVNG_POINT);
-  pos.setRelativePosition(STOFFPosition::Char);
   input->seek(0, librevenge::RVNG_SEEK_SET);
   f << "Entries(CONTMAJ):";
 
@@ -1100,6 +1031,9 @@ bool STOFFOLEParser::readCONTENTS(STOFFInputStreamPtr input,
 
   // checkme: two bdbox, in document then data : units ?
   //     Maybe first in POINT, second in TWIP ?
+  STOFFPosition pos;
+  pos.setUnit(librevenge::RVNG_POINT);
+  pos.setRelativePosition(STOFFPosition::Char);
   for (int st = 0; st < 2 ; st++) {
     long dim[4];
     for (int i = 0; i < 4; i++) dim[i] = input->readLong(4);
@@ -1111,6 +1045,7 @@ bool STOFFOLEParser::readCONTENTS(STOFFInputStreamPtr input,
     if (!ok) f << "###";
     f << "=(" << dim[0] << "x" << dim[1] << "<->" << dim[2] << "x" << dim[3] << ")";
   }
+  content.setPosition(pos);
   char dataType[5];
   for (int i = 0; i < 4; i++) dataType[i] = (char) input->readULong(1);
   dataType[4] = '\0';
@@ -1150,11 +1085,16 @@ bool STOFFOLEParser::readCONTENTS(STOFFInputStreamPtr input,
       || input->tell() != hSize+4+dataLength || !input->isEnd()) {
     STOFF_DEBUG_MSG(("STOFFOLEParser: warning: CONTENTS unexpected file length=%ld\n",
                      dataLength));
-    return false;
+    return true;
   }
 
   input->seek(4+hSize, librevenge::RVNG_SEEK_SET);
-  if (!input->readEndDataBlock(pict)) return false;
+  librevenge::RVNGBinaryData pict;
+  if (!input->readEndDataBlock(pict)) return true;
+  content.setImageData(pict,"object/ole");
+#ifdef DEBUG_WITH_FILES
+  libstoff::Debug::dumpFile(pict, content.getOleName().c_str());
+#endif
 
   ascii.skipZone(hSize+4, input->tell()-1);
   return true;

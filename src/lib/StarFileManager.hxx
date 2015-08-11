@@ -85,8 +85,6 @@ public:
 
   // other
 
-  //! try to read a "Pool" zone
-  static bool readPool(StarZone &zone);
   //! try to read a "Ole-Object" zone
   static bool readOleObject(STOFFInputStreamPtr input, std::string const &fileName);
   //! try to read the "OutPlace Object"
@@ -99,8 +97,6 @@ public:
   static bool readSfxItemList(StarZone &zone);
 
 protected:
-  //! try to read a "Pool" zone (version 1)
-  static bool readPoolV1(StarZone &zone);
 
   //
   // data

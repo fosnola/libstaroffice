@@ -68,14 +68,16 @@
 
 #include <librevenge-stream/librevenge-stream.h>
 
+#include <libstaroffice/STOFFDocument.hxx>
+
 #include "libstaroffice_internal.hxx"
-#include "STOFFInputStream.hxx"
+#include "STOFFPosition.hxx"
 
 #include "STOFFDebug.hxx"
 
 namespace STOFFOLEParserInternal
 {
-class CompObj;
+struct State;
 }
 
 /** \brief a class used to parse some basic oles
@@ -84,9 +86,10 @@ class CompObj;
 class STOFFOLEParser
 {
 public:
-  /** constructor
-      \param mainName name of the main ole, we must avoid to parse */
-  STOFFOLEParser(std::string mainName);
+  struct OleDirectory;
+
+  /** constructor */
+  STOFFOLEParser();
 
   /** destructor */
   ~STOFFOLEParser();
@@ -95,41 +98,118 @@ public:
       \return false if fileInput is not an Ole file */
   bool parse(STOFFInputStreamPtr fileInput);
 
-  //! returns the list of unknown ole
-  std::vector<std::string> const &getUnparsedOLEZones() const
-  {
-    return m_unknownOLEs;
-  }
+  //! returns the list of directory ole
+  std::vector<shared_ptr<OleDirectory> > &getDirectoryList();
+  //! returns a OleDirectory corresponding to a dir if found
+  shared_ptr<OleDirectory> getDirectory(std::string const &dir);
 
-  //! returns the list of id for which we have find a representation
-  std::vector<int> const &getObjectsId() const
-  {
-    return m_objectsId;
-  }
-  //! returns the list of data positions which have been read
-  std::vector<STOFFPosition> const &getObjectsPosition() const
-  {
-    return m_objectsPosition;
-  }
-  //! returns the list of data which have been read
-  std::vector<librevenge::RVNGBinaryData> const &getObjects() const
-  {
-    return m_objects;
-  }
-  //! returns the list of data type
-  std::vector<std::string> const &getObjectsType() const
-  {
-    return m_objectsType;
-  }
+  /** structure use to store an object content */
+  struct OleContent {
+    //! constructor
+    OleContent(std::string const &dir, std::string const &base) :
+      m_dir(dir), m_base(base), m_isParsed(false), m_position(), m_imageData(), m_imageType("")
+    {
+    }
+    //! returns the base name
+    std::string getBaseName()
+    {
+      return m_base;
+    }
+    //! returns the ole name
+    std::string getOleName() const
+    {
+      if (m_dir.empty()) return m_base;
+      return m_dir+"/"+m_base;
+    }
+    //! returns true if the object if parsed
+    bool isParsed() const
+    {
+      return m_isParsed;
+    }
+    //! sets the parsed flag
+    void setParsed(bool flag=true)
+    {
+      m_isParsed=flag;
+    }
+    //! return the image position
+    STOFFPosition const &getPosition() const
+    {
+      return m_position;
+    }
+    //! set the image position
+    void setPosition(STOFFPosition const &pos)
+    {
+      m_position=pos;
+    }
+    //! returns the image data
+    bool getImageData(librevenge::RVNGBinaryData &data, std::string &type) const
+    {
+      if (m_imageData.empty()) {
+        data.clear();
+        type="";
+        return false;
+      }
+      data=m_imageData;
+      type=m_imageType;
+      return true;
+    }
+    //! sets the image data
+    void setImageData(librevenge::RVNGBinaryData const &data, std::string const &type)
+    {
+      m_imageData=data;
+      m_imageType=type;
+    }
+  protected:
+    //! the directory
+    std::string m_dir;
+    //! the base name
+    std::string m_base;
+    //! true if the data has been parsed
+    bool m_isParsed;
+    //! the image position (if known)
+    STOFFPosition m_position;
+    //! the image content ( if known )
+    librevenge::RVNGBinaryData m_imageData;
+    //! the image type ( if known)
+    std::string m_imageType;
+  };
 
-  //! returns the picture corresponding to an id
-  bool getObject(int id, librevenge::RVNGBinaryData &obj, STOFFPosition &pos, std::string &type) const;
-
-  /*! \brief sets an object
-   * just in case, the external parsing find another representation
-   */
-  void setObject(int id, librevenge::RVNGBinaryData const &obj, STOFFPosition const &pos,
-                 std::string const &type);
+  /** Internal: internal method to keep ole directory and their content */
+  struct OleDirectory {
+    //! constructor
+    OleDirectory(std::string const &dir) : m_dir(dir), m_contentList(), m_kind(STOFFDocument::STOFF_K_UNKNOWN),
+      m_hasCompObj(false), m_clsName(""), m_clipName("") { }
+    //! add a new base file
+    void addNewBase(std::string const &base)
+    {
+      if (base=="CompObj")
+        m_hasCompObj=true;
+      else
+        m_contentList.push_back(OleContent(m_dir,base));
+    }
+    //! returns the list of unknown ole
+    std::vector<std::string> getUnparsedOles() const
+    {
+      std::vector<std::string> res;
+      for (size_t i=0; i<m_contentList.size(); ++i) {
+        if (m_contentList[i].isParsed()) continue;
+        res.push_back(m_contentList[i].getOleName());
+      }
+      return res;
+    }
+    /**the dir name*/
+    std::string m_dir;
+    /**the list of base name*/
+    std::vector<OleContent> m_contentList;
+    //! the ole kind
+    STOFFDocument::Kind m_kind;
+    /** true if the directory contains a compobj object */
+    bool m_hasCompObj;
+    /** the compobj CLSname */
+    std::string m_clsName;
+    /** the compobj clipname */
+    std::string m_clipName;
+  };
 
 protected:
   //! the summary information
@@ -143,53 +223,41 @@ protected:
   static bool readObjInfo(STOFFInputStreamPtr input, std::string const &oleName,
                           libstoff::DebugFile &ascii);
   //!  the "CompObj" contains : UserType,ClipName,ProgIdName
-  bool readCompObj(STOFFInputStreamPtr ip, std::string const &oleName,
-                   libstoff::DebugFile &ascii);
+  bool readCompObj(STOFFInputStreamPtr ip, OleDirectory &directory);
 
   /** the OlePres001 seems to contain standart picture file and size */
   static  bool isOlePres(STOFFInputStreamPtr ip, std::string const &oleName);
-  /** extracts the picture of OlePres001 if it is possible */
-  static bool readOlePres(STOFFInputStreamPtr ip, librevenge::RVNGBinaryData &data, STOFFPosition &pos,
-                          libstoff::DebugFile &ascii);
+  /** extracts the picture of OlePres001 if it is possible.
+
+   \note it only sets the image size with setNaturalSize.*/
+  static bool readOlePres(STOFFInputStreamPtr ip, OleContent &content);
 
   //! theOle10Native : basic Windows© picture, with no size
   static bool isOle10Native(STOFFInputStreamPtr ip, std::string const &oleName);
-  /** extracts the picture if it is possible */
-  static bool readOle10Native(STOFFInputStreamPtr ip, librevenge::RVNGBinaryData &data,
-                              libstoff::DebugFile &ascii);
+  /** extracts the picture if it is possible.
+
+   \note it does not set the image position*/
+  static bool readOle10Native(STOFFInputStreamPtr ip, OleContent &content);
 
   /** \brief the Contents : in general a picture : a PNG, an JPEG, a basic metafile,
    * I find also a Word art picture, which are not sucefull read
    */
-  bool readContents(STOFFInputStreamPtr input, std::string const &oleName,
-                    librevenge::RVNGBinaryData &pict, STOFFPosition &pos, libstoff::DebugFile &ascii);
+  bool readContents(STOFFInputStreamPtr input, OleContent &content);
 
   /** the CONTENTS : seems to store a header size, the header
    * and then a object in EMF (with the same header)...
    * \note I only find such lib in 2 files, so the parsing may be incomplete
    *  and many such Ole rejected
    */
-  bool readCONTENTS(STOFFInputStreamPtr input, std::string const &oleName,
-                    librevenge::RVNGBinaryData &pict, STOFFPosition &pos, libstoff::DebugFile &ascii);
+  bool readCONTENTS(STOFFInputStreamPtr input, OleContent &content);
 
+protected:
+  //
+  // data
+  //
 
-  //! if filled, does not parse content with this name
-  std::string m_avoidOLE;
-  //! list of ole which can not be parsed
-  std::vector<std::string> m_unknownOLEs;
-
-  //! list of pictures read
-  std::vector<librevenge::RVNGBinaryData> m_objects;
-  //! list of picture size ( if known)
-  std::vector<STOFFPosition> m_objectsPosition;
-  //! list of pictures id
-  std::vector<int> m_objectsId;
-  //! list of picture type
-  std::vector<std::string> m_objectsType;
-
-  //! a smart ptr used to stored the list of compobj id->name
-  shared_ptr<STOFFOLEParserInternal::CompObj> m_compObjIdName;
-
+  //! the class state
+  shared_ptr<STOFFOLEParserInternal::State> m_state;
 };
 
 #endif

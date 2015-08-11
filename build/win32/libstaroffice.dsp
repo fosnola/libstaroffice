@@ -139,6 +139,10 @@ SOURCE=..\..\src\lib\StarFileManager.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarItemPool.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarZone.cxx
 # End Source File
 # Begin Source File
@@ -224,6 +228,10 @@ SOURCE=..\..\src\lib\STOFFSubDocument.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarFileManager.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarItemPool.hxx
 # End Source File
 # Begin Source File
 

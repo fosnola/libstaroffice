@@ -45,6 +45,7 @@
 #include "SWAttributeManager.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
+#include "StarItemPool.hxx"
 #include "StarZone.hxx"
 
 #include "SDCParser.hxx"
@@ -112,11 +113,12 @@ bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &
   ascFile.addPos(0);
   ascFile.addNote(f.str().c_str());
   long pos=input->tell(), lastPos= zone.getRecordLastPosition();
-  StarFileManager fileManager;
-  if (!fileManager.readPool(zone))
+  StarItemPool pool;
+  if (!pool.read(zone))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
 
   pos=input->tell();
+  StarFileManager fileManager;
   if (pos!=lastPos && !fileManager.readJobSetUp(zone))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
 
@@ -192,6 +194,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
     long lastPos=zone.getRecordLastPosition();
+    int poolVers=1;
     while (input->tell()+6 < lastPos) {
       pos=input->tell();
       f.str("");
@@ -206,10 +209,23 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
       }
       switch (nId) {
       case 0x4211:
-      case 0x4214:
+      case 0x4214: {
         f << (nId==0x411 ? "pool" : "pool[edit]") << ",";
-        if (!fileManager.readPool(zone)) {
+        StarItemPool pool;
+        if (pool.read(zone))
+          poolVers=pool.getVersion();
+        else {
           STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: can not readPoolZone\n"));
+          f << "###";
+          input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+          break;
+        }
+        break;
+      }
+      case 0x4212:
+        f << "style[pool],";
+        if (!StarItemPool::readStyle(zone, poolVers)) {
+          STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: can not readStylePool\n"));
           f << "###";
           input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
           break;
@@ -223,6 +239,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
         break;
       }
       default:
+        STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: find unexpected tag\n"));
         input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
         f << "###";
         break;
@@ -245,17 +262,21 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
   input->seek(0, librevenge::RVNG_SEEK_SET);
   while (!input->isEnd()) {
     long pos=input->tell();
-    if (fileManager.readPool(zone))
+    StarItemPool pool;
+    if (pool.read(zone))
       continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
   if (input->isEnd()) return true;
   long pos=input->tell();
-  libstoff::DebugStream f;
-  f << "Entries(SfxStyleSheets):";
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
+  if (!StarItemPool::readStyle(zone, input->peek()==3 ? 2 : 1))
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+  if (!input->isEnd()) {
+    STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: find extra data\n"));
+    ascFile.addPos(input->tell());
+    ascFile.addNote("Entries(SfxStyleSheets):###extra");
+  }
   return true;
 }
 

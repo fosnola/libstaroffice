@@ -273,6 +273,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\StarItemPool.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\StarZone.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -342,6 +350,8 @@
 			<File RelativePath="..\..\src\lib\STOFFSubDocument.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarFileManager.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\StarItemPool.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarZone.hxx">
 			</File>

@@ -42,10 +42,11 @@
 #include "STOFFOLEParser.hxx"
 
 #include "SDCParser.hxx"
-#include "StarFileManager.hxx"
 #include "SWAttributeManager.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
+#include "StarFileManager.hxx"
+#include "StarItemPool.hxx"
 #include "StarZone.hxx"
 
 #include "SDWParser.hxx"
@@ -113,105 +114,111 @@ void SDWParser::parse(librevenge::RVNGTextInterface *docInterface)
 
 bool SDWParser::createZones()
 {
-  STOFFOLEParser oleParser("NIMP");
+  STOFFOLEParser oleParser;
   oleParser.parse(getInput());
 
   // send the final data
-  std::vector<std::string> unparsedOLEs=oleParser.getUnparsedOLEZones();
-  size_t numUnparsed = unparsedOLEs.size();
-  StarFileManager fileManager;
-  for (size_t i = 0; i < numUnparsed; i++) {
-    std::string const &name = unparsedOLEs[i];
-    STOFFInputStreamPtr ole = getInput()->getSubStreamByName(name.c_str());
-    if (!ole.get()) {
-      STOFF_DEBUG_MSG(("SDWParser::createZones: error: can not find OLE part: \"%s\"\n", name.c_str()));
-      continue;
-    }
+  std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > listDir=oleParser.getDirectoryList();
+  for (size_t d=0; d<listDir.size(); ++d) {
+    if (!listDir[d]) continue;
+    STOFFOLEParser::OleDirectory &direc=*listDir[d];
+    std::vector<std::string> unparsedOLEs=direc.getUnparsedOles();
+    size_t numUnparsed = unparsedOLEs.size();
+    StarFileManager fileManager;
+    for (size_t i = 0; i < numUnparsed; i++) {
+      std::string const &name = unparsedOLEs[i];
+      STOFFInputStreamPtr ole = getInput()->getSubStreamByName(name.c_str());
+      if (!ole.get()) {
+        STOFF_DEBUG_MSG(("SDWParser::createZones: error: can not find OLE part: \"%s\"\n", name.c_str()));
+        continue;
+      }
 
-    std::string::size_type pos = name.find_last_of('/');
-    std::string dir(""), base;
-    if (pos == std::string::npos) base = name;
-    else if (pos == 0) base = name.substr(1);
-    else {
-      dir = name.substr(0,pos);
-      base = name.substr(pos+1);
-    }
+      std::string::size_type pos = name.find_last_of('/');
+      std::string dir(""), base;
+      if (pos == std::string::npos) base = name;
+      else if (pos == 0) base = name.substr(1);
+      else {
+        dir = name.substr(0,pos);
+        base = name.substr(pos+1);
+      }
 
-    ole->setReadInverted(true);
-    if (base=="SwNumRules") {
-      readSwNumRuleList(ole, name);
-      continue;
-    }
-    if (base=="SwPageStyleSheets") {
-      readSwPageStyleSheets(ole,name);
-      continue;
-    }
-    if (base=="StarChartDocument") {
-      SDCParser sdcParser;
-      sdcParser.readChartDocument(ole,name);
-      continue;
-    }
-    if (base=="SfxStyleSheets") {
-      SDCParser sdcParser;
-      sdcParser.readSfxStyleSheets(ole,name);
-      continue;
-    }
-    if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
-      librevenge::RVNGBinaryData data;
-      fileManager.readImageDocument(ole,data,name);
-      continue;
-    }
-    if (base=="StarMathDocument") {
-      fileManager.readMathDocument(ole,name);
-      continue;
-    }
-    if (base=="StarWriterDocument") {
-      readWriterDocument(ole,name);
-      continue;
-    }
-    if (base.compare(0,3,"Pic")==0) {
-      librevenge::RVNGBinaryData data;
-      fileManager.readEmbeddedPicture(ole,data,name);
-      continue;
-    }
-    // other
-    if (base=="Ole-Object") {
-      fileManager.readOleObject(ole,name);
-      continue;
-    }
-    else if (base=="VCPool") {
-      StarZone zone(ole, name, "VCPool");
-      zone.ascii().open(name);
-      ole->seek(0, librevenge::RVNG_SEEK_SET);
-      fileManager.readPool(zone);
-      continue;
-    }
-    libstoff::DebugFile asciiFile(ole);
-    asciiFile.open(name);
+      ole->setReadInverted(true);
+      if (base=="SwNumRules") {
+        readSwNumRuleList(ole, name);
+        continue;
+      }
+      if (base=="SwPageStyleSheets") {
+        readSwPageStyleSheets(ole,name);
+        continue;
+      }
+      if (base=="StarChartDocument") {
+        SDCParser sdcParser;
+        sdcParser.readChartDocument(ole,name);
+        continue;
+      }
+      if (base=="SfxStyleSheets") {
+        SDCParser sdcParser;
+        sdcParser.readSfxStyleSheets(ole,name);
+        continue;
+      }
+      if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
+        librevenge::RVNGBinaryData data;
+        fileManager.readImageDocument(ole,data,name);
+        continue;
+      }
+      if (base=="StarMathDocument") {
+        fileManager.readMathDocument(ole,name);
+        continue;
+      }
+      if (base=="StarWriterDocument") {
+        readWriterDocument(ole,name);
+        continue;
+      }
+      if (base.compare(0,3,"Pic")==0) {
+        librevenge::RVNGBinaryData data;
+        fileManager.readEmbeddedPicture(ole,data,name);
+        continue;
+      }
+      // other
+      if (base=="Ole-Object") {
+        fileManager.readOleObject(ole,name);
+        continue;
+      }
+      else if (base=="VCPool") {
+        StarZone zone(ole, name, "VCPool");
+        zone.ascii().open(name);
+        ole->seek(0, librevenge::RVNG_SEEK_SET);
+        StarItemPool pool;
+        pool.read(zone);
+        continue;
+      }
+      libstoff::DebugFile asciiFile(ole);
+      asciiFile.open(name);
 
-    bool ok=false;
-    if (base=="persist elements")
-      ok=fileManager.readPersistElements(ole, asciiFile);
-    else if (base=="SfxDocumentInfo")
-      ok=fileManager.readSfxDocumentInformation(ole, asciiFile);
-    // TODO SfxPreview: GetPreviewMetaFile()
-    else if (base=="SfxWindows")
-      ok=fileManager.readSfxWindows(ole, asciiFile);
-    else if (base=="Star Framework Config File")
-      ok=fileManager.readStarFrameworkConfigFile(ole, asciiFile);
-    // other
-    else if (base=="OutPlace Object")
-      ok=fileManager.readOutPlaceObject(ole, asciiFile);
-    if (!ok) {
-      libstoff::DebugStream f;
-      if (base=="Standard") // can be Standard or STANDARD
-        f << "Entries(STANDARD):";
-      else
-        f << "Entries(" << base << "):";
-      asciiFile.addPos(0);
-      asciiFile.addNote(f.str().c_str());
+      bool ok=false;
+      if (base=="persist elements")
+        ok=fileManager.readPersistElements(ole, asciiFile);
+      else if (base=="SfxDocumentInfo")
+        ok=fileManager.readSfxDocumentInformation(ole, asciiFile);
+      // TODO SfxPreview: GetPreviewMetaFile()
+      else if (base=="SfxWindows")
+        ok=fileManager.readSfxWindows(ole, asciiFile);
+      else if (base=="Star Framework Config File")
+        ok=fileManager.readStarFrameworkConfigFile(ole, asciiFile);
+      // other
+      else if (base=="OutPlace Object")
+        ok=fileManager.readOutPlaceObject(ole, asciiFile);
+      if (!ok) {
+        libstoff::DebugStream f;
+        if (base=="Standard") // can be Standard or STANDARD
+          f << "Entries(STANDARD):";
+        else
+          f << "Entries(" << base << "):";
+        asciiFile.addPos(0);
+        asciiFile.addNote(f.str().c_str());
+      }
+      asciiFile.reset();
     }
-    asciiFile.reset();
   }
   return false;
 }

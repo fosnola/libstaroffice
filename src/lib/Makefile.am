@@ -43,6 +43,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFSubDocument.hxx			\
 	StarFileManager.cxx			\
 	StarFileManager.hxx			\
+	StarItemPool.cxx			\
+	StarItemPool.hxx			\
 	StarZone.cxx				\
 	StarZone.hxx				\
 	SWAttributeManager.cxx			\
