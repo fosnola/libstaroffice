@@ -265,6 +265,22 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\StarAttribute.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File RelativePath="..\..\src\lib\StarDocument.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\StarFileManager.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -282,14 +298,6 @@
 				</FileConfiguration>
 			</File>
 			<File RelativePath="..\..\src\lib\StarZone.cxx">
-				<FileConfiguration Name="Release|Win32">
-					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
-				</FileConfiguration>
-				<FileConfiguration Name="Debug|Win32">
-					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File RelativePath="..\..\src\lib\SWAttributeManager.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
 				</FileConfiguration>
@@ -349,13 +357,15 @@
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFSubDocument.hxx">
 			</File>
+			<File RelativePath="..\..\src\lib\StarAttribute.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\StarDocument.hxx">
+			</File>
 			<File RelativePath="..\..\src\lib\StarFileManager.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarItemPool.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarZone.hxx">
-			</File>
-			<File RelativePath="..\..\src\lib\SWAttributeManager.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\SWFieldManager.hxx">
 			</File>

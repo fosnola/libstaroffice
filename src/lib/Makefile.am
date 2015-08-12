@@ -41,14 +41,16 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFSpreadsheetDecoder.hxx		\
 	STOFFSubDocument.cxx			\
 	STOFFSubDocument.hxx			\
+	StarAttribute.cxx			\
+	StarAttribute.hxx			\
+	StarDocument.cxx			\
+	StarDocument.hxx			\
 	StarFileManager.cxx			\
 	StarFileManager.hxx			\
 	StarItemPool.cxx			\
 	StarItemPool.hxx			\
 	StarZone.cxx				\
 	StarZone.hxx				\
-	SWAttributeManager.cxx			\
-	SWAttributeManager.hxx			\
 	SWFieldManager.cxx			\
 	SWFieldManager.hxx			\
 	SWFormatManager.cxx			\

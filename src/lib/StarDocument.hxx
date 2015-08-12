@@ -32,51 +32,75 @@
 */
 
 /*
- * AttributeManager to read/parse SW StarOffice attributes
+ * class to parse/store the main ole document
  *
  */
-#ifndef SW_ATTRIBUTEMANAGER
-#  define SW_ATTRIBUTEMANAGER
+#ifndef STAR_DOCUMENT
+#  define STAR_DOCUMENT
 
 #include <vector>
+#include <stack>
+#include <libstaroffice/STOFFDocument.hxx>
 
 #include "STOFFDebug.hxx"
-#include "STOFFEntry.hxx"
-#include "STOFFInputStream.hxx"
+#include "STOFFOLEParser.hxx"
 
-namespace SWAttributeManagerInternal
+namespace StarDocumentInternal
 {
 struct State;
 }
 
-class StarZone;
-class SDWParser;
+class StarItemPool;
 
-/** \brief the main class to read/.. a StarOffice sdw attribute
+/** \brief a main ole in a StarOffice file
  *
  *
  *
  */
-class SWAttributeManager
+class StarDocument
 {
 public:
   //! constructor
-  SWAttributeManager();
+  StarDocument(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory);
   //! destructor
-  virtual ~SWAttributeManager();
+  virtual ~StarDocument();
 
+  //
+  // basic
+  //
 
-  //! try to read a attribute: 'A'
-  bool readAttribute(StarZone &zone, SDWParser &manager);
-  //! try to read a attribute list: 'S'
-  bool readAttributeList(StarZone &zone, SDWParser &manager);
+  //! try to parse data
+  bool parse();
+  //! returns a new item pool for this document
+  shared_ptr<StarItemPool> getNewItemPool();
+protected:
+  //!  the "persist elements" small ole: the list of object
+  bool readPersistElements(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
+  //! try to read the document information : "SfxDocumentInformation"
+  bool readSfxDocumentInformation(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
+  //! try to read the windows information : "SfxWindows"
+  bool readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
+  //! try to read the "Star Framework Config File"
+  bool readStarFrameworkConfigFile(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
 
   //
   // data
   //
-private:
+
+  //! the input
+  STOFFInputStreamPtr m_input;
+  //! the main ole parser
+  shared_ptr<STOFFOLEParser> m_oleParser;
+  //! the directory
+  shared_ptr<STOFFOLEParser::OleDirectory> m_directory;
+
   //! the state
-  shared_ptr<SWAttributeManagerInternal::State> m_state;
+  shared_ptr<StarDocumentInternal::State> m_state;
+
+private:
+  StarDocument(StarDocument const &orig);
+  StarDocument &operator=(StarDocument const &orig);
 };
+
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

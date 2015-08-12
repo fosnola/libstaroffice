@@ -42,9 +42,10 @@
 #include "STOFFOLEParser.hxx"
 
 #include "StarFileManager.hxx"
-#include "SWAttributeManager.hxx"
+#include "StarAttribute.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
+#include "StarDocument.hxx"
 #include "StarItemPool.hxx"
 #include "StarZone.hxx"
 
@@ -84,7 +85,7 @@ SDCParser::~SDCParser()
 ////////////////////////////////////////////////////////////
 // main zone
 ////////////////////////////////////////////////////////////
-bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &name)
+bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
 {
   StarZone zone(input, name, "SWChartDocument");
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -113,8 +114,8 @@ bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &
   ascFile.addPos(0);
   ascFile.addNote(f.str().c_str());
   long pos=input->tell(), lastPos= zone.getRecordLastPosition();
-  StarItemPool pool;
-  if (!pool.read(zone))
+  shared_ptr<StarItemPool> pool=document.getNewItemPool();
+  if (!pool || !pool->read(zone))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
 
   pos=input->tell();
@@ -170,7 +171,7 @@ bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &
   return true;
 }
 
-bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name)
+bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
 {
   StarZone zone(input, name, "SfxStyleSheets");
   input->seek(0, librevenge::RVNG_SEEK_SET);
@@ -211,9 +212,9 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
       case 0x4211:
       case 0x4214: {
         f << (nId==0x411 ? "pool" : "pool[edit]") << ",";
-        StarItemPool pool;
-        if (pool.read(zone))
-          poolVers=pool.getVersion();
+        shared_ptr<StarItemPool> pool=document.getNewItemPool();
+        if (pool && pool->read(zone))
+          poolVers=pool->getVersion();
         else {
           STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: can not readPoolZone\n"));
           f << "###";
@@ -262,8 +263,8 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
   input->seek(0, librevenge::RVNG_SEEK_SET);
   while (!input->isEnd()) {
     long pos=input->tell();
-    StarItemPool pool;
-    if (pool.read(zone))
+    shared_ptr<StarItemPool> pool=document.getNewItemPool();
+    if (pool && pool->read(zone))
       continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;

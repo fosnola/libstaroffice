@@ -66,15 +66,6 @@ public:
 
   //! low level
 
-  //!  the "persist elements" small ole: the list of object
-  static bool readPersistElements(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
-  //! try to read the document information : "SfxDocumentInformation"
-  static bool readSfxDocumentInformation(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
-  //! try to read the windows information : "SfxWindows"
-  static bool readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
-  //! try to read the "Star Framework Config File"
-  static bool readStarFrameworkConfigFile(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
-
   //! try to read a image zone: "StarImageDocument" or "StarImageDocument 4.0
   static bool readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName);
   //! try to read a math zone: "StarMathDocument" (v 3 or v4) .sdf

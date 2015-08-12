@@ -40,6 +40,8 @@
 
 #include <vector>
 
+#include <libstaroffice/STOFFDocument.hxx>
+
 #include "STOFFDebug.hxx"
 #include "STOFFEntry.hxx"
 #include "STOFFInputStream.hxx"
@@ -60,7 +62,7 @@ class StarItemPool
 {
 public:
   //! constructor
-  StarItemPool();
+  StarItemPool(STOFFDocument::Kind kind);
   //! destructor
   virtual ~StarItemPool();
 

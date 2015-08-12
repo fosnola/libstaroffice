@@ -51,9 +51,10 @@ namespace SDWParserInternal
 struct State;
 }
 
-class SWAttributeManager;
+class StarAttribute;
+class SWFormatManager;
 class StarZone;
-
+class STOFFOLEParser;
 /** \brief the main class to read a StarOffice sdw file
  *
  *
@@ -61,7 +62,8 @@ class StarZone;
  */
 class SDWParser : public STOFFTextParser
 {
-  friend class SWAttributeManager;
+  friend class StarAttribute;
+  friend class SWFormatManager;
 public:
   //! constructor
   SDWParser(STOFFInputStreamPtr input, STOFFHeader *header);
@@ -74,6 +76,8 @@ public:
   // the main parse function
   void parse(librevenge::RVNGTextInterface *documentInterface);
 
+  //! try to read a image map zone : 'X'
+  static bool readSWImageMap(StarZone &zone);
 protected:
   //! inits all internal variables
   void init();
@@ -97,6 +101,10 @@ protected:
   bool readWriterDocument(STOFFInputStreamPtr input, std::string const &fileName);
 
 protected:
+  //! try to read an attribute: 'A'
+  bool readSWAttribute(StarZone &zone);
+  //! try to read a attribute list: 'S'
+  bool readSWAttributeList(StarZone &zone);
   //! try a list of bookmark field : 'a'
   bool readSWBookmarkList(StarZone &zone);
   //! try to read some content : 'N'
@@ -111,8 +119,6 @@ protected:
   bool readSWFootNoteInfo(StarZone &zone);
   //! try to read a OLE node : 'g'
   bool readSWGraphNode(StarZone &zone);
-  //! try to read a image map zone : 'X'
-  bool readSWImageMap(StarZone &zone);
   //! try to read a SW zone setup : 'J'
   bool readSWJobSetUp(StarZone &zone);
   //! try to read a layout information zone : 'Y'
@@ -149,6 +155,8 @@ protected:
   // data
   //
 
+  //! the ole parser
+  shared_ptr<STOFFOLEParser> m_oleParser;
   //! the state
   shared_ptr<SDWParserInternal::State> m_state;
 };

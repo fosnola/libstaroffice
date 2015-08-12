@@ -42,9 +42,10 @@
 #include "STOFFOLEParser.hxx"
 
 #include "SDCParser.hxx"
-#include "SWAttributeManager.hxx"
+#include "StarAttribute.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
+#include "StarDocument.hxx"
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarZone.hxx"
@@ -71,7 +72,7 @@ struct State {
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
 SDWParser::SDWParser(STOFFInputStreamPtr input, STOFFHeader *header) :
-  STOFFTextParser(input, header), m_state()
+  STOFFTextParser(input, header),  m_oleParser(), m_state()
 {
   init();
 }
@@ -114,15 +115,18 @@ void SDWParser::parse(librevenge::RVNGTextInterface *docInterface)
 
 bool SDWParser::createZones()
 {
-  STOFFOLEParser oleParser;
-  oleParser.parse(getInput());
+  m_oleParser.reset(new STOFFOLEParser);
+  m_oleParser->parse(getInput());
 
   // send the final data
-  std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > listDir=oleParser.getDirectoryList();
+  std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > listDir=m_oleParser->getDirectoryList();
   for (size_t d=0; d<listDir.size(); ++d) {
     if (!listDir[d]) continue;
-    STOFFOLEParser::OleDirectory &direc=*listDir[d];
-    std::vector<std::string> unparsedOLEs=direc.getUnparsedOles();
+    StarDocument document(getInput(), m_oleParser, listDir[d]);
+    // Ole-Object has persist elements, so...
+    if (listDir[d]->m_hasCompObj) document.parse();
+    STOFFOLEParser::OleDirectory &direct=*listDir[d];
+    std::vector<std::string> unparsedOLEs=direct.getUnparsedOles();
     size_t numUnparsed = unparsedOLEs.size();
     StarFileManager fileManager;
     for (size_t i = 0; i < numUnparsed; i++) {
@@ -141,7 +145,6 @@ bool SDWParser::createZones()
         dir = name.substr(0,pos);
         base = name.substr(pos+1);
       }
-
       ole->setReadInverted(true);
       if (base=="SwNumRules") {
         readSwNumRuleList(ole, name);
@@ -153,12 +156,12 @@ bool SDWParser::createZones()
       }
       if (base=="StarChartDocument") {
         SDCParser sdcParser;
-        sdcParser.readChartDocument(ole,name);
+        sdcParser.readChartDocument(ole,name,document);
         continue;
       }
       if (base=="SfxStyleSheets") {
         SDCParser sdcParser;
-        sdcParser.readSfxStyleSheets(ole,name);
+        sdcParser.readSfxStyleSheets(ole,name,document);
         continue;
       }
       if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
@@ -184,29 +187,11 @@ bool SDWParser::createZones()
         fileManager.readOleObject(ole,name);
         continue;
       }
-      else if (base=="VCPool") {
-        StarZone zone(ole, name, "VCPool");
-        zone.ascii().open(name);
-        ole->seek(0, librevenge::RVNG_SEEK_SET);
-        StarItemPool pool;
-        pool.read(zone);
-        continue;
-      }
       libstoff::DebugFile asciiFile(ole);
       asciiFile.open(name);
 
       bool ok=false;
-      if (base=="persist elements")
-        ok=fileManager.readPersistElements(ole, asciiFile);
-      else if (base=="SfxDocumentInfo")
-        ok=fileManager.readSfxDocumentInformation(ole, asciiFile);
-      // TODO SfxPreview: GetPreviewMetaFile()
-      else if (base=="SfxWindows")
-        ok=fileManager.readSfxWindows(ole, asciiFile);
-      else if (base=="Star Framework Config File")
-        ok=fileManager.readStarFrameworkConfigFile(ole, asciiFile);
-      // other
-      else if (base=="OutPlace Object")
+      if (base=="OutPlace Object")
         ok=fileManager.readOutPlaceObject(ole, asciiFile);
       if (!ok) {
         libstoff::DebugStream f;
@@ -417,11 +402,10 @@ bool SDWParser::readSWPageDef(StarZone &zone)
   long lastPos=zone.getRecordLastPosition();
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  SWAttributeManager attributeManager;
   while (input->tell() < lastPos) {
     pos=input->tell();
     int rType=input->peek();
-    if (rType=='S' && attributeManager.readAttributeList(zone, *this))
+    if (rType=='S' && readSWAttributeList(zone))
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -465,6 +449,80 @@ bool SDWParser::readSWPageDef(StarZone &zone)
     zone.closeSWRecord(type, "SWPageDef");
   }
   zone.closeSWRecord('p', "SWPageDef");
+  return true;
+}
+
+bool SDWParser::readSWAttribute(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  char type;
+  long pos=input->tell();
+  if (input->peek()!='A' || !zone.openSWRecord(type)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+
+  // sw_sw3fmts.cxx InAttr
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[SW-" << zone.getRecordLevel() << "]:";
+  int fl=zone.openFlagZone();
+  uint16_t nWhich, nVers, nBegin=0xFFFF, nEnd=0xFFFF;
+  *input >> nWhich >> nVers;
+  if (fl&0x10) *input >> nBegin;
+  if (fl&0x20) *input >> nEnd;
+
+  int which=(int) nWhich;
+  if (which>0x6001 && zone.getDocumentVersion()!=0x0219) // bug correction 0x95500
+    which+=15;
+  if (which>=0x1000 && which<=0x1024) which+=-0x1000+(int) StarAttribute::ATR_CHR_CASEMAP;
+  else if (which>=0x2000 && which<=0x2009) which+=-0x2000+(int) StarAttribute::ATR_TXT_INETFMT;
+  else if (which>=0x3000 && which<=0x3006) which+=-0x3000+(int) StarAttribute::ATR_TXT_FIELD;
+  else if (which>=0x4000 && which<=0x4013) which+=-0x4000+(int) StarAttribute::ATR_PARA_LINESPACING;
+  else if (which>=0x5000 && which<=0x5022) which+=-0x5000+(int) StarAttribute::ATR_FRM_FILL_ORDER;
+  else if (which>=0x6000 && which<=0x6013) which+=-0x6000+(int) StarAttribute::ATR_GRF_MIRRORGRF;
+  else {
+    STOFF_DEBUG_MSG(("SDWParser::readSWAttribute: find unexpected which value\n"));
+    which=-1;
+    f << "###";
+  }
+  f << "wh=" << which << "[" << std::hex << nWhich << std::dec << "],";
+  if (nVers) f << "nVers=" << nVers << ",";
+  if (nBegin!=0xFFFF) f << "nBgin=" << nBegin << ",";
+  if (nEnd!=0xFFFF) f << "nEnd=" << nEnd << ",";
+  zone.closeFlagZone();
+
+  StarAttribute attribute;
+  if (which<=0 || !attribute.readAttribute(zone, which, int(nVers), zone.getRecordLastPosition(), *this))
+    f << "###";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  zone.closeSWRecord('A', "StarAttribute");
+  return true;
+}
+
+bool SDWParser::readSWAttributeList(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  char type;
+  long pos=input->tell();
+  if (input->peek()!='S' || !zone.openSWRecord(type)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[SWList-" << zone.getRecordLevel() << "]:";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  while (input->tell() < zone.getRecordLastPosition()) { // normally only 2
+    pos=input->tell();
+    if (readSWAttribute(zone) && input->tell()>pos) continue;
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    break;
+  }
+  zone.closeSWRecord('S', "StarAttribute");
   return true;
 }
 
@@ -928,7 +986,6 @@ bool SDWParser::readSWGraphNode(StarZone &zone)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   long lastPos=zone.getRecordLastPosition();
-  SWAttributeManager attributeManager;
   while (input->tell() < lastPos) {
     pos=input->tell();
     bool done=false;
@@ -936,7 +993,7 @@ bool SDWParser::readSWGraphNode(StarZone &zone)
 
     switch (rType) {
     case 'S':
-      done=attributeManager.readAttributeList(zone, *this);
+      done=readSWAttributeList(zone);
       break;
     case 'X':
       done=readSWImageMap(zone);
@@ -1679,7 +1736,6 @@ bool SDWParser::readSWTextZone(StarZone &zone)
   ascFile.addNote(f.str().c_str());
 
   long lastPos=zone.getRecordLastPosition();
-  SWAttributeManager attributeManager;
   SWFormatManager formatManager;
   while (input->tell()<lastPos) {
     pos=input->tell();
@@ -1689,13 +1745,13 @@ bool SDWParser::readSWTextZone(StarZone &zone)
 
     switch (rType) {
     case 'A':
-      done=attributeManager.readAttribute(zone, *this);
+      done=readSWAttribute(zone);
       break;
     case 'R':
       done=readSWNumRule(zone,'R');
       break;
     case 'S':
-      done=attributeManager.readAttributeList(zone, *this);
+      done=readSWAttributeList(zone);
       break;
     case 'l': // related to link
     case 'o': // format: safe to ignore

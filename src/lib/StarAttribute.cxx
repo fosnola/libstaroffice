@@ -44,13 +44,13 @@
 #include "SWFormatManager.hxx"
 #include "StarZone.hxx"
 
-#include "SWAttributeManager.hxx"
+#include "StarAttribute.hxx"
 
-/** Internal: the structures of a SWAttributeManager */
-namespace SWAttributeManagerInternal
+/** Internal: the structures of a StarAttribute */
+namespace StarAttributeInternal
 {
 ////////////////////////////////////////
-//! Internal: the state of a SWAttributeManager
+//! Internal: the state of a StarAttribute
 struct State {
   //! constructor
   State()
@@ -63,52 +63,32 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SWAttributeManager::SWAttributeManager() : m_state(new SWAttributeManagerInternal::State)
+StarAttribute::StarAttribute() : m_state(new StarAttributeInternal::State)
 {
 }
 
-SWAttributeManager::~SWAttributeManager()
+StarAttribute::~StarAttribute()
 {
 }
 
-bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
+bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long lastPos, SDWParser &manager)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='A' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-
-  // sw_sw3fmts.cxx InAttr
   libstoff::DebugStream f;
-  f << "Entries(SWAttributeDef)[" << zone.getRecordLevel() << "]:";
-  int fl=zone.openFlagZone();
-  uint16_t nWhich, nVers, nBegin=0xFFFF, nEnd=0xFFFF;
-  *input >> nWhich >> nVers;
-  if (fl&0x10) *input >> nBegin;
-  if (fl&0x20) *input >> nEnd;
-  if (nWhich>0x6001 && zone.getDocumentVersion()!=0x0219) // bug correction 0x95500
-    nWhich=uint16_t(nWhich+15);
-  f << "wh=" << std::hex << nWhich << std::dec << ",";
-  if (nVers) f << "nVers=" << nVers << ",";
-  if (nBegin!=0xFFFF) f << "nBgin=" << nBegin << ",";
-  if (nEnd!=0xFFFF) f << "nEnd=" << nEnd << ",";
-  zone.closeFlagZone();
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
 
-  long lastPos=zone.getRecordLastPosition();
+  long pos=input->tell();
   int val;
   switch (nWhich) {
-  case 0x1000: // no data
+  case ATR_CHR_CASEMAP: // no data
     f << "chrAtrCaseMap,";
     break;
-  case 0x1001: {
+  case ATR_CHR_CHARSETCOLOR: {
     f << "chrAtrCharSetColor=" << input->readULong(1) << ",";
     STOFFColor color;
     if (!input->readColor(color)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find a color\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find a color\n"));
       f << "###aColor,";
       break;
     }
@@ -116,11 +96,11 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
       f << color << ",";
     break;
   }
-  case 0x1002: {
+  case ATR_CHR_COLOR: {
     f << "chrAtrColor,";
     STOFFColor color;
     if (!input->readColor(color)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find a color\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find a color\n"));
       f << "###aColor,";
       break;
     }
@@ -128,22 +108,22 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
       f << color << ",";
     break;
   }
-  case 0x1003:
+  case ATR_CHR_CONTOUR:
     f << "chrAtrContour=" << input->readULong(1) << ",";
     break;
-  case 0x1004:
+  case ATR_CHR_CROSSEDOUT:
     f << "chrAtrCrossedOut=" << input->readULong(1) << ",";
     break;
-  case 0x1005:
+  case ATR_CHR_ESCAPEMENT:
     f << "chrAtrEscapement=" << input->readULong(1) << ",";
     f << "nEsc=" << input->readLong(2) << ",";
     break;
-  case 0x1006:
-  case 0x1015:
-  case 0x101a: {
-    if (nWhich==0x1006)
+  case ATR_CHR_FONT:
+  case ATR_CHR_CJK_FONT:
+  case ATR_CHR_CTL_FONT: {
+    if (nWhich==ATR_CHR_FONT)
       f << "chrAtrFont,";
-    else if (nWhich==0x1015)
+    else if (nWhich==ATR_CHR_CJK_FONT)
       f << "chrAtrCJKFont,";
     else
       f << "chrAtrCTLFont,";
@@ -153,14 +133,14 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     f << "eTextEncoding=" << encoding << ",";
     librevenge::RVNGString fName, string;
     if (!zone.readString(fName)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the name\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the name\n"));
       f << "###aName,";
       break;
     }
     if (!fName.empty())
       f << "aName=" << fName.cstr() << ",";
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the style\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the style\n"));
       f << "###aStyle,";
       break;
     }
@@ -170,14 +150,14 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
       if (input->readULong(4)==0xFE331188) {
         // reread data in unicode
         if (!zone.readString(fName)) {
-          STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the name\n"));
+          STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the name\n"));
           f << "###aName,";
           break;
         }
         if (!fName.empty())
           f << "aNameUni=" << fName.cstr() << ",";
         if (!zone.readString(string)) {
-          STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the style\n"));
+          STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the style\n"));
           f << "###aStyle,";
           break;
         }
@@ -188,12 +168,12 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     }
     break;
   }
-  case 0x1007:
-  case 0x1016:
-  case 0x101b:
-    if (nWhich==0x1007)
+  case ATR_CHR_FONTSIZE:
+  case ATR_CHR_CJK_FONTSIZE:
+  case ATR_CHR_CTL_FONTSIZE:
+    if (nWhich==ATR_CHR_FONTSIZE)
       f << "chrAtrFontSize,";
-    else if (nWhich==0x1016)
+    else if (nWhich==ATR_CHR_CJK_FONTSIZE)
       f << "chrAtrCJKFontSize,";
     else
       f << "chrAtrCTLFontSize,";
@@ -201,65 +181,65 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     f << "nProp=" << input->readULong((nVers>=1) ? 2 : 1) << ",";
     if (nVers>=2) f << "nPropUnit=" << input->readULong(2) << ",";
     break;
-  case 0x1008:
+  case ATR_CHR_KERNING:
     f << "chrAtrKerning=" << input->readULong(1) << ",";
     break;
-  case 0x1009:
-  case 0x1017:
-  case 0x101c:
-    f << (nWhich==0x1009 ? "chrAtrLanguage": nWhich==0x1017 ? "chrAtrCJKLanguage" : "chrAtrCTLLanguage");
+  case ATR_CHR_LANGUAGE:
+  case ATR_CHR_CJK_LANGUAGE:
+  case ATR_CHR_CTL_LANGUAGE:
+    f << (nWhich==ATR_CHR_LANGUAGE ? "chrAtrLanguage": nWhich==ATR_CHR_CJK_LANGUAGE ? "chrAtrCJKLanguage" : "chrAtrCTLLanguage");
     f << "=" << input->readULong(2) << ",";
     break;
-  case 0x100a:
-  case 0x1018:
-  case 0x101d:
-    f << (nWhich==0x100a ? "chrAtrPosture": nWhich==0x1018 ? "chrAtrCJKPosture" : "chrAtrCTLPosture");
+  case ATR_CHR_POSTURE:
+  case ATR_CHR_CJK_POSTURE:
+  case ATR_CHR_CTL_POSTURE:
+    f << (nWhich==ATR_CHR_POSTURE ? "chrAtrPosture": nWhich==ATR_CHR_CJK_POSTURE ? "chrAtrCJKPosture" : "chrAtrCTLPosture");
     f << "=" << input->readULong(1) << ",";
     break;
-  case 0x100b:
+  case ATR_CHR_PROPORTIONALFONTSIZE:
     f << "chrAtrProportionFontSize,";
     f << "size=" << input->readULong(2) << ",";
     break;
-  case 0x100c:
+  case ATR_CHR_SHADOWED:
     f << "chrAtrShadowed=" << input->readULong(1) << ",";
     break;
-  case 0x100d:
+  case ATR_CHR_UNDERLINE:
     f << "chrAtrUnderline=" << input->readULong(1) << ",";
     break;
-  case 0x100e:
-  case 0x1019:
-  case 0x101e:
-    f << (nWhich==0x100e ? "chrAtrWeight" : nWhich==0x1019 ? "chrAtrCJKWeight" : "chrAtrCTLWeight");
+  case ATR_CHR_WEIGHT:
+  case ATR_CHR_CJK_WEIGHT:
+  case ATR_CHR_CTL_WEIGHT:
+    f << (nWhich==ATR_CHR_WEIGHT ? "chrAtrWeight" : nWhich==ATR_CHR_CJK_WEIGHT ? "chrAtrCJKWeight" : "chrAtrCTLWeight");
     f << "=" << input->readULong(1) << ",";
     break;
-  case 0x100f:
+  case ATR_CHR_WORDLINEMODE:
     f << "chrAtrWordlineMode=" << input->readULong(1) << ",";
     break;
-  case 0x1010:
+  case ATR_CHR_AUTOKERN:
     f << "chrAtrAutoKern=" << input->readULong(1) << ",";
     break;
-  case 0x1011:
+  case ATR_CHR_BLINK:
     f << "chrAtrBlink=" << input->readULong(1) << ",";
     break;
-  case 0x1012:
+  case ATR_CHR_NOHYPHEN:
     f << "chrAtrNoHyphen=" << input->readULong(1) << ",";
     break;
-  case 0x1013:
+  case ATR_CHR_NOLINEBREAK:
     f << "chrAtrNoLineBreak=" << input->readULong(1) << ",";
     break;
-  case 0x1014:
-  case 0x5011: {
-    f << (nWhich==0x1014 ? "chrAtrBackground" : "background") << "=" << input->readULong(1) << ",";
+  case ATR_CHR_BACKGROUND:
+  case ATR_FRM_BACKGROUND: {
+    f << (nWhich==ATR_CHR_BACKGROUND ? "chrAtrBackground" : "background") << "=" << input->readULong(1) << ",";
     STOFFColor color;
     if (!input->readColor(color)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not read color\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read color\n"));
       f << "###color,";
       break;
     }
     else if (!color.isWhite())
       f << "color=" << color << ",";
     if (!input->readColor(color)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not read fill color\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read fill color\n"));
       f << "###fillcolor,";
       break;
     }
@@ -269,14 +249,14 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     if (nVers<1) break;
     int doLoad=(int) input->readULong(2);
     if (doLoad & 1) { // TODO: svx_frmitems.cxx:1948
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: do not know how to load graphic\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: do not know how to load graphic\n"));
       f << "###graphic,";
       break;
     }
     if (doLoad & 2) {
       librevenge::RVNGString link;
       if (!zone.readString(link)) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the link\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the link\n"));
         f << "###link,";
         break;
       }
@@ -286,7 +266,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     if (doLoad & 4) {
       librevenge::RVNGString filter;
       if (!zone.readString(filter)) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the filter\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the filter\n"));
         f << "###filter,";
         break;
       }
@@ -296,48 +276,48 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     f << "nPos=" << input->readULong(1) << ",";
     break;
   }
-  case 0x101f:
+  case ATR_CHR_ROTATE:
     f << "chrAtrRotate,";
     f << "nVal=" << input->readULong(2) << ",";
     f << "b=" << input->readULong(1) << ",";
     break;
-  case 0x1020:
+  case ATR_CHR_EMPHASIS_MARK:
     f << "chrAtrEmphasisMark=" << input->readULong(2) << ",";
     break;
-  case 0x1021: { // checkme
+  case ATR_CHR_TWO_LINES: { // checkme
     f << "chrAtrTwoLines=" << input->readULong(1) << ",";
     f << "nStart[unicode]=" << input->readULong(2) << ",";
     f << "nEnd[unicode]=" << input->readULong(2) << ",";
     break;
   }
-  case 0x1022:
+  case ATR_CHR_SCALEW:
     f << "chrAtrScaleW=" << input->readULong(2);
     if (input->tell()<lastPos) {
       f << "nVal=" << input->readULong(2) << ",";
       f << "test=" << input->readULong(2) << ",";
     }
     break;
-  case 0x1023:
+  case ATR_CHR_RELIEF:
     f << "chrAtrRelief=" << input->readULong(2);
     break;
-  case 0x1024: // ok no data
+  case ATR_CHR_DUMMY1: // ok no data
     f << "chrAtrDummy1,";
     break;
 
   // text attribute
-  case 0x2000: {
+  case ATR_TXT_INETFMT: {
     f << "textAtrInetFmt,";
     // SwFmtINetFmt::Create
     librevenge::RVNGString string;
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find string\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find string\n"));
       f << "###url,";
       break;
     }
     if (!string.empty())
       f << "url=" << string.cstr() << ",";
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find string\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find string\n"));
       f << "###targert,";
       break;
     }
@@ -350,14 +330,14 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     f << "libMac=[";
     for (int i=0; i<nCnt; ++i) {
       if (input->tell()>lastPos) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not read a libmac name\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a libmac name\n"));
         f << "###libname,";
         ok=false;
         break;
       }
       if (!zone.readString(string)) {
         f << "###string,";
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
         ok=false;
         break;
       }
@@ -365,7 +345,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
         f << string.cstr() << ":";
       if (!zone.readString(string)) {
         f << "###string,";
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
         ok=false;
         break;
       }
@@ -377,7 +357,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     if (!ok) break;
     if (nVers>=1) {
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find string\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find string\n"));
         f << "###aName1,";
         break;
       }
@@ -390,20 +370,20 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
       for (int i=0; i<nCnt; ++i) {
         f << "nCurKey=" << input->readULong(2) << ",";
         if (input->tell()>lastPos) {
-          STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not read a libmac name\n"));
+          STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a libmac name\n"));
           f << "###libname2,";
           break;
         }
         if (!zone.readString(string)) {
           f << "###string,";
-          STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not read a string\n"));
+          STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
           break;
         }
         else if (!string.empty())
           f << string.cstr() << ":";
         if (!zone.readString(string)) {
           f << "###string,";
-          STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not read a string\n"));
+          STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
           break;
         }
         else if (!string.empty())
@@ -414,14 +394,14 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     }
     break;
   }
-  case 0x2001: // ok no data
+  case ATR_TXT_DUMMY4: // ok no data
     f << "textAtrDummy4,";
     break;
-  case 0x2002: {
+  case ATR_TXT_REFMARK: {
     f << "textAtrRefMark,";
     librevenge::RVNGString string;
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find aName\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find aName\n"));
       f << "###aName,";
       break;
     }
@@ -429,7 +409,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
       f << "aName=" << string.cstr() << ",";
     break;
   }
-  case 0x2003: {
+  case ATR_TXT_TOXMARK: {
     f << "textAtrToXMark,";
     int cType=(int) input->readULong(1);
     f << "cType=" << cType << ",";
@@ -438,7 +418,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     int nStringId=0xFFFF;
     if (nVers<1) {
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find aTypeName\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find aTypeName\n"));
         f << "###aTypeName,";
         break;
       }
@@ -451,21 +431,21 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
         f << "nStringId=" << nStringId << ",";
     }
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find aAltText\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find aAltText\n"));
       f << "###aAltText,";
       break;
     }
     if (!string.empty())
       f << "aAltText=" << string.cstr() << ",";
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find aPrimKey\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find aPrimKey\n"));
       f << "###aPrimKey,";
       break;
     }
     if (!string.empty())
       f << "aPrimKey=" << string.cstr() << ",";
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find aSecKey\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find aSecKey\n"));
       f << "###aSecKey,";
       break;
     }
@@ -481,7 +461,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     }
     if (nVers>=1 && nStringId!=0xFFFF) {
       if (!zone.getPoolName(nStringId, string)) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find a nId name\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find a nId name\n"));
         f << "###nId=" << nStringId << ",";
       }
       else
@@ -489,34 +469,34 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     }
     break;
   }
-  case 0x2004:
+  case ATR_TXT_CHARFMT:
     f << "textAtrCharFmt=" << input->readULong(2) << ",";
     break;
-  case 0x2005: // ok no data
+  case ATR_TXT_DUMMY5: // ok no data
     f << "textAtrDummy5,";
     break;
-  case 0x2006:
+  case ATR_TXT_CJK_RUBY:
     f << "textAtrCJKRuby=" << input->readULong(1) << ",";
     break;
-  case 0x2007:
+  case ATR_TXT_UNKNOWN_CONTAINER:
     f << "textAtrUnknownContainer,";
     // call SfxPoolItem::Create which does nothing
     break;
-  case 0x2008: // ok no data
+  case ATR_TXT_DUMMY6: // ok no data
     f << "textAtrDummy6,";
     break;
-  case 0x2009: // ok no data
+  case ATR_TXT_DUMMY7: // ok no data
     f << "textAtrDummy7,";
     break;
 
   // field...
-  case 0x3000: {
+  case ATR_TXT_FIELD: {
     f << "textAtrField,";
     SWFieldManager fieldManager;
     fieldManager.readField(zone);
     break;
   }
-  case 0x3001: {
+  case ATR_TXT_FLYCNT: {
     f << "textAtrFlycnt,";
     SWFormatManager formatManager;
     if (input->peek()=='o')
@@ -525,13 +505,13 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
       formatManager.readSWFormatDef(zone,'l', manager);
     break;
   }
-  case 0x3002: {
+  case ATR_TXT_FTN: {
     f << "textAtrFtn,";
     // sw_sw3npool.cxx SwFmtFtn::Create
     f << "number1=" << input->readULong(2) << ",";
     librevenge::RVNGString string;
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the aNumber\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the aNumber\n"));
       f << "###aNumber,";
       break;
     }
@@ -539,7 +519,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
       f << "aNumber=" << string.cstr() << ",";
     // no sure, find this attribute once with a content here, so ...
     if (!manager.readSWContent(zone)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the content\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the content\n"));
       f << "###aContent,";
       break;
     }
@@ -555,21 +535,21 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     }
     break;
   }
-  case 0x3003: // ok no data
+  case ATR_TXT_SOFTHYPH: // ok no data
     f << "textAtrSoftHyph,";
     break;
-  case 0x3004: // ok no data
+  case ATR_TXT_HARDBLANK: // ok no data
     f << "textAtrHardBlank,";
     break;
-  case 0x3005: // ok no data
+  case ATR_TXT_DUMMY1: // ok no data
     f << "textAtrDummy1,";
     break;
-  case 0x3006: // ok no data
+  case ATR_TXT_DUMMY2: // ok no data
     f << "textAtrDummy2,";
     break;
 
   // paragraph attribute
-  case 0x4000:
+  case ATR_PARA_LINESPACING:
     f << "parAtrLineSpacing,";
     f << "nPropSpace=" << input->readLong(1) << ",";
     f << "nInterSpace=" << input->readLong(2) << ",";
@@ -577,26 +557,26 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     f << "nRule=" << input->readULong(1) << ",";
     f << "nInterRule=" << input->readULong(1) << ",";
     break;
-  case 0x4001:
+  case ATR_PARA_ADJUST:
     f << "parAtrAdjust=" << input->readULong(1) << ",";
     if (nVers>=1) f << "nFlags=" << input->readULong(1) << ",";
     break;
-  case 0x4002:
+  case ATR_PARA_SPLIT:
     f << "parAtrSplit=" << input->readULong(1) << ",";
     break;
-  case 0x4003:
+  case ATR_PARA_ORPHANS:
     f << "parAtrOrphans,";
     f << "nLines="  << input->readLong(1) << ",";
     break;
-  case 0x4004:
+  case ATR_PARA_WIDOWS:
     f << "parAtrWidows,";
     f << "nLines="  << input->readLong(1) << ",";
     break;
-  case 0x4005: {
+  case ATR_PARA_TABSTOP: {
     f << "parAtrTabStop,";
     int N=(int) input->readULong(1);
     if (input->tell()+7*N>lastPos) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: N is too big\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: N is too big\n"));
       f << "###N=" << N << ",";
       N=int(lastPos-input->tell())/7;
     }
@@ -608,14 +588,14 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     f << "],";
     break;
   }
-  case 0x4006:
+  case ATR_PARA_HYPHENZONE:
     f << "parAtrHyphenZone=" << input->readLong(1) << ",";
     f << "bHyphenPageEnd=" << input->readLong(1) << ",";
     f << "nMinLead=" << input->readLong(1) << ",";
     f << "nMinTail=" << input->readLong(1) << ",";
     f << "nMaxHyphen=" << input->readLong(1) << ",";
     break;
-  case 0x4007:
+  case ATR_PARA_DROP:
     f << "parAtrDrop,";
     f << "nFmt=" << input->readULong(2) << ",";
     f << "nLines1=" << input->readULong(2) << ",";
@@ -628,14 +608,14 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
       f << "nY=" << input->readULong(2) << ",";
     }
     break;
-  case 0x4008:
+  case ATR_PARA_REGISTER:
     f << "parAtrRegister=" << input->readULong(1) << ",";
     break;
-  case 0x4009: {
+  case ATR_PARA_NUMRULE: {
     f << "parAtrNumRule,";
     librevenge::RVNGString string;
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the sTmp\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the sTmp\n"));
       f << "###sTmp,";
       break;
     }
@@ -645,42 +625,42 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
       f << "nPoolId=" << input->readULong(2) << ",";
     break;
   }
-  case 0x400a:
+  case ATR_PARA_SCRIPTSPACE:
     f << "parAtrScriptSpace=" << input->readULong(1) << ",";
     break;
-  case 0x400b:
+  case ATR_PARA_HANGINGPUNCTUATION:
     f << "parAtrHangingPunctuation=" << input->readULong(1) << ",";
     break;
-  case 0x400c:
+  case ATR_PARA_FORBIDDEN_RULES:
     f << "parAtrForbiddenRules=" << input->readULong(1) << ",";
     break;
-  case 0x400d:
+  case ATR_PARA_VERTALIGN:
     f << "parAtrVertAlign=" << input->readULong(2) << ",";
     break;
-  case 0x400e:
+  case ATR_PARA_SNAPTOGRID:
     f << "parAtrSnapToGrid=" << input->readULong(1) << ",";
     break;
-  case 0x400f:
+  case ATR_PARA_CONNECT_BORDER:
     f << "parAtrConnectBorder=" << input->readULong(1) << ",";
     break;
-  case 0x4010: // no data
+  case ATR_PARA_DUMMY5: // no data
     f << "parAtrDummy5,";
     break;
-  case 0x4011: // no data
+  case ATR_PARA_DUMMY6: // no data
     f << "parAtrDummy6,";
     break;
-  case 0x4012: // no data
+  case ATR_PARA_DUMMY7: // no data
     f << "parAtrDummy7,";
     break;
-  case 0x4013: // no data
+  case ATR_PARA_DUMMY8: // no data
     f << "parAtrDummy8,";
     break;
 
   // frame parameter
-  case 0x5000:
+  case ATR_FRM_FILL_ORDER:
     f << "fillOrder=" << input->readULong(1) << ",";
     break;
-  case 0x5001:
+  case ATR_FRM_FRM_SIZE:
     f << "frmSize,";
     f << "sizeType=" << input->readULong(1) << ",";
     f << "width=" << input->readULong(4) << ",";
@@ -688,10 +668,10 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     if (nVers>1)
       f << "percent=" << input->readULong(1) << "x"  << input->readULong(1) << ",";
     break;
-  case 0x5002:
+  case ATR_FRM_PAPER_BIN:
     f << "paperBin=" << input->readULong(1) << ",";
     break;
-  case 0x5003:
+  case ATR_FRM_LR_SPACE:
     f << "lrSpace,";
     f << "left=" << input->readULong(2);
     val=(int) input->readULong(nVers>=1 ? 2 : 1);
@@ -717,7 +697,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
         input->seek(-4, librevenge::RVNG_SEEK_CUR);
     }
     break;
-  case 0x5004:
+  case ATR_FRM_UL_SPACE:
     f << "ulSpace,";
     f << "upper=" << input->readULong(2);
     val=(int) input->readULong(nVers==1 ? 2 : 1);
@@ -728,7 +708,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     if (val) f << ":" << val;
     f << ",";
     break;
-  case 0x5005:
+  case ATR_FRM_PAGEDESC:
     f << "pageDesc,";
     if (nVers<1)
       f << "bAutor=" << input->readULong(1) << ",";
@@ -737,7 +717,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     else {
       unsigned long nOff;
       if (!input->readCompressedULong(nOff)) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not read nOff\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read nOff\n"));
         f << "###nOff,";
         break;
       }
@@ -745,24 +725,24 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     }
     f << "nIdx=" << input->readULong(2) << ",";
     break;
-  case 0x5006:
+  case ATR_FRM_BREAK:
     f << "pageBreak=" << input->readULong(1) << ",";
     if (nVers<1) input->seek(1, librevenge::RVNG_SEEK_CUR); // dummy
     break;
-  case 0x5007: // checkme
+  case ATR_FRM_CNTNT: // checkme
     f << "pageCntnt,";
     while (input->tell()<lastPos) {
       long actPos=input->tell();
       if (input->peek()!='N' || !manager.readSWContent(zone) || input->tell()<=actPos) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: find unknown pageCntnt child\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: find unknown pageCntnt child\n"));
         f << "###child";
         break;
       }
     }
     break;
-  case 0x5008:
-  case 0x5009: {
-    f << (nWhich==0x5008 ? "header" : "footer") << ",";
+  case ATR_FRM_HEADER:
+  case ATR_FRM_FOOTER: {
+    f << (nWhich==ATR_FRM_HEADER ? "header" : "footer") << ",";
     f << "active=" << input->readULong(1) << ",";
     long actPos=input->tell();
     if (actPos==lastPos)
@@ -771,42 +751,42 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     formatManager.readSWFormatDef(zone,'r',manager);
     break;
   }
-  case 0x500a:
+  case ATR_FRM_PRINT:
     f << "print=" << input->readULong(1) << ",";
     break;
-  case 0x500b:
+  case ATR_FRM_OPAQUE:
     f << "opaque=" << input->readULong(1) << ",";
     break;
-  case 0x500c:
+  case ATR_FRM_PROTECT:
     f << "protect,";
     val=(int) input->readULong(1);
     if (val&1) f << "pos[protect],";
     if (val&2) f << "size[protect],";
     if (val&4) f << "cntnt[protect],";
     break;
-  case 0x500d:
+  case ATR_FRM_SURROUND:
     f << "surround=" << input->readULong(1) << ",";
     if (nVers<5) f << "bGold=" << input->readULong(1) << ",";
     if (nVers>1) f << "bAnch=" << input->readULong(1) << ",";
     if (nVers>2) f << "bCont=" << input->readULong(1) << ",";
     if (nVers>3) f << "bOutside1=" << input->readULong(1) << ",";
     break;
-  case 0x500e:
-  case 0x500f:
-    f << (nWhich==0x500e ? "vertOrient" : "horiOrient") << ",";
+  case ATR_FRM_VERT_ORIENT:
+  case ATR_FRM_HORI_ORIENT:
+    f << (nWhich==ATR_FRM_VERT_ORIENT ? "vertOrient" : "horiOrient") << ",";
     f << "nPos=" << input->readULong(4) << ",";
     f << "nOrient=" << input->readULong(1) << ",";
     f << "nRel=" << input->readULong(1) << ",";
-    if (nWhich==0x500f && nVers>=1) f << "bToggle=" << input->readULong(1) << ",";
+    if (nWhich==ATR_FRM_HORI_ORIENT && nVers>=1) f << "bToggle=" << input->readULong(1) << ",";
     break;
-  case 0x5010:
+  case ATR_FRM_ANCHOR:
     f << "anchor=" << input->readULong(1) << ",";
     if (nVers<1)
       f << "nId=" << input->readULong(2) << ",";
     else {
       unsigned long nId;
       if (!input->readCompressedULong(nId)) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not read nId\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read nId\n"));
         f << "###nId,";
         break;
       }
@@ -814,8 +794,8 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
         f << "nId=" << nId << ",";
     }
     break;
-  // 5011 see case 0x1014
-  case 0x5012: {
+  // ATR_FRM_BACKGROUND see case ATR_CHR_BACKGROUND
+  case ATR_FRM_BOX: {
     f << "box,";
     f << "nDist=" << input->readULong(2) << ",";
     int cLine=0;
@@ -826,7 +806,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
       f << "[";
       STOFFColor color;
       if (!input->readColor(color)) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find a box's color\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find a box's color\n"));
         f << "###color,";
         ok=false;
         break;
@@ -846,21 +826,21 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     }
     break;
   }
-  case 0x5013: {
+  case ATR_FRM_SHADOW: {
     f << "shadow,";
     f << "cLoc=" << input->readULong(1) << ",";
     f << "nWidth=" << input->readULong(2) << ",";
     f << "bTrans=" << input->readULong(1) << ",";
     STOFFColor color;
     if (!input->readColor(color)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not read color\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read color\n"));
       f << "###color,";
       break;
     }
     else if (!color.isWhite())
       f << "color=" << color << ",";
     if (!input->readColor(color)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not read fill color\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read fill color\n"));
       f << "###fillcolor,";
       break;
     }
@@ -869,7 +849,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     f << "style=" << input->readULong(1) << ",";
     break;
   }
-  case 0x5014: { // macitem.cxx SvxMacroTableDtor::Read
+  case ATR_FRM_FRMMACRO: { // macitem.cxx SvxMacroTableDtor::Read
     f << "frmMacro,";
     if (nVers>=1) {
       nVers=(uint16_t) input->readULong(2);
@@ -887,7 +867,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
       for (int j=0; j<2; ++j) {
         librevenge::RVNGString text;
         if (!zone.readString(text)) {
-          STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find a macro string\n"));
+          STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find a macro string\n"));
           f << "###string" << j << ",";
           ok=false;
           break;
@@ -905,7 +885,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     f << "],";
     break;
   }
-  case 0x5015: {
+  case ATR_FRM_COL: {
     f << "col,";
     f << "nLineAdj=" << input->readULong(1) << ",";
     f << "bOrtho=" << input->readULong(1) << ",";
@@ -923,7 +903,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     if (nWishWidth==0)
       break;
     if (input->tell()+10*nCol>lastPos) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: nCol is bad\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: nCol is bad\n"));
       f << "###N,";
       break;
     }
@@ -940,17 +920,17 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     f << "],";
     break;
   }
-  case 0x5016:
+  case ATR_FRM_KEEP:
     f << "keep=" << input->readULong(1) << ",";
     break;
-  case 0x5017:
+  case ATR_FRM_URL:
     f << "url,";
-    if (!manager.readSWImageMap(zone))
+    if (!SDWParser::readSWImageMap(zone))
       break;
     if (nVers>=1) {
       librevenge::RVNGString text;
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the setName\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the setName\n"));
         f << "###name1,";
         break;
       }
@@ -958,43 +938,43 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
         f << "name1=" << text.cstr() << ",";
     }
     break;
-  case 0x5018:
+  case ATR_FRM_EDIT_IN_READONLY:
     f << "editInReadOnly=" << input->readULong(1) << ",";
     break;
-  case 0x5019:
+  case ATR_FRM_LAYOUT_SPLIT:
     f << "layoutSplit=" << input->readULong(1) << ",";
     break;
-  case 0x501a:
+  case ATR_FRM_CHAIN:
     f << "chain,";
     if (nVers>0) {
       f << "prevIdx=" << input->readULong(2) << ",";
       f << "nextIdx=" << input->readULong(2) << ",";
     }
     break;
-  case 0x501b:
+  case ATR_FRM_TEXTGRID:
     f << "textgrid=" << input->readULong(1) << ",";
     break;
-  case 0x501c:
+  case ATR_FRM_LINENUMBER:
     f << "lineNumber,";
     f << "start=" << input->readULong(4) << ",";
     f << "count[lines]=" << input->readULong(1) << ",";
     break;
-  case 0x501d:
-  case 0x501e:
-    f << (nWhich==0x501d ? "ftnAtTextEnd" : "ednAtTextEnd") << "=" << input->readULong(1) << ",";
+  case ATR_FRM_FTN_AT_TXTEND:
+  case ATR_FRM_END_AT_TXTEND:
+    f << (nWhich==ATR_FRM_FTN_AT_TXTEND ? "ftnAtTextEnd" : "ednAtTextEnd") << "=" << input->readULong(1) << ",";
     if (nVers>0) {
       f << "offset=" << input->readULong(2) << ",";
       f << "fmtType=" << input->readULong(2) << ",";
       librevenge::RVNGString text;
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the prefix\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the prefix\n"));
         f << "###prefix,";
         break;
       }
       else if (!text.empty())
         f << "prefix=" << text.cstr() << ",";
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the suffix\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the suffix\n"));
         f << "###suffix,";
         break;
       }
@@ -1002,24 +982,24 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
         f << "suffix=" << text.cstr() << ",";
     }
     break;
-  case 0x501f:
+  case ATR_FRM_COLUMNBALANCE:
     f << "columnBalance=" << input->readULong(1) << ",";
     break;
-  case 0x5020:
+  case ATR_FRM_FRAMEDIR:
     f << "frameDir=" << input->readULong(2) << ",";
     break;
-  case 0x5021:
+  case ATR_FRM_HEADER_FOOTER_EAT_SPACING:
     f << "headerFooterEatSpacing=" << input->readULong(1) << ",";
     break;
-  case 0x5022: // ok, no data
+  case ATR_FRM_FRMATR_DUMMY9: // ok, no data
     f << "frmAtrDummy9,";
     break;
   // graphic attribute
-  case 0x6000:
+  case ATR_GRF_MIRRORGRF:
     f << "grfMirrorGrf=" << input->readULong(1) << ",";
     if (nVers>0) f << "nToggle=" << input->readULong(1) << ",";
     break;
-  case 0x6001:
+  case ATR_GRF_CROPGRF:
     f << "grfCropGrf,";
     f << "top=" << input->readLong(4) << ",";
     f << "left=" << input->readLong(4) << ",";
@@ -1027,61 +1007,61 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     f << "bottom=" << input->readLong(4) << ",";
     break;
   // no saved ?
-  case 0x6002:
+  case ATR_GRF_ROTATION:
     f << "grfRotation,";
     break;
-  case 0x6003:
+  case ATR_GRF_LUMINANCE:
     f << "grfLuminance,";
     break;
-  case 0x6004:
+  case ATR_GRF_CONTRAST:
     f << "grfContrast,";
     break;
-  case 0x6005:
+  case ATR_GRF_CHANNELR:
     f << "grfChannelR,";
     break;
-  case 0x6006:
+  case ATR_GRF_CHANNELG:
     f << "grfChannelG,";
     break;
-  case 0x6007:
+  case ATR_GRF_CHANNELB:
     f << "grfChannelB,";
     break;
-  case 0x6008:
+  case ATR_GRF_GAMMA:
     f << "grfGamma,";
     break;
-  case 0x6009:
+  case ATR_GRF_INVERT:
     f << "grfInvert,";
     break;
-  case 0x600a:
+  case ATR_GRF_TRANSPARENCY:
     f << "grfTransparency,";
     break;
-  case 0x600b:
+  case ATR_GRF_DRAWMODE:
     f << "grfDrawMode,";
     break;
-  case 0x600c: // ok no data
+  case ATR_GRF_DUMMY1: // ok no data
     f << "grfDummy1,";
     break;
-  case 0x600d: // ok no data
+  case ATR_GRF_DUMMY2: // ok no data
     f << "grfDummy2,";
     break;
-  case 0x600e: // ok no data
+  case ATR_GRF_DUMMY3: // ok no data
     f << "grfDummy3,";
     break;
-  case 0x600f: // ok no data
+  case ATR_GRF_DUMMY4: // ok no data
     f << "grfDummy4,";
     break;
-  case 0x6010: // ok no data
+  case ATR_GRF_DUMMY5: // ok no data
     f << "grfDummy5,";
     break;
 
-  case 0x6011:
+  case ATR_BOX_FORMAT:
     f << "boxFormat=" << input->readULong(1) << ",";
     f << "nTmp=" << input->readULong(4) << ",";
     break;
-  case 0x6012: {
+  case ATR_BOX_FORMULA: {
     f << "boxFormula,";
     librevenge::RVNGString text;
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the formula\n"));
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the formula\n"));
       f << "###formula,";
       break;
     }
@@ -1089,12 +1069,12 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
       f << "formula=" << text.cstr() << ",";
     break;
   }
-  case 0x6013:
+  case ATR_BOX_VALUE:
     f << "boxAtrValue,";
     if (nVers==0) {
       librevenge::RVNGString text;
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not find the dValue\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the dValue\n"));
         f << "###dValue,";
         break;
       }
@@ -1105,7 +1085,7 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
       double res;
       bool isNan;
       if (!input->readDoubleReverted8(res, isNan)) {
-        STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: can not read a double\n"));
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a double\n"));
         f << "##value,";
       }
       else if (res<0||res>0)
@@ -1114,39 +1094,18 @@ bool SWAttributeManager::readAttribute(StarZone &zone, SDWParser &manager)
     break;
 
   default:
-    STOFF_DEBUG_MSG(("SWAttributeManager::readAttribute: reading not format attribute is not implemented\n"));
-    f << "#unimplemented,";
+    STOFF_DEBUG_MSG(("StarAttribute::readAttribute: reading not format attribute is not implemented\n"));
+    f << "#unimplemented[wh=" << std::hex << nWhich << std::dec << ",";
+  }
+  if (input->tell()!=lastPos) {
+    STOFF_DEBUG_MSG(("StarAttribute::readAttribute: find extra data\n"));
+    f << "###extra,";
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  zone.closeSWRecord('A', "SWAttributeDef");
   return true;
 
-}
-
-bool SWAttributeManager::readAttributeList(StarZone &zone, SDWParser &manager)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='S' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  libstoff::DebugStream f;
-  f << "Entries(SWAttributeList)[" << zone.getRecordLevel() << "]:";
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-
-  while (input->tell() < zone.getRecordLastPosition()) { // normally only 2
-    pos=input->tell();
-    if (readAttribute(zone, manager) && input->tell()>pos) continue;
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    break;
-  }
-  zone.closeSWRecord('S', "SWAttributeList");
-  return true;
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

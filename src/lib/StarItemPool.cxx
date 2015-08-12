@@ -285,9 +285,40 @@ struct Version {
 //! Internal: the state of a StarItemPool
 struct State {
   //! constructor
-  State() : m_majorVersion(0), m_minorVersion(0), m_loadingVersion(0), m_name(""),
-    m_currentVersion(0), m_verStart(100/*ATTR_STARTINDEX*/), m_verEnd(183/*ATTR_ENDINDEX*/), m_versionList()
+  State(STOFFDocument::Kind kind) : m_kind(kind), m_majorVersion(0), m_minorVersion(0), m_loadingVersion(0), m_name(""),
+    m_currentVersion(0), m_verStart(100/**/), m_verEnd(183/*ATTR_ENDINDEX*/), m_versionList()
   {
+    switch (m_kind) {
+    case STOFFDocument::STOFF_K_CHART:
+      // sch_sch_itempool.cxx
+      m_verStart=1; // SCHATTR_START
+      m_verEnd=58;
+      // user from 100 SCHATTR_NONPERSISTENT_START
+      break;
+    case STOFFDocument::STOFF_K_SPREADSHEET:
+      // sc_docpool.cxx
+      m_verStart=100; // ATTR_STARTINDEX
+      m_verEnd=183; // ATTR_ENDINDEX
+      break;
+    case STOFFDocument::STOFF_K_TEXT:
+      // SwAttrPool::SwAttrPool set default map
+      m_verStart=1; //POOLATTR_BEGIN
+      m_verEnd=130; //POOLATTR_END-1
+      break;
+    case STOFFDocument::STOFF_K_BITMAP: // normally none
+    case STOFFDocument::STOFF_K_MATH: // normally none
+      m_verStart=m_verEnd=0;
+      break;
+    case STOFFDocument::STOFF_K_DATABASE: // checkme
+    case STOFFDocument::STOFF_K_DRAW: // checkme
+    case STOFFDocument::STOFF_K_PRESENTATION: // checkme
+
+    case STOFFDocument::STOFF_K_UNKNOWN:
+    default:
+      m_verStart=0;
+      m_verEnd=83;
+      break;
+    }
   }
   //! returns true if the value is in expected range
   int isInRange(int which) const
@@ -344,6 +375,8 @@ struct State {
     }
     return nFileWhich;
   }
+  //! the document kind
+  STOFFDocument::Kind m_kind;
   //! the majorVersion
   int m_majorVersion;
   //! the minorVersion
@@ -370,7 +403,7 @@ private:
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarItemPool::StarItemPool() : m_state(new StarItemPoolInternal::State)
+StarItemPool::StarItemPool(STOFFDocument::Kind kind) : m_state(new StarItemPoolInternal::State(kind))
 {
 }
 
@@ -386,7 +419,8 @@ int StarItemPool::getVersion() const
 bool StarItemPool::read(StarZone &zone)
 {
   // reinit all
-  m_state.reset(new StarItemPoolInternal::State);
+  STOFFDocument::Kind kind=m_state->m_kind;
+  m_state.reset(new StarItemPoolInternal::State(kind));
 
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascii=zone.ascii();
@@ -561,23 +595,54 @@ bool StarItemPool::read(StarZone &zone)
       int which=nWhich;
       if (m_state->m_currentVersion!=m_state->m_loadingVersion) which=m_state->getWhich(which);
       if (!m_state->isInRange(which)) {
-        if (which<100)
-          f << "##";
-        else {
-          STOFF_DEBUG_MSG(("StarItemPool::read: the which value seems bad\n"));
-          f << "###";
-        }
+        STOFF_DEBUG_MSG(("StarItemPool::read: the which value seems bad\n"));
+        f << "###";
       }
-      f << "wh=" << which << ", vers=" << nVersion << ", count=" << nCount << ",";
+      f << "wh=" << which-m_state->m_verStart << ", vers=" << nVersion << ", count=" << nCount << ",";
       static bool first=true;
       if (first) {
         STOFF_DEBUG_MSG(("StarItemPool::read: reading attribute is not implemented\n"));
         first=false;
       }
-      f << "##";
-      input->seek(mRecord.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
+      pos=input->tell();
+      if (step==0) {
+        StarItemPoolInternal::SfxMultiRecord mRecord1;
+        f.str("");
+        f << "Entries(SfxAttribute):";
+        if (!mRecord1.open(zone)) {
+          STOFF_DEBUG_MSG(("StarItemPool::read: can not open record1\n"));
+          f << "###record1";
+          ascii.addPos(pos);
+          ascii.addNote(f.str().c_str());
+        }
+        else {
+          f << mRecord1;
+          ascii.addPos(pos);
+          ascii.addNote(f.str().c_str());
+          while (mRecord1.getNewContent("SfxAttribute")) {
+            pos=input->tell();
+            f.str("");
+            f << "SfxAttribute[" <<  which-m_state->m_verStart << "]:";
+            uint16_t nRef;
+            *input>>nRef;
+            f << "ref=" << nRef << ",";
+            ascii.addDelimiter(input->tell(),'|');
+            ascii.addPos(pos);
+            ascii.addNote(f.str().c_str());
+            input->seek(mRecord1.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
+          }
+          mRecord1.close("SfxAttribute");
+        }
+      }
+      else {
+        f.str("");
+        f << "Entries(SfxAttribute)[" <<  which-m_state->m_verStart << "]:";
+        ascii.addPos(pos);
+        ascii.addNote(f.str().c_str());
+      }
+      input->seek(mRecord.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
     }
     mRecord.close("PoolDef");
   }

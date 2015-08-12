@@ -51,7 +51,8 @@ namespace SDCParserInternal
 struct State;
 }
 
-class SWAttributeManager;
+class StarAttribute;
+class StarDocument;
 class StarZone;
 
 /** \brief the main class to read a StarOffice sdc file
@@ -68,9 +69,9 @@ public:
   virtual ~SDCParser();
 
   //! try to read a chart zone: StarChartDocument .sds
-  bool readChartDocument(STOFFInputStreamPtr input, std::string const &fileName);
+  bool readChartDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &document);
   //! try to read a spreadshet style zone: SfxStyleSheets
-  bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
+  bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &document);
 
 protected:
   //

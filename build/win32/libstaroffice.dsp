@@ -135,6 +135,14 @@ SOURCE=..\..\src\lib\STOFFSubDocument.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarAttribute.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarDocument.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarFileManager.cxx
 # End Source File
 # Begin Source File
@@ -144,10 +152,6 @@ SOURCE=..\..\src\lib\StarItemPool.cxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarZone.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\SWAttributeManager.cxx
 # End Source File
 # Begin Source File
 
@@ -227,6 +231,14 @@ SOURCE=..\..\src\lib\STOFFSubDocument.hxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarAttribute.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarDocument.hxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarFileManager.hxx
 # End Source File
 # Begin Source File
@@ -236,10 +248,6 @@ SOURCE=..\..\src\lib\StarItemPool.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarZone.hxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\SWAttributeManager.hxx
 # End Source File
 # Begin Source File
 

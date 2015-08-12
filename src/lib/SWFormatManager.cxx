@@ -39,9 +39,9 @@
 
 #include <librevenge/librevenge.h>
 
+#include "SDWParser.hxx"
 #include "StarZone.hxx"
 
-#include "SWAttributeManager.hxx"
 #include "SWFormatManager.hxx"
 
 /** Internal: the structures of a SWFormatManager */
@@ -129,11 +129,10 @@ bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, SDWParser &mana
   ascFile.addNote(f.str().c_str());
 
   long lastPos=zone.getRecordLastPosition();
-  SWAttributeManager attributeManager;
   while (input->tell()<lastPos) {
     pos=(int) input->tell();
     int rType=input->peek();
-    if (rType=='S' && attributeManager.readAttributeList(zone, manager))
+    if (rType=='S' && manager.readSWAttributeList(zone))
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
