@@ -122,7 +122,7 @@ bool SDWParser::createZones()
   std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > listDir=m_oleParser->getDirectoryList();
   for (size_t d=0; d<listDir.size(); ++d) {
     if (!listDir[d]) continue;
-    StarDocument document(getInput(), m_oleParser, listDir[d]);
+    StarDocument document(getInput(), m_oleParser, listDir[d], this);
     // Ole-Object has persist elements, so...
     if (listDir[d]->m_hasCompObj) document.parse();
     STOFFOLEParser::OleDirectory &direct=*listDir[d];

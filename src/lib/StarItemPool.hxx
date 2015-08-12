@@ -51,6 +51,7 @@ namespace StarItemPoolInternal
 struct State;
 }
 
+class StarDocument;
 class StarZone;
 
 /** \brief the main class to read/.. some basic StarOffice SfxItemItemPool itemPools
@@ -62,7 +63,7 @@ class StarItemPool
 {
 public:
   //! constructor
-  StarItemPool(STOFFDocument::Kind kind);
+  StarItemPool(StarDocument &document);
   //! destructor
   virtual ~StarItemPool();
 
@@ -76,6 +77,9 @@ public:
 protected:
   //! try to read a "ItemPool" zone (version 1)
   bool readV1(StarZone &zone);
+
+  //! try to read an attribute
+  bool readAttribute(StarZone &zone, int which, int vers, long endPos);
 
   //
   // data

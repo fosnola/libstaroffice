@@ -101,7 +101,7 @@ struct SfxMultiRecord {
     std::stringstream s;
     if (m_headerType==2) {
       // fixed size
-      if (m_startPos+m_numRecord*m_contentSize > m_endPos) {
+      if (m_startPos+long(m_numRecord)*long(m_contentSize) > m_endPos) {
         STOFF_DEBUG_MSG(("StarFileManagerInternal::SfxMultiRecord::open: oops the number of record seems bad\n"));
         s << "##numRecord=" << m_numRecord << ",";
         if (m_contentSize && m_endPos>m_startPos)

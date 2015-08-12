@@ -49,24 +49,44 @@ namespace StarDocumentInternal
 {
 //! the state of a StarDocument
 struct State {
+  //! constructor
+  State() : m_sdwParser(0)
+  {
+  }
+  //! the sdw parser REMOVEME
+  SDWParser *m_sdwParser;
+private:
+  State(State const &orig);
+  State operator=(State const &orig);
 };
 }
 
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarDocument::StarDocument(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory) :
+StarDocument::StarDocument(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *sdwParser) :
   m_input(input), m_oleParser(oleParser), m_directory(directory), m_state(new StarDocumentInternal::State)
 {
+  m_state->m_sdwParser=sdwParser;
 }
 
 StarDocument::~StarDocument()
 {
 }
 
+STOFFDocument::Kind StarDocument::getDocumentKind() const
+{
+  return m_directory ? m_directory->m_kind : STOFFDocument::STOFF_K_UNKNOWN;
+}
+
 shared_ptr<StarItemPool> StarDocument::getNewItemPool()
 {
-  return shared_ptr<StarItemPool>(new StarItemPool(m_directory ? m_directory->m_kind : STOFFDocument::STOFF_K_UNKNOWN));
+  return shared_ptr<StarItemPool>(new StarItemPool(*this));
+}
+
+SDWParser *StarDocument::getSDWParser()
+{
+  return m_state->m_sdwParser;
 }
 
 bool StarDocument::parse()

@@ -52,6 +52,7 @@ struct State;
 
 class StarItemPool;
 
+class SDWParser;
 /** \brief a main ole in a StarOffice file
  *
  *
@@ -61,7 +62,7 @@ class StarDocument
 {
 public:
   //! constructor
-  StarDocument(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory);
+  StarDocument(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *parser);
   //! destructor
   virtual ~StarDocument();
 
@@ -73,6 +74,11 @@ public:
   bool parse();
   //! returns a new item pool for this document
   shared_ptr<StarItemPool> getNewItemPool();
+  //! returns the document kind
+  STOFFDocument::Kind getDocumentKind() const;
+  //! returns a SDWParser(REMOVEME)
+  SDWParser *getSDWParser();
+
 protected:
   //!  the "persist elements" small ole: the list of object
   bool readPersistElements(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);

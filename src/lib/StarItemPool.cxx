@@ -39,7 +39,9 @@
 
 #include <librevenge/librevenge.h>
 
+#include "StarAttribute.hxx"
 #include "StarFileManager.hxx"
+#include "StarDocument.hxx"
 #include "StarZone.hxx"
 
 #include "StarItemPool.hxx"
@@ -116,7 +118,7 @@ struct SfxMultiRecord {
     std::stringstream s;
     if (m_headerType==2) {
       // fixed size
-      if (m_startPos+m_numRecord*m_contentSize > m_endPos) {
+      if (m_startPos+long(m_numRecord)*long(m_contentSize) > m_endPos) {
         STOFF_DEBUG_MSG(("StarItemPoolInternal::SfxMultiRecord::open: oops the number of record seems bad\n"));
         s << "##numRecord=" << m_numRecord << ",";
         if (m_contentSize && m_endPos>m_startPos)
@@ -285,10 +287,10 @@ struct Version {
 //! Internal: the state of a StarItemPool
 struct State {
   //! constructor
-  State(STOFFDocument::Kind kind) : m_kind(kind), m_majorVersion(0), m_minorVersion(0), m_loadingVersion(0), m_name(""),
-    m_currentVersion(0), m_verStart(100/**/), m_verEnd(183/*ATTR_ENDINDEX*/), m_versionList()
+  State(StarDocument &document) : m_document(document), m_majorVersion(0), m_minorVersion(0), m_loadingVersion(0), m_name(""),
+    m_currentVersion(0), m_verStart(0), m_verEnd(0), m_versionList(), m_idToAttributeList()
   {
-    switch (m_kind) {
+    switch (m_document.getDocumentKind()) {
     case STOFFDocument::STOFF_K_CHART:
       // sch_sch_itempool.cxx
       m_verStart=1; // SCHATTR_START
@@ -300,11 +302,36 @@ struct State {
       m_verStart=100; // ATTR_STARTINDEX
       m_verEnd=183; // ATTR_ENDINDEX
       break;
-    case STOFFDocument::STOFF_K_TEXT:
+    case STOFFDocument::STOFF_K_TEXT: {
       // SwAttrPool::SwAttrPool set default map
       m_verStart=1; //POOLATTR_BEGIN
       m_verEnd=130; //POOLATTR_END-1
+      for (int i=StarAttribute::ATR_CHR_CASEMAP; i<=StarAttribute::ATR_BOX_VALUE; ++i)
+        m_idToAttributeList.push_back(i);
+      std::vector<int> list;
+      // sw_swatrset.cxx SwAttrPool::SwAttrPool and sw_init.cxx pVersionMap1
+      for (int i = 1; i <= 17; i++) list.push_back(i);
+      for (int i = 18; i <= 27; i++) list.push_back(i+5);
+      for (int i = 28; i <= 35; i++) list.push_back(i+7);
+      for (int i = 36; i <= 58; i++) list.push_back(i+10);
+      for (int i = 59; i <= 60; i++) list.push_back(i+12);
+      addVersionMap(1, 1, list);
+      list.clear();
+      for (int i = 1; i <= 70; i++) list.push_back(i);
+      for (int i = 71; i <= 75; i++) list.push_back(i+10);
+      addVersionMap(2, 1, list);
+      list.clear();
+      for (int i = 1; i <= 21; i++) list.push_back(i);
+      for (int i = 22; i <= 27; i++) list.push_back(i+15);
+      for (int i = 28; i <= 82; i++) list.push_back(i+20);
+      for (int i = 83; i <= 86; i++) list.push_back(i+35);
+      addVersionMap(3, 1, list);
+      list.clear();
+      for (int i = 1; i <= 65; i++) list.push_back(i);
+      for (int i = 66; i <= 121; i++) list.push_back(i+9);
+      addVersionMap(4, 1, list);
       break;
+    }
     case STOFFDocument::STOFF_K_BITMAP: // normally none
     case STOFFDocument::STOFF_K_MATH: // normally none
       m_verStart=m_verEnd=0;
@@ -329,10 +356,9 @@ struct State {
   void addVersionMap(uint16_t nVers, uint16_t nStart, std::vector<int> const &list)
   {
     // SfxItemPool::SetVersionMap
+    if (nVers<=m_currentVersion)
+      return;
     m_versionList.push_back(Version(int(nVers), int(nStart), list));
-    if (nVers<=m_currentVersion) {
-      STOFF_DEBUG_MSG(("StarItemPoolInternal::State::addVersionMap: arghh the version are not sorted\n"));
-    }
     m_currentVersion=nVers;
     Version const &vers=m_versionList.back();
     if (vers.m_invertListMap.empty()) return;
@@ -375,8 +401,8 @@ struct State {
     }
     return nFileWhich;
   }
-  //! the document kind
-  STOFFDocument::Kind m_kind;
+  //! the document
+  StarDocument &m_document;
   //! the majorVersion
   int m_majorVersion;
   //! the minorVersion
@@ -393,6 +419,8 @@ struct State {
   int m_verEnd;
   //! the list of version
   std::vector<Version> m_versionList;
+  //! list whichId to attribute list
+  std::vector<int> m_idToAttributeList;
 private:
   State(State const &orig);
   State operator=(State const &orig);
@@ -403,7 +431,7 @@ private:
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarItemPool::StarItemPool(STOFFDocument::Kind kind) : m_state(new StarItemPoolInternal::State(kind))
+StarItemPool::StarItemPool(StarDocument &doc) : m_state(new StarItemPoolInternal::State(doc))
 {
 }
 
@@ -416,11 +444,31 @@ int StarItemPool::getVersion() const
   return m_state->m_majorVersion;
 }
 
+bool StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPos)
+{
+  if (which<m_state->m_verStart || which>=m_state->m_verStart+int(m_state->m_idToAttributeList.size()) ||
+      !m_state->m_document.getSDWParser()) {
+    STOFFInputStreamPtr input=zone.input();
+    long pos=input->tell();
+    libstoff::DebugFile &ascii=zone.ascii();
+    libstoff::DebugStream f;
+    f << "Entries(StarAttribute)["<< zone.getRecordLevel() << "]:wh=" << which;
+    if (!m_state->m_idToAttributeList.empty())
+      f << "##";
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    input->seek(endPos, librevenge::RVNG_SEEK_SET);
+    return true;
+  }
+  StarAttribute attribute;
+  return attribute.readAttribute(zone, m_state->m_idToAttributeList[size_t(which-m_state->m_verStart)],
+                                 vers, endPos, *m_state->m_document.getSDWParser());
+}
+
 bool StarItemPool::read(StarZone &zone)
 {
   // reinit all
-  STOFFDocument::Kind kind=m_state->m_kind;
-  m_state.reset(new StarItemPoolInternal::State(kind));
+  m_state.reset(new StarItemPoolInternal::State(m_state->m_document));
 
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascii=zone.ascii();
@@ -610,7 +658,7 @@ bool StarItemPool::read(StarZone &zone)
       if (step==0) {
         StarItemPoolInternal::SfxMultiRecord mRecord1;
         f.str("");
-        f << "Entries(SfxAttribute):";
+        f << "Entries(StarAttribute):inPool,";
         if (!mRecord1.open(zone)) {
           STOFF_DEBUG_MSG(("StarItemPool::read: can not open record1\n"));
           f << "###record1";
@@ -621,26 +669,30 @@ bool StarItemPool::read(StarZone &zone)
           f << mRecord1;
           ascii.addPos(pos);
           ascii.addNote(f.str().c_str());
-          while (mRecord1.getNewContent("SfxAttribute")) {
+          while (mRecord1.getNewContent("StarAttribute")) {
             pos=input->tell();
             f.str("");
-            f << "SfxAttribute[" <<  which-m_state->m_verStart << "]:";
+            f << "StarAttribute:inPool,wh=" <<  which-m_state->m_verStart << ",";
             uint16_t nRef;
             *input>>nRef;
             f << "ref=" << nRef << ",";
-            ascii.addDelimiter(input->tell(),'|');
+            if (!readAttribute(zone, which, (int) nVersion, mRecord1.getLastContentPosition())) {
+              f << "###";
+              input->seek(mRecord1.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
+            }
             ascii.addPos(pos);
             ascii.addNote(f.str().c_str());
-            input->seek(mRecord1.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
           }
-          mRecord1.close("SfxAttribute");
+          mRecord1.close("StarAttribute");
         }
       }
       else {
-        f.str("");
-        f << "Entries(SfxAttribute)[" <<  which-m_state->m_verStart << "]:";
-        ascii.addPos(pos);
-        ascii.addNote(f.str().c_str());
+        if (!readAttribute(zone, which, (int) nVersion, mRecord.getLastContentPosition())) {
+          f.str("");
+          f << "Entries(StarAttribute)[" <<  which-m_state->m_verStart << "]:";
+          ascii.addPos(pos);
+          ascii.addNote(f.str().c_str());
+        }
       }
       input->seek(mRecord.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
     }
@@ -706,7 +758,7 @@ bool StarItemPool::readV1(StarZone &zone)
   uint32_t attribSize;
   *input>>attribSize;
   long attribPos=input->tell();
-  if (attribPos+attribSize+10>endPos) {
+  if (attribPos+long(attribSize)+10>endPos) {
     STOFF_DEBUG_MSG(("StarItemPool::readV1: attribSize is bad\n"));
     f << "###";
     ascii.addPos(pos);
@@ -869,7 +921,7 @@ bool StarItemPool::readV1(StarZone &zone)
     f << "sz=[";
     long actPos=input->tell();
     for (int i=0; i<nCount; ++i) {
-      if (n >= sizeAttr.size() || actPos+sizeAttr[n]>endDataPos) {
+      if (n >= sizeAttr.size() || actPos+(long)sizeAttr[n]>endDataPos) {
         ok=false;
 
         STOFF_DEBUG_MSG(("StarItemPool::readV1: can not find attrib size\n"));
@@ -936,7 +988,7 @@ bool StarItemPool::readV1(StarZone &zone)
     uint16_t nSlot, nVersion;
     *input >> nSlot >> nVersion;
     f << "wh=" << nWhich << "[" << std::hex << nSlot << std::dec << "], vers=" << nVersion << ",";
-    if (n >= sizeAttr.size() || sizeAttr[n]<6 || pos+sizeAttr[n]>endDataPos) {
+    if (n >= sizeAttr.size() || sizeAttr[n]<6 || pos+(long) sizeAttr[n]>endDataPos) {
       ok=false;
 
       STOFF_DEBUG_MSG(("StarItemPool::readV1: can not find attrib size\n"));
@@ -1133,7 +1185,7 @@ bool StarItemPool::readStyle(StarZone &zone, int poolVersion)
     }
     *input>>nVer>>nSize;
     if (nVer) f << "version=" << nVer << ",";
-    if (input->tell()+nSize>lastPos || (poolVersion==2 && input->tell()+nSize+4<lastPos)) {
+    if (input->tell()+long(nSize)>lastPos || (poolVersion==2 && input->tell()+long(nSize)+4<lastPos)) {
       // be strict while readSfxItemList is not sure
       STOFF_DEBUG_MSG(("StarItemPool::readStyle: something is bad\n"));
       f << "###nSize=" << nSize << ",";

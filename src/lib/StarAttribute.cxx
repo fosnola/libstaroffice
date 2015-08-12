@@ -81,8 +81,8 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
   long pos=input->tell();
   int val;
   switch (nWhich) {
-  case ATR_CHR_CASEMAP: // no data
-    f << "chrAtrCaseMap,";
+  case ATR_CHR_CASEMAP:
+    f << "chrAtrCaseMap=" << input->readULong(1) << ",";
     break;
   case ATR_CHR_CHARSETCOLOR: {
     f << "chrAtrCharSetColor=" << input->readULong(1) << ",";
@@ -182,7 +182,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     if (nVers>=2) f << "nPropUnit=" << input->readULong(2) << ",";
     break;
   case ATR_CHR_KERNING:
-    f << "chrAtrKerning=" << input->readULong(1) << ",";
+    f << "chrAtrKerning=" << input->readULong(2) << ",";
     break;
   case ATR_CHR_LANGUAGE:
   case ATR_CHR_CJK_LANGUAGE:
@@ -1100,6 +1100,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
   if (input->tell()!=lastPos) {
     STOFF_DEBUG_MSG(("StarAttribute::readAttribute: find extra data\n"));
     f << "###extra,";
+    ascFile.addDelimiter(input->tell(), '|');
     input->seek(lastPos, librevenge::RVNG_SEEK_SET);
   }
   ascFile.addPos(pos);
