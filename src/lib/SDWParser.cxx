@@ -151,7 +151,7 @@ bool SDWParser::createZones()
         continue;
       }
       if (base=="SwPageStyleSheets") {
-        readSwPageStyleSheets(ole,name);
+        readSwPageStyleSheets(ole,name, document);
         continue;
       }
       if (base=="StarChartDocument") {
@@ -174,7 +174,7 @@ bool SDWParser::createZones()
         continue;
       }
       if (base=="StarWriterDocument") {
-        readWriterDocument(ole,name);
+        readWriterDocument(ole,name, document);
         continue;
       }
       if (base.compare(0,3,"Pic")==0) {
@@ -294,7 +294,7 @@ bool SDWParser::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &
   return true;
 }
 
-bool SDWParser::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &name)
+bool SDWParser::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &name, StarDocument &doc)
 {
   StarZone zone(input, name, "SWPageStyleSheets");
   if (!zone.readSWHeader()) {
@@ -329,7 +329,7 @@ bool SDWParser::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string con
       f << "N=" << N << ",";
       zone.closeFlagZone();
       for (int i=0; i<N; ++i) {
-        if (!readSWPageDef(zone))
+        if (!readSWPageDef(zone, doc))
           break;
       }
       break;
@@ -362,7 +362,7 @@ bool SDWParser::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string con
   return true;
 }
 
-bool SDWParser::readSWPageDef(StarZone &zone)
+bool SDWParser::readSWPageDef(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -405,7 +405,7 @@ bool SDWParser::readSWPageDef(StarZone &zone)
   while (input->tell() < lastPos) {
     pos=input->tell();
     int rType=input->peek();
-    if (rType=='S' && readSWAttributeList(zone))
+    if (rType=='S' && readSWAttributeList(zone, doc))
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -452,7 +452,7 @@ bool SDWParser::readSWPageDef(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWAttribute(StarZone &zone)
+bool SDWParser::readSWAttribute(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -475,12 +475,12 @@ bool SDWParser::readSWAttribute(StarZone &zone)
   int which=(int) nWhich;
   if (which>0x6001 && zone.getDocumentVersion()!=0x0219) // bug correction 0x95500
     which+=15;
-  if (which>=0x1000 && which<=0x1024) which+=-0x1000+(int) StarAttribute::ATR_CHR_CASEMAP;
-  else if (which>=0x2000 && which<=0x2009) which+=-0x2000+(int) StarAttribute::ATR_TXT_INETFMT;
-  else if (which>=0x3000 && which<=0x3006) which+=-0x3000+(int) StarAttribute::ATR_TXT_FIELD;
-  else if (which>=0x4000 && which<=0x4013) which+=-0x4000+(int) StarAttribute::ATR_PARA_LINESPACING;
-  else if (which>=0x5000 && which<=0x5022) which+=-0x5000+(int) StarAttribute::ATR_FRM_FILL_ORDER;
-  else if (which>=0x6000 && which<=0x6013) which+=-0x6000+(int) StarAttribute::ATR_GRF_MIRRORGRF;
+  if (which>=0x1000 && which<=0x1024) which+=-0x1000+(int) StarAttribute::ATTR_CHR_CASEMAP;
+  else if (which>=0x2000 && which<=0x2009) which+=-0x2000+(int) StarAttribute::ATTR_TXT_INETFMT;
+  else if (which>=0x3000 && which<=0x3006) which+=-0x3000+(int) StarAttribute::ATTR_TXT_FIELD;
+  else if (which>=0x4000 && which<=0x4013) which+=-0x4000+(int) StarAttribute::ATTR_PARA_LINESPACING;
+  else if (which>=0x5000 && which<=0x5022) which+=-0x5000+(int) StarAttribute::ATTR_FRM_FILL_ORDER;
+  else if (which>=0x6000 && which<=0x6013) which+=-0x6000+(int) StarAttribute::ATTR_GRF_MIRRORGRF;
   else {
     STOFF_DEBUG_MSG(("SDWParser::readSWAttribute: find unexpected which value\n"));
     which=-1;
@@ -493,7 +493,7 @@ bool SDWParser::readSWAttribute(StarZone &zone)
   zone.closeFlagZone();
 
   StarAttribute attribute;
-  if (which<=0 || !attribute.readAttribute(zone, which, int(nVers), zone.getRecordLastPosition(), *this))
+  if (which<=0 || !attribute.readAttribute(zone, which, int(nVers), zone.getRecordLastPosition(), doc))
     f << "###";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -501,7 +501,7 @@ bool SDWParser::readSWAttribute(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWAttributeList(StarZone &zone)
+bool SDWParser::readSWAttributeList(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -518,7 +518,7 @@ bool SDWParser::readSWAttributeList(StarZone &zone)
 
   while (input->tell() < zone.getRecordLastPosition()) { // normally only 2
     pos=input->tell();
-    if (readSWAttribute(zone) && input->tell()>pos) continue;
+    if (readSWAttribute(zone, doc) && input->tell()>pos) continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
@@ -598,7 +598,7 @@ bool SDWParser::readSWBookmarkList(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWContent(StarZone &zone)
+bool SDWParser::readSWContent(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -636,10 +636,10 @@ bool SDWParser::readSWContent(StarZone &zone)
     bool done=false;
     switch (cType) {
     case 'E':
-      done=readSWTable(zone);
+      done=readSWTable(zone, doc);
       break;
     case 'G':
-      done=readSWGraphNode(zone);
+      done=readSWGraphNode(zone, doc);
       break;
     case 'I':
       done=readSWSection(zone);
@@ -648,11 +648,11 @@ bool SDWParser::readSWContent(StarZone &zone)
       done=readSWOLENode(zone);
       break;
     case 'T':
-      done=readSWTextZone(zone);
+      done=readSWTextZone(zone, doc);
       break;
     case 'l': // related to link
     case 'o': // format: safe to ignore
-      done=formatManager.readSWFormatDef(zone,char(cType),*this);
+      done=formatManager.readSWFormatDef(zone,char(cType),doc);
       break;
     case 'v':
       done=readSWNodeRedline(zone);
@@ -939,7 +939,7 @@ bool SDWParser::readSWFootNoteInfo(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWGraphNode(StarZone &zone)
+bool SDWParser::readSWGraphNode(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -993,7 +993,7 @@ bool SDWParser::readSWGraphNode(StarZone &zone)
 
     switch (rType) {
     case 'S':
-      done=readSWAttributeList(zone);
+      done=readSWAttributeList(zone, doc);
       break;
     case 'X':
       done=readSWImageMap(zone);
@@ -1566,7 +1566,7 @@ bool SDWParser::readSWSection(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWTable(StarZone &zone)
+bool SDWParser::readSWTable(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1592,7 +1592,7 @@ bool SDWParser::readSWTable(StarZone &zone)
 
   long lastPos=zone.getRecordLastPosition();
   SWFormatManager formatManager;
-  if (input->peek()=='f') formatManager.readSWFormatDef(zone, 'f', *this);
+  if (input->peek()=='f') formatManager.readSWFormatDef(zone, 'f', doc);
   if (input->peek()=='Y') {
     SWFieldManager fieldManager;
     fieldManager.readField(zone,'Y');
@@ -1610,7 +1610,7 @@ bool SDWParser::readSWTable(StarZone &zone)
 
   while (input->tell()<lastPos && input->peek()=='L') {
     pos=input->tell();
-    if (readSWTableLine(zone))
+    if (readSWTableLine(zone, doc))
       continue;
     pos=input->tell();
     STOFF_DEBUG_MSG(("SDWParser::readSWTable: can not read a table line\n"));
@@ -1621,7 +1621,7 @@ bool SDWParser::readSWTable(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWTableBox(StarZone &zone)
+bool SDWParser::readSWTableBox(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1644,12 +1644,12 @@ bool SDWParser::readSWTableBox(StarZone &zone)
   ascFile.addNote(f.str().c_str());
 
   SWFormatManager formatManager;
-  if (input->peek()=='f') formatManager.readSWFormatDef(zone,'f',*this);
-  if (input->peek()=='N') readSWContent(zone);
+  if (input->peek()=='f') formatManager.readSWFormatDef(zone,'f',doc);
+  if (input->peek()=='N') readSWContent(zone, doc);
   long lastPos=zone.getRecordLastPosition();
   while (input->tell()<lastPos) {
     pos=input->tell();
-    if (readSWTableLine(zone)) continue;
+    if (readSWTableLine(zone, doc)) continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
@@ -1657,7 +1657,7 @@ bool SDWParser::readSWTableBox(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWTableLine(StarZone &zone)
+bool SDWParser::readSWTableLine(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1679,12 +1679,12 @@ bool SDWParser::readSWTableLine(StarZone &zone)
   ascFile.addNote(f.str().c_str());
   SWFormatManager formatManager;
   if (input->peek()=='f')
-    formatManager.readSWFormatDef(zone,'f',*this);
+    formatManager.readSWFormatDef(zone,'f',doc);
 
   long lastPos=zone.getRecordLastPosition();
   while (input->tell()<lastPos) {
     pos=input->tell();
-    if (readSWTableBox(zone))
+    if (readSWTableBox(zone, doc))
       continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
@@ -1693,7 +1693,7 @@ bool SDWParser::readSWTableLine(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWTextZone(StarZone &zone)
+bool SDWParser::readSWTextZone(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1745,17 +1745,17 @@ bool SDWParser::readSWTextZone(StarZone &zone)
 
     switch (rType) {
     case 'A':
-      done=readSWAttribute(zone);
+      done=readSWAttribute(zone, doc);
       break;
     case 'R':
       done=readSWNumRule(zone,'R');
       break;
     case 'S':
-      done=readSWAttributeList(zone);
+      done=readSWAttributeList(zone, doc);
       break;
     case 'l': // related to link
     case 'o': // format: safe to ignore
-      done=formatManager.readSWFormatDef(zone,char(rType), *this);
+      done=formatManager.readSWFormatDef(zone,char(rType), doc);
       break;
     case 'v':
       done=readSWNodeRedline(zone);
@@ -1829,7 +1829,7 @@ bool SDWParser::readSWTextZone(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWTOXList(StarZone &zone)
+bool SDWParser::readSWTOXList(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1964,7 +1964,7 @@ bool SDWParser::readSWTOXList(StarZone &zone)
 
     if ((fl&0x10)) {
       while (input->tell()<zone.getRecordLastPosition() && input->peek()=='s') {
-        if (!formatManager.readSWFormatDef(zone,'s', *this)) {
+        if (!formatManager.readSWFormatDef(zone,'s', doc)) {
           STOFF_DEBUG_MSG(("SDWParser::readSWTOXList: can not read some format\n"));
           f << "###format,";
           break;
@@ -2079,7 +2079,7 @@ bool SDWParser::readSWTOX51List(StarZone &zone)
 ////////////////////////////////////////////////////////////
 // main zone
 ////////////////////////////////////////////////////////////
-bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const &name)
+bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const &name, StarDocument &doc)
 {
   StarZone zone(input, name, "SWWriterDocument");
   if (!zone.readSWHeader()) {
@@ -2113,7 +2113,7 @@ bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const 
       done=readSWDBName(zone);
       break;
     case 'F':
-      done=formatManager.readSWFlyFrameList(zone, *this);
+      done=formatManager.readSWFlyFrameList(zone, doc);
       break;
     case 'J':
       done=readSWJobSetUp(zone);
@@ -2122,7 +2122,7 @@ bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const 
       done=readSWMacroTable(zone);
       break;
     case 'N':
-      done=readSWContent(zone);
+      done=readSWContent(zone, doc);
       break;
     case 'U': // layout info, no code, ignored by LibreOffice
       done=readSWLayoutInfo(zone);
@@ -2144,7 +2144,7 @@ bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const 
       done=formatManager.readSWNumberFormatterList(zone);
       break;
     case 'u':
-      done=readSWTOXList(zone);
+      done=readSWTOXList(zone, doc);
       break;
     case 'y':
       done=readSWTOX51List(zone);

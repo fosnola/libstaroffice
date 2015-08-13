@@ -39,8 +39,10 @@
 
 #include <librevenge/librevenge.h>
 
-#include "SDWParser.hxx"
+#include "StarDocument.hxx"
 #include "StarZone.hxx"
+
+#include "SDWParser.hxx"
 
 #include "SWFormatManager.hxx"
 
@@ -69,7 +71,7 @@ SWFormatManager::~SWFormatManager()
 {
 }
 
-bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, SDWParser &manager)
+bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -132,7 +134,7 @@ bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, SDWParser &mana
   while (input->tell()<lastPos) {
     pos=(int) input->tell();
     int rType=input->peek();
-    if (rType=='S' && manager.readSWAttributeList(zone))
+    if (rType=='S' && doc.getSDWParser()->readSWAttributeList(zone, doc))
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -439,7 +441,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
   return true;
 }
 
-bool SWFormatManager::readSWFlyFrameList(StarZone &zone, SDWParser &manager)
+bool SWFormatManager::readSWFlyFrameList(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -456,7 +458,7 @@ bool SWFormatManager::readSWFlyFrameList(StarZone &zone, SDWParser &manager)
   while (input->tell()<lastPos) {
     pos=input->tell();
     int rType=input->peek();
-    if ((rType=='o' || rType=='l') && readSWFormatDef(zone, char(rType), manager))
+    if ((rType=='o' || rType=='l') && readSWFormatDef(zone, char(rType), doc))
       continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;

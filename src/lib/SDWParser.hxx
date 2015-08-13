@@ -52,9 +52,10 @@ struct State;
 }
 
 class StarAttribute;
-class SWFormatManager;
+class StarDocument;
 class StarZone;
 class STOFFOLEParser;
+class SWFormatManager;
 /** \brief the main class to read a StarOffice sdw file
  *
  *
@@ -93,22 +94,22 @@ protected:
   //
 
   //! the page style
-  bool readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
+  bool readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
   //! the rulers?
   bool readSwNumRuleList(STOFFInputStreamPtr input, std::string const &fileName);
 
   //! the main zone
-  bool readWriterDocument(STOFFInputStreamPtr input, std::string const &fileName);
+  bool readWriterDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
 
 protected:
   //! try to read an attribute: 'A'
-  bool readSWAttribute(StarZone &zone);
+  bool readSWAttribute(StarZone &zone, StarDocument &doc);
   //! try to read a attribute list: 'S'
-  bool readSWAttributeList(StarZone &zone);
+  bool readSWAttributeList(StarZone &zone, StarDocument &doc);
   //! try a list of bookmark field : 'a'
   bool readSWBookmarkList(StarZone &zone);
   //! try to read some content : 'N'
-  bool readSWContent(StarZone &zone);
+  bool readSWContent(StarZone &zone, StarDocument &doc);
   //! try to read a DBName zone : 'D'
   bool readSWDBName(StarZone &zone);
   //! try to read a dictionary table : 'j'
@@ -118,7 +119,7 @@ protected:
   //! try to read a footnode node : '1'
   bool readSWFootNoteInfo(StarZone &zone);
   //! try to read a OLE node : 'g'
-  bool readSWGraphNode(StarZone &zone);
+  bool readSWGraphNode(StarZone &zone, StarDocument &doc);
   //! try to read a SW zone setup : 'J'
   bool readSWJobSetUp(StarZone &zone);
   //! try to read a layout information zone : 'Y'
@@ -134,21 +135,21 @@ protected:
   //! try to read a OLE node : 'O'
   bool readSWOLENode(StarZone &zone);
   //! try to read a list of page style : 'p'
-  bool readSWPageDef(StarZone &zone);
+  bool readSWPageDef(StarZone &zone, StarDocument &doc);
   //! try to read a list of redline : 'V' (list of 'R' list of 'D')
   bool readSWRedlineList(StarZone &zone);
   //! try to read a section : 'I'
   bool readSWSection(StarZone &zone);
   //! try to read a table : 'E'
-  bool readSWTable(StarZone &zone);
+  bool readSWTable(StarZone &zone, StarDocument &doc);
   //! try to read a table box : 't'
-  bool readSWTableBox(StarZone &zone);
+  bool readSWTableBox(StarZone &zone, StarDocument &doc);
   //! try to read a table line : 'L'
-  bool readSWTableLine(StarZone &zone);
+  bool readSWTableLine(StarZone &zone, StarDocument &doc);
   //! try to read some content : 'T'
-  bool readSWTextZone(StarZone &zone);
+  bool readSWTextZone(StarZone &zone, StarDocument &doc);
   //! try to read a list of TOX : 'u' ( list of 'x')
-  bool readSWTOXList(StarZone &zone);
+  bool readSWTOXList(StarZone &zone, StarDocument &doc);
   //! try to read a list of TOX51 : 'y' ( list of 'x')
   bool readSWTOX51List(StarZone &zone);
   //

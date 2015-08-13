@@ -49,6 +49,7 @@ namespace StarFileManagerInternal
 struct State;
 }
 
+class StarDocument;
 class StarZone;
 
 /** \brief the main class to read/.. some basic StarOffice OLEs
@@ -83,6 +84,9 @@ public:
 
   //! try to read a printer zone
   static bool readJobSetUp(StarZone &zone);
+
+  //! try to read a edit text object
+  static bool readEditTextObject(StarZone &zone, long lastPos, StarDocument &doc);
 
   //! try to read a SfxItemList(TODO)
   static bool readSfxItemList(StarZone &zone);

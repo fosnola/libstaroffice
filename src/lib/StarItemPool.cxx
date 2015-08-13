@@ -290,23 +290,107 @@ struct State {
   State(StarDocument &document) : m_document(document), m_majorVersion(0), m_minorVersion(0), m_loadingVersion(0), m_name(""),
     m_currentVersion(0), m_verStart(0), m_verEnd(0), m_versionList(), m_idToAttributeList()
   {
-    switch (m_document.getDocumentKind()) {
-    case STOFFDocument::STOFF_K_CHART:
+  }
+
+  //! set the pool name
+  void setPoolName(librevenge::RVNGString const &name)
+  {
+    m_name=name;
+    init();
+  }
+  //! the pool
+  void init()
+  {
+    // to do EditEngineItemPool, VCControls, XOutdevItemPool
+    if (m_name=="SchItemPool") {
       // sch_sch_itempool.cxx
       m_verStart=1; // SCHATTR_START
       m_verEnd=58;
       // user from 100 SCHATTR_NONPERSISTENT_START
-      break;
-    case STOFFDocument::STOFF_K_SPREADSHEET:
+    }
+    else if (m_name=="ScDocumentPool") {
       // sc_docpool.cxx
       m_verStart=100; // ATTR_STARTINDEX
       m_verEnd=183; // ATTR_ENDINDEX
-      break;
-    case STOFFDocument::STOFF_K_TEXT: {
+
+      std::vector<int> list;
+      for (int i = 0; i <= 17; i++) list.push_back(100+i);
+      for (int i = 18; i <= 57; i++) list.push_back(100+i+1);
+      addVersionMap(1, 100, list);
+
+      list.clear();
+      for (int i = 0; i <= 23; i++) list.push_back(100+i);
+      for (int i = 24; i <= 58; i++) list.push_back(100+i+2);
+      addVersionMap(2, 100, list);
+
+      list.clear();
+      for (int i = 0; i <= 10; i++) list.push_back(100+i);
+      for (int i = 11; i <= 60; i++) list.push_back(100+i+1);
+      addVersionMap(3, 100, list);
+
+      list.clear();
+      for (int i = 0; i <= 13; i++) list.push_back(100+i);
+      for (int i = 14; i <= 61; i++) list.push_back(100+i+2);
+      addVersionMap(4, 100, list);
+
+      list.clear();
+      for (int i = 0; i <= 9; i++) list.push_back(100+i);
+      for (int i = 10; i <= 63; i++) list.push_back(100+i+12);
+      addVersionMap(5, 100, list);
+
+      list.clear();
+      for (int i = 0; i <= 21; i++) list.push_back(100+i);
+      for (int i = 22; i <= 75; i++) list.push_back(100+i+3);
+      addVersionMap(6, 100, list);
+
+      list.clear();
+      for (int i = 0; i <= 21; i++) list.push_back(100+i);
+      for (int i = 22; i <= 78; i++) list.push_back(100+i+3);
+      addVersionMap(7, 100, list);
+
+      list.clear();
+      for (int i = 0; i <= 33; i++) list.push_back(100+i);
+      for (int i = 34; i <= 81; i++) list.push_back(100+i+1);
+      addVersionMap(8, 100, list);
+
+      list.clear();
+      for (int i = 0; i <= 34; i++) list.push_back(100+i);
+      for (int i = 35; i <= 82; i++) list.push_back(100+i+1);
+      addVersionMap(9, 100, list);
+      static int const(what[])= {
+        StarAttribute::ATTR_CHR_FONT, StarAttribute::ATTR_CHR_FONTSIZE, StarAttribute::ATTR_CHR_WEIGHT, StarAttribute::ATTR_CHR_POSTURE,
+        StarAttribute::ATTR_CHR_UNDERLINE, StarAttribute::ATTR_CHR_CROSSEDOUT, StarAttribute::ATTR_CHR_CONTOUR, StarAttribute::ATTR_CHR_SHADOWED,
+        StarAttribute::ATTR_CHR_COLOR, StarAttribute::ATTR_CHR_LANGUAGE, StarAttribute::ATTR_CHR_CJK_FONT, StarAttribute::ATTR_CHR_CJK_FONTSIZE,
+        StarAttribute::ATTR_CHR_CJK_WEIGHT, StarAttribute::ATTR_CHR_CJK_POSTURE, StarAttribute::ATTR_CHR_CJK_LANGUAGE, StarAttribute::ATTR_CHR_CTL_FONT,
+        StarAttribute::ATTR_CHR_CTL_FONTSIZE, StarAttribute::ATTR_CHR_CTL_WEIGHT, StarAttribute::ATTR_CHR_CTL_POSTURE, StarAttribute::ATTR_CHR_CTL_LANGUAGE,
+
+        StarAttribute::ATTR_CHR_EMPHASIS_MARK, StarAttribute::ATTR_SC_USERDEF, StarAttribute::ATTR_CHR_WORDLINEMODE, StarAttribute::ATTR_CHR_RELIEF,
+        StarAttribute::ATTR_SC_HYPHENATE, StarAttribute::ATTR_PARA_SCRIPTSPACE, StarAttribute::ATTR_PARA_HANGINGPUNCTUATION, StarAttribute::ATTR_PARA_FORBIDDEN_RULES,
+        StarAttribute::ATTR_SC_HORJUSTIFY, StarAttribute::ATTR_SC_INDENT, StarAttribute::ATTR_SC_VERJUSTIFY, StarAttribute::ATTR_SC_ORIENTATION,
+        StarAttribute::ATTR_SC_ROTATE_VALUE, StarAttribute::ATTR_SC_ROTATE_MODE, StarAttribute::ATTR_SC_VERTICAL_ASIAN, StarAttribute::ATTR_SC_WRITINGDIR,
+        StarAttribute::ATTR_SC_LINEBREAK, StarAttribute::ATTR_SC_MARGIN, StarAttribute::ATTR_SC_MERGE, StarAttribute::ATTR_SC_MERGE_FLAG,
+
+        StarAttribute::ATTR_SC_VALUE_FORMAT, StarAttribute::ATTR_SC_LANGUAGE_FORMAT, StarAttribute::ATTR_FRM_BACKGROUND, StarAttribute::ATTR_SC_PROTECTION,
+        StarAttribute::ATTR_SC_BORDER, StarAttribute::ATTR_SC_BORDER_INNER, StarAttribute::ATTR_FRM_SHADOW, StarAttribute::ATTR_SC_VALIDDATA,
+        StarAttribute::ATTR_SC_CONDITIONAL, StarAttribute::ATTR_SC_PATTERN, StarAttribute::ATTR_FRM_LR_SPACE, StarAttribute::ATTR_FRM_UL_SPACE,
+        StarAttribute::ATTR_SC_PAGE, StarAttribute::ATTR_SC_PAGE_PAPERTRAY, StarAttribute::ATTR_FRM_PAPER_BIN, StarAttribute::ATTR_SC_PAGE_SIZE,
+        StarAttribute::ATTR_SC_PAGE_MAXSIZE, StarAttribute::ATTR_SC_PAGE_HORCENTER, StarAttribute::ATTR_SC_PAGE_VERCENTER, StarAttribute::ATTR_SC_PAGE_ON,
+
+        StarAttribute::ATTR_SC_PAGE_DYNAMIC, StarAttribute::ATTR_SC_PAGE_SHARED, StarAttribute::ATTR_SC_PAGE_NOTES, StarAttribute::ATTR_SC_PAGE_GRID,
+        StarAttribute::ATTR_SC_PAGE_HEADERS, StarAttribute::ATTR_SC_PAGE_CHARTS, StarAttribute::ATTR_SC_PAGE_OBJECTS, StarAttribute::ATTR_SC_PAGE_DRAWINGS,
+        StarAttribute::ATTR_SC_PAGE_TOPDOWN, StarAttribute::ATTR_SC_PAGE_SCALE, StarAttribute::ATTR_SC_PAGE_SCALETOPAGES, StarAttribute::ATTR_SC_PAGE_FIRSTPAGENO,
+        StarAttribute::ATTR_SC_PAGE_PRINTAREA, StarAttribute::ATTR_SC_PAGE_REPEATROW, StarAttribute::ATTR_SC_PAGE_REPEATCOL, StarAttribute::ATTR_SC_PAGE_PRINTTABLES,
+        StarAttribute::ATTR_SC_PAGE_HEADERLEFT, StarAttribute::ATTR_SC_PAGE_FOOTERLEFT, StarAttribute::ATTR_SC_PAGE_HEADERRIGHT, StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT,
+        StarAttribute::ATTR_SC_PAGE_HEADERSET, StarAttribute::ATTR_SC_PAGE_FOOTERSET, StarAttribute::ATTR_SC_PAGE_FORMULAS, StarAttribute::ATTR_SC_PAGE_NULLVALS
+      };
+      for (int i=0; i<int(sizeof(what)/sizeof(int)); ++i)
+        m_idToAttributeList.push_back(what[i]);
+    }
+    else if (m_name=="SWG") {
       // SwAttrPool::SwAttrPool set default map
       m_verStart=1; //POOLATTR_BEGIN
       m_verEnd=130; //POOLATTR_END-1
-      for (int i=StarAttribute::ATR_CHR_CASEMAP; i<=StarAttribute::ATR_BOX_VALUE; ++i)
+      for (int i=StarAttribute::ATTR_CHR_CASEMAP; i<=StarAttribute::ATTR_BOX_VALUE; ++i)
         m_idToAttributeList.push_back(i);
       std::vector<int> list;
       // sw_swatrset.cxx SwAttrPool::SwAttrPool and sw_init.cxx pVersionMap1
@@ -330,21 +414,10 @@ struct State {
       for (int i = 1; i <= 65; i++) list.push_back(i);
       for (int i = 66; i <= 121; i++) list.push_back(i+9);
       addVersionMap(4, 1, list);
-      break;
     }
-    case STOFFDocument::STOFF_K_BITMAP: // normally none
-    case STOFFDocument::STOFF_K_MATH: // normally none
-      m_verStart=m_verEnd=0;
-      break;
-    case STOFFDocument::STOFF_K_DATABASE: // checkme
-    case STOFFDocument::STOFF_K_DRAW: // checkme
-    case STOFFDocument::STOFF_K_PRESENTATION: // checkme
-
-    case STOFFDocument::STOFF_K_UNKNOWN:
-    default:
+    else { // unsure
       m_verStart=0;
       m_verEnd=83;
-      break;
     }
   }
   //! returns true if the value is in expected range
@@ -462,7 +535,7 @@ bool StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPo
   }
   StarAttribute attribute;
   return attribute.readAttribute(zone, m_state->m_idToAttributeList[size_t(which-m_state->m_verStart)],
-                                 vers, endPos, *m_state->m_document.getSDWParser());
+                                 vers, endPos, m_state->m_document);
 }
 
 bool StarItemPool::read(StarZone &zone)
@@ -551,7 +624,7 @@ bool StarItemPool::read(StarZone &zone)
     f << "###name";
   }
   if (!string.empty()) {
-    m_state->m_name=string;
+    m_state->setPoolName(string);
     f << "name[ext]=" << string.cstr() << ",";
   }
   zone.closeSfxRecord(type1, "PoolDef");
@@ -753,8 +826,10 @@ bool StarItemPool::readV1(StarZone &zone)
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
-  if (!string.empty())
+  if (!string.empty()) {
+    m_state->setPoolName(string);
     f << "name[ext]=" << string.cstr() << ",";
+  }
   uint32_t attribSize;
   *input>>attribSize;
   long attribPos=input->tell();

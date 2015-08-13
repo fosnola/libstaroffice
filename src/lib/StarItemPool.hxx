@@ -74,12 +74,12 @@ public:
   //! try to read a "StyleItemPool" zone
   static bool readStyle(StarZone &zone, int itemPoolVersion);
 
+  //! try to read an attribute
+  bool readAttribute(StarZone &zone, int which, int vers, long endPos);
+
 protected:
   //! try to read a "ItemPool" zone (version 1)
   bool readV1(StarZone &zone);
-
-  //! try to read an attribute
-  bool readAttribute(StarZone &zone, int which, int vers, long endPos);
 
   //
   // data

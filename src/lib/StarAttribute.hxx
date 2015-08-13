@@ -50,7 +50,7 @@ struct State;
 }
 
 class StarZone;
-class SDWParser;
+class StarDocument;
 
 /** \brief the main class to read/.. a StarOffice attribute
  *
@@ -62,141 +62,197 @@ class StarAttribute
 public:
   //! the attribute list
   enum {
-    ATR_CHR_CASEMAP = 1,					        	    		// 1
-    ATR_CHR_CHARSETCOLOR,					        	    		// 2
-    ATR_CHR_COLOR,								        	    		// 3
-    ATR_CHR_CONTOUR,							        	    		// 4
-    ATR_CHR_CROSSEDOUT,						        	    		// 5
-    ATR_CHR_ESCAPEMENT,						        	    		// 6
-    ATR_CHR_FONT,									        	    		// 7
-    ATR_CHR_FONTSIZE,							        	    		// 8
-    ATR_CHR_KERNING, 							        	    		// 9
-    ATR_CHR_LANGUAGE,							        	    		// 10
-    ATR_CHR_POSTURE, 							        	    		// 11
-    ATR_CHR_PROPORTIONALFONTSIZE,		      	    		// 12
-    ATR_CHR_SHADOWED,							        	    		// 13
-    ATR_CHR_UNDERLINE,						        	    		// 14
-    ATR_CHR_WEIGHT,								        	    		// 15
-    ATR_CHR_WORDLINEMODE,					        	    		// 16
-    ATR_CHR_AUTOKERN,							        	    		// 17
-    ATR_CHR_BLINK,								        	    		// 18
-    ATR_CHR_NOHYPHEN,							        	    		// 19
-    ATR_CHR_NOLINEBREAK, 					        	    		// 20
-    ATR_CHR_BACKGROUND,						        	    		// 21
-    ATR_CHR_CJK_FONT,							        	    		// 22
-    ATR_CHR_CJK_FONTSIZE,					        	    		// 23
-    ATR_CHR_CJK_LANGUAGE,					        	    		// 24
-    ATR_CHR_CJK_POSTURE, 					        	    		// 25
-    ATR_CHR_CJK_WEIGHT,						        	    		// 26
-    ATR_CHR_CTL_FONT,							        	    		// 27
-    ATR_CHR_CTL_FONTSIZE,					        	    		// 28
-    ATR_CHR_CTL_LANGUAGE,					        	    		// 29
-    ATR_CHR_CTL_POSTURE, 					        	    		// 30
-    ATR_CHR_CTL_WEIGHT,						        	    		// 31
-    ATR_CHR_ROTATE,								        	    		// 32
-    ATR_CHR_EMPHASIS_MARK,				        	    		// 33
-    ATR_CHR_TWO_LINES, 						        	    		// 34
-    ATR_CHR_SCALEW,								        	    		// 35
-    ATR_CHR_RELIEF,								        	    		// 36
-    ATR_CHR_DUMMY1,								        	    		// 37
+    ATTR_CHR_CASEMAP = 1,					        	    		// 1
+    ATTR_CHR_CHARSETCOLOR,					        	    	// 2
+    ATTR_CHR_COLOR,								        	    		// 3
+    ATTR_CHR_CONTOUR,							        	    		// 4
+    ATTR_CHR_CROSSEDOUT,						        	    	// 5
+    ATTR_CHR_ESCAPEMENT,						        	    	// 6
+    ATTR_CHR_FONT,									        	    	// 7
+    ATTR_CHR_FONTSIZE,							        	    	// 8
+    ATTR_CHR_KERNING, 							        	    	// 9
+    ATTR_CHR_LANGUAGE,							        	    	// 10
+    ATTR_CHR_POSTURE, 							        	    	// 11
+    ATTR_CHR_PROPORTIONALFONTSIZE,		      	    	// 12
+    ATTR_CHR_SHADOWED,							        	    	// 13
+    ATTR_CHR_UNDERLINE,						        	    		// 14
+    ATTR_CHR_WEIGHT,								        	    	// 15
+    ATTR_CHR_WORDLINEMODE,					        	    	// 16
+    ATTR_CHR_AUTOKERN,							        	    	// 17
+    ATTR_CHR_BLINK,								        	    		// 18
+    ATTR_CHR_NOHYPHEN,							        	    	// 19
+    ATTR_CHR_NOLINEBREAK, 					        	    	// 20
+    ATTR_CHR_BACKGROUND,						        	    	// 21
+    ATTR_CHR_CJK_FONT,							        	    	// 22
+    ATTR_CHR_CJK_FONTSIZE,					        	    	// 23
+    ATTR_CHR_CJK_LANGUAGE,					        	    	// 24
+    ATTR_CHR_CJK_POSTURE, 					        	    	// 25
+    ATTR_CHR_CJK_WEIGHT,						        	    	// 26
+    ATTR_CHR_CTL_FONT,							        	    	// 27
+    ATTR_CHR_CTL_FONTSIZE,					        	    	// 28
+    ATTR_CHR_CTL_LANGUAGE,					        	    	// 29
+    ATTR_CHR_CTL_POSTURE, 					        	    	// 30
+    ATTR_CHR_CTL_WEIGHT,						        	    	// 31
+    ATTR_CHR_ROTATE,								        	    	// 32
+    ATTR_CHR_EMPHASIS_MARK,				        	    		// 33
+    ATTR_CHR_TWO_LINES, 						        	    	// 34
+    ATTR_CHR_SCALEW,								        	    	// 35
+    ATTR_CHR_RELIEF,								        	    	// 36
+    ATTR_CHR_DUMMY1,								        	    	// 37
 
-    ATR_TXT_INETFMT,							        	    		// 38
-    ATR_TXT_DUMMY4,								        	    		// 39
-    ATR_TXT_REFMARK, 							        	    		// 40
-    ATR_TXT_TOXMARK, 							        	    		// 41
-    ATR_TXT_CHARFMT, 							        	    		// 42
-    ATR_TXT_DUMMY5, 								      	    		// 43
-    ATR_TXT_CJK_RUBY, 							      	    		// 44
-    ATR_TXT_UNKNOWN_CONTAINER,					  	    		// 45
-    ATR_TXT_DUMMY6,								        	    		// 46
-    ATR_TXT_DUMMY7,								        	    		// 47
+    ATTR_TXT_INETFMT,							        	    		// 38
+    ATTR_TXT_DUMMY4,								        	    	// 39
+    ATTR_TXT_REFMARK, 							        	    	// 40
+    ATTR_TXT_TOXMARK, 							        	    	// 41
+    ATTR_TXT_CHARFMT, 							        	    	// 42
+    ATTR_TXT_DUMMY5, 								      	    		// 43
+    ATTR_TXT_CJK_RUBY, 							      	    		// 44
+    ATTR_TXT_UNKNOWN_CONTAINER,					  	    		// 45
+    ATTR_TXT_DUMMY6,								        	    	// 46
+    ATTR_TXT_DUMMY7,								        	    	// 47
 
-    ATR_TXT_FIELD,								        	    		// 48
-    ATR_TXT_FLYCNT,								        	    		// 49
-    ATR_TXT_FTN, 									        	    		// 50
-    ATR_TXT_SOFTHYPH,							        	    		// 51
-    ATR_TXT_HARDBLANK,							      	    		// 52
-    ATR_TXT_DUMMY1,								        	    		// 53
-    ATR_TXT_DUMMY2,								        	    		// 54
+    ATTR_TXT_FIELD,								        	    		// 48
+    ATTR_TXT_FLYCNT,								        	    	// 49
+    ATTR_TXT_FTN, 									        	    	// 50
+    ATTR_TXT_SOFTHYPH,							        	    	// 51
+    ATTR_TXT_HARDBLANK,							      	    		// 52
+    ATTR_TXT_DUMMY1,								        	    	// 53
+    ATTR_TXT_DUMMY2,								        	    	// 54
 
-    ATR_PARA_LINESPACING,		              	    		// 55
-    ATR_PARA_ADJUST,								    	    			// 56
-    ATR_PARA_SPLIT,								              		// 57
-    ATR_PARA_ORPHANS, 							    	    			// 58
-    ATR_PARA_WIDOWS,								    	    			// 59
-    ATR_PARA_TABSTOP, 							    	    			// 60
-    ATR_PARA_HYPHENZONE,							    	    		// 61
-    ATR_PARA_DROP,								              		// 62
-    ATR_PARA_REGISTER,							    	    			// 63
-    ATR_PARA_NUMRULE, 							    	    			// 64
-    ATR_PARA_SCRIPTSPACE,							    	    		// 65
-    ATR_PARA_HANGINGPUNCTUATION,					    	    // 66
-    ATR_PARA_FORBIDDEN_RULES,						    	    	// 67
-    ATR_PARA_VERTALIGN,								              // 68
-    ATR_PARA_SNAPTOGRID,                    	    	// 69
-    ATR_PARA_CONNECT_BORDER,                	    	// 70
-    ATR_PARA_DUMMY5,								              	// 71
-    ATR_PARA_DUMMY6,								              	// 72
-    ATR_PARA_DUMMY7,								              	// 73
-    ATR_PARA_DUMMY8,								              	// 74
+    ATTR_PARA_LINESPACING,		              	    	// 55
+    ATTR_PARA_ADJUST,								    	    			// 56
+    ATTR_PARA_SPLIT,								              	// 57
+    ATTR_PARA_ORPHANS, 							    	    			// 58
+    ATTR_PARA_WIDOWS,								    	    			// 59
+    ATTR_PARA_TABSTOP, 							    	    			// 60
+    ATTR_PARA_HYPHENZONE,							    	    		// 61
+    ATTR_PARA_DROP,								              		// 62
+    ATTR_PARA_REGISTER,							    	    			// 63
+    ATTR_PARA_NUMRULE, 							    	    			// 64
+    ATTR_PARA_SCRIPTSPACE,							    	    	// 65
+    ATTR_PARA_HANGINGPUNCTUATION,					    	    // 66
+    ATTR_PARA_FORBIDDEN_RULES,						    	    // 67
+    ATTR_PARA_VERTALIGN,								            // 68
+    ATTR_PARA_SNAPTOGRID,                    	    	// 69
+    ATTR_PARA_CONNECT_BORDER,                	    	// 70
+    ATTR_PARA_DUMMY5,								              	// 71
+    ATTR_PARA_DUMMY6,								              	// 72
+    ATTR_PARA_DUMMY7,								              	// 73
+    ATTR_PARA_DUMMY8,								              	// 74
 
-    ATR_FRM_FILL_ORDER,                           	// 75
-    ATR_FRM_FRM_SIZE,                             	// 76
-    ATR_FRM_PAPER_BIN,                            	// 77
-    ATR_FRM_LR_SPACE,                             	// 78
-    ATR_FRM_UL_SPACE,                             	// 79
-    ATR_FRM_PAGEDESC,                             	// 80
-    ATR_FRM_BREAK,                                	// 81
-    ATR_FRM_CNTNT,                                	// 82
-    ATR_FRM_HEADER,                               	// 83
-    ATR_FRM_FOOTER,                               	// 84
-    ATR_FRM_PRINT,                                	// 85
-    ATR_FRM_OPAQUE,                               	// 86
-    ATR_FRM_PROTECT,                              	// 87
-    ATR_FRM_SURROUND,                             	// 88
-    ATR_FRM_VERT_ORIENT,                          	// 89
-    ATR_FRM_HORI_ORIENT,                          	// 90
-    ATR_FRM_ANCHOR,                               	// 91
-    ATR_FRM_BACKGROUND,                           	// 92
-    ATR_FRM_BOX,                                  	// 93
-    ATR_FRM_SHADOW,                               	// 94
-    ATR_FRM_FRMMACRO,                             	// 95
-    ATR_FRM_COL,                                  	// 96
-    ATR_FRM_KEEP,                                 	// 97
-    ATR_FRM_URL,                                  	// 98
-    ATR_FRM_EDIT_IN_READONLY,                     	// 99
-    ATR_FRM_LAYOUT_SPLIT,                         	// 100
-    ATR_FRM_CHAIN,                                	// 101
-    ATR_FRM_TEXTGRID,                             	// 102
-    ATR_FRM_LINENUMBER  ,                         	// 103
-    ATR_FRM_FTN_AT_TXTEND,                        	// 104
-    ATR_FRM_END_AT_TXTEND,                        	// 105
-    ATR_FRM_COLUMNBALANCE,                        	// 106
-    ATR_FRM_FRAMEDIR,                             	// 107
-    ATR_FRM_HEADER_FOOTER_EAT_SPACING,            	// 108
-    ATR_FRM_FRMATR_DUMMY9,                        	// 109
+    ATTR_FRM_FILL_ORDER,                           	// 75
+    ATTR_FRM_FRM_SIZE,                             	// 76
+    ATTR_FRM_PAPER_BIN,                            	// 77
+    ATTR_FRM_LR_SPACE,                             	// 78
+    ATTR_FRM_UL_SPACE,                             	// 79
+    ATTR_FRM_PAGEDESC,                             	// 80
+    ATTR_FRM_BREAK,                                	// 81
+    ATTR_FRM_CNTNT,                                	// 82
+    ATTR_FRM_HEADER,                               	// 83
+    ATTR_FRM_FOOTER,                               	// 84
+    ATTR_FRM_PRINT,                                	// 85
+    ATTR_FRM_OPAQUE,                               	// 86
+    ATTR_FRM_PROTECT,                              	// 87
+    ATTR_FRM_SURROUND,                             	// 88
+    ATTR_FRM_VERT_ORIENT,                          	// 89
+    ATTR_FRM_HORI_ORIENT,                          	// 90
+    ATTR_FRM_ANCHOR,                               	// 91
+    ATTR_FRM_BACKGROUND,                           	// 92
+    ATTR_FRM_BOX,                                  	// 93
+    ATTR_FRM_SHADOW,                               	// 94
+    ATTR_FRM_FRMMACRO,                             	// 95
+    ATTR_FRM_COL,                                  	// 96
+    ATTR_FRM_KEEP,                                 	// 97
+    ATTR_FRM_URL,                                  	// 98
+    ATTR_FRM_EDIT_IN_READONLY,                     	// 99
+    ATTR_FRM_LAYOUT_SPLIT,                         	// 100
+    ATTR_FRM_CHAIN,                                	// 101
+    ATTR_FRM_TEXTGRID,                             	// 102
+    ATTR_FRM_LINENUMBER  ,                         	// 103
+    ATTR_FRM_FTN_AT_TXTEND,                        	// 104
+    ATTR_FRM_END_AT_TXTEND,                        	// 105
+    ATTR_FRM_COLUMNBALANCE,                        	// 106
+    ATTR_FRM_FRAMEDIR,                             	// 107
+    ATTR_FRM_HEADER_FOOTER_EAT_SPACING,            	// 108
+    ATTR_FRM_FRMATTR_DUMMY9,                        // 109
 
-    ATR_GRF_MIRRORGRF,  	                 	      	// 110
-    ATR_GRF_CROPGRF,                       	      	// 111
-    ATR_GRF_ROTATION,                      	      	// 112
-    ATR_GRF_LUMINANCE,                     	      	// 113
-    ATR_GRF_CONTRAST,                      	      	// 114
-    ATR_GRF_CHANNELR,                      	      	// 115
-    ATR_GRF_CHANNELG,                      	      	// 116
-    ATR_GRF_CHANNELB,                      	      	// 117
-    ATR_GRF_GAMMA,                         	      	// 118
-    ATR_GRF_INVERT,                        	      	// 119
-    ATR_GRF_TRANSPARENCY,                  	      	// 120
-    ATR_GRF_DRAWMODE,                      	      	// 121
-    ATR_GRF_DUMMY1,                        	      	// 122
-    ATR_GRF_DUMMY2,                        	      	// 123
-    ATR_GRF_DUMMY3,                        	      	// 124
-    ATR_GRF_DUMMY4,                        	      	// 125
-    ATR_GRF_DUMMY5,                        	      	// 126
+    ATTR_GRF_MIRRORGRF,  	                 	      	// 110
+    ATTR_GRF_CROPGRF,                       	      // 111
+    ATTR_GRF_ROTATION,                      	      // 112
+    ATTR_GRF_LUMINANCE,                     	      // 113
+    ATTR_GRF_CONTRAST,                      	      // 114
+    ATTR_GRF_CHANNELR,                      	      // 115
+    ATTR_GRF_CHANNELG,                      	      // 116
+    ATTR_GRF_CHANNELB,                      	      // 117
+    ATTR_GRF_GAMMA,                         	      // 118
+    ATTR_GRF_INVERT,                        	      // 119
+    ATTR_GRF_TRANSPARENCY,                  	      // 120
+    ATTR_GRF_DRAWMODE,                      	      // 121
+    ATTR_GRF_DUMMY1,                        	      // 122
+    ATTR_GRF_DUMMY2,                        	      // 123
+    ATTR_GRF_DUMMY3,                        	      // 124
+    ATTR_GRF_DUMMY4,                        	      // 125
+    ATTR_GRF_DUMMY5,                        	      // 126
 
-    ATR_BOX_FORMAT,     	                 	      	// 127
-    ATR_BOX_FORMULA,                       	      	// 128
-    ATR_BOX_VALUE                         	      	// 129
+    ATTR_BOX_FORMAT,     	                 	      	// 127
+    ATTR_BOX_FORMULA,                       	      // 128
+    ATTR_BOX_VALUE,                         	      // 129
+
+    // other
+    ATTR_SC_USERDEF,
+    ATTR_SC_HYPHENATE,
+    ATTR_SC_HORJUSTIFY,
+    ATTR_SC_INDENT,
+    ATTR_SC_VERJUSTIFY,
+    ATTR_SC_ORIENTATION,
+    ATTR_SC_ROTATE_VALUE,
+    ATTR_SC_ROTATE_MODE,
+    ATTR_SC_VERTICAL_ASIAN,
+    ATTR_SC_WRITINGDIR,
+    ATTR_SC_LINEBREAK,
+    ATTR_SC_MARGIN,
+    ATTR_SC_MERGE,
+    ATTR_SC_MERGE_FLAG,
+    ATTR_SC_VALUE_FORMAT,
+    ATTR_SC_LANGUAGE_FORMAT,
+    ATTR_SC_PROTECTION,
+    ATTR_SC_BORDER,
+    ATTR_SC_BORDER_INNER,
+    ATTR_SC_VALIDDATA,
+    ATTR_SC_CONDITIONAL,
+    ATTR_SC_PATTERN, // TODO
+    ATTR_SC_PAGE,
+    ATTR_SC_PAGE_PAPERTRAY,
+    ATTR_SC_PAGE_SIZE,
+    ATTR_SC_PAGE_MAXSIZE,
+    ATTR_SC_PAGE_HORCENTER,
+    ATTR_SC_PAGE_VERCENTER,
+    ATTR_SC_PAGE_ON,
+    ATTR_SC_PAGE_DYNAMIC,
+    ATTR_SC_PAGE_SHARED,
+    ATTR_SC_PAGE_NOTES,
+    ATTR_SC_PAGE_GRID,
+    ATTR_SC_PAGE_HEADERS,
+    ATTR_SC_PAGE_CHARTS,
+    ATTR_SC_PAGE_OBJECTS,
+    ATTR_SC_PAGE_DRAWINGS,
+    ATTR_SC_PAGE_TOPDOWN,
+    ATTR_SC_PAGE_SCALE,
+    ATTR_SC_PAGE_SCALETOPAGES,
+    ATTR_SC_PAGE_FIRSTPAGENO,
+    ATTR_SC_PAGE_PRINTAREA,
+    ATTR_SC_PAGE_REPEATROW,
+    ATTR_SC_PAGE_REPEATCOL,
+    ATTR_SC_PAGE_PRINTTABLES,
+    ATTR_SC_PAGE_HEADERLEFT,
+    ATTR_SC_PAGE_FOOTERLEFT,
+    ATTR_SC_PAGE_HEADERRIGHT,
+    ATTR_SC_PAGE_FOOTERRIGHT,
+    ATTR_SC_PAGE_HEADERSET,
+    ATTR_SC_PAGE_FOOTERSET,
+    ATTR_SC_PAGE_FORMULAS,
+    ATTR_SC_PAGE_NULLVALS
+
   };
   //! constructor
   StarAttribute();
@@ -205,7 +261,7 @@ public:
 
 
   //! try to read an attribute
-  bool readAttribute(StarZone &zone, int which, int vers, long endPos, SDWParser &manager);
+  bool readAttribute(StarZone &zone, int which, int vers, long endPos, StarDocument &document);
 
   //
   // data

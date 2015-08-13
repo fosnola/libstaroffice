@@ -42,6 +42,9 @@
 #include "StarZone.hxx"
 
 #include "StarAttribute.hxx"
+#include "StarDocument.hxx"
+#include "StarItemPool.hxx"
+
 #include "StarFileManager.hxx"
 
 /** Internal: the structures of a StarFileManager */
@@ -662,6 +665,166 @@ bool StarFileManager::readJobSetUp(StarZone &zone)
 
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
+  return true;
+}
+
+bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarDocument &doc)
+{
+  // svx_editobj.cxx EditTextObject::Create
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+
+  f << "Entries(EditTextObject):";
+  uint16_t nWhich;
+  uint32_t nStructSz;
+  *input >> nWhich >> nStructSz;
+  f << "structSz=" << nStructSz << ",";
+  f << "nWhich=" << nWhich << ",";
+  if ((nWhich != 0x22 && nWhich !=0x31) || pos+6+long(nStructSz)>lastPos) {
+    STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: bad which/structSz\n"));
+    f << "###";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  lastPos=pos+6+long(nStructSz);
+  // BinTextObject::CreateData
+  uint16_t version;
+  bool ownPool;
+  *input>>version >> ownPool;
+  if (version) f << "vers=" << version << ",";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  pos=input->tell();
+  shared_ptr<StarItemPool> pool=doc.getNewItemPool();
+  if (ownPool && !pool->read(zone)) {
+    STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read a pool\n"));
+    ascFile.addPos(pos);
+    ascFile.addNote("EditTextObject:###pool");
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+    return true;
+  }
+  pos=input->tell();
+  f.str("");
+  f << "EditTextObject:";
+  uint16_t charSet, nPara;
+  *input>>charSet >> nPara;
+  f << "char[set]=" << charSet << ",";
+  if (nPara) f << "nPara=" << nPara << ",";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  for (int i=0; i<int(nPara); ++i) {
+    pos=input->tell();
+    f.str("");
+    f << "EditTextObject[para" << i << "]:";
+    for (int j=0; j<2; ++j) {
+      librevenge::RVNGString text;
+      if (!zone.readString(text) || input->tell()>lastPos) {
+        STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read a strings\n"));
+        f << "###strings,";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+        return true;
+      }
+      else if (!text.empty())
+        f << (j==0 ? "name" : "style") << "=" << text.cstr() << ",";
+    }
+    uint16_t styleFamily;
+    *input >> styleFamily;
+    if (styleFamily) f << "styleFam=" << styleFamily << ",";
+    if (!readSfxItemList(zone)) {
+      STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read item list\n"));
+      f << "###item list,";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+      return true;
+    }
+    uint16_t nAttr;
+    *input>>nAttr;
+    if (input->tell()+long(nAttr)*6 > lastPos) {
+      STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read item list\n"));
+      f << "###item list,";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+      return true;
+    }
+    f << "attrib=[";
+    for (int j=0; j<int(nAttr); ++j) { // checkme, probably bad
+      uint16_t which, start, end;
+      *input >> which >> start >> end;
+      f << "wh=" << which << ":";
+      f << "pos=" << start << "x" << end << ",";
+      if (!pool->readAttribute(zone, which, 0, lastPos) || input->tell() >lastPos) {
+        STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read an attribute\n"));
+        f << "###attribute,";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+        return true;
+      }
+    }
+    f << "],";
+    // REMOVE WHEN readAttribute is sure...
+    if (nAttr) {
+      STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read an attribute\n"));
+      f << "##checkme";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+      return true;
+    }
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+  }
+
+  pos=input->tell();
+  f.str("");
+  f << "EditTextObject:";
+  if (version>=400)
+    f << "tmpMetric=" << input->readULong(2) << ",";
+  if (version>=600) {
+    f << "userType=" << input->readULong(2) << ",";
+    f << "objSettings=" << input->readULong(4) << ",";
+  }
+  if (version>=601)
+    f << "vertical=" << input->readULong(1) << ",";
+  if (version>=602) {
+    f << "scriptType=" << input->readULong(2) << ",";
+    bool unicodeString;
+    *input >> unicodeString;
+    f << "strings=[";
+    for (int i=0; unicodeString && i<int(nPara); ++i) {
+      for (int s=0; s<2; ++s) {
+        librevenge::RVNGString text;
+        if (!zone.readString(text) || input->tell()>lastPos) {
+          STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read a strings\n"));
+          f << "###strings,";
+          break;
+        }
+        if (text.empty())
+          f << "_,";
+        else
+          f << text.cstr() << ",";
+      }
+    }
+    f << "],";
+  }
+  if (input->tell()!=lastPos) {
+    STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: find extra data\n"));
+    f << "###";
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  }
+  if (pos!=lastPos) {
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+  }
   return true;
 }
 
