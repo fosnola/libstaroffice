@@ -76,6 +76,8 @@ public:
   //! try to read a format pattern LCL : 'P' (list of 'D') (child of a TOXs)
   bool readSWPatternLCL(StarZone &zone);
 
+  //! try to read a number format (find in attribute)
+  bool readNumberFormat(StarZone &zone, long endPos);
   //! try to read number formatter type
   bool readNumberFormatter(StarZone &zone);
 

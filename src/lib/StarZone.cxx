@@ -353,6 +353,16 @@ bool StarZone::closeSDRHeader(std::string const &debugName)
 ////////////////////////////////////////////////////////////
 // record: open/close, read size
 ////////////////////////////////////////////////////////////
+bool StarZone::openDummyRecord()
+{
+  m_typeStack.push('@');
+  if (!m_positionStack.empty())
+    m_positionStack.push(m_positionStack.top());
+  else
+    m_positionStack.push(m_input->size());
+  return true;
+}
+
 bool StarZone::openRecord()
 {
   long pos=m_input->tell();
@@ -486,7 +496,7 @@ bool StarZone::closeRecord(char type, std::string const &debugName)
     m_typeStack.pop();
     m_positionStack.pop();
     if (typ!=type) continue;
-    if (!pos)
+    if (!pos || type=='@')
       return true;
     long actPos=m_input->tell();
     if (actPos!=pos) {

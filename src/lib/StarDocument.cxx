@@ -118,13 +118,16 @@ bool StarDocument::parse()
       getNewItemPool()->read(zone);
       continue;
     }
+    if (base=="persist elements") {
+      content.setParsed(true);
+      readPersistElements(ole, name);
+      continue;
+    }
     libstoff::DebugFile asciiFile(ole);
     asciiFile.open(name);
 
     bool ok=false;
-    if (base=="persist elements")
-      ok=readPersistElements(ole, asciiFile);
-    else if (base=="SfxDocumentInfo")
+    if (base=="SfxDocumentInfo")
       ok=readSfxDocumentInformation(ole, asciiFile);
     // TODO SfxPreview: GetPreviewMetaFile()
     else if (base=="SfxWindows")
@@ -137,8 +140,11 @@ bool StarDocument::parse()
   return true;
 }
 
-bool StarDocument::readPersistElements(STOFFInputStreamPtr input, libstoff::DebugFile &ascii)
+bool StarDocument::readPersistElements(STOFFInputStreamPtr input, std::string const &name)
 {
+  StarZone zone(input, name, "PersistsElement");
+  libstoff::DebugFile &ascii=zone.ascii();
+  ascii.open(name);
   input->seek(0, librevenge::RVNG_SEEK_SET);
   libstoff::DebugStream f;
   f << "Entries(Persists):";
@@ -185,58 +191,16 @@ bool StarDocument::readPersistElements(STOFFInputStreamPtr input, libstoff::Debu
   ascii.addNote(f.str().c_str());
   for (int i=0; i<N; ++i) {
     long pos=input->tell();
+    if (readPersistData(zone, endDataPos))
+      continue;
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
     f.str("");
     f << "Persists-A" << i << ":";
-    val=(int) input->readULong(1); // 60|70
-    if (val) f << "f0=" << std::hex << val << std::dec << ",";
-    long id;
-    if (pos+10>endDataPos || !input->readCompressedLong(id)) {
-      STOFF_DEBUG_MSG(("StarDocument::readPersistElements: data %d seems bad\n", i));
-      f << "###";
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      break;
-    }
-    if (id!=i+1) f << "id=" << id << ",";
-    val=(int) input->readULong(1); // another compressed long ?
-    if (val) f << "f1=" << val << ",";
-    long dSz=(long) input->readULong(4);
-    long endZPos=input->tell()+dSz;
-    if (dSz<16 || endZPos>endDataPos) {
-      STOFF_DEBUG_MSG(("StarDocument::readPersistElements: dSz seems bad\n"));
-      f << "###dSz=" << dSz << ",";
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      break;
-    }
-    int decalSz=(int) input->readULong(1);
-    if (decalSz) f << "decal=" << decalSz << ",";
-    int textSz=(int) input->readULong(2);
-    bool oddHeader=false;
-    if (textSz==0) {
-      f << "#odd,";
-      oddHeader=true;
-      textSz=(int) input->readULong(2);
-    }
-    if (input->tell()+textSz>endZPos) {
-      STOFF_DEBUG_MSG(("StarDocument::readPersistElements: data %d seems bad\n", i));
-      f << "###textSz=" << textSz << ",";
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      input->seek(endZPos, librevenge::RVNG_SEEK_SET);
-      continue;
-    }
-    std::string text("");
-    for (int c=0; c<textSz; ++c) text += (char) input->readULong(1);
-    f << text << ",";
-    if (!oddHeader) { // always 0?
-      val=(int) input->readLong(2);
-      if (val) f << "f2=" << val << ",";
-    }
-    ascii.addDelimiter(input->tell(),'|');
-    input->seek(endZPos, librevenge::RVNG_SEEK_SET);
+    STOFF_DEBUG_MSG(("StarDocument::readPersistElements: data %d seems bad\n", i));
+    f << "###";
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());
+    break;
   }
   input->seek(-18, librevenge::RVNG_SEEK_END);
   long pos=input->tell();
@@ -247,6 +211,129 @@ bool StarDocument::readPersistElements(STOFFInputStreamPtr input, libstoff::Debu
   f << "dim=" << STOFFBox2i(STOFFVec2i(dim[0],dim[1]), STOFFVec2i(dim[2],dim[3])) << ",";
   val=(int) input->readLong(2); // 0|9
   if (val) f << "f0=" << val << ",";
+  ascii.addPos(pos);
+  ascii.addNote(f.str().c_str());
+  return true;
+}
+
+bool StarDocument::readPersistData(StarZone &zone, long lastPos)
+{
+  // pstm.cxx SvPersistStream::ReadObj
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascii=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(PersistData)["<< zone.getRecordLevel() << "]:";
+  // SvPersistStream::ReadId
+  uint8_t hdr;
+  *input >> hdr;
+  long id=0, classId=0;
+  bool ok=true;
+  if (hdr&0x80) // nId=0
+    ;
+  else {
+    if ((hdr&0xf)==0) {
+      if ((hdr&0x20) || !(hdr&0x40))
+        ok=input->readCompressedLong(id);
+    }
+    else if (hdr&0x10)
+      ok=input->readCompressedLong(id);
+    if (hdr&0x60)
+      ok=input->readCompressedLong(classId);
+  }
+  if (id) f << "id=" << id << ",";
+  if (classId) f << "id[class]=" << classId << ",";
+  if (!ok || !hdr || input->tell()>lastPos) {
+    STOFF_DEBUG_MSG(("StarDocument::readPersistData: find unexpected header\n"));
+    f << "###header";
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    return false;
+  }
+  if (hdr&0x80 || (hdr&0x40)==0) {
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    return true;
+  }
+  if (hdr&0x20) {
+    ok=zone.openSCRecord();
+    if (!ok || zone.getRecordLastPosition()>lastPos) {
+      STOFF_DEBUG_MSG(("StarDocument::readPersistData: can not open main zone\n"));
+      if (ok) zone.closeSCRecord("PersistData");
+      f << "###,";
+      ascii.addPos(pos);
+      ascii.addNote(f.str().c_str());
+      return false;
+    }
+    lastPos=zone.getRecordLastPosition();
+  }
+  if (hdr&0x40) {
+    // app.cxx OfficeApplication::Init
+    switch (classId) {
+    case 2: {
+      long actPos=input->tell();
+      uint8_t val;
+      *input>>val;
+      librevenge::RVNGString text;
+      if (!zone.readString(text)||input->tell()>=lastPos) {
+        input->seek(actPos, librevenge::RVNG_SEEK_SET);
+        f << "##classId";
+        break;
+      }
+      f << "objData,";
+      if (val) f << "f0=" << int(val) << ","; // 0 or 1
+      f << text.cstr() << ",";
+      break;
+    }
+    case 3: { // flditem.cxx:void SvxURLField::Load
+      f << "urlData,";
+      uint16_t format;
+      *input >> format;
+      if (format) f << "format=" << format << ",";
+      for (int i=0; i<2; ++i) {
+        librevenge::RVNGString text;
+        if (!zone.readString(text) || input->tell()>lastPos) {
+          STOFF_DEBUG_MSG(("StarDocument::readPersistData: can not read a string\n"));
+          f << "##string";
+          break;
+        }
+        else if (!text.empty())
+          f << (i==0 ? "url" : "representation") << "=" << text.cstr() << ",";
+      }
+      if (input->tell()==lastPos)
+        break;
+      uint32_t nFrameMarker;
+      *input>>nFrameMarker;
+      uint16_t val;
+      switch (nFrameMarker) {
+      case 0x21981357:
+        *input>>val;
+        if (val) f << "char[set]=" << val << ",";
+        break;
+      case 0x21981358:
+        for (int i=0; i<2; ++i) {
+          *input>>val;
+          if (val) f << "f" << i << "=" << val << ",";
+        }
+        break;
+      default:
+        input->seek(-4, librevenge::RVNG_SEEK_CUR);
+        break;
+      }
+      break;
+    }
+    default:
+      STOFF_DEBUG_MSG(("StarDocument::readPersistData: unknown class id\n"));
+      f << "##classId";
+      break;
+    }
+  }
+  if (input->tell()!=lastPos)
+    ascii.addDelimiter(input->tell(),'|');
+  input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  if (hdr&0x20)
+    zone.closeSCRecord("PersistData");
+
   ascii.addPos(pos);
   ascii.addNote(f.str().c_str());
   return true;

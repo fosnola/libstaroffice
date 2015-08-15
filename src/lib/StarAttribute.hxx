@@ -251,8 +251,21 @@ public:
     ATTR_SC_PAGE_HEADERSET,
     ATTR_SC_PAGE_FOOTERSET,
     ATTR_SC_PAGE_FORMULAS,
-    ATTR_SC_PAGE_NULLVALS
+    ATTR_SC_PAGE_NULLVALS,
 
+    ATTR_EE_PARA_XMLATTRIBS,
+    ATTR_EE_PARA_ASIANCJKSPACING,
+    ATTR_EE_PARA_NUMBULLET,
+    ATTR_EE_PARA_BULLETSTATE,
+    ATTR_EE_PARA_OUTLLR_SPACE,
+    ATTR_EE_PARA_OUTLLEVEL,
+    ATTR_EE_PARA_BULLET,
+    ATTR_EE_CHR_SCALEW,
+    ATTR_EE_CHR_RUBI_DUMMY,
+    ATTR_EE_CHR_XMLATTRIBS,
+    ATTR_EE_FEATURE_TAB,
+    ATTR_EE_FEATURE_LINEBR,
+    ATTR_EE_FEATURE_FIELD
   };
   //! constructor
   StarAttribute();
@@ -262,7 +275,10 @@ public:
 
   //! try to read an attribute
   bool readAttribute(StarZone &zone, int which, int vers, long endPos, StarDocument &document);
+  //! try to read a brush
+  bool readBrushItem(StarZone &zone, int nVers, long endPos, libstoff::DebugStream &f);
 
+protected:
   //
   // data
   //

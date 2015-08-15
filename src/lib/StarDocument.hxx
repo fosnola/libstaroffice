@@ -79,9 +79,11 @@ public:
   //! returns a SDWParser(REMOVEME)
   SDWParser *getSDWParser();
 
+  //! try to read persist data
+  bool readPersistData(StarZone &zone, long endPos);
 protected:
   //!  the "persist elements" small ole: the list of object
-  bool readPersistElements(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
+  bool readPersistElements(STOFFInputStreamPtr input, std::string const &name);
   //! try to read the document information : "SfxDocumentInformation"
   bool readSfxDocumentInformation(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
   //! try to read the windows information : "SfxWindows"

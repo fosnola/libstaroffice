@@ -108,7 +108,7 @@ struct SfxMultiRecord {
         STOFF_DEBUG_MSG(("StarFileManagerInternal::SfxMultiRecord::open: oops the number of record seems bad\n"));
         s << "##numRecord=" << m_numRecord << ",";
         if (m_contentSize && m_endPos>m_startPos)
-          m_numRecord=uint16_t((m_endPos-m_startPos)/m_contentSize);
+          m_numRecord=uint16_t((m_endPos-m_startPos)/long(m_contentSize));
         else
           m_numRecord=0;
       }
@@ -116,7 +116,7 @@ struct SfxMultiRecord {
       return true;
     }
 
-    long debOffsetList=((m_headerType==3 || m_headerType==7) ? m_startPos : 0) + m_contentSize;
+    long debOffsetList=((m_headerType==3 || m_headerType==7) ? m_startPos : 0) + long(m_contentSize);
     if (debOffsetList<m_startPos || debOffsetList+4*m_numRecord > m_endPos) {
       STOFF_DEBUG_MSG(("StarFileManagerInternal::SfxMultiRecord::open: can not find the version map offset\n"));
       s << "###contentCount";
@@ -186,12 +186,12 @@ struct SfxMultiRecord {
   long getLastContentPosition() const
   {
     if (m_actualRecord >= m_numRecord) return m_endPos;
-    if (m_headerType==2) return m_startPos+m_actualRecord*m_contentSize;
+    if (m_headerType==2) return m_startPos+m_actualRecord*long(m_contentSize);
     if (m_actualRecord >= uint16_t(m_offsetList.size())) {
       STOFF_DEBUG_MSG(("StarFileManagerInternal::SfxMultiRecord::getLastContentPosition: argh, find unexpected index\n"));
       return m_endPos;
     }
-    return m_startPos+(m_offsetList[size_t(m_actualRecord)]>>8)-14;
+    return m_startPos+long(m_offsetList[size_t(m_actualRecord)]>>8)-14;
   }
 
   //! basic operator<< ; print header data
@@ -567,6 +567,77 @@ bool StarFileManager::readOutPlaceObject(STOFFInputStreamPtr input, libstoff::De
 ////////////////////////////////////////////////////////////
 // small zone
 ////////////////////////////////////////////////////////////
+bool StarFileManager::readBitmap(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  long pos=input->tell();
+  libstoff::DebugStream f;
+  f << "Entries(StarBitmap)[" << zone.getRecordLevel() << "]:";
+
+  STOFF_DEBUG_MSG(("StarFileManager::readBitmap: is not implement\n"));
+  f << "###";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return false;
+}
+
+bool StarFileManager::readFont(StarZone &zone, int nVers, long lastPos)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  long pos=input->tell();
+  // font.cxx:  operator>>( ..., Impl_Font& )
+  libstoff::DebugStream f;
+  f << "Entries(StarFont)[" << zone.getRecordLevel() << "]:";
+  for (int i=0; i<2; ++i) {
+    librevenge::RVNGString string;
+    if (!zone.readString(string)||input->tell()>lastPos) {
+      STOFF_DEBUG_MSG(("StarFileManager::readFont: can not read a string\n"));
+      f << "###string";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+    if (!string.empty()) f << (i==0 ? "name" : "style") << "=" << string.cstr() << ",";
+  }
+  f << "size=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+  uint16_t eCharSet, eFamily, ePitch, eWeight, eUnderline, eStrikeOut, eItalic, eLanguage, eWidthType;
+  int16_t orientation;
+  *input >> eCharSet >> eFamily >> ePitch >> eWeight >> eUnderline >> eStrikeOut
+         >> eItalic >> eLanguage >> eWidthType >> orientation;
+  if (eCharSet) f << "eCharSet=" << eCharSet << ",";
+  if (eFamily) f << "eFamily=" << eFamily << ",";
+  if (ePitch) f << "ePitch=" << ePitch << ",";
+  if (eWeight) f << "eWeight=" << eWeight << ",";
+  if (eUnderline) f << "eUnderline=" << eUnderline << ",";
+  if (eStrikeOut) f << "eStrikeOut=" << eStrikeOut << ",";
+  if (eItalic) f << "eItalic=" << eItalic << ",";
+  if (eLanguage) f << "eLanguage=" << eLanguage << ",";
+  if (eWidthType) f << "eWidthType=" << eWidthType << ",";
+  if (orientation) f << "orientation=" << orientation << ",";
+  bool wordline, outline, shadow;
+  uint8_t kerning;
+  *input >> wordline >> outline >> shadow >> kerning;
+  if (wordline) f << "wordline,";
+  if (outline) f << "outline,";
+  if (shadow) f << "shadow,";
+  if (kerning) f << "kerning=" << (int) kerning << ",";
+  if (nVers >= 2) {
+    bool vertical;
+    int8_t relief;
+    uint16_t cjkLanguage, emphasisMark;
+    *input >> relief >> cjkLanguage >> vertical >> emphasisMark;
+    if (relief) f << "relief=" << int(relief) << ",";
+    if (cjkLanguage) f << "cjkLanguage=" << cjkLanguage << ",";
+    if (vertical) f << "vertical,";
+    if (emphasisMark) f << "emphasisMark=" << emphasisMark << ",";
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return true;
+}
+
 bool StarFileManager::readJobSetUp(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -690,11 +761,13 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarDocum
     return false;
   }
   lastPos=pos+6+long(nStructSz);
-  // BinTextObject::CreateData
-  uint16_t version;
-  bool ownPool;
-  *input>>version >> ownPool;
-  if (version) f << "vers=" << version << ",";
+  // BinTextObject::CreateData or BinTextObject::CreateData
+  uint16_t version=0;
+  bool ownPool=true;
+  if (nWhich==0x31) {
+    *input>>version >> ownPool;
+    if (version) f << "vers=" << version << ",";
+  }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
@@ -710,9 +783,16 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarDocum
   pos=input->tell();
   f.str("");
   f << "EditTextObject:";
-  uint16_t charSet, nPara;
-  *input>>charSet >> nPara;
-  f << "char[set]=" << charSet << ",";
+  uint16_t charSet=0;
+  uint32_t nPara;
+  if (nWhich==0x31) {
+    uint16_t numPara;
+    *input>>charSet >> numPara;
+    nPara=numPara;
+  }
+  else
+    *input>> nPara;
+  if (charSet)  f << "char[set]=" << charSet << ",";
   if (nPara) f << "nPara=" << nPara << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -737,16 +817,24 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarDocum
     uint16_t styleFamily;
     *input >> styleFamily;
     if (styleFamily) f << "styleFam=" << styleFamily << ",";
-    if (!readSfxItemList(zone)) {
+    uint16_t nSfxItem;
+    *input >> nSfxItem;
+    if (nSfxItem) {
       STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read item list\n"));
-      f << "###item list,";
+      f << "nSfx=" << nSfxItem << ",###item list,";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       input->seek(lastPos, librevenge::RVNG_SEEK_SET);
       return true;
     }
-    uint16_t nAttr;
-    *input>>nAttr;
+    uint32_t nAttr;
+    if (nWhich==0x22)
+      *input>>nAttr;
+    else {
+      uint16_t nAttr16;
+      *input>>nAttr16;
+      nAttr=nAttr16;
+    }
     if (input->tell()+long(nAttr)*6 > lastPos) {
       STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read item list\n"));
       f << "###item list,";
@@ -787,6 +875,14 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarDocum
   pos=input->tell();
   f.str("");
   f << "EditTextObject:";
+  if (nWhich==0x22) {
+    uint16_t marker;
+    *input >> marker;
+    if (marker==0x9999) {
+      *input >> charSet;
+      if (charSet)  f << "char[set]=" << charSet << ",";
+    }
+  }
   if (version>=400)
     f << "tmpMetric=" << input->readULong(2) << ",";
   if (version>=600) {

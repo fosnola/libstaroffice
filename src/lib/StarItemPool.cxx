@@ -122,7 +122,7 @@ struct SfxMultiRecord {
         STOFF_DEBUG_MSG(("StarItemPoolInternal::SfxMultiRecord::open: oops the number of record seems bad\n"));
         s << "##numRecord=" << m_numRecord << ",";
         if (m_contentSize && m_endPos>m_startPos)
-          m_numRecord=uint16_t((m_endPos-m_startPos)/m_contentSize);
+          m_numRecord=uint16_t((m_endPos-m_startPos)/long(m_contentSize));
         else
           m_numRecord=0;
       }
@@ -130,7 +130,7 @@ struct SfxMultiRecord {
       return true;
     }
 
-    long debOffsetList=((m_headerType==3 || m_headerType==7) ? m_startPos : 0) + m_contentSize;
+    long debOffsetList=((m_headerType==3 || m_headerType==7) ? m_startPos : 0) + long(m_contentSize);
     if (debOffsetList<m_startPos || debOffsetList+4*m_numRecord > m_endPos) {
       STOFF_DEBUG_MSG(("StarItemPoolInternal::SfxMultiRecord::open: can not find the version map offset\n"));
       s << "###contentCount";
@@ -198,12 +198,12 @@ struct SfxMultiRecord {
   long getLastContentPosition() const
   {
     if (m_actualRecord >= m_numRecord) return m_endPos;
-    if (m_headerType==2) return m_startPos+m_actualRecord*m_contentSize;
+    if (m_headerType==2) return m_startPos+m_actualRecord*(long)m_contentSize;
     if (m_actualRecord >= uint16_t(m_offsetList.size())) {
       STOFF_DEBUG_MSG(("StarItemPoolInternal::SfxMultiRecord::getLastContentPosition: argh, find unexpected index\n"));
       return m_endPos;
     }
-    return m_startPos+(m_offsetList[size_t(m_actualRecord)]>>8)-14;
+    return m_startPos+long(m_offsetList[size_t(m_actualRecord)]>>8)-14;
   }
 
   //! basic operator<< ; print header data
@@ -301,8 +301,52 @@ struct State {
   //! the pool
   void init()
   {
-    // to do EditEngineItemPool, VCControls, XOutdevItemPool
-    if (m_name=="SchItemPool") {
+    // to do VCControls, XOutdevItemPool
+    if (m_name=="EditEngineItemPool") {
+      m_verStart=3989;
+      m_verEnd=4037;
+      // svx_editdoc.cxx
+      std::vector<int> list;
+      for (int i = 0; i <= 14; ++i) list.push_back(3999+i);
+      for (int i = 15; i <= 17; ++i) list.push_back(3999+i+4);
+      addVersionMap(1, 3999, list);
+
+      list.clear();
+      for (int i = 0; i <= 17; ++i) list.push_back(3999+i);
+      for (int i=18; i<=20; ++i)  list.push_back(3999+i+1);
+      addVersionMap(2, 3999, list);
+
+      list.clear();
+      for (int i = 0; i <= 10; ++i) list.push_back(3997+i);
+      for (int i=11; i<=23; ++i)  list.push_back(3997+i+1);
+      addVersionMap(3, 3997, list);
+
+      list.clear();
+      for (int i = 0; i <= 24; ++i) list.push_back(3994+i);
+      for (int i=25; i<=28; ++i)  list.push_back(3994+i+15);
+      addVersionMap(4, 3994, list);
+      // svx_eerdll.cxx GlobalEditData::GetDefItems
+      static int const(what[])= {
+        StarAttribute::ATTR_SC_WRITINGDIR, StarAttribute::ATTR_EE_PARA_XMLATTRIBS, StarAttribute::ATTR_PARA_HANGINGPUNCTUATION, StarAttribute::ATTR_PARA_FORBIDDEN_RULES,
+        StarAttribute::ATTR_EE_PARA_ASIANCJKSPACING, StarAttribute::ATTR_EE_PARA_NUMBULLET, StarAttribute::ATTR_SC_HYPHENATE, StarAttribute::ATTR_EE_PARA_BULLETSTATE,
+        StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE, StarAttribute::ATTR_EE_PARA_OUTLLEVEL, StarAttribute::ATTR_EE_PARA_BULLET, StarAttribute::ATTR_FRM_LR_SPACE,
+        StarAttribute::ATTR_FRM_UL_SPACE, StarAttribute::ATTR_PARA_LINESPACING, StarAttribute::ATTR_PARA_ADJUST, StarAttribute::ATTR_PARA_TABSTOP,
+        StarAttribute::ATTR_CHR_COLOR, StarAttribute::ATTR_CHR_FONT, StarAttribute::ATTR_CHR_FONTSIZE, StarAttribute::ATTR_EE_CHR_SCALEW,
+
+        StarAttribute::ATTR_CHR_WEIGHT, StarAttribute::ATTR_CHR_UNDERLINE, StarAttribute::ATTR_CHR_CROSSEDOUT, StarAttribute::ATTR_CHR_POSTURE,
+        StarAttribute::ATTR_CHR_CONTOUR, StarAttribute::ATTR_CHR_SHADOWED, StarAttribute::ATTR_CHR_ESCAPEMENT, StarAttribute::ATTR_CHR_AUTOKERN,
+        StarAttribute::ATTR_CHR_KERNING, StarAttribute::ATTR_CHR_WORDLINEMODE, StarAttribute::ATTR_CHR_LANGUAGE, StarAttribute::ATTR_CHR_CJK_LANGUAGE,
+        StarAttribute::ATTR_CHR_CTL_LANGUAGE, StarAttribute::ATTR_CHR_CJK_FONT, StarAttribute::ATTR_CHR_CTL_FONT, StarAttribute::ATTR_CHR_CJK_FONTSIZE,
+        StarAttribute::ATTR_CHR_CTL_FONTSIZE, StarAttribute::ATTR_CHR_CJK_WEIGHT, StarAttribute::ATTR_CHR_CTL_WEIGHT, StarAttribute::ATTR_CHR_CJK_POSTURE,
+
+        StarAttribute::ATTR_CHR_CTL_POSTURE, StarAttribute::ATTR_CHR_EMPHASIS_MARK, StarAttribute::ATTR_CHR_RELIEF, StarAttribute::ATTR_EE_CHR_RUBI_DUMMY,
+        StarAttribute::ATTR_EE_CHR_XMLATTRIBS, StarAttribute::ATTR_EE_FEATURE_TAB, StarAttribute::ATTR_EE_FEATURE_LINEBR, StarAttribute::ATTR_CHR_CHARSETCOLOR,
+        StarAttribute::ATTR_EE_FEATURE_FIELD
+      };
+      for (int i=0; i<int(sizeof(what)/sizeof(int)); ++i)
+        m_idToAttributeList.push_back(what[i]);
+    }
+    else if (m_name=="SchItemPool") {
       // sch_sch_itempool.cxx
       m_verStart=1; // SCHATTR_START
       m_verEnd=58;
@@ -534,8 +578,11 @@ bool StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPo
     return true;
   }
   StarAttribute attribute;
-  return attribute.readAttribute(zone, m_state->m_idToAttributeList[size_t(which-m_state->m_verStart)],
-                                 vers, endPos, m_state->m_document);
+  zone.openDummyRecord();
+  bool ok=attribute.readAttribute(zone, m_state->m_idToAttributeList[size_t(which-m_state->m_verStart)],
+                                  vers, endPos, m_state->m_document);
+  zone.closeDummyRecord();
+  return ok;
 }
 
 bool StarItemPool::read(StarZone &zone)
@@ -749,10 +796,13 @@ bool StarItemPool::read(StarZone &zone)
             uint16_t nRef;
             *input>>nRef;
             f << "ref=" << nRef << ",";
-            if (!readAttribute(zone, which, (int) nVersion, mRecord1.getLastContentPosition())) {
+            if (!readAttribute(zone, which, (int) nVersion, mRecord1.getLastContentPosition()))
               f << "###";
-              input->seek(mRecord1.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
+            else if (input->tell()!=mRecord1.getLastContentPosition()) {
+              STOFF_DEBUG_MSG(("StarItemPool::read: find extra attrib data\n"));
+              f << "###extra";
             }
+            input->seek(mRecord1.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
             ascii.addPos(pos);
             ascii.addNote(f.str().c_str());
           }
@@ -765,6 +815,11 @@ bool StarItemPool::read(StarZone &zone)
           f << "Entries(StarAttribute)[" <<  which-m_state->m_verStart << "]:";
           ascii.addPos(pos);
           ascii.addNote(f.str().c_str());
+        }
+        else if (input->tell()!=mRecord.getLastContentPosition()) {
+          STOFF_DEBUG_MSG(("StarItemPool::read: find extra attrib data\n"));
+          ascii.addPos(pos);
+          ascii.addNote("extra###");
         }
       }
       input->seek(mRecord.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
@@ -789,7 +844,7 @@ bool StarItemPool::readV1(StarZone &zone)
     return false;
   }
   uint16_t tag;
-  // poolio.cxx SfxItemPool::Load
+  // poolio.cxx SfxItemPool::Load1_Impl
   uint8_t nMajorVers, nMinorVers;
   *input >> tag >> nMajorVers >> nMinorVers;
   if (tag==0x1111)
@@ -815,6 +870,7 @@ bool StarItemPool::readV1(StarZone &zone)
   if (nMinorVers>=2) {
     int16_t nLoadingVersion;
     *input >> nLoadingVersion;
+    m_state->m_loadingVersion=int(nLoadingVersion);
     if (nLoadingVersion) f << "vers[loading]=" << nLoadingVersion << ",";
   }
   librevenge::RVNGString string;
@@ -843,7 +899,7 @@ bool StarItemPool::readV1(StarZone &zone)
   }
   else if (attribSize) {
     f << "attr[sz]=" << attribSize << ",";
-    input->seek(attribSize, librevenge::RVNG_SEEK_CUR);
+    input->seek((long)attribSize, librevenge::RVNG_SEEK_CUR);
   }
   else {
     STOFF_DEBUG_MSG(("StarItemPool::readV1: attribSize\n"));
@@ -862,7 +918,7 @@ bool StarItemPool::readV1(StarZone &zone)
   uint32_t tableSize;
   *input>>tableSize;
   long tablePos=input->tell();
-  long beginEndPos=tablePos+tableSize;
+  long beginEndPos=tablePos+(long) tableSize;
   if (beginEndPos+4>endPos) {
     STOFF_DEBUG_MSG(("StarItemPool::readV1: tableSize is bad\n"));
     f << "###";
@@ -880,9 +936,9 @@ bool StarItemPool::readV1(StarZone &zone)
   ascii.addPos(pos);
   ascii.addNote(f.str().c_str());
 
-  long endTablePos=tablePos+tableSize;
+  long endTablePos=tablePos+(long)tableSize;
   if (nMinorVers>=3 && tableSize>=4) { // CHECKME: never seens
-    input->seek(tablePos+tableSize-4, librevenge::RVNG_SEEK_SET);
+    input->seek(endTablePos-4, librevenge::RVNG_SEEK_SET);
     pos=(long) input->readULong(4);
     endTablePos-=4;
     if (pos<tablePos || pos>=endTablePos) {
@@ -948,7 +1004,7 @@ bool StarItemPool::readV1(StarZone &zone)
   // now read the attribute
   input->seek(attribPos, librevenge::RVNG_SEEK_SET);
   pos=input->tell();
-  long endDataPos=attribPos+attribSize;
+  long endDataPos=attribPos+(long) attribSize;
   f.str("");
   f << "PoolDef[attrib]:";
   bool ok=false;
@@ -992,11 +1048,22 @@ bool StarItemPool::readV1(StarZone &zone)
     }
     uint16_t nSlot, nVersion, nCount;
     *input >> nSlot >> nVersion >> nCount;
-    f << "wh=" << nWhich << "[" << std::hex << nSlot << std::dec << "], vers=" << nVersion << ", count=" << nCount << ",";
-    f << "sz=[";
-    long actPos=input->tell();
+    int which=nWhich;
+    if (m_state->m_currentVersion!=m_state->m_loadingVersion) which=m_state->getWhich(which);
+    if (!m_state->isInRange(which)) {
+      STOFF_DEBUG_MSG(("StarItemPool::readV1: the which value seems bad\n"));
+      f << "###";
+    }
+    f << "wh=" << which << "[" << std::hex << nSlot << std::dec << "], vers=" << nVersion << ", count=" << nCount << ",";
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+
     for (int i=0; i<nCount; ++i) {
-      if (n >= sizeAttr.size() || actPos+(long)sizeAttr[n]>endDataPos) {
+      pos=input->tell();
+
+      f.str("");
+      f << "StarAttribute:inPool,wh=" <<  which-m_state->m_verStart << ",";
+      if (n >= sizeAttr.size() || pos+(long)sizeAttr[n]>endDataPos) {
         ok=false;
 
         STOFF_DEBUG_MSG(("StarItemPool::readV1: can not find attrib size\n"));
@@ -1005,20 +1072,27 @@ bool StarItemPool::readV1(StarZone &zone)
         ascii.addNote(f.str().c_str());
         break;
       }
-      if (sizeAttr[n]) {
-        ascii.addDelimiter(actPos,'|');
-        f << sizeAttr[n] << ",";
-        actPos+=sizeAttr[n];
+      if (!sizeAttr[n]) continue;
+
+      uint16_t nRef;
+      *input>>nRef;
+      f << "ref=" << nRef << ",";
+      if (nRef) {
+        if (!readAttribute(zone, which, (int) nVersion, pos+(long) sizeAttr[n]))
+          f << "###";
       }
-      else
-        f << "_,";
+      if (input->tell()!=pos+(long)sizeAttr[n]) {
+        STOFF_DEBUG_MSG(("StarItemPool::readV1: find extra attrib data\n"));
+        f << "###extra,";
+        if (input->tell()!=pos+2)
+          ascii.addDelimiter(input->tell(),'|');
+        input->seek(pos+(long) sizeAttr[n], librevenge::RVNG_SEEK_SET);
+      }
+      ascii.addPos(pos);
+      ascii.addNote(f.str().c_str());
       ++n;
     }
     if (!ok) break;
-    f << "],";
-    input->seek(actPos, librevenge::RVNG_SEEK_SET);
-    ascii.addPos(pos);
-    ascii.addNote(f.str().c_str());
   }
   if (ok) {
     pos=input->tell();
@@ -1073,7 +1147,7 @@ bool StarItemPool::readV1(StarZone &zone)
       break;
     }
     if (sizeAttr[n]>6) ascii.addDelimiter(input->tell(),'|');
-    input->seek(pos+sizeAttr[n++], librevenge::RVNG_SEEK_SET);
+    input->seek(pos+(long) sizeAttr[n++], librevenge::RVNG_SEEK_SET);
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());
   }
@@ -1282,7 +1356,7 @@ bool StarItemPool::readStyle(StarZone &zone, int poolVersion)
       ascii.addPos(input->tell()-4);
       ascii.addNote(f2.str().c_str());
       ascii.addDelimiter(input->tell(),'|');
-      input->seek(nSize, librevenge::RVNG_SEEK_CUR);
+      input->seek((long) nSize, librevenge::RVNG_SEEK_CUR);
     }
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());

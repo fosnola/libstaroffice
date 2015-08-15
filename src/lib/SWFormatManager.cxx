@@ -39,7 +39,9 @@
 
 #include <librevenge/librevenge.h>
 
+#include "StarAttribute.hxx"
 #include "StarDocument.hxx"
+#include "StarFileManager.hxx"
 #include "StarZone.hxx"
 
 #include "SDWParser.hxx"
@@ -238,6 +240,108 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
   ascFile.addNote(f.str().c_str());
 
   zone.closeSWRecord(type, "NumberFormatter[container]");
+  return true;
+}
+
+bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos)
+{
+  // svx_numitem.cxx SvxNumberFormat::SvxNumberFormat
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  long pos=input->tell();
+  libstoff::DebugStream f;
+  f << "Entries(StarNumberFormat)[" << zone.getRecordLevel() << "]:";
+  if (pos+26>lastPos) {
+    STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: the zone seems too short\n"));
+    f << "###size";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  uint16_t nVers, numType, eNumAdjust, nInclUpperLevels, nStart, cBullet;
+  *input >> nVers >> numType >> eNumAdjust >> nInclUpperLevels >> nStart >> cBullet;
+  f << "vers=" << nVers << ",";
+  if (numType) f << "numberingType=" << numType << ",";
+  if (eNumAdjust) f << "eNumAdjust=" << eNumAdjust << ",";
+  if (nInclUpperLevels) f << "nInclUpperLevels=" << nInclUpperLevels << ",";
+  if (nStart) f << "nStart=" << nStart << ",";
+  if (cBullet) f << "cBullet=" << cBullet << ",";
+
+  uint16_t firstLineOffs, absLSpace, lSpace, nCharTextDist;
+  *input >> firstLineOffs >> absLSpace >> lSpace >> nCharTextDist;
+  if (firstLineOffs) f << "firstLineOffs=" << firstLineOffs << ",";
+  if (absLSpace) f << "absLSpace=" << absLSpace << ",";
+  if (lSpace) f << "lSpace=" << lSpace << ",";
+  if (nCharTextDist) f << "nCharTextDist=" << nCharTextDist << ",";
+
+  for (int i=0; i<3; ++i) {
+    librevenge::RVNGString text;
+    if (!zone.readString(text)) {
+      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: can not read the format string\n"));
+      f << "###string";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+    f << (i==0 ? "prefix" : i==1 ? "suffix" : "style[name]") << "=" << text.cstr() << ",";
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  pos=input->tell();
+  f.str("");
+  f << "StarNumberFormat:";
+  uint16_t tmp;
+  *input >> tmp;
+  if (tmp) {
+    StarAttribute attribute;
+    if (!attribute.readBrushItem(zone, 1, lastPos, f)) {
+      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: can not read a brush\n"));
+      f << "###brush";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+    pos=input->tell();
+    f.str("");
+    f << "StarNumberFormat:";
+  }
+  uint16_t eVertOrient;
+  *input >> eVertOrient >> tmp;
+  if (eVertOrient) f << "vertOrient=" << eVertOrient << ",";
+  if (tmp) {
+    StarFileManager fileManager;
+    if (!fileManager.readFont(zone, int(nVers), lastPos)) { // unsure about version
+      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: can not read a font\n"));
+      f << "###font";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+    pos=input->tell();
+    f.str("");
+    f << "StarNumberFormat:";
+  }
+  f << "size=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+  STOFFColor col;
+  if (!input->readColor(col)) {
+    STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: can not read a color\n"));
+    f << "###color";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  *input >> tmp;
+  if (tmp) f << "show[symbol],";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
   return true;
 }
 

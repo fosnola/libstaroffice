@@ -122,7 +122,13 @@ public:
   {
     return closeRecord(' ', debugName);
   }
-
+  //! open a dummy record
+  bool openDummyRecord();
+  //! close a dummy record
+  bool closeDummyRecord()
+  {
+    return closeRecord('@', "Entries(BadDummy)");
+  }
   //
   // sc record
   //

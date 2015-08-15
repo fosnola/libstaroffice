@@ -232,54 +232,10 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "chrAtrNoLineBreak=" << input->readULong(1) << ",";
     break;
   case ATTR_CHR_BACKGROUND:
-  case ATTR_FRM_BACKGROUND: {
+  case ATTR_FRM_BACKGROUND:
     f << (nWhich==ATTR_CHR_BACKGROUND ? "chrAtrBackground" : "background") << "=" << input->readULong(1) << ",";
-    STOFFColor color;
-    if (!input->readColor(color)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read color\n"));
-      f << "###color,";
-      break;
-    }
-    else if (!color.isWhite())
-      f << "color=" << color << ",";
-    if (!input->readColor(color)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read fill color\n"));
-      f << "###fillcolor,";
-      break;
-    }
-    else if (!color.isWhite())
-      f << "fillcolor=" << color << ",";
-    f << "nStyle=" << input->readULong(1) << ",";
-    if (nVers<1) break;
-    int doLoad=(int) input->readULong(2);
-    if (doLoad & 1) { // TODO: svx_frmitems.cxx:1948
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: do not know how to load graphic\n"));
-      f << "###graphic,";
-      break;
-    }
-    if (doLoad & 2) {
-      librevenge::RVNGString link;
-      if (!zone.readString(link)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the link\n"));
-        f << "###link,";
-        break;
-      }
-      if (!link.empty())
-        f << "link=" << link.cstr() << ",";
-    }
-    if (doLoad & 4) {
-      librevenge::RVNGString filter;
-      if (!zone.readString(filter)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the filter\n"));
-        f << "###filter,";
-        break;
-      }
-      if (!filter.empty())
-        f << "filter=" << filter.cstr() << ",";
-    }
-    f << "nPos=" << input->readULong(1) << ",";
+    if (!readBrushItem(zone, nVers, lastPos, f)) break;
     break;
-  }
   case ATTR_CHR_ROTATE:
     f << "chrAtrRotate,";
     f << "nVal=" << input->readULong(2) << ",";
@@ -295,7 +251,8 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     break;
   }
   case ATTR_CHR_SCALEW:
-    f << "chrAtrScaleW=" << input->readULong(2);
+  case ATTR_EE_CHR_SCALEW:
+    f << (nWhich==ATTR_CHR_SCALEW ? "chrAtrScaleW":"eeScaleW") << "=" << input->readULong(2) << ",";
     if (input->tell()<lastPos) {
       f << "nVal=" << input->readULong(2) << ",";
       f << "test=" << input->readULong(2) << ",";
@@ -484,8 +441,12 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     break;
   case ATTR_TXT_UNKNOWN_CONTAINER:
   case ATTR_SC_USERDEF:
+  case ATTR_EE_PARA_XMLATTRIBS:
+  case ATTR_EE_CHR_XMLATTRIBS:
     // call SfxPoolItem::Create which does nothing
-    f << (nWhich==ATTR_TXT_UNKNOWN_CONTAINER ?  "textAtrUnknownContainer" : "scUserDef") << ",";
+    f << (nWhich==ATTR_TXT_UNKNOWN_CONTAINER ?  "textAtrUnknownContainer" :
+          nWhich==ATTR_SC_USERDEF ? "scUserDef" :
+          nWhich==ATTR_EE_PARA_XMLATTRIBS ? "eeParaXmlAttr" : "eeCharXmlAttr") << ",";
     break;
   case ATTR_TXT_DUMMY6:
     f << "textAtrDummy6" << input->readULong(1) << ",";
@@ -631,7 +592,9 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     break;
   }
   case ATTR_PARA_SCRIPTSPACE:
-    f << "parAtrScriptSpace=" << input->readULong(1) << ",";
+  case ATTR_EE_PARA_ASIANCJKSPACING:
+    f << (nWhich==ATTR_PARA_SCRIPTSPACE ? "parAtrScriptSpace" : "parAsianScriptSpace")
+      << "=" << input->readULong(1) << ",";
     break;
   case ATTR_PARA_HANGINGPUNCTUATION:
     f << "parAtrHangingPunctuation=" << input->readULong(1) << ",";
@@ -677,7 +640,8 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "paperBin=" << input->readULong(1) << ",";
     break;
   case ATTR_FRM_LR_SPACE:
-    f << "lrSpace,";
+  case ATTR_EE_PARA_OUTLLR_SPACE:
+    f << (nWhich==ATTR_FRM_LR_SPACE ? "lrSpace" : "eeOutLrSpace") << ",";
     f << "left=" << input->readULong(2);
     val=(int) input->readULong(nVers>=1 ? 2 : 1);
     if (val) f << ":" << val;
@@ -1346,20 +1310,179 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
   case ATTR_SC_PAGE_NULLVALS:
     f << (nWhich==ATTR_SC_PAGE_FORMULAS ? "page[formulas]" : "page[numVals") << "=" << input->readULong(1) << ",";
     break;
+  case ATTR_EE_PARA_NUMBULLET: {
+    // svx_numitem.cxx SvxNumRule::SvxNumRule
+    f << "eeParaNumBullet,";
+    uint16_t version, levelC, nFeatureFlags, nContinuousNumb, numberingType;
+    *input >> version >> levelC >> nFeatureFlags >> nContinuousNumb >> numberingType;
+    if (version) f << "vers=" << version << ",";
+    if (levelC) f << "level[count]=" << levelC << ",";
+    if (nFeatureFlags) f << "feature[flags]=" << nFeatureFlags << ",";
+    if (nContinuousNumb) f << "continuous[numbering],";
+    if (numberingType) f << "number[type]=" << numberingType << ",";
+    f << "set=[";
+    for (int i=0; i<10; ++i) {
+      uint16_t nSet;
+      *input>>nSet;
+      if (nSet) {
+        f << nSet << ",";
+        SWFormatManager formatManager;
+        if (!formatManager.readNumberFormat(zone, lastPos)) {
+          f << "###";
+          break;
+        }
+      }
+      else
+        f << "_";
+    }
+    f << "],";
+    if (nVers>=2) {
+      *input>>nFeatureFlags;
+      f << "nFeatureFlags2=" << nFeatureFlags << ",";
+    }
+    break;
+  }
+  case ATTR_EE_PARA_BULLETSTATE:
+  case ATTR_EE_PARA_OUTLLEVEL:
+    f << (nWhich==ATTR_EE_PARA_BULLETSTATE ? "eeBulletState" : "eeOutLevel") << "=" << input->readULong(2) << ",";
+    break;
+  case ATTR_EE_PARA_BULLET: {
+    // svx_bulitem.cxx SvxBulletItem::SvxBulletItem
+    f << "paraBullet,";
+    uint16_t style;
+    *input >> style;
+    if (style==128) {
+      StarFileManager fileManager;
+      if (!fileManager.readBitmap(zone)) {
+        f << "###BM,";
+        break;
+      }
+    }
+    else {
+      // SvxBulletItem::CreateFont
+      STOFFColor col;
+      if (!input->readColor(col)) {
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+        f << "###color,";
+        break;
+      }
+      else if (!col.isBlack())
+        f << "color=" << col << ",";
+      uint16_t family, encoding, pitch, align, weight, underline, strikeOut, italic;
+      *input >> family >> encoding >> pitch >> align >> weight >> underline >> strikeOut >> italic;
+      if (family) f << "family=" << family << ",";
+      if (encoding) f << "encoding=" << encoding << ",";
+      if (pitch) f << "pitch=" << pitch << ",";
+      if (weight) f << "weight=" << weight << ",";
+      if (underline) f << "underline=" << underline << ",";
+      if (strikeOut) f << "strikeOut=" << strikeOut << ",";
+      if (italic) f << "italic=" << italic << ",";
+      librevenge::RVNGString text;
+      if (!zone.readString(text)) {
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a name\n"));
+        f << "###text,";
+        break;
+      }
+      f << text.cstr() << ",";
+      // if (nVers==1) f << "size=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      bool outline, shadow, transparent;
+      *input >> outline >>  shadow >>  transparent;
+      if (outline) f << "outline,";
+      if (shadow) f << "shadow,";
+      if (transparent) f << "transparent,";
+    }
+    f << "width=" << input->readLong(4) << ",";
+    f << "start=" << input->readULong(2) << ",";
+    f << "justify=" << input->readULong(1) << ",";
+    f << "symbol=" << input->readULong(1) << ",";
+    f << "scale=" << input->readULong(2) << ",";
+    for (int i=0; i<2; ++i) {
+      librevenge::RVNGString text;
+      if (!zone.readString(text)) {
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a name\n"));
+        f << "###text,";
+        break;
+      }
+      else if (!text.empty())
+        f << (i==0 ? "prev" : "next") << "=" << text.cstr() << ",";
+    }
+    break;
+  }
+  case ATTR_EE_CHR_RUBI_DUMMY: // ok no data
+  case ATTR_EE_FEATURE_TAB:
+  case ATTR_EE_FEATURE_LINEBR:
+    f << (nWhich==ATTR_EE_CHR_RUBI_DUMMY ? "eeRubiDummy" :
+          nWhich==ATTR_EE_FEATURE_TAB ? "eeFeatureTab" : "eeFeatureLineBr") << ",";
+    break;
+  case ATTR_EE_FEATURE_FIELD: {
+    f << "eeFeatureField,vers=" << nVers << ",";
+    // svx_flditem.cxx SvxFieldItem::Create
+    if (!document.readPersistData(zone, lastPos)) break;
+    return true;
+  }
   default:
     STOFF_DEBUG_MSG(("StarAttribute::readAttribute: reading not format attribute is not implemented\n"));
     f << "#unimplemented[wh=" << std::hex << nWhich << std::dec << ",";
   }
-  if (input->tell()!=lastPos) {
-    STOFF_DEBUG_MSG(("StarAttribute::readAttribute: find extra data\n"));
-    f << "###extra,";
+  if (input->tell()>lastPos) {
+    STOFF_DEBUG_MSG(("StarAttribute::readAttribute: read too much data\n"));
+    f << "###too much,";
     ascFile.addDelimiter(input->tell(), '|');
-    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return true;
 
+}
+
+bool StarAttribute::readBrushItem(StarZone &zone, int nVers, long /*endPos*/, libstoff::DebugStream &f)
+{
+  STOFFInputStreamPtr input=zone.input();
+  STOFFColor color;
+  if (!input->readColor(color)) {
+    STOFF_DEBUG_MSG(("StarAttribute::readBrushItem: can not read color\n"));
+    f << "###color,";
+    return false;
+  }
+  else if (!color.isWhite())
+    f << "color=" << color << ",";
+  if (!input->readColor(color)) {
+    STOFF_DEBUG_MSG(("StarAttribute::readBrushItem: can not read fill color\n"));
+    f << "###fillcolor,";
+    return false;
+  }
+  else if (!color.isWhite())
+    f << "fillcolor=" << color << ",";
+  f << "nStyle=" << input->readULong(1) << ",";
+  if (nVers<1) return true;
+  int doLoad=(int) input->readULong(2);
+  if (doLoad & 1) { // TODO: svx_frmitems.cxx:1948
+    STOFF_DEBUG_MSG(("StarAttribute::readBrushItem: do not know how to load graphic\n"));
+    f << "###graphic,";
+    return false;
+  }
+  if (doLoad & 2) {
+    librevenge::RVNGString link;
+    if (!zone.readString(link)) {
+      STOFF_DEBUG_MSG(("StarAttribute::readBrushItem: can not find the link\n"));
+      f << "###link,";
+      return false;
+    }
+    if (!link.empty())
+      f << "link=" << link.cstr() << ",";
+  }
+  if (doLoad & 4) {
+    librevenge::RVNGString filter;
+    if (!zone.readString(filter)) {
+      STOFF_DEBUG_MSG(("StarAttribute::readBrushItem: can not find the filter\n"));
+      f << "###filter,";
+      return false;
+    }
+    if (!filter.empty())
+      f << "filter=" << filter.cstr() << ",";
+  }
+  f << "nPos=" << input->readULong(1) << ",";
+  return true;
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
