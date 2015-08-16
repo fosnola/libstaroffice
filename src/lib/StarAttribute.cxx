@@ -233,7 +233,9 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     break;
   case ATTR_CHR_BACKGROUND:
   case ATTR_FRM_BACKGROUND:
-    f << (nWhich==ATTR_CHR_BACKGROUND ? "chrAtrBackground" : "background") << "=" << input->readULong(1) << ",";
+  case ATTR_SCH_SYMBOL_BRUSH:
+    f << (nWhich==ATTR_CHR_BACKGROUND ? "chrAtrBackground" :
+          nWhich==ATTR_FRM_BACKGROUND ? "background" : "symbol[brush]") << "=" << input->readULong(1) << ",";
     if (!readBrushItem(zone, nVers, lastPos, f)) break;
     break;
   case ATTR_CHR_ROTATE:
@@ -443,10 +445,12 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
   case ATTR_SC_USERDEF:
   case ATTR_EE_PARA_XMLATTRIBS:
   case ATTR_EE_CHR_XMLATTRIBS:
+  case ATTR_SCH_USER_DEFINED_ATTR:
     // call SfxPoolItem::Create which does nothing
     f << (nWhich==ATTR_TXT_UNKNOWN_CONTAINER ?  "textAtrUnknownContainer" :
           nWhich==ATTR_SC_USERDEF ? "scUserDef" :
-          nWhich==ATTR_EE_PARA_XMLATTRIBS ? "eeParaXmlAttr" : "eeCharXmlAttr") << ",";
+          nWhich==ATTR_EE_PARA_XMLATTRIBS ? "eeParaXmlAttr" :
+          nWhich==ATTR_EE_CHR_XMLATTRIBS ? "eeCharXmlAttr" : "schUserDef") << ",";
     break;
   case ATTR_TXT_DUMMY6:
     f << "textAtrDummy6" << input->readULong(1) << ",";
@@ -1420,6 +1424,265 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     if (!document.readPersistData(zone, lastPos)) break;
     return true;
   }
+
+  case ATTR_SCH_DATADESCR_DESCR:
+    f << "data[desc]=" << input->readULong(2) << ",";
+    break;
+  case ATTR_SCH_DATADESCR_SHOW_SYM:
+    f << "dataDesc[showSym]=" << input->readULong(1) << ",";
+    break;
+  case ATTR_SCH_LEGEND_POS:
+  case ATTR_SCH_TEXT_ORIENT:
+  case ATTR_SCH_TEXT_ORDER:
+    f << (nWhich==ATTR_SCH_LEGEND_POS ? "legend[pos]" :
+          nWhich==ATTR_SCH_TEXT_ORIENT ? "text[orient]" : "text[order]")
+      << "=" << input->readULong(2) << ",";
+    break;
+  case ATTR_SCH_X_AXIS_AUTO_MIN:
+  case ATTR_SCH_Y_AXIS_AUTO_MIN:
+  case ATTR_SCH_Z_AXIS_AUTO_MIN:
+  case ATTR_SCH_AXIS_AUTO_MIN:
+    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_MIN ? "xAxisAutoMin" :
+          nWhich==ATTR_SCH_Y_AXIS_AUTO_MIN ? "yAxisAutoMin" :
+          nWhich==ATTR_SCH_Z_AXIS_AUTO_MIN ? "zAxisAutoMin" : "axisAutoMin")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case ATTR_SCH_X_AXIS_MIN:
+  case ATTR_SCH_Y_AXIS_MIN:
+  case ATTR_SCH_Z_AXIS_MIN:
+  case ATTR_SCH_AXIS_MIN: {
+    double value;
+    *input >> value;
+    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_MIN ? "xAxisMin" :
+          nWhich==ATTR_SCH_Y_AXIS_AUTO_MIN ? "yAxisMin" :
+          nWhich==ATTR_SCH_Z_AXIS_AUTO_MIN ? "zAxisMin" : "axisMin")
+      << "=" << value << ",";
+    break;
+  }
+  case ATTR_SCH_X_AXIS_AUTO_MAX:
+  case ATTR_SCH_Y_AXIS_AUTO_MAX:
+  case ATTR_SCH_Z_AXIS_AUTO_MAX:
+  case ATTR_SCH_AXIS_AUTO_MAX:
+    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_MAX ? "xAxisAutoMax" :
+          nWhich==ATTR_SCH_Y_AXIS_AUTO_MAX ? "yAxisAutoMax" :
+          nWhich==ATTR_SCH_Z_AXIS_AUTO_MAX ? "zAxisAutoMax" : "axisAutoMax")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case ATTR_SCH_X_AXIS_MAX:
+  case ATTR_SCH_Y_AXIS_MAX:
+  case ATTR_SCH_Z_AXIS_MAX:
+  case ATTR_SCH_AXIS_MAX: {
+    double value;
+    *input >> value;
+    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_MAX ? "xAxisMax" :
+          nWhich==ATTR_SCH_Y_AXIS_AUTO_MAX ? "yAxisMax" :
+          nWhich==ATTR_SCH_Z_AXIS_AUTO_MAX ? "zAxisMax" : "axisMax")
+      << "=" << value << ",";
+    break;
+  }
+  case ATTR_SCH_X_AXIS_AUTO_STEP_MAIN:
+  case ATTR_SCH_Y_AXIS_AUTO_STEP_MAIN:
+  case ATTR_SCH_Z_AXIS_AUTO_STEP_MAIN:
+  case ATTR_SCH_AXIS_AUTO_STEP_MAIN:
+    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_STEP_MAIN ? "xAxisAutoStepMain" :
+          nWhich==ATTR_SCH_Y_AXIS_AUTO_STEP_MAIN ? "yAxisAutoStepMain" :
+          nWhich==ATTR_SCH_Z_AXIS_AUTO_STEP_MAIN ? "zAxisAutoStepMain" : "axisAutoStepMain")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case ATTR_SCH_X_AXIS_STEP_MAIN:
+  case ATTR_SCH_Y_AXIS_STEP_MAIN:
+  case ATTR_SCH_Z_AXIS_STEP_MAIN:
+  case ATTR_SCH_AXIS_STEP_MAIN: {
+    double value;
+    *input >> value;
+    f << (nWhich==ATTR_SCH_X_AXIS_STEP_MAIN ? "xAxisStepMain" :
+          nWhich==ATTR_SCH_Y_AXIS_STEP_MAIN ? "yAxisStepMain" :
+          nWhich==ATTR_SCH_Z_AXIS_STEP_MAIN ? "zAxisStepMain" : "axisStepMain")
+      << "=" << value << ",";
+    break;
+  }
+  case ATTR_SCH_X_AXIS_AUTO_STEP_HELP:
+  case ATTR_SCH_Y_AXIS_AUTO_STEP_HELP:
+  case ATTR_SCH_Z_AXIS_AUTO_STEP_HELP:
+  case ATTR_SCH_AXIS_AUTO_STEP_HELP:
+    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_STEP_HELP ? "xAxisAutoStepHelp" :
+          nWhich==ATTR_SCH_Y_AXIS_AUTO_STEP_HELP ? "yAxisAutoStepHelp" :
+          nWhich==ATTR_SCH_Z_AXIS_AUTO_STEP_HELP ? "zAxisAutoStepHelp" : "axisAutoStepHelp")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case ATTR_SCH_X_AXIS_STEP_HELP:
+  case ATTR_SCH_Y_AXIS_STEP_HELP:
+  case ATTR_SCH_Z_AXIS_STEP_HELP:
+  case ATTR_SCH_AXIS_STEP_HELP: {
+    double value;
+    *input >> value;
+    f << (nWhich==ATTR_SCH_X_AXIS_STEP_HELP ? "xAxisStepHelp" :
+          nWhich==ATTR_SCH_Y_AXIS_STEP_HELP ? "yAxisStepHelp" :
+          nWhich==ATTR_SCH_Z_AXIS_STEP_HELP ? "zAxisStepHelp" : "axisStepHelp")
+      << "=" << value << ",";
+    break;
+  }
+  case ATTR_SCH_X_AXIS_LOGARITHM:
+  case ATTR_SCH_Y_AXIS_LOGARITHM:
+  case ATTR_SCH_Z_AXIS_LOGARITHM:
+  case ATTR_SCH_AXIS_LOGARITHM:
+    f << (nWhich==ATTR_SCH_X_AXIS_LOGARITHM ? "xAxisLogarithm" :
+          nWhich==ATTR_SCH_Y_AXIS_LOGARITHM ? "yAxisLogarithm" :
+          nWhich==ATTR_SCH_Z_AXIS_LOGARITHM ? "zAxisLogarithm" : "axisLogarithm")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case ATTR_SCH_X_AXIS_AUTO_ORIGIN:
+  case ATTR_SCH_Y_AXIS_AUTO_ORIGIN:
+  case ATTR_SCH_Z_AXIS_AUTO_ORIGIN:
+  case ATTR_SCH_AXIS_AUTO_ORIGIN:
+    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_ORIGIN ? "xAxisAutoOrigin" :
+          nWhich==ATTR_SCH_Y_AXIS_AUTO_ORIGIN ? "yAxisAutoOrigin" :
+          nWhich==ATTR_SCH_Z_AXIS_AUTO_ORIGIN ? "zAxisAutoOrigin" : "axisAutoOrigin")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case ATTR_SCH_X_AXIS_ORIGIN:
+  case ATTR_SCH_Y_AXIS_ORIGIN:
+  case ATTR_SCH_Z_AXIS_ORIGIN:
+  case ATTR_SCH_AXIS_ORIGIN: {
+    double value;
+    *input >> value;
+    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_ORIGIN ? "xAxisOrigin" :
+          nWhich==ATTR_SCH_Y_AXIS_AUTO_ORIGIN ? "yAxisOrigin" :
+          nWhich==ATTR_SCH_AXIS_AUTO_ORIGIN ? "zAxisOrigin" : "axisOrigin")
+      << "=" << value << ",";
+    break;
+  }
+  case ATTR_SCH_AXISTYPE:
+  case ATTR_SCH_DUMMY0:
+  case ATTR_SCH_DUMMY1:
+    f << (nWhich==ATTR_SCH_AXISTYPE ? "axis[type]" : nWhich==ATTR_SCH_DUMMY0 ? "dummy0[sch]" : "dummy1[sch]")
+      << "=" << input->readLong(4) << ",";
+    break;
+
+  case ATTR_SCH_DUMMY2:
+  case ATTR_SCH_DUMMY3:
+  case ATTR_SCH_DUMMY_END:
+    f << (nWhich==ATTR_SCH_DUMMY2 ? "dummy2[sch]" : nWhich==ATTR_SCH_DUMMY3 ? "dummy3[sch]" : "dummyEnd[sch]")
+      << "=" << input->readLong(4) << ",";
+    break;
+
+  case ATTR_SCH_STAT_AVERAGE:
+    f << "statAverage=" << input->readULong(1) << ",";
+    break;
+
+  case ATTR_SCH_STAT_KIND_ERROR:
+    f << "statKindError=" << input->readLong(4) << ",";
+    break;
+
+  case ATTR_SCH_STAT_PERCENT:
+  case ATTR_SCH_STAT_BIGERROR:
+  case ATTR_SCH_STAT_CONSTPLUS:
+  case ATTR_SCH_STAT_CONSTMINUS: {
+    double value;
+    *input>>value;
+    f << (nWhich==ATTR_SCH_STAT_PERCENT ? "stat[percent]" : nWhich==ATTR_SCH_STAT_BIGERROR ? "stat[bigError]" :
+          nWhich==ATTR_SCH_STAT_CONSTPLUS ? "stat[constPlus]" : "stat[constMinus]")
+      << "=" << value << ",";
+    break;
+  }
+
+  case ATTR_SCH_STAT_REGRESSTYPE:
+  case ATTR_SCH_STAT_INDICATE:
+  case ATTR_SCH_TEXT_DEGREES:
+    f << (nWhich==ATTR_SCH_STAT_REGRESSTYPE ? "stat[regType]" :
+          nWhich==ATTR_SCH_STAT_INDICATE ? "stat[indicate]" : "stat[textDegree")
+      << "=" << input->readLong(4) << ",";
+    break;
+
+  case ATTR_SCH_TEXT_OVERLAP:
+    f << "overlap[sch,text]=" << input->readULong(1) << ",";
+    break;
+
+  case ATTR_SCH_TEXT_DUMMY0:
+  case ATTR_SCH_TEXT_DUMMY1:
+  case ATTR_SCH_TEXT_DUMMY2:
+  case ATTR_SCH_TEXT_DUMMY3:
+    f << (nWhich==ATTR_SCH_TEXT_DUMMY0 ? "dummy0[sch,text]" :
+          nWhich==ATTR_SCH_TEXT_DUMMY1 ? "dummy1[sch,text]" :
+          nWhich==ATTR_SCH_TEXT_DUMMY2 ? "dummy2[sch,text]" : "dummy3[sch,text]")
+      << "=" << input->readLong(4) << ",";
+    break;
+
+  case ATTR_SCH_STYLE_DEEP:
+  case ATTR_SCH_STYLE_3D:
+  case ATTR_SCH_STYLE_VERTICAL:
+    f << (nWhich==ATTR_SCH_STYLE_DEEP ? "deep[style]" : nWhich==ATTR_SCH_STYLE_3D ? "3d[style]" : "vert[style]")
+      << "=" << input->readULong(1) << ",";
+    break;
+
+  case ATTR_SCH_STYLE_BASETYPE:
+    f << "baseType[style]=" << input->readLong(4) << ",";
+    break;
+
+  case ATTR_SCH_STYLE_LINES:
+  case ATTR_SCH_STYLE_PERCENT:
+  case ATTR_SCH_STYLE_STACKED:
+    f << (nWhich==ATTR_SCH_STYLE_LINES ? "lines[style]" :
+          nWhich==ATTR_SCH_STYLE_PERCENT ? "percent[style]" : "stacked[style]")
+      << "=" << input->readULong(1) << ",";
+    break;
+
+  case ATTR_SCH_STYLE_SPLINES:
+  case ATTR_SCH_STYLE_SYMBOL:
+  case ATTR_SCH_STYLE_SHAPE:
+    f << (nWhich==ATTR_SCH_STYLE_SPLINES ? "splines[style]" :
+          nWhich==ATTR_SCH_STYLE_SYMBOL ? "symbol[style]" : "shape[style]")
+      << "=" << input->readLong(4);
+    break;
+
+  case ATTR_SCH_AXIS:
+    f << "axis[sch]=" << input->readLong(4) << ",";
+    break;
+
+  case ATTR_SCH_AXIS_HELPTICKS:
+  case ATTR_SCH_AXIS_TICKS:
+  case ATTR_SCH_AXIS_NUMFMT:
+  case ATTR_SCH_AXIS_NUMFMTPERCENT:
+    f << (nWhich==ATTR_SCH_AXIS_HELPTICKS ? "axis[helpticks]" :
+          nWhich==ATTR_SCH_AXIS_TICKS ? "axis[ticks]" :
+          nWhich==ATTR_SCH_AXIS_NUMFMT ? "axis[numfmt]" : "axis[numfmtpercent]")
+      << "=" << input->readLong(4);
+    break;
+
+  case ATTR_SCH_AXIS_SHOWAXIS:
+  case ATTR_SCH_AXIS_SHOWDESCR:
+  case ATTR_SCH_AXIS_SHOWMAINGRID:
+    f << (nWhich==ATTR_SCH_AXIS_SHOWAXIS ? "show[axis]" :
+          nWhich==ATTR_SCH_AXIS_SHOWDESCR ? "show[descr]" : "show[maingrid]")
+      << "=" << input->readULong(1) << ",";
+    break;
+
+  case ATTR_SCH_AXIS_SHOWHELPGRID:
+  case ATTR_SCH_AXIS_TOPDOWN:
+    f << (nWhich==ATTR_SCH_AXIS_SHOWHELPGRID ? "show[helpGrid]" : "topDown")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case ATTR_SCH_AXIS_DUMMY0:
+  case ATTR_SCH_AXIS_DUMMY1:
+  case ATTR_SCH_AXIS_DUMMY2:
+    f << (nWhich==ATTR_SCH_AXIS_DUMMY0 ? "dummy0[sch,axis]" :
+          nWhich==ATTR_SCH_AXIS_DUMMY1 ? "dummy1[sch,axis]" : "dummy2[sch,axis]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case ATTR_SCH_AXIS_DUMMY3:
+  case ATTR_SCH_BAR_OVERLAP:
+  case ATTR_SCH_BAR_GAPWIDTH:
+    f << (nWhich==ATTR_SCH_AXIS_DUMMY3 ? "dummy3[sch,axis]" :
+          nWhich==ATTR_SCH_BAR_OVERLAP ? "bar[overlap]" : "bar[gapwidth]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case ATTR_SCH_STOCK_VOLUME:
+  case ATTR_SCH_STOCK_UPDOWN:
+    f << (nWhich==ATTR_SCH_STOCK_VOLUME ? "stock[volume]" : "stock[updown]") << "=" << input->readULong(1) << ",";
+    break;
+  case ATTR_SCH_SYMBOL_SIZE:
+    f << "symbolSize[sch]=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+    break;
   default:
     STOFF_DEBUG_MSG(("StarAttribute::readAttribute: reading not format attribute is not implemented\n"));
     f << "#unimplemented[wh=" << std::hex << nWhich << std::dec << ",";

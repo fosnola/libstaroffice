@@ -347,10 +347,44 @@ struct State {
         m_idToAttributeList.push_back(what[i]);
     }
     else if (m_name=="SchItemPool") {
-      // sch_sch_itempool.cxx
+      // sch_itempool.cxx SchItemPool::SchItemPool
       m_verStart=1; // SCHATTR_START
-      m_verEnd=58;
-      // user from 100 SCHATTR_NONPERSISTENT_START
+      m_verEnd=100; // SCHATTR_NONPERSISTENT_START
+      // svx_eerdll.cxx GlobalEditData::GetDefItems
+      static int const(what[])= {
+        StarAttribute::ATTR_SCH_DATADESCR_DESCR, StarAttribute::ATTR_SCH_DATADESCR_SHOW_SYM, StarAttribute::ATTR_SCH_LEGEND_POS, StarAttribute::ATTR_SCH_TEXT_ORIENT,
+        StarAttribute::ATTR_SCH_TEXT_ORDER, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MIN, StarAttribute::ATTR_SCH_Y_AXIS_MIN, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MAX,
+        StarAttribute::ATTR_SCH_Y_AXIS_MAX, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_STEP_MAIN, StarAttribute::ATTR_SCH_Y_AXIS_STEP_MAIN, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_STEP_HELP,
+        StarAttribute::ATTR_SCH_Y_AXIS_STEP_HELP, StarAttribute::ATTR_SCH_Y_AXIS_LOGARITHM, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_ORIGIN, StarAttribute::ATTR_SCH_Y_AXIS_ORIGIN,
+        StarAttribute::ATTR_SCH_X_AXIS_AUTO_MIN, StarAttribute::ATTR_SCH_X_AXIS_MIN, StarAttribute::ATTR_SCH_X_AXIS_AUTO_MAX, StarAttribute::ATTR_SCH_X_AXIS_MAX,
+
+        StarAttribute::ATTR_SCH_X_AXIS_AUTO_STEP_MAIN, StarAttribute::ATTR_SCH_X_AXIS_STEP_MAIN, StarAttribute::ATTR_SCH_X_AXIS_AUTO_STEP_HELP, StarAttribute::ATTR_SCH_X_AXIS_STEP_HELP,
+        StarAttribute::ATTR_SCH_X_AXIS_LOGARITHM, StarAttribute::ATTR_SCH_X_AXIS_AUTO_ORIGIN, StarAttribute::ATTR_SCH_X_AXIS_ORIGIN, StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MIN,
+        StarAttribute::ATTR_SCH_Z_AXIS_MIN, StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MAX, StarAttribute::ATTR_SCH_Z_AXIS_MAX, StarAttribute::ATTR_SCH_Z_AXIS_AUTO_STEP_MAIN,
+        StarAttribute::ATTR_SCH_Z_AXIS_STEP_MAIN, StarAttribute::ATTR_SCH_Z_AXIS_AUTO_STEP_HELP, StarAttribute::ATTR_SCH_Z_AXIS_STEP_HELP, StarAttribute::ATTR_SCH_Z_AXIS_LOGARITHM,
+        StarAttribute::ATTR_SCH_Z_AXIS_AUTO_ORIGIN, StarAttribute::ATTR_SCH_Z_AXIS_ORIGIN, StarAttribute::ATTR_SCH_AXISTYPE, StarAttribute::ATTR_SCH_DUMMY0,
+
+        StarAttribute::ATTR_SCH_DUMMY1, StarAttribute::ATTR_SCH_DUMMY2, StarAttribute::ATTR_SCH_DUMMY3, StarAttribute::ATTR_SCH_DUMMY_END,
+        StarAttribute::ATTR_SCH_STAT_AVERAGE, StarAttribute::ATTR_SCH_STAT_KIND_ERROR, StarAttribute::ATTR_SCH_STAT_PERCENT, StarAttribute::ATTR_SCH_STAT_BIGERROR,
+        StarAttribute::ATTR_SCH_STAT_CONSTPLUS, StarAttribute::ATTR_SCH_STAT_CONSTMINUS, StarAttribute::ATTR_SCH_STAT_REGRESSTYPE, StarAttribute::ATTR_SCH_STAT_INDICATE,
+        StarAttribute::ATTR_SCH_TEXT_DEGREES, StarAttribute::ATTR_SCH_TEXT_OVERLAP, StarAttribute::ATTR_SCH_TEXT_DUMMY0, StarAttribute::ATTR_SCH_TEXT_DUMMY1,
+        StarAttribute::ATTR_SCH_TEXT_DUMMY2, StarAttribute::ATTR_SCH_TEXT_DUMMY3, StarAttribute::ATTR_SCH_STYLE_DEEP, StarAttribute::ATTR_SCH_STYLE_3D,
+
+        StarAttribute::ATTR_SCH_STYLE_VERTICAL, StarAttribute::ATTR_SCH_STYLE_BASETYPE, StarAttribute::ATTR_SCH_STYLE_LINES, StarAttribute::ATTR_SCH_STYLE_PERCENT,
+        StarAttribute::ATTR_SCH_STYLE_STACKED, StarAttribute::ATTR_SCH_STYLE_SPLINES, StarAttribute::ATTR_SCH_STYLE_SYMBOL, StarAttribute::ATTR_SCH_STYLE_SHAPE,
+        StarAttribute::ATTR_SCH_AXIS, StarAttribute::ATTR_SCH_AXIS_AUTO_MIN, StarAttribute::ATTR_SCH_AXIS_MIN, StarAttribute::ATTR_SCH_AXIS_AUTO_MAX,
+        StarAttribute::ATTR_SCH_AXIS_MAX, StarAttribute::ATTR_SCH_AXIS_AUTO_STEP_MAIN, StarAttribute::ATTR_SCH_AXIS_STEP_MAIN, StarAttribute::ATTR_SCH_AXIS_AUTO_STEP_HELP,
+        StarAttribute::ATTR_SCH_AXIS_STEP_HELP, StarAttribute::ATTR_SCH_AXIS_LOGARITHM, StarAttribute::ATTR_SCH_AXIS_AUTO_ORIGIN, StarAttribute::ATTR_SCH_AXIS_ORIGIN,
+
+        StarAttribute::ATTR_SCH_AXIS_TICKS, StarAttribute::ATTR_SCH_AXIS_NUMFMT, StarAttribute::ATTR_SCH_AXIS_NUMFMTPERCENT, StarAttribute::ATTR_SCH_AXIS_SHOWAXIS,
+        StarAttribute::ATTR_SCH_AXIS_SHOWDESCR, StarAttribute::ATTR_SCH_AXIS_SHOWMAINGRID, StarAttribute::ATTR_SCH_AXIS_SHOWHELPGRID, StarAttribute::ATTR_SCH_AXIS_TOPDOWN,
+        StarAttribute::ATTR_SCH_AXIS_HELPTICKS, StarAttribute::ATTR_SCH_AXIS_DUMMY0, StarAttribute::ATTR_SCH_AXIS_DUMMY1, StarAttribute::ATTR_SCH_AXIS_DUMMY2,
+        StarAttribute::ATTR_SCH_AXIS_DUMMY3, StarAttribute::ATTR_SCH_BAR_OVERLAP, StarAttribute::ATTR_SCH_BAR_GAPWIDTH, StarAttribute::ATTR_SCH_SYMBOL_BRUSH,
+        StarAttribute::ATTR_SCH_STOCK_VOLUME, StarAttribute::ATTR_SCH_STOCK_UPDOWN, StarAttribute::ATTR_SCH_SYMBOL_SIZE, StarAttribute::ATTR_SCH_USER_DEFINED_ATTR
+      };
+
+      for (int i=0; i<int(sizeof(what)/sizeof(int)); ++i)
+        m_idToAttributeList.push_back(what[i]);
     }
     else if (m_name=="ScDocumentPool") {
       // sc_docpool.cxx
