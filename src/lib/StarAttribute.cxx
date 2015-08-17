@@ -1357,7 +1357,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     *input >> style;
     if (style==128) {
       StarFileManager fileManager;
-      if (!fileManager.readBitmap(zone)) {
+      if (!fileManager.readBitmap(zone, true, lastPos)) {
         f << "###BM,";
         break;
       }
@@ -1683,6 +1683,707 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
   case ATTR_SCH_SYMBOL_SIZE:
     f << "symbolSize[sch]=" << input->readLong(4) << "x" << input->readLong(4) << ",";
     break;
+
+  case XATTR_LINESTYLE:
+  case XATTR_FILLSTYLE:
+    f << (nWhich==XATTR_LINESTYLE ? "line[style]" : "fill[style]")
+      << "=" << input->readULong(2) << ",";
+    break;
+  case XATTR_LINEWIDTH:
+  case XATTR_LINESTARTWIDTH:
+  case XATTR_LINEENDWIDTH:
+    f << (nWhich==XATTR_LINEWIDTH ? "line[width]" : XATTR_LINESTARTWIDTH ? "line[startWidth]" : "line[endWidth]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case XATTR_LINESTARTCENTER:
+  case XATTR_LINEENDCENTER:
+    f << (nWhich==XATTR_LINESTARTCENTER ? "line[startCenter]" : "line[endCenter]")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case XATTR_LINETRANSPARENCE:
+    f << "lineTransparence=" << input->readULong(2) << ",";
+    break;
+  case XATTR_LINEJOINT:
+    f << "lineJoint=" << input->readULong(2) << ",";
+    break;
+
+  // name or index
+  case XATTR_LINEDASH:
+  case XATTR_LINECOLOR:
+  case XATTR_LINESTART:
+  case XATTR_LINEEND:
+  case XATTR_FILLCOLOR:
+  case XATTR_FILLGRADIENT:
+  case XATTR_FILLHATCH:
+  case XATTR_FILLBITMAP:
+  case XATTR_FILLFLOATTRANSPARENCE:
+
+  case XATTR_FORMTXTSHDWCOLOR: {
+    librevenge::RVNGString text;
+    if (!zone.readString(text)) {
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
+      f << "###string";
+      break;
+    }
+    if (!text.empty()) f << "name=" << text.cstr() << ",";
+    int32_t id;
+    *input >> id;
+    if (id>=0) f << "id=" << id << ",";
+    switch (nWhich) {
+    case XATTR_LINEDASH: {
+      f << "line[dash],";
+      if (id>=0) break;
+      int32_t dashStyle;
+      uint16_t dots, dashes;
+      uint32_t dotLen, dashLen, distance;
+      *input >> dashStyle >> dots >> dotLen >> dashes >> dashLen >> distance;
+      if (dashStyle) f << "style=" << dashStyle << ",";
+      if (dots || dotLen) f << "dots=" << dots << ":" << dotLen << ",";
+      if (dashes || dashLen) f << "dashs=" << dashes << ":" << dashLen << ",";
+      if (distance) f << "distance=" << distance << ",";
+      break;
+    }
+    case XATTR_LINECOLOR:
+    case XATTR_FILLCOLOR:
+    case XATTR_FORMTXTSHDWCOLOR: {
+      f << (nWhich==XATTR_LINECOLOR ? "line[color]" :
+            nWhich==XATTR_FILLCOLOR ? "fill[color]" : "shadow[form,color]") << ",";
+      if (id>=0) break;
+      STOFFColor col;
+      if (!input->readColor(col)) {
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+        f << "###color,";
+        break;
+      }
+      if (!col.isBlack()) f << col << ",";
+      break;
+    }
+    case XATTR_LINESTART:
+    case XATTR_LINEEND: {
+      f << (nWhich==XATTR_LINESTART ? "line[start]" : "line[end]") << ",";
+      if (id>=0) break;
+      uint32_t nPoints;
+      *input >> nPoints;
+      if (input->tell()+6*long(nPoints)>lastPos) {
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: bad num point\n"));
+        f << "###nPoints=" << nPoints << ",";
+        break;
+      }
+      f << "pts=[";
+      for (uint32_t i=0; i<nPoints; ++i)
+        f << input->readLong(4) << "x" << input->readLong(4) << ":" << input->readULong(4) << ",";
+      f << "],";
+      break;
+    }
+    case XATTR_FILLGRADIENT:
+    case XATTR_FILLFLOATTRANSPARENCE: {
+      f << (nWhich==XATTR_FILLGRADIENT ? "gradient[fill]" : "transparence[float,fill]")  << ",";
+      if (id>=0) break;
+      uint16_t type, red, green, blue, red2, green2, blue2;
+      *input >> type >> red >> green >> blue >> red2 >> green2 >> blue2;
+      if (type) f << "type=" << type << ",";
+      f << "startColor=" << STOFFColor(uint8_t(red>>8),uint8_t(green>>8),uint8_t(blue>>8)) << ",";
+      f << "endColor=" << STOFFColor(uint8_t(red2>>8),uint8_t(green2>>8),uint8_t(blue2>>8)) << ",";
+      uint32_t angle;
+      uint16_t border, xOffset, yOffset, startIntens, endIntens, nStep;
+      *input >> angle >> border >> xOffset >> yOffset >> startIntens >> endIntens;
+      if (angle) f << "angle=" << angle << ",";
+      if (border) f << "border=" << border << ",";
+      f << "offset=" << xOffset << "x" << yOffset << ",";
+      f << "intensity=[" << startIntens << "," << endIntens << "],";
+      if (nVers>=1) {
+        *input >> nStep;
+        if (nStep) f << "step=" << nStep << ",";
+      }
+      if (nWhich==XATTR_FILLFLOATTRANSPARENCE) {
+        bool enabled;
+        *input>>enabled;
+        if (enabled) f << "enabled,";
+      }
+      break;
+    }
+    case XATTR_FILLHATCH: {
+      f << "hatch[fill],";
+      if (id>=0) break;
+      uint16_t type, red, green, blue;
+      int32_t distance, angle;
+      *input >> type >> red >> green >> blue >> distance >> angle;
+      if (type) f << "type=" << type << ",";
+      f << "color=" << STOFFColor(uint8_t(red>>8),uint8_t(green>>8),uint8_t(blue>>8)) << ",";
+      f << "distance=" << distance << ",";
+      f << "angle=" << angle << ",";
+      break;
+    }
+    case XATTR_FILLBITMAP: {
+      f << "bitmap[fill],";
+      if (id>=0) break;
+      if (nVers==1) {
+        int16_t style, type;
+        *input >> style >> type;
+        if (style) f << "style=" << style << ",";
+        if (type) f << "type=" << type << ",";
+        if (type==1) {
+          if (input->tell()+128+2>lastPos) {
+            STOFF_DEBUG_MSG(("StarAttribute::readAttribute: the zone seems too short\n"));
+            f << "###short,";
+            break;
+          }
+          f << "val=[";
+          for (int i=0; i<64; ++i) {
+            uint16_t value;
+            *input>>value;
+            if (value) f << std::hex << value << std::dec << ",";
+            else f << "_,";
+          }
+          f << "],";
+          for (int i=0; i<2; ++i) {
+            STOFFColor col;
+            if (!input->readColor(col)) {
+              STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+              f << "###color,";
+              break;
+            }
+            f << "col" << i << "=" << col << ",";
+          }
+          break;
+        }
+        if (type==2) break;
+        if (type!=0) {
+          STOFF_DEBUG_MSG(("StarAttribute::readAttribute: unexpected type\n"));
+          f << "###type,";
+          break;
+        }
+      }
+      StarFileManager fileManager;
+      if (!fileManager.readBitmap(zone, true, lastPos)) break;
+      break;
+    }
+
+    default:
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: unknown name id\n"));
+      f << "###nameId,";
+      break;
+    }
+    break;
+  }
+  case XATTR_LINERESERVED2:
+  case XATTR_LINERESERVED3:
+  case XATTR_LINERESERVED4:
+    f << (nWhich==XATTR_LINERESERVED2? "line[reserved2]" :
+          nWhich==XATTR_LINERESERVED3? "line[reserved3]" : "line[reserved4]") << ",";
+    break;
+  case XATTR_LINERESERVED5:
+  case XATTR_LINERESERVED_LAST:
+    f << (nWhich==XATTR_LINERESERVED5? "line[reserved5]" : "line[reserved6]") << ",";
+    break;
+
+  case XATTR_SET_LINE:
+  case XATTR_SET_FILL:
+  case XATTR_SET_TEXT: {
+    f << (nWhich==XATTR_SET_LINE ? "setLine" :
+          nWhich==XATTR_SET_FILL ? "setFill" : "setText") << ",";
+    StarFileManager fileManager;
+    fileManager.readSfxItemList(zone);
+    break;
+  }
+  case XATTR_FILLTRANSPARENCE:
+  case XATTR_GRADIENTSTEPCOUNT:
+  case XATTR_FILLBMP_POS:
+    f << (nWhich==XATTR_FILLTRANSPARENCE ? "transparence[fill]" :
+          nWhich==XATTR_GRADIENTSTEPCOUNT ? "gradient[stepCount]" : "bmp[pos]")
+      << "=" << input->readULong(2) << ",";
+    break;
+  case XATTR_FILLBMP_TILE:
+  case XATTR_FILLBMP_STRETCH:
+  case XATTR_FILLBMP_SIZELOG:
+    f << (nWhich==XATTR_FILLBMP_TILE ? "bmp[title]" :
+          nWhich==XATTR_FILLBMP_STRETCH ? "bmp[strech]" : "bmp[sizelog]") << "=" << input->readULong(1) <<",";
+    break;
+  case XATTR_FILLBMP_SIZEX:
+  case XATTR_FILLBMP_SIZEY:
+    f << (nWhich==XATTR_FILLBMP_SIZEX ? "bmp[sizeX]" : "bmp[sizeY]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case XATTR_FILLBMP_TILEOFFSETX:
+  case XATTR_FILLBMP_TILEOFFSETY:
+    f << (nWhich==XATTR_FILLBMP_TILEOFFSETX ? "bmp[offsX]" : "bmp[offsY]")
+      << "=" << input->readULong(2) << ",";
+    break;
+  case XATTR_FILLBMP_POSOFFSETX:
+  case XATTR_FILLBMP_POSOFFSETY:
+    f << (nWhich==XATTR_FILLBMP_POSOFFSETX ? "bmp[posOffsX]" : "bmp[posOffsY]")
+      << "=" << input->readULong(2) << ",";
+    break;
+  case XATTR_FILLBACKGROUND:
+    f << "fill[background]=" << input->readULong(1) << ",";
+    break;
+  case XATTR_FILLRESERVED2:
+    f << "fill[reserved2],";
+    break;
+  case XATTR_FILLRESERVED3:
+  case XATTR_FILLRESERVED4:
+  case XATTR_FILLRESERVED5:
+    f << (nWhich==XATTR_FILLRESERVED3? "fill[reserved3]" :
+          nWhich==XATTR_FILLRESERVED4? "fill[reserved4]" : "fill[reserved5]") << ",";
+    break;
+  case XATTR_FILLRESERVED6:
+  case XATTR_FILLRESERVED7:
+  case XATTR_FILLRESERVED8:
+    f << (nWhich==XATTR_FILLRESERVED6? "fill[reserved6]" :
+          nWhich==XATTR_FILLRESERVED7? "fill[reserved7]" : "fill[reserved8]") << ",";
+    break;
+  case XATTR_FILLRESERVED10:
+  case XATTR_FILLRESERVED11:
+  case XATTR_FILLRESERVED_LAST:
+    f << (nWhich==XATTR_FILLRESERVED10? "fill[reserved10]" :
+          nWhich==XATTR_FILLRESERVED11? "fill[reserved11]" : "fill[reserved12]") << ",";
+    break;
+
+  case XATTR_FORMTXTSTYLE:
+  case XATTR_FORMTXTADJUST:
+  case XATTR_FORMTXTSHADOW:
+    f << (nWhich==XATTR_FORMTXTSTYLE ? "style[form]" :
+          nWhich==XATTR_FORMTXTADJUST ? "adjust[form]" : "shadow[form]")
+      << "=" << input->readULong(2) << ",";
+    break;
+
+  case XATTR_FORMTXTDISTANCE:
+  case XATTR_FORMTXTSTART:
+    f << (nWhich==XATTR_FORMTXTDISTANCE ? "distance[form]" : "start[form]") << "=" << input->readLong(4) << ",";
+    break;
+
+  case XATTR_FORMTXTMIRROR:
+  case XATTR_FORMTXTOUTLINE:
+  case XATTR_FORMTXTHIDEFORM:
+    f << (nWhich==XATTR_FORMTXTMIRROR ? "mirror[form]" :
+          nWhich==XATTR_FORMTXTOUTLINE ? "outline[form]" : "hide[form]") << "=" << input->readULong(1) << ",";
+    break;
+
+  case XATTR_FORMTXTSHDWXVAL:
+  case XATTR_FORMTXTSHDWYVAL:
+    f << (nWhich==XATTR_FORMTXTSHDWXVAL ? "shadowX[form]" : "shadowY[form]") << "=" << input->readLong(4) << ",";
+    break;
+
+  case XATTR_FORMTXTSTDFORM:
+  case XATTR_FORMTXTSHDWTRANSP:
+    f << (nWhich==XATTR_FORMTXTSTDFORM ? "standart[form]" : "shadowTrans[form]") << "=" << input->readULong(2) << ",";
+    break;
+
+  case XATTR_FTRESERVED2:
+  case XATTR_FTRESERVED3:
+  case XATTR_FTRESERVED4:
+    f << (nWhich==XATTR_FTRESERVED2? "form[reserved2]" :
+          nWhich==XATTR_FTRESERVED3? "form[reserved3]" : "form[reserved4]") << ",";
+    break;
+  case XATTR_FTRESERVED5:
+  case XATTR_FTRESERVED_LAST:
+    f << (nWhich==XATTR_FTRESERVED5? "form[reserved5]" : "form[reserved6]") << ",";
+    break;
+
+  case SDRATTR_SET_SHADOW:
+  case SDRATTR_SET_CAPTION:
+  case SDRATTR_SET_OUTLINER:
+  case SDRATTR_SET_MISC:
+  case SDRATTR_SET_EDGE:
+  case SDRATTR_SET_MEASURE:
+  case SDRATTR_SET_CIRC: {
+    f << (nWhich==SDRATTR_SET_SHADOW ? "setSdrShadow" :
+          nWhich==SDRATTR_SET_CAPTION ? "setSdrCaption" :
+          nWhich==SDRATTR_SET_OUTLINER ? "setSdrOutliner" :
+          nWhich==SDRATTR_SET_MISC ? "setSdrMisc" :
+          nWhich==SDRATTR_SET_EDGE ? "setSdrEdge" :
+          nWhich==SDRATTR_SET_MEASURE ? "setSdrMeasure" : "setCircle") << ",";
+    StarFileManager fileManager;
+    fileManager.readSfxItemList(zone);
+    break;
+  }
+
+  case SDRATTR_SHADOW3D:
+  case SDRATTR_SHADOWPERSP:
+    f << (nWhich==SDRATTR_SHADOW3D ? "sdrShadow3d" : "sdrShadowPersp") << ",";
+    break;
+
+  case SDRATTR_SHADOW:
+    f << "sdrShadow=" << input->readULong(1) << ",";
+    break;
+
+  // name or index
+  case SDRATTR_SHADOWCOLOR: {
+    librevenge::RVNGString text;
+    if (!zone.readString(text)) {
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
+      f << "###string";
+      break;
+    }
+    if (!text.empty()) f << "name=" << text.cstr() << ",";
+    int32_t id;
+    *input >> id;
+    if (id>=0) f << "id=" << id << ",";
+    switch (nWhich) {
+    case SDRATTR_SHADOWCOLOR: {
+      f << "sdrShadow[color],";
+      if (id>=0) break;
+      STOFFColor col;
+      if (!input->readColor(col)) {
+        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+        f << "###color,";
+        break;
+      }
+      if (!col.isBlack()) f << col << ",";
+      break;
+    }
+    default:
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: unknown name id\n"));
+      f << "###nameId,";
+      break;
+    }
+    break;
+  }
+  case SDRATTR_SHADOWXDIST:
+  case SDRATTR_SHADOWYDIST:
+    f << (nWhich==SDRATTR_SHADOWXDIST ? "sdrXDist[shadow]" : "sdrYDist[shadow]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_SHADOWTRANSPARENCE:
+    f << "sdrTransparence[shadow]=" << input->readULong(2) << ",";
+    break;
+
+  case SDRATTR_SHADOWRESERVE1:
+  case SDRATTR_SHADOWRESERVE2:
+  case SDRATTR_SHADOWRESERVE3:
+  case SDRATTR_SHADOWRESERVE4:
+  case SDRATTR_SHADOWRESERVE5:
+    f << "shadowReserved" << nWhich-SDRATTR_SHADOWRESERVE1+1 << "[sdr],";
+    break;
+
+  case SDRATTR_CAPTIONTYPE:
+  case SDRATTR_CAPTIONESCDIR:
+    f << (nWhich==SDRATTR_CAPTIONTYPE ? "sdrCaption[type]" : "sdrCaption[escDir]") << "=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_CAPTIONFIXEDANGLE:
+  case SDRATTR_CAPTIONESCISREL:
+  case SDRATTR_CAPTIONFITLINELEN:
+    f << (nWhich==SDRATTR_CAPTIONFIXEDANGLE ? "sdrCaption[fixedAngle]" :
+          nWhich==SDRATTR_CAPTIONESCISREL ? "sdrCaption[escIsRel]" : "sdrCaption[fitLineLen]") << input->readULong(1) << ",";
+    break;
+  case SDRATTR_CAPTIONANGLE: // angle
+    f << "sdrCaption[angle]=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_CAPTIONGAP: // metric
+  case SDRATTR_CAPTIONESCABS:
+  case SDRATTR_CAPTIONLINELEN:
+    f << (nWhich==SDRATTR_CAPTIONGAP ? "sdrCaption[gap]" :
+          nWhich==SDRATTR_CAPTIONESCABS ? "sdrCaption[escAbs]" : "sdrCaption[lineLen]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_CAPTIONESCREL:
+    f << "sdrCaption[escRel]=" << input->readLong(4) << ",";
+    break;
+
+  case SDRATTR_CAPTIONRESERVE1:
+  case SDRATTR_CAPTIONRESERVE2:
+  case SDRATTR_CAPTIONRESERVE3:
+  case SDRATTR_CAPTIONRESERVE4:
+  case SDRATTR_CAPTIONRESERVE5:
+    f << "captionReserved" << nWhich-SDRATTR_CAPTIONRESERVE1+1 << "[sdr},";
+    break;
+
+  case SDRATTR_ECKENRADIUS: // metric
+  case SDRATTR_TEXT_MINFRAMEHEIGHT:
+  case SDRATTR_TEXT_LEFTDIST:
+    f << (nWhich==SDRATTR_ECKENRADIUS ? "eckenRadius[sdr]":
+          nWhich==SDRATTR_TEXT_MINFRAMEHEIGHT ? "textMinHeight[sdr]" : "textLeftDist[sdr]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_TEXT_AUTOGROWHEIGHT: // onoff
+  case SDRATTR_TEXT_AUTOGROWWIDTH:
+    f << (nWhich==SDRATTR_TEXT_AUTOGROWHEIGHT ? "textAutoGrowHeight[sdr]" : "textAutoGrowWidth[sdr]")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case SDRATTR_TEXT_FITTOSIZE:
+  case SDRATTR_TEXT_VERTADJUST:
+  case SDRATTR_TEXT_HORZADJUST:
+    f << (nWhich==SDRATTR_TEXT_FITTOSIZE ? "fitToSize[sdr]" :
+          nWhich==SDRATTR_TEXT_VERTADJUST ? "vertAdjust[sdr]" : "horAdjust[sdr]")
+      << "=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_TEXT_RIGHTDIST: // metric
+  case SDRATTR_TEXT_UPPERDIST:
+  case SDRATTR_TEXT_LOWERDIST:
+    f << (nWhich==SDRATTR_TEXT_RIGHTDIST ? "textRightDist[sdr]" :
+          nWhich==SDRATTR_TEXT_UPPERDIST ? "textUpperDist[sdr]" : "textLowerDist[sdr]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_TEXT_MAXFRAMEHEIGHT: // metric
+  case SDRATTR_TEXT_MINFRAMEWIDTH:
+  case SDRATTR_TEXT_MAXFRAMEWIDTH:
+    f << (nWhich==SDRATTR_TEXT_MAXFRAMEHEIGHT ? "maxFrmHeight[sdr]" :
+          nWhich==SDRATTR_TEXT_MINFRAMEWIDTH ? "minFrmWidth[sdr]" : "maxFrmWidth[sdr]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_TEXT_ANIKIND:
+  case SDRATTR_TEXT_ANIDIRECTION:
+    f << (nWhich==SDRATTR_TEXT_ANIKIND ? "aniKind[sdr]" : "aniDir[sdr]") << "=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_TEXT_ANISTARTINSIDE: // yesNo
+  case SDRATTR_TEXT_ANISTOPINSIDE:
+  case SDRATTR_TEXT_CONTOURFRAME: // onOff
+    f << (nWhich==SDRATTR_TEXT_ANISTARTINSIDE ? "aniStartInside" :
+          nWhich==SDRATTR_TEXT_ANISTOPINSIDE ? "aniStopInside" : "textContourFrm[sdr]")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case SDRATTR_TEXT_ANICOUNT:
+  case SDRATTR_TEXT_ANIDELAY:
+    f << (nWhich==SDRATTR_TEXT_ANICOUNT ? "aniCount" : "aniDelay") << "=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_TEXT_ANIAMOUNT:
+    f << "aniAmount=" << input->readLong(2) << ",";
+    break;
+  case SDRATTR_AUTOSHAPE_ADJUSTMENT:
+    f << "autoShapeAdjust[sdr],";
+    if (nVers) {
+      uint32_t n;
+      *input >> n;
+      if (n) f << "nCount=" << n << ",";
+    }
+    break;
+  case SDRATTR_XMLATTRIBUTES:
+    f << "sdrXmlAttributes,";
+    break;
+  case SDRATTR_RESERVE15:
+  case SDRATTR_RESERVE16:
+  case SDRATTR_RESERVE17:
+  case SDRATTR_RESERVE18:
+  case SDRATTR_RESERVE19:
+    f << "sdrReserved" << (nWhich+1-SDRATTR_RESERVE15) << ",";
+    break;
+
+  case SDRATTR_EDGEKIND:
+    f << "edge[kind]=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_EDGENODE1HORZDIST: // metric
+  case SDRATTR_EDGENODE1VERTDIST:
+  case SDRATTR_EDGENODE2HORZDIST:
+    f << (nWhich==SDRATTR_EDGENODE1HORZDIST ? "edgeNode1HorDist" :
+          nWhich==SDRATTR_EDGENODE1VERTDIST ? "edgeNode1VerDist" : "edgeNode2HorDist")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_EDGENODE2VERTDIST: // metric
+  case SDRATTR_EDGENODE1GLUEDIST:
+  case SDRATTR_EDGENODE2GLUEDIST:
+    f << (nWhich==SDRATTR_EDGENODE2VERTDIST ? "edgeNode1VerDist" :
+          nWhich==SDRATTR_EDGENODE1GLUEDIST ? "edgeNode1GlueDist" : "edgeNode2GlueDist")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_EDGELINEDELTAANZ:
+    f << "edge[lineDeltaAnz=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_EDGELINE1DELTA: // metric
+  case SDRATTR_EDGELINE2DELTA:
+  case SDRATTR_EDGELINE3DELTA:
+    f << (nWhich==SDRATTR_EDGELINE1DELTA ? "edgeLine1Delta" :
+          nWhich==SDRATTR_EDGELINE2DELTA ? "edgeLine2Delta" : "edgeLine3Delta")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_EDGERESERVE02:
+  case SDRATTR_EDGERESERVE03:
+  case SDRATTR_EDGERESERVE04:
+  case SDRATTR_EDGERESERVE05:
+  case SDRATTR_EDGERESERVE06:
+  case SDRATTR_EDGERESERVE07:
+  case SDRATTR_EDGERESERVE08:
+  case SDRATTR_EDGERESERVE09:
+    f << "sdrEdgeReserve" << nWhich-SDRATTR_EDGERESERVE02+2 << ",";
+    break;
+
+  case SDRATTR_MEASUREKIND:
+  case SDRATTR_MEASURETEXTHPOS:
+  case SDRATTR_MEASURETEXTVPOS:
+    f << (nWhich==SDRATTR_MEASUREKIND ? "measure[kind]" :
+          nWhich==SDRATTR_MEASURETEXTHPOS ? "measure[extHPos]" : "measure[extVPos]")
+      << "=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_MEASURELINEDIST: // metric
+  case SDRATTR_MEASUREHELPLINEOVERHANG:
+  case SDRATTR_MEASUREHELPLINEDIST:
+    f << (nWhich==SDRATTR_MEASURELINEDIST ? "measure[lineDist]" :
+          nWhich==SDRATTR_MEASUREHELPLINEOVERHANG ? "measure[helpLineOverHang]" : "measure[helpLineDist]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_MEASUREHELPLINE1LEN: // metric
+  case SDRATTR_MEASUREHELPLINE2LEN:
+    f << (nWhich==SDRATTR_MEASUREHELPLINE1LEN ? "measure[helpLine1Len]" : "measure[helpLine2Len]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_MEASUREBELOWREFEDGE: // yesNo
+  case SDRATTR_MEASURETEXTROTA90:
+  case SDRATTR_MEASURETEXTUPSIDEDOWN:
+    f << (nWhich==SDRATTR_MEASUREBELOWREFEDGE ? "measure[belowRefEdge]" :
+          nWhich==SDRATTR_MEASURETEXTROTA90 ? "measure[textRot90]" : "measure[textUpsideDown]")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case SDRATTR_MEASUREOVERHANG: // metric
+    f << "measure[overHang]=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_MEASUREUNIT: // enum
+    f << "measure[unit]=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_MEASURESCALE: //  // sdrFraction
+    f << "measure[scale],mult=" << input->readLong(4) << ",div=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_MEASURESHOWUNIT: // yesNo
+  case SDRATTR_MEASURETEXTAUTOANGLE:
+  case SDRATTR_MEASURETEXTISFIXEDANGLE:
+    f << (nWhich==SDRATTR_MEASURESHOWUNIT ? "measure[showUnit]" :
+          nWhich==SDRATTR_MEASURETEXTAUTOANGLE ? "measure[autoAngle]" : "measure[fixAngle]")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case SDRATTR_MEASUREFORMATSTRING: { // string
+    f << "measure[formatString]=";
+    librevenge::RVNGString format;
+    if (!zone.readString(format)) {
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
+      f << "###string";
+      break;
+    }
+    f << format.cstr() << ",";
+    break;
+  }
+  case SDRATTR_MEASURETEXTAUTOANGLEVIEW: // sdrAngle
+  case SDRATTR_MEASURETEXTFIXEDANGLE:
+    f << (nWhich==SDRATTR_MEASURETEXTAUTOANGLEVIEW ? "measure[autoAngle]" : "measure[fixedAngle]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_MEASUREDECIMALPLACES: // int16
+    f << "measure[decimalPlaces]=" << input->readLong(2) << ",";
+    break;
+  case SDRATTR_MEASURERESERVE05:
+  case SDRATTR_MEASURERESERVE06:
+  case SDRATTR_MEASURERESERVE07:
+    f << "sdrMeasureReserved" << nWhich-SDRATTR_MEASURERESERVE05+5 << ",";
+    break;
+
+  case SDRATTR_CIRCKIND: // enum
+    f << "sdrCircle[kind]=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_CIRCSTARTANGLE: // sdrAngle
+  case SDRATTR_CIRCENDANGLE:
+    f << (nWhich==SDRATTR_CIRCSTARTANGLE ? "circle[start]" : "circle[end]") << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_CIRCRESERVE0:
+  case SDRATTR_CIRCRESERVE1:
+  case SDRATTR_CIRCRESERVE2:
+  case SDRATTR_CIRCRESERVE3:
+    f << "sdrCirReserve" << nWhich-SDRATTR_CIRCRESERVE0 << ",";
+    break;
+
+  case SDRATTR_OBJMOVEPROTECT: // yesNo
+  case SDRATTR_OBJSIZEPROTECT:
+  case SDRATTR_OBJPRINTABLE:
+    f << (nWhich==SDRATTR_OBJMOVEPROTECT ? "sdrObjMoveProtect" :
+          nWhich==SDRATTR_OBJSIZEPROTECT ? "sdrObjSizeProtect" : "sdrObjPrintable")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case SDRATTR_LAYERID: // uint16
+    f << "sdrLayerId=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_LAYERNAME:
+  case SDRATTR_OBJECTNAME: {
+    f << (nWhich==SDRATTR_LAYERNAME ? "sdrLayerName" : "sdrObjectName") << ",";
+    librevenge::RVNGString name;
+    if (!zone.readString(name)) {
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
+      f << "###string";
+      break;
+    }
+    f << name.cstr() << ",";
+    break;
+  }
+  case SDRATTR_ALLPOSITIONX: // metric
+  case SDRATTR_ALLPOSITIONY:
+  case SDRATTR_ALLSIZEWIDTH:
+    f << (nWhich==SDRATTR_ALLPOSITIONX ? "sdrAllPosX" :
+          nWhich==SDRATTR_ALLPOSITIONY ? "sdrAllPosY" : "allSizeWidth")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_ALLSIZEHEIGHT: // metric
+  case SDRATTR_ONEPOSITIONX:
+  case SDRATTR_ONEPOSITIONY:
+    f << (nWhich==SDRATTR_ALLSIZEHEIGHT ? "sdrAllSizeHeight" :
+          nWhich==SDRATTR_ONEPOSITIONX ? "sdrOnePosX" : "sdrOnePoxY")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_ONESIZEWIDTH: // metric
+  case SDRATTR_ONESIZEHEIGHT:
+  case SDRATTR_LOGICSIZEWIDTH:
+    f << (nWhich==SDRATTR_ONESIZEWIDTH ? "sdrOneSizeWidth" :
+          nWhich==SDRATTR_ONESIZEHEIGHT ? "sdrOneSizeHeight" : "sdrLogicSizeWidth")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_LOGICSIZEHEIGHT: // metric
+  case SDRATTR_MOVEX:
+  case SDRATTR_MOVEY:
+    f << (nWhich==SDRATTR_LOGICSIZEHEIGHT ? "sdrLogicSizeHeight" :
+          nWhich==SDRATTR_MOVEX ? "sdrMoveX" : "sdrMoveY")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_ROTATEANGLE: // sdrAngle
+  case SDRATTR_SHEARANGLE:
+    f << (nWhich==SDRATTR_ROTATEANGLE ? "sdrAngle[rotate]" : "sdrAngle[shear]") << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_RESIZEXONE: // sdrFraction
+  case SDRATTR_RESIZEYONE:
+    f << (nWhich==SDRATTR_RESIZEXONE ? "sdrResizeX[one]" : "sdrResizeY[one]") << ","
+      << "mult=" << input->readLong(4) << ",div=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_ROTATEONE: // sdrAngle
+  case SDRATTR_HORZSHEARONE:
+  case SDRATTR_VERTSHEARONE:
+    f << (nWhich==SDRATTR_ROTATEONE ? "sdr[rotateOne]" :
+          nWhich==SDRATTR_HORZSHEARONE ? "sdr[horzShearOne]" : "sdr[vertShearOne]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_RESIZEXALL: // sdrFraction
+  case SDRATTR_RESIZEYALL:
+    f << (nWhich==SDRATTR_RESIZEXALL ? "sdrResizeX[all]" : "sdrResizeY[all]") << ","
+      << "mult=" << input->readLong(4) << ",div=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_ROTATEALL: // sdrAngle
+  case SDRATTR_HORZSHEARALL:
+  case SDRATTR_VERTSHEARALL:
+    f << (nWhich==SDRATTR_ROTATEALL ? "sdr[rotateAll]" :
+          nWhich==SDRATTR_HORZSHEARALL ? "sdr[horzShearAll]" : "sdr[vertShearAll]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_TRANSFORMREF1X: // metric
+  case SDRATTR_TRANSFORMREF1Y:
+    f << (nWhich==SDRATTR_TRANSFORMREF1X ? "sdr[transRef1X]" : "sdr[transRef1Y]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_TRANSFORMREF2X: // metric
+  case SDRATTR_TRANSFORMREF2Y:
+    f << (nWhich==SDRATTR_TRANSFORMREF2X ? "sdr[transRef2X]" : "sdr[transRef2Y]")
+      << "=" << input->readLong(4) << ",";
+    break;
+  case SDRATTR_TEXTDIRECTION: // uint16
+    f << "sdr[textDirection]=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_NOTPERSISTRESERVE2:
+  case SDRATTR_NOTPERSISTRESERVE3:
+  case SDRATTR_NOTPERSISTRESERVE4:
+  case SDRATTR_NOTPERSISTRESERVE5:
+  case SDRATTR_NOTPERSISTRESERVE6:
+  case SDRATTR_NOTPERSISTRESERVE7:
+  case SDRATTR_NOTPERSISTRESERVE8:
+  case SDRATTR_NOTPERSISTRESERVE9:
+  case SDRATTR_NOTPERSISTRESERVE10:
+  case SDRATTR_NOTPERSISTRESERVE11:
+  case SDRATTR_NOTPERSISTRESERVE12:
+  case SDRATTR_NOTPERSISTRESERVE13:
+  case SDRATTR_NOTPERSISTRESERVE14:
+  case SDRATTR_NOTPERSISTRESERVE15:
+    f << "sdr[notPersistReserve" << nWhich-SDRATTR_NOTPERSISTRESERVE2+2 << ",";
+    break;
   default:
     STOFF_DEBUG_MSG(("StarAttribute::readAttribute: reading not format attribute is not implemented\n"));
     f << "#unimplemented[wh=" << std::hex << nWhich << std::dec << ",";
@@ -1695,7 +2396,6 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return true;
-
 }
 
 bool StarAttribute::readBrushItem(StarZone &zone, int nVers, long /*endPos*/, libstoff::DebugStream &f)

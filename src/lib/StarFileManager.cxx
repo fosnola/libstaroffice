@@ -567,7 +567,7 @@ bool StarFileManager::readOutPlaceObject(STOFFInputStreamPtr input, libstoff::De
 ////////////////////////////////////////////////////////////
 // small zone
 ////////////////////////////////////////////////////////////
-bool StarFileManager::readBitmap(StarZone &zone)
+bool StarFileManager::readBitmap(StarZone &zone, bool inFileHeader, long lastPos)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -575,11 +575,49 @@ bool StarFileManager::readBitmap(StarZone &zone)
   libstoff::DebugStream f;
   f << "Entries(StarBitmap)[" << zone.getRecordLevel() << "]:";
 
+  // bitmap2.cxx: Bitmap::Read
+  unsigned long offset=0;
+  if (inFileHeader) {
+    // ImplReadDIBFileHeader
+    f << "header,";
+    uint16_t header;
+    *input >> header;
+    bool ok=true;
+    if (header==0x4142) {
+      input->seek(12, librevenge::RVNG_SEEK_CUR);
+      ok=(input->readULong(2)==0x4d42);
+      input->seek(8, librevenge::RVNG_SEEK_CUR);
+      offset=input->readULong(4)-28ul;
+    }
+    else if (header==0x4d42) {
+      input->seek(8, librevenge::RVNG_SEEK_CUR);
+      offset=input->readULong(4)-14ul;
+    }
+    else
+      ok=false;
+    f << "offset=" << offset << ",";
+    if (!ok || (long) offset<0 || input->tell()+(long) offset>lastPos) {
+      STOFF_DEBUG_MSG(("StarFileManager::readBitmap: can not read the header\n"));
+      f << "###";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+    pos=input->tell();
+    f.str("");
+    f << "StarBitmap:";
+  }
+  // ImplReadDIBInfoHeader
   STOFF_DEBUG_MSG(("StarFileManager::readBitmap: is not implement\n"));
   f << "###";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  return false;
+  input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  return true;
 }
 
 bool StarFileManager::readFont(StarZone &zone, int nVers, long lastPos)

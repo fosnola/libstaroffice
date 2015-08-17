@@ -83,7 +83,7 @@ public:
   static bool readOutPlaceObject(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
 
   //! try to read a bitmap
-  static bool readBitmap(StarZone &zone);
+  static bool readBitmap(StarZone &zone, bool inFileHeader, long lastPos);
   //! try to read a printer zone
   static bool readJobSetUp(StarZone &zone);
   //! try to read a font
