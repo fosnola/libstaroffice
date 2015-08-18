@@ -496,7 +496,7 @@ struct State {
     else if (m_name=="XOutdevItemPool") {
       // svx_xpool.cxx XOutdevItemPool::Ctor
       m_verStart=1000;
-      m_verEnd=1228; // checkme
+      m_verEnd=1333;
       std::vector<int> list;
       for (int i=1000; i<=1021; ++i) list.push_back(i);
       for (int i=1022; i<=1039; ++i) list.push_back(i+13);
@@ -592,16 +592,41 @@ struct State {
         StarAttribute::SDRATTR_NOTPERSISTRESERVE6, StarAttribute::SDRATTR_NOTPERSISTRESERVE7, StarAttribute::SDRATTR_NOTPERSISTRESERVE8, StarAttribute::SDRATTR_NOTPERSISTRESERVE9,
         StarAttribute::SDRATTR_NOTPERSISTRESERVE10, StarAttribute::SDRATTR_NOTPERSISTRESERVE11, StarAttribute::SDRATTR_NOTPERSISTRESERVE12, StarAttribute::SDRATTR_NOTPERSISTRESERVE13,
 
-        StarAttribute::SDRATTR_NOTPERSISTRESERVE14, StarAttribute::SDRATTR_NOTPERSISTRESERVE15,
+        StarAttribute::SDRATTR_NOTPERSISTRESERVE14, StarAttribute::SDRATTR_NOTPERSISTRESERVE15, StarAttribute::SDRATTR_GRAFRED, StarAttribute::SDRATTR_GRAFGREEN,
+        StarAttribute::SDRATTR_GRAFBLUE, StarAttribute::SDRATTR_GRAFLUMINANCE, StarAttribute::SDRATTR_GRAFCONTRAST, StarAttribute::SDRATTR_GRAFGAMMA,
+        StarAttribute::SDRATTR_GRAFTRANSPARENCE, StarAttribute::SDRATTR_GRAFINVERT, StarAttribute::SDRATTR_GRAFMODE, StarAttribute::SDRATTR_GRAFCROP,
+        StarAttribute::SDRATTR_GRAFRESERVE3, StarAttribute::SDRATTR_GRAFRESERVE4, StarAttribute::SDRATTR_GRAFRESERVE5, StarAttribute::SDRATTR_GRAFRESERVE6,
+        StarAttribute::SDRATTR_SET_GRAF, StarAttribute::SDRATTR_3DOBJ_PERCENT_DIAGONAL, StarAttribute::SDRATTR_3DOBJ_BACKSCALE, StarAttribute::SDRATTR_3DOBJ_DEPTH,
+
+        StarAttribute::SDRATTR_3DOBJ_HORZ_SEGS, StarAttribute::SDRATTR_3DOBJ_VERT_SEGS, StarAttribute::SDRATTR_3DOBJ_END_ANGLE, StarAttribute::SDRATTR_3DOBJ_DOUBLE_SIDED,
+        StarAttribute::SDRATTR_3DOBJ_NORMALS_KIND, StarAttribute::SDRATTR_3DOBJ_NORMALS_INVERT, StarAttribute::SDRATTR_3DOBJ_TEXTURE_PROJ_X, StarAttribute::SDRATTR_3DOBJ_TEXTURE_PROJ_Y,
+        StarAttribute::SDRATTR_3DOBJ_SHADOW_3D, StarAttribute::SDRATTR_3DOBJ_MAT_COLOR, StarAttribute::SDRATTR_3DOBJ_MAT_EMISSION, StarAttribute::SDRATTR_3DOBJ_MAT_SPECULAR,
+        StarAttribute::SDRATTR_3DOBJ_MAT_SPECULAR_INTENSITY, StarAttribute::SDRATTR_3DOBJ_TEXTURE_KIND, StarAttribute::SDRATTR_3DOBJ_TEXTURE_MODE, StarAttribute::SDRATTR_3DOBJ_TEXTURE_FILTER,
+        StarAttribute::SDRATTR_3DOBJ_SMOOTH_NORMALS, StarAttribute::SDRATTR_3DOBJ_SMOOTH_LIDS, StarAttribute::SDRATTR_3DOBJ_CHARACTER_MODE, StarAttribute::SDRATTR_3DOBJ_CLOSE_FRONT,
+        //1267
+        StarAttribute::SDRATTR_3DOBJ_CLOSE_BACK, StarAttribute::SDRATTR_3DOBJ_RESERVED_06, StarAttribute::SDRATTR_3DOBJ_RESERVED_07, StarAttribute::SDRATTR_3DOBJ_RESERVED_08,
+        StarAttribute::SDRATTR_3DOBJ_RESERVED_09, StarAttribute::SDRATTR_3DOBJ_RESERVED_10, StarAttribute::SDRATTR_3DOBJ_RESERVED_11, StarAttribute::SDRATTR_3DOBJ_RESERVED_12,
+        StarAttribute::SDRATTR_3DOBJ_RESERVED_13, StarAttribute::SDRATTR_3DOBJ_RESERVED_14, StarAttribute::SDRATTR_3DOBJ_RESERVED_15, StarAttribute::SDRATTR_3DOBJ_RESERVED_16,
+        StarAttribute::SDRATTR_3DOBJ_RESERVED_17, StarAttribute::SDRATTR_3DOBJ_RESERVED_18, StarAttribute::SDRATTR_3DOBJ_RESERVED_19, StarAttribute::SDRATTR_3DOBJ_RESERVED_20,
+        StarAttribute::SDRATTR_3DSCENE_PERSPECTIVE, StarAttribute::SDRATTR_3DSCENE_DISTANCE, StarAttribute::SDRATTR_3DSCENE_FOCAL_LENGTH, StarAttribute::SDRATTR_3DSCENE_TWO_SIDED_LIGHTING,
+
+        StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_1, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_2, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_3, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_4,
+        StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_5, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_6, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_7, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_8,
+        StarAttribute::SDRATTR_3DSCENE_AMBIENTCOLOR, StarAttribute::SDRATTR_3DSCENE_LIGHTON_1, StarAttribute::SDRATTR_3DSCENE_LIGHTON_2, StarAttribute::SDRATTR_3DSCENE_LIGHTON_3,
+        StarAttribute::SDRATTR_3DSCENE_LIGHTON_4, StarAttribute::SDRATTR_3DSCENE_LIGHTON_5, StarAttribute::SDRATTR_3DSCENE_LIGHTON_6, StarAttribute::SDRATTR_3DSCENE_LIGHTON_7,
+        StarAttribute::SDRATTR_3DSCENE_LIGHTON_8, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_1, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_2, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_3,
+
+        StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_4, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_5, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_6, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_7,
+        StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_8, StarAttribute::SDRATTR_3DSCENE_SHADOW_SLANT, StarAttribute::SDRATTR_3DSCENE_SHADE_MODE, StarAttribute::SDRATTR_3DSCENE_RESERVED_01,
+        StarAttribute::SDRATTR_3DSCENE_RESERVED_02, StarAttribute::SDRATTR_3DSCENE_RESERVED_03, StarAttribute::SDRATTR_3DSCENE_RESERVED_04, StarAttribute::SDRATTR_3DSCENE_RESERVED_05,
+        StarAttribute::SDRATTR_3DSCENE_RESERVED_06, StarAttribute::SDRATTR_3DSCENE_RESERVED_07, StarAttribute::SDRATTR_3DSCENE_RESERVED_08, StarAttribute::SDRATTR_3DSCENE_RESERVED_09,
+        StarAttribute::SDRATTR_3DSCENE_RESERVED_10, StarAttribute::SDRATTR_3DSCENE_RESERVED_11, StarAttribute::SDRATTR_3DSCENE_RESERVED_12, StarAttribute::SDRATTR_3DSCENE_RESERVED_13,
+
+        StarAttribute::SDRATTR_3DSCENE_RESERVED_14, StarAttribute::SDRATTR_3DSCENE_RESERVED_15, StarAttribute::SDRATTR_3DSCENE_RESERVED_16, StarAttribute::SDRATTR_3DSCENE_RESERVED_17,
+        StarAttribute::SDRATTR_3DSCENE_RESERVED_18, StarAttribute::SDRATTR_3DSCENE_RESERVED_19, StarAttribute::SDRATTR_3DSCENE_RESERVED_20 /* 1333*/
       };
       for (int i=0; i<int(sizeof(what)/sizeof(int)); ++i)
         m_idToAttributeList.push_back(what[i]);
-
-#if 0
-
-
-// then from 1229=SDRATTR_GRAFRED sdr svddef.hxx and svx_svdattr.cxx
-#endif
     }
   }
   //! returns true if the value is in expected range
@@ -709,9 +734,8 @@ bool StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPo
     long pos=input->tell();
     libstoff::DebugFile &ascii=zone.ascii();
     libstoff::DebugStream f;
-    f << "Entries(StarAttribute)["<< zone.getRecordLevel() << "]:wh=" << which;
-    if (!m_state->m_idToAttributeList.empty())
-      f << "##";
+    STOFF_DEBUG_MSG(("StarItemPool::readAttribute: find unknown attribute\n"));
+    f << "Entries(StarAttribute)["<< zone.getRecordLevel() << "]:###wh=" << which;
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());
     input->seek(endPos, librevenge::RVNG_SEEK_SET);

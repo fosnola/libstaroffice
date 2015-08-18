@@ -984,13 +984,17 @@ bool StarFileManager::readSfxItemList(StarZone &zone)
     return false;
   }
   if (n) {
-    // TODO poolio.cxx SfxItemPool::LoadItem
-    static bool first=true;
-    if (first) {
-      STOFF_DEBUG_MSG(("StarFileManager::readSfxItemList: reading a SfxItem is not implemented\n"));
-      first=false;
+    if (lastPos!=pos+2+6*n) {
+      // TODO poolio.cxx SfxItemPool::LoadItem
+      static bool first=true;
+      if (first) {
+        STOFF_DEBUG_MSG(("StarFileManager::readSfxItemList: reading a SfxItem is not implemented\n"));
+        first=false;
+      }
+      f << "##";
     }
-    f << "##";
+    else
+      f << "#";
     input->seek(pos+2+6*n, librevenge::RVNG_SEEK_SET);
   }
   ascFile.addPos(pos);

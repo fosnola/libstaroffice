@@ -1986,13 +1986,15 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
   case SDRATTR_SET_MISC:
   case SDRATTR_SET_EDGE:
   case SDRATTR_SET_MEASURE:
-  case SDRATTR_SET_CIRC: {
+  case SDRATTR_SET_CIRC:
+  case SDRATTR_SET_GRAF: {
     f << (nWhich==SDRATTR_SET_SHADOW ? "setSdrShadow" :
           nWhich==SDRATTR_SET_CAPTION ? "setSdrCaption" :
           nWhich==SDRATTR_SET_OUTLINER ? "setSdrOutliner" :
           nWhich==SDRATTR_SET_MISC ? "setSdrMisc" :
           nWhich==SDRATTR_SET_EDGE ? "setSdrEdge" :
-          nWhich==SDRATTR_SET_MEASURE ? "setSdrMeasure" : "setCircle") << ",";
+          nWhich==SDRATTR_SET_MEASURE ? "setSdrMeasure" :
+          nWhich==SDRATTR_SET_CIRC ? "setCircle" : "setGraph") << ",";
     StarFileManager fileManager;
     fileManager.readSfxItemList(zone);
     break;
@@ -2383,6 +2385,219 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
   case SDRATTR_NOTPERSISTRESERVE14:
   case SDRATTR_NOTPERSISTRESERVE15:
     f << "sdr[notPersistReserve" << nWhich-SDRATTR_NOTPERSISTRESERVE2+2 << ",";
+    break;
+
+  case SDRATTR_GRAFRED: // signed percent
+  case SDRATTR_GRAFGREEN:
+  case SDRATTR_GRAFBLUE:
+    f << (nWhich==SDRATTR_GRAFRED ? "graf[red]" : nWhich==SDRATTR_GRAFGREEN ? "graf[green]" : "graf[blue]")
+      << "=" << input->readLong(2) << ",";
+    break;
+  case SDRATTR_GRAFLUMINANCE: // signed percent
+  case SDRATTR_GRAFCONTRAST:
+    f << (nWhich==SDRATTR_GRAFLUMINANCE ? "graf[luminance]" : "graf[contrast]")
+      << "=" << input->readLong(2) << ",";
+    break;
+  case SDRATTR_GRAFGAMMA: // uint32
+    f << "graf[gamma]=" << input->readULong(4) << ",";
+    break;
+  case SDRATTR_GRAFTRANSPARENCE: // percent
+    f << "graf[transparence]=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_GRAFINVERT: // onOff
+    f << "graf[invert]=" << input->readULong(1) << ",";
+    break;
+  case SDRATTR_GRAFMODE: // enum
+    f << "graf[mode]=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_GRAFCROP: {
+    f << "graf[crop],";
+    if (nVers==0) break; // clone(0)
+    int32_t top, left, right, bottom;
+    *input >> top >> left >> right >> bottom;
+    f << "crop=" << left << "x" << top << "<->" << right << "x" << bottom << ",";
+    break;
+  }
+  case SDRATTR_GRAFRESERVE3:
+  case SDRATTR_GRAFRESERVE4:
+  case SDRATTR_GRAFRESERVE5:
+  case SDRATTR_GRAFRESERVE6:
+    f << "grafReserve" << nWhich-SDRATTR_GRAFRESERVE3+3;
+    break;
+
+  case SDRATTR_3DOBJ_PERCENT_DIAGONAL: // uint16
+  case SDRATTR_3DOBJ_BACKSCALE:
+  case SDRATTR_3DOBJ_NORMALS_KIND:
+    f << (nWhich==SDRATTR_3DOBJ_PERCENT_DIAGONAL ? "obj3d[percentDiag]" :
+          nWhich==SDRATTR_3DOBJ_BACKSCALE ? "obj3d[backScale]" : "obj3d[normalKind]")
+      << "=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_3DOBJ_DEPTH: // uint32
+  case SDRATTR_3DOBJ_HORZ_SEGS:
+  case SDRATTR_3DOBJ_VERT_SEGS:
+    f << (nWhich==SDRATTR_3DOBJ_DEPTH ? "obj3d[depth]" :
+          nWhich==SDRATTR_3DOBJ_HORZ_SEGS ? "obj3d[horizSegs]" : "obj3d[verticSegs]")
+      << "=" << input->readULong(4) << ",";
+    break;
+  case SDRATTR_3DOBJ_END_ANGLE: // uint32
+    f << "obj3d[endAngle]=" << input->readULong(4) << ",";
+    break;
+  case SDRATTR_3DOBJ_DOUBLE_SIDED: // bool
+  case SDRATTR_3DOBJ_NORMALS_INVERT:
+  case SDRATTR_3DOBJ_SHADOW_3D:
+    f << (nWhich==SDRATTR_3DOBJ_DOUBLE_SIDED ? "obj3d[doubleSided]":
+          nWhich==SDRATTR_3DOBJ_NORMALS_INVERT ? "obj3d[normalInvert]" : "obj3d[shadow]")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case SDRATTR_3DOBJ_TEXTURE_PROJ_X: // uint16
+  case SDRATTR_3DOBJ_TEXTURE_PROJ_Y:
+  case SDRATTR_3DOBJ_MAT_SPECULAR_INTENSITY:
+    f << (nWhich==SDRATTR_3DOBJ_TEXTURE_PROJ_X ? "obj3d[textProjX]" :
+          nWhich==SDRATTR_3DOBJ_TEXTURE_PROJ_Y ? "obj3d[textProjX]" : "obj3d[intensitySpecular]")
+      << "=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_3DOBJ_MAT_COLOR: // SvxColorItem
+  case SDRATTR_3DOBJ_MAT_EMISSION:
+  case SDRATTR_3DOBJ_MAT_SPECULAR: {
+    f << (nWhich==SDRATTR_3DOBJ_MAT_COLOR ? "obj3d[matColor]" :
+          nWhich==SDRATTR_3DOBJ_MAT_EMISSION ? "obj3d[matEmission]" : "obj3d[matSpecular]") << "=";
+    STOFFColor col;
+    if (!input->readColor(col)) {
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+      f << "###color";
+      break;
+    }
+    f << col << ",";
+    break;
+  }
+  case SDRATTR_3DOBJ_TEXTURE_KIND: // uint16
+  case SDRATTR_3DOBJ_TEXTURE_MODE:
+    f << (nWhich==SDRATTR_3DOBJ_TEXTURE_KIND ? "obj3d[textureKind" : "obj3d[textureMode")
+      << "=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_3DOBJ_TEXTURE_FILTER: // bool
+  case SDRATTR_3DOBJ_SMOOTH_NORMALS:
+  case SDRATTR_3DOBJ_SMOOTH_LIDS:
+    f << (nWhich==SDRATTR_3DOBJ_TEXTURE_FILTER ? "obj3d[textureFilter]" :
+          nWhich==SDRATTR_3DOBJ_SMOOTH_NORMALS ? "obj3d[smoothNormals]" : "obj3d[smoothLids]")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case SDRATTR_3DOBJ_CHARACTER_MODE: // bool
+  case SDRATTR_3DOBJ_CLOSE_FRONT:
+  case SDRATTR_3DOBJ_CLOSE_BACK:
+    f << (nWhich==SDRATTR_3DOBJ_CHARACTER_MODE ? "obj3d[charMode]" :
+          nWhich==SDRATTR_3DOBJ_CLOSE_FRONT ? "obj3d[closeFront]" : "obj3d[closeBack]")
+      << "=" << input->readULong(1) << ",";
+    break;
+  case SDRATTR_3DOBJ_RESERVED_06:
+  case SDRATTR_3DOBJ_RESERVED_07:
+  case SDRATTR_3DOBJ_RESERVED_08:
+  case SDRATTR_3DOBJ_RESERVED_09:
+  case SDRATTR_3DOBJ_RESERVED_10:
+  case SDRATTR_3DOBJ_RESERVED_11:
+  case SDRATTR_3DOBJ_RESERVED_12:
+  case SDRATTR_3DOBJ_RESERVED_13:
+  case SDRATTR_3DOBJ_RESERVED_14:
+  case SDRATTR_3DOBJ_RESERVED_15:
+  case SDRATTR_3DOBJ_RESERVED_16:
+  case SDRATTR_3DOBJ_RESERVED_17:
+  case SDRATTR_3DOBJ_RESERVED_18:
+  case SDRATTR_3DOBJ_RESERVED_19:
+  case SDRATTR_3DOBJ_RESERVED_20:
+    f << "obj3dReserved" << nWhich-SDRATTR_3DOBJ_RESERVED_06+6 << ",";
+    break;
+
+  case SDRATTR_3DSCENE_PERSPECTIVE: // uint16
+    f << "scene3d[perspective]=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_3DSCENE_DISTANCE: // uint32
+  case SDRATTR_3DSCENE_FOCAL_LENGTH:
+    f << (nWhich==SDRATTR_3DSCENE_DISTANCE ? "scene3d[distance]" : "scene3d[focalLength]")
+      << "=" << input->readULong(4) << ",";
+    break;
+  case SDRATTR_3DSCENE_TWO_SIDED_LIGHTING: // bool
+    f << "scene3d[twoSidedLighting]=" << input->readULong(1) << ",";
+    break;
+  case SDRATTR_3DSCENE_LIGHTCOLOR_1: // SvxColorItem
+  case SDRATTR_3DSCENE_LIGHTCOLOR_2:
+  case SDRATTR_3DSCENE_LIGHTCOLOR_3:
+  case SDRATTR_3DSCENE_LIGHTCOLOR_4:
+  case SDRATTR_3DSCENE_LIGHTCOLOR_5:
+  case SDRATTR_3DSCENE_LIGHTCOLOR_6:
+  case SDRATTR_3DSCENE_LIGHTCOLOR_7:
+  case SDRATTR_3DSCENE_LIGHTCOLOR_8: {
+    f << "scene3d[lightColor" << nWhich-SDRATTR_3DSCENE_LIGHTCOLOR_1+1 << "]=";
+    STOFFColor col;
+    if (!input->readColor(col)) {
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+      f << "###color";
+      break;
+    }
+    f << col << ",";
+    break;
+  }
+  case SDRATTR_3DSCENE_AMBIENTCOLOR: {  // SvxColorItem
+    f << "scene3d[ambientColor]=";
+    STOFFColor col;
+    if (!input->readColor(col)) {
+      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+      f << "###color";
+      break;
+    }
+    f << col << ",";
+    break;
+  }
+  case SDRATTR_3DSCENE_LIGHTON_1: // bool
+  case SDRATTR_3DSCENE_LIGHTON_2:
+  case SDRATTR_3DSCENE_LIGHTON_3:
+  case SDRATTR_3DSCENE_LIGHTON_4:
+  case SDRATTR_3DSCENE_LIGHTON_5:
+  case SDRATTR_3DSCENE_LIGHTON_6:
+  case SDRATTR_3DSCENE_LIGHTON_7:
+  case SDRATTR_3DSCENE_LIGHTON_8:
+    f << "scene3d[lightOn" << nWhich-SDRATTR_3DSCENE_LIGHTON_1+1 << "]=" << input->readULong(1) << ",";
+    break;
+  case SDRATTR_3DSCENE_LIGHTDIRECTION_1: // SvxVector3DItem (Vector3d)
+  case SDRATTR_3DSCENE_LIGHTDIRECTION_2:
+  case SDRATTR_3DSCENE_LIGHTDIRECTION_3:
+  case SDRATTR_3DSCENE_LIGHTDIRECTION_4:
+  case SDRATTR_3DSCENE_LIGHTDIRECTION_5:
+  case SDRATTR_3DSCENE_LIGHTDIRECTION_6:
+  case SDRATTR_3DSCENE_LIGHTDIRECTION_7:
+  case SDRATTR_3DSCENE_LIGHTDIRECTION_8:
+    f << "scene3d[lightDir" << nWhich-SDRATTR_3DSCENE_LIGHTDIRECTION_1+1 << "=";
+    for (int i=0; i<3; ++i) {
+      double coord;
+      *input >> coord;
+      f << coord << (i==2 ? "," : "x");
+    }
+    break;
+  case SDRATTR_3DSCENE_SHADOW_SLANT: // uint16
+  case SDRATTR_3DSCENE_SHADE_MODE:
+    f << (nWhich==SDRATTR_3DSCENE_SHADOW_SLANT ? "scene3d[shadowSlant]" : "scene3d[shadowMode]")
+      << "=" << input->readULong(2) << ",";
+    break;
+  case SDRATTR_3DSCENE_RESERVED_01:
+  case SDRATTR_3DSCENE_RESERVED_02:
+  case SDRATTR_3DSCENE_RESERVED_03:
+  case SDRATTR_3DSCENE_RESERVED_04:
+  case SDRATTR_3DSCENE_RESERVED_05:
+  case SDRATTR_3DSCENE_RESERVED_06:
+  case SDRATTR_3DSCENE_RESERVED_07:
+  case SDRATTR_3DSCENE_RESERVED_08:
+  case SDRATTR_3DSCENE_RESERVED_09:
+  case SDRATTR_3DSCENE_RESERVED_10:
+  case SDRATTR_3DSCENE_RESERVED_11:
+  case SDRATTR_3DSCENE_RESERVED_12:
+  case SDRATTR_3DSCENE_RESERVED_13:
+  case SDRATTR_3DSCENE_RESERVED_14:
+  case SDRATTR_3DSCENE_RESERVED_15:
+  case SDRATTR_3DSCENE_RESERVED_16:
+  case SDRATTR_3DSCENE_RESERVED_17:
+  case SDRATTR_3DSCENE_RESERVED_18:
+  case SDRATTR_3DSCENE_RESERVED_19:
+  case SDRATTR_3DSCENE_RESERVED_20:
+    f << "3dsceneReserved" << nWhich-SDRATTR_3DSCENE_RESERVED_01+1 << ",";
     break;
   default:
     STOFF_DEBUG_MSG(("StarAttribute::readAttribute: reading not format attribute is not implemented\n"));
