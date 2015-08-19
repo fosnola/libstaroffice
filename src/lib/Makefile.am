@@ -10,9 +10,9 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_include_HEAD
 	$(top_srcdir)/inc/libstaroffice/libstaroffice.hxx \
 	$(top_srcdir)/inc/libstaroffice/STOFFDocument.hxx
 
-AM_CXXFLAGS =  -I$(top_srcdir)/inc $(REVENGE_CFLAGS) $(DEBUG_CXXFLAGS) -DBUILD_STAROFFICE=1
+AM_CXXFLAGS =  -I$(top_srcdir)/inc $(REVENGE_CFLAGS) $(DEBUG_CXXFLAGS) $(ZLIB_CFLAGS) -DBUILD_STAROFFICE=1
 
-libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_LIBADD  = $(REVENGE_LIBS) @LIBSTAROFFICE_WIN32_RESOURCE@
+libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_LIBADD  = $(REVENGE_LIBS) $(ZLIB_LIBS) @LIBSTAROFFICE_WIN32_RESOURCE@
 libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_DEPENDENCIES = @LIBSTAROFFICE_WIN32_RESOURCE@
 libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_LDFLAGS = $(version_info) -export-dynamic -no-undefined
 libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES = \
@@ -39,10 +39,14 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFPropertyHandler.hxx		\
 	STOFFSpreadsheetDecoder.cxx		\
 	STOFFSpreadsheetDecoder.hxx		\
+	STOFFStringStream.cxx			\
+	STOFFStringStream.hxx			\
 	STOFFSubDocument.cxx			\
 	STOFFSubDocument.hxx			\
 	StarAttribute.cxx			\
 	StarAttribute.hxx			\
+	StarBitmap.cxx				\
+	StarBitmap.hxx				\
 	StarDocument.cxx			\
 	StarDocument.hxx			\
 	StarFileManager.cxx			\

@@ -131,11 +131,19 @@ SOURCE=..\..\src\lib\STOFFSpreadsheetDecoder.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFStringStream.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFSubDocument.cxx
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarAttribute.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarBitmap.cxx
 # End Source File
 # Begin Source File
 
@@ -227,11 +235,19 @@ SOURCE=..\..\src\lib\STOFFSpreadsheetDecoder.hxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFStringStream.hxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFSubDocument.hxx
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarAttribute.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarBitmap.hxx
 # End Source File
 # Begin Source File
 

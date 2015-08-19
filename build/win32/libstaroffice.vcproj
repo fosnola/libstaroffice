@@ -257,6 +257,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\STOFFStringStream.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\STOFFSubDocument.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -266,6 +274,14 @@
 				</FileConfiguration>
 			</File>
 			<File RelativePath="..\..\src\lib\StarAttribute.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File RelativePath="..\..\src\lib\StarBitmap.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
 				</FileConfiguration>
@@ -355,9 +371,13 @@
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFSpreadsheetDecoder.hxx">
 			</File>
+			<File RelativePath="..\..\src\lib\STOFFStringStream.hxx">
+			</File>
 			<File RelativePath="..\..\src\lib\STOFFSubDocument.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarAttribute.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\StarBitmap.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarDocument.hxx">
 			</File>

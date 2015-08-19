@@ -32,11 +32,11 @@
 */
 
 /*
- * StarFileManager to read/parse some basic StarOffice OLEs
+ * StarBitmap to read/parse some basic bitmap/pattern in StarOffice documents
  *
  */
-#ifndef STAR_FILE_MANAGER
-#  define STAR_FILE_MANAGER
+#ifndef STAR_BITMAP
+#  define STAR_BITMAP
 
 #include <vector>
 
@@ -44,63 +44,44 @@
 #include "STOFFEntry.hxx"
 #include "STOFFInputStream.hxx"
 
-namespace StarFileManagerInternal
+namespace StarBitmapInternal
 {
+struct Bitmap;
 struct State;
 }
 
 class StarDocument;
 class StarZone;
 
-/** \brief the main class to read/.. some basic StarOffice OLEs
+/** \brief the main class to read/.. some basic bitmap/pattern in StarOffice documents
  *
  *
  *
  */
-class StarFileManager
+class StarBitmap
 {
 public:
   //! constructor
-  StarFileManager();
+  StarBitmap();
   //! destructor
-  virtual ~StarFileManager();
+  virtual ~StarBitmap();
 
   //! low level
 
-  //! try to read a image zone: "StarImageDocument" or "StarImageDocument 4.0
-  static bool readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName);
-  //! try to read a math zone: "StarMathDocument" (v 3 or v4) .sdf
-  static bool readMathDocument(STOFFInputStreamPtr input, std::string const &fileName);
-
-  //! try to read a embedded picture file: Embedded/PicXXXXXX
-  static bool readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName);
-
-  // other
-
-  //! try to read a "Ole-Object" zone
-  static bool readOleObject(STOFFInputStreamPtr input, std::string const &fileName);
-  //! try to read the "OutPlace Object"
-  static bool readOutPlaceObject(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
-
-  //! try to read a printer zone
-  static bool readJobSetUp(StarZone &zone);
-  //! try to read a font
-  static bool readFont(StarZone &zone, int nVers, long lastPos);
-
-  //! try to read a edit text object
-  static bool readEditTextObject(StarZone &zone, long lastPos, StarDocument &doc);
-
-  //! try to read a SfxItemList(TODO)
-  static bool readSfxItemList(StarZone &zone);
+  //! try to read a bitmap
+  bool readBitmap(StarZone &zone, bool inFileHeader, long lastPos);
 
 protected:
-
+  //! try to read the bitmap information block
+  bool readBitmapInformation(StarZone &zone, StarBitmapInternal::Bitmap &info, long lastPos);
+  //! try to read the bitmap data block
+  bool readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::Bitmap &bitmap, long lastPos);
   //
   // data
   //
 private:
   //! the state
-  shared_ptr<StarFileManagerInternal::State> m_state;
+  shared_ptr<StarBitmapInternal::State> m_state;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

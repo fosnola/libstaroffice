@@ -189,6 +189,30 @@ AS_IF([test "x$native_win32" = "xyes"], [
 	])
 ])
 
+# =======
+# Zlib
+# =======
+AC_ARG_ENABLE([zip],
+	[AS_HELP_STRING([--disable-zip], [Do not use the zip library.])],
+	[with_zip="$enableval"],
+	[with_zip=yes]
+)
+if test "x$with_zip" != "xno"; then
+	PKG_CHECK_MODULES([ZLIB],[zlib],[],[
+		AC_CHECK_HEADER(zlib.h, [],
+			[AC_MSG_ERROR(zlib.h not found. install zlib)], [])
+		AC_CHECK_LIB(z, inflate, [ ZLIB_LIBS=-lz ],
+			[AC_MSG_ERROR(zlib not found or functional)], [])
+	])
+	AC_DEFINE([USE_ZIP],[1],[Use the zip library to create mwawZip.])
+	ZLIB_CFLAGS="$ZLIB_CFLAGS -DUSE_ZIP"
+else
+	ZLIB_CFLAGS=
+	ZLIB_LIBS=
+fi
+AC_SUBST(ZLIB_CFLAGS)
+AC_SUBST(ZLIB_LIBS)
+
 # ============
 # Debug switch
 # ============
@@ -374,6 +398,7 @@ Build configuration:
 	full-debug:      ${enable_full_debug}
 	docs:            ${build_docs}
 	shared_ptr:      ${with_sharedptr}
+	zip:             ${with_zip}
 	static-tools:    ${enable_static_tools}
 	werror:          ${enable_werror}
 ==============================================================================

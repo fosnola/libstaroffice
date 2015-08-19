@@ -42,6 +42,7 @@
 #include "SDWParser.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
+#include "StarBitmap.hxx"
 #include "StarDocument.hxx"
 #include "StarFileManager.hxx"
 #include "StarZone.hxx"
@@ -1356,8 +1357,8 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     uint16_t style;
     *input >> style;
     if (style==128) {
-      StarFileManager fileManager;
-      if (!fileManager.readBitmap(zone, true, lastPos)) {
+      StarBitmap bitmap;
+      if (!bitmap.readBitmap(zone, true, lastPos)) {
         f << "###BM,";
         break;
       }
@@ -1854,8 +1855,8 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
           break;
         }
       }
-      StarFileManager fileManager;
-      if (!fileManager.readBitmap(zone, true, lastPos)) break;
+      StarBitmap bitmap;
+      if (!bitmap.readBitmap(zone, true, lastPos)) break;
       break;
     }
 
