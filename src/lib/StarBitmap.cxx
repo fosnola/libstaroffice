@@ -540,7 +540,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
       for (uint32_t x=0; x<bitmap.m_width; ++x) {
         if ((x%2)==0)
           val=(unsigned char) input->readULong(1);
-        bitmap.m_indexDataList[wPos++]=int((x%2) ? val : (val>>4))&0xf);
+        bitmap.m_indexDataList[wPos++]=int((x%2) ? val : (val>>4)&0xf);
       }
       input->seek(actPos+alignWidth, librevenge::RVNG_SEEK_SET);
     }

@@ -728,6 +728,9 @@ int StarItemPool::getVersion() const
 
 bool StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPos)
 {
+  if (m_state->m_currentVersion!=m_state->m_loadingVersion)
+    which=m_state->getWhich(which);
+
   if (which<m_state->m_verStart || which>=m_state->m_verStart+int(m_state->m_idToAttributeList.size()) ||
       !m_state->m_document.getSDWParser()) {
     STOFFInputStreamPtr input=zone.input();
@@ -925,12 +928,11 @@ bool StarItemPool::read(StarZone &zone)
       *input >> nWhich >> nVersion;
       if (step==0) *input >> nCount;
       int which=nWhich;
-      if (m_state->m_currentVersion!=m_state->m_loadingVersion) which=m_state->getWhich(which);
       if (!m_state->isInRange(which)) {
         STOFF_DEBUG_MSG(("StarItemPool::read: the which value seems bad\n"));
         f << "###";
       }
-      f << "wh=" << which-m_state->m_verStart << ", vers=" << nVersion << ", count=" << nCount << ",";
+      f << "wh=" << which << ", vers=" << nVersion << ", count=" << nCount << ",";
       static bool first=true;
       if (first) {
         STOFF_DEBUG_MSG(("StarItemPool::read: reading attribute is not implemented\n"));
@@ -956,7 +958,7 @@ bool StarItemPool::read(StarZone &zone)
           while (mRecord1.getNewContent("StarAttribute")) {
             pos=input->tell();
             f.str("");
-            f << "StarAttribute:inPool,wh=" <<  which-m_state->m_verStart << ",";
+            f << "StarAttribute:inPool,wh=" <<  which << ",";
             uint16_t nRef;
             *input>>nRef;
             f << "ref=" << nRef << ",";
@@ -976,7 +978,7 @@ bool StarItemPool::read(StarZone &zone)
       else {
         if (!readAttribute(zone, which, (int) nVersion, mRecord.getLastContentPosition())) {
           f.str("");
-          f << "Entries(StarAttribute)[" <<  which-m_state->m_verStart << "]:";
+          f << "Entries(StarAttribute)[" <<  which << "]:";
           ascii.addPos(pos);
           ascii.addNote(f.str().c_str());
         }
@@ -1213,7 +1215,6 @@ bool StarItemPool::readV1(StarZone &zone)
     uint16_t nSlot, nVersion, nCount;
     *input >> nSlot >> nVersion >> nCount;
     int which=nWhich;
-    if (m_state->m_currentVersion!=m_state->m_loadingVersion) which=m_state->getWhich(which);
     if (!m_state->isInRange(which)) {
       STOFF_DEBUG_MSG(("StarItemPool::readV1: the which value seems bad\n"));
       f << "###";
@@ -1226,7 +1227,7 @@ bool StarItemPool::readV1(StarZone &zone)
       pos=input->tell();
 
       f.str("");
-      f << "StarAttribute:inPool,wh=" <<  which-m_state->m_verStart << ",";
+      f << "StarAttribute:inPool,wh=" <<  which << ",";
       if (n >= sizeAttr.size() || pos+(long)sizeAttr[n]>endDataPos) {
         ok=false;
 
