@@ -126,6 +126,11 @@ struct State {
   //! a map which to an attribute
   std::map<int, shared_ptr<StarAttribute> > m_whichToAttributeMap;
 protected:
+  //! add a void attribute
+  void addAttributeVoid(StarAttribute::Type type, std::string const &debugName)
+  {
+    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(type,debugName));
+  }
   //! add a bool attribute
   void addAttributeBool(StarAttribute::Type type, std::string const &debugName, bool defValue)
   {
@@ -136,11 +141,69 @@ protected:
 void State::initAttributeMap()
 {
   std::stringstream s;
+  // --- sw --- sw_init.cxx
+  addAttributeBool(StarAttribute::ATTR_CHR_CONTOUR,"char[contour]",false);
+  addAttributeBool(StarAttribute::ATTR_CHR_SHADOWED,"char[shadowed]",false);
+  addAttributeBool(StarAttribute::ATTR_CHR_WORDLINEMODE,"char[word,linemode]",false);
+  addAttributeBool(StarAttribute::ATTR_CHR_AUTOKERN,"char[autoKern]",false);
+  addAttributeBool(StarAttribute::ATTR_CHR_BLINK,"char[blink]",false);
+  addAttributeBool(StarAttribute::ATTR_CHR_NOHYPHEN,"char[noHyphen]",true);
+  addAttributeBool(StarAttribute::ATTR_CHR_NOLINEBREAK,"char[nolineBreak]",true);
+  addAttributeBool(StarAttribute::ATTR_CHR_DUMMY1,"char[dummy1]",false);
+
+  addAttributeVoid(StarAttribute::ATTR_TXT_SOFTHYPH,"text[softHyphen]");
+  addAttributeBool(StarAttribute::ATTR_TXT_DUMMY1,"text[dummy1]",false);
+  addAttributeBool(StarAttribute::ATTR_TXT_DUMMY2,"text[dummy2]",false);
+  addAttributeBool(StarAttribute::ATTR_TXT_DUMMY4,"text[dummy4]",false);
+  addAttributeBool(StarAttribute::ATTR_TXT_DUMMY5,"text[dummy5]",false);
+  addAttributeBool(StarAttribute::ATTR_TXT_DUMMY6,"text[dummy6]",false);
+  addAttributeBool(StarAttribute::ATTR_TXT_DUMMY7,"text[dummy7]",false);
+
+  addAttributeBool(StarAttribute::ATTR_PARA_SPLIT,"para[split]",true);
+  addAttributeBool(StarAttribute::ATTR_PARA_REGISTER,"para[register]",false);
+  addAttributeBool(StarAttribute::ATTR_PARA_SCRIPTSPACE,"para[scriptSpace]",false);
+  addAttributeBool(StarAttribute::ATTR_PARA_HANGINGPUNCTUATION,"para[hangingPunctuation]",true);
+  addAttributeBool(StarAttribute::ATTR_PARA_FORBIDDEN_RULES,"para[forbiddenRules]",true);
+  addAttributeBool(StarAttribute::ATTR_PARA_SNAPTOGRID,"para[snapToGrid]",true);
+  addAttributeBool(StarAttribute::ATTR_PARA_CONNECT_BORDER,"para[connectBorder]",true);
+  for (int type=StarAttribute::ATTR_PARA_DUMMY5; type<=StarAttribute::ATTR_PARA_DUMMY8; ++type) {
+    s.str("");
+    s << "paraDummy" << type-StarAttribute::ATTR_PARA_DUMMY5+5;
+    addAttributeBool(StarAttribute::Type(type), s.str(), false);
+  }
+
+  addAttributeBool(StarAttribute::ATTR_FRM_PRINT,"print",true);
+  addAttributeBool(StarAttribute::ATTR_FRM_OPAQUE,"opaque",true);
+  addAttributeBool(StarAttribute::ATTR_FRM_KEEP,"frm[keep]",false);
+  addAttributeBool(StarAttribute::ATTR_FRM_EDIT_IN_READONLY,"edit[readOnly]",false);
+  addAttributeBool(StarAttribute::ATTR_FRM_LAYOUT_SPLIT,"layout[split]", true);
+  addAttributeBool(StarAttribute::ATTR_FRM_COLUMNBALANCE,"col[noBalanced]", true);
+  addAttributeBool(StarAttribute::ATTR_FRM_FRMATTR_DUMMY9,"grfDummy9", false);
+  addAttributeBool(StarAttribute::ATTR_GRF_INVERT,"grfInvert", false);
+  for (int type=StarAttribute::ATTR_GRF_DUMMY1; type<=StarAttribute::ATTR_GRF_DUMMY5; ++type) {
+    s.str("");
+    s << "grafDummy" << type-StarAttribute::ATTR_GRF_DUMMY1+1;
+    addAttributeBool(StarAttribute::Type(type), s.str(), false);
+  }
   // --- sc --- sc_docpool.cxx
+
+  addAttributeBool(StarAttribute::ATTR_SC_HYPHENATE,"hyphenate", false);
+  addAttributeBool(StarAttribute::ATTR_SC_VERTICAL_ASIAN,"vertical[asian]", false);
+  addAttributeBool(StarAttribute::ATTR_SC_LINEBREAK,"lineBreak", false);
+  addAttributeBool(StarAttribute::ATTR_SC_PAGE_HORCENTER,"page[horizontal,center]", false);
+  addAttributeBool(StarAttribute::ATTR_SC_PAGE_VERCENTER,"page[vertical,center]", false);
+  addAttributeBool(StarAttribute::ATTR_SC_PAGE_ON,"page[on]", true);
+  addAttributeBool(StarAttribute::ATTR_SC_PAGE_DYNAMIC,"page[dynamic]", true);
+  addAttributeBool(StarAttribute::ATTR_SC_PAGE_SHARED,"page[shared]", true);
+  addAttributeBool(StarAttribute::ATTR_SC_PAGE_NOTES,"page[notes]", false);
+  addAttributeBool(StarAttribute::ATTR_SC_PAGE_GRID,"page[grid]", false);
+  addAttributeBool(StarAttribute::ATTR_SC_PAGE_HEADERS,"page[headers]", false);
+  addAttributeBool(StarAttribute::ATTR_SC_PAGE_TOPDOWN,"page[topdown]", true);
   addAttributeBool(StarAttribute::ATTR_SC_PAGE_FORMULAS,"page[formulas]", false);
   addAttributeBool(StarAttribute::ATTR_SC_PAGE_NULLVALS,"page[nullvals]", true);
 
   // --- ee --- svx_editdoc.cxx
+  addAttributeBool(StarAttribute::ATTR_EE_PARA_ASIANCJKSPACING,"para[asianCJKSpacing]",false);
 
   // --- sch --- sch_itempool.cxx
   addAttributeBool(StarAttribute::ATTR_SCH_DATADESCR_SHOW_SYM,"dataDescr[showSym]", false);
@@ -196,7 +259,7 @@ void State::initAttributeMap()
   for (int type=StarAttribute::XATTR_LINERESERVED2; type<=StarAttribute::XATTR_LINERESERVED_LAST; ++type) {
     s.str("");
     s << "line[reserved" << type-StarAttribute::XATTR_LINERESERVED2+2 << "]";
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+    addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
   addAttributeBool(StarAttribute::XATTR_FILLBMP_TILE,"fill[bmp,tile]", true);
@@ -206,7 +269,7 @@ void State::initAttributeMap()
   for (int type=StarAttribute::XATTR_FILLRESERVED2; type<=StarAttribute::XATTR_FILLRESERVED_LAST; ++type) {
     s.str("");
     s << "fill[reserved" << type-StarAttribute::XATTR_FILLRESERVED2+2 << "]";
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+    addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
   addAttributeBool(StarAttribute::XATTR_FORMTXTMIRROR,"formText[mirror]", false);
@@ -215,7 +278,7 @@ void State::initAttributeMap()
   for (int type=StarAttribute::XATTR_FTRESERVED2; type<=StarAttribute::XATTR_FTRESERVED_LAST; ++type) {
     s.str("");
     s << "form[reserved" << type-StarAttribute::XATTR_FTRESERVED2+2 << "]";
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+    addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
   // ---- sdr ---- svx_svdattr.cxx
@@ -223,7 +286,7 @@ void State::initAttributeMap()
   for (int type=StarAttribute::SDRATTR_SHADOWRESERVE1; type<=StarAttribute::SDRATTR_SHADOWRESERVE5; ++type) {
     s.str("");
     s << "shadow[reserved" << type-StarAttribute::SDRATTR_SHADOWRESERVE1+1 << "]";
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+    addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
   addAttributeBool(StarAttribute::SDRATTR_CAPTIONFIXEDANGLE,"caption[fixedAngle]", true); // onOff
@@ -232,7 +295,7 @@ void State::initAttributeMap()
   for (int type=StarAttribute::SDRATTR_CAPTIONRESERVE1; type<=StarAttribute::SDRATTR_CAPTIONRESERVE5; ++type) {
     s.str("");
     s << "caption[reserved" << type-StarAttribute::SDRATTR_CAPTIONRESERVE1+1 << "]";
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+    addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
   addAttributeBool(StarAttribute::SDRATTR_TEXT_AUTOGROWHEIGHT,"text[autoGrow,height]", true); // onOff
@@ -243,13 +306,13 @@ void State::initAttributeMap()
   for (int type=StarAttribute::SDRATTR_RESERVE15; type<=StarAttribute::SDRATTR_RESERVE19; ++type) {
     s.str("");
     s << "sdr[reserved" << type-StarAttribute::SDRATTR_RESERVE15+15 << "]";
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+    addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
   for (int type=StarAttribute::SDRATTR_EDGERESERVE02; type<=StarAttribute::SDRATTR_EDGERESERVE09; ++type) {
     s.str("");
     s << "edge[reserved" << type-StarAttribute::SDRATTR_EDGERESERVE02+2 << "]";
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+    addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
   addAttributeBool(StarAttribute::SDRATTR_MEASUREBELOWREFEDGE,"measure[belowRefEdge]", false); // yesNo
@@ -261,13 +324,13 @@ void State::initAttributeMap()
   for (int type=StarAttribute::SDRATTR_MEASURERESERVE05; type<=StarAttribute::SDRATTR_MEASURERESERVE07; ++type) {
     s.str("");
     s << "measure[reserved" << type-StarAttribute::SDRATTR_MEASURERESERVE05+5 << "]";
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+    addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
   for (int type=StarAttribute::SDRATTR_CIRCRESERVE0; type<=StarAttribute::SDRATTR_CIRCRESERVE3; ++type) {
     s.str("");
     s << "circle[reserved" << type-StarAttribute::SDRATTR_CIRCRESERVE0 << "]";
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+    addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
   addAttributeBool(StarAttribute::SDRATTR_OBJMOVEPROTECT,"obj[move,protect]", false); // yesNo
@@ -276,14 +339,14 @@ void State::initAttributeMap()
   for (int type=StarAttribute::SDRATTR_NOTPERSISTRESERVE2; type<=StarAttribute::SDRATTR_NOTPERSISTRESERVE15; ++type) {
     s.str("");
     s << "notpersist[reserved" << type-StarAttribute::SDRATTR_NOTPERSISTRESERVE2+2 << "]";
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+    addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
   addAttributeBool(StarAttribute::SDRATTR_GRAFINVERT,"graf[invert]", false); // onOff
   for (int type=StarAttribute::SDRATTR_GRAFRESERVE3; type<=StarAttribute::SDRATTR_GRAFRESERVE6; ++type) {
     s.str("");
     s << "graf[reserved" << type-StarAttribute::SDRATTR_GRAFRESERVE3+3 << "]";
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+    addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
   addAttributeBool(StarAttribute::SDRATTR_3DOBJ_DOUBLE_SIDED,"obj3d[doubleSided]", false);
@@ -298,7 +361,7 @@ void State::initAttributeMap()
   for (int type=StarAttribute::SDRATTR_3DOBJ_RESERVED_06; type<=StarAttribute::SDRATTR_3DOBJ_RESERVED_20; ++type) {
     s.str("");
     s << "obj3d[reserved" << type-StarAttribute::SDRATTR_3DOBJ_RESERVED_06+6 << "]";
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+    addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
   addAttributeBool(StarAttribute::SDRATTR_3DSCENE_TWO_SIDED_LIGHTING,"scene3d[twoSidedLighting]", false);
@@ -310,7 +373,7 @@ void State::initAttributeMap()
   for (int type=StarAttribute::SDRATTR_3DSCENE_RESERVED_01; type<=StarAttribute::SDRATTR_3DSCENE_RESERVED_20; ++type) {
     s.str("");
     s << "scene3d[reserved" << type-StarAttribute::SDRATTR_3DSCENE_RESERVED_01+1 << "]";
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+    addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 }
 
@@ -350,7 +413,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
 
   int val;
   switch (nWhich) {
-  case StarAttribute::ATTR_CHR_CASEMAP:
+  case StarAttribute::ATTR_CHR_CASEMAP: // enum
     f << "chrAtrCaseMap=" << input->readULong(1) << ",";
     break;
   case StarAttribute::ATTR_CHR_CHARSETCOLOR: {
@@ -377,10 +440,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       f << color << ",";
     break;
   }
-  case StarAttribute::ATTR_CHR_CONTOUR:
-    f << "chrAtrContour=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_CHR_CROSSEDOUT:
+  case StarAttribute::ATTR_CHR_CROSSEDOUT: // enum
     f << "chrAtrCrossedOut=" << input->readULong(1) << ",";
     break;
   case StarAttribute::ATTR_CHR_ESCAPEMENT:
@@ -463,7 +523,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     break;
   case StarAttribute::ATTR_CHR_POSTURE:
   case StarAttribute::ATTR_CHR_CJK_POSTURE:
-  case StarAttribute::ATTR_CHR_CTL_POSTURE:
+  case StarAttribute::ATTR_CHR_CTL_POSTURE: // enum
     f << (nWhich==StarAttribute::ATTR_CHR_POSTURE ? "chrAtrPosture": nWhich==StarAttribute::ATTR_CHR_CJK_POSTURE ? "chrAtrCJKPosture" : "chrAtrCTLPosture");
     f << "=" << input->readULong(1) << ",";
     break;
@@ -471,32 +531,14 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << "chrAtrProportionFontSize,";
     f << "size=" << input->readULong(2) << ",";
     break;
-  case StarAttribute::ATTR_CHR_SHADOWED:
-    f << "chrAtrShadowed=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_CHR_UNDERLINE:
+  case StarAttribute::ATTR_CHR_UNDERLINE: // enum item
     f << "chrAtrUnderline=" << input->readULong(1) << ",";
     break;
-  case StarAttribute::ATTR_CHR_WEIGHT:
+  case StarAttribute::ATTR_CHR_WEIGHT: // enum item
   case StarAttribute::ATTR_CHR_CJK_WEIGHT:
   case StarAttribute::ATTR_CHR_CTL_WEIGHT:
     f << (nWhich==StarAttribute::ATTR_CHR_WEIGHT ? "chrAtrWeight" : nWhich==StarAttribute::ATTR_CHR_CJK_WEIGHT ? "chrAtrCJKWeight" : "chrAtrCTLWeight");
     f << "=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_CHR_WORDLINEMODE:
-    f << "chrAtrWordlineMode=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_CHR_AUTOKERN:
-    f << "chrAtrAutoKern=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_CHR_BLINK:
-    f << "chrAtrBlink=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_CHR_NOHYPHEN:
-    f << "chrAtrNoHyphen=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_CHR_NOLINEBREAK:
-    f << "chrAtrNoLineBreak=" << input->readULong(1) << ",";
     break;
   case StarAttribute::ATTR_CHR_BACKGROUND:
   case StarAttribute::ATTR_FRM_BACKGROUND:
@@ -529,9 +571,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     break;
   case StarAttribute::ATTR_CHR_RELIEF:
     f << "chrAtrRelief=" << input->readULong(2);
-    break;
-  case StarAttribute::ATTR_CHR_DUMMY1:
-    f << "chrAtrDummy1=" << input->readULong(1) << ",";
     break;
 
   // text attribute
@@ -624,9 +663,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     }
     break;
   }
-  case StarAttribute::ATTR_TXT_DUMMY4:
-    f << "textAtrDummy4=" << input->readULong(1) << ",";
-    break;
   case StarAttribute::ATTR_TXT_REFMARK: {
     f << "textAtrRefMark,";
     librevenge::RVNGString string;
@@ -702,10 +738,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   case StarAttribute::ATTR_TXT_CHARFMT:
     f << "textAtrCharFmt=" << input->readULong(2) << ",";
     break;
-  case StarAttribute::ATTR_TXT_DUMMY5:
-    f << "textAtrDummy5=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_TXT_CJK_RUBY:
+  case StarAttribute::ATTR_TXT_CJK_RUBY: // string("")+bool
     f << "textAtrCJKRuby=" << input->readULong(1) << ",";
     break;
   case StarAttribute::ATTR_TXT_UNKNOWN_CONTAINER:
@@ -718,12 +751,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
           nWhich==StarAttribute::ATTR_SC_USERDEF ? "scUserDef" :
           nWhich==StarAttribute::ATTR_EE_PARA_XMLATTRIBS ? "eeParaXmlAttr" :
           nWhich==StarAttribute::ATTR_EE_CHR_XMLATTRIBS ? "eeCharXmlAttr" : "schUserDef") << ",";
-    break;
-  case StarAttribute::ATTR_TXT_DUMMY6:
-    f << "textAtrDummy6" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_TXT_DUMMY7:
-    f << "textAtrDummy7" << input->readULong(1) << ",";
     break;
 
   // field...
@@ -772,17 +799,8 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     }
     break;
   }
-  case StarAttribute::ATTR_TXT_SOFTHYPH: // ok no data
-    f << "textAtrSoftHyph,";
-    break;
   case StarAttribute::ATTR_TXT_HARDBLANK: // ok no data
     f << "textAtrHardBlank,";
-    break;
-  case StarAttribute::ATTR_TXT_DUMMY1:
-    f << "textAtrDummy1" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_TXT_DUMMY2:
-    f << "textAtrDummy2" << input->readULong(1) << ",";
     break;
 
   // paragraph attribute
@@ -798,14 +816,11 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << "parAtrAdjust=" << input->readULong(1) << ",";
     if (nVers>=1) f << "nFlags=" << input->readULong(1) << ",";
     break;
-  case StarAttribute::ATTR_PARA_SPLIT:
-    f << "parAtrSplit=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_PARA_ORPHANS:
+  case StarAttribute::ATTR_PARA_ORPHANS: // SfxByteItem
     f << "parAtrOrphans,";
     f << "nLines="  << input->readLong(1) << ",";
     break;
-  case StarAttribute::ATTR_PARA_WIDOWS:
+  case StarAttribute::ATTR_PARA_WIDOWS: // SfxByteItem
     f << "parAtrWidows,";
     f << "nLines="  << input->readLong(1) << ",";
     break;
@@ -845,9 +860,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       f << "nY=" << input->readULong(2) << ",";
     }
     break;
-  case StarAttribute::ATTR_PARA_REGISTER:
-    f << "parAtrRegister=" << input->readULong(1) << ",";
-    break;
   case StarAttribute::ATTR_PARA_NUMRULE: {
     f << "parAtrNumRule,";
     librevenge::RVNGString string;
@@ -862,41 +874,12 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       f << "nPoolId=" << input->readULong(2) << ",";
     break;
   }
-  case StarAttribute::ATTR_PARA_SCRIPTSPACE:
-  case StarAttribute::ATTR_EE_PARA_ASIANCJKSPACING:
-    f << (nWhich==StarAttribute::ATTR_PARA_SCRIPTSPACE ? "parAtrScriptSpace" : "parAsianScriptSpace")
-      << "=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_PARA_HANGINGPUNCTUATION:
-    f << "parAtrHangingPunctuation=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_PARA_FORBIDDEN_RULES:
-    f << "parAtrForbiddenRules=" << input->readULong(1) << ",";
-    break;
   case StarAttribute::ATTR_PARA_VERTALIGN:
     f << "parAtrVertAlign=" << input->readULong(2) << ",";
     break;
-  case StarAttribute::ATTR_PARA_SNAPTOGRID:
-    f << "parAtrSnapToGrid=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_PARA_CONNECT_BORDER:
-    f << "parAtrConnectBorder=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_PARA_DUMMY5:
-    f << "parAtrDummy5" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_PARA_DUMMY6:
-    f << "parAtrDummy6" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_PARA_DUMMY7:
-    f << "parAtrDummy7" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_PARA_DUMMY8:
-    f << "parAtrDummy8" << input->readULong(1) << ",";
-    break;
 
   // frame parameter
-  case StarAttribute::ATTR_FRM_FILL_ORDER:
+  case StarAttribute::ATTR_FRM_FILL_ORDER: // SfxEnumItem(byte)
     f << "fillOrder=" << input->readULong(1) << ",";
     break;
   case StarAttribute::ATTR_FRM_FRM_SIZE:
@@ -907,7 +890,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     if (nVers>1)
       f << "percent=" << input->readULong(1) << "x"  << input->readULong(1) << ",";
     break;
-  case StarAttribute::ATTR_FRM_PAPER_BIN:
+  case StarAttribute::ATTR_FRM_PAPER_BIN: // SfxByteItem
     f << "paperBin=" << input->readULong(1) << ",";
     break;
   case StarAttribute::ATTR_FRM_LR_SPACE:
@@ -991,12 +974,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     formatManager.readSWFormatDef(zone,'r',document);
     break;
   }
-  case StarAttribute::ATTR_FRM_PRINT:
-    f << "print=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_FRM_OPAQUE:
-    f << "opaque=" << input->readULong(1) << ",";
-    break;
   case StarAttribute::ATTR_FRM_PROTECT:
     f << "protect,";
     val=(int) input->readULong(1);
@@ -1161,9 +1138,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << "],";
     break;
   }
-  case StarAttribute::ATTR_FRM_KEEP:
-    f << "keep=" << input->readULong(1) << ",";
-    break;
   case StarAttribute::ATTR_FRM_URL:
     f << "url,";
     if (!SDWParser::readSWImageMap(zone))
@@ -1179,12 +1153,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
         f << "name1=" << text.cstr() << ",";
     }
     break;
-  case StarAttribute::ATTR_FRM_EDIT_IN_READONLY:
-    f << "editInReadOnly=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_FRM_LAYOUT_SPLIT:
-    f << "layoutSplit=" << input->readULong(1) << ",";
-    break;
   case StarAttribute::ATTR_FRM_CHAIN:
     f << "chain,";
     if (nVers>0) {
@@ -1192,7 +1160,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       f << "nextIdx=" << input->readULong(2) << ",";
     }
     break;
-  case StarAttribute::ATTR_FRM_TEXTGRID:
+  case StarAttribute::ATTR_FRM_TEXTGRID: // SwTextGridItem::Create
     f << "textgrid=" << input->readULong(1) << ",";
     break;
   case StarAttribute::ATTR_FRM_LINENUMBER:
@@ -1223,18 +1191,12 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
         f << "suffix=" << text.cstr() << ",";
     }
     break;
-  case StarAttribute::ATTR_FRM_COLUMNBALANCE:
-    f << "columnBalance=" << input->readULong(1) << ",";
-    break;
   case StarAttribute::ATTR_FRM_FRAMEDIR:
   case StarAttribute::ATTR_SC_WRITINGDIR:
     f << (nWhich==StarAttribute::ATTR_FRM_FRAMEDIR ? "frameDir" : "ScWritingDir") << "=" << input->readULong(2) << ",";
     break;
   case StarAttribute::ATTR_FRM_HEADER_FOOTER_EAT_SPACING:
     f << "headerFooterEatSpacing=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_FRM_FRMATTR_DUMMY9:
-    f << "frmAtrDummy9" << input->readULong(1) << ",";
     break;
   // graphic attribute
   case StarAttribute::ATTR_GRF_MIRRORGRF:
@@ -1249,50 +1211,35 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << "bottom=" << input->readLong(4) << ",";
     break;
   // no saved ?
-  case StarAttribute::ATTR_GRF_ROTATION:
-    f << "grfRotation,";
+  case StarAttribute::ATTR_GRF_ROTATION: // uint16
+    f << "grfRotation=" << input->readULong(2) << ",";
     break;
-  case StarAttribute::ATTR_GRF_LUMINANCE:
-    f << "grfLuminance,";
+  case StarAttribute::ATTR_GRF_LUMINANCE: // int16
+    f << "grfLuminance=" << input->readLong(2) << ",";
     break;
-  case StarAttribute::ATTR_GRF_CONTRAST:
-    f << "grfContrast,";
+  case StarAttribute::ATTR_GRF_CONTRAST: // int16
+    f << "grfContrast=" << input->readLong(2) << ",";
     break;
-  case StarAttribute::ATTR_GRF_CHANNELR:
-    f << "grfChannelR,";
+  case StarAttribute::ATTR_GRF_CHANNELR: // int16
+    f << "grfChannelR=" << input->readLong(2) << ",";
     break;
-  case StarAttribute::ATTR_GRF_CHANNELG:
-    f << "grfChannelG,";
+  case StarAttribute::ATTR_GRF_CHANNELG: // int16
+    f << "grfChannelG=" << input->readLong(2) << ",";
     break;
-  case StarAttribute::ATTR_GRF_CHANNELB:
-    f << "grfChannelB,";
+  case StarAttribute::ATTR_GRF_CHANNELB: // int16
+    f << "grfChannelB=" << input->readLong(2) << ",";
     break;
-  case StarAttribute::ATTR_GRF_GAMMA:
-    f << "grfGamma,";
+  case StarAttribute::ATTR_GRF_GAMMA: { // double
+    double value;
+    *input >> value;
+    f << "grfGamma=" << value << ",";
     break;
-  case StarAttribute::ATTR_GRF_INVERT:
-    f << "grfInvert,";
+  }
+  case StarAttribute::ATTR_GRF_TRANSPARENCY: // SfxByteItem(0)
+    f << "grfTransparency=" << input->readULong(1) << ",";
     break;
-  case StarAttribute::ATTR_GRF_TRANSPARENCY:
-    f << "grfTransparency,";
-    break;
-  case StarAttribute::ATTR_GRF_DRAWMODE:
-    f << "grfDrawMode,";
-    break;
-  case StarAttribute::ATTR_GRF_DUMMY1:
-    f << "grfDummy1" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_GRF_DUMMY2:
-    f << "grfDummy2" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_GRF_DUMMY3:
-    f << "grfDummy3" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_GRF_DUMMY4:
-    f << "grfDummy4" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_GRF_DUMMY5:
-    f << "grfDummy5" << input->readULong(1) << ",";
+  case StarAttribute::ATTR_GRF_DRAWMODE: // enum(0)
+    f << "grfDrawMode=" << input->readULong(2) << ",";
     break;
 
   case StarAttribute::ATTR_BOX_FORMAT:
@@ -1335,9 +1282,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     }
     break;
 
-  case StarAttribute::ATTR_SC_HYPHENATE:
-    f << "scHyphenate=" << input->readULong(1) << ",";
-    break;
   case StarAttribute::ATTR_SC_HORJUSTIFY:
   case StarAttribute::ATTR_SC_VERJUSTIFY:
     // algitem.cxx Svx{Hor,Ver}JustifyItem::Create
@@ -1356,12 +1300,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   case StarAttribute::ATTR_SC_ROTATE_MODE:
     // rotmodit.cxx SvxRotateModeItem::Create
     f << "scRotateMode=" << input->readULong(2) << ",";
-    break;
-  case StarAttribute::ATTR_SC_VERTICAL_ASIAN:
-    f << "scVerticalAsian=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_SC_LINEBREAK:
-    f << "scLineBreak=" << input->readULong(1) << ",";
     break;
   case StarAttribute::ATTR_SC_MARGIN:
     // algItem SvxMarginItem::Create
@@ -1473,31 +1411,12 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   case StarAttribute::ATTR_SC_PAGE_MAXSIZE:
     f << (nWhich==StarAttribute::ATTR_SC_PAGE_SIZE ? "page[sz]" : "maxPage[sz]") << "=" << input->readLong(4) << "x" << input->readLong(4) << ",";
     break;
-  case StarAttribute::ATTR_SC_PAGE_HORCENTER:
-  case StarAttribute::ATTR_SC_PAGE_VERCENTER:
-  case StarAttribute::ATTR_SC_PAGE_ON:
-    f << (nWhich==StarAttribute::ATTR_SC_PAGE_HORCENTER ? "scPageHor[center]" : nWhich==StarAttribute::ATTR_SC_PAGE_VERCENTER ? "scPageVer[center]" : "pageOn")
-      << "=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_SC_PAGE_DYNAMIC:
-  case StarAttribute::ATTR_SC_PAGE_SHARED:
-  case StarAttribute::ATTR_SC_PAGE_NOTES:
-    f << (nWhich==StarAttribute::ATTR_SC_PAGE_DYNAMIC ? "page[dynamic]" : nWhich==StarAttribute::ATTR_SC_PAGE_SHARED ? "page[shared]" : "page[note]")
-      << "=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_SC_PAGE_GRID:
-  case StarAttribute::ATTR_SC_PAGE_HEADERS:
-    f << (nWhich==StarAttribute::ATTR_SC_PAGE_GRID ? "page[grid]" : "page[headers]") << "=" << input->readULong(1) << ",";
-    break;
   case StarAttribute::ATTR_SC_PAGE_CHARTS:
   case StarAttribute::ATTR_SC_PAGE_OBJECTS:
   case StarAttribute::ATTR_SC_PAGE_DRAWINGS:
     f << (nWhich==StarAttribute::ATTR_SC_PAGE_CHARTS ? "page[charts]" : nWhich==StarAttribute::ATTR_SC_PAGE_OBJECTS ? "page[object]" : "page[drawings]");
     if (nVers==0) f << ",";
     else f << input->readULong(2) << ",";
-    break;
-  case StarAttribute::ATTR_SC_PAGE_TOPDOWN:
-    f << "scPageTopDown=" << input->readULong(1);
     break;
   case StarAttribute::ATTR_SC_PAGE_SCALE:
   case StarAttribute::ATTR_SC_PAGE_SCALETOPAGES:
