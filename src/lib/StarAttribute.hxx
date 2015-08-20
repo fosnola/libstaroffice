@@ -733,7 +733,7 @@ public:
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const=0;
   //! read an attribute zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarDocument &document) const=0;
+  virtual bool read(StarZone &zone, int vers, long endPos, StarDocument &document)=0;
   //! returns the debug name
   std::string const &getDebugName() const
   {
