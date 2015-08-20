@@ -122,7 +122,8 @@ bool SDWParser::createZones()
   std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > listDir=m_oleParser->getDirectoryList();
   for (size_t d=0; d<listDir.size(); ++d) {
     if (!listDir[d]) continue;
-    StarDocument document(getInput(), m_oleParser, listDir[d], this);
+    shared_ptr<StarAttributeManager> attrManager(new StarAttributeManager);
+    StarDocument document(getInput(), m_oleParser, listDir[d], attrManager, this);
     // Ole-Object has persist elements, so...
     if (listDir[d]->m_hasCompObj) document.parse();
     STOFFOLEParser::OleDirectory &direct=*listDir[d];
@@ -492,8 +493,8 @@ bool SDWParser::readSWAttribute(StarZone &zone, StarDocument &doc)
   if (nEnd!=0xFFFF) f << "nEnd=" << nEnd << ",";
   zone.closeFlagZone();
 
-  StarAttribute attribute;
-  if (which<=0 || !attribute.readAttribute(zone, which, int(nVers), zone.getRecordLastPosition(), doc))
+  if (which<=0 || !doc.getAttributeManager() ||
+      !doc.getAttributeManager()->readAttribute(zone, which, int(nVers), zone.getRecordLastPosition(), doc))
     f << "###";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());

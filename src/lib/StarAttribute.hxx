@@ -52,16 +52,11 @@ struct State;
 class StarZone;
 class StarDocument;
 
-/** \brief the main class to read/.. a StarOffice attribute
- *
- *
- *
- */
 class StarAttribute
 {
 public:
   //! the attribute list
-  enum {
+  enum Type {
     ATTR_CHR_CASEMAP = 1,					        	    		// 1
     ATTR_CHR_CHARSETCOLOR,					        	    	// 2
     ATTR_CHR_COLOR,								        	    		// 3
@@ -406,20 +401,20 @@ public:
     XATTR_FILLBMP_SIZEX,
     XATTR_FILLBMP_SIZEY,
     XATTR_FILLFLOATTRANSPARENCE,
-    XATTR_FILLRESERVED2,
     XATTR_FILLBMP_SIZELOG,
     XATTR_FILLBMP_TILEOFFSETX,
     XATTR_FILLBMP_TILEOFFSETY,
     XATTR_FILLBMP_STRETCH,
+    XATTR_FILLBMP_POSOFFSETX,
+    XATTR_FILLBMP_POSOFFSETY,
+    XATTR_FILLBACKGROUND,
+    XATTR_FILLRESERVED2,
     XATTR_FILLRESERVED3,
     XATTR_FILLRESERVED4,
     XATTR_FILLRESERVED5,
     XATTR_FILLRESERVED6,
     XATTR_FILLRESERVED7,
     XATTR_FILLRESERVED8,
-    XATTR_FILLBMP_POSOFFSETX,
-    XATTR_FILLBMP_POSOFFSETY,
-    XATTR_FILLBACKGROUND,
     XATTR_FILLRESERVED10,
     XATTR_FILLRESERVED11,
     XATTR_FILLRESERVED_LAST,
@@ -725,16 +720,65 @@ public:
     SDRATTR_3DSCENE_RESERVED_19,
     SDRATTR_3DSCENE_RESERVED_20
   };
-  //! constructor
-  StarAttribute();
+
   //! destructor
-  virtual ~StarAttribute();
+  virtual ~StarAttribute()
+  {
+  }
+  //! returns the attribute type
+  Type getType() const
+  {
+    return m_type;
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const=0;
+  //! read an attribute zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarDocument &document) const=0;
+  //! returns the debug name
+  std::string const &getDebugName() const
+  {
+    return m_debugName;
+  }
+protected:
+  //! constructor
+  StarAttribute(Type type, std::string const &debugName) : m_type(type), m_debugName(debugName)
+  {
+  }
+  //! copy constructor
+  StarAttribute(StarAttribute const &orig) : m_type(orig.m_type), m_debugName(orig.m_debugName)
+  {
+  }
+
+  //
+  // data
+  //
+
+  //! the type
+  Type m_type;
+  //! the debug name
+  std::string m_debugName;
+
+private:
+  StarAttribute &operator=(StarAttribute const &orig);
+};
+/** \brief the main class to read/.. a StarOffice attribute
+ *
+ *
+ *
+ */
+class StarAttributeManager
+{
+public:
+  //! constructor
+  StarAttributeManager();
+  //! destructor
+  virtual ~StarAttributeManager();
 
 
   //! try to read an attribute
   bool readAttribute(StarZone &zone, int which, int vers, long endPos, StarDocument &document);
   //! try to read a brush
-  bool readBrushItem(StarZone &zone, int nVers, long endPos, libstoff::DebugStream &f);
+  static bool readBrushItem(StarZone &zone, int nVers, long endPos, libstoff::DebugStream &f);
 
 protected:
   //

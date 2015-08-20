@@ -52,29 +52,81 @@
 /** Internal: the structures of a StarAttribute */
 namespace StarAttributeInternal
 {
+//! void attribute of StarAttributeInternal
+class StarAttributeVoid : public StarAttribute
+{
+public:
+  //! constructor
+  StarAttributeVoid(Type type, std::string const &debugName) : StarAttribute(type, debugName)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarAttributeVoid(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int /*vers*/, long /*endPos*/, StarDocument &/*document*/) const
+  {
+    STOFFInputStreamPtr input=zone.input();
+    libstoff::DebugFile &ascFile=zone.ascii();
+    libstoff::DebugStream f;
+    f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << ",";
+    ascFile.addPos(input->tell());
+    ascFile.addNote(f.str().c_str());
+    return true;
+  }
+
+};
+
 ////////////////////////////////////////
 //! Internal: the state of a StarAttribute
 struct State {
   //! constructor
-  State()
+  State() : m_whichToAttributeMap()
   {
+    initAttributeMap();
   }
+  //! init the attribute map list
+  void initAttributeMap();
+  //! a map which to an attribute
+  std::map<int, shared_ptr<StarAttribute> > m_whichToAttributeMap;
 };
+
+void State::initAttributeMap()
+{
+  std::stringstream s;
+  for (int type=StarAttribute::XATTR_LINERESERVED2; type<=StarAttribute::XATTR_LINERESERVED_LAST; ++type) {
+    s.str("");
+    s << "line[reserved" << type-StarAttribute::XATTR_LINERESERVED2+2 << "]";
+    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+  }
+  for (int type=StarAttribute::XATTR_FILLRESERVED2; type<=StarAttribute::XATTR_FILLRESERVED_LAST; ++type) {
+    s.str("");
+    s << "fill[reserved" << type-StarAttribute::XATTR_FILLRESERVED2+2 << "]";
+    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+  }
+  for (int type=StarAttribute::XATTR_FTRESERVED2; type<=StarAttribute::XATTR_FTRESERVED_LAST; ++type) {
+    s.str("");
+    s << "form[reserved" << type-StarAttribute::XATTR_FTRESERVED2+2 << "]";
+    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::Type(type), s.str()));
+  }
+}
 
 }
 
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarAttribute::StarAttribute() : m_state(new StarAttributeInternal::State)
+StarAttributeManager::StarAttributeManager() : m_state(new StarAttributeInternal::State)
 {
 }
 
-StarAttribute::~StarAttribute()
+StarAttributeManager::~StarAttributeManager()
 {
 }
 
-bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long lastPos, StarDocument &document)
+bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, long lastPos, StarDocument &document)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -82,16 +134,29 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
 
   long pos=input->tell();
+  if (m_state->m_whichToAttributeMap.find(nWhich)!=m_state->m_whichToAttributeMap.end() &&
+      m_state->m_whichToAttributeMap.find(nWhich)->second) {
+    shared_ptr<StarAttribute> attrib=m_state->m_whichToAttributeMap.find(nWhich)->second->create();
+    if (!attrib || !attrib->read(zone, nVers, lastPos, document)) {
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read an attribute\n"));
+      f << "###bad";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+    return true;
+  }
+
   int val;
   switch (nWhich) {
-  case ATTR_CHR_CASEMAP:
+  case StarAttribute::ATTR_CHR_CASEMAP:
     f << "chrAtrCaseMap=" << input->readULong(1) << ",";
     break;
-  case ATTR_CHR_CHARSETCOLOR: {
+  case StarAttribute::ATTR_CHR_CHARSETCOLOR: {
     f << "chrAtrCharSetColor=" << input->readULong(1) << ",";
     STOFFColor color;
     if (!input->readColor(color)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find a color\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find a color\n"));
       f << "###aColor,";
       break;
     }
@@ -99,11 +164,11 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       f << color << ",";
     break;
   }
-  case ATTR_CHR_COLOR: {
+  case StarAttribute::ATTR_CHR_COLOR: {
     f << "chrAtrColor,";
     STOFFColor color;
     if (!input->readColor(color)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find a color\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find a color\n"));
       f << "###aColor,";
       break;
     }
@@ -111,22 +176,22 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       f << color << ",";
     break;
   }
-  case ATTR_CHR_CONTOUR:
+  case StarAttribute::ATTR_CHR_CONTOUR:
     f << "chrAtrContour=" << input->readULong(1) << ",";
     break;
-  case ATTR_CHR_CROSSEDOUT:
+  case StarAttribute::ATTR_CHR_CROSSEDOUT:
     f << "chrAtrCrossedOut=" << input->readULong(1) << ",";
     break;
-  case ATTR_CHR_ESCAPEMENT:
+  case StarAttribute::ATTR_CHR_ESCAPEMENT:
     f << "chrAtrEscapement=" << input->readULong(1) << ",";
     f << "nEsc=" << input->readLong(2) << ",";
     break;
-  case ATTR_CHR_FONT:
-  case ATTR_CHR_CJK_FONT:
-  case ATTR_CHR_CTL_FONT: {
-    if (nWhich==ATTR_CHR_FONT)
+  case StarAttribute::ATTR_CHR_FONT:
+  case StarAttribute::ATTR_CHR_CJK_FONT:
+  case StarAttribute::ATTR_CHR_CTL_FONT: {
+    if (nWhich==StarAttribute::ATTR_CHR_FONT)
       f << "chrAtrFont,";
-    else if (nWhich==ATTR_CHR_CJK_FONT)
+    else if (nWhich==StarAttribute::ATTR_CHR_CJK_FONT)
       f << "chrAtrCJKFont,";
     else
       f << "chrAtrCTLFont,";
@@ -136,14 +201,14 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "eTextEncoding=" << encoding << ",";
     librevenge::RVNGString fName, string;
     if (!zone.readString(fName)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the name\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the name\n"));
       f << "###aName,";
       break;
     }
     if (!fName.empty())
       f << "aName=" << fName.cstr() << ",";
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the style\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the style\n"));
       f << "###aStyle,";
       break;
     }
@@ -153,14 +218,14 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       if (input->readULong(4)==0xFE331188) {
         // reread data in unicode
         if (!zone.readString(fName)) {
-          STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the name\n"));
+          STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the name\n"));
           f << "###aName,";
           break;
         }
         if (!fName.empty())
           f << "aNameUni=" << fName.cstr() << ",";
         if (!zone.readString(string)) {
-          STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the style\n"));
+          STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the style\n"));
           f << "###aStyle,";
           break;
         }
@@ -171,12 +236,12 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     }
     break;
   }
-  case ATTR_CHR_FONTSIZE:
-  case ATTR_CHR_CJK_FONTSIZE:
-  case ATTR_CHR_CTL_FONTSIZE:
-    if (nWhich==ATTR_CHR_FONTSIZE)
+  case StarAttribute::ATTR_CHR_FONTSIZE:
+  case StarAttribute::ATTR_CHR_CJK_FONTSIZE:
+  case StarAttribute::ATTR_CHR_CTL_FONTSIZE:
+    if (nWhich==StarAttribute::ATTR_CHR_FONTSIZE)
       f << "chrAtrFontSize,";
-    else if (nWhich==ATTR_CHR_CJK_FONTSIZE)
+    else if (nWhich==StarAttribute::ATTR_CHR_CJK_FONTSIZE)
       f << "chrAtrCJKFontSize,";
     else
       f << "chrAtrCTLFontSize,";
@@ -184,104 +249,104 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "nProp=" << input->readULong((nVers>=1) ? 2 : 1) << ",";
     if (nVers>=2) f << "nPropUnit=" << input->readULong(2) << ",";
     break;
-  case ATTR_CHR_KERNING:
+  case StarAttribute::ATTR_CHR_KERNING:
     f << "chrAtrKerning=" << input->readULong(2) << ",";
     break;
-  case ATTR_CHR_LANGUAGE:
-  case ATTR_CHR_CJK_LANGUAGE:
-  case ATTR_CHR_CTL_LANGUAGE:
-  case ATTR_SC_LANGUAGE_FORMAT:
-    f << (nWhich==ATTR_CHR_LANGUAGE ? "chrAtrLanguage": nWhich==ATTR_CHR_CJK_LANGUAGE ? "chrAtrCJKLanguage" :
-          nWhich==ATTR_CHR_CTL_LANGUAGE ? "chrAtrCTLLanguage" : "scLanguage");
+  case StarAttribute::ATTR_CHR_LANGUAGE:
+  case StarAttribute::ATTR_CHR_CJK_LANGUAGE:
+  case StarAttribute::ATTR_CHR_CTL_LANGUAGE:
+  case StarAttribute::ATTR_SC_LANGUAGE_FORMAT:
+    f << (nWhich==StarAttribute::ATTR_CHR_LANGUAGE ? "chrAtrLanguage": nWhich==StarAttribute::ATTR_CHR_CJK_LANGUAGE ? "chrAtrCJKLanguage" :
+          nWhich==StarAttribute::ATTR_CHR_CTL_LANGUAGE ? "chrAtrCTLLanguage" : "scLanguage");
     f << "=" << input->readULong(2) << ",";
     break;
-  case ATTR_CHR_POSTURE:
-  case ATTR_CHR_CJK_POSTURE:
-  case ATTR_CHR_CTL_POSTURE:
-    f << (nWhich==ATTR_CHR_POSTURE ? "chrAtrPosture": nWhich==ATTR_CHR_CJK_POSTURE ? "chrAtrCJKPosture" : "chrAtrCTLPosture");
+  case StarAttribute::ATTR_CHR_POSTURE:
+  case StarAttribute::ATTR_CHR_CJK_POSTURE:
+  case StarAttribute::ATTR_CHR_CTL_POSTURE:
+    f << (nWhich==StarAttribute::ATTR_CHR_POSTURE ? "chrAtrPosture": nWhich==StarAttribute::ATTR_CHR_CJK_POSTURE ? "chrAtrCJKPosture" : "chrAtrCTLPosture");
     f << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_CHR_PROPORTIONALFONTSIZE:
+  case StarAttribute::ATTR_CHR_PROPORTIONALFONTSIZE:
     f << "chrAtrProportionFontSize,";
     f << "size=" << input->readULong(2) << ",";
     break;
-  case ATTR_CHR_SHADOWED:
+  case StarAttribute::ATTR_CHR_SHADOWED:
     f << "chrAtrShadowed=" << input->readULong(1) << ",";
     break;
-  case ATTR_CHR_UNDERLINE:
+  case StarAttribute::ATTR_CHR_UNDERLINE:
     f << "chrAtrUnderline=" << input->readULong(1) << ",";
     break;
-  case ATTR_CHR_WEIGHT:
-  case ATTR_CHR_CJK_WEIGHT:
-  case ATTR_CHR_CTL_WEIGHT:
-    f << (nWhich==ATTR_CHR_WEIGHT ? "chrAtrWeight" : nWhich==ATTR_CHR_CJK_WEIGHT ? "chrAtrCJKWeight" : "chrAtrCTLWeight");
+  case StarAttribute::ATTR_CHR_WEIGHT:
+  case StarAttribute::ATTR_CHR_CJK_WEIGHT:
+  case StarAttribute::ATTR_CHR_CTL_WEIGHT:
+    f << (nWhich==StarAttribute::ATTR_CHR_WEIGHT ? "chrAtrWeight" : nWhich==StarAttribute::ATTR_CHR_CJK_WEIGHT ? "chrAtrCJKWeight" : "chrAtrCTLWeight");
     f << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_CHR_WORDLINEMODE:
+  case StarAttribute::ATTR_CHR_WORDLINEMODE:
     f << "chrAtrWordlineMode=" << input->readULong(1) << ",";
     break;
-  case ATTR_CHR_AUTOKERN:
+  case StarAttribute::ATTR_CHR_AUTOKERN:
     f << "chrAtrAutoKern=" << input->readULong(1) << ",";
     break;
-  case ATTR_CHR_BLINK:
+  case StarAttribute::ATTR_CHR_BLINK:
     f << "chrAtrBlink=" << input->readULong(1) << ",";
     break;
-  case ATTR_CHR_NOHYPHEN:
+  case StarAttribute::ATTR_CHR_NOHYPHEN:
     f << "chrAtrNoHyphen=" << input->readULong(1) << ",";
     break;
-  case ATTR_CHR_NOLINEBREAK:
+  case StarAttribute::ATTR_CHR_NOLINEBREAK:
     f << "chrAtrNoLineBreak=" << input->readULong(1) << ",";
     break;
-  case ATTR_CHR_BACKGROUND:
-  case ATTR_FRM_BACKGROUND:
-  case ATTR_SCH_SYMBOL_BRUSH:
-    f << (nWhich==ATTR_CHR_BACKGROUND ? "chrAtrBackground" :
-          nWhich==ATTR_FRM_BACKGROUND ? "background" : "symbol[brush]") << "=" << input->readULong(1) << ",";
+  case StarAttribute::ATTR_CHR_BACKGROUND:
+  case StarAttribute::ATTR_FRM_BACKGROUND:
+  case StarAttribute::ATTR_SCH_SYMBOL_BRUSH:
+    f << (nWhich==StarAttribute::ATTR_CHR_BACKGROUND ? "chrAtrBackground" :
+          nWhich==StarAttribute::ATTR_FRM_BACKGROUND ? "background" : "symbol[brush]") << "=" << input->readULong(1) << ",";
     if (!readBrushItem(zone, nVers, lastPos, f)) break;
     break;
-  case ATTR_CHR_ROTATE:
+  case StarAttribute::ATTR_CHR_ROTATE:
     f << "chrAtrRotate,";
     f << "nVal=" << input->readULong(2) << ",";
     f << "b=" << input->readULong(1) << ",";
     break;
-  case ATTR_CHR_EMPHASIS_MARK:
+  case StarAttribute::ATTR_CHR_EMPHASIS_MARK:
     f << "chrAtrEmphasisMark=" << input->readULong(2) << ",";
     break;
-  case ATTR_CHR_TWO_LINES: { // checkme
+  case StarAttribute::ATTR_CHR_TWO_LINES: { // checkme
     f << "chrAtrTwoLines=" << input->readULong(1) << ",";
     f << "nStart[unicode]=" << input->readULong(2) << ",";
     f << "nEnd[unicode]=" << input->readULong(2) << ",";
     break;
   }
-  case ATTR_CHR_SCALEW:
-  case ATTR_EE_CHR_SCALEW:
-    f << (nWhich==ATTR_CHR_SCALEW ? "chrAtrScaleW":"eeScaleW") << "=" << input->readULong(2) << ",";
+  case StarAttribute::ATTR_CHR_SCALEW:
+  case StarAttribute::ATTR_EE_CHR_SCALEW:
+    f << (nWhich==StarAttribute::ATTR_CHR_SCALEW ? "chrAtrScaleW":"eeScaleW") << "=" << input->readULong(2) << ",";
     if (input->tell()<lastPos) {
       f << "nVal=" << input->readULong(2) << ",";
       f << "test=" << input->readULong(2) << ",";
     }
     break;
-  case ATTR_CHR_RELIEF:
+  case StarAttribute::ATTR_CHR_RELIEF:
     f << "chrAtrRelief=" << input->readULong(2);
     break;
-  case ATTR_CHR_DUMMY1:
+  case StarAttribute::ATTR_CHR_DUMMY1:
     f << "chrAtrDummy1=" << input->readULong(1) << ",";
     break;
 
   // text attribute
-  case ATTR_TXT_INETFMT: {
+  case StarAttribute::ATTR_TXT_INETFMT: {
     f << "textAtrInetFmt,";
     // SwFmtINetFmt::Create
     librevenge::RVNGString string;
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find string\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find string\n"));
       f << "###url,";
       break;
     }
     if (!string.empty())
       f << "url=" << string.cstr() << ",";
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find string\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find string\n"));
       f << "###targert,";
       break;
     }
@@ -294,14 +359,14 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "libMac=[";
     for (int i=0; i<nCnt; ++i) {
       if (input->tell()>lastPos) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a libmac name\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a libmac name\n"));
         f << "###libname,";
         ok=false;
         break;
       }
       if (!zone.readString(string)) {
         f << "###string,";
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
         ok=false;
         break;
       }
@@ -309,7 +374,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
         f << string.cstr() << ":";
       if (!zone.readString(string)) {
         f << "###string,";
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
         ok=false;
         break;
       }
@@ -321,7 +386,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     if (!ok) break;
     if (nVers>=1) {
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find string\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find string\n"));
         f << "###aName1,";
         break;
       }
@@ -334,20 +399,20 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       for (int i=0; i<nCnt; ++i) {
         f << "nCurKey=" << input->readULong(2) << ",";
         if (input->tell()>lastPos) {
-          STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a libmac name\n"));
+          STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a libmac name\n"));
           f << "###libname2,";
           break;
         }
         if (!zone.readString(string)) {
           f << "###string,";
-          STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
+          STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
           break;
         }
         else if (!string.empty())
           f << string.cstr() << ":";
         if (!zone.readString(string)) {
           f << "###string,";
-          STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
+          STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
           break;
         }
         else if (!string.empty())
@@ -358,14 +423,14 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     }
     break;
   }
-  case ATTR_TXT_DUMMY4:
+  case StarAttribute::ATTR_TXT_DUMMY4:
     f << "textAtrDummy4=" << input->readULong(1) << ",";
     break;
-  case ATTR_TXT_REFMARK: {
+  case StarAttribute::ATTR_TXT_REFMARK: {
     f << "textAtrRefMark,";
     librevenge::RVNGString string;
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find aName\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find aName\n"));
       f << "###aName,";
       break;
     }
@@ -373,7 +438,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       f << "aName=" << string.cstr() << ",";
     break;
   }
-  case ATTR_TXT_TOXMARK: {
+  case StarAttribute::ATTR_TXT_TOXMARK: {
     f << "textAtrToXMark,";
     int cType=(int) input->readULong(1);
     f << "cType=" << cType << ",";
@@ -382,7 +447,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     int nStringId=0xFFFF;
     if (nVers<1) {
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find aTypeName\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find aTypeName\n"));
         f << "###aTypeName,";
         break;
       }
@@ -395,21 +460,21 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
         f << "nStringId=" << nStringId << ",";
     }
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find aAltText\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find aAltText\n"));
       f << "###aAltText,";
       break;
     }
     if (!string.empty())
       f << "aAltText=" << string.cstr() << ",";
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find aPrimKey\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find aPrimKey\n"));
       f << "###aPrimKey,";
       break;
     }
     if (!string.empty())
       f << "aPrimKey=" << string.cstr() << ",";
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find aSecKey\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find aSecKey\n"));
       f << "###aSecKey,";
       break;
     }
@@ -425,7 +490,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     }
     if (nVers>=1 && nStringId!=0xFFFF) {
       if (!zone.getPoolName(nStringId, string)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find a nId name\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find a nId name\n"));
         f << "###nId=" << nStringId << ",";
       }
       else
@@ -433,41 +498,41 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     }
     break;
   }
-  case ATTR_TXT_CHARFMT:
+  case StarAttribute::ATTR_TXT_CHARFMT:
     f << "textAtrCharFmt=" << input->readULong(2) << ",";
     break;
-  case ATTR_TXT_DUMMY5:
+  case StarAttribute::ATTR_TXT_DUMMY5:
     f << "textAtrDummy5=" << input->readULong(1) << ",";
     break;
-  case ATTR_TXT_CJK_RUBY:
+  case StarAttribute::ATTR_TXT_CJK_RUBY:
     f << "textAtrCJKRuby=" << input->readULong(1) << ",";
     break;
-  case ATTR_TXT_UNKNOWN_CONTAINER:
-  case ATTR_SC_USERDEF:
-  case ATTR_EE_PARA_XMLATTRIBS:
-  case ATTR_EE_CHR_XMLATTRIBS:
-  case ATTR_SCH_USER_DEFINED_ATTR:
+  case StarAttribute::ATTR_TXT_UNKNOWN_CONTAINER:
+  case StarAttribute::ATTR_SC_USERDEF:
+  case StarAttribute::ATTR_EE_PARA_XMLATTRIBS:
+  case StarAttribute::ATTR_EE_CHR_XMLATTRIBS:
+  case StarAttribute::ATTR_SCH_USER_DEFINED_ATTR:
     // call SfxPoolItem::Create which does nothing
-    f << (nWhich==ATTR_TXT_UNKNOWN_CONTAINER ?  "textAtrUnknownContainer" :
-          nWhich==ATTR_SC_USERDEF ? "scUserDef" :
-          nWhich==ATTR_EE_PARA_XMLATTRIBS ? "eeParaXmlAttr" :
-          nWhich==ATTR_EE_CHR_XMLATTRIBS ? "eeCharXmlAttr" : "schUserDef") << ",";
+    f << (nWhich==StarAttribute::ATTR_TXT_UNKNOWN_CONTAINER ?  "textAtrUnknownContainer" :
+          nWhich==StarAttribute::ATTR_SC_USERDEF ? "scUserDef" :
+          nWhich==StarAttribute::ATTR_EE_PARA_XMLATTRIBS ? "eeParaXmlAttr" :
+          nWhich==StarAttribute::ATTR_EE_CHR_XMLATTRIBS ? "eeCharXmlAttr" : "schUserDef") << ",";
     break;
-  case ATTR_TXT_DUMMY6:
+  case StarAttribute::ATTR_TXT_DUMMY6:
     f << "textAtrDummy6" << input->readULong(1) << ",";
     break;
-  case ATTR_TXT_DUMMY7:
+  case StarAttribute::ATTR_TXT_DUMMY7:
     f << "textAtrDummy7" << input->readULong(1) << ",";
     break;
 
   // field...
-  case ATTR_TXT_FIELD: {
+  case StarAttribute::ATTR_TXT_FIELD: {
     f << "textAtrField,";
     SWFieldManager fieldManager;
     fieldManager.readField(zone);
     break;
   }
-  case ATTR_TXT_FLYCNT: {
+  case StarAttribute::ATTR_TXT_FLYCNT: {
     f << "textAtrFlycnt,";
     SWFormatManager formatManager;
     if (input->peek()=='o')
@@ -476,13 +541,13 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       formatManager.readSWFormatDef(zone,'l', document);
     break;
   }
-  case ATTR_TXT_FTN: {
+  case StarAttribute::ATTR_TXT_FTN: {
     f << "textAtrFtn,";
     // sw_sw3npool.cxx SwFmtFtn::Create
     f << "number1=" << input->readULong(2) << ",";
     librevenge::RVNGString string;
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the aNumber\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the aNumber\n"));
       f << "###aNumber,";
       break;
     }
@@ -490,7 +555,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       f << "aNumber=" << string.cstr() << ",";
     // no sure, find this attribute once with a content here, so ...
     if (!document.getSDWParser()->readSWContent(zone, document)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the content\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the content\n"));
       f << "###aContent,";
       break;
     }
@@ -506,21 +571,21 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     }
     break;
   }
-  case ATTR_TXT_SOFTHYPH: // ok no data
+  case StarAttribute::ATTR_TXT_SOFTHYPH: // ok no data
     f << "textAtrSoftHyph,";
     break;
-  case ATTR_TXT_HARDBLANK: // ok no data
+  case StarAttribute::ATTR_TXT_HARDBLANK: // ok no data
     f << "textAtrHardBlank,";
     break;
-  case ATTR_TXT_DUMMY1:
+  case StarAttribute::ATTR_TXT_DUMMY1:
     f << "textAtrDummy1" << input->readULong(1) << ",";
     break;
-  case ATTR_TXT_DUMMY2:
+  case StarAttribute::ATTR_TXT_DUMMY2:
     f << "textAtrDummy2" << input->readULong(1) << ",";
     break;
 
   // paragraph attribute
-  case ATTR_PARA_LINESPACING:
+  case StarAttribute::ATTR_PARA_LINESPACING:
     f << "parAtrLineSpacing,";
     f << "nPropSpace=" << input->readLong(1) << ",";
     f << "nInterSpace=" << input->readLong(2) << ",";
@@ -528,26 +593,26 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "nRule=" << input->readULong(1) << ",";
     f << "nInterRule=" << input->readULong(1) << ",";
     break;
-  case ATTR_PARA_ADJUST:
+  case StarAttribute::ATTR_PARA_ADJUST:
     f << "parAtrAdjust=" << input->readULong(1) << ",";
     if (nVers>=1) f << "nFlags=" << input->readULong(1) << ",";
     break;
-  case ATTR_PARA_SPLIT:
+  case StarAttribute::ATTR_PARA_SPLIT:
     f << "parAtrSplit=" << input->readULong(1) << ",";
     break;
-  case ATTR_PARA_ORPHANS:
+  case StarAttribute::ATTR_PARA_ORPHANS:
     f << "parAtrOrphans,";
     f << "nLines="  << input->readLong(1) << ",";
     break;
-  case ATTR_PARA_WIDOWS:
+  case StarAttribute::ATTR_PARA_WIDOWS:
     f << "parAtrWidows,";
     f << "nLines="  << input->readLong(1) << ",";
     break;
-  case ATTR_PARA_TABSTOP: {
+  case StarAttribute::ATTR_PARA_TABSTOP: {
     f << "parAtrTabStop,";
     int N=(int) input->readULong(1);
     if (input->tell()+7*N>lastPos) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: N is too big\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: N is too big\n"));
       f << "###N=" << N << ",";
       N=int(lastPos-input->tell())/7;
     }
@@ -559,14 +624,14 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "],";
     break;
   }
-  case ATTR_PARA_HYPHENZONE:
+  case StarAttribute::ATTR_PARA_HYPHENZONE:
     f << "parAtrHyphenZone=" << input->readLong(1) << ",";
     f << "bHyphenPageEnd=" << input->readLong(1) << ",";
     f << "nMinLead=" << input->readLong(1) << ",";
     f << "nMinTail=" << input->readLong(1) << ",";
     f << "nMaxHyphen=" << input->readLong(1) << ",";
     break;
-  case ATTR_PARA_DROP:
+  case StarAttribute::ATTR_PARA_DROP:
     f << "parAtrDrop,";
     f << "nFmt=" << input->readULong(2) << ",";
     f << "nLines1=" << input->readULong(2) << ",";
@@ -579,14 +644,14 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       f << "nY=" << input->readULong(2) << ",";
     }
     break;
-  case ATTR_PARA_REGISTER:
+  case StarAttribute::ATTR_PARA_REGISTER:
     f << "parAtrRegister=" << input->readULong(1) << ",";
     break;
-  case ATTR_PARA_NUMRULE: {
+  case StarAttribute::ATTR_PARA_NUMRULE: {
     f << "parAtrNumRule,";
     librevenge::RVNGString string;
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the sTmp\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the sTmp\n"));
       f << "###sTmp,";
       break;
     }
@@ -596,44 +661,44 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       f << "nPoolId=" << input->readULong(2) << ",";
     break;
   }
-  case ATTR_PARA_SCRIPTSPACE:
-  case ATTR_EE_PARA_ASIANCJKSPACING:
-    f << (nWhich==ATTR_PARA_SCRIPTSPACE ? "parAtrScriptSpace" : "parAsianScriptSpace")
+  case StarAttribute::ATTR_PARA_SCRIPTSPACE:
+  case StarAttribute::ATTR_EE_PARA_ASIANCJKSPACING:
+    f << (nWhich==StarAttribute::ATTR_PARA_SCRIPTSPACE ? "parAtrScriptSpace" : "parAsianScriptSpace")
       << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_PARA_HANGINGPUNCTUATION:
+  case StarAttribute::ATTR_PARA_HANGINGPUNCTUATION:
     f << "parAtrHangingPunctuation=" << input->readULong(1) << ",";
     break;
-  case ATTR_PARA_FORBIDDEN_RULES:
+  case StarAttribute::ATTR_PARA_FORBIDDEN_RULES:
     f << "parAtrForbiddenRules=" << input->readULong(1) << ",";
     break;
-  case ATTR_PARA_VERTALIGN:
+  case StarAttribute::ATTR_PARA_VERTALIGN:
     f << "parAtrVertAlign=" << input->readULong(2) << ",";
     break;
-  case ATTR_PARA_SNAPTOGRID:
+  case StarAttribute::ATTR_PARA_SNAPTOGRID:
     f << "parAtrSnapToGrid=" << input->readULong(1) << ",";
     break;
-  case ATTR_PARA_CONNECT_BORDER:
+  case StarAttribute::ATTR_PARA_CONNECT_BORDER:
     f << "parAtrConnectBorder=" << input->readULong(1) << ",";
     break;
-  case ATTR_PARA_DUMMY5:
+  case StarAttribute::ATTR_PARA_DUMMY5:
     f << "parAtrDummy5" << input->readULong(1) << ",";
     break;
-  case ATTR_PARA_DUMMY6:
+  case StarAttribute::ATTR_PARA_DUMMY6:
     f << "parAtrDummy6" << input->readULong(1) << ",";
     break;
-  case ATTR_PARA_DUMMY7:
+  case StarAttribute::ATTR_PARA_DUMMY7:
     f << "parAtrDummy7" << input->readULong(1) << ",";
     break;
-  case ATTR_PARA_DUMMY8:
+  case StarAttribute::ATTR_PARA_DUMMY8:
     f << "parAtrDummy8" << input->readULong(1) << ",";
     break;
 
   // frame parameter
-  case ATTR_FRM_FILL_ORDER:
+  case StarAttribute::ATTR_FRM_FILL_ORDER:
     f << "fillOrder=" << input->readULong(1) << ",";
     break;
-  case ATTR_FRM_FRM_SIZE:
+  case StarAttribute::ATTR_FRM_FRM_SIZE:
     f << "frmSize,";
     f << "sizeType=" << input->readULong(1) << ",";
     f << "width=" << input->readULong(4) << ",";
@@ -641,12 +706,12 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     if (nVers>1)
       f << "percent=" << input->readULong(1) << "x"  << input->readULong(1) << ",";
     break;
-  case ATTR_FRM_PAPER_BIN:
+  case StarAttribute::ATTR_FRM_PAPER_BIN:
     f << "paperBin=" << input->readULong(1) << ",";
     break;
-  case ATTR_FRM_LR_SPACE:
-  case ATTR_EE_PARA_OUTLLR_SPACE:
-    f << (nWhich==ATTR_FRM_LR_SPACE ? "lrSpace" : "eeOutLrSpace") << ",";
+  case StarAttribute::ATTR_FRM_LR_SPACE:
+  case StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE:
+    f << (nWhich==StarAttribute::ATTR_FRM_LR_SPACE ? "lrSpace" : "eeOutLrSpace") << ",";
     f << "left=" << input->readULong(2);
     val=(int) input->readULong(nVers>=1 ? 2 : 1);
     if (val) f << ":" << val;
@@ -671,7 +736,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
         input->seek(-4, librevenge::RVNG_SEEK_CUR);
     }
     break;
-  case ATTR_FRM_UL_SPACE:
+  case StarAttribute::ATTR_FRM_UL_SPACE:
     f << "ulSpace,";
     f << "upper=" << input->readULong(2);
     val=(int) input->readULong(nVers==1 ? 2 : 1);
@@ -682,7 +747,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     if (val) f << ":" << val;
     f << ",";
     break;
-  case ATTR_FRM_PAGEDESC:
+  case StarAttribute::ATTR_FRM_PAGEDESC:
     f << "pageDesc,";
     if (nVers<1)
       f << "bAutor=" << input->readULong(1) << ",";
@@ -691,7 +756,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     else {
       unsigned long nOff;
       if (!input->readCompressedULong(nOff)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read nOff\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read nOff\n"));
         f << "###nOff,";
         break;
       }
@@ -699,24 +764,24 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     }
     f << "nIdx=" << input->readULong(2) << ",";
     break;
-  case ATTR_FRM_BREAK:
+  case StarAttribute::ATTR_FRM_BREAK:
     f << "pageBreak=" << input->readULong(1) << ",";
     if (nVers<1) input->seek(1, librevenge::RVNG_SEEK_CUR); // dummy
     break;
-  case ATTR_FRM_CNTNT: // checkme
+  case StarAttribute::ATTR_FRM_CNTNT: // checkme
     f << "pageCntnt,";
     while (input->tell()<lastPos) {
       long actPos=input->tell();
       if (input->peek()!='N' || !document.getSDWParser()->readSWContent(zone, document) || input->tell()<=actPos) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: find unknown pageCntnt child\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: find unknown pageCntnt child\n"));
         f << "###child";
         break;
       }
     }
     break;
-  case ATTR_FRM_HEADER:
-  case ATTR_FRM_FOOTER: {
-    f << (nWhich==ATTR_FRM_HEADER ? "header" : "footer") << ",";
+  case StarAttribute::ATTR_FRM_HEADER:
+  case StarAttribute::ATTR_FRM_FOOTER: {
+    f << (nWhich==StarAttribute::ATTR_FRM_HEADER ? "header" : "footer") << ",";
     f << "active=" << input->readULong(1) << ",";
     long actPos=input->tell();
     if (actPos==lastPos)
@@ -725,42 +790,42 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     formatManager.readSWFormatDef(zone,'r',document);
     break;
   }
-  case ATTR_FRM_PRINT:
+  case StarAttribute::ATTR_FRM_PRINT:
     f << "print=" << input->readULong(1) << ",";
     break;
-  case ATTR_FRM_OPAQUE:
+  case StarAttribute::ATTR_FRM_OPAQUE:
     f << "opaque=" << input->readULong(1) << ",";
     break;
-  case ATTR_FRM_PROTECT:
+  case StarAttribute::ATTR_FRM_PROTECT:
     f << "protect,";
     val=(int) input->readULong(1);
     if (val&1) f << "pos[protect],";
     if (val&2) f << "size[protect],";
     if (val&4) f << "cntnt[protect],";
     break;
-  case ATTR_FRM_SURROUND:
+  case StarAttribute::ATTR_FRM_SURROUND:
     f << "surround=" << input->readULong(1) << ",";
     if (nVers<5) f << "bGold=" << input->readULong(1) << ",";
     if (nVers>1) f << "bAnch=" << input->readULong(1) << ",";
     if (nVers>2) f << "bCont=" << input->readULong(1) << ",";
     if (nVers>3) f << "bOutside1=" << input->readULong(1) << ",";
     break;
-  case ATTR_FRM_VERT_ORIENT:
-  case ATTR_FRM_HORI_ORIENT:
-    f << (nWhich==ATTR_FRM_VERT_ORIENT ? "vertOrient" : "horiOrient") << ",";
+  case StarAttribute::ATTR_FRM_VERT_ORIENT:
+  case StarAttribute::ATTR_FRM_HORI_ORIENT:
+    f << (nWhich==StarAttribute::ATTR_FRM_VERT_ORIENT ? "vertOrient" : "horiOrient") << ",";
     f << "nPos=" << input->readULong(4) << ",";
     f << "nOrient=" << input->readULong(1) << ",";
     f << "nRel=" << input->readULong(1) << ",";
-    if (nWhich==ATTR_FRM_HORI_ORIENT && nVers>=1) f << "bToggle=" << input->readULong(1) << ",";
+    if (nWhich==StarAttribute::ATTR_FRM_HORI_ORIENT && nVers>=1) f << "bToggle=" << input->readULong(1) << ",";
     break;
-  case ATTR_FRM_ANCHOR:
+  case StarAttribute::ATTR_FRM_ANCHOR:
     f << "anchor=" << input->readULong(1) << ",";
     if (nVers<1)
       f << "nId=" << input->readULong(2) << ",";
     else {
       unsigned long nId;
       if (!input->readCompressedULong(nId)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read nId\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read nId\n"));
         f << "###nId,";
         break;
       }
@@ -768,10 +833,10 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
         f << "nId=" << nId << ",";
     }
     break;
-  // ATTR_FRM_BACKGROUND see case ATTR_CHR_BACKGROUND
-  case ATTR_FRM_BOX:
-  case ATTR_SC_BORDER: {
-    f << (nWhich==ATTR_FRM_BOX ? "box" : "scBorder") << ",";
+  // ATTR_FRM_BACKGROUND see case StarAttribute::ATTR_CHR_BACKGROUND
+  case StarAttribute::ATTR_FRM_BOX:
+  case StarAttribute::ATTR_SC_BORDER: {
+    f << (nWhich==StarAttribute::ATTR_FRM_BOX ? "box" : "scBorder") << ",";
     f << "nDist=" << input->readULong(2) << ",";
     int cLine=0;
     bool ok=true;
@@ -781,7 +846,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       f << "[";
       STOFFColor color;
       if (!input->readColor(color)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find a box's color\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find a box's color\n"));
         f << "###color,";
         ok=false;
         break;
@@ -801,21 +866,21 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     }
     break;
   }
-  case ATTR_FRM_SHADOW: {
+  case StarAttribute::ATTR_FRM_SHADOW: {
     f << "shadow,";
     f << "cLoc=" << input->readULong(1) << ",";
     f << "nWidth=" << input->readULong(2) << ",";
     f << "bTrans=" << input->readULong(1) << ",";
     STOFFColor color;
     if (!input->readColor(color)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read color\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read color\n"));
       f << "###color,";
       break;
     }
     else if (!color.isWhite())
       f << "color=" << color << ",";
     if (!input->readColor(color)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read fill color\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read fill color\n"));
       f << "###fillcolor,";
       break;
     }
@@ -824,7 +889,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "style=" << input->readULong(1) << ",";
     break;
   }
-  case ATTR_FRM_FRMMACRO: { // macitem.cxx SvxMacroTableDtor::Read
+  case StarAttribute::ATTR_FRM_FRMMACRO: { // macitem.cxx SvxMacroTableDtor::Read
     f << "frmMacro,";
     if (nVers>=1) {
       nVers=(uint16_t) input->readULong(2);
@@ -842,7 +907,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       for (int j=0; j<2; ++j) {
         librevenge::RVNGString text;
         if (!zone.readString(text)) {
-          STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find a macro string\n"));
+          STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find a macro string\n"));
           f << "###string" << j << ",";
           ok=false;
           break;
@@ -860,7 +925,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "],";
     break;
   }
-  case ATTR_FRM_COL: {
+  case StarAttribute::ATTR_FRM_COL: {
     f << "col,";
     f << "nLineAdj=" << input->readULong(1) << ",";
     f << "bOrtho=" << input->readULong(1) << ",";
@@ -878,7 +943,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     if (nWishWidth==0)
       break;
     if (input->tell()+10*nCol>lastPos) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: nCol is bad\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: nCol is bad\n"));
       f << "###N,";
       break;
     }
@@ -895,17 +960,17 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "],";
     break;
   }
-  case ATTR_FRM_KEEP:
+  case StarAttribute::ATTR_FRM_KEEP:
     f << "keep=" << input->readULong(1) << ",";
     break;
-  case ATTR_FRM_URL:
+  case StarAttribute::ATTR_FRM_URL:
     f << "url,";
     if (!SDWParser::readSWImageMap(zone))
       break;
     if (nVers>=1) {
       librevenge::RVNGString text;
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the setName\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the setName\n"));
         f << "###name1,";
         break;
       }
@@ -913,43 +978,43 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
         f << "name1=" << text.cstr() << ",";
     }
     break;
-  case ATTR_FRM_EDIT_IN_READONLY:
+  case StarAttribute::ATTR_FRM_EDIT_IN_READONLY:
     f << "editInReadOnly=" << input->readULong(1) << ",";
     break;
-  case ATTR_FRM_LAYOUT_SPLIT:
+  case StarAttribute::ATTR_FRM_LAYOUT_SPLIT:
     f << "layoutSplit=" << input->readULong(1) << ",";
     break;
-  case ATTR_FRM_CHAIN:
+  case StarAttribute::ATTR_FRM_CHAIN:
     f << "chain,";
     if (nVers>0) {
       f << "prevIdx=" << input->readULong(2) << ",";
       f << "nextIdx=" << input->readULong(2) << ",";
     }
     break;
-  case ATTR_FRM_TEXTGRID:
+  case StarAttribute::ATTR_FRM_TEXTGRID:
     f << "textgrid=" << input->readULong(1) << ",";
     break;
-  case ATTR_FRM_LINENUMBER:
+  case StarAttribute::ATTR_FRM_LINENUMBER:
     f << "lineNumber,";
     f << "start=" << input->readULong(4) << ",";
     f << "count[lines]=" << input->readULong(1) << ",";
     break;
-  case ATTR_FRM_FTN_AT_TXTEND:
-  case ATTR_FRM_END_AT_TXTEND:
-    f << (nWhich==ATTR_FRM_FTN_AT_TXTEND ? "ftnAtTextEnd" : "ednAtTextEnd") << "=" << input->readULong(1) << ",";
+  case StarAttribute::ATTR_FRM_FTN_AT_TXTEND:
+  case StarAttribute::ATTR_FRM_END_AT_TXTEND:
+    f << (nWhich==StarAttribute::ATTR_FRM_FTN_AT_TXTEND ? "ftnAtTextEnd" : "ednAtTextEnd") << "=" << input->readULong(1) << ",";
     if (nVers>0) {
       f << "offset=" << input->readULong(2) << ",";
       f << "fmtType=" << input->readULong(2) << ",";
       librevenge::RVNGString text;
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the prefix\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the prefix\n"));
         f << "###prefix,";
         break;
       }
       else if (!text.empty())
         f << "prefix=" << text.cstr() << ",";
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the suffix\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the suffix\n"));
         f << "###suffix,";
         break;
       }
@@ -957,25 +1022,25 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
         f << "suffix=" << text.cstr() << ",";
     }
     break;
-  case ATTR_FRM_COLUMNBALANCE:
+  case StarAttribute::ATTR_FRM_COLUMNBALANCE:
     f << "columnBalance=" << input->readULong(1) << ",";
     break;
-  case ATTR_FRM_FRAMEDIR:
-  case ATTR_SC_WRITINGDIR:
-    f << (nWhich==ATTR_FRM_FRAMEDIR ? "frameDir" : "ScWritingDir") << "=" << input->readULong(2) << ",";
+  case StarAttribute::ATTR_FRM_FRAMEDIR:
+  case StarAttribute::ATTR_SC_WRITINGDIR:
+    f << (nWhich==StarAttribute::ATTR_FRM_FRAMEDIR ? "frameDir" : "ScWritingDir") << "=" << input->readULong(2) << ",";
     break;
-  case ATTR_FRM_HEADER_FOOTER_EAT_SPACING:
+  case StarAttribute::ATTR_FRM_HEADER_FOOTER_EAT_SPACING:
     f << "headerFooterEatSpacing=" << input->readULong(1) << ",";
     break;
-  case ATTR_FRM_FRMATTR_DUMMY9:
+  case StarAttribute::ATTR_FRM_FRMATTR_DUMMY9:
     f << "frmAtrDummy9" << input->readULong(1) << ",";
     break;
   // graphic attribute
-  case ATTR_GRF_MIRRORGRF:
+  case StarAttribute::ATTR_GRF_MIRRORGRF:
     f << "grfMirrorGrf=" << input->readULong(1) << ",";
     if (nVers>0) f << "nToggle=" << input->readULong(1) << ",";
     break;
-  case ATTR_GRF_CROPGRF:
+  case StarAttribute::ATTR_GRF_CROPGRF:
     f << "grfCropGrf,";
     f << "top=" << input->readLong(4) << ",";
     f << "left=" << input->readLong(4) << ",";
@@ -983,61 +1048,61 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "bottom=" << input->readLong(4) << ",";
     break;
   // no saved ?
-  case ATTR_GRF_ROTATION:
+  case StarAttribute::ATTR_GRF_ROTATION:
     f << "grfRotation,";
     break;
-  case ATTR_GRF_LUMINANCE:
+  case StarAttribute::ATTR_GRF_LUMINANCE:
     f << "grfLuminance,";
     break;
-  case ATTR_GRF_CONTRAST:
+  case StarAttribute::ATTR_GRF_CONTRAST:
     f << "grfContrast,";
     break;
-  case ATTR_GRF_CHANNELR:
+  case StarAttribute::ATTR_GRF_CHANNELR:
     f << "grfChannelR,";
     break;
-  case ATTR_GRF_CHANNELG:
+  case StarAttribute::ATTR_GRF_CHANNELG:
     f << "grfChannelG,";
     break;
-  case ATTR_GRF_CHANNELB:
+  case StarAttribute::ATTR_GRF_CHANNELB:
     f << "grfChannelB,";
     break;
-  case ATTR_GRF_GAMMA:
+  case StarAttribute::ATTR_GRF_GAMMA:
     f << "grfGamma,";
     break;
-  case ATTR_GRF_INVERT:
+  case StarAttribute::ATTR_GRF_INVERT:
     f << "grfInvert,";
     break;
-  case ATTR_GRF_TRANSPARENCY:
+  case StarAttribute::ATTR_GRF_TRANSPARENCY:
     f << "grfTransparency,";
     break;
-  case ATTR_GRF_DRAWMODE:
+  case StarAttribute::ATTR_GRF_DRAWMODE:
     f << "grfDrawMode,";
     break;
-  case ATTR_GRF_DUMMY1:
+  case StarAttribute::ATTR_GRF_DUMMY1:
     f << "grfDummy1" << input->readULong(1) << ",";
     break;
-  case ATTR_GRF_DUMMY2:
+  case StarAttribute::ATTR_GRF_DUMMY2:
     f << "grfDummy2" << input->readULong(1) << ",";
     break;
-  case ATTR_GRF_DUMMY3:
+  case StarAttribute::ATTR_GRF_DUMMY3:
     f << "grfDummy3" << input->readULong(1) << ",";
     break;
-  case ATTR_GRF_DUMMY4:
+  case StarAttribute::ATTR_GRF_DUMMY4:
     f << "grfDummy4" << input->readULong(1) << ",";
     break;
-  case ATTR_GRF_DUMMY5:
+  case StarAttribute::ATTR_GRF_DUMMY5:
     f << "grfDummy5" << input->readULong(1) << ",";
     break;
 
-  case ATTR_BOX_FORMAT:
+  case StarAttribute::ATTR_BOX_FORMAT:
     f << "boxFormat=" << input->readULong(1) << ",";
     f << "nTmp=" << input->readULong(4) << ",";
     break;
-  case ATTR_BOX_FORMULA: {
+  case StarAttribute::ATTR_BOX_FORMULA: {
     f << "boxFormula,";
     librevenge::RVNGString text;
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the formula\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the formula\n"));
       f << "###formula,";
       break;
     }
@@ -1045,12 +1110,12 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       f << "formula=" << text.cstr() << ",";
     break;
   }
-  case ATTR_BOX_VALUE:
+  case StarAttribute::ATTR_BOX_VALUE:
     f << "boxAtrValue,";
     if (nVers==0) {
       librevenge::RVNGString text;
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not find the dValue\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the dValue\n"));
         f << "###dValue,";
         break;
       }
@@ -1061,7 +1126,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       double res;
       bool isNan;
       if (!input->readDoubleReverted8(res, isNan)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a double\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a double\n"));
         f << "##value,";
       }
       else if (res<0||res>0)
@@ -1069,35 +1134,35 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     }
     break;
 
-  case ATTR_SC_HYPHENATE:
+  case StarAttribute::ATTR_SC_HYPHENATE:
     f << "scHyphenate=" << input->readULong(1) << ",";
     break;
-  case ATTR_SC_HORJUSTIFY:
-  case ATTR_SC_VERJUSTIFY:
+  case StarAttribute::ATTR_SC_HORJUSTIFY:
+  case StarAttribute::ATTR_SC_VERJUSTIFY:
     // algitem.cxx Svx{Hor,Ver}JustifyItem::Create
-    f << (nWhich==ATTR_SC_HORJUSTIFY ? "scHorJustify" : "scVerJustify") << "=" << input->readULong(2) << ",";
+    f << (nWhich==StarAttribute::ATTR_SC_HORJUSTIFY ? "scHorJustify" : "scVerJustify") << "=" << input->readULong(2) << ",";
     break;
-  case ATTR_SC_INDENT:
+  case StarAttribute::ATTR_SC_INDENT:
     f << "scIndent=" << input->readULong(2) << ",";
     break;
-  case ATTR_SC_ORIENTATION:
+  case StarAttribute::ATTR_SC_ORIENTATION:
     // algitem.cxx SvxOrientationItem::Create
     f << "scOrientation=" << input->readULong(2) << ",";
     break;
-  case ATTR_SC_ROTATE_VALUE:
+  case StarAttribute::ATTR_SC_ROTATE_VALUE:
     f << "scRotateValue=" << input->readLong(4) << ",";
     break;
-  case ATTR_SC_ROTATE_MODE:
+  case StarAttribute::ATTR_SC_ROTATE_MODE:
     // rotmodit.cxx SvxRotateModeItem::Create
     f << "scRotateMode=" << input->readULong(2) << ",";
     break;
-  case ATTR_SC_VERTICAL_ASIAN:
+  case StarAttribute::ATTR_SC_VERTICAL_ASIAN:
     f << "scVerticalAsian=" << input->readULong(1) << ",";
     break;
-  case ATTR_SC_LINEBREAK:
+  case StarAttribute::ATTR_SC_LINEBREAK:
     f << "scLineBreak=" << input->readULong(1) << ",";
     break;
-  case ATTR_SC_MARGIN:
+  case StarAttribute::ATTR_SC_MARGIN:
     // algItem SvxMarginItem::Create
     f << "scMargin,";
     f << "top=" << input->readLong(2) << ",";
@@ -1105,19 +1170,19 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "right=" << input->readLong(2) << ",";
     f << "bottom=" << input->readLong(2) << ",";
     break;
-  case ATTR_SC_MERGE:
+  case StarAttribute::ATTR_SC_MERGE:
     // sc_attrib.cxx ScMergeAttr::Create
     f << "scMerge,";
     f << "nCol=" << input->readLong(2) << ",";
     f << "nRow=" << input->readLong(2) << ",";
     break;
-  case ATTR_SC_MERGE_FLAG:
+  case StarAttribute::ATTR_SC_MERGE_FLAG:
     f << "scMergeFlag=" << input->readLong(2) << ",";
     break;
-  case ATTR_SC_VALUE_FORMAT:
+  case StarAttribute::ATTR_SC_VALUE_FORMAT:
     f << "scValueFormat=" << input->readULong(4) << ",";
     break;
-  case ATTR_SC_PROTECTION:
+  case StarAttribute::ATTR_SC_PROTECTION:
     // sc_attrib.cxx ScProtectionAttr::Create
     f << "scProtection,";
     f << "bProtect=" << input->readLong(1) << ",";
@@ -1125,7 +1190,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "bHCell=" << input->readLong(1) << ",";
     f << "bHPrint=" << input->readLong(1) << ",";
     break;
-  case ATTR_SC_BORDER_INNER: {
+  case StarAttribute::ATTR_SC_BORDER_INNER: {
     // frmitem.cxx SvxBoxInfoItem::Create
     f << "scBorderInner,";
     int cFlags=(int) input->readULong(1);
@@ -1140,7 +1205,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       f << "line" << n++ <<"=[";
       STOFFColor col;
       if (!input->readColor(col)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a color\n"));
         f << "###color,";
         break;
       }
@@ -1153,11 +1218,11 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     }
     break;
   }
-  case ATTR_SC_VALIDDATA:
-  case ATTR_SC_CONDITIONAL:
-    f << (nWhich==ATTR_SC_VALIDDATA ? "scValidData" : "scConditional") << input->readULong(4) << ",";
+  case StarAttribute::ATTR_SC_VALIDDATA:
+  case StarAttribute::ATTR_SC_CONDITIONAL:
+    f << (nWhich==StarAttribute::ATTR_SC_VALIDDATA ? "scValidData" : "scConditional") << input->readULong(4) << ",";
     break;
-  case ATTR_SC_PATTERN: {
+  case StarAttribute::ATTR_SC_PATTERN: {
     f << "pattern,";
     // sc_patattr.cxx ScPatternAttr::Create
     bool hasStyle;
@@ -1166,7 +1231,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       f << "hasStyle,";
       librevenge::RVNGString text;
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a name\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a name\n"));
         f << "###name,";
         break;
       }
@@ -1176,7 +1241,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     // TODO
     static bool first=true;
     if (first) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: reading a pattern item is not implemented\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: reading a pattern item is not implemented\n"));
       first=false;
     }
     f << "##";
@@ -1184,12 +1249,12 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     input->seek(lastPos, librevenge::RVNG_SEEK_SET);
     break;
   }
-  case ATTR_SC_PAGE: {
+  case StarAttribute::ATTR_SC_PAGE: {
     // svx_pageitem.cxx SvxPageItem::Create
     f << "page,";
     librevenge::RVNGString text;
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a name\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a name\n"));
       f << "###name,";
       break;
     }
@@ -1200,49 +1265,49 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "nUse=" << input->readULong(2) << ",";
     break;
   }
-  case ATTR_SC_PAGE_PAPERTRAY:
+  case StarAttribute::ATTR_SC_PAGE_PAPERTRAY:
     f << "paper[tray]=" << input->readULong(2) << ",";
     break;
-  case ATTR_SC_PAGE_SIZE:
-  case ATTR_SC_PAGE_MAXSIZE:
-    f << (nWhich==ATTR_SC_PAGE_SIZE ? "page[sz]" : "maxPage[sz]") << "=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+  case StarAttribute::ATTR_SC_PAGE_SIZE:
+  case StarAttribute::ATTR_SC_PAGE_MAXSIZE:
+    f << (nWhich==StarAttribute::ATTR_SC_PAGE_SIZE ? "page[sz]" : "maxPage[sz]") << "=" << input->readLong(4) << "x" << input->readLong(4) << ",";
     break;
-  case ATTR_SC_PAGE_HORCENTER:
-  case ATTR_SC_PAGE_VERCENTER:
-  case ATTR_SC_PAGE_ON:
-    f << (nWhich==ATTR_SC_PAGE_HORCENTER ? "scPageHor[center]" : nWhich==ATTR_SC_PAGE_VERCENTER ? "scPageVer[center]" : "pageOn")
+  case StarAttribute::ATTR_SC_PAGE_HORCENTER:
+  case StarAttribute::ATTR_SC_PAGE_VERCENTER:
+  case StarAttribute::ATTR_SC_PAGE_ON:
+    f << (nWhich==StarAttribute::ATTR_SC_PAGE_HORCENTER ? "scPageHor[center]" : nWhich==StarAttribute::ATTR_SC_PAGE_VERCENTER ? "scPageVer[center]" : "pageOn")
       << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_SC_PAGE_DYNAMIC:
-  case ATTR_SC_PAGE_SHARED:
-  case ATTR_SC_PAGE_NOTES:
-    f << (nWhich==ATTR_SC_PAGE_DYNAMIC ? "page[dynamic]" : nWhich==ATTR_SC_PAGE_SHARED ? "page[shared]" : "page[note]")
+  case StarAttribute::ATTR_SC_PAGE_DYNAMIC:
+  case StarAttribute::ATTR_SC_PAGE_SHARED:
+  case StarAttribute::ATTR_SC_PAGE_NOTES:
+    f << (nWhich==StarAttribute::ATTR_SC_PAGE_DYNAMIC ? "page[dynamic]" : nWhich==StarAttribute::ATTR_SC_PAGE_SHARED ? "page[shared]" : "page[note]")
       << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_SC_PAGE_GRID:
-  case ATTR_SC_PAGE_HEADERS:
-    f << (nWhich==ATTR_SC_PAGE_GRID ? "page[grid]" : "page[headers]") << "=" << input->readULong(1) << ",";
+  case StarAttribute::ATTR_SC_PAGE_GRID:
+  case StarAttribute::ATTR_SC_PAGE_HEADERS:
+    f << (nWhich==StarAttribute::ATTR_SC_PAGE_GRID ? "page[grid]" : "page[headers]") << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_SC_PAGE_CHARTS:
-  case ATTR_SC_PAGE_OBJECTS:
-  case ATTR_SC_PAGE_DRAWINGS:
-    f << (nWhich==ATTR_SC_PAGE_CHARTS ? "page[charts]" : nWhich==ATTR_SC_PAGE_OBJECTS ? "page[object]" : "page[drawings]");
+  case StarAttribute::ATTR_SC_PAGE_CHARTS:
+  case StarAttribute::ATTR_SC_PAGE_OBJECTS:
+  case StarAttribute::ATTR_SC_PAGE_DRAWINGS:
+    f << (nWhich==StarAttribute::ATTR_SC_PAGE_CHARTS ? "page[charts]" : nWhich==StarAttribute::ATTR_SC_PAGE_OBJECTS ? "page[object]" : "page[drawings]");
     if (nVers==0) f << ",";
     else f << input->readULong(2) << ",";
     break;
-  case ATTR_SC_PAGE_TOPDOWN:
+  case StarAttribute::ATTR_SC_PAGE_TOPDOWN:
     f << "scPageTopDown=" << input->readULong(1);
     break;
-  case ATTR_SC_PAGE_SCALE:
-  case ATTR_SC_PAGE_SCALETOPAGES:
-  case ATTR_SC_PAGE_FIRSTPAGENO:
-    f << (nWhich==ATTR_SC_PAGE_SCALE ? "page[scale]" : nWhich==ATTR_SC_PAGE_SCALETOPAGES ? "page[scaleToPage]" : "firstPageNo")
+  case StarAttribute::ATTR_SC_PAGE_SCALE:
+  case StarAttribute::ATTR_SC_PAGE_SCALETOPAGES:
+  case StarAttribute::ATTR_SC_PAGE_FIRSTPAGENO:
+    f << (nWhich==StarAttribute::ATTR_SC_PAGE_SCALE ? "page[scale]" : nWhich==StarAttribute::ATTR_SC_PAGE_SCALETOPAGES ? "page[scaleToPage]" : "firstPageNo")
       << "=" << input->readULong(2) << ",";
     break;
-  case ATTR_SC_PAGE_PRINTAREA:
-  case ATTR_SC_PAGE_REPEATROW:
-  case ATTR_SC_PAGE_REPEATCOL:
-    f << (nWhich==ATTR_SC_PAGE_PRINTAREA ? "print[area]" : nWhich==ATTR_SC_PAGE_REPEATROW ? "repeat[row]" : "repeat[col]") << ",";
+  case StarAttribute::ATTR_SC_PAGE_PRINTAREA:
+  case StarAttribute::ATTR_SC_PAGE_REPEATROW:
+  case StarAttribute::ATTR_SC_PAGE_REPEATCOL:
+    f << (nWhich==StarAttribute::ATTR_SC_PAGE_PRINTAREA ? "print[area]" : nWhich==StarAttribute::ATTR_SC_PAGE_REPEATROW ? "repeat[row]" : "repeat[col]") << ",";
     // sc_attrib.cxx ScRangeItem::Create
     if (nVers==0) {
       uint16_t n, nColS, nRowS, nColE, nRowE;
@@ -1265,7 +1330,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       }
     }
     break;
-  case ATTR_SC_PAGE_PRINTTABLES: {
+  case StarAttribute::ATTR_SC_PAGE_PRINTTABLES: {
     f << "print[tables],";
     uint16_t n;
     *input >> n;
@@ -1276,18 +1341,18 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "],";
     break;
   }
-  case ATTR_SC_PAGE_HEADERLEFT:
-  case ATTR_SC_PAGE_FOOTERLEFT:
-  case ATTR_SC_PAGE_HEADERRIGHT:
-  case ATTR_SC_PAGE_FOOTERRIGHT: {
-    f << (nWhich==ATTR_SC_PAGE_HEADERLEFT ? "header[left]" :
-          nWhich==ATTR_SC_PAGE_FOOTERLEFT ? "footer[left]" :
-          nWhich==ATTR_SC_PAGE_HEADERRIGHT ? "header[right]" : "footer[right]") << ",";
+  case StarAttribute::ATTR_SC_PAGE_HEADERLEFT:
+  case StarAttribute::ATTR_SC_PAGE_FOOTERLEFT:
+  case StarAttribute::ATTR_SC_PAGE_HEADERRIGHT:
+  case StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT: {
+    f << (nWhich==StarAttribute::ATTR_SC_PAGE_HEADERLEFT ? "header[left]" :
+          nWhich==StarAttribute::ATTR_SC_PAGE_FOOTERLEFT ? "footer[left]" :
+          nWhich==StarAttribute::ATTR_SC_PAGE_HEADERRIGHT ? "header[right]" : "footer[right]") << ",";
     for (int i=0; i<3; ++i) {
       long actPos=input->tell();
       StarFileManager fileManager;
       if (!fileManager.readEditTextObject(zone, lastPos, document) || input->tell()>lastPos) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a text object\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a text object\n"));
         ascFile.addPos(actPos);
         ascFile.addNote("StarAttribute:###editTextObject");
         input->seek(lastPos, librevenge::RVNG_SEEK_SET);
@@ -1296,14 +1361,14 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     }
     break;
   }
-  case ATTR_SC_PAGE_HEADERSET:
-  case ATTR_SC_PAGE_FOOTERSET: {
+  case StarAttribute::ATTR_SC_PAGE_HEADERSET:
+  case StarAttribute::ATTR_SC_PAGE_FOOTERSET: {
     // svx_pageitem.cxx SvxSetItem::Create
-    f << (nWhich==ATTR_SC_PAGE_HEADERSET ? "page[headerSet]" : "page[footerSet]") << ",";
+    f << (nWhich==StarAttribute::ATTR_SC_PAGE_HEADERSET ? "page[headerSet]" : "page[footerSet]") << ",";
     // TODO
     static bool first=true;
     if (first) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: reading a header/footer set item is not implemented\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: reading a header/footer set item is not implemented\n"));
       first=false;
     }
     f << "##";
@@ -1311,11 +1376,11 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     input->seek(lastPos, librevenge::RVNG_SEEK_SET);
     break;
   }
-  case ATTR_SC_PAGE_FORMULAS:
-  case ATTR_SC_PAGE_NULLVALS:
-    f << (nWhich==ATTR_SC_PAGE_FORMULAS ? "page[formulas]" : "page[numVals") << "=" << input->readULong(1) << ",";
+  case StarAttribute::ATTR_SC_PAGE_FORMULAS:
+  case StarAttribute::ATTR_SC_PAGE_NULLVALS:
+    f << (nWhich==StarAttribute::ATTR_SC_PAGE_FORMULAS ? "page[formulas]" : "page[numVals") << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_EE_PARA_NUMBULLET: {
+  case StarAttribute::ATTR_EE_PARA_NUMBULLET: {
     // svx_numitem.cxx SvxNumRule::SvxNumRule
     f << "eeParaNumBullet,";
     uint16_t version, levelC, nFeatureFlags, nContinuousNumb, numberingType;
@@ -1347,11 +1412,11 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     }
     break;
   }
-  case ATTR_EE_PARA_BULLETSTATE:
-  case ATTR_EE_PARA_OUTLLEVEL:
-    f << (nWhich==ATTR_EE_PARA_BULLETSTATE ? "eeBulletState" : "eeOutLevel") << "=" << input->readULong(2) << ",";
+  case StarAttribute::ATTR_EE_PARA_BULLETSTATE:
+  case StarAttribute::ATTR_EE_PARA_OUTLLEVEL:
+    f << (nWhich==StarAttribute::ATTR_EE_PARA_BULLETSTATE ? "eeBulletState" : "eeOutLevel") << "=" << input->readULong(2) << ",";
     break;
-  case ATTR_EE_PARA_BULLET: {
+  case StarAttribute::ATTR_EE_PARA_BULLET: {
     // svx_bulitem.cxx SvxBulletItem::SvxBulletItem
     f << "paraBullet,";
     uint16_t style;
@@ -1367,7 +1432,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       // SvxBulletItem::CreateFont
       STOFFColor col;
       if (!input->readColor(col)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a color\n"));
         f << "###color,";
         break;
       }
@@ -1384,7 +1449,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       if (italic) f << "italic=" << italic << ",";
       librevenge::RVNGString text;
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a name\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a name\n"));
         f << "###text,";
         break;
       }
@@ -1404,7 +1469,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     for (int i=0; i<2; ++i) {
       librevenge::RVNGString text;
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a name\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a name\n"));
         f << "###text,";
         break;
       }
@@ -1413,316 +1478,317 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     }
     break;
   }
-  case ATTR_EE_CHR_RUBI_DUMMY: // ok no data
-  case ATTR_EE_FEATURE_TAB:
-  case ATTR_EE_FEATURE_LINEBR:
-    f << (nWhich==ATTR_EE_CHR_RUBI_DUMMY ? "eeRubiDummy" :
-          nWhich==ATTR_EE_FEATURE_TAB ? "eeFeatureTab" : "eeFeatureLineBr") << ",";
+  case StarAttribute::ATTR_EE_CHR_RUBI_DUMMY: // ok no data
+  case StarAttribute::ATTR_EE_FEATURE_TAB:
+  case StarAttribute::ATTR_EE_FEATURE_LINEBR:
+    f << (nWhich==StarAttribute::ATTR_EE_CHR_RUBI_DUMMY ? "eeRubiDummy" :
+          nWhich==StarAttribute::ATTR_EE_FEATURE_TAB ? "eeFeatureTab" : "eeFeatureLineBr") << ",";
     break;
-  case ATTR_EE_FEATURE_FIELD: {
+  case StarAttribute::ATTR_EE_FEATURE_FIELD: {
     f << "eeFeatureField,vers=" << nVers << ",";
     // svx_flditem.cxx SvxFieldItem::Create
     if (!document.readPersistData(zone, lastPos)) break;
     return true;
   }
 
-  case ATTR_SCH_DATADESCR_DESCR:
+  case StarAttribute::ATTR_SCH_DATADESCR_DESCR:
     f << "data[desc]=" << input->readULong(2) << ",";
     break;
-  case ATTR_SCH_DATADESCR_SHOW_SYM:
+  case StarAttribute::ATTR_SCH_DATADESCR_SHOW_SYM:
     f << "dataDesc[showSym]=" << input->readULong(1) << ",";
     break;
-  case ATTR_SCH_LEGEND_POS:
-  case ATTR_SCH_TEXT_ORIENT:
-  case ATTR_SCH_TEXT_ORDER:
-    f << (nWhich==ATTR_SCH_LEGEND_POS ? "legend[pos]" :
-          nWhich==ATTR_SCH_TEXT_ORIENT ? "text[orient]" : "text[order]")
+  case StarAttribute::ATTR_SCH_LEGEND_POS:
+  case StarAttribute::ATTR_SCH_TEXT_ORIENT:
+  case StarAttribute::ATTR_SCH_TEXT_ORDER:
+    f << (nWhich==StarAttribute::ATTR_SCH_LEGEND_POS ? "legend[pos]" :
+          nWhich==StarAttribute::ATTR_SCH_TEXT_ORIENT ? "text[orient]" : "text[order]")
       << "=" << input->readULong(2) << ",";
     break;
-  case ATTR_SCH_X_AXIS_AUTO_MIN:
-  case ATTR_SCH_Y_AXIS_AUTO_MIN:
-  case ATTR_SCH_Z_AXIS_AUTO_MIN:
-  case ATTR_SCH_AXIS_AUTO_MIN:
-    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_MIN ? "xAxisAutoMin" :
-          nWhich==ATTR_SCH_Y_AXIS_AUTO_MIN ? "yAxisAutoMin" :
-          nWhich==ATTR_SCH_Z_AXIS_AUTO_MIN ? "zAxisAutoMin" : "axisAutoMin")
+  case StarAttribute::ATTR_SCH_X_AXIS_AUTO_MIN:
+  case StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MIN:
+  case StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MIN:
+  case StarAttribute::ATTR_SCH_AXIS_AUTO_MIN:
+    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_AUTO_MIN ? "xAxisAutoMin" :
+          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MIN ? "yAxisAutoMin" :
+          nWhich==StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MIN ? "zAxisAutoMin" : "axisAutoMin")
       << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_SCH_X_AXIS_MIN:
-  case ATTR_SCH_Y_AXIS_MIN:
-  case ATTR_SCH_Z_AXIS_MIN:
-  case ATTR_SCH_AXIS_MIN: {
+  case StarAttribute::ATTR_SCH_X_AXIS_MIN:
+  case StarAttribute::ATTR_SCH_Y_AXIS_MIN:
+  case StarAttribute::ATTR_SCH_Z_AXIS_MIN:
+  case StarAttribute::ATTR_SCH_AXIS_MIN: {
     double value;
     *input >> value;
-    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_MIN ? "xAxisMin" :
-          nWhich==ATTR_SCH_Y_AXIS_AUTO_MIN ? "yAxisMin" :
-          nWhich==ATTR_SCH_Z_AXIS_AUTO_MIN ? "zAxisMin" : "axisMin")
+    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_AUTO_MIN ? "xAxisMin" :
+          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MIN ? "yAxisMin" :
+          nWhich==StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MIN ? "zAxisMin" : "axisMin")
       << "=" << value << ",";
     break;
   }
-  case ATTR_SCH_X_AXIS_AUTO_MAX:
-  case ATTR_SCH_Y_AXIS_AUTO_MAX:
-  case ATTR_SCH_Z_AXIS_AUTO_MAX:
-  case ATTR_SCH_AXIS_AUTO_MAX:
-    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_MAX ? "xAxisAutoMax" :
-          nWhich==ATTR_SCH_Y_AXIS_AUTO_MAX ? "yAxisAutoMax" :
-          nWhich==ATTR_SCH_Z_AXIS_AUTO_MAX ? "zAxisAutoMax" : "axisAutoMax")
+  case StarAttribute::ATTR_SCH_X_AXIS_AUTO_MAX:
+  case StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MAX:
+  case StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MAX:
+  case StarAttribute::ATTR_SCH_AXIS_AUTO_MAX:
+    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_AUTO_MAX ? "xAxisAutoMax" :
+          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MAX ? "yAxisAutoMax" :
+          nWhich==StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MAX ? "zAxisAutoMax" : "axisAutoMax")
       << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_SCH_X_AXIS_MAX:
-  case ATTR_SCH_Y_AXIS_MAX:
-  case ATTR_SCH_Z_AXIS_MAX:
-  case ATTR_SCH_AXIS_MAX: {
+  case StarAttribute::ATTR_SCH_X_AXIS_MAX:
+  case StarAttribute::ATTR_SCH_Y_AXIS_MAX:
+  case StarAttribute::ATTR_SCH_Z_AXIS_MAX:
+  case StarAttribute::ATTR_SCH_AXIS_MAX: {
     double value;
     *input >> value;
-    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_MAX ? "xAxisMax" :
-          nWhich==ATTR_SCH_Y_AXIS_AUTO_MAX ? "yAxisMax" :
-          nWhich==ATTR_SCH_Z_AXIS_AUTO_MAX ? "zAxisMax" : "axisMax")
+    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_AUTO_MAX ? "xAxisMax" :
+          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MAX ? "yAxisMax" :
+          nWhich==StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MAX ? "zAxisMax" : "axisMax")
       << "=" << value << ",";
     break;
   }
-  case ATTR_SCH_X_AXIS_AUTO_STEP_MAIN:
-  case ATTR_SCH_Y_AXIS_AUTO_STEP_MAIN:
-  case ATTR_SCH_Z_AXIS_AUTO_STEP_MAIN:
-  case ATTR_SCH_AXIS_AUTO_STEP_MAIN:
-    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_STEP_MAIN ? "xAxisAutoStepMain" :
-          nWhich==ATTR_SCH_Y_AXIS_AUTO_STEP_MAIN ? "yAxisAutoStepMain" :
-          nWhich==ATTR_SCH_Z_AXIS_AUTO_STEP_MAIN ? "zAxisAutoStepMain" : "axisAutoStepMain")
+  case StarAttribute::ATTR_SCH_X_AXIS_AUTO_STEP_MAIN:
+  case StarAttribute::ATTR_SCH_Y_AXIS_AUTO_STEP_MAIN:
+  case StarAttribute::ATTR_SCH_Z_AXIS_AUTO_STEP_MAIN:
+  case StarAttribute::ATTR_SCH_AXIS_AUTO_STEP_MAIN:
+    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_AUTO_STEP_MAIN ? "xAxisAutoStepMain" :
+          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_AUTO_STEP_MAIN ? "yAxisAutoStepMain" :
+          nWhich==StarAttribute::ATTR_SCH_Z_AXIS_AUTO_STEP_MAIN ? "zAxisAutoStepMain" : "axisAutoStepMain")
       << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_SCH_X_AXIS_STEP_MAIN:
-  case ATTR_SCH_Y_AXIS_STEP_MAIN:
-  case ATTR_SCH_Z_AXIS_STEP_MAIN:
-  case ATTR_SCH_AXIS_STEP_MAIN: {
+  case StarAttribute::ATTR_SCH_X_AXIS_STEP_MAIN:
+  case StarAttribute::ATTR_SCH_Y_AXIS_STEP_MAIN:
+  case StarAttribute::ATTR_SCH_Z_AXIS_STEP_MAIN:
+  case StarAttribute::ATTR_SCH_AXIS_STEP_MAIN: {
     double value;
     *input >> value;
-    f << (nWhich==ATTR_SCH_X_AXIS_STEP_MAIN ? "xAxisStepMain" :
-          nWhich==ATTR_SCH_Y_AXIS_STEP_MAIN ? "yAxisStepMain" :
-          nWhich==ATTR_SCH_Z_AXIS_STEP_MAIN ? "zAxisStepMain" : "axisStepMain")
+    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_STEP_MAIN ? "xAxisStepMain" :
+          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_STEP_MAIN ? "yAxisStepMain" :
+          nWhich==StarAttribute::ATTR_SCH_Z_AXIS_STEP_MAIN ? "zAxisStepMain" : "axisStepMain")
       << "=" << value << ",";
     break;
   }
-  case ATTR_SCH_X_AXIS_AUTO_STEP_HELP:
-  case ATTR_SCH_Y_AXIS_AUTO_STEP_HELP:
-  case ATTR_SCH_Z_AXIS_AUTO_STEP_HELP:
-  case ATTR_SCH_AXIS_AUTO_STEP_HELP:
-    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_STEP_HELP ? "xAxisAutoStepHelp" :
-          nWhich==ATTR_SCH_Y_AXIS_AUTO_STEP_HELP ? "yAxisAutoStepHelp" :
-          nWhich==ATTR_SCH_Z_AXIS_AUTO_STEP_HELP ? "zAxisAutoStepHelp" : "axisAutoStepHelp")
+  case StarAttribute::ATTR_SCH_X_AXIS_AUTO_STEP_HELP:
+  case StarAttribute::ATTR_SCH_Y_AXIS_AUTO_STEP_HELP:
+  case StarAttribute::ATTR_SCH_Z_AXIS_AUTO_STEP_HELP:
+  case StarAttribute::ATTR_SCH_AXIS_AUTO_STEP_HELP:
+    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_AUTO_STEP_HELP ? "xAxisAutoStepHelp" :
+          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_AUTO_STEP_HELP ? "yAxisAutoStepHelp" :
+          nWhich==StarAttribute::ATTR_SCH_Z_AXIS_AUTO_STEP_HELP ? "zAxisAutoStepHelp" : "axisAutoStepHelp")
       << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_SCH_X_AXIS_STEP_HELP:
-  case ATTR_SCH_Y_AXIS_STEP_HELP:
-  case ATTR_SCH_Z_AXIS_STEP_HELP:
-  case ATTR_SCH_AXIS_STEP_HELP: {
+  case StarAttribute::ATTR_SCH_X_AXIS_STEP_HELP:
+  case StarAttribute::ATTR_SCH_Y_AXIS_STEP_HELP:
+  case StarAttribute::ATTR_SCH_Z_AXIS_STEP_HELP:
+  case StarAttribute::ATTR_SCH_AXIS_STEP_HELP: {
     double value;
     *input >> value;
-    f << (nWhich==ATTR_SCH_X_AXIS_STEP_HELP ? "xAxisStepHelp" :
-          nWhich==ATTR_SCH_Y_AXIS_STEP_HELP ? "yAxisStepHelp" :
-          nWhich==ATTR_SCH_Z_AXIS_STEP_HELP ? "zAxisStepHelp" : "axisStepHelp")
+    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_STEP_HELP ? "xAxisStepHelp" :
+          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_STEP_HELP ? "yAxisStepHelp" :
+          nWhich==StarAttribute::ATTR_SCH_Z_AXIS_STEP_HELP ? "zAxisStepHelp" : "axisStepHelp")
       << "=" << value << ",";
     break;
   }
-  case ATTR_SCH_X_AXIS_LOGARITHM:
-  case ATTR_SCH_Y_AXIS_LOGARITHM:
-  case ATTR_SCH_Z_AXIS_LOGARITHM:
-  case ATTR_SCH_AXIS_LOGARITHM:
-    f << (nWhich==ATTR_SCH_X_AXIS_LOGARITHM ? "xAxisLogarithm" :
-          nWhich==ATTR_SCH_Y_AXIS_LOGARITHM ? "yAxisLogarithm" :
-          nWhich==ATTR_SCH_Z_AXIS_LOGARITHM ? "zAxisLogarithm" : "axisLogarithm")
+  case StarAttribute::ATTR_SCH_X_AXIS_LOGARITHM:
+  case StarAttribute::ATTR_SCH_Y_AXIS_LOGARITHM:
+  case StarAttribute::ATTR_SCH_Z_AXIS_LOGARITHM:
+  case StarAttribute::ATTR_SCH_AXIS_LOGARITHM:
+    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_LOGARITHM ? "xAxisLogarithm" :
+          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_LOGARITHM ? "yAxisLogarithm" :
+          nWhich==StarAttribute::ATTR_SCH_Z_AXIS_LOGARITHM ? "zAxisLogarithm" : "axisLogarithm")
       << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_SCH_X_AXIS_AUTO_ORIGIN:
-  case ATTR_SCH_Y_AXIS_AUTO_ORIGIN:
-  case ATTR_SCH_Z_AXIS_AUTO_ORIGIN:
-  case ATTR_SCH_AXIS_AUTO_ORIGIN:
-    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_ORIGIN ? "xAxisAutoOrigin" :
-          nWhich==ATTR_SCH_Y_AXIS_AUTO_ORIGIN ? "yAxisAutoOrigin" :
-          nWhich==ATTR_SCH_Z_AXIS_AUTO_ORIGIN ? "zAxisAutoOrigin" : "axisAutoOrigin")
+  case StarAttribute::ATTR_SCH_X_AXIS_AUTO_ORIGIN:
+  case StarAttribute::ATTR_SCH_Y_AXIS_AUTO_ORIGIN:
+  case StarAttribute::ATTR_SCH_Z_AXIS_AUTO_ORIGIN:
+  case StarAttribute::ATTR_SCH_AXIS_AUTO_ORIGIN:
+    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_AUTO_ORIGIN ? "xAxisAutoOrigin" :
+          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_AUTO_ORIGIN ? "yAxisAutoOrigin" :
+          nWhich==StarAttribute::ATTR_SCH_Z_AXIS_AUTO_ORIGIN ? "zAxisAutoOrigin" : "axisAutoOrigin")
       << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_SCH_X_AXIS_ORIGIN:
-  case ATTR_SCH_Y_AXIS_ORIGIN:
-  case ATTR_SCH_Z_AXIS_ORIGIN:
-  case ATTR_SCH_AXIS_ORIGIN: {
+  case StarAttribute::ATTR_SCH_X_AXIS_ORIGIN:
+  case StarAttribute::ATTR_SCH_Y_AXIS_ORIGIN:
+  case StarAttribute::ATTR_SCH_Z_AXIS_ORIGIN:
+  case StarAttribute::ATTR_SCH_AXIS_ORIGIN: {
     double value;
     *input >> value;
-    f << (nWhich==ATTR_SCH_X_AXIS_AUTO_ORIGIN ? "xAxisOrigin" :
-          nWhich==ATTR_SCH_Y_AXIS_AUTO_ORIGIN ? "yAxisOrigin" :
-          nWhich==ATTR_SCH_AXIS_AUTO_ORIGIN ? "zAxisOrigin" : "axisOrigin")
+    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_AUTO_ORIGIN ? "xAxisOrigin" :
+          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_AUTO_ORIGIN ? "yAxisOrigin" :
+          nWhich==StarAttribute::ATTR_SCH_AXIS_AUTO_ORIGIN ? "zAxisOrigin" : "axisOrigin")
       << "=" << value << ",";
     break;
   }
-  case ATTR_SCH_AXISTYPE:
-  case ATTR_SCH_DUMMY0:
-  case ATTR_SCH_DUMMY1:
-    f << (nWhich==ATTR_SCH_AXISTYPE ? "axis[type]" : nWhich==ATTR_SCH_DUMMY0 ? "dummy0[sch]" : "dummy1[sch]")
+  case StarAttribute::ATTR_SCH_AXISTYPE:
+  case StarAttribute::ATTR_SCH_DUMMY0:
+  case StarAttribute::ATTR_SCH_DUMMY1:
+    f << (nWhich==StarAttribute::ATTR_SCH_AXISTYPE ? "axis[type]" : nWhich==StarAttribute::ATTR_SCH_DUMMY0 ? "dummy0[sch]" : "dummy1[sch]")
       << "=" << input->readLong(4) << ",";
     break;
 
-  case ATTR_SCH_DUMMY2:
-  case ATTR_SCH_DUMMY3:
-  case ATTR_SCH_DUMMY_END:
-    f << (nWhich==ATTR_SCH_DUMMY2 ? "dummy2[sch]" : nWhich==ATTR_SCH_DUMMY3 ? "dummy3[sch]" : "dummyEnd[sch]")
+  case StarAttribute::ATTR_SCH_DUMMY2:
+  case StarAttribute::ATTR_SCH_DUMMY3:
+  case StarAttribute::ATTR_SCH_DUMMY_END:
+    f << (nWhich==StarAttribute::ATTR_SCH_DUMMY2 ? "dummy2[sch]" : nWhich==StarAttribute::ATTR_SCH_DUMMY3 ? "dummy3[sch]" : "dummyEnd[sch]")
       << "=" << input->readLong(4) << ",";
     break;
 
-  case ATTR_SCH_STAT_AVERAGE:
+  case StarAttribute::ATTR_SCH_STAT_AVERAGE:
     f << "statAverage=" << input->readULong(1) << ",";
     break;
 
-  case ATTR_SCH_STAT_KIND_ERROR:
+  case StarAttribute::ATTR_SCH_STAT_KIND_ERROR:
     f << "statKindError=" << input->readLong(4) << ",";
     break;
 
-  case ATTR_SCH_STAT_PERCENT:
-  case ATTR_SCH_STAT_BIGERROR:
-  case ATTR_SCH_STAT_CONSTPLUS:
-  case ATTR_SCH_STAT_CONSTMINUS: {
+  case StarAttribute::ATTR_SCH_STAT_PERCENT:
+  case StarAttribute::ATTR_SCH_STAT_BIGERROR:
+  case StarAttribute::ATTR_SCH_STAT_CONSTPLUS:
+  case StarAttribute::ATTR_SCH_STAT_CONSTMINUS: {
     double value;
     *input>>value;
-    f << (nWhich==ATTR_SCH_STAT_PERCENT ? "stat[percent]" : nWhich==ATTR_SCH_STAT_BIGERROR ? "stat[bigError]" :
-          nWhich==ATTR_SCH_STAT_CONSTPLUS ? "stat[constPlus]" : "stat[constMinus]")
+    f << (nWhich==StarAttribute::ATTR_SCH_STAT_PERCENT ? "stat[percent]" : nWhich==StarAttribute::ATTR_SCH_STAT_BIGERROR ? "stat[bigError]" :
+          nWhich==StarAttribute::ATTR_SCH_STAT_CONSTPLUS ? "stat[constPlus]" : "stat[constMinus]")
       << "=" << value << ",";
     break;
   }
 
-  case ATTR_SCH_STAT_REGRESSTYPE:
-  case ATTR_SCH_STAT_INDICATE:
-  case ATTR_SCH_TEXT_DEGREES:
-    f << (nWhich==ATTR_SCH_STAT_REGRESSTYPE ? "stat[regType]" :
-          nWhich==ATTR_SCH_STAT_INDICATE ? "stat[indicate]" : "stat[textDegree")
+  case StarAttribute::ATTR_SCH_STAT_REGRESSTYPE:
+  case StarAttribute::ATTR_SCH_STAT_INDICATE:
+  case StarAttribute::ATTR_SCH_TEXT_DEGREES:
+    f << (nWhich==StarAttribute::ATTR_SCH_STAT_REGRESSTYPE ? "stat[regType]" :
+          nWhich==StarAttribute::ATTR_SCH_STAT_INDICATE ? "stat[indicate]" : "stat[textDegree")
       << "=" << input->readLong(4) << ",";
     break;
 
-  case ATTR_SCH_TEXT_OVERLAP:
+  case StarAttribute::ATTR_SCH_TEXT_OVERLAP:
     f << "overlap[sch,text]=" << input->readULong(1) << ",";
     break;
 
-  case ATTR_SCH_TEXT_DUMMY0:
-  case ATTR_SCH_TEXT_DUMMY1:
-  case ATTR_SCH_TEXT_DUMMY2:
-  case ATTR_SCH_TEXT_DUMMY3:
-    f << (nWhich==ATTR_SCH_TEXT_DUMMY0 ? "dummy0[sch,text]" :
-          nWhich==ATTR_SCH_TEXT_DUMMY1 ? "dummy1[sch,text]" :
-          nWhich==ATTR_SCH_TEXT_DUMMY2 ? "dummy2[sch,text]" : "dummy3[sch,text]")
+  case StarAttribute::ATTR_SCH_TEXT_DUMMY0:
+  case StarAttribute::ATTR_SCH_TEXT_DUMMY1:
+  case StarAttribute::ATTR_SCH_TEXT_DUMMY2:
+  case StarAttribute::ATTR_SCH_TEXT_DUMMY3:
+    f << (nWhich==StarAttribute::ATTR_SCH_TEXT_DUMMY0 ? "dummy0[sch,text]" :
+          nWhich==StarAttribute::ATTR_SCH_TEXT_DUMMY1 ? "dummy1[sch,text]" :
+          nWhich==StarAttribute::ATTR_SCH_TEXT_DUMMY2 ? "dummy2[sch,text]" : "dummy3[sch,text]")
       << "=" << input->readLong(4) << ",";
     break;
 
-  case ATTR_SCH_STYLE_DEEP:
-  case ATTR_SCH_STYLE_3D:
-  case ATTR_SCH_STYLE_VERTICAL:
-    f << (nWhich==ATTR_SCH_STYLE_DEEP ? "deep[style]" : nWhich==ATTR_SCH_STYLE_3D ? "3d[style]" : "vert[style]")
+  case StarAttribute::ATTR_SCH_STYLE_DEEP:
+  case StarAttribute::ATTR_SCH_STYLE_3D:
+  case StarAttribute::ATTR_SCH_STYLE_VERTICAL:
+    f << (nWhich==StarAttribute::ATTR_SCH_STYLE_DEEP ? "deep[style]" : nWhich==StarAttribute::ATTR_SCH_STYLE_3D ? "3d[style]" : "vert[style]")
       << "=" << input->readULong(1) << ",";
     break;
 
-  case ATTR_SCH_STYLE_BASETYPE:
+  case StarAttribute::ATTR_SCH_STYLE_BASETYPE:
     f << "baseType[style]=" << input->readLong(4) << ",";
     break;
 
-  case ATTR_SCH_STYLE_LINES:
-  case ATTR_SCH_STYLE_PERCENT:
-  case ATTR_SCH_STYLE_STACKED:
-    f << (nWhich==ATTR_SCH_STYLE_LINES ? "lines[style]" :
-          nWhich==ATTR_SCH_STYLE_PERCENT ? "percent[style]" : "stacked[style]")
+  case StarAttribute::ATTR_SCH_STYLE_LINES:
+  case StarAttribute::ATTR_SCH_STYLE_PERCENT:
+  case StarAttribute::ATTR_SCH_STYLE_STACKED:
+    f << (nWhich==StarAttribute::ATTR_SCH_STYLE_LINES ? "lines[style]" :
+          nWhich==StarAttribute::ATTR_SCH_STYLE_PERCENT ? "percent[style]" : "stacked[style]")
       << "=" << input->readULong(1) << ",";
     break;
 
-  case ATTR_SCH_STYLE_SPLINES:
-  case ATTR_SCH_STYLE_SYMBOL:
-  case ATTR_SCH_STYLE_SHAPE:
-    f << (nWhich==ATTR_SCH_STYLE_SPLINES ? "splines[style]" :
-          nWhich==ATTR_SCH_STYLE_SYMBOL ? "symbol[style]" : "shape[style]")
+  case StarAttribute::ATTR_SCH_STYLE_SPLINES:
+  case StarAttribute::ATTR_SCH_STYLE_SYMBOL:
+  case StarAttribute::ATTR_SCH_STYLE_SHAPE:
+    f << (nWhich==StarAttribute::ATTR_SCH_STYLE_SPLINES ? "splines[style]" :
+          nWhich==StarAttribute::ATTR_SCH_STYLE_SYMBOL ? "symbol[style]" : "shape[style]")
       << "=" << input->readLong(4);
     break;
 
-  case ATTR_SCH_AXIS:
+  case StarAttribute::ATTR_SCH_AXIS:
     f << "axis[sch]=" << input->readLong(4) << ",";
     break;
 
-  case ATTR_SCH_AXIS_HELPTICKS:
-  case ATTR_SCH_AXIS_TICKS:
-  case ATTR_SCH_AXIS_NUMFMT:
-  case ATTR_SCH_AXIS_NUMFMTPERCENT:
-    f << (nWhich==ATTR_SCH_AXIS_HELPTICKS ? "axis[helpticks]" :
-          nWhich==ATTR_SCH_AXIS_TICKS ? "axis[ticks]" :
-          nWhich==ATTR_SCH_AXIS_NUMFMT ? "axis[numfmt]" : "axis[numfmtpercent]")
+  case StarAttribute::ATTR_SCH_AXIS_HELPTICKS:
+  case StarAttribute::ATTR_SCH_AXIS_TICKS:
+  case StarAttribute::ATTR_SCH_AXIS_NUMFMT:
+  case StarAttribute::ATTR_SCH_AXIS_NUMFMTPERCENT:
+    f << (nWhich==StarAttribute::ATTR_SCH_AXIS_HELPTICKS ? "axis[helpticks]" :
+          nWhich==StarAttribute::ATTR_SCH_AXIS_TICKS ? "axis[ticks]" :
+          nWhich==StarAttribute::ATTR_SCH_AXIS_NUMFMT ? "axis[numfmt]" : "axis[numfmtpercent]")
       << "=" << input->readLong(4);
     break;
 
-  case ATTR_SCH_AXIS_SHOWAXIS:
-  case ATTR_SCH_AXIS_SHOWDESCR:
-  case ATTR_SCH_AXIS_SHOWMAINGRID:
-    f << (nWhich==ATTR_SCH_AXIS_SHOWAXIS ? "show[axis]" :
-          nWhich==ATTR_SCH_AXIS_SHOWDESCR ? "show[descr]" : "show[maingrid]")
+  case StarAttribute::ATTR_SCH_AXIS_SHOWAXIS:
+  case StarAttribute::ATTR_SCH_AXIS_SHOWDESCR:
+  case StarAttribute::ATTR_SCH_AXIS_SHOWMAINGRID:
+    f << (nWhich==StarAttribute::ATTR_SCH_AXIS_SHOWAXIS ? "show[axis]" :
+          nWhich==StarAttribute::ATTR_SCH_AXIS_SHOWDESCR ? "show[descr]" : "show[maingrid]")
       << "=" << input->readULong(1) << ",";
     break;
 
-  case ATTR_SCH_AXIS_SHOWHELPGRID:
-  case ATTR_SCH_AXIS_TOPDOWN:
-    f << (nWhich==ATTR_SCH_AXIS_SHOWHELPGRID ? "show[helpGrid]" : "topDown")
+  case StarAttribute::ATTR_SCH_AXIS_SHOWHELPGRID:
+  case StarAttribute::ATTR_SCH_AXIS_TOPDOWN:
+    f << (nWhich==StarAttribute::ATTR_SCH_AXIS_SHOWHELPGRID ? "show[helpGrid]" : "topDown")
       << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_SCH_AXIS_DUMMY0:
-  case ATTR_SCH_AXIS_DUMMY1:
-  case ATTR_SCH_AXIS_DUMMY2:
-    f << (nWhich==ATTR_SCH_AXIS_DUMMY0 ? "dummy0[sch,axis]" :
-          nWhich==ATTR_SCH_AXIS_DUMMY1 ? "dummy1[sch,axis]" : "dummy2[sch,axis]")
+  case StarAttribute::ATTR_SCH_AXIS_DUMMY0:
+  case StarAttribute::ATTR_SCH_AXIS_DUMMY1:
+  case StarAttribute::ATTR_SCH_AXIS_DUMMY2:
+    f << (nWhich==StarAttribute::ATTR_SCH_AXIS_DUMMY0 ? "dummy0[sch,axis]" :
+          nWhich==StarAttribute::ATTR_SCH_AXIS_DUMMY1 ? "dummy1[sch,axis]" : "dummy2[sch,axis]")
       << "=" << input->readLong(4) << ",";
     break;
-  case ATTR_SCH_AXIS_DUMMY3:
-  case ATTR_SCH_BAR_OVERLAP:
-  case ATTR_SCH_BAR_GAPWIDTH:
-    f << (nWhich==ATTR_SCH_AXIS_DUMMY3 ? "dummy3[sch,axis]" :
-          nWhich==ATTR_SCH_BAR_OVERLAP ? "bar[overlap]" : "bar[gapwidth]")
+  case StarAttribute::ATTR_SCH_AXIS_DUMMY3:
+  case StarAttribute::ATTR_SCH_BAR_OVERLAP:
+  case StarAttribute::ATTR_SCH_BAR_GAPWIDTH:
+    f << (nWhich==StarAttribute::ATTR_SCH_AXIS_DUMMY3 ? "dummy3[sch,axis]" :
+          nWhich==StarAttribute::ATTR_SCH_BAR_OVERLAP ? "bar[overlap]" : "bar[gapwidth]")
       << "=" << input->readLong(4) << ",";
     break;
-  case ATTR_SCH_STOCK_VOLUME:
-  case ATTR_SCH_STOCK_UPDOWN:
-    f << (nWhich==ATTR_SCH_STOCK_VOLUME ? "stock[volume]" : "stock[updown]") << "=" << input->readULong(1) << ",";
+  case StarAttribute::ATTR_SCH_STOCK_VOLUME:
+  case StarAttribute::ATTR_SCH_STOCK_UPDOWN:
+    f << (nWhich==StarAttribute::ATTR_SCH_STOCK_VOLUME ? "stock[volume]" : "stock[updown]") << "=" << input->readULong(1) << ",";
     break;
-  case ATTR_SCH_SYMBOL_SIZE:
+  case StarAttribute::ATTR_SCH_SYMBOL_SIZE:
     f << "symbolSize[sch]=" << input->readLong(4) << "x" << input->readLong(4) << ",";
     break;
 
-  case XATTR_LINESTYLE:
-  case XATTR_FILLSTYLE:
-    f << (nWhich==XATTR_LINESTYLE ? "line[style]" : "fill[style]")
+  case StarAttribute::XATTR_LINESTYLE:
+  case StarAttribute::XATTR_FILLSTYLE:
+    f << (nWhich==StarAttribute::XATTR_LINESTYLE ? "line[style]" : "fill[style]")
       << "=" << input->readULong(2) << ",";
     break;
-  case XATTR_LINEWIDTH:
-  case XATTR_LINESTARTWIDTH:
-  case XATTR_LINEENDWIDTH:
-    f << (nWhich==XATTR_LINEWIDTH ? "line[width]" : XATTR_LINESTARTWIDTH ? "line[startWidth]" : "line[endWidth]")
+  case StarAttribute::XATTR_LINEWIDTH:
+  case StarAttribute::XATTR_LINESTARTWIDTH:
+  case StarAttribute::XATTR_LINEENDWIDTH:
+    f << (nWhich==StarAttribute::XATTR_LINEWIDTH ? "line[width]" :
+          nWhich==StarAttribute::XATTR_LINESTARTWIDTH ? "line[startWidth]" : "line[endWidth]")
       << "=" << input->readLong(4) << ",";
     break;
-  case XATTR_LINESTARTCENTER:
-  case XATTR_LINEENDCENTER:
-    f << (nWhich==XATTR_LINESTARTCENTER ? "line[startCenter]" : "line[endCenter]")
+  case StarAttribute::XATTR_LINESTARTCENTER:
+  case StarAttribute::XATTR_LINEENDCENTER:
+    f << (nWhich==StarAttribute::XATTR_LINESTARTCENTER ? "line[startCenter]" : "line[endCenter]")
       << "=" << input->readULong(1) << ",";
     break;
-  case XATTR_LINETRANSPARENCE:
+  case StarAttribute::XATTR_LINETRANSPARENCE:
     f << "lineTransparence=" << input->readULong(2) << ",";
     break;
-  case XATTR_LINEJOINT:
+  case StarAttribute::XATTR_LINEJOINT:
     f << "lineJoint=" << input->readULong(2) << ",";
     break;
 
   // name or index
-  case XATTR_LINEDASH:
-  case XATTR_LINECOLOR:
-  case XATTR_LINESTART:
-  case XATTR_LINEEND:
-  case XATTR_FILLCOLOR:
-  case XATTR_FILLGRADIENT:
-  case XATTR_FILLHATCH:
-  case XATTR_FILLBITMAP:
-  case XATTR_FILLFLOATTRANSPARENCE:
+  case StarAttribute::XATTR_LINEDASH:
+  case StarAttribute::XATTR_LINECOLOR:
+  case StarAttribute::XATTR_LINESTART:
+  case StarAttribute::XATTR_LINEEND:
+  case StarAttribute::XATTR_FILLCOLOR:
+  case StarAttribute::XATTR_FILLGRADIENT:
+  case StarAttribute::XATTR_FILLHATCH:
+  case StarAttribute::XATTR_FILLBITMAP:
+  case StarAttribute::XATTR_FILLFLOATTRANSPARENCE:
 
-  case XATTR_FORMTXTSHDWCOLOR: {
+  case StarAttribute::XATTR_FORMTXTSHDWCOLOR: {
     librevenge::RVNGString text;
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
       f << "###string";
       break;
     }
@@ -1731,7 +1797,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     *input >> id;
     if (id>=0) f << "id=" << id << ",";
     switch (nWhich) {
-    case XATTR_LINEDASH: {
+    case StarAttribute::XATTR_LINEDASH: {
       f << "line[dash],";
       if (id>=0) break;
       int32_t dashStyle;
@@ -1744,29 +1810,29 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       if (distance) f << "distance=" << distance << ",";
       break;
     }
-    case XATTR_LINECOLOR:
-    case XATTR_FILLCOLOR:
-    case XATTR_FORMTXTSHDWCOLOR: {
-      f << (nWhich==XATTR_LINECOLOR ? "line[color]" :
-            nWhich==XATTR_FILLCOLOR ? "fill[color]" : "shadow[form,color]") << ",";
+    case StarAttribute::XATTR_LINECOLOR:
+    case StarAttribute::XATTR_FILLCOLOR:
+    case StarAttribute::XATTR_FORMTXTSHDWCOLOR: {
+      f << (nWhich==StarAttribute::XATTR_LINECOLOR ? "line[color]" :
+            nWhich==StarAttribute::XATTR_FILLCOLOR ? "fill[color]" : "shadow[form,color]") << ",";
       if (id>=0) break;
       STOFFColor col;
       if (!input->readColor(col)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a color\n"));
         f << "###color,";
         break;
       }
       if (!col.isBlack()) f << col << ",";
       break;
     }
-    case XATTR_LINESTART:
-    case XATTR_LINEEND: {
-      f << (nWhich==XATTR_LINESTART ? "line[start]" : "line[end]") << ",";
+    case StarAttribute::XATTR_LINESTART:
+    case StarAttribute::XATTR_LINEEND: {
+      f << (nWhich==StarAttribute::XATTR_LINESTART ? "line[start]" : "line[end]") << ",";
       if (id>=0) break;
       uint32_t nPoints;
       *input >> nPoints;
       if (input->tell()+6*long(nPoints)>lastPos) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: bad num point\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: bad num point\n"));
         f << "###nPoints=" << nPoints << ",";
         break;
       }
@@ -1776,9 +1842,9 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       f << "],";
       break;
     }
-    case XATTR_FILLGRADIENT:
-    case XATTR_FILLFLOATTRANSPARENCE: {
-      f << (nWhich==XATTR_FILLGRADIENT ? "gradient[fill]" : "transparence[float,fill]")  << ",";
+    case StarAttribute::XATTR_FILLGRADIENT:
+    case StarAttribute::XATTR_FILLFLOATTRANSPARENCE: {
+      f << (nWhich==StarAttribute::XATTR_FILLGRADIENT ? "gradient[fill]" : "transparence[float,fill]")  << ",";
       if (id>=0) break;
       uint16_t type, red, green, blue, red2, green2, blue2;
       *input >> type >> red >> green >> blue >> red2 >> green2 >> blue2;
@@ -1796,14 +1862,14 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
         *input >> nStep;
         if (nStep) f << "step=" << nStep << ",";
       }
-      if (nWhich==XATTR_FILLFLOATTRANSPARENCE) {
+      if (nWhich==StarAttribute::XATTR_FILLFLOATTRANSPARENCE) {
         bool enabled;
         *input>>enabled;
         if (enabled) f << "enabled,";
       }
       break;
     }
-    case XATTR_FILLHATCH: {
+    case StarAttribute::XATTR_FILLHATCH: {
       f << "hatch[fill],";
       if (id>=0) break;
       uint16_t type, red, green, blue;
@@ -1815,7 +1881,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       f << "angle=" << angle << ",";
       break;
     }
-    case XATTR_FILLBITMAP: {
+    case StarAttribute::XATTR_FILLBITMAP: {
       f << "bitmap[fill],";
       if (id>=0) break;
       if (nVers==1) {
@@ -1825,7 +1891,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
         if (type) f << "type=" << type << ",";
         if (type==1) {
           if (input->tell()+128+2>lastPos) {
-            STOFF_DEBUG_MSG(("StarAttribute::readAttribute: the zone seems too short\n"));
+            STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: the zone seems too short\n"));
             f << "###short,";
             break;
           }
@@ -1840,7 +1906,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
           for (int i=0; i<2; ++i) {
             STOFFColor col;
             if (!input->readColor(col)) {
-              STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+              STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a color\n"));
               f << "###color,";
               break;
             }
@@ -1850,7 +1916,7 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
         }
         if (type==2) break;
         if (type!=0) {
-          STOFF_DEBUG_MSG(("StarAttribute::readAttribute: unexpected type\n"));
+          STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: unexpected type\n"));
           f << "###type,";
           break;
         }
@@ -1861,160 +1927,120 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     }
 
     default:
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: unknown name id\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: unknown name id\n"));
       f << "###nameId,";
       break;
     }
     break;
   }
-  case XATTR_LINERESERVED2:
-  case XATTR_LINERESERVED3:
-  case XATTR_LINERESERVED4:
-    f << (nWhich==XATTR_LINERESERVED2? "line[reserved2]" :
-          nWhich==XATTR_LINERESERVED3? "line[reserved3]" : "line[reserved4]") << ",";
-    break;
-  case XATTR_LINERESERVED5:
-  case XATTR_LINERESERVED_LAST:
-    f << (nWhich==XATTR_LINERESERVED5? "line[reserved5]" : "line[reserved6]") << ",";
-    break;
 
-  case XATTR_SET_LINE:
-  case XATTR_SET_FILL:
-  case XATTR_SET_TEXT: {
-    f << (nWhich==XATTR_SET_LINE ? "setLine" :
-          nWhich==XATTR_SET_FILL ? "setFill" : "setText") << ",";
+  case StarAttribute::XATTR_SET_LINE:
+    f << "setLine,";
+    document.readItemSet(zone, 1000, 1016, lastPos, document.getCurrentPool().get());
+    break;
+  case StarAttribute::XATTR_SET_FILL:
+  case StarAttribute::XATTR_SET_TEXT: {
+    f << (nWhich==StarAttribute::XATTR_SET_FILL ? "setFill" : "setText") << ",";
     StarFileManager fileManager;
     fileManager.readSfxItemList(zone);
     break;
   }
-  case XATTR_FILLTRANSPARENCE:
-  case XATTR_GRADIENTSTEPCOUNT:
-  case XATTR_FILLBMP_POS:
-    f << (nWhich==XATTR_FILLTRANSPARENCE ? "transparence[fill]" :
-          nWhich==XATTR_GRADIENTSTEPCOUNT ? "gradient[stepCount]" : "bmp[pos]")
+  case StarAttribute::XATTR_FILLTRANSPARENCE:
+  case StarAttribute::XATTR_GRADIENTSTEPCOUNT:
+  case StarAttribute::XATTR_FILLBMP_POS:
+    f << (nWhich==StarAttribute::XATTR_FILLTRANSPARENCE ? "transparence[fill]" :
+          nWhich==StarAttribute::XATTR_GRADIENTSTEPCOUNT ? "gradient[stepCount]" : "bmp[pos]")
       << "=" << input->readULong(2) << ",";
     break;
-  case XATTR_FILLBMP_TILE:
-  case XATTR_FILLBMP_STRETCH:
-  case XATTR_FILLBMP_SIZELOG:
-    f << (nWhich==XATTR_FILLBMP_TILE ? "bmp[title]" :
-          nWhich==XATTR_FILLBMP_STRETCH ? "bmp[strech]" : "bmp[sizelog]") << "=" << input->readULong(1) <<",";
+  case StarAttribute::XATTR_FILLBMP_TILE:
+  case StarAttribute::XATTR_FILLBMP_STRETCH:
+  case StarAttribute::XATTR_FILLBMP_SIZELOG:
+    f << (nWhich==StarAttribute::XATTR_FILLBMP_TILE ? "bmp[title]" :
+          nWhich==StarAttribute::XATTR_FILLBMP_STRETCH ? "bmp[strech]" : "bmp[sizelog]") << "=" << input->readULong(1) <<",";
     break;
-  case XATTR_FILLBMP_SIZEX:
-  case XATTR_FILLBMP_SIZEY:
-    f << (nWhich==XATTR_FILLBMP_SIZEX ? "bmp[sizeX]" : "bmp[sizeY]")
+  case StarAttribute::XATTR_FILLBMP_SIZEX:
+  case StarAttribute::XATTR_FILLBMP_SIZEY:
+    f << (nWhich==StarAttribute::XATTR_FILLBMP_SIZEX ? "bmp[sizeX]" : "bmp[sizeY]")
       << "=" << input->readLong(4) << ",";
     break;
-  case XATTR_FILLBMP_TILEOFFSETX:
-  case XATTR_FILLBMP_TILEOFFSETY:
-    f << (nWhich==XATTR_FILLBMP_TILEOFFSETX ? "bmp[offsX]" : "bmp[offsY]")
+  case StarAttribute::XATTR_FILLBMP_TILEOFFSETX:
+  case StarAttribute::XATTR_FILLBMP_TILEOFFSETY:
+    f << (nWhich==StarAttribute::XATTR_FILLBMP_TILEOFFSETX ? "bmp[offsX]" : "bmp[offsY]")
       << "=" << input->readULong(2) << ",";
     break;
-  case XATTR_FILLBMP_POSOFFSETX:
-  case XATTR_FILLBMP_POSOFFSETY:
-    f << (nWhich==XATTR_FILLBMP_POSOFFSETX ? "bmp[posOffsX]" : "bmp[posOffsY]")
+  case StarAttribute::XATTR_FILLBMP_POSOFFSETX:
+  case StarAttribute::XATTR_FILLBMP_POSOFFSETY:
+    f << (nWhich==StarAttribute::XATTR_FILLBMP_POSOFFSETX ? "bmp[posOffsX]" : "bmp[posOffsY]")
       << "=" << input->readULong(2) << ",";
     break;
-  case XATTR_FILLBACKGROUND:
+  case StarAttribute::XATTR_FILLBACKGROUND:
     f << "fill[background]=" << input->readULong(1) << ",";
     break;
-  case XATTR_FILLRESERVED2:
-    f << "fill[reserved2],";
-    break;
-  case XATTR_FILLRESERVED3:
-  case XATTR_FILLRESERVED4:
-  case XATTR_FILLRESERVED5:
-    f << (nWhich==XATTR_FILLRESERVED3? "fill[reserved3]" :
-          nWhich==XATTR_FILLRESERVED4? "fill[reserved4]" : "fill[reserved5]") << ",";
-    break;
-  case XATTR_FILLRESERVED6:
-  case XATTR_FILLRESERVED7:
-  case XATTR_FILLRESERVED8:
-    f << (nWhich==XATTR_FILLRESERVED6? "fill[reserved6]" :
-          nWhich==XATTR_FILLRESERVED7? "fill[reserved7]" : "fill[reserved8]") << ",";
-    break;
-  case XATTR_FILLRESERVED10:
-  case XATTR_FILLRESERVED11:
-  case XATTR_FILLRESERVED_LAST:
-    f << (nWhich==XATTR_FILLRESERVED10? "fill[reserved10]" :
-          nWhich==XATTR_FILLRESERVED11? "fill[reserved11]" : "fill[reserved12]") << ",";
-    break;
 
-  case XATTR_FORMTXTSTYLE:
-  case XATTR_FORMTXTADJUST:
-  case XATTR_FORMTXTSHADOW:
-    f << (nWhich==XATTR_FORMTXTSTYLE ? "style[form]" :
-          nWhich==XATTR_FORMTXTADJUST ? "adjust[form]" : "shadow[form]")
+  case StarAttribute::XATTR_FORMTXTSTYLE:
+  case StarAttribute::XATTR_FORMTXTADJUST:
+  case StarAttribute::XATTR_FORMTXTSHADOW:
+    f << (nWhich==StarAttribute::XATTR_FORMTXTSTYLE ? "style[form]" :
+          nWhich==StarAttribute::XATTR_FORMTXTADJUST ? "adjust[form]" : "shadow[form]")
       << "=" << input->readULong(2) << ",";
     break;
 
-  case XATTR_FORMTXTDISTANCE:
-  case XATTR_FORMTXTSTART:
-    f << (nWhich==XATTR_FORMTXTDISTANCE ? "distance[form]" : "start[form]") << "=" << input->readLong(4) << ",";
+  case StarAttribute::XATTR_FORMTXTDISTANCE:
+  case StarAttribute::XATTR_FORMTXTSTART:
+    f << (nWhich==StarAttribute::XATTR_FORMTXTDISTANCE ? "distance[form]" : "start[form]") << "=" << input->readLong(4) << ",";
     break;
 
-  case XATTR_FORMTXTMIRROR:
-  case XATTR_FORMTXTOUTLINE:
-  case XATTR_FORMTXTHIDEFORM:
-    f << (nWhich==XATTR_FORMTXTMIRROR ? "mirror[form]" :
-          nWhich==XATTR_FORMTXTOUTLINE ? "outline[form]" : "hide[form]") << "=" << input->readULong(1) << ",";
+  case StarAttribute::XATTR_FORMTXTMIRROR:
+  case StarAttribute::XATTR_FORMTXTOUTLINE:
+  case StarAttribute::XATTR_FORMTXTHIDEFORM:
+    f << (nWhich==StarAttribute::XATTR_FORMTXTMIRROR ? "mirror[form]" :
+          nWhich==StarAttribute::XATTR_FORMTXTOUTLINE ? "outline[form]" : "hide[form]") << "=" << input->readULong(1) << ",";
     break;
 
-  case XATTR_FORMTXTSHDWXVAL:
-  case XATTR_FORMTXTSHDWYVAL:
-    f << (nWhich==XATTR_FORMTXTSHDWXVAL ? "shadowX[form]" : "shadowY[form]") << "=" << input->readLong(4) << ",";
+  case StarAttribute::XATTR_FORMTXTSHDWXVAL:
+  case StarAttribute::XATTR_FORMTXTSHDWYVAL:
+    f << (nWhich==StarAttribute::XATTR_FORMTXTSHDWXVAL ? "shadowX[form]" : "shadowY[form]") << "=" << input->readLong(4) << ",";
     break;
 
-  case XATTR_FORMTXTSTDFORM:
-  case XATTR_FORMTXTSHDWTRANSP:
-    f << (nWhich==XATTR_FORMTXTSTDFORM ? "standart[form]" : "shadowTrans[form]") << "=" << input->readULong(2) << ",";
+  case StarAttribute::XATTR_FORMTXTSTDFORM:
+  case StarAttribute::XATTR_FORMTXTSHDWTRANSP:
+    f << (nWhich==StarAttribute::XATTR_FORMTXTSTDFORM ? "standart[form]" : "shadowTrans[form]") << "=" << input->readULong(2) << ",";
     break;
 
-  case XATTR_FTRESERVED2:
-  case XATTR_FTRESERVED3:
-  case XATTR_FTRESERVED4:
-    f << (nWhich==XATTR_FTRESERVED2? "form[reserved2]" :
-          nWhich==XATTR_FTRESERVED3? "form[reserved3]" : "form[reserved4]") << ",";
-    break;
-  case XATTR_FTRESERVED5:
-  case XATTR_FTRESERVED_LAST:
-    f << (nWhich==XATTR_FTRESERVED5? "form[reserved5]" : "form[reserved6]") << ",";
-    break;
-
-  case SDRATTR_SET_SHADOW:
-  case SDRATTR_SET_CAPTION:
-  case SDRATTR_SET_OUTLINER:
-  case SDRATTR_SET_MISC:
-  case SDRATTR_SET_EDGE:
-  case SDRATTR_SET_MEASURE:
-  case SDRATTR_SET_CIRC:
-  case SDRATTR_SET_GRAF: {
-    f << (nWhich==SDRATTR_SET_SHADOW ? "setSdrShadow" :
-          nWhich==SDRATTR_SET_CAPTION ? "setSdrCaption" :
-          nWhich==SDRATTR_SET_OUTLINER ? "setSdrOutliner" :
-          nWhich==SDRATTR_SET_MISC ? "setSdrMisc" :
-          nWhich==SDRATTR_SET_EDGE ? "setSdrEdge" :
-          nWhich==SDRATTR_SET_MEASURE ? "setSdrMeasure" :
-          nWhich==SDRATTR_SET_CIRC ? "setCircle" : "setGraph") << ",";
+  case StarAttribute::SDRATTR_SET_SHADOW:
+  case StarAttribute::SDRATTR_SET_CAPTION:
+  case StarAttribute::SDRATTR_SET_OUTLINER:
+  case StarAttribute::SDRATTR_SET_MISC:
+  case StarAttribute::SDRATTR_SET_EDGE:
+  case StarAttribute::SDRATTR_SET_MEASURE:
+  case StarAttribute::SDRATTR_SET_CIRC:
+  case StarAttribute::SDRATTR_SET_GRAF: {
+    f << (nWhich==StarAttribute::SDRATTR_SET_SHADOW ? "setSdrShadow" :
+          nWhich==StarAttribute::SDRATTR_SET_CAPTION ? "setSdrCaption" :
+          nWhich==StarAttribute::SDRATTR_SET_OUTLINER ? "setSdrOutliner" :
+          nWhich==StarAttribute::SDRATTR_SET_MISC ? "setSdrMisc" :
+          nWhich==StarAttribute::SDRATTR_SET_EDGE ? "setSdrEdge" :
+          nWhich==StarAttribute::SDRATTR_SET_MEASURE ? "setSdrMeasure" :
+          nWhich==StarAttribute::SDRATTR_SET_CIRC ? "setCircle" : "setGraph") << ",";
     StarFileManager fileManager;
     fileManager.readSfxItemList(zone);
     break;
   }
 
-  case SDRATTR_SHADOW3D:
-  case SDRATTR_SHADOWPERSP:
-    f << (nWhich==SDRATTR_SHADOW3D ? "sdrShadow3d" : "sdrShadowPersp") << ",";
+  case StarAttribute::SDRATTR_SHADOW3D:
+  case StarAttribute::SDRATTR_SHADOWPERSP:
+    f << (nWhich==StarAttribute::SDRATTR_SHADOW3D ? "sdrShadow3d" : "sdrShadowPersp") << ",";
     break;
 
-  case SDRATTR_SHADOW:
+  case StarAttribute::SDRATTR_SHADOW:
     f << "sdrShadow=" << input->readULong(1) << ",";
     break;
 
   // name or index
-  case SDRATTR_SHADOWCOLOR: {
+  case StarAttribute::SDRATTR_SHADOWCOLOR: {
     librevenge::RVNGString text;
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
       f << "###string";
       break;
     }
@@ -2023,12 +2049,12 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     *input >> id;
     if (id>=0) f << "id=" << id << ",";
     switch (nWhich) {
-    case SDRATTR_SHADOWCOLOR: {
+    case StarAttribute::SDRATTR_SHADOWCOLOR: {
       f << "sdrShadow[color],";
       if (id>=0) break;
       STOFFColor col;
       if (!input->readColor(col)) {
-        STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a color\n"));
         f << "###color,";
         break;
       }
@@ -2036,113 +2062,113 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       break;
     }
     default:
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: unknown name id\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: unknown name id\n"));
       f << "###nameId,";
       break;
     }
     break;
   }
-  case SDRATTR_SHADOWXDIST:
-  case SDRATTR_SHADOWYDIST:
-    f << (nWhich==SDRATTR_SHADOWXDIST ? "sdrXDist[shadow]" : "sdrYDist[shadow]")
+  case StarAttribute::SDRATTR_SHADOWXDIST:
+  case StarAttribute::SDRATTR_SHADOWYDIST:
+    f << (nWhich==StarAttribute::SDRATTR_SHADOWXDIST ? "sdrXDist[shadow]" : "sdrYDist[shadow]")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_SHADOWTRANSPARENCE:
+  case StarAttribute::SDRATTR_SHADOWTRANSPARENCE:
     f << "sdrTransparence[shadow]=" << input->readULong(2) << ",";
     break;
 
-  case SDRATTR_SHADOWRESERVE1:
-  case SDRATTR_SHADOWRESERVE2:
-  case SDRATTR_SHADOWRESERVE3:
-  case SDRATTR_SHADOWRESERVE4:
-  case SDRATTR_SHADOWRESERVE5:
-    f << "shadowReserved" << nWhich-SDRATTR_SHADOWRESERVE1+1 << "[sdr],";
+  case StarAttribute::SDRATTR_SHADOWRESERVE1:
+  case StarAttribute::SDRATTR_SHADOWRESERVE2:
+  case StarAttribute::SDRATTR_SHADOWRESERVE3:
+  case StarAttribute::SDRATTR_SHADOWRESERVE4:
+  case StarAttribute::SDRATTR_SHADOWRESERVE5:
+    f << "shadowReserved" << nWhich-StarAttribute::SDRATTR_SHADOWRESERVE1+1 << "[sdr],";
     break;
 
-  case SDRATTR_CAPTIONTYPE:
-  case SDRATTR_CAPTIONESCDIR:
-    f << (nWhich==SDRATTR_CAPTIONTYPE ? "sdrCaption[type]" : "sdrCaption[escDir]") << "=" << input->readULong(2) << ",";
+  case StarAttribute::SDRATTR_CAPTIONTYPE:
+  case StarAttribute::SDRATTR_CAPTIONESCDIR:
+    f << (nWhich==StarAttribute::SDRATTR_CAPTIONTYPE ? "sdrCaption[type]" : "sdrCaption[escDir]") << "=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_CAPTIONFIXEDANGLE:
-  case SDRATTR_CAPTIONESCISREL:
-  case SDRATTR_CAPTIONFITLINELEN:
-    f << (nWhich==SDRATTR_CAPTIONFIXEDANGLE ? "sdrCaption[fixedAngle]" :
-          nWhich==SDRATTR_CAPTIONESCISREL ? "sdrCaption[escIsRel]" : "sdrCaption[fitLineLen]") << input->readULong(1) << ",";
+  case StarAttribute::SDRATTR_CAPTIONFIXEDANGLE:
+  case StarAttribute::SDRATTR_CAPTIONESCISREL:
+  case StarAttribute::SDRATTR_CAPTIONFITLINELEN:
+    f << (nWhich==StarAttribute::SDRATTR_CAPTIONFIXEDANGLE ? "sdrCaption[fixedAngle]" :
+          nWhich==StarAttribute::SDRATTR_CAPTIONESCISREL ? "sdrCaption[escIsRel]" : "sdrCaption[fitLineLen]") << input->readULong(1) << ",";
     break;
-  case SDRATTR_CAPTIONANGLE: // angle
+  case StarAttribute::SDRATTR_CAPTIONANGLE: // angle
     f << "sdrCaption[angle]=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_CAPTIONGAP: // metric
-  case SDRATTR_CAPTIONESCABS:
-  case SDRATTR_CAPTIONLINELEN:
-    f << (nWhich==SDRATTR_CAPTIONGAP ? "sdrCaption[gap]" :
-          nWhich==SDRATTR_CAPTIONESCABS ? "sdrCaption[escAbs]" : "sdrCaption[lineLen]")
+  case StarAttribute::SDRATTR_CAPTIONGAP: // metric
+  case StarAttribute::SDRATTR_CAPTIONESCABS:
+  case StarAttribute::SDRATTR_CAPTIONLINELEN:
+    f << (nWhich==StarAttribute::SDRATTR_CAPTIONGAP ? "sdrCaption[gap]" :
+          nWhich==StarAttribute::SDRATTR_CAPTIONESCABS ? "sdrCaption[escAbs]" : "sdrCaption[lineLen]")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_CAPTIONESCREL:
+  case StarAttribute::SDRATTR_CAPTIONESCREL:
     f << "sdrCaption[escRel]=" << input->readLong(4) << ",";
     break;
 
-  case SDRATTR_CAPTIONRESERVE1:
-  case SDRATTR_CAPTIONRESERVE2:
-  case SDRATTR_CAPTIONRESERVE3:
-  case SDRATTR_CAPTIONRESERVE4:
-  case SDRATTR_CAPTIONRESERVE5:
-    f << "captionReserved" << nWhich-SDRATTR_CAPTIONRESERVE1+1 << "[sdr},";
+  case StarAttribute::SDRATTR_CAPTIONRESERVE1:
+  case StarAttribute::SDRATTR_CAPTIONRESERVE2:
+  case StarAttribute::SDRATTR_CAPTIONRESERVE3:
+  case StarAttribute::SDRATTR_CAPTIONRESERVE4:
+  case StarAttribute::SDRATTR_CAPTIONRESERVE5:
+    f << "captionReserved" << nWhich-StarAttribute::SDRATTR_CAPTIONRESERVE1+1 << "[sdr},";
     break;
 
-  case SDRATTR_ECKENRADIUS: // metric
-  case SDRATTR_TEXT_MINFRAMEHEIGHT:
-  case SDRATTR_TEXT_LEFTDIST:
-    f << (nWhich==SDRATTR_ECKENRADIUS ? "eckenRadius[sdr]":
-          nWhich==SDRATTR_TEXT_MINFRAMEHEIGHT ? "textMinHeight[sdr]" : "textLeftDist[sdr]")
+  case StarAttribute::SDRATTR_ECKENRADIUS: // metric
+  case StarAttribute::SDRATTR_TEXT_MINFRAMEHEIGHT:
+  case StarAttribute::SDRATTR_TEXT_LEFTDIST:
+    f << (nWhich==StarAttribute::SDRATTR_ECKENRADIUS ? "eckenRadius[sdr]":
+          nWhich==StarAttribute::SDRATTR_TEXT_MINFRAMEHEIGHT ? "textMinHeight[sdr]" : "textLeftDist[sdr]")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_TEXT_AUTOGROWHEIGHT: // onoff
-  case SDRATTR_TEXT_AUTOGROWWIDTH:
-    f << (nWhich==SDRATTR_TEXT_AUTOGROWHEIGHT ? "textAutoGrowHeight[sdr]" : "textAutoGrowWidth[sdr]")
+  case StarAttribute::SDRATTR_TEXT_AUTOGROWHEIGHT: // onoff
+  case StarAttribute::SDRATTR_TEXT_AUTOGROWWIDTH:
+    f << (nWhich==StarAttribute::SDRATTR_TEXT_AUTOGROWHEIGHT ? "textAutoGrowHeight[sdr]" : "textAutoGrowWidth[sdr]")
       << "=" << input->readULong(1) << ",";
     break;
-  case SDRATTR_TEXT_FITTOSIZE:
-  case SDRATTR_TEXT_VERTADJUST:
-  case SDRATTR_TEXT_HORZADJUST:
-    f << (nWhich==SDRATTR_TEXT_FITTOSIZE ? "fitToSize[sdr]" :
-          nWhich==SDRATTR_TEXT_VERTADJUST ? "vertAdjust[sdr]" : "horAdjust[sdr]")
+  case StarAttribute::SDRATTR_TEXT_FITTOSIZE:
+  case StarAttribute::SDRATTR_TEXT_VERTADJUST:
+  case StarAttribute::SDRATTR_TEXT_HORZADJUST:
+    f << (nWhich==StarAttribute::SDRATTR_TEXT_FITTOSIZE ? "fitToSize[sdr]" :
+          nWhich==StarAttribute::SDRATTR_TEXT_VERTADJUST ? "vertAdjust[sdr]" : "horAdjust[sdr]")
       << "=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_TEXT_RIGHTDIST: // metric
-  case SDRATTR_TEXT_UPPERDIST:
-  case SDRATTR_TEXT_LOWERDIST:
-    f << (nWhich==SDRATTR_TEXT_RIGHTDIST ? "textRightDist[sdr]" :
-          nWhich==SDRATTR_TEXT_UPPERDIST ? "textUpperDist[sdr]" : "textLowerDist[sdr]")
+  case StarAttribute::SDRATTR_TEXT_RIGHTDIST: // metric
+  case StarAttribute::SDRATTR_TEXT_UPPERDIST:
+  case StarAttribute::SDRATTR_TEXT_LOWERDIST:
+    f << (nWhich==StarAttribute::SDRATTR_TEXT_RIGHTDIST ? "textRightDist[sdr]" :
+          nWhich==StarAttribute::SDRATTR_TEXT_UPPERDIST ? "textUpperDist[sdr]" : "textLowerDist[sdr]")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_TEXT_MAXFRAMEHEIGHT: // metric
-  case SDRATTR_TEXT_MINFRAMEWIDTH:
-  case SDRATTR_TEXT_MAXFRAMEWIDTH:
-    f << (nWhich==SDRATTR_TEXT_MAXFRAMEHEIGHT ? "maxFrmHeight[sdr]" :
-          nWhich==SDRATTR_TEXT_MINFRAMEWIDTH ? "minFrmWidth[sdr]" : "maxFrmWidth[sdr]")
+  case StarAttribute::SDRATTR_TEXT_MAXFRAMEHEIGHT: // metric
+  case StarAttribute::SDRATTR_TEXT_MINFRAMEWIDTH:
+  case StarAttribute::SDRATTR_TEXT_MAXFRAMEWIDTH:
+    f << (nWhich==StarAttribute::SDRATTR_TEXT_MAXFRAMEHEIGHT ? "maxFrmHeight[sdr]" :
+          nWhich==StarAttribute::SDRATTR_TEXT_MINFRAMEWIDTH ? "minFrmWidth[sdr]" : "maxFrmWidth[sdr]")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_TEXT_ANIKIND:
-  case SDRATTR_TEXT_ANIDIRECTION:
-    f << (nWhich==SDRATTR_TEXT_ANIKIND ? "aniKind[sdr]" : "aniDir[sdr]") << "=" << input->readULong(2) << ",";
+  case StarAttribute::SDRATTR_TEXT_ANIKIND:
+  case StarAttribute::SDRATTR_TEXT_ANIDIRECTION:
+    f << (nWhich==StarAttribute::SDRATTR_TEXT_ANIKIND ? "aniKind[sdr]" : "aniDir[sdr]") << "=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_TEXT_ANISTARTINSIDE: // yesNo
-  case SDRATTR_TEXT_ANISTOPINSIDE:
-  case SDRATTR_TEXT_CONTOURFRAME: // onOff
-    f << (nWhich==SDRATTR_TEXT_ANISTARTINSIDE ? "aniStartInside" :
-          nWhich==SDRATTR_TEXT_ANISTOPINSIDE ? "aniStopInside" : "textContourFrm[sdr]")
+  case StarAttribute::SDRATTR_TEXT_ANISTARTINSIDE: // yesNo
+  case StarAttribute::SDRATTR_TEXT_ANISTOPINSIDE:
+  case StarAttribute::SDRATTR_TEXT_CONTOURFRAME: // onOff
+    f << (nWhich==StarAttribute::SDRATTR_TEXT_ANISTARTINSIDE ? "aniStartInside" :
+          nWhich==StarAttribute::SDRATTR_TEXT_ANISTOPINSIDE ? "aniStopInside" : "textContourFrm[sdr]")
       << "=" << input->readULong(1) << ",";
     break;
-  case SDRATTR_TEXT_ANICOUNT:
-  case SDRATTR_TEXT_ANIDELAY:
-    f << (nWhich==SDRATTR_TEXT_ANICOUNT ? "aniCount" : "aniDelay") << "=" << input->readULong(2) << ",";
+  case StarAttribute::SDRATTR_TEXT_ANICOUNT:
+  case StarAttribute::SDRATTR_TEXT_ANIDELAY:
+    f << (nWhich==StarAttribute::SDRATTR_TEXT_ANICOUNT ? "aniCount" : "aniDelay") << "=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_TEXT_ANIAMOUNT:
+  case StarAttribute::SDRATTR_TEXT_ANIAMOUNT:
     f << "aniAmount=" << input->readLong(2) << ",";
     break;
-  case SDRATTR_AUTOSHAPE_ADJUSTMENT:
+  case StarAttribute::SDRATTR_AUTOSHAPE_ADJUSTMENT:
     f << "autoShapeAdjust[sdr],";
     if (nVers) {
       uint32_t n;
@@ -2150,268 +2176,268 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
       if (n) f << "nCount=" << n << ",";
     }
     break;
-  case SDRATTR_XMLATTRIBUTES:
+  case StarAttribute::SDRATTR_XMLATTRIBUTES:
     f << "sdrXmlAttributes,";
     break;
-  case SDRATTR_RESERVE15:
-  case SDRATTR_RESERVE16:
-  case SDRATTR_RESERVE17:
-  case SDRATTR_RESERVE18:
-  case SDRATTR_RESERVE19:
-    f << "sdrReserved" << (nWhich+1-SDRATTR_RESERVE15) << ",";
+  case StarAttribute::SDRATTR_RESERVE15:
+  case StarAttribute::SDRATTR_RESERVE16:
+  case StarAttribute::SDRATTR_RESERVE17:
+  case StarAttribute::SDRATTR_RESERVE18:
+  case StarAttribute::SDRATTR_RESERVE19:
+    f << "sdrReserved" << (nWhich-StarAttribute::SDRATTR_RESERVE15+15) << ",";
     break;
 
-  case SDRATTR_EDGEKIND:
+  case StarAttribute::SDRATTR_EDGEKIND:
     f << "edge[kind]=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_EDGENODE1HORZDIST: // metric
-  case SDRATTR_EDGENODE1VERTDIST:
-  case SDRATTR_EDGENODE2HORZDIST:
-    f << (nWhich==SDRATTR_EDGENODE1HORZDIST ? "edgeNode1HorDist" :
-          nWhich==SDRATTR_EDGENODE1VERTDIST ? "edgeNode1VerDist" : "edgeNode2HorDist")
+  case StarAttribute::SDRATTR_EDGENODE1HORZDIST: // metric
+  case StarAttribute::SDRATTR_EDGENODE1VERTDIST:
+  case StarAttribute::SDRATTR_EDGENODE2HORZDIST:
+    f << (nWhich==StarAttribute::SDRATTR_EDGENODE1HORZDIST ? "edgeNode1HorDist" :
+          nWhich==StarAttribute::SDRATTR_EDGENODE1VERTDIST ? "edgeNode1VerDist" : "edgeNode2HorDist")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_EDGENODE2VERTDIST: // metric
-  case SDRATTR_EDGENODE1GLUEDIST:
-  case SDRATTR_EDGENODE2GLUEDIST:
-    f << (nWhich==SDRATTR_EDGENODE2VERTDIST ? "edgeNode1VerDist" :
-          nWhich==SDRATTR_EDGENODE1GLUEDIST ? "edgeNode1GlueDist" : "edgeNode2GlueDist")
+  case StarAttribute::SDRATTR_EDGENODE2VERTDIST: // metric
+  case StarAttribute::SDRATTR_EDGENODE1GLUEDIST:
+  case StarAttribute::SDRATTR_EDGENODE2GLUEDIST:
+    f << (nWhich==StarAttribute::SDRATTR_EDGENODE2VERTDIST ? "edgeNode1VerDist" :
+          nWhich==StarAttribute::SDRATTR_EDGENODE1GLUEDIST ? "edgeNode1GlueDist" : "edgeNode2GlueDist")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_EDGELINEDELTAANZ:
+  case StarAttribute::SDRATTR_EDGELINEDELTAANZ:
     f << "edge[lineDeltaAnz=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_EDGELINE1DELTA: // metric
-  case SDRATTR_EDGELINE2DELTA:
-  case SDRATTR_EDGELINE3DELTA:
-    f << (nWhich==SDRATTR_EDGELINE1DELTA ? "edgeLine1Delta" :
-          nWhich==SDRATTR_EDGELINE2DELTA ? "edgeLine2Delta" : "edgeLine3Delta")
+  case StarAttribute::SDRATTR_EDGELINE1DELTA: // metric
+  case StarAttribute::SDRATTR_EDGELINE2DELTA:
+  case StarAttribute::SDRATTR_EDGELINE3DELTA:
+    f << (nWhich==StarAttribute::SDRATTR_EDGELINE1DELTA ? "edgeLine1Delta" :
+          nWhich==StarAttribute::SDRATTR_EDGELINE2DELTA ? "edgeLine2Delta" : "edgeLine3Delta")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_EDGERESERVE02:
-  case SDRATTR_EDGERESERVE03:
-  case SDRATTR_EDGERESERVE04:
-  case SDRATTR_EDGERESERVE05:
-  case SDRATTR_EDGERESERVE06:
-  case SDRATTR_EDGERESERVE07:
-  case SDRATTR_EDGERESERVE08:
-  case SDRATTR_EDGERESERVE09:
-    f << "sdrEdgeReserve" << nWhich-SDRATTR_EDGERESERVE02+2 << ",";
+  case StarAttribute::SDRATTR_EDGERESERVE02:
+  case StarAttribute::SDRATTR_EDGERESERVE03:
+  case StarAttribute::SDRATTR_EDGERESERVE04:
+  case StarAttribute::SDRATTR_EDGERESERVE05:
+  case StarAttribute::SDRATTR_EDGERESERVE06:
+  case StarAttribute::SDRATTR_EDGERESERVE07:
+  case StarAttribute::SDRATTR_EDGERESERVE08:
+  case StarAttribute::SDRATTR_EDGERESERVE09:
+    f << "sdrEdgeReserve" << nWhich-StarAttribute::SDRATTR_EDGERESERVE02+2 << ",";
     break;
 
-  case SDRATTR_MEASUREKIND:
-  case SDRATTR_MEASURETEXTHPOS:
-  case SDRATTR_MEASURETEXTVPOS:
-    f << (nWhich==SDRATTR_MEASUREKIND ? "measure[kind]" :
-          nWhich==SDRATTR_MEASURETEXTHPOS ? "measure[extHPos]" : "measure[extVPos]")
+  case StarAttribute::SDRATTR_MEASUREKIND:
+  case StarAttribute::SDRATTR_MEASURETEXTHPOS:
+  case StarAttribute::SDRATTR_MEASURETEXTVPOS:
+    f << (nWhich==StarAttribute::SDRATTR_MEASUREKIND ? "measure[kind]" :
+          nWhich==StarAttribute::SDRATTR_MEASURETEXTHPOS ? "measure[extHPos]" : "measure[extVPos]")
       << "=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_MEASURELINEDIST: // metric
-  case SDRATTR_MEASUREHELPLINEOVERHANG:
-  case SDRATTR_MEASUREHELPLINEDIST:
-    f << (nWhich==SDRATTR_MEASURELINEDIST ? "measure[lineDist]" :
-          nWhich==SDRATTR_MEASUREHELPLINEOVERHANG ? "measure[helpLineOverHang]" : "measure[helpLineDist]")
+  case StarAttribute::SDRATTR_MEASURELINEDIST: // metric
+  case StarAttribute::SDRATTR_MEASUREHELPLINEOVERHANG:
+  case StarAttribute::SDRATTR_MEASUREHELPLINEDIST:
+    f << (nWhich==StarAttribute::SDRATTR_MEASURELINEDIST ? "measure[lineDist]" :
+          nWhich==StarAttribute::SDRATTR_MEASUREHELPLINEOVERHANG ? "measure[helpLineOverHang]" : "measure[helpLineDist]")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_MEASUREHELPLINE1LEN: // metric
-  case SDRATTR_MEASUREHELPLINE2LEN:
-    f << (nWhich==SDRATTR_MEASUREHELPLINE1LEN ? "measure[helpLine1Len]" : "measure[helpLine2Len]")
+  case StarAttribute::SDRATTR_MEASUREHELPLINE1LEN: // metric
+  case StarAttribute::SDRATTR_MEASUREHELPLINE2LEN:
+    f << (nWhich==StarAttribute::SDRATTR_MEASUREHELPLINE1LEN ? "measure[helpLine1Len]" : "measure[helpLine2Len]")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_MEASUREBELOWREFEDGE: // yesNo
-  case SDRATTR_MEASURETEXTROTA90:
-  case SDRATTR_MEASURETEXTUPSIDEDOWN:
-    f << (nWhich==SDRATTR_MEASUREBELOWREFEDGE ? "measure[belowRefEdge]" :
-          nWhich==SDRATTR_MEASURETEXTROTA90 ? "measure[textRot90]" : "measure[textUpsideDown]")
+  case StarAttribute::SDRATTR_MEASUREBELOWREFEDGE: // yesNo
+  case StarAttribute::SDRATTR_MEASURETEXTROTA90:
+  case StarAttribute::SDRATTR_MEASURETEXTUPSIDEDOWN:
+    f << (nWhich==StarAttribute::SDRATTR_MEASUREBELOWREFEDGE ? "measure[belowRefEdge]" :
+          nWhich==StarAttribute::SDRATTR_MEASURETEXTROTA90 ? "measure[textRot90]" : "measure[textUpsideDown]")
       << "=" << input->readULong(1) << ",";
     break;
-  case SDRATTR_MEASUREOVERHANG: // metric
+  case StarAttribute::SDRATTR_MEASUREOVERHANG: // metric
     f << "measure[overHang]=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_MEASUREUNIT: // enum
+  case StarAttribute::SDRATTR_MEASUREUNIT: // enum
     f << "measure[unit]=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_MEASURESCALE: //  // sdrFraction
+  case StarAttribute::SDRATTR_MEASURESCALE: //  // sdrFraction
     f << "measure[scale],mult=" << input->readLong(4) << ",div=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_MEASURESHOWUNIT: // yesNo
-  case SDRATTR_MEASURETEXTAUTOANGLE:
-  case SDRATTR_MEASURETEXTISFIXEDANGLE:
-    f << (nWhich==SDRATTR_MEASURESHOWUNIT ? "measure[showUnit]" :
-          nWhich==SDRATTR_MEASURETEXTAUTOANGLE ? "measure[autoAngle]" : "measure[fixAngle]")
+  case StarAttribute::SDRATTR_MEASURESHOWUNIT: // yesNo
+  case StarAttribute::SDRATTR_MEASURETEXTAUTOANGLE:
+  case StarAttribute::SDRATTR_MEASURETEXTISFIXEDANGLE:
+    f << (nWhich==StarAttribute::SDRATTR_MEASURESHOWUNIT ? "measure[showUnit]" :
+          nWhich==StarAttribute::SDRATTR_MEASURETEXTAUTOANGLE ? "measure[autoAngle]" : "measure[fixAngle]")
       << "=" << input->readULong(1) << ",";
     break;
-  case SDRATTR_MEASUREFORMATSTRING: { // string
+  case StarAttribute::SDRATTR_MEASUREFORMATSTRING: { // string
     f << "measure[formatString]=";
     librevenge::RVNGString format;
     if (!zone.readString(format)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
       f << "###string";
       break;
     }
     f << format.cstr() << ",";
     break;
   }
-  case SDRATTR_MEASURETEXTAUTOANGLEVIEW: // sdrAngle
-  case SDRATTR_MEASURETEXTFIXEDANGLE:
-    f << (nWhich==SDRATTR_MEASURETEXTAUTOANGLEVIEW ? "measure[autoAngle]" : "measure[fixedAngle]")
+  case StarAttribute::SDRATTR_MEASURETEXTAUTOANGLEVIEW: // sdrAngle
+  case StarAttribute::SDRATTR_MEASURETEXTFIXEDANGLE:
+    f << (nWhich==StarAttribute::SDRATTR_MEASURETEXTAUTOANGLEVIEW ? "measure[autoAngle]" : "measure[fixedAngle]")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_MEASUREDECIMALPLACES: // int16
+  case StarAttribute::SDRATTR_MEASUREDECIMALPLACES: // int16
     f << "measure[decimalPlaces]=" << input->readLong(2) << ",";
     break;
-  case SDRATTR_MEASURERESERVE05:
-  case SDRATTR_MEASURERESERVE06:
-  case SDRATTR_MEASURERESERVE07:
-    f << "sdrMeasureReserved" << nWhich-SDRATTR_MEASURERESERVE05+5 << ",";
+  case StarAttribute::SDRATTR_MEASURERESERVE05:
+  case StarAttribute::SDRATTR_MEASURERESERVE06:
+  case StarAttribute::SDRATTR_MEASURERESERVE07:
+    f << "sdrMeasureReserved" << nWhich-StarAttribute::SDRATTR_MEASURERESERVE05+5 << ",";
     break;
 
-  case SDRATTR_CIRCKIND: // enum
+  case StarAttribute::SDRATTR_CIRCKIND: // enum
     f << "sdrCircle[kind]=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_CIRCSTARTANGLE: // sdrAngle
-  case SDRATTR_CIRCENDANGLE:
-    f << (nWhich==SDRATTR_CIRCSTARTANGLE ? "circle[start]" : "circle[end]") << "=" << input->readLong(4) << ",";
+  case StarAttribute::SDRATTR_CIRCSTARTANGLE: // sdrAngle
+  case StarAttribute::SDRATTR_CIRCENDANGLE:
+    f << (nWhich==StarAttribute::SDRATTR_CIRCSTARTANGLE ? "circle[start]" : "circle[end]") << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_CIRCRESERVE0:
-  case SDRATTR_CIRCRESERVE1:
-  case SDRATTR_CIRCRESERVE2:
-  case SDRATTR_CIRCRESERVE3:
-    f << "sdrCirReserve" << nWhich-SDRATTR_CIRCRESERVE0 << ",";
+  case StarAttribute::SDRATTR_CIRCRESERVE0:
+  case StarAttribute::SDRATTR_CIRCRESERVE1:
+  case StarAttribute::SDRATTR_CIRCRESERVE2:
+  case StarAttribute::SDRATTR_CIRCRESERVE3:
+    f << "sdrCirReserve" << nWhich-StarAttribute::SDRATTR_CIRCRESERVE0 << ",";
     break;
 
-  case SDRATTR_OBJMOVEPROTECT: // yesNo
-  case SDRATTR_OBJSIZEPROTECT:
-  case SDRATTR_OBJPRINTABLE:
-    f << (nWhich==SDRATTR_OBJMOVEPROTECT ? "sdrObjMoveProtect" :
-          nWhich==SDRATTR_OBJSIZEPROTECT ? "sdrObjSizeProtect" : "sdrObjPrintable")
+  case StarAttribute::SDRATTR_OBJMOVEPROTECT: // yesNo
+  case StarAttribute::SDRATTR_OBJSIZEPROTECT:
+  case StarAttribute::SDRATTR_OBJPRINTABLE:
+    f << (nWhich==StarAttribute::SDRATTR_OBJMOVEPROTECT ? "sdrObjMoveProtect" :
+          nWhich==StarAttribute::SDRATTR_OBJSIZEPROTECT ? "sdrObjSizeProtect" : "sdrObjPrintable")
       << "=" << input->readULong(1) << ",";
     break;
-  case SDRATTR_LAYERID: // uint16
+  case StarAttribute::SDRATTR_LAYERID: // uint16
     f << "sdrLayerId=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_LAYERNAME:
-  case SDRATTR_OBJECTNAME: {
-    f << (nWhich==SDRATTR_LAYERNAME ? "sdrLayerName" : "sdrObjectName") << ",";
+  case StarAttribute::SDRATTR_LAYERNAME:
+  case StarAttribute::SDRATTR_OBJECTNAME: {
+    f << (nWhich==StarAttribute::SDRATTR_LAYERNAME ? "sdrLayerName" : "sdrObjectName") << ",";
     librevenge::RVNGString name;
     if (!zone.readString(name)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a string\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
       f << "###string";
       break;
     }
     f << name.cstr() << ",";
     break;
   }
-  case SDRATTR_ALLPOSITIONX: // metric
-  case SDRATTR_ALLPOSITIONY:
-  case SDRATTR_ALLSIZEWIDTH:
-    f << (nWhich==SDRATTR_ALLPOSITIONX ? "sdrAllPosX" :
-          nWhich==SDRATTR_ALLPOSITIONY ? "sdrAllPosY" : "allSizeWidth")
+  case StarAttribute::SDRATTR_ALLPOSITIONX: // metric
+  case StarAttribute::SDRATTR_ALLPOSITIONY:
+  case StarAttribute::SDRATTR_ALLSIZEWIDTH:
+    f << (nWhich==StarAttribute::SDRATTR_ALLPOSITIONX ? "sdrAllPosX" :
+          nWhich==StarAttribute::SDRATTR_ALLPOSITIONY ? "sdrAllPosY" : "allSizeWidth")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_ALLSIZEHEIGHT: // metric
-  case SDRATTR_ONEPOSITIONX:
-  case SDRATTR_ONEPOSITIONY:
-    f << (nWhich==SDRATTR_ALLSIZEHEIGHT ? "sdrAllSizeHeight" :
-          nWhich==SDRATTR_ONEPOSITIONX ? "sdrOnePosX" : "sdrOnePoxY")
+  case StarAttribute::SDRATTR_ALLSIZEHEIGHT: // metric
+  case StarAttribute::SDRATTR_ONEPOSITIONX:
+  case StarAttribute::SDRATTR_ONEPOSITIONY:
+    f << (nWhich==StarAttribute::SDRATTR_ALLSIZEHEIGHT ? "sdrAllSizeHeight" :
+          nWhich==StarAttribute::SDRATTR_ONEPOSITIONX ? "sdrOnePosX" : "sdrOnePoxY")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_ONESIZEWIDTH: // metric
-  case SDRATTR_ONESIZEHEIGHT:
-  case SDRATTR_LOGICSIZEWIDTH:
-    f << (nWhich==SDRATTR_ONESIZEWIDTH ? "sdrOneSizeWidth" :
-          nWhich==SDRATTR_ONESIZEHEIGHT ? "sdrOneSizeHeight" : "sdrLogicSizeWidth")
+  case StarAttribute::SDRATTR_ONESIZEWIDTH: // metric
+  case StarAttribute::SDRATTR_ONESIZEHEIGHT:
+  case StarAttribute::SDRATTR_LOGICSIZEWIDTH:
+    f << (nWhich==StarAttribute::SDRATTR_ONESIZEWIDTH ? "sdrOneSizeWidth" :
+          nWhich==StarAttribute::SDRATTR_ONESIZEHEIGHT ? "sdrOneSizeHeight" : "sdrLogicSizeWidth")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_LOGICSIZEHEIGHT: // metric
-  case SDRATTR_MOVEX:
-  case SDRATTR_MOVEY:
-    f << (nWhich==SDRATTR_LOGICSIZEHEIGHT ? "sdrLogicSizeHeight" :
-          nWhich==SDRATTR_MOVEX ? "sdrMoveX" : "sdrMoveY")
+  case StarAttribute::SDRATTR_LOGICSIZEHEIGHT: // metric
+  case StarAttribute::SDRATTR_MOVEX:
+  case StarAttribute::SDRATTR_MOVEY:
+    f << (nWhich==StarAttribute::SDRATTR_LOGICSIZEHEIGHT ? "sdrLogicSizeHeight" :
+          nWhich==StarAttribute::SDRATTR_MOVEX ? "sdrMoveX" : "sdrMoveY")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_ROTATEANGLE: // sdrAngle
-  case SDRATTR_SHEARANGLE:
-    f << (nWhich==SDRATTR_ROTATEANGLE ? "sdrAngle[rotate]" : "sdrAngle[shear]") << "=" << input->readLong(4) << ",";
+  case StarAttribute::SDRATTR_ROTATEANGLE: // sdrAngle
+  case StarAttribute::SDRATTR_SHEARANGLE:
+    f << (nWhich==StarAttribute::SDRATTR_ROTATEANGLE ? "sdrAngle[rotate]" : "sdrAngle[shear]") << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_RESIZEXONE: // sdrFraction
-  case SDRATTR_RESIZEYONE:
-    f << (nWhich==SDRATTR_RESIZEXONE ? "sdrResizeX[one]" : "sdrResizeY[one]") << ","
+  case StarAttribute::SDRATTR_RESIZEXONE: // sdrFraction
+  case StarAttribute::SDRATTR_RESIZEYONE:
+    f << (nWhich==StarAttribute::SDRATTR_RESIZEXONE ? "sdrResizeX[one]" : "sdrResizeY[one]") << ","
       << "mult=" << input->readLong(4) << ",div=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_ROTATEONE: // sdrAngle
-  case SDRATTR_HORZSHEARONE:
-  case SDRATTR_VERTSHEARONE:
-    f << (nWhich==SDRATTR_ROTATEONE ? "sdr[rotateOne]" :
-          nWhich==SDRATTR_HORZSHEARONE ? "sdr[horzShearOne]" : "sdr[vertShearOne]")
+  case StarAttribute::SDRATTR_ROTATEONE: // sdrAngle
+  case StarAttribute::SDRATTR_HORZSHEARONE:
+  case StarAttribute::SDRATTR_VERTSHEARONE:
+    f << (nWhich==StarAttribute::SDRATTR_ROTATEONE ? "sdr[rotateOne]" :
+          nWhich==StarAttribute::SDRATTR_HORZSHEARONE ? "sdr[horzShearOne]" : "sdr[vertShearOne]")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_RESIZEXALL: // sdrFraction
-  case SDRATTR_RESIZEYALL:
-    f << (nWhich==SDRATTR_RESIZEXALL ? "sdrResizeX[all]" : "sdrResizeY[all]") << ","
+  case StarAttribute::SDRATTR_RESIZEXALL: // sdrFraction
+  case StarAttribute::SDRATTR_RESIZEYALL:
+    f << (nWhich==StarAttribute::SDRATTR_RESIZEXALL ? "sdrResizeX[all]" : "sdrResizeY[all]") << ","
       << "mult=" << input->readLong(4) << ",div=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_ROTATEALL: // sdrAngle
-  case SDRATTR_HORZSHEARALL:
-  case SDRATTR_VERTSHEARALL:
-    f << (nWhich==SDRATTR_ROTATEALL ? "sdr[rotateAll]" :
-          nWhich==SDRATTR_HORZSHEARALL ? "sdr[horzShearAll]" : "sdr[vertShearAll]")
+  case StarAttribute::SDRATTR_ROTATEALL: // sdrAngle
+  case StarAttribute::SDRATTR_HORZSHEARALL:
+  case StarAttribute::SDRATTR_VERTSHEARALL:
+    f << (nWhich==StarAttribute::SDRATTR_ROTATEALL ? "sdr[rotateAll]" :
+          nWhich==StarAttribute::SDRATTR_HORZSHEARALL ? "sdr[horzShearAll]" : "sdr[vertShearAll]")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_TRANSFORMREF1X: // metric
-  case SDRATTR_TRANSFORMREF1Y:
-    f << (nWhich==SDRATTR_TRANSFORMREF1X ? "sdr[transRef1X]" : "sdr[transRef1Y]")
+  case StarAttribute::SDRATTR_TRANSFORMREF1X: // metric
+  case StarAttribute::SDRATTR_TRANSFORMREF1Y:
+    f << (nWhich==StarAttribute::SDRATTR_TRANSFORMREF1X ? "sdr[transRef1X]" : "sdr[transRef1Y]")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_TRANSFORMREF2X: // metric
-  case SDRATTR_TRANSFORMREF2Y:
-    f << (nWhich==SDRATTR_TRANSFORMREF2X ? "sdr[transRef2X]" : "sdr[transRef2Y]")
+  case StarAttribute::SDRATTR_TRANSFORMREF2X: // metric
+  case StarAttribute::SDRATTR_TRANSFORMREF2Y:
+    f << (nWhich==StarAttribute::SDRATTR_TRANSFORMREF2X ? "sdr[transRef2X]" : "sdr[transRef2Y]")
       << "=" << input->readLong(4) << ",";
     break;
-  case SDRATTR_TEXTDIRECTION: // uint16
+  case StarAttribute::SDRATTR_TEXTDIRECTION: // uint16
     f << "sdr[textDirection]=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_NOTPERSISTRESERVE2:
-  case SDRATTR_NOTPERSISTRESERVE3:
-  case SDRATTR_NOTPERSISTRESERVE4:
-  case SDRATTR_NOTPERSISTRESERVE5:
-  case SDRATTR_NOTPERSISTRESERVE6:
-  case SDRATTR_NOTPERSISTRESERVE7:
-  case SDRATTR_NOTPERSISTRESERVE8:
-  case SDRATTR_NOTPERSISTRESERVE9:
-  case SDRATTR_NOTPERSISTRESERVE10:
-  case SDRATTR_NOTPERSISTRESERVE11:
-  case SDRATTR_NOTPERSISTRESERVE12:
-  case SDRATTR_NOTPERSISTRESERVE13:
-  case SDRATTR_NOTPERSISTRESERVE14:
-  case SDRATTR_NOTPERSISTRESERVE15:
-    f << "sdr[notPersistReserve" << nWhich-SDRATTR_NOTPERSISTRESERVE2+2 << ",";
+  case StarAttribute::SDRATTR_NOTPERSISTRESERVE2:
+  case StarAttribute::SDRATTR_NOTPERSISTRESERVE3:
+  case StarAttribute::SDRATTR_NOTPERSISTRESERVE4:
+  case StarAttribute::SDRATTR_NOTPERSISTRESERVE5:
+  case StarAttribute::SDRATTR_NOTPERSISTRESERVE6:
+  case StarAttribute::SDRATTR_NOTPERSISTRESERVE7:
+  case StarAttribute::SDRATTR_NOTPERSISTRESERVE8:
+  case StarAttribute::SDRATTR_NOTPERSISTRESERVE9:
+  case StarAttribute::SDRATTR_NOTPERSISTRESERVE10:
+  case StarAttribute::SDRATTR_NOTPERSISTRESERVE11:
+  case StarAttribute::SDRATTR_NOTPERSISTRESERVE12:
+  case StarAttribute::SDRATTR_NOTPERSISTRESERVE13:
+  case StarAttribute::SDRATTR_NOTPERSISTRESERVE14:
+  case StarAttribute::SDRATTR_NOTPERSISTRESERVE15:
+    f << "sdr[notPersistReserve" << nWhich-StarAttribute::SDRATTR_NOTPERSISTRESERVE2+2 << ",";
     break;
 
-  case SDRATTR_GRAFRED: // signed percent
-  case SDRATTR_GRAFGREEN:
-  case SDRATTR_GRAFBLUE:
-    f << (nWhich==SDRATTR_GRAFRED ? "graf[red]" : nWhich==SDRATTR_GRAFGREEN ? "graf[green]" : "graf[blue]")
+  case StarAttribute::SDRATTR_GRAFRED: // signed percent
+  case StarAttribute::SDRATTR_GRAFGREEN:
+  case StarAttribute::SDRATTR_GRAFBLUE:
+    f << (nWhich==StarAttribute::SDRATTR_GRAFRED ? "graf[red]" : nWhich==StarAttribute::SDRATTR_GRAFGREEN ? "graf[green]" : "graf[blue]")
       << "=" << input->readLong(2) << ",";
     break;
-  case SDRATTR_GRAFLUMINANCE: // signed percent
-  case SDRATTR_GRAFCONTRAST:
-    f << (nWhich==SDRATTR_GRAFLUMINANCE ? "graf[luminance]" : "graf[contrast]")
+  case StarAttribute::SDRATTR_GRAFLUMINANCE: // signed percent
+  case StarAttribute::SDRATTR_GRAFCONTRAST:
+    f << (nWhich==StarAttribute::SDRATTR_GRAFLUMINANCE ? "graf[luminance]" : "graf[contrast]")
       << "=" << input->readLong(2) << ",";
     break;
-  case SDRATTR_GRAFGAMMA: // uint32
+  case StarAttribute::SDRATTR_GRAFGAMMA: // uint32
     f << "graf[gamma]=" << input->readULong(4) << ",";
     break;
-  case SDRATTR_GRAFTRANSPARENCE: // percent
+  case StarAttribute::SDRATTR_GRAFTRANSPARENCE: // percent
     f << "graf[transparence]=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_GRAFINVERT: // onOff
+  case StarAttribute::SDRATTR_GRAFINVERT: // onOff
     f << "graf[invert]=" << input->readULong(1) << ",";
     break;
-  case SDRATTR_GRAFMODE: // enum
+  case StarAttribute::SDRATTR_GRAFMODE: // enum
     f << "graf[mode]=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_GRAFCROP: {
+  case StarAttribute::SDRATTR_GRAFCROP: {
     f << "graf[crop],";
     if (nVers==0) break; // clone(0)
     int32_t top, left, right, bottom;
@@ -2419,193 +2445,193 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
     f << "crop=" << left << "x" << top << "<->" << right << "x" << bottom << ",";
     break;
   }
-  case SDRATTR_GRAFRESERVE3:
-  case SDRATTR_GRAFRESERVE4:
-  case SDRATTR_GRAFRESERVE5:
-  case SDRATTR_GRAFRESERVE6:
-    f << "grafReserve" << nWhich-SDRATTR_GRAFRESERVE3+3;
+  case StarAttribute::SDRATTR_GRAFRESERVE3:
+  case StarAttribute::SDRATTR_GRAFRESERVE4:
+  case StarAttribute::SDRATTR_GRAFRESERVE5:
+  case StarAttribute::SDRATTR_GRAFRESERVE6:
+    f << "grafReserve" << nWhich-StarAttribute::SDRATTR_GRAFRESERVE3+3;
     break;
 
-  case SDRATTR_3DOBJ_PERCENT_DIAGONAL: // uint16
-  case SDRATTR_3DOBJ_BACKSCALE:
-  case SDRATTR_3DOBJ_NORMALS_KIND:
-    f << (nWhich==SDRATTR_3DOBJ_PERCENT_DIAGONAL ? "obj3d[percentDiag]" :
-          nWhich==SDRATTR_3DOBJ_BACKSCALE ? "obj3d[backScale]" : "obj3d[normalKind]")
+  case StarAttribute::SDRATTR_3DOBJ_PERCENT_DIAGONAL: // uint16
+  case StarAttribute::SDRATTR_3DOBJ_BACKSCALE:
+  case StarAttribute::SDRATTR_3DOBJ_NORMALS_KIND:
+    f << (nWhich==StarAttribute::SDRATTR_3DOBJ_PERCENT_DIAGONAL ? "obj3d[percentDiag]" :
+          nWhich==StarAttribute::SDRATTR_3DOBJ_BACKSCALE ? "obj3d[backScale]" : "obj3d[normalKind]")
       << "=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_3DOBJ_DEPTH: // uint32
-  case SDRATTR_3DOBJ_HORZ_SEGS:
-  case SDRATTR_3DOBJ_VERT_SEGS:
-    f << (nWhich==SDRATTR_3DOBJ_DEPTH ? "obj3d[depth]" :
-          nWhich==SDRATTR_3DOBJ_HORZ_SEGS ? "obj3d[horizSegs]" : "obj3d[verticSegs]")
+  case StarAttribute::SDRATTR_3DOBJ_DEPTH: // uint32
+  case StarAttribute::SDRATTR_3DOBJ_HORZ_SEGS:
+  case StarAttribute::SDRATTR_3DOBJ_VERT_SEGS:
+    f << (nWhich==StarAttribute::SDRATTR_3DOBJ_DEPTH ? "obj3d[depth]" :
+          nWhich==StarAttribute::SDRATTR_3DOBJ_HORZ_SEGS ? "obj3d[horizSegs]" : "obj3d[verticSegs]")
       << "=" << input->readULong(4) << ",";
     break;
-  case SDRATTR_3DOBJ_END_ANGLE: // uint32
+  case StarAttribute::SDRATTR_3DOBJ_END_ANGLE: // uint32
     f << "obj3d[endAngle]=" << input->readULong(4) << ",";
     break;
-  case SDRATTR_3DOBJ_DOUBLE_SIDED: // bool
-  case SDRATTR_3DOBJ_NORMALS_INVERT:
-  case SDRATTR_3DOBJ_SHADOW_3D:
-    f << (nWhich==SDRATTR_3DOBJ_DOUBLE_SIDED ? "obj3d[doubleSided]":
-          nWhich==SDRATTR_3DOBJ_NORMALS_INVERT ? "obj3d[normalInvert]" : "obj3d[shadow]")
+  case StarAttribute::SDRATTR_3DOBJ_DOUBLE_SIDED: // bool
+  case StarAttribute::SDRATTR_3DOBJ_NORMALS_INVERT:
+  case StarAttribute::SDRATTR_3DOBJ_SHADOW_3D:
+    f << (nWhich==StarAttribute::SDRATTR_3DOBJ_DOUBLE_SIDED ? "obj3d[doubleSided]":
+          nWhich==StarAttribute::SDRATTR_3DOBJ_NORMALS_INVERT ? "obj3d[normalInvert]" : "obj3d[shadow]")
       << "=" << input->readULong(1) << ",";
     break;
-  case SDRATTR_3DOBJ_TEXTURE_PROJ_X: // uint16
-  case SDRATTR_3DOBJ_TEXTURE_PROJ_Y:
-  case SDRATTR_3DOBJ_MAT_SPECULAR_INTENSITY:
-    f << (nWhich==SDRATTR_3DOBJ_TEXTURE_PROJ_X ? "obj3d[textProjX]" :
-          nWhich==SDRATTR_3DOBJ_TEXTURE_PROJ_Y ? "obj3d[textProjX]" : "obj3d[intensitySpecular]")
+  case StarAttribute::SDRATTR_3DOBJ_TEXTURE_PROJ_X: // uint16
+  case StarAttribute::SDRATTR_3DOBJ_TEXTURE_PROJ_Y:
+  case StarAttribute::SDRATTR_3DOBJ_MAT_SPECULAR_INTENSITY:
+    f << (nWhich==StarAttribute::SDRATTR_3DOBJ_TEXTURE_PROJ_X ? "obj3d[textProjX]" :
+          nWhich==StarAttribute::SDRATTR_3DOBJ_TEXTURE_PROJ_Y ? "obj3d[textProjX]" : "obj3d[intensitySpecular]")
       << "=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_3DOBJ_MAT_COLOR: // SvxColorItem
-  case SDRATTR_3DOBJ_MAT_EMISSION:
-  case SDRATTR_3DOBJ_MAT_SPECULAR: {
-    f << (nWhich==SDRATTR_3DOBJ_MAT_COLOR ? "obj3d[matColor]" :
-          nWhich==SDRATTR_3DOBJ_MAT_EMISSION ? "obj3d[matEmission]" : "obj3d[matSpecular]") << "=";
+  case StarAttribute::SDRATTR_3DOBJ_MAT_COLOR: // SvxColorItem
+  case StarAttribute::SDRATTR_3DOBJ_MAT_EMISSION:
+  case StarAttribute::SDRATTR_3DOBJ_MAT_SPECULAR: {
+    f << (nWhich==StarAttribute::SDRATTR_3DOBJ_MAT_COLOR ? "obj3d[matColor]" :
+          nWhich==StarAttribute::SDRATTR_3DOBJ_MAT_EMISSION ? "obj3d[matEmission]" : "obj3d[matSpecular]") << "=";
     STOFFColor col;
     if (!input->readColor(col)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a color\n"));
       f << "###color";
       break;
     }
     f << col << ",";
     break;
   }
-  case SDRATTR_3DOBJ_TEXTURE_KIND: // uint16
-  case SDRATTR_3DOBJ_TEXTURE_MODE:
-    f << (nWhich==SDRATTR_3DOBJ_TEXTURE_KIND ? "obj3d[textureKind" : "obj3d[textureMode")
+  case StarAttribute::SDRATTR_3DOBJ_TEXTURE_KIND: // uint16
+  case StarAttribute::SDRATTR_3DOBJ_TEXTURE_MODE:
+    f << (nWhich==StarAttribute::SDRATTR_3DOBJ_TEXTURE_KIND ? "obj3d[textureKind" : "obj3d[textureMode")
       << "=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_3DOBJ_TEXTURE_FILTER: // bool
-  case SDRATTR_3DOBJ_SMOOTH_NORMALS:
-  case SDRATTR_3DOBJ_SMOOTH_LIDS:
-    f << (nWhich==SDRATTR_3DOBJ_TEXTURE_FILTER ? "obj3d[textureFilter]" :
-          nWhich==SDRATTR_3DOBJ_SMOOTH_NORMALS ? "obj3d[smoothNormals]" : "obj3d[smoothLids]")
+  case StarAttribute::SDRATTR_3DOBJ_TEXTURE_FILTER: // bool
+  case StarAttribute::SDRATTR_3DOBJ_SMOOTH_NORMALS:
+  case StarAttribute::SDRATTR_3DOBJ_SMOOTH_LIDS:
+    f << (nWhich==StarAttribute::SDRATTR_3DOBJ_TEXTURE_FILTER ? "obj3d[textureFilter]" :
+          nWhich==StarAttribute::SDRATTR_3DOBJ_SMOOTH_NORMALS ? "obj3d[smoothNormals]" : "obj3d[smoothLids]")
       << "=" << input->readULong(1) << ",";
     break;
-  case SDRATTR_3DOBJ_CHARACTER_MODE: // bool
-  case SDRATTR_3DOBJ_CLOSE_FRONT:
-  case SDRATTR_3DOBJ_CLOSE_BACK:
-    f << (nWhich==SDRATTR_3DOBJ_CHARACTER_MODE ? "obj3d[charMode]" :
-          nWhich==SDRATTR_3DOBJ_CLOSE_FRONT ? "obj3d[closeFront]" : "obj3d[closeBack]")
+  case StarAttribute::SDRATTR_3DOBJ_CHARACTER_MODE: // bool
+  case StarAttribute::SDRATTR_3DOBJ_CLOSE_FRONT:
+  case StarAttribute::SDRATTR_3DOBJ_CLOSE_BACK:
+    f << (nWhich==StarAttribute::SDRATTR_3DOBJ_CHARACTER_MODE ? "obj3d[charMode]" :
+          nWhich==StarAttribute::SDRATTR_3DOBJ_CLOSE_FRONT ? "obj3d[closeFront]" : "obj3d[closeBack]")
       << "=" << input->readULong(1) << ",";
     break;
-  case SDRATTR_3DOBJ_RESERVED_06:
-  case SDRATTR_3DOBJ_RESERVED_07:
-  case SDRATTR_3DOBJ_RESERVED_08:
-  case SDRATTR_3DOBJ_RESERVED_09:
-  case SDRATTR_3DOBJ_RESERVED_10:
-  case SDRATTR_3DOBJ_RESERVED_11:
-  case SDRATTR_3DOBJ_RESERVED_12:
-  case SDRATTR_3DOBJ_RESERVED_13:
-  case SDRATTR_3DOBJ_RESERVED_14:
-  case SDRATTR_3DOBJ_RESERVED_15:
-  case SDRATTR_3DOBJ_RESERVED_16:
-  case SDRATTR_3DOBJ_RESERVED_17:
-  case SDRATTR_3DOBJ_RESERVED_18:
-  case SDRATTR_3DOBJ_RESERVED_19:
-  case SDRATTR_3DOBJ_RESERVED_20:
-    f << "obj3dReserved" << nWhich-SDRATTR_3DOBJ_RESERVED_06+6 << ",";
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_06:
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_07:
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_08:
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_09:
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_10:
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_11:
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_12:
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_13:
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_14:
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_15:
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_16:
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_17:
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_18:
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_19:
+  case StarAttribute::SDRATTR_3DOBJ_RESERVED_20:
+    f << "obj3dReserved" << nWhich-StarAttribute::SDRATTR_3DOBJ_RESERVED_06+6 << ",";
     break;
 
-  case SDRATTR_3DSCENE_PERSPECTIVE: // uint16
+  case StarAttribute::SDRATTR_3DSCENE_PERSPECTIVE: // uint16
     f << "scene3d[perspective]=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_3DSCENE_DISTANCE: // uint32
-  case SDRATTR_3DSCENE_FOCAL_LENGTH:
-    f << (nWhich==SDRATTR_3DSCENE_DISTANCE ? "scene3d[distance]" : "scene3d[focalLength]")
+  case StarAttribute::SDRATTR_3DSCENE_DISTANCE: // uint32
+  case StarAttribute::SDRATTR_3DSCENE_FOCAL_LENGTH:
+    f << (nWhich==StarAttribute::SDRATTR_3DSCENE_DISTANCE ? "scene3d[distance]" : "scene3d[focalLength]")
       << "=" << input->readULong(4) << ",";
     break;
-  case SDRATTR_3DSCENE_TWO_SIDED_LIGHTING: // bool
+  case StarAttribute::SDRATTR_3DSCENE_TWO_SIDED_LIGHTING: // bool
     f << "scene3d[twoSidedLighting]=" << input->readULong(1) << ",";
     break;
-  case SDRATTR_3DSCENE_LIGHTCOLOR_1: // SvxColorItem
-  case SDRATTR_3DSCENE_LIGHTCOLOR_2:
-  case SDRATTR_3DSCENE_LIGHTCOLOR_3:
-  case SDRATTR_3DSCENE_LIGHTCOLOR_4:
-  case SDRATTR_3DSCENE_LIGHTCOLOR_5:
-  case SDRATTR_3DSCENE_LIGHTCOLOR_6:
-  case SDRATTR_3DSCENE_LIGHTCOLOR_7:
-  case SDRATTR_3DSCENE_LIGHTCOLOR_8: {
-    f << "scene3d[lightColor" << nWhich-SDRATTR_3DSCENE_LIGHTCOLOR_1+1 << "]=";
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_1: // SvxColorItem
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_2:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_3:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_4:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_5:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_6:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_7:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_8: {
+    f << "scene3d[lightColor" << nWhich-StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_1+1 << "]=";
     STOFFColor col;
     if (!input->readColor(col)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a color\n"));
       f << "###color";
       break;
     }
     f << col << ",";
     break;
   }
-  case SDRATTR_3DSCENE_AMBIENTCOLOR: {  // SvxColorItem
+  case StarAttribute::SDRATTR_3DSCENE_AMBIENTCOLOR: {  // SvxColorItem
     f << "scene3d[ambientColor]=";
     STOFFColor col;
     if (!input->readColor(col)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readAttribute: can not read a color\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a color\n"));
       f << "###color";
       break;
     }
     f << col << ",";
     break;
   }
-  case SDRATTR_3DSCENE_LIGHTON_1: // bool
-  case SDRATTR_3DSCENE_LIGHTON_2:
-  case SDRATTR_3DSCENE_LIGHTON_3:
-  case SDRATTR_3DSCENE_LIGHTON_4:
-  case SDRATTR_3DSCENE_LIGHTON_5:
-  case SDRATTR_3DSCENE_LIGHTON_6:
-  case SDRATTR_3DSCENE_LIGHTON_7:
-  case SDRATTR_3DSCENE_LIGHTON_8:
-    f << "scene3d[lightOn" << nWhich-SDRATTR_3DSCENE_LIGHTON_1+1 << "]=" << input->readULong(1) << ",";
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTON_1: // bool
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTON_2:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTON_3:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTON_4:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTON_5:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTON_6:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTON_7:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTON_8:
+    f << "scene3d[lightOn" << nWhich-StarAttribute::SDRATTR_3DSCENE_LIGHTON_1+1 << "]=" << input->readULong(1) << ",";
     break;
-  case SDRATTR_3DSCENE_LIGHTDIRECTION_1: // SvxVector3DItem (Vector3d)
-  case SDRATTR_3DSCENE_LIGHTDIRECTION_2:
-  case SDRATTR_3DSCENE_LIGHTDIRECTION_3:
-  case SDRATTR_3DSCENE_LIGHTDIRECTION_4:
-  case SDRATTR_3DSCENE_LIGHTDIRECTION_5:
-  case SDRATTR_3DSCENE_LIGHTDIRECTION_6:
-  case SDRATTR_3DSCENE_LIGHTDIRECTION_7:
-  case SDRATTR_3DSCENE_LIGHTDIRECTION_8:
-    f << "scene3d[lightDir" << nWhich-SDRATTR_3DSCENE_LIGHTDIRECTION_1+1 << "=";
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_1: // SvxVector3DItem (Vector3d)
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_2:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_3:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_4:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_5:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_6:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_7:
+  case StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_8:
+    f << "scene3d[lightDir" << nWhich-StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_1+1 << "=";
     for (int i=0; i<3; ++i) {
       double coord;
       *input >> coord;
       f << coord << (i==2 ? "," : "x");
     }
     break;
-  case SDRATTR_3DSCENE_SHADOW_SLANT: // uint16
-  case SDRATTR_3DSCENE_SHADE_MODE:
-    f << (nWhich==SDRATTR_3DSCENE_SHADOW_SLANT ? "scene3d[shadowSlant]" : "scene3d[shadowMode]")
+  case StarAttribute::SDRATTR_3DSCENE_SHADOW_SLANT: // uint16
+  case StarAttribute::SDRATTR_3DSCENE_SHADE_MODE:
+    f << (nWhich==StarAttribute::SDRATTR_3DSCENE_SHADOW_SLANT ? "scene3d[shadowSlant]" : "scene3d[shadowMode]")
       << "=" << input->readULong(2) << ",";
     break;
-  case SDRATTR_3DSCENE_RESERVED_01:
-  case SDRATTR_3DSCENE_RESERVED_02:
-  case SDRATTR_3DSCENE_RESERVED_03:
-  case SDRATTR_3DSCENE_RESERVED_04:
-  case SDRATTR_3DSCENE_RESERVED_05:
-  case SDRATTR_3DSCENE_RESERVED_06:
-  case SDRATTR_3DSCENE_RESERVED_07:
-  case SDRATTR_3DSCENE_RESERVED_08:
-  case SDRATTR_3DSCENE_RESERVED_09:
-  case SDRATTR_3DSCENE_RESERVED_10:
-  case SDRATTR_3DSCENE_RESERVED_11:
-  case SDRATTR_3DSCENE_RESERVED_12:
-  case SDRATTR_3DSCENE_RESERVED_13:
-  case SDRATTR_3DSCENE_RESERVED_14:
-  case SDRATTR_3DSCENE_RESERVED_15:
-  case SDRATTR_3DSCENE_RESERVED_16:
-  case SDRATTR_3DSCENE_RESERVED_17:
-  case SDRATTR_3DSCENE_RESERVED_18:
-  case SDRATTR_3DSCENE_RESERVED_19:
-  case SDRATTR_3DSCENE_RESERVED_20:
-    f << "3dsceneReserved" << nWhich-SDRATTR_3DSCENE_RESERVED_01+1 << ",";
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_01:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_02:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_03:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_04:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_05:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_06:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_07:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_08:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_09:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_10:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_11:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_12:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_13:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_14:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_15:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_16:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_17:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_18:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_19:
+  case StarAttribute::SDRATTR_3DSCENE_RESERVED_20:
+    f << "3dsceneReserved" << nWhich-StarAttribute::SDRATTR_3DSCENE_RESERVED_01+1 << ",";
     break;
   default:
-    STOFF_DEBUG_MSG(("StarAttribute::readAttribute: reading not format attribute is not implemented\n"));
+    STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: reading not format attribute is not implemented\n"));
     f << "#unimplemented[wh=" << std::hex << nWhich << std::dec << ",";
   }
   if (input->tell()>lastPos) {
-    STOFF_DEBUG_MSG(("StarAttribute::readAttribute: read too much data\n"));
+    STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: read too much data\n"));
     f << "###too much,";
     ascFile.addDelimiter(input->tell(), '|');
   }
@@ -2614,19 +2640,19 @@ bool StarAttribute::readAttribute(StarZone &zone, int nWhich, int nVers, long la
   return true;
 }
 
-bool StarAttribute::readBrushItem(StarZone &zone, int nVers, long /*endPos*/, libstoff::DebugStream &f)
+bool StarAttributeManager::readBrushItem(StarZone &zone, int nVers, long /*endPos*/, libstoff::DebugStream &f)
 {
   STOFFInputStreamPtr input=zone.input();
   STOFFColor color;
   if (!input->readColor(color)) {
-    STOFF_DEBUG_MSG(("StarAttribute::readBrushItem: can not read color\n"));
+    STOFF_DEBUG_MSG(("StarAttributeManager::readBrushItem: can not read color\n"));
     f << "###color,";
     return false;
   }
   else if (!color.isWhite())
     f << "color=" << color << ",";
   if (!input->readColor(color)) {
-    STOFF_DEBUG_MSG(("StarAttribute::readBrushItem: can not read fill color\n"));
+    STOFF_DEBUG_MSG(("StarAttributeManager::readBrushItem: can not read fill color\n"));
     f << "###fillcolor,";
     return false;
   }
@@ -2636,14 +2662,14 @@ bool StarAttribute::readBrushItem(StarZone &zone, int nVers, long /*endPos*/, li
   if (nVers<1) return true;
   int doLoad=(int) input->readULong(2);
   if (doLoad & 1) { // TODO: svx_frmitems.cxx:1948
-    STOFF_DEBUG_MSG(("StarAttribute::readBrushItem: do not know how to load graphic\n"));
+    STOFF_DEBUG_MSG(("StarAttributeManager::readBrushItem: do not know how to load graphic\n"));
     f << "###graphic,";
     return false;
   }
   if (doLoad & 2) {
     librevenge::RVNGString link;
     if (!zone.readString(link)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readBrushItem: can not find the link\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readBrushItem: can not find the link\n"));
       f << "###link,";
       return false;
     }
@@ -2653,7 +2679,7 @@ bool StarAttribute::readBrushItem(StarZone &zone, int nVers, long /*endPos*/, li
   if (doLoad & 4) {
     librevenge::RVNGString filter;
     if (!zone.readString(filter)) {
-      STOFF_DEBUG_MSG(("StarAttribute::readBrushItem: can not find the filter\n"));
+      STOFF_DEBUG_MSG(("StarAttributeManager::readBrushItem: can not find the filter\n"));
       f << "###filter,";
       return false;
     }

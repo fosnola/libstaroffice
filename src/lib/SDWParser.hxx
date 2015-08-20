@@ -51,7 +51,7 @@ namespace SDWParserInternal
 struct State;
 }
 
-class StarAttribute;
+class StarAttributeManager;
 class StarDocument;
 class StarZone;
 class STOFFOLEParser;
@@ -63,7 +63,7 @@ class SWFormatManager;
  */
 class SDWParser : public STOFFTextParser
 {
-  friend class StarAttribute;
+  friend class StarAttributeManager;
   friend class SWFormatManager;
 public:
   //! constructor

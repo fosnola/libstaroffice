@@ -287,347 +287,34 @@ struct Version {
 //! Internal: the state of a StarItemPool
 struct State {
   //! constructor
-  State(StarDocument &document) : m_document(document), m_majorVersion(0), m_minorVersion(0), m_loadingVersion(0), m_name(""),
-    m_currentVersion(0), m_verStart(0), m_verEnd(0), m_versionList(), m_idToAttributeList()
+  State(StarDocument &document, StarItemPool::Type type) : m_document(document), m_type(StarItemPool::T_Unknown), m_majorVersion(0), m_minorVersion(0), m_loadingVersion(0),
+    m_name(""), m_currentVersion(0), m_verStart(0), m_verEnd(0), m_versionList(), m_idToAttributeList()
   {
+    init(type);
   }
-
+  //! initialize a pool
+  void init(StarItemPool::Type type);
   //! set the pool name
   void setPoolName(librevenge::RVNGString const &name)
   {
     m_name=name;
-    init();
-  }
-  //! the pool
-  void init()
-  {
-    // to do VCControls
-    if (m_name=="EditEngineItemPool") {
-      m_verStart=3989;
-      m_verEnd=4037;
-      // svx_editdoc.cxx
-      std::vector<int> list;
-      for (int i = 0; i <= 14; ++i) list.push_back(3999+i);
-      for (int i = 15; i <= 17; ++i) list.push_back(3999+i+4);
-      addVersionMap(1, 3999, list);
-
-      list.clear();
-      for (int i = 0; i <= 17; ++i) list.push_back(3999+i);
-      for (int i=18; i<=20; ++i)  list.push_back(3999+i+1);
-      addVersionMap(2, 3999, list);
-
-      list.clear();
-      for (int i = 0; i <= 10; ++i) list.push_back(3997+i);
-      for (int i=11; i<=23; ++i)  list.push_back(3997+i+1);
-      addVersionMap(3, 3997, list);
-
-      list.clear();
-      for (int i = 0; i <= 24; ++i) list.push_back(3994+i);
-      for (int i=25; i<=28; ++i)  list.push_back(3994+i+15);
-      addVersionMap(4, 3994, list);
-      // svx_eerdll.cxx GlobalEditData::GetDefItems
-      static int const(what[])= {
-        StarAttribute::ATTR_SC_WRITINGDIR, StarAttribute::ATTR_EE_PARA_XMLATTRIBS, StarAttribute::ATTR_PARA_HANGINGPUNCTUATION, StarAttribute::ATTR_PARA_FORBIDDEN_RULES,
-        StarAttribute::ATTR_EE_PARA_ASIANCJKSPACING, StarAttribute::ATTR_EE_PARA_NUMBULLET, StarAttribute::ATTR_SC_HYPHENATE, StarAttribute::ATTR_EE_PARA_BULLETSTATE,
-        StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE, StarAttribute::ATTR_EE_PARA_OUTLLEVEL, StarAttribute::ATTR_EE_PARA_BULLET, StarAttribute::ATTR_FRM_LR_SPACE,
-        StarAttribute::ATTR_FRM_UL_SPACE, StarAttribute::ATTR_PARA_LINESPACING, StarAttribute::ATTR_PARA_ADJUST, StarAttribute::ATTR_PARA_TABSTOP,
-        StarAttribute::ATTR_CHR_COLOR, StarAttribute::ATTR_CHR_FONT, StarAttribute::ATTR_CHR_FONTSIZE, StarAttribute::ATTR_EE_CHR_SCALEW,
-
-        StarAttribute::ATTR_CHR_WEIGHT, StarAttribute::ATTR_CHR_UNDERLINE, StarAttribute::ATTR_CHR_CROSSEDOUT, StarAttribute::ATTR_CHR_POSTURE,
-        StarAttribute::ATTR_CHR_CONTOUR, StarAttribute::ATTR_CHR_SHADOWED, StarAttribute::ATTR_CHR_ESCAPEMENT, StarAttribute::ATTR_CHR_AUTOKERN,
-        StarAttribute::ATTR_CHR_KERNING, StarAttribute::ATTR_CHR_WORDLINEMODE, StarAttribute::ATTR_CHR_LANGUAGE, StarAttribute::ATTR_CHR_CJK_LANGUAGE,
-        StarAttribute::ATTR_CHR_CTL_LANGUAGE, StarAttribute::ATTR_CHR_CJK_FONT, StarAttribute::ATTR_CHR_CTL_FONT, StarAttribute::ATTR_CHR_CJK_FONTSIZE,
-        StarAttribute::ATTR_CHR_CTL_FONTSIZE, StarAttribute::ATTR_CHR_CJK_WEIGHT, StarAttribute::ATTR_CHR_CTL_WEIGHT, StarAttribute::ATTR_CHR_CJK_POSTURE,
-
-        StarAttribute::ATTR_CHR_CTL_POSTURE, StarAttribute::ATTR_CHR_EMPHASIS_MARK, StarAttribute::ATTR_CHR_RELIEF, StarAttribute::ATTR_EE_CHR_RUBI_DUMMY,
-        StarAttribute::ATTR_EE_CHR_XMLATTRIBS, StarAttribute::ATTR_EE_FEATURE_TAB, StarAttribute::ATTR_EE_FEATURE_LINEBR, StarAttribute::ATTR_CHR_CHARSETCOLOR,
-        StarAttribute::ATTR_EE_FEATURE_FIELD
-      };
-      for (int i=0; i<int(sizeof(what)/sizeof(int)); ++i)
-        m_idToAttributeList.push_back(what[i]);
+    StarItemPool::Type type=StarItemPool::T_Unknown;
+    if (m_name=="EditEngineItemPool")
+      type=StarItemPool::T_EditEnginePool;
+    else if (m_name=="SchItemPool")
+      type=StarItemPool::T_ChartPool;
+    else if (m_name=="ScDocumentPool")
+      type=StarItemPool::T_SpreadsheetPool;
+    else if (m_name=="SWG")
+      type=StarItemPool::T_WriterPool;
+    else if (m_name=="XOutdevItemPool")
+      type=StarItemPool::T_XOutdevPool;
+    else if (m_name=="VCControls")
+      type=StarItemPool::T_VCControlPool;
+    else {
+      STOFF_DEBUG_MSG(("StarItemPoolInternal::State::setPoolName: find unknown pool type %s\n", name.cstr()));
     }
-    else if (m_name=="SchItemPool") {
-      // sch_itempool.cxx SchItemPool::SchItemPool
-      m_verStart=1; // SCHATTR_START
-      m_verEnd=100; // SCHATTR_NONPERSISTENT_START
-      // svx_eerdll.cxx GlobalEditData::GetDefItems
-      static int const(what[])= {
-        StarAttribute::ATTR_SCH_DATADESCR_DESCR, StarAttribute::ATTR_SCH_DATADESCR_SHOW_SYM, StarAttribute::ATTR_SCH_LEGEND_POS, StarAttribute::ATTR_SCH_TEXT_ORIENT,
-        StarAttribute::ATTR_SCH_TEXT_ORDER, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MIN, StarAttribute::ATTR_SCH_Y_AXIS_MIN, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MAX,
-        StarAttribute::ATTR_SCH_Y_AXIS_MAX, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_STEP_MAIN, StarAttribute::ATTR_SCH_Y_AXIS_STEP_MAIN, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_STEP_HELP,
-        StarAttribute::ATTR_SCH_Y_AXIS_STEP_HELP, StarAttribute::ATTR_SCH_Y_AXIS_LOGARITHM, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_ORIGIN, StarAttribute::ATTR_SCH_Y_AXIS_ORIGIN,
-        StarAttribute::ATTR_SCH_X_AXIS_AUTO_MIN, StarAttribute::ATTR_SCH_X_AXIS_MIN, StarAttribute::ATTR_SCH_X_AXIS_AUTO_MAX, StarAttribute::ATTR_SCH_X_AXIS_MAX,
-
-        StarAttribute::ATTR_SCH_X_AXIS_AUTO_STEP_MAIN, StarAttribute::ATTR_SCH_X_AXIS_STEP_MAIN, StarAttribute::ATTR_SCH_X_AXIS_AUTO_STEP_HELP, StarAttribute::ATTR_SCH_X_AXIS_STEP_HELP,
-        StarAttribute::ATTR_SCH_X_AXIS_LOGARITHM, StarAttribute::ATTR_SCH_X_AXIS_AUTO_ORIGIN, StarAttribute::ATTR_SCH_X_AXIS_ORIGIN, StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MIN,
-        StarAttribute::ATTR_SCH_Z_AXIS_MIN, StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MAX, StarAttribute::ATTR_SCH_Z_AXIS_MAX, StarAttribute::ATTR_SCH_Z_AXIS_AUTO_STEP_MAIN,
-        StarAttribute::ATTR_SCH_Z_AXIS_STEP_MAIN, StarAttribute::ATTR_SCH_Z_AXIS_AUTO_STEP_HELP, StarAttribute::ATTR_SCH_Z_AXIS_STEP_HELP, StarAttribute::ATTR_SCH_Z_AXIS_LOGARITHM,
-        StarAttribute::ATTR_SCH_Z_AXIS_AUTO_ORIGIN, StarAttribute::ATTR_SCH_Z_AXIS_ORIGIN, StarAttribute::ATTR_SCH_AXISTYPE, StarAttribute::ATTR_SCH_DUMMY0,
-
-        StarAttribute::ATTR_SCH_DUMMY1, StarAttribute::ATTR_SCH_DUMMY2, StarAttribute::ATTR_SCH_DUMMY3, StarAttribute::ATTR_SCH_DUMMY_END,
-        StarAttribute::ATTR_SCH_STAT_AVERAGE, StarAttribute::ATTR_SCH_STAT_KIND_ERROR, StarAttribute::ATTR_SCH_STAT_PERCENT, StarAttribute::ATTR_SCH_STAT_BIGERROR,
-        StarAttribute::ATTR_SCH_STAT_CONSTPLUS, StarAttribute::ATTR_SCH_STAT_CONSTMINUS, StarAttribute::ATTR_SCH_STAT_REGRESSTYPE, StarAttribute::ATTR_SCH_STAT_INDICATE,
-        StarAttribute::ATTR_SCH_TEXT_DEGREES, StarAttribute::ATTR_SCH_TEXT_OVERLAP, StarAttribute::ATTR_SCH_TEXT_DUMMY0, StarAttribute::ATTR_SCH_TEXT_DUMMY1,
-        StarAttribute::ATTR_SCH_TEXT_DUMMY2, StarAttribute::ATTR_SCH_TEXT_DUMMY3, StarAttribute::ATTR_SCH_STYLE_DEEP, StarAttribute::ATTR_SCH_STYLE_3D,
-
-        StarAttribute::ATTR_SCH_STYLE_VERTICAL, StarAttribute::ATTR_SCH_STYLE_BASETYPE, StarAttribute::ATTR_SCH_STYLE_LINES, StarAttribute::ATTR_SCH_STYLE_PERCENT,
-        StarAttribute::ATTR_SCH_STYLE_STACKED, StarAttribute::ATTR_SCH_STYLE_SPLINES, StarAttribute::ATTR_SCH_STYLE_SYMBOL, StarAttribute::ATTR_SCH_STYLE_SHAPE,
-        StarAttribute::ATTR_SCH_AXIS, StarAttribute::ATTR_SCH_AXIS_AUTO_MIN, StarAttribute::ATTR_SCH_AXIS_MIN, StarAttribute::ATTR_SCH_AXIS_AUTO_MAX,
-        StarAttribute::ATTR_SCH_AXIS_MAX, StarAttribute::ATTR_SCH_AXIS_AUTO_STEP_MAIN, StarAttribute::ATTR_SCH_AXIS_STEP_MAIN, StarAttribute::ATTR_SCH_AXIS_AUTO_STEP_HELP,
-        StarAttribute::ATTR_SCH_AXIS_STEP_HELP, StarAttribute::ATTR_SCH_AXIS_LOGARITHM, StarAttribute::ATTR_SCH_AXIS_AUTO_ORIGIN, StarAttribute::ATTR_SCH_AXIS_ORIGIN,
-
-        StarAttribute::ATTR_SCH_AXIS_TICKS, StarAttribute::ATTR_SCH_AXIS_NUMFMT, StarAttribute::ATTR_SCH_AXIS_NUMFMTPERCENT, StarAttribute::ATTR_SCH_AXIS_SHOWAXIS,
-        StarAttribute::ATTR_SCH_AXIS_SHOWDESCR, StarAttribute::ATTR_SCH_AXIS_SHOWMAINGRID, StarAttribute::ATTR_SCH_AXIS_SHOWHELPGRID, StarAttribute::ATTR_SCH_AXIS_TOPDOWN,
-        StarAttribute::ATTR_SCH_AXIS_HELPTICKS, StarAttribute::ATTR_SCH_AXIS_DUMMY0, StarAttribute::ATTR_SCH_AXIS_DUMMY1, StarAttribute::ATTR_SCH_AXIS_DUMMY2,
-        StarAttribute::ATTR_SCH_AXIS_DUMMY3, StarAttribute::ATTR_SCH_BAR_OVERLAP, StarAttribute::ATTR_SCH_BAR_GAPWIDTH, StarAttribute::ATTR_SCH_SYMBOL_BRUSH,
-        StarAttribute::ATTR_SCH_STOCK_VOLUME, StarAttribute::ATTR_SCH_STOCK_UPDOWN, StarAttribute::ATTR_SCH_SYMBOL_SIZE, StarAttribute::ATTR_SCH_USER_DEFINED_ATTR
-      };
-
-      for (int i=0; i<int(sizeof(what)/sizeof(int)); ++i)
-        m_idToAttributeList.push_back(what[i]);
-    }
-    else if (m_name=="ScDocumentPool") {
-      // sc_docpool.cxx
-      m_verStart=100; // ATTR_STARTINDEX
-      m_verEnd=183; // ATTR_ENDINDEX
-
-      std::vector<int> list;
-      for (int i = 0; i <= 17; i++) list.push_back(100+i);
-      for (int i = 18; i <= 57; i++) list.push_back(100+i+1);
-      addVersionMap(1, 100, list);
-
-      list.clear();
-      for (int i = 0; i <= 23; i++) list.push_back(100+i);
-      for (int i = 24; i <= 58; i++) list.push_back(100+i+2);
-      addVersionMap(2, 100, list);
-
-      list.clear();
-      for (int i = 0; i <= 10; i++) list.push_back(100+i);
-      for (int i = 11; i <= 60; i++) list.push_back(100+i+1);
-      addVersionMap(3, 100, list);
-
-      list.clear();
-      for (int i = 0; i <= 13; i++) list.push_back(100+i);
-      for (int i = 14; i <= 61; i++) list.push_back(100+i+2);
-      addVersionMap(4, 100, list);
-
-      list.clear();
-      for (int i = 0; i <= 9; i++) list.push_back(100+i);
-      for (int i = 10; i <= 63; i++) list.push_back(100+i+12);
-      addVersionMap(5, 100, list);
-
-      list.clear();
-      for (int i = 0; i <= 21; i++) list.push_back(100+i);
-      for (int i = 22; i <= 75; i++) list.push_back(100+i+3);
-      addVersionMap(6, 100, list);
-
-      list.clear();
-      for (int i = 0; i <= 21; i++) list.push_back(100+i);
-      for (int i = 22; i <= 78; i++) list.push_back(100+i+3);
-      addVersionMap(7, 100, list);
-
-      list.clear();
-      for (int i = 0; i <= 33; i++) list.push_back(100+i);
-      for (int i = 34; i <= 81; i++) list.push_back(100+i+1);
-      addVersionMap(8, 100, list);
-
-      list.clear();
-      for (int i = 0; i <= 34; i++) list.push_back(100+i);
-      for (int i = 35; i <= 82; i++) list.push_back(100+i+1);
-      addVersionMap(9, 100, list);
-      static int const(what[])= {
-        StarAttribute::ATTR_CHR_FONT, StarAttribute::ATTR_CHR_FONTSIZE, StarAttribute::ATTR_CHR_WEIGHT, StarAttribute::ATTR_CHR_POSTURE,
-        StarAttribute::ATTR_CHR_UNDERLINE, StarAttribute::ATTR_CHR_CROSSEDOUT, StarAttribute::ATTR_CHR_CONTOUR, StarAttribute::ATTR_CHR_SHADOWED,
-        StarAttribute::ATTR_CHR_COLOR, StarAttribute::ATTR_CHR_LANGUAGE, StarAttribute::ATTR_CHR_CJK_FONT, StarAttribute::ATTR_CHR_CJK_FONTSIZE,
-        StarAttribute::ATTR_CHR_CJK_WEIGHT, StarAttribute::ATTR_CHR_CJK_POSTURE, StarAttribute::ATTR_CHR_CJK_LANGUAGE, StarAttribute::ATTR_CHR_CTL_FONT,
-        StarAttribute::ATTR_CHR_CTL_FONTSIZE, StarAttribute::ATTR_CHR_CTL_WEIGHT, StarAttribute::ATTR_CHR_CTL_POSTURE, StarAttribute::ATTR_CHR_CTL_LANGUAGE,
-
-        StarAttribute::ATTR_CHR_EMPHASIS_MARK, StarAttribute::ATTR_SC_USERDEF, StarAttribute::ATTR_CHR_WORDLINEMODE, StarAttribute::ATTR_CHR_RELIEF,
-        StarAttribute::ATTR_SC_HYPHENATE, StarAttribute::ATTR_PARA_SCRIPTSPACE, StarAttribute::ATTR_PARA_HANGINGPUNCTUATION, StarAttribute::ATTR_PARA_FORBIDDEN_RULES,
-        StarAttribute::ATTR_SC_HORJUSTIFY, StarAttribute::ATTR_SC_INDENT, StarAttribute::ATTR_SC_VERJUSTIFY, StarAttribute::ATTR_SC_ORIENTATION,
-        StarAttribute::ATTR_SC_ROTATE_VALUE, StarAttribute::ATTR_SC_ROTATE_MODE, StarAttribute::ATTR_SC_VERTICAL_ASIAN, StarAttribute::ATTR_SC_WRITINGDIR,
-        StarAttribute::ATTR_SC_LINEBREAK, StarAttribute::ATTR_SC_MARGIN, StarAttribute::ATTR_SC_MERGE, StarAttribute::ATTR_SC_MERGE_FLAG,
-
-        StarAttribute::ATTR_SC_VALUE_FORMAT, StarAttribute::ATTR_SC_LANGUAGE_FORMAT, StarAttribute::ATTR_FRM_BACKGROUND, StarAttribute::ATTR_SC_PROTECTION,
-        StarAttribute::ATTR_SC_BORDER, StarAttribute::ATTR_SC_BORDER_INNER, StarAttribute::ATTR_FRM_SHADOW, StarAttribute::ATTR_SC_VALIDDATA,
-        StarAttribute::ATTR_SC_CONDITIONAL, StarAttribute::ATTR_SC_PATTERN, StarAttribute::ATTR_FRM_LR_SPACE, StarAttribute::ATTR_FRM_UL_SPACE,
-        StarAttribute::ATTR_SC_PAGE, StarAttribute::ATTR_SC_PAGE_PAPERTRAY, StarAttribute::ATTR_FRM_PAPER_BIN, StarAttribute::ATTR_SC_PAGE_SIZE,
-        StarAttribute::ATTR_SC_PAGE_MAXSIZE, StarAttribute::ATTR_SC_PAGE_HORCENTER, StarAttribute::ATTR_SC_PAGE_VERCENTER, StarAttribute::ATTR_SC_PAGE_ON,
-
-        StarAttribute::ATTR_SC_PAGE_DYNAMIC, StarAttribute::ATTR_SC_PAGE_SHARED, StarAttribute::ATTR_SC_PAGE_NOTES, StarAttribute::ATTR_SC_PAGE_GRID,
-        StarAttribute::ATTR_SC_PAGE_HEADERS, StarAttribute::ATTR_SC_PAGE_CHARTS, StarAttribute::ATTR_SC_PAGE_OBJECTS, StarAttribute::ATTR_SC_PAGE_DRAWINGS,
-        StarAttribute::ATTR_SC_PAGE_TOPDOWN, StarAttribute::ATTR_SC_PAGE_SCALE, StarAttribute::ATTR_SC_PAGE_SCALETOPAGES, StarAttribute::ATTR_SC_PAGE_FIRSTPAGENO,
-        StarAttribute::ATTR_SC_PAGE_PRINTAREA, StarAttribute::ATTR_SC_PAGE_REPEATROW, StarAttribute::ATTR_SC_PAGE_REPEATCOL, StarAttribute::ATTR_SC_PAGE_PRINTTABLES,
-        StarAttribute::ATTR_SC_PAGE_HEADERLEFT, StarAttribute::ATTR_SC_PAGE_FOOTERLEFT, StarAttribute::ATTR_SC_PAGE_HEADERRIGHT, StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT,
-        StarAttribute::ATTR_SC_PAGE_HEADERSET, StarAttribute::ATTR_SC_PAGE_FOOTERSET, StarAttribute::ATTR_SC_PAGE_FORMULAS, StarAttribute::ATTR_SC_PAGE_NULLVALS
-      };
-      for (int i=0; i<int(sizeof(what)/sizeof(int)); ++i)
-        m_idToAttributeList.push_back(what[i]);
-    }
-    else if (m_name=="SWG") {
-      // SwAttrPool::SwAttrPool set default map
-      m_verStart=1; //POOLATTR_BEGIN
-      m_verEnd=130; //POOLATTR_END-1
-      for (int i=StarAttribute::ATTR_CHR_CASEMAP; i<=StarAttribute::ATTR_BOX_VALUE; ++i)
-        m_idToAttributeList.push_back(i);
-      std::vector<int> list;
-      // sw_swatrset.cxx SwAttrPool::SwAttrPool and sw_init.cxx pVersionMap1
-      for (int i = 1; i <= 17; i++) list.push_back(i);
-      for (int i = 18; i <= 27; i++) list.push_back(i+5);
-      for (int i = 28; i <= 35; i++) list.push_back(i+7);
-      for (int i = 36; i <= 58; i++) list.push_back(i+10);
-      for (int i = 59; i <= 60; i++) list.push_back(i+12);
-      addVersionMap(1, 1, list);
-      list.clear();
-      for (int i = 1; i <= 70; i++) list.push_back(i);
-      for (int i = 71; i <= 75; i++) list.push_back(i+10);
-      addVersionMap(2, 1, list);
-      list.clear();
-      for (int i = 1; i <= 21; i++) list.push_back(i);
-      for (int i = 22; i <= 27; i++) list.push_back(i+15);
-      for (int i = 28; i <= 82; i++) list.push_back(i+20);
-      for (int i = 83; i <= 86; i++) list.push_back(i+35);
-      addVersionMap(3, 1, list);
-      list.clear();
-      for (int i = 1; i <= 65; i++) list.push_back(i);
-      for (int i = 66; i <= 121; i++) list.push_back(i+9);
-      addVersionMap(4, 1, list);
-    }
-    else if (m_name=="XOutdevItemPool") {
-      // svx_xpool.cxx XOutdevItemPool::Ctor
-      m_verStart=1000;
-      m_verEnd=1333;
-      std::vector<int> list;
-      for (int i=1000; i<=1021; ++i) list.push_back(i);
-      for (int i=1022; i<=1039; ++i) list.push_back(i+13);
-      addVersionMap(1, 1000, list);
-
-      list.clear();
-      for (int i=1000; i<=1009; ++i) list.push_back(i);
-      for (int i=1010; i<=1015; ++i) list.push_back(i+7);
-      for (int i=1016; i<=1039; ++i) list.push_back(i+14);
-      for (int i=1040; i<=1050; ++i) list.push_back(i+22);
-      for (int i=1051; i<=1056; ++i) list.push_back(i+27);
-      for (int i=1057; i<=1065; ++i) list.push_back(i+52);
-      addVersionMap(2, 1000, list);
-
-      list.clear();
-      for (int i=1000; i<=1029; ++i) list.push_back(i);
-      for (int i=1030; i<=1123; ++i) list.push_back(i+17);
-      addVersionMap(3, 1000, list);
-
-      list.clear();
-      for (int i=1000; i<=1126; ++i) list.push_back(i);
-      for (int i=1127; i<=1140; ++i) list.push_back(i+45);
-      addVersionMap(4, 1000, list);
-
-      static int const(what[])= {
-        StarAttribute::XATTR_LINESTYLE, StarAttribute::XATTR_LINEDASH, StarAttribute::XATTR_LINEWIDTH, StarAttribute::XATTR_LINECOLOR,
-        StarAttribute::XATTR_LINESTART, StarAttribute::XATTR_LINEEND, StarAttribute::XATTR_LINESTARTWIDTH, StarAttribute::XATTR_LINEENDWIDTH,
-        StarAttribute::XATTR_LINESTARTCENTER, StarAttribute::XATTR_LINEENDCENTER, StarAttribute::XATTR_LINETRANSPARENCE, StarAttribute::XATTR_LINEJOINT,
-        StarAttribute::XATTR_LINERESERVED2, StarAttribute::XATTR_LINERESERVED3, StarAttribute::XATTR_LINERESERVED4,StarAttribute::XATTR_LINERESERVED5,
-        StarAttribute::XATTR_LINERESERVED_LAST, StarAttribute::XATTR_SET_LINE, StarAttribute::XATTR_FILLSTYLE, StarAttribute::XATTR_FILLCOLOR,
-
-        StarAttribute::XATTR_FILLGRADIENT, StarAttribute::XATTR_FILLHATCH, StarAttribute::XATTR_FILLBITMAP, StarAttribute::XATTR_FILLTRANSPARENCE,
-        StarAttribute::XATTR_GRADIENTSTEPCOUNT, StarAttribute::XATTR_FILLBMP_TILE, StarAttribute::XATTR_FILLBMP_POS, StarAttribute::XATTR_FILLBMP_SIZEX,
-        StarAttribute::XATTR_FILLBMP_SIZEY, StarAttribute::XATTR_FILLFLOATTRANSPARENCE, StarAttribute::XATTR_FILLRESERVED2, StarAttribute::XATTR_FILLBMP_SIZELOG,
-        StarAttribute::XATTR_FILLBMP_TILEOFFSETX, StarAttribute::XATTR_FILLBMP_TILEOFFSETY, StarAttribute::XATTR_FILLBMP_STRETCH, StarAttribute::XATTR_FILLRESERVED3,
-        StarAttribute::XATTR_FILLRESERVED4, StarAttribute::XATTR_FILLRESERVED5, StarAttribute::XATTR_FILLRESERVED6, StarAttribute::XATTR_FILLRESERVED7,
-
-        StarAttribute::XATTR_FILLRESERVED8, StarAttribute::XATTR_FILLBMP_POSOFFSETX, StarAttribute::XATTR_FILLBMP_POSOFFSETY, StarAttribute::XATTR_FILLBACKGROUND,
-        StarAttribute::XATTR_FILLRESERVED10, StarAttribute::XATTR_FILLRESERVED11, StarAttribute::XATTR_FILLRESERVED_LAST, StarAttribute::XATTR_SET_FILL,
-        StarAttribute::XATTR_FORMTXTSTYLE, StarAttribute::XATTR_FORMTXTADJUST, StarAttribute::XATTR_FORMTXTDISTANCE, StarAttribute::XATTR_FORMTXTSTART,
-        StarAttribute::XATTR_FORMTXTMIRROR, StarAttribute::XATTR_FORMTXTOUTLINE, StarAttribute::XATTR_FORMTXTSHADOW, StarAttribute::XATTR_FORMTXTSHDWCOLOR,
-        StarAttribute::XATTR_FORMTXTSHDWXVAL, StarAttribute::XATTR_FORMTXTSHDWYVAL, StarAttribute::XATTR_FORMTXTSTDFORM, StarAttribute::XATTR_FORMTXTHIDEFORM,
-
-        StarAttribute::XATTR_FORMTXTSHDWTRANSP, StarAttribute::XATTR_FTRESERVED2, StarAttribute::XATTR_FTRESERVED3, StarAttribute::XATTR_FTRESERVED4,
-        StarAttribute::XATTR_FTRESERVED5, StarAttribute::XATTR_FTRESERVED_LAST, StarAttribute::XATTR_SET_TEXT,
-
-        // SDR 1067...
-        StarAttribute::SDRATTR_SHADOW, StarAttribute::SDRATTR_SHADOWCOLOR, StarAttribute::SDRATTR_SHADOWXDIST, StarAttribute::SDRATTR_SHADOWYDIST,
-        StarAttribute::SDRATTR_SHADOWTRANSPARENCE, StarAttribute::SDRATTR_SHADOW3D, StarAttribute::SDRATTR_SHADOWPERSP, StarAttribute::SDRATTR_SHADOWRESERVE1,
-        StarAttribute::SDRATTR_SHADOWRESERVE2, StarAttribute::SDRATTR_SHADOWRESERVE3, StarAttribute::SDRATTR_SHADOWRESERVE4, StarAttribute::SDRATTR_SHADOWRESERVE5,
-        StarAttribute::SDRATTR_SET_SHADOW, StarAttribute::SDRATTR_CAPTIONTYPE, StarAttribute::SDRATTR_CAPTIONFIXEDANGLE, StarAttribute::SDRATTR_CAPTIONANGLE,
-        StarAttribute::SDRATTR_CAPTIONGAP, StarAttribute::SDRATTR_CAPTIONESCDIR, StarAttribute::SDRATTR_CAPTIONESCISREL, StarAttribute::SDRATTR_CAPTIONESCREL,
-
-        StarAttribute::SDRATTR_CAPTIONESCABS, StarAttribute::SDRATTR_CAPTIONLINELEN, StarAttribute::SDRATTR_CAPTIONFITLINELEN, StarAttribute::SDRATTR_CAPTIONRESERVE1,
-        StarAttribute::SDRATTR_CAPTIONRESERVE2, StarAttribute::SDRATTR_CAPTIONRESERVE3, StarAttribute::SDRATTR_CAPTIONRESERVE4, StarAttribute::SDRATTR_CAPTIONRESERVE5,
-        StarAttribute::SDRATTR_SET_CAPTION, StarAttribute::SDRATTR_SET_OUTLINER, StarAttribute::SDRATTR_ECKENRADIUS, StarAttribute::SDRATTR_TEXT_MINFRAMEHEIGHT,
-        StarAttribute::SDRATTR_TEXT_AUTOGROWHEIGHT, StarAttribute::SDRATTR_TEXT_FITTOSIZE, StarAttribute::SDRATTR_TEXT_LEFTDIST, StarAttribute::SDRATTR_TEXT_RIGHTDIST,
-        StarAttribute::SDRATTR_TEXT_UPPERDIST, StarAttribute::SDRATTR_TEXT_LOWERDIST, StarAttribute::SDRATTR_TEXT_VERTADJUST, StarAttribute::SDRATTR_TEXT_MAXFRAMEHEIGHT,
-
-        StarAttribute::SDRATTR_TEXT_MINFRAMEWIDTH, StarAttribute::SDRATTR_TEXT_MAXFRAMEWIDTH, StarAttribute::SDRATTR_TEXT_AUTOGROWWIDTH, StarAttribute::SDRATTR_TEXT_HORZADJUST,
-        StarAttribute::SDRATTR_TEXT_ANIKIND, StarAttribute::SDRATTR_TEXT_ANIDIRECTION, StarAttribute::SDRATTR_TEXT_ANISTARTINSIDE, StarAttribute::SDRATTR_TEXT_ANISTOPINSIDE,
-        StarAttribute::SDRATTR_TEXT_ANICOUNT, StarAttribute::SDRATTR_TEXT_ANIDELAY, StarAttribute::SDRATTR_TEXT_ANIAMOUNT, StarAttribute::SDRATTR_TEXT_CONTOURFRAME,
-        StarAttribute::SDRATTR_AUTOSHAPE_ADJUSTMENT, StarAttribute::SDRATTR_XMLATTRIBUTES, StarAttribute::SDRATTR_RESERVE15, StarAttribute::SDRATTR_RESERVE16,
-        StarAttribute::SDRATTR_RESERVE17, StarAttribute::SDRATTR_RESERVE18, StarAttribute::SDRATTR_RESERVE19, StarAttribute::SDRATTR_SET_MISC,
-
-        StarAttribute::SDRATTR_EDGEKIND, StarAttribute::SDRATTR_EDGENODE1HORZDIST, StarAttribute::SDRATTR_EDGENODE1VERTDIST, StarAttribute::SDRATTR_EDGENODE2HORZDIST,
-        StarAttribute::SDRATTR_EDGENODE2VERTDIST, StarAttribute::SDRATTR_EDGENODE1GLUEDIST, StarAttribute::SDRATTR_EDGENODE2GLUEDIST, StarAttribute::SDRATTR_EDGELINEDELTAANZ,
-        StarAttribute::SDRATTR_EDGELINE1DELTA, StarAttribute::SDRATTR_EDGELINE2DELTA, StarAttribute::SDRATTR_EDGELINE3DELTA, StarAttribute::SDRATTR_EDGERESERVE02,
-        StarAttribute::SDRATTR_EDGERESERVE03, StarAttribute::SDRATTR_EDGERESERVE04, StarAttribute::SDRATTR_EDGERESERVE05, StarAttribute::SDRATTR_EDGERESERVE06,
-        StarAttribute::SDRATTR_EDGERESERVE07, StarAttribute::SDRATTR_EDGERESERVE08, StarAttribute::SDRATTR_EDGERESERVE09, StarAttribute::SDRATTR_SET_EDGE,
-
-        StarAttribute::SDRATTR_MEASUREKIND, StarAttribute::SDRATTR_MEASURETEXTHPOS, StarAttribute::SDRATTR_MEASURETEXTVPOS, StarAttribute::SDRATTR_MEASURELINEDIST,
-        StarAttribute::SDRATTR_MEASUREHELPLINEOVERHANG, StarAttribute::SDRATTR_MEASUREHELPLINEDIST, StarAttribute::SDRATTR_MEASUREHELPLINE1LEN, StarAttribute::SDRATTR_MEASUREHELPLINE2LEN,
-        StarAttribute::SDRATTR_MEASUREBELOWREFEDGE, StarAttribute::SDRATTR_MEASURETEXTROTA90, StarAttribute::SDRATTR_MEASURETEXTUPSIDEDOWN, StarAttribute::SDRATTR_MEASUREOVERHANG,
-        StarAttribute::SDRATTR_MEASUREUNIT, StarAttribute::SDRATTR_MEASURESCALE, StarAttribute::SDRATTR_MEASURESHOWUNIT, StarAttribute::SDRATTR_MEASUREFORMATSTRING,
-        StarAttribute::SDRATTR_MEASURETEXTAUTOANGLE, StarAttribute::SDRATTR_MEASURETEXTAUTOANGLEVIEW, StarAttribute::SDRATTR_MEASURETEXTISFIXEDANGLE, StarAttribute::SDRATTR_MEASURETEXTFIXEDANGLE,
-        // 1167
-        StarAttribute::SDRATTR_MEASUREDECIMALPLACES, StarAttribute::SDRATTR_MEASURERESERVE05, StarAttribute::SDRATTR_MEASURERESERVE06, StarAttribute::SDRATTR_MEASURERESERVE07,
-        StarAttribute::SDRATTR_SET_MEASURE, StarAttribute::SDRATTR_CIRCKIND, StarAttribute::SDRATTR_CIRCSTARTANGLE, StarAttribute::SDRATTR_CIRCENDANGLE,
-        StarAttribute::SDRATTR_CIRCRESERVE0, StarAttribute::SDRATTR_CIRCRESERVE1, StarAttribute::SDRATTR_CIRCRESERVE2, StarAttribute::SDRATTR_CIRCRESERVE3,
-        StarAttribute::SDRATTR_SET_CIRC, StarAttribute::SDRATTR_OBJMOVEPROTECT, StarAttribute::SDRATTR_OBJSIZEPROTECT, StarAttribute::SDRATTR_OBJPRINTABLE,
-        StarAttribute::SDRATTR_LAYERID, StarAttribute::SDRATTR_LAYERNAME, StarAttribute::SDRATTR_OBJECTNAME, StarAttribute::SDRATTR_ALLPOSITIONX,
-
-        StarAttribute::SDRATTR_ALLPOSITIONY, StarAttribute::SDRATTR_ALLSIZEWIDTH, StarAttribute::SDRATTR_ALLSIZEHEIGHT, StarAttribute::SDRATTR_ONEPOSITIONX,
-        StarAttribute::SDRATTR_ONEPOSITIONY, StarAttribute::SDRATTR_ONESIZEWIDTH, StarAttribute::SDRATTR_ONESIZEHEIGHT, StarAttribute::SDRATTR_LOGICSIZEWIDTH,
-        StarAttribute::SDRATTR_LOGICSIZEHEIGHT, StarAttribute::SDRATTR_ROTATEANGLE, StarAttribute::SDRATTR_SHEARANGLE, StarAttribute::SDRATTR_MOVEX,
-        StarAttribute::SDRATTR_MOVEY, StarAttribute::SDRATTR_RESIZEXONE, StarAttribute::SDRATTR_RESIZEYONE, StarAttribute::SDRATTR_ROTATEONE,
-        StarAttribute::SDRATTR_HORZSHEARONE, StarAttribute::SDRATTR_VERTSHEARONE, StarAttribute::SDRATTR_RESIZEXALL, StarAttribute::SDRATTR_RESIZEYALL,
-
-        StarAttribute::SDRATTR_ROTATEALL, StarAttribute::SDRATTR_HORZSHEARALL, StarAttribute::SDRATTR_VERTSHEARALL, StarAttribute::SDRATTR_TRANSFORMREF1X,
-        StarAttribute::SDRATTR_TRANSFORMREF1Y, StarAttribute::SDRATTR_TRANSFORMREF2X, StarAttribute::SDRATTR_TRANSFORMREF2Y, StarAttribute::SDRATTR_TEXTDIRECTION,
-        StarAttribute::SDRATTR_NOTPERSISTRESERVE2, StarAttribute::SDRATTR_NOTPERSISTRESERVE3, StarAttribute::SDRATTR_NOTPERSISTRESERVE4, StarAttribute::SDRATTR_NOTPERSISTRESERVE5,
-        StarAttribute::SDRATTR_NOTPERSISTRESERVE6, StarAttribute::SDRATTR_NOTPERSISTRESERVE7, StarAttribute::SDRATTR_NOTPERSISTRESERVE8, StarAttribute::SDRATTR_NOTPERSISTRESERVE9,
-        StarAttribute::SDRATTR_NOTPERSISTRESERVE10, StarAttribute::SDRATTR_NOTPERSISTRESERVE11, StarAttribute::SDRATTR_NOTPERSISTRESERVE12, StarAttribute::SDRATTR_NOTPERSISTRESERVE13,
-
-        StarAttribute::SDRATTR_NOTPERSISTRESERVE14, StarAttribute::SDRATTR_NOTPERSISTRESERVE15, StarAttribute::SDRATTR_GRAFRED, StarAttribute::SDRATTR_GRAFGREEN,
-        StarAttribute::SDRATTR_GRAFBLUE, StarAttribute::SDRATTR_GRAFLUMINANCE, StarAttribute::SDRATTR_GRAFCONTRAST, StarAttribute::SDRATTR_GRAFGAMMA,
-        StarAttribute::SDRATTR_GRAFTRANSPARENCE, StarAttribute::SDRATTR_GRAFINVERT, StarAttribute::SDRATTR_GRAFMODE, StarAttribute::SDRATTR_GRAFCROP,
-        StarAttribute::SDRATTR_GRAFRESERVE3, StarAttribute::SDRATTR_GRAFRESERVE4, StarAttribute::SDRATTR_GRAFRESERVE5, StarAttribute::SDRATTR_GRAFRESERVE6,
-        StarAttribute::SDRATTR_SET_GRAF, StarAttribute::SDRATTR_3DOBJ_PERCENT_DIAGONAL, StarAttribute::SDRATTR_3DOBJ_BACKSCALE, StarAttribute::SDRATTR_3DOBJ_DEPTH,
-
-        StarAttribute::SDRATTR_3DOBJ_HORZ_SEGS, StarAttribute::SDRATTR_3DOBJ_VERT_SEGS, StarAttribute::SDRATTR_3DOBJ_END_ANGLE, StarAttribute::SDRATTR_3DOBJ_DOUBLE_SIDED,
-        StarAttribute::SDRATTR_3DOBJ_NORMALS_KIND, StarAttribute::SDRATTR_3DOBJ_NORMALS_INVERT, StarAttribute::SDRATTR_3DOBJ_TEXTURE_PROJ_X, StarAttribute::SDRATTR_3DOBJ_TEXTURE_PROJ_Y,
-        StarAttribute::SDRATTR_3DOBJ_SHADOW_3D, StarAttribute::SDRATTR_3DOBJ_MAT_COLOR, StarAttribute::SDRATTR_3DOBJ_MAT_EMISSION, StarAttribute::SDRATTR_3DOBJ_MAT_SPECULAR,
-        StarAttribute::SDRATTR_3DOBJ_MAT_SPECULAR_INTENSITY, StarAttribute::SDRATTR_3DOBJ_TEXTURE_KIND, StarAttribute::SDRATTR_3DOBJ_TEXTURE_MODE, StarAttribute::SDRATTR_3DOBJ_TEXTURE_FILTER,
-        StarAttribute::SDRATTR_3DOBJ_SMOOTH_NORMALS, StarAttribute::SDRATTR_3DOBJ_SMOOTH_LIDS, StarAttribute::SDRATTR_3DOBJ_CHARACTER_MODE, StarAttribute::SDRATTR_3DOBJ_CLOSE_FRONT,
-        //1267
-        StarAttribute::SDRATTR_3DOBJ_CLOSE_BACK, StarAttribute::SDRATTR_3DOBJ_RESERVED_06, StarAttribute::SDRATTR_3DOBJ_RESERVED_07, StarAttribute::SDRATTR_3DOBJ_RESERVED_08,
-        StarAttribute::SDRATTR_3DOBJ_RESERVED_09, StarAttribute::SDRATTR_3DOBJ_RESERVED_10, StarAttribute::SDRATTR_3DOBJ_RESERVED_11, StarAttribute::SDRATTR_3DOBJ_RESERVED_12,
-        StarAttribute::SDRATTR_3DOBJ_RESERVED_13, StarAttribute::SDRATTR_3DOBJ_RESERVED_14, StarAttribute::SDRATTR_3DOBJ_RESERVED_15, StarAttribute::SDRATTR_3DOBJ_RESERVED_16,
-        StarAttribute::SDRATTR_3DOBJ_RESERVED_17, StarAttribute::SDRATTR_3DOBJ_RESERVED_18, StarAttribute::SDRATTR_3DOBJ_RESERVED_19, StarAttribute::SDRATTR_3DOBJ_RESERVED_20,
-        StarAttribute::SDRATTR_3DSCENE_PERSPECTIVE, StarAttribute::SDRATTR_3DSCENE_DISTANCE, StarAttribute::SDRATTR_3DSCENE_FOCAL_LENGTH, StarAttribute::SDRATTR_3DSCENE_TWO_SIDED_LIGHTING,
-
-        StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_1, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_2, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_3, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_4,
-        StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_5, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_6, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_7, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_8,
-        StarAttribute::SDRATTR_3DSCENE_AMBIENTCOLOR, StarAttribute::SDRATTR_3DSCENE_LIGHTON_1, StarAttribute::SDRATTR_3DSCENE_LIGHTON_2, StarAttribute::SDRATTR_3DSCENE_LIGHTON_3,
-        StarAttribute::SDRATTR_3DSCENE_LIGHTON_4, StarAttribute::SDRATTR_3DSCENE_LIGHTON_5, StarAttribute::SDRATTR_3DSCENE_LIGHTON_6, StarAttribute::SDRATTR_3DSCENE_LIGHTON_7,
-        StarAttribute::SDRATTR_3DSCENE_LIGHTON_8, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_1, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_2, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_3,
-
-        StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_4, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_5, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_6, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_7,
-        StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_8, StarAttribute::SDRATTR_3DSCENE_SHADOW_SLANT, StarAttribute::SDRATTR_3DSCENE_SHADE_MODE, StarAttribute::SDRATTR_3DSCENE_RESERVED_01,
-        StarAttribute::SDRATTR_3DSCENE_RESERVED_02, StarAttribute::SDRATTR_3DSCENE_RESERVED_03, StarAttribute::SDRATTR_3DSCENE_RESERVED_04, StarAttribute::SDRATTR_3DSCENE_RESERVED_05,
-        StarAttribute::SDRATTR_3DSCENE_RESERVED_06, StarAttribute::SDRATTR_3DSCENE_RESERVED_07, StarAttribute::SDRATTR_3DSCENE_RESERVED_08, StarAttribute::SDRATTR_3DSCENE_RESERVED_09,
-        StarAttribute::SDRATTR_3DSCENE_RESERVED_10, StarAttribute::SDRATTR_3DSCENE_RESERVED_11, StarAttribute::SDRATTR_3DSCENE_RESERVED_12, StarAttribute::SDRATTR_3DSCENE_RESERVED_13,
-
-        StarAttribute::SDRATTR_3DSCENE_RESERVED_14, StarAttribute::SDRATTR_3DSCENE_RESERVED_15, StarAttribute::SDRATTR_3DSCENE_RESERVED_16, StarAttribute::SDRATTR_3DSCENE_RESERVED_17,
-        StarAttribute::SDRATTR_3DSCENE_RESERVED_18, StarAttribute::SDRATTR_3DSCENE_RESERVED_19, StarAttribute::SDRATTR_3DSCENE_RESERVED_20 /* 1333*/
-      };
-      for (int i=0; i<int(sizeof(what)/sizeof(int)); ++i)
-        m_idToAttributeList.push_back(what[i]);
-    }
+    init(type);
   }
   //! returns true if the value is in expected range
   int isInRange(int which) const
@@ -685,6 +372,8 @@ struct State {
   }
   //! the document
   StarDocument &m_document;
+  //! the document type
+  StarItemPool::Type m_type;
   //! the majorVersion
   int m_majorVersion;
   //! the minorVersion
@@ -708,12 +397,365 @@ private:
   State operator=(State const &orig);
 };
 
+void State::init(StarItemPool::Type type)
+{
+  if (type==m_type) return;
+  if (m_type!=StarItemPool::T_Unknown) {
+    STOFF_DEBUG_MSG(("StarItemPoolInternal::State::init: arghhhh, change pool type\n"));
+  }
+  m_type=type;
+  // reset internal data
+  m_verStart=m_verEnd=m_currentVersion=0;
+  m_versionList.clear();
+  m_idToAttributeList.clear();
+
+  // to do VCControls
+  switch (type) {
+  case StarItemPool::T_ChartPool: {
+    // sch_itempool.cxx SchItemPool::SchItemPool
+    m_verStart=1; // SCHATTR_START
+    m_verEnd=100; // SCHATTR_NONPERSISTENT_START
+    // svx_eerdll.cxx GlobalEditData::GetDefItems
+    static int const(what[])= {
+      StarAttribute::ATTR_SCH_DATADESCR_DESCR, StarAttribute::ATTR_SCH_DATADESCR_SHOW_SYM, StarAttribute::ATTR_SCH_LEGEND_POS, StarAttribute::ATTR_SCH_TEXT_ORIENT,
+      StarAttribute::ATTR_SCH_TEXT_ORDER, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MIN, StarAttribute::ATTR_SCH_Y_AXIS_MIN, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MAX,
+      StarAttribute::ATTR_SCH_Y_AXIS_MAX, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_STEP_MAIN, StarAttribute::ATTR_SCH_Y_AXIS_STEP_MAIN, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_STEP_HELP,
+      StarAttribute::ATTR_SCH_Y_AXIS_STEP_HELP, StarAttribute::ATTR_SCH_Y_AXIS_LOGARITHM, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_ORIGIN, StarAttribute::ATTR_SCH_Y_AXIS_ORIGIN,
+      StarAttribute::ATTR_SCH_X_AXIS_AUTO_MIN, StarAttribute::ATTR_SCH_X_AXIS_MIN, StarAttribute::ATTR_SCH_X_AXIS_AUTO_MAX, StarAttribute::ATTR_SCH_X_AXIS_MAX,
+
+      StarAttribute::ATTR_SCH_X_AXIS_AUTO_STEP_MAIN, StarAttribute::ATTR_SCH_X_AXIS_STEP_MAIN, StarAttribute::ATTR_SCH_X_AXIS_AUTO_STEP_HELP, StarAttribute::ATTR_SCH_X_AXIS_STEP_HELP,
+      StarAttribute::ATTR_SCH_X_AXIS_LOGARITHM, StarAttribute::ATTR_SCH_X_AXIS_AUTO_ORIGIN, StarAttribute::ATTR_SCH_X_AXIS_ORIGIN, StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MIN,
+      StarAttribute::ATTR_SCH_Z_AXIS_MIN, StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MAX, StarAttribute::ATTR_SCH_Z_AXIS_MAX, StarAttribute::ATTR_SCH_Z_AXIS_AUTO_STEP_MAIN,
+      StarAttribute::ATTR_SCH_Z_AXIS_STEP_MAIN, StarAttribute::ATTR_SCH_Z_AXIS_AUTO_STEP_HELP, StarAttribute::ATTR_SCH_Z_AXIS_STEP_HELP, StarAttribute::ATTR_SCH_Z_AXIS_LOGARITHM,
+      StarAttribute::ATTR_SCH_Z_AXIS_AUTO_ORIGIN, StarAttribute::ATTR_SCH_Z_AXIS_ORIGIN, StarAttribute::ATTR_SCH_AXISTYPE, StarAttribute::ATTR_SCH_DUMMY0,
+
+      StarAttribute::ATTR_SCH_DUMMY1, StarAttribute::ATTR_SCH_DUMMY2, StarAttribute::ATTR_SCH_DUMMY3, StarAttribute::ATTR_SCH_DUMMY_END,
+      StarAttribute::ATTR_SCH_STAT_AVERAGE, StarAttribute::ATTR_SCH_STAT_KIND_ERROR, StarAttribute::ATTR_SCH_STAT_PERCENT, StarAttribute::ATTR_SCH_STAT_BIGERROR,
+      StarAttribute::ATTR_SCH_STAT_CONSTPLUS, StarAttribute::ATTR_SCH_STAT_CONSTMINUS, StarAttribute::ATTR_SCH_STAT_REGRESSTYPE, StarAttribute::ATTR_SCH_STAT_INDICATE,
+      StarAttribute::ATTR_SCH_TEXT_DEGREES, StarAttribute::ATTR_SCH_TEXT_OVERLAP, StarAttribute::ATTR_SCH_TEXT_DUMMY0, StarAttribute::ATTR_SCH_TEXT_DUMMY1,
+      StarAttribute::ATTR_SCH_TEXT_DUMMY2, StarAttribute::ATTR_SCH_TEXT_DUMMY3, StarAttribute::ATTR_SCH_STYLE_DEEP, StarAttribute::ATTR_SCH_STYLE_3D,
+
+      StarAttribute::ATTR_SCH_STYLE_VERTICAL, StarAttribute::ATTR_SCH_STYLE_BASETYPE, StarAttribute::ATTR_SCH_STYLE_LINES, StarAttribute::ATTR_SCH_STYLE_PERCENT,
+      StarAttribute::ATTR_SCH_STYLE_STACKED, StarAttribute::ATTR_SCH_STYLE_SPLINES, StarAttribute::ATTR_SCH_STYLE_SYMBOL, StarAttribute::ATTR_SCH_STYLE_SHAPE,
+      StarAttribute::ATTR_SCH_AXIS, StarAttribute::ATTR_SCH_AXIS_AUTO_MIN, StarAttribute::ATTR_SCH_AXIS_MIN, StarAttribute::ATTR_SCH_AXIS_AUTO_MAX,
+      StarAttribute::ATTR_SCH_AXIS_MAX, StarAttribute::ATTR_SCH_AXIS_AUTO_STEP_MAIN, StarAttribute::ATTR_SCH_AXIS_STEP_MAIN, StarAttribute::ATTR_SCH_AXIS_AUTO_STEP_HELP,
+      StarAttribute::ATTR_SCH_AXIS_STEP_HELP, StarAttribute::ATTR_SCH_AXIS_LOGARITHM, StarAttribute::ATTR_SCH_AXIS_AUTO_ORIGIN, StarAttribute::ATTR_SCH_AXIS_ORIGIN,
+
+      StarAttribute::ATTR_SCH_AXIS_TICKS, StarAttribute::ATTR_SCH_AXIS_NUMFMT, StarAttribute::ATTR_SCH_AXIS_NUMFMTPERCENT, StarAttribute::ATTR_SCH_AXIS_SHOWAXIS,
+      StarAttribute::ATTR_SCH_AXIS_SHOWDESCR, StarAttribute::ATTR_SCH_AXIS_SHOWMAINGRID, StarAttribute::ATTR_SCH_AXIS_SHOWHELPGRID, StarAttribute::ATTR_SCH_AXIS_TOPDOWN,
+      StarAttribute::ATTR_SCH_AXIS_HELPTICKS, StarAttribute::ATTR_SCH_AXIS_DUMMY0, StarAttribute::ATTR_SCH_AXIS_DUMMY1, StarAttribute::ATTR_SCH_AXIS_DUMMY2,
+      StarAttribute::ATTR_SCH_AXIS_DUMMY3, StarAttribute::ATTR_SCH_BAR_OVERLAP, StarAttribute::ATTR_SCH_BAR_GAPWIDTH, StarAttribute::ATTR_SCH_SYMBOL_BRUSH,
+      StarAttribute::ATTR_SCH_STOCK_VOLUME, StarAttribute::ATTR_SCH_STOCK_UPDOWN, StarAttribute::ATTR_SCH_SYMBOL_SIZE, StarAttribute::ATTR_SCH_USER_DEFINED_ATTR
+    };
+
+    for (int i=0; i<int(sizeof(what)/sizeof(int)); ++i)
+      m_idToAttributeList.push_back(what[i]);
+    break;
+  }
+  case StarItemPool::T_EditEnginePool: {
+    m_verStart=3989;
+    m_verEnd=4037;
+    // svx_editdoc.cxx
+    std::vector<int> list;
+    for (int i = 0; i <= 14; ++i) list.push_back(3999+i);
+    for (int i = 15; i <= 17; ++i) list.push_back(3999+i+4);
+    addVersionMap(1, 3999, list);
+
+    list.clear();
+    for (int i = 0; i <= 17; ++i) list.push_back(3999+i);
+    for (int i=18; i<=20; ++i)  list.push_back(3999+i+1);
+    addVersionMap(2, 3999, list);
+
+    list.clear();
+    for (int i = 0; i <= 10; ++i) list.push_back(3997+i);
+    for (int i=11; i<=23; ++i)  list.push_back(3997+i+1);
+    addVersionMap(3, 3997, list);
+
+    list.clear();
+    for (int i = 0; i <= 24; ++i) list.push_back(3994+i);
+    for (int i=25; i<=28; ++i)  list.push_back(3994+i+15);
+    addVersionMap(4, 3994, list);
+    // svx_eerdll.cxx GlobalEditData::GetDefItems
+    static int const(what[])= {
+      StarAttribute::ATTR_SC_WRITINGDIR, StarAttribute::ATTR_EE_PARA_XMLATTRIBS, StarAttribute::ATTR_PARA_HANGINGPUNCTUATION, StarAttribute::ATTR_PARA_FORBIDDEN_RULES,
+      StarAttribute::ATTR_EE_PARA_ASIANCJKSPACING, StarAttribute::ATTR_EE_PARA_NUMBULLET, StarAttribute::ATTR_SC_HYPHENATE, StarAttribute::ATTR_EE_PARA_BULLETSTATE,
+      StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE, StarAttribute::ATTR_EE_PARA_OUTLLEVEL, StarAttribute::ATTR_EE_PARA_BULLET, StarAttribute::ATTR_FRM_LR_SPACE,
+      StarAttribute::ATTR_FRM_UL_SPACE, StarAttribute::ATTR_PARA_LINESPACING, StarAttribute::ATTR_PARA_ADJUST, StarAttribute::ATTR_PARA_TABSTOP,
+      StarAttribute::ATTR_CHR_COLOR, StarAttribute::ATTR_CHR_FONT, StarAttribute::ATTR_CHR_FONTSIZE, StarAttribute::ATTR_EE_CHR_SCALEW,
+
+      StarAttribute::ATTR_CHR_WEIGHT, StarAttribute::ATTR_CHR_UNDERLINE, StarAttribute::ATTR_CHR_CROSSEDOUT, StarAttribute::ATTR_CHR_POSTURE,
+      StarAttribute::ATTR_CHR_CONTOUR, StarAttribute::ATTR_CHR_SHADOWED, StarAttribute::ATTR_CHR_ESCAPEMENT, StarAttribute::ATTR_CHR_AUTOKERN,
+      StarAttribute::ATTR_CHR_KERNING, StarAttribute::ATTR_CHR_WORDLINEMODE, StarAttribute::ATTR_CHR_LANGUAGE, StarAttribute::ATTR_CHR_CJK_LANGUAGE,
+      StarAttribute::ATTR_CHR_CTL_LANGUAGE, StarAttribute::ATTR_CHR_CJK_FONT, StarAttribute::ATTR_CHR_CTL_FONT, StarAttribute::ATTR_CHR_CJK_FONTSIZE,
+      StarAttribute::ATTR_CHR_CTL_FONTSIZE, StarAttribute::ATTR_CHR_CJK_WEIGHT, StarAttribute::ATTR_CHR_CTL_WEIGHT, StarAttribute::ATTR_CHR_CJK_POSTURE,
+
+      StarAttribute::ATTR_CHR_CTL_POSTURE, StarAttribute::ATTR_CHR_EMPHASIS_MARK, StarAttribute::ATTR_CHR_RELIEF, StarAttribute::ATTR_EE_CHR_RUBI_DUMMY,
+      StarAttribute::ATTR_EE_CHR_XMLATTRIBS, StarAttribute::ATTR_EE_FEATURE_TAB, StarAttribute::ATTR_EE_FEATURE_LINEBR, StarAttribute::ATTR_CHR_CHARSETCOLOR,
+      StarAttribute::ATTR_EE_FEATURE_FIELD
+    };
+    for (int i=0; i<int(sizeof(what)/sizeof(int)); ++i)
+      m_idToAttributeList.push_back(what[i]);
+    break;
+  }
+  case StarItemPool::T_SpreadsheetPool: {
+    // sc_docpool.cxx
+    m_verStart=100; // ATTR_STARTINDEX
+    m_verEnd=183; // ATTR_ENDINDEX
+
+    std::vector<int> list;
+    for (int i = 0; i <= 17; i++) list.push_back(100+i);
+    for (int i = 18; i <= 57; i++) list.push_back(100+i+1);
+    addVersionMap(1, 100, list);
+
+    list.clear();
+    for (int i = 0; i <= 23; i++) list.push_back(100+i);
+    for (int i = 24; i <= 58; i++) list.push_back(100+i+2);
+    addVersionMap(2, 100, list);
+
+    list.clear();
+    for (int i = 0; i <= 10; i++) list.push_back(100+i);
+    for (int i = 11; i <= 60; i++) list.push_back(100+i+1);
+    addVersionMap(3, 100, list);
+
+    list.clear();
+    for (int i = 0; i <= 13; i++) list.push_back(100+i);
+    for (int i = 14; i <= 61; i++) list.push_back(100+i+2);
+    addVersionMap(4, 100, list);
+
+    list.clear();
+    for (int i = 0; i <= 9; i++) list.push_back(100+i);
+    for (int i = 10; i <= 63; i++) list.push_back(100+i+12);
+    addVersionMap(5, 100, list);
+
+    list.clear();
+    for (int i = 0; i <= 21; i++) list.push_back(100+i);
+    for (int i = 22; i <= 75; i++) list.push_back(100+i+3);
+    addVersionMap(6, 100, list);
+
+    list.clear();
+    for (int i = 0; i <= 21; i++) list.push_back(100+i);
+    for (int i = 22; i <= 78; i++) list.push_back(100+i+3);
+    addVersionMap(7, 100, list);
+
+    list.clear();
+    for (int i = 0; i <= 33; i++) list.push_back(100+i);
+    for (int i = 34; i <= 81; i++) list.push_back(100+i+1);
+    addVersionMap(8, 100, list);
+
+    list.clear();
+    for (int i = 0; i <= 34; i++) list.push_back(100+i);
+    for (int i = 35; i <= 82; i++) list.push_back(100+i+1);
+    addVersionMap(9, 100, list);
+    static int const(what[])= {
+      StarAttribute::ATTR_CHR_FONT, StarAttribute::ATTR_CHR_FONTSIZE, StarAttribute::ATTR_CHR_WEIGHT, StarAttribute::ATTR_CHR_POSTURE,
+      StarAttribute::ATTR_CHR_UNDERLINE, StarAttribute::ATTR_CHR_CROSSEDOUT, StarAttribute::ATTR_CHR_CONTOUR, StarAttribute::ATTR_CHR_SHADOWED,
+      StarAttribute::ATTR_CHR_COLOR, StarAttribute::ATTR_CHR_LANGUAGE, StarAttribute::ATTR_CHR_CJK_FONT, StarAttribute::ATTR_CHR_CJK_FONTSIZE,
+      StarAttribute::ATTR_CHR_CJK_WEIGHT, StarAttribute::ATTR_CHR_CJK_POSTURE, StarAttribute::ATTR_CHR_CJK_LANGUAGE, StarAttribute::ATTR_CHR_CTL_FONT,
+      StarAttribute::ATTR_CHR_CTL_FONTSIZE, StarAttribute::ATTR_CHR_CTL_WEIGHT, StarAttribute::ATTR_CHR_CTL_POSTURE, StarAttribute::ATTR_CHR_CTL_LANGUAGE,
+
+      StarAttribute::ATTR_CHR_EMPHASIS_MARK, StarAttribute::ATTR_SC_USERDEF, StarAttribute::ATTR_CHR_WORDLINEMODE, StarAttribute::ATTR_CHR_RELIEF,
+      StarAttribute::ATTR_SC_HYPHENATE, StarAttribute::ATTR_PARA_SCRIPTSPACE, StarAttribute::ATTR_PARA_HANGINGPUNCTUATION, StarAttribute::ATTR_PARA_FORBIDDEN_RULES,
+      StarAttribute::ATTR_SC_HORJUSTIFY, StarAttribute::ATTR_SC_INDENT, StarAttribute::ATTR_SC_VERJUSTIFY, StarAttribute::ATTR_SC_ORIENTATION,
+      StarAttribute::ATTR_SC_ROTATE_VALUE, StarAttribute::ATTR_SC_ROTATE_MODE, StarAttribute::ATTR_SC_VERTICAL_ASIAN, StarAttribute::ATTR_SC_WRITINGDIR,
+      StarAttribute::ATTR_SC_LINEBREAK, StarAttribute::ATTR_SC_MARGIN, StarAttribute::ATTR_SC_MERGE, StarAttribute::ATTR_SC_MERGE_FLAG,
+
+      StarAttribute::ATTR_SC_VALUE_FORMAT, StarAttribute::ATTR_SC_LANGUAGE_FORMAT, StarAttribute::ATTR_FRM_BACKGROUND, StarAttribute::ATTR_SC_PROTECTION,
+      StarAttribute::ATTR_SC_BORDER, StarAttribute::ATTR_SC_BORDER_INNER, StarAttribute::ATTR_FRM_SHADOW, StarAttribute::ATTR_SC_VALIDDATA,
+      StarAttribute::ATTR_SC_CONDITIONAL, StarAttribute::ATTR_SC_PATTERN, StarAttribute::ATTR_FRM_LR_SPACE, StarAttribute::ATTR_FRM_UL_SPACE,
+      StarAttribute::ATTR_SC_PAGE, StarAttribute::ATTR_SC_PAGE_PAPERTRAY, StarAttribute::ATTR_FRM_PAPER_BIN, StarAttribute::ATTR_SC_PAGE_SIZE,
+      StarAttribute::ATTR_SC_PAGE_MAXSIZE, StarAttribute::ATTR_SC_PAGE_HORCENTER, StarAttribute::ATTR_SC_PAGE_VERCENTER, StarAttribute::ATTR_SC_PAGE_ON,
+
+      StarAttribute::ATTR_SC_PAGE_DYNAMIC, StarAttribute::ATTR_SC_PAGE_SHARED, StarAttribute::ATTR_SC_PAGE_NOTES, StarAttribute::ATTR_SC_PAGE_GRID,
+      StarAttribute::ATTR_SC_PAGE_HEADERS, StarAttribute::ATTR_SC_PAGE_CHARTS, StarAttribute::ATTR_SC_PAGE_OBJECTS, StarAttribute::ATTR_SC_PAGE_DRAWINGS,
+      StarAttribute::ATTR_SC_PAGE_TOPDOWN, StarAttribute::ATTR_SC_PAGE_SCALE, StarAttribute::ATTR_SC_PAGE_SCALETOPAGES, StarAttribute::ATTR_SC_PAGE_FIRSTPAGENO,
+      StarAttribute::ATTR_SC_PAGE_PRINTAREA, StarAttribute::ATTR_SC_PAGE_REPEATROW, StarAttribute::ATTR_SC_PAGE_REPEATCOL, StarAttribute::ATTR_SC_PAGE_PRINTTABLES,
+      StarAttribute::ATTR_SC_PAGE_HEADERLEFT, StarAttribute::ATTR_SC_PAGE_FOOTERLEFT, StarAttribute::ATTR_SC_PAGE_HEADERRIGHT, StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT,
+      StarAttribute::ATTR_SC_PAGE_HEADERSET, StarAttribute::ATTR_SC_PAGE_FOOTERSET, StarAttribute::ATTR_SC_PAGE_FORMULAS, StarAttribute::ATTR_SC_PAGE_NULLVALS
+    };
+    for (int i=0; i<int(sizeof(what)/sizeof(int)); ++i)
+      m_idToAttributeList.push_back(what[i]);
+    break;
+  }
+  case StarItemPool::T_VCControlPool: // never seens with data, so
+    break;
+  case StarItemPool::T_WriterPool: {
+    // SwAttrPool::SwAttrPool set default map
+    m_verStart=1; //POOLATTR_BEGIN
+    m_verEnd=130; //POOLATTR_END-1
+    for (int i=StarAttribute::ATTR_CHR_CASEMAP; i<=StarAttribute::ATTR_BOX_VALUE; ++i)
+      m_idToAttributeList.push_back(i);
+    std::vector<int> list;
+    // sw_swatrset.cxx SwAttrPool::SwAttrPool and sw_init.cxx pVersionMap1
+    for (int i = 1; i <= 17; i++) list.push_back(i);
+    for (int i = 18; i <= 27; i++) list.push_back(i+5);
+    for (int i = 28; i <= 35; i++) list.push_back(i+7);
+    for (int i = 36; i <= 58; i++) list.push_back(i+10);
+    for (int i = 59; i <= 60; i++) list.push_back(i+12);
+    addVersionMap(1, 1, list);
+    list.clear();
+    for (int i = 1; i <= 70; i++) list.push_back(i);
+    for (int i = 71; i <= 75; i++) list.push_back(i+10);
+    addVersionMap(2, 1, list);
+    list.clear();
+    for (int i = 1; i <= 21; i++) list.push_back(i);
+    for (int i = 22; i <= 27; i++) list.push_back(i+15);
+    for (int i = 28; i <= 82; i++) list.push_back(i+20);
+    for (int i = 83; i <= 86; i++) list.push_back(i+35);
+    addVersionMap(3, 1, list);
+    list.clear();
+    for (int i = 1; i <= 65; i++) list.push_back(i);
+    for (int i = 66; i <= 121; i++) list.push_back(i+9);
+    addVersionMap(4, 1, list);
+    break;
+  }
+  case StarItemPool::T_XOutdevPool: {
+    // svx_xpool.cxx XOutdevItemPool::Ctor
+    m_verStart=1000;
+    m_verEnd=1333;
+    std::vector<int> list;
+    for (int i=1000; i<=1021; ++i) list.push_back(i);
+    for (int i=1022; i<=1039; ++i) list.push_back(i+13);
+    addVersionMap(1, 1000, list);
+
+    list.clear();
+    for (int i=1000; i<=1009; ++i) list.push_back(i);
+    for (int i=1010; i<=1015; ++i) list.push_back(i+7);
+    for (int i=1016; i<=1039; ++i) list.push_back(i+14);
+    for (int i=1040; i<=1050; ++i) list.push_back(i+22);
+    for (int i=1051; i<=1056; ++i) list.push_back(i+27);
+    for (int i=1057; i<=1065; ++i) list.push_back(i+52);
+    addVersionMap(2, 1000, list);
+
+    list.clear();
+    for (int i=1000; i<=1029; ++i) list.push_back(i);
+    for (int i=1030; i<=1123; ++i) list.push_back(i+17);
+    addVersionMap(3, 1000, list);
+
+    list.clear();
+    for (int i=1000; i<=1126; ++i) list.push_back(i);
+    for (int i=1127; i<=1140; ++i) list.push_back(i+45);
+    addVersionMap(4, 1000, list);
+
+    static int const(what[])= {
+      StarAttribute::XATTR_LINESTYLE, StarAttribute::XATTR_LINEDASH, StarAttribute::XATTR_LINEWIDTH, StarAttribute::XATTR_LINECOLOR,
+      StarAttribute::XATTR_LINESTART, StarAttribute::XATTR_LINEEND, StarAttribute::XATTR_LINESTARTWIDTH, StarAttribute::XATTR_LINEENDWIDTH,
+      StarAttribute::XATTR_LINESTARTCENTER, StarAttribute::XATTR_LINEENDCENTER, StarAttribute::XATTR_LINETRANSPARENCE, StarAttribute::XATTR_LINEJOINT,
+      StarAttribute::XATTR_LINERESERVED2, StarAttribute::XATTR_LINERESERVED3, StarAttribute::XATTR_LINERESERVED4,StarAttribute::XATTR_LINERESERVED5,
+      StarAttribute::XATTR_LINERESERVED_LAST, StarAttribute::XATTR_SET_LINE, StarAttribute::XATTR_FILLSTYLE, StarAttribute::XATTR_FILLCOLOR,
+
+      StarAttribute::XATTR_FILLGRADIENT, StarAttribute::XATTR_FILLHATCH, StarAttribute::XATTR_FILLBITMAP, StarAttribute::XATTR_FILLTRANSPARENCE,
+      StarAttribute::XATTR_GRADIENTSTEPCOUNT, StarAttribute::XATTR_FILLBMP_TILE, StarAttribute::XATTR_FILLBMP_POS, StarAttribute::XATTR_FILLBMP_SIZEX,
+      StarAttribute::XATTR_FILLBMP_SIZEY, StarAttribute::XATTR_FILLFLOATTRANSPARENCE, StarAttribute::XATTR_FILLRESERVED2, StarAttribute::XATTR_FILLBMP_SIZELOG,
+      StarAttribute::XATTR_FILLBMP_TILEOFFSETX, StarAttribute::XATTR_FILLBMP_TILEOFFSETY, StarAttribute::XATTR_FILLBMP_STRETCH, StarAttribute::XATTR_FILLRESERVED3,
+      StarAttribute::XATTR_FILLRESERVED4, StarAttribute::XATTR_FILLRESERVED5, StarAttribute::XATTR_FILLRESERVED6, StarAttribute::XATTR_FILLRESERVED7,
+
+      StarAttribute::XATTR_FILLRESERVED8, StarAttribute::XATTR_FILLBMP_POSOFFSETX, StarAttribute::XATTR_FILLBMP_POSOFFSETY, StarAttribute::XATTR_FILLBACKGROUND,
+      StarAttribute::XATTR_FILLRESERVED10, StarAttribute::XATTR_FILLRESERVED11, StarAttribute::XATTR_FILLRESERVED_LAST, StarAttribute::XATTR_SET_FILL,
+      StarAttribute::XATTR_FORMTXTSTYLE, StarAttribute::XATTR_FORMTXTADJUST, StarAttribute::XATTR_FORMTXTDISTANCE, StarAttribute::XATTR_FORMTXTSTART,
+      StarAttribute::XATTR_FORMTXTMIRROR, StarAttribute::XATTR_FORMTXTOUTLINE, StarAttribute::XATTR_FORMTXTSHADOW, StarAttribute::XATTR_FORMTXTSHDWCOLOR,
+      StarAttribute::XATTR_FORMTXTSHDWXVAL, StarAttribute::XATTR_FORMTXTSHDWYVAL, StarAttribute::XATTR_FORMTXTSTDFORM, StarAttribute::XATTR_FORMTXTHIDEFORM,
+
+      StarAttribute::XATTR_FORMTXTSHDWTRANSP, StarAttribute::XATTR_FTRESERVED2, StarAttribute::XATTR_FTRESERVED3, StarAttribute::XATTR_FTRESERVED4,
+      StarAttribute::XATTR_FTRESERVED5, StarAttribute::XATTR_FTRESERVED_LAST, StarAttribute::XATTR_SET_TEXT,
+
+      // SDR 1067...
+      StarAttribute::SDRATTR_SHADOW, StarAttribute::SDRATTR_SHADOWCOLOR, StarAttribute::SDRATTR_SHADOWXDIST, StarAttribute::SDRATTR_SHADOWYDIST,
+      StarAttribute::SDRATTR_SHADOWTRANSPARENCE, StarAttribute::SDRATTR_SHADOW3D, StarAttribute::SDRATTR_SHADOWPERSP, StarAttribute::SDRATTR_SHADOWRESERVE1,
+      StarAttribute::SDRATTR_SHADOWRESERVE2, StarAttribute::SDRATTR_SHADOWRESERVE3, StarAttribute::SDRATTR_SHADOWRESERVE4, StarAttribute::SDRATTR_SHADOWRESERVE5,
+      StarAttribute::SDRATTR_SET_SHADOW, StarAttribute::SDRATTR_CAPTIONTYPE, StarAttribute::SDRATTR_CAPTIONFIXEDANGLE, StarAttribute::SDRATTR_CAPTIONANGLE,
+      StarAttribute::SDRATTR_CAPTIONGAP, StarAttribute::SDRATTR_CAPTIONESCDIR, StarAttribute::SDRATTR_CAPTIONESCISREL, StarAttribute::SDRATTR_CAPTIONESCREL,
+
+      StarAttribute::SDRATTR_CAPTIONESCABS, StarAttribute::SDRATTR_CAPTIONLINELEN, StarAttribute::SDRATTR_CAPTIONFITLINELEN, StarAttribute::SDRATTR_CAPTIONRESERVE1,
+      StarAttribute::SDRATTR_CAPTIONRESERVE2, StarAttribute::SDRATTR_CAPTIONRESERVE3, StarAttribute::SDRATTR_CAPTIONRESERVE4, StarAttribute::SDRATTR_CAPTIONRESERVE5,
+      StarAttribute::SDRATTR_SET_CAPTION, StarAttribute::SDRATTR_SET_OUTLINER, StarAttribute::SDRATTR_ECKENRADIUS, StarAttribute::SDRATTR_TEXT_MINFRAMEHEIGHT,
+      StarAttribute::SDRATTR_TEXT_AUTOGROWHEIGHT, StarAttribute::SDRATTR_TEXT_FITTOSIZE, StarAttribute::SDRATTR_TEXT_LEFTDIST, StarAttribute::SDRATTR_TEXT_RIGHTDIST,
+      StarAttribute::SDRATTR_TEXT_UPPERDIST, StarAttribute::SDRATTR_TEXT_LOWERDIST, StarAttribute::SDRATTR_TEXT_VERTADJUST, StarAttribute::SDRATTR_TEXT_MAXFRAMEHEIGHT,
+
+      StarAttribute::SDRATTR_TEXT_MINFRAMEWIDTH, StarAttribute::SDRATTR_TEXT_MAXFRAMEWIDTH, StarAttribute::SDRATTR_TEXT_AUTOGROWWIDTH, StarAttribute::SDRATTR_TEXT_HORZADJUST,
+      StarAttribute::SDRATTR_TEXT_ANIKIND, StarAttribute::SDRATTR_TEXT_ANIDIRECTION, StarAttribute::SDRATTR_TEXT_ANISTARTINSIDE, StarAttribute::SDRATTR_TEXT_ANISTOPINSIDE,
+      StarAttribute::SDRATTR_TEXT_ANICOUNT, StarAttribute::SDRATTR_TEXT_ANIDELAY, StarAttribute::SDRATTR_TEXT_ANIAMOUNT, StarAttribute::SDRATTR_TEXT_CONTOURFRAME,
+      StarAttribute::SDRATTR_AUTOSHAPE_ADJUSTMENT, StarAttribute::SDRATTR_XMLATTRIBUTES, StarAttribute::SDRATTR_RESERVE15, StarAttribute::SDRATTR_RESERVE16,
+      StarAttribute::SDRATTR_RESERVE17, StarAttribute::SDRATTR_RESERVE18, StarAttribute::SDRATTR_RESERVE19, StarAttribute::SDRATTR_SET_MISC,
+
+      StarAttribute::SDRATTR_EDGEKIND, StarAttribute::SDRATTR_EDGENODE1HORZDIST, StarAttribute::SDRATTR_EDGENODE1VERTDIST, StarAttribute::SDRATTR_EDGENODE2HORZDIST,
+      StarAttribute::SDRATTR_EDGENODE2VERTDIST, StarAttribute::SDRATTR_EDGENODE1GLUEDIST, StarAttribute::SDRATTR_EDGENODE2GLUEDIST, StarAttribute::SDRATTR_EDGELINEDELTAANZ,
+      StarAttribute::SDRATTR_EDGELINE1DELTA, StarAttribute::SDRATTR_EDGELINE2DELTA, StarAttribute::SDRATTR_EDGELINE3DELTA, StarAttribute::SDRATTR_EDGERESERVE02,
+      StarAttribute::SDRATTR_EDGERESERVE03, StarAttribute::SDRATTR_EDGERESERVE04, StarAttribute::SDRATTR_EDGERESERVE05, StarAttribute::SDRATTR_EDGERESERVE06,
+      StarAttribute::SDRATTR_EDGERESERVE07, StarAttribute::SDRATTR_EDGERESERVE08, StarAttribute::SDRATTR_EDGERESERVE09, StarAttribute::SDRATTR_SET_EDGE,
+
+      StarAttribute::SDRATTR_MEASUREKIND, StarAttribute::SDRATTR_MEASURETEXTHPOS, StarAttribute::SDRATTR_MEASURETEXTVPOS, StarAttribute::SDRATTR_MEASURELINEDIST,
+      StarAttribute::SDRATTR_MEASUREHELPLINEOVERHANG, StarAttribute::SDRATTR_MEASUREHELPLINEDIST, StarAttribute::SDRATTR_MEASUREHELPLINE1LEN, StarAttribute::SDRATTR_MEASUREHELPLINE2LEN,
+      StarAttribute::SDRATTR_MEASUREBELOWREFEDGE, StarAttribute::SDRATTR_MEASURETEXTROTA90, StarAttribute::SDRATTR_MEASURETEXTUPSIDEDOWN, StarAttribute::SDRATTR_MEASUREOVERHANG,
+      StarAttribute::SDRATTR_MEASUREUNIT, StarAttribute::SDRATTR_MEASURESCALE, StarAttribute::SDRATTR_MEASURESHOWUNIT, StarAttribute::SDRATTR_MEASUREFORMATSTRING,
+      StarAttribute::SDRATTR_MEASURETEXTAUTOANGLE, StarAttribute::SDRATTR_MEASURETEXTAUTOANGLEVIEW, StarAttribute::SDRATTR_MEASURETEXTISFIXEDANGLE, StarAttribute::SDRATTR_MEASURETEXTFIXEDANGLE,
+      // 1167
+      StarAttribute::SDRATTR_MEASUREDECIMALPLACES, StarAttribute::SDRATTR_MEASURERESERVE05, StarAttribute::SDRATTR_MEASURERESERVE06, StarAttribute::SDRATTR_MEASURERESERVE07,
+      StarAttribute::SDRATTR_SET_MEASURE, StarAttribute::SDRATTR_CIRCKIND, StarAttribute::SDRATTR_CIRCSTARTANGLE, StarAttribute::SDRATTR_CIRCENDANGLE,
+      StarAttribute::SDRATTR_CIRCRESERVE0, StarAttribute::SDRATTR_CIRCRESERVE1, StarAttribute::SDRATTR_CIRCRESERVE2, StarAttribute::SDRATTR_CIRCRESERVE3,
+      StarAttribute::SDRATTR_SET_CIRC, StarAttribute::SDRATTR_OBJMOVEPROTECT, StarAttribute::SDRATTR_OBJSIZEPROTECT, StarAttribute::SDRATTR_OBJPRINTABLE,
+      StarAttribute::SDRATTR_LAYERID, StarAttribute::SDRATTR_LAYERNAME, StarAttribute::SDRATTR_OBJECTNAME, StarAttribute::SDRATTR_ALLPOSITIONX,
+
+      StarAttribute::SDRATTR_ALLPOSITIONY, StarAttribute::SDRATTR_ALLSIZEWIDTH, StarAttribute::SDRATTR_ALLSIZEHEIGHT, StarAttribute::SDRATTR_ONEPOSITIONX,
+      StarAttribute::SDRATTR_ONEPOSITIONY, StarAttribute::SDRATTR_ONESIZEWIDTH, StarAttribute::SDRATTR_ONESIZEHEIGHT, StarAttribute::SDRATTR_LOGICSIZEWIDTH,
+      StarAttribute::SDRATTR_LOGICSIZEHEIGHT, StarAttribute::SDRATTR_ROTATEANGLE, StarAttribute::SDRATTR_SHEARANGLE, StarAttribute::SDRATTR_MOVEX,
+      StarAttribute::SDRATTR_MOVEY, StarAttribute::SDRATTR_RESIZEXONE, StarAttribute::SDRATTR_RESIZEYONE, StarAttribute::SDRATTR_ROTATEONE,
+      StarAttribute::SDRATTR_HORZSHEARONE, StarAttribute::SDRATTR_VERTSHEARONE, StarAttribute::SDRATTR_RESIZEXALL, StarAttribute::SDRATTR_RESIZEYALL,
+
+      StarAttribute::SDRATTR_ROTATEALL, StarAttribute::SDRATTR_HORZSHEARALL, StarAttribute::SDRATTR_VERTSHEARALL, StarAttribute::SDRATTR_TRANSFORMREF1X,
+      StarAttribute::SDRATTR_TRANSFORMREF1Y, StarAttribute::SDRATTR_TRANSFORMREF2X, StarAttribute::SDRATTR_TRANSFORMREF2Y, StarAttribute::SDRATTR_TEXTDIRECTION,
+      StarAttribute::SDRATTR_NOTPERSISTRESERVE2, StarAttribute::SDRATTR_NOTPERSISTRESERVE3, StarAttribute::SDRATTR_NOTPERSISTRESERVE4, StarAttribute::SDRATTR_NOTPERSISTRESERVE5,
+      StarAttribute::SDRATTR_NOTPERSISTRESERVE6, StarAttribute::SDRATTR_NOTPERSISTRESERVE7, StarAttribute::SDRATTR_NOTPERSISTRESERVE8, StarAttribute::SDRATTR_NOTPERSISTRESERVE9,
+      StarAttribute::SDRATTR_NOTPERSISTRESERVE10, StarAttribute::SDRATTR_NOTPERSISTRESERVE11, StarAttribute::SDRATTR_NOTPERSISTRESERVE12, StarAttribute::SDRATTR_NOTPERSISTRESERVE13,
+
+      StarAttribute::SDRATTR_NOTPERSISTRESERVE14, StarAttribute::SDRATTR_NOTPERSISTRESERVE15, StarAttribute::SDRATTR_GRAFRED, StarAttribute::SDRATTR_GRAFGREEN,
+      StarAttribute::SDRATTR_GRAFBLUE, StarAttribute::SDRATTR_GRAFLUMINANCE, StarAttribute::SDRATTR_GRAFCONTRAST, StarAttribute::SDRATTR_GRAFGAMMA,
+      StarAttribute::SDRATTR_GRAFTRANSPARENCE, StarAttribute::SDRATTR_GRAFINVERT, StarAttribute::SDRATTR_GRAFMODE, StarAttribute::SDRATTR_GRAFCROP,
+      StarAttribute::SDRATTR_GRAFRESERVE3, StarAttribute::SDRATTR_GRAFRESERVE4, StarAttribute::SDRATTR_GRAFRESERVE5, StarAttribute::SDRATTR_GRAFRESERVE6,
+      StarAttribute::SDRATTR_SET_GRAF, StarAttribute::SDRATTR_3DOBJ_PERCENT_DIAGONAL, StarAttribute::SDRATTR_3DOBJ_BACKSCALE, StarAttribute::SDRATTR_3DOBJ_DEPTH,
+
+      StarAttribute::SDRATTR_3DOBJ_HORZ_SEGS, StarAttribute::SDRATTR_3DOBJ_VERT_SEGS, StarAttribute::SDRATTR_3DOBJ_END_ANGLE, StarAttribute::SDRATTR_3DOBJ_DOUBLE_SIDED,
+      StarAttribute::SDRATTR_3DOBJ_NORMALS_KIND, StarAttribute::SDRATTR_3DOBJ_NORMALS_INVERT, StarAttribute::SDRATTR_3DOBJ_TEXTURE_PROJ_X, StarAttribute::SDRATTR_3DOBJ_TEXTURE_PROJ_Y,
+      StarAttribute::SDRATTR_3DOBJ_SHADOW_3D, StarAttribute::SDRATTR_3DOBJ_MAT_COLOR, StarAttribute::SDRATTR_3DOBJ_MAT_EMISSION, StarAttribute::SDRATTR_3DOBJ_MAT_SPECULAR,
+      StarAttribute::SDRATTR_3DOBJ_MAT_SPECULAR_INTENSITY, StarAttribute::SDRATTR_3DOBJ_TEXTURE_KIND, StarAttribute::SDRATTR_3DOBJ_TEXTURE_MODE, StarAttribute::SDRATTR_3DOBJ_TEXTURE_FILTER,
+      StarAttribute::SDRATTR_3DOBJ_SMOOTH_NORMALS, StarAttribute::SDRATTR_3DOBJ_SMOOTH_LIDS, StarAttribute::SDRATTR_3DOBJ_CHARACTER_MODE, StarAttribute::SDRATTR_3DOBJ_CLOSE_FRONT,
+      //1267
+      StarAttribute::SDRATTR_3DOBJ_CLOSE_BACK, StarAttribute::SDRATTR_3DOBJ_RESERVED_06, StarAttribute::SDRATTR_3DOBJ_RESERVED_07, StarAttribute::SDRATTR_3DOBJ_RESERVED_08,
+      StarAttribute::SDRATTR_3DOBJ_RESERVED_09, StarAttribute::SDRATTR_3DOBJ_RESERVED_10, StarAttribute::SDRATTR_3DOBJ_RESERVED_11, StarAttribute::SDRATTR_3DOBJ_RESERVED_12,
+      StarAttribute::SDRATTR_3DOBJ_RESERVED_13, StarAttribute::SDRATTR_3DOBJ_RESERVED_14, StarAttribute::SDRATTR_3DOBJ_RESERVED_15, StarAttribute::SDRATTR_3DOBJ_RESERVED_16,
+      StarAttribute::SDRATTR_3DOBJ_RESERVED_17, StarAttribute::SDRATTR_3DOBJ_RESERVED_18, StarAttribute::SDRATTR_3DOBJ_RESERVED_19, StarAttribute::SDRATTR_3DOBJ_RESERVED_20,
+      StarAttribute::SDRATTR_3DSCENE_PERSPECTIVE, StarAttribute::SDRATTR_3DSCENE_DISTANCE, StarAttribute::SDRATTR_3DSCENE_FOCAL_LENGTH, StarAttribute::SDRATTR_3DSCENE_TWO_SIDED_LIGHTING,
+
+      StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_1, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_2, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_3, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_4,
+      StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_5, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_6, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_7, StarAttribute::SDRATTR_3DSCENE_LIGHTCOLOR_8,
+      StarAttribute::SDRATTR_3DSCENE_AMBIENTCOLOR, StarAttribute::SDRATTR_3DSCENE_LIGHTON_1, StarAttribute::SDRATTR_3DSCENE_LIGHTON_2, StarAttribute::SDRATTR_3DSCENE_LIGHTON_3,
+      StarAttribute::SDRATTR_3DSCENE_LIGHTON_4, StarAttribute::SDRATTR_3DSCENE_LIGHTON_5, StarAttribute::SDRATTR_3DSCENE_LIGHTON_6, StarAttribute::SDRATTR_3DSCENE_LIGHTON_7,
+      StarAttribute::SDRATTR_3DSCENE_LIGHTON_8, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_1, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_2, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_3,
+
+      StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_4, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_5, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_6, StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_7,
+      StarAttribute::SDRATTR_3DSCENE_LIGHTDIRECTION_8, StarAttribute::SDRATTR_3DSCENE_SHADOW_SLANT, StarAttribute::SDRATTR_3DSCENE_SHADE_MODE, StarAttribute::SDRATTR_3DSCENE_RESERVED_01,
+      StarAttribute::SDRATTR_3DSCENE_RESERVED_02, StarAttribute::SDRATTR_3DSCENE_RESERVED_03, StarAttribute::SDRATTR_3DSCENE_RESERVED_04, StarAttribute::SDRATTR_3DSCENE_RESERVED_05,
+      StarAttribute::SDRATTR_3DSCENE_RESERVED_06, StarAttribute::SDRATTR_3DSCENE_RESERVED_07, StarAttribute::SDRATTR_3DSCENE_RESERVED_08, StarAttribute::SDRATTR_3DSCENE_RESERVED_09,
+      StarAttribute::SDRATTR_3DSCENE_RESERVED_10, StarAttribute::SDRATTR_3DSCENE_RESERVED_11, StarAttribute::SDRATTR_3DSCENE_RESERVED_12, StarAttribute::SDRATTR_3DSCENE_RESERVED_13,
+
+      StarAttribute::SDRATTR_3DSCENE_RESERVED_14, StarAttribute::SDRATTR_3DSCENE_RESERVED_15, StarAttribute::SDRATTR_3DSCENE_RESERVED_16, StarAttribute::SDRATTR_3DSCENE_RESERVED_17,
+      StarAttribute::SDRATTR_3DSCENE_RESERVED_18, StarAttribute::SDRATTR_3DSCENE_RESERVED_19, StarAttribute::SDRATTR_3DSCENE_RESERVED_20 /* 1333*/
+    };
+    for (int i=0; i<int(sizeof(what)/sizeof(int)); ++i)
+      m_idToAttributeList.push_back(what[i]);
+    break;
+  }
+  case StarItemPool::T_Unknown:
+  default:
+    break;
+  }
+}
 }
 
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarItemPool::StarItemPool(StarDocument &doc) : m_state(new StarItemPoolInternal::State(doc))
+StarItemPool::StarItemPool(StarDocument &doc, StarItemPool::Type type) :
+  m_isInside(false), m_state(new StarItemPoolInternal::State(doc, type))
 {
 }
 
@@ -726,13 +768,18 @@ int StarItemPool::getVersion() const
   return m_state->m_majorVersion;
 }
 
+StarItemPool::Type StarItemPool::getType() const
+{
+  return m_state->m_type;
+}
+
 bool StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPos)
 {
   if (m_state->m_currentVersion!=m_state->m_loadingVersion)
     which=m_state->getWhich(which);
 
   if (which<m_state->m_verStart || which>=m_state->m_verStart+int(m_state->m_idToAttributeList.size()) ||
-      !m_state->m_document.getSDWParser()) {
+      !m_state->m_document.getAttributeManager() || !m_state->m_document.getSDWParser()) {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
     libstoff::DebugFile &ascii=zone.ascii();
@@ -744,10 +791,9 @@ bool StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPo
     input->seek(endPos, librevenge::RVNG_SEEK_SET);
     return true;
   }
-  StarAttribute attribute;
   zone.openDummyRecord();
-  bool ok=attribute.readAttribute(zone, m_state->m_idToAttributeList[size_t(which-m_state->m_verStart)],
-                                  vers, endPos, m_state->m_document);
+  bool ok=m_state->m_document.getAttributeManager()->readAttribute
+          (zone, m_state->m_idToAttributeList[size_t(which-m_state->m_verStart)], vers, endPos, m_state->m_document);
   zone.closeDummyRecord();
   return ok;
 }
@@ -755,7 +801,124 @@ bool StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPo
 bool StarItemPool::read(StarZone &zone)
 {
   // reinit all
-  m_state.reset(new StarItemPoolInternal::State(m_state->m_document));
+  m_state.reset(new StarItemPoolInternal::State(m_state->m_document, m_state->m_type));
+
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  long endPos=zone.getRecordLevel()>0 ?  zone.getRecordLastPosition() : input->size();
+
+  if (pos+18>endPos)
+    return false;
+  uint16_t tag;
+  uint8_t nMajorVers;
+  *input >> tag >> nMajorVers;
+  input->seek(pos, librevenge::RVNG_SEEK_SET);
+  if ((tag!=0x1111 && tag!=0xbbbb) || nMajorVers<1 || nMajorVers>2)
+    return false;
+  m_isInside=true;
+  bool ok=nMajorVers==2 ? readV2(zone) : readV1(zone);
+  m_isInside=false;
+  return ok;
+}
+
+bool StarItemPool::readItem(StarZone &zone, bool isDirect, long endPos)
+{
+  // polio.cxx SfxItemPool::LoadItem
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascii=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarItem)["<< zone.getRecordLevel() << "]:";
+  long pos=input->tell();
+  if (pos+4>endPos) {
+    STOFF_DEBUG_MSG(("StarItemPool::readItem: the zone seems too short\n"));
+    return false;
+  }
+  uint16_t nWhich, nSlot;
+  *input>>nWhich >> nSlot;
+  f << "which=" << nWhich << ",";
+  if (nSlot) f << "slot=" << nSlot << ",";
+  if (!m_state->isInRange(nWhich)) {
+    uint16_t nSurro, nVersion, nLength;
+    *input >> nSurro;
+    bool ok=true;
+    if (nSurro==0xffff) {
+      *input >> nVersion >> nLength;
+      f << "nVersion=" << nVersion << ",";
+      if (input->tell()+long(nLength)>endPos) {
+        f << "###length=" << nLength << ",";
+        STOFF_DEBUG_MSG(("StarItemPool::readItem: find bad surro length\n"));
+        ok=false;
+      }
+      else if (nLength) {
+        ascii.addDelimiter(input->tell(),'|');
+        input->seek(nLength, librevenge::RVNG_SEEK_CUR);
+      }
+    }
+    else if (nSurro)
+      f << "surro=" << nSurro << ",";
+    if (ok && input->tell()>endPos) {
+      f << "###,";
+      STOFF_DEBUG_MSG(("StarItemPool::readItem: find bad position\n"));
+      ok=false;
+    }
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    return ok;
+  }
+  bool pItem=false;
+  if (!isDirect) {
+    if (nWhich) {
+      uint16_t nSurrog;
+      *input>>nSurrog;
+      if (nSurrog==0xffff) {
+        f << "direct,";
+      }
+      else if (nSurrog==0xfff0) {
+        f << "null,";
+        nWhich=0;
+      }
+      else {
+        f << "surrog=" << nSurrog << ",";
+        pItem=true;
+      }
+    }
+    else
+      input->seek(2, librevenge::RVNG_SEEK_CUR);
+  }
+  if (isDirect || (nWhich && !pItem)) {
+    uint16_t nVersion;
+    uint32_t nLength;
+    *input >> nVersion >> nLength;
+    if (nVersion) f << "vers=" << nVersion << ",";
+    bool ok=true;
+    if (input->tell()+long(nLength)>endPos) {
+      f << "###length=" << nLength << ",";
+      STOFF_DEBUG_MSG(("StarItemPool::readItem: find bad item\n"));
+      ok=false;
+    }
+    else if (nLength) {
+      f << "##item,";
+      ascii.addDelimiter(input->tell(),'|');
+      input->seek(nLength, librevenge::RVNG_SEEK_CUR);
+    }
+    if (ok && input->tell()>endPos) {
+      f << "###,";
+      STOFF_DEBUG_MSG(("StarItemPool::readItem: find bad position\n"));
+      ok=false;
+    }
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    return ok;
+  }
+  ascii.addPos(pos);
+  ascii.addNote(f.str().c_str());
+  return true;
+}
+
+bool StarItemPool::readV2(StarZone &zone)
+{
+  // reinit all
+  m_state.reset(new StarItemPoolInternal::State(m_state->m_document, m_state->m_type));
 
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascii=zone.ascii();
@@ -764,7 +927,7 @@ bool StarItemPool::read(StarZone &zone)
   f << "Entries(PoolDef)["<< zone.getRecordLevel() << "]:";
   long pos=input->tell();
   if (pos+18>endPos) {
-    STOFF_DEBUG_MSG(("StarItemPool::read: the zone seems too short\n"));
+    STOFF_DEBUG_MSG(("StarItemPool::readV2: the zone seems too short\n"));
     return false;
   }
   uint16_t tag;
@@ -780,11 +943,6 @@ bool StarItemPool::read(StarZone &zone)
     return false;
   }
 
-  if (nMajorVers==1) {
-    m_state->m_majorVersion=1;
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return readV1(zone);
-  }
   if (nMajorVers!=2) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
@@ -803,7 +961,7 @@ bool StarItemPool::read(StarZone &zone)
 
   char type; // always 1
   if (input->peek()!=1 || !zone.openSfxRecord(type)) {
-    STOFF_DEBUG_MSG(("StarItemPool::read: can not open the sfx record\n"));
+    STOFF_DEBUG_MSG(("StarItemPool::readV2: can not open the sfx record\n"));
     m_state->m_majorVersion=0;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
@@ -819,7 +977,7 @@ bool StarItemPool::read(StarZone &zone)
   // string part
   char type1;
   if (input->peek()!=16 || !zone.openSfxRecord(type1)) {
-    STOFF_DEBUG_MSG(("StarItemPool::read: can not open the string sfx record\n"));
+    STOFF_DEBUG_MSG(("StarItemPool::readV2: can not open the string sfx record\n"));
     f << "###openString";
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());
@@ -834,7 +992,7 @@ bool StarItemPool::read(StarZone &zone)
   }
   librevenge::RVNGString string;
   if (!zone.readString(string)) {
-    STOFF_DEBUG_MSG(("StarItemPool::read: can not read the name\n"));
+    STOFF_DEBUG_MSG(("StarItemPool::readV2: can not readV2 the name\n"));
     f << "###name";
   }
   if (!string.empty()) {
@@ -851,7 +1009,7 @@ bool StarItemPool::read(StarZone &zone)
   f << "PoolDef[versMap]:";
   StarItemPoolInternal::SfxMultiRecord mRecord;
   if (!mRecord.open(zone) || mRecord.getHeaderTag()!=0x20) {
-    STOFF_DEBUG_MSG(("StarItemPool::read: can not open the versionMap sfx record\n"));
+    STOFF_DEBUG_MSG(("StarItemPool::readV2: can not open the versionMap sfx record\n"));
     f << "###openVersionMap";
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());
@@ -871,7 +1029,7 @@ bool StarItemPool::read(StarZone &zone)
     *input >> nVers >> nStart >> nEnd;
     f << "vers=" << nVers << "," << nStart << "<->" << nEnd << ",";
     if (nStart>nEnd || input->tell()+2*(nEnd-nStart+1) > mRecord.getLastContentPosition()) {
-      STOFF_DEBUG_MSG(("StarItemPool::read: can not find start|end pos\n"));
+      STOFF_DEBUG_MSG(("StarItemPool::readV2: can not find start|end pos\n"));
       f << "###badStartEnd";
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
@@ -899,7 +1057,7 @@ bool StarItemPool::read(StarZone &zone)
     f.str("");
     f << "PoolDef[" << wh << "]:";
     if (!mRecord.open(zone)) {
-      STOFF_DEBUG_MSG(("StarItemPool::read: can not open the sfx record\n"));
+      STOFF_DEBUG_MSG(("StarItemPool::readV2: can not open the sfx record\n"));
       f << "###" << wh;
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
@@ -909,7 +1067,7 @@ bool StarItemPool::read(StarZone &zone)
     f << mRecord;
 
     if (mRecord.getHeaderTag()!=(step==0 ? 0x30:0x50)) {
-      STOFF_DEBUG_MSG(("StarItemPool::read: can not find the pool which tag\n"));
+      STOFF_DEBUG_MSG(("StarItemPool::readV2: can not find the pool which tag\n"));
       f << "###tag";
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
@@ -929,13 +1087,13 @@ bool StarItemPool::read(StarZone &zone)
       if (step==0) *input >> nCount;
       int which=nWhich;
       if (!m_state->isInRange(which)) {
-        STOFF_DEBUG_MSG(("StarItemPool::read: the which value seems bad\n"));
+        STOFF_DEBUG_MSG(("StarItemPool::readV2: the which value seems bad\n"));
         f << "###";
       }
       f << "wh=" << which << ", vers=" << nVersion << ", count=" << nCount << ",";
       static bool first=true;
       if (first) {
-        STOFF_DEBUG_MSG(("StarItemPool::read: reading attribute is not implemented\n"));
+        STOFF_DEBUG_MSG(("StarItemPool::readV2: reading attribute is not implemented\n"));
         first=false;
       }
       ascii.addPos(pos);
@@ -946,7 +1104,7 @@ bool StarItemPool::read(StarZone &zone)
         f.str("");
         f << "Entries(StarAttribute):inPool,";
         if (!mRecord1.open(zone)) {
-          STOFF_DEBUG_MSG(("StarItemPool::read: can not open record1\n"));
+          STOFF_DEBUG_MSG(("StarItemPool::readV2: can not open record1\n"));
           f << "###record1";
           ascii.addPos(pos);
           ascii.addNote(f.str().c_str());
@@ -965,7 +1123,7 @@ bool StarItemPool::read(StarZone &zone)
             if (!readAttribute(zone, which, (int) nVersion, mRecord1.getLastContentPosition()))
               f << "###";
             else if (input->tell()!=mRecord1.getLastContentPosition()) {
-              STOFF_DEBUG_MSG(("StarItemPool::read: find extra attrib data\n"));
+              STOFF_DEBUG_MSG(("StarItemPool::readV2: find extra attrib data\n"));
               f << "###extra";
             }
             input->seek(mRecord1.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
@@ -983,7 +1141,7 @@ bool StarItemPool::read(StarZone &zone)
           ascii.addNote(f.str().c_str());
         }
         else if (input->tell()!=mRecord.getLastContentPosition()) {
-          STOFF_DEBUG_MSG(("StarItemPool::read: find extra attrib data\n"));
+          STOFF_DEBUG_MSG(("StarItemPool::readV2: find extra attrib data\n"));
           ascii.addPos(pos);
           ascii.addNote("extra###");
         }
@@ -1026,6 +1184,7 @@ bool StarItemPool::readV1(StarZone &zone)
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
+  m_state->m_majorVersion=1;
   f << "version=" << int(nMajorVers) << ",vers[minor]=" << int(nMinorVers) << ",";
   if (nMinorVers>=3) {
     STOFF_DEBUG_MSG(("StarItemPool::readV1: find a minor version >= 3\n"));

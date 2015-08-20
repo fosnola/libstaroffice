@@ -114,7 +114,7 @@ bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &
   ascFile.addPos(0);
   ascFile.addNote(f.str().c_str());
   long pos=input->tell(), lastPos= zone.getRecordLastPosition();
-  shared_ptr<StarItemPool> pool=document.getNewItemPool();
+  shared_ptr<StarItemPool> pool=document.getNewItemPool(StarItemPool::T_VCControlPool);
   if (!pool || !pool->read(zone))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
 
@@ -212,7 +212,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
       case 0x4211:
       case 0x4214: {
         f << (nId==0x411 ? "pool" : "pool[edit]") << ",";
-        shared_ptr<StarItemPool> pool=document.getNewItemPool();
+        shared_ptr<StarItemPool> pool=document.getNewItemPool(nId==0x4211 ? StarItemPool::T_SpreadsheetPool : StarItemPool::T_EditEnginePool);
         if (pool && pool->read(zone))
           poolVers=pool->getVersion();
         else {
@@ -263,7 +263,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
   input->seek(0, librevenge::RVNG_SEEK_SET);
   while (!input->isEnd()) {
     long pos=input->tell();
-    shared_ptr<StarItemPool> pool=document.getNewItemPool();
+    shared_ptr<StarItemPool> pool=document.getNewItemPool(StarItemPool::T_Unknown); // CHANGEME
     if (pool && pool->read(zone))
       continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);

@@ -39,6 +39,7 @@
 
 #include <librevenge/librevenge.h>
 
+#include "StarAttribute.hxx"
 #include "StarItemPool.hxx"
 #include "StarZone.hxx"
 
@@ -50,9 +51,14 @@ namespace StarDocumentInternal
 //! the state of a StarDocument
 struct State {
   //! constructor
-  State() : m_sdwParser(0)
+  State(shared_ptr<StarAttributeManager> attributeManager) :
+    m_poolList(), m_attributeManager(attributeManager), m_sdwParser(0)
   {
   }
+  //! the list of pool
+  std::vector<shared_ptr<StarItemPool> > m_poolList;
+  //! the attribute manager
+  shared_ptr<StarAttributeManager> m_attributeManager;
   //! the sdw parser REMOVEME
   SDWParser *m_sdwParser;
 private:
@@ -64,8 +70,9 @@ private:
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarDocument::StarDocument(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *sdwParser) :
-  m_input(input), m_oleParser(oleParser), m_directory(directory), m_state(new StarDocumentInternal::State)
+StarDocument::StarDocument(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory,
+                           shared_ptr<StarAttributeManager> attributeManager, SDWParser *sdwParser) :
+  m_input(input), m_oleParser(oleParser), m_directory(directory), m_state(new StarDocumentInternal::State(attributeManager))
 {
   m_state->m_sdwParser=sdwParser;
 }
@@ -79,9 +86,36 @@ STOFFDocument::Kind StarDocument::getDocumentKind() const
   return m_directory ? m_directory->m_kind : STOFFDocument::STOFF_K_UNKNOWN;
 }
 
-shared_ptr<StarItemPool> StarDocument::getNewItemPool()
+shared_ptr<StarAttributeManager> StarDocument::getAttributeManager()
 {
-  return shared_ptr<StarItemPool>(new StarItemPool(*this));
+  return m_state->m_attributeManager;
+}
+
+shared_ptr<StarItemPool> StarDocument::getNewItemPool(StarItemPool::Type type)
+{
+  shared_ptr<StarItemPool> pool(new StarItemPool(*this, type));
+  m_state->m_poolList.push_back(pool);
+  return pool;
+}
+
+shared_ptr<StarItemPool> StarDocument::getCurrentPool()
+{
+  for (size_t i=m_state->m_poolList.size(); i>0;) {
+    shared_ptr<StarItemPool> pool=m_state->m_poolList[--i];
+    if (pool && pool->isInside()) return pool;
+  }
+  return shared_ptr<StarItemPool>();
+}
+
+shared_ptr<StarItemPool> StarDocument::findItemPool(StarItemPool::Type type, bool isInside)
+{
+  for (size_t i=m_state->m_poolList.size(); i>0;) {
+    shared_ptr<StarItemPool> pool=m_state->m_poolList[--i];
+    if (!pool || pool->getType()!=type) continue;
+    if (isInside && !pool->isInside()) continue;
+    return pool;
+  }
+  return shared_ptr<StarItemPool>();
 }
 
 SDWParser *StarDocument::getSDWParser()
@@ -115,7 +149,7 @@ bool StarDocument::parse()
       StarZone zone(ole, name, "VCPool");
       zone.ascii().open(name);
       ole->seek(0, librevenge::RVNG_SEEK_SET);
-      getNewItemPool()->read(zone);
+      getNewItemPool(StarItemPool::T_VCControlPool)->read(zone);
       continue;
     }
     if (base=="persist elements") {
@@ -137,6 +171,58 @@ bool StarDocument::parse()
     content.setParsed(ok);
   }
 
+  return true;
+}
+
+bool StarDocument::readItemSet(StarZone &zone, int /*startId*/, int /*endId*/, long lastPos, StarItemPool *pool, bool isDirect)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+
+  f << "Entries(StarItem):pool,";
+  // itemset.cxx: SfxItemSet::Load (ncount)
+  uint16_t n;
+  *input >> n;
+  f << "N=" << n << ",";
+  if (!pool) {
+    if (input->tell()+6*n > lastPos) {
+      STOFF_DEBUG_MSG(("StarDocument::readItemSet: can not read a SfxItemSet\n"));
+      f << "###,";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+
+      return false;
+    }
+    if (n) {
+      if (lastPos!=pos+2+6*n) {
+        // TODO poolio.cxx SfxItemPool::LoadItem
+        static bool first=true;
+        if (first) {
+          STOFF_DEBUG_MSG(("StarDocument::readItemSet: reading a SfxItem is not implemented without pool\n"));
+          first=false;
+        }
+        f << "##noPool";
+      }
+      else
+        f << "#";
+      input->seek(pos+2+6*n, librevenge::RVNG_SEEK_SET);
+    }
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return true;
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  for (int i=0; i<int(n); ++i) {
+    pos=input->tell();
+    if (pool->readItem(zone, isDirect, lastPos)) continue;
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    ascFile.addPos(pos);
+    ascFile.addNote("StarItem:pool,###extra");
+    break;
+  }
   return true;
 }
 

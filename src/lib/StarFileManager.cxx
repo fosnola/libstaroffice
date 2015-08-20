@@ -757,7 +757,7 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarDocum
   ascFile.addNote(f.str().c_str());
 
   pos=input->tell();
-  shared_ptr<StarItemPool> pool=doc.getNewItemPool();
+  shared_ptr<StarItemPool> pool=doc.getNewItemPool(StarItemPool::T_EditEnginePool);
   if (ownPool && !pool->read(zone)) {
     STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read a pool\n"));
     ascFile.addPos(pos);

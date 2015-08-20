@@ -45,14 +45,16 @@
 #include "STOFFDebug.hxx"
 #include "STOFFOLEParser.hxx"
 
+#include "StarItemPool.hxx"
+
 namespace StarDocumentInternal
 {
 struct State;
 }
 
-class StarItemPool;
-
 class SDWParser;
+class StarAttributeManager;
+
 /** \brief a main ole in a StarOffice file
  *
  *
@@ -62,7 +64,8 @@ class StarDocument
 {
 public:
   //! constructor
-  StarDocument(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *parser);
+  StarDocument(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory,
+               shared_ptr<StarAttributeManager> attributeManager, SDWParser *parser);
   //! destructor
   virtual ~StarDocument();
 
@@ -72,15 +75,27 @@ public:
 
   //! try to parse data
   bool parse();
-  //! returns a new item pool for this document
-  shared_ptr<StarItemPool> getNewItemPool();
   //! returns the document kind
   STOFFDocument::Kind getDocumentKind() const;
+  //! return the attribute manager
+  shared_ptr<StarAttributeManager> getAttributeManager();
+
+  // the document pool
+  //! returns a new item pool for this document
+  shared_ptr<StarItemPool> getNewItemPool(StarItemPool::Type type);
+  /** check if a pool corresponding to a given type is opened if so returned it.
+      \note if isInside is set only look for inside pool
+   */
+  shared_ptr<StarItemPool> findItemPool(StarItemPool::Type type, bool isInside);
+  //! returns the current inside pool
+  shared_ptr<StarItemPool> getCurrentPool();
   //! returns a SDWParser(REMOVEME)
   SDWParser *getSDWParser();
 
   //! try to read persist data
   bool readPersistData(StarZone &zone, long endPos);
+  //! try to read a list of item
+  bool readItemSet(StarZone &zone, int startId, int endId, long endPos, StarItemPool *pool=0, bool isDirect=false);
 protected:
   //!  the "persist elements" small ole: the list of object
   bool readPersistElements(STOFFInputStreamPtr input, std::string const &name);

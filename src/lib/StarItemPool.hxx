@@ -62,8 +62,10 @@ class StarZone;
 class StarItemPool
 {
 public:
+  //! the known item pool
+  enum Type { T_ChartPool, T_EditEnginePool, T_SpreadsheetPool, T_VCControlPool, T_WriterPool, T_XOutdevPool, T_Unknown };
   //! constructor
-  StarItemPool(StarDocument &document);
+  StarItemPool(StarDocument &document, Type type);
   //! destructor
   virtual ~StarItemPool();
 
@@ -71,20 +73,32 @@ public:
   bool read(StarZone &zone);
   //! returns the pool version
   int getVersion() const;
+  //! returns the pool type
+  Type getType() const;
+  //! returns true if we are reading the pool
+  bool isInside() const
+  {
+    return m_isInside;
+  }
   //! try to read a "StyleItemPool" zone
   static bool readStyle(StarZone &zone, int itemPoolVersion);
 
   //! try to read an attribute
   bool readAttribute(StarZone &zone, int which, int vers, long endPos);
-
+  //! read a item
+  bool readItem(StarZone &zone, bool isDirect, long endPos);
 protected:
   //! try to read a "ItemPool" zone (version 1)
   bool readV1(StarZone &zone);
+  //! try to read a "ItemPool" zone (version 2)
+  bool readV2(StarZone &zone);
 
   //
   // data
   //
 private:
+  //! true if the pool is open
+  bool m_isInside;
   //! the state
   shared_ptr<StarItemPoolInternal::State> m_state;
 };

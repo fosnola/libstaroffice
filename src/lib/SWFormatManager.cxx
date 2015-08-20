@@ -294,8 +294,7 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos)
   uint16_t tmp;
   *input >> tmp;
   if (tmp) {
-    StarAttribute attribute;
-    if (!attribute.readBrushItem(zone, 1, lastPos, f)) {
+    if (!StarAttributeManager::readBrushItem(zone, 1, lastPos, f)) {
       STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: can not read a brush\n"));
       f << "###brush";
       ascFile.addPos(pos);
