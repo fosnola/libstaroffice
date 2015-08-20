@@ -243,7 +243,7 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
   return true;
 }
 
-bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos)
+bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarDocument &doc)
 {
   // svx_numitem.cxx SvxNumberFormat::SvxNumberFormat
   STOFFInputStreamPtr input=zone.input();
@@ -294,7 +294,7 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos)
   uint16_t tmp;
   *input >> tmp;
   if (tmp) {
-    if (!StarAttributeManager::readBrushItem(zone, 1, lastPos, f)) {
+    if (!StarAttributeManager::readBrushItem(zone, 1, lastPos, doc, f)) {
       STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: can not read a brush\n"));
       f << "###brush";
       ascFile.addPos(pos);

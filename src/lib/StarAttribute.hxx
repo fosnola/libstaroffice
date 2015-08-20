@@ -778,7 +778,7 @@ public:
   //! try to read an attribute
   bool readAttribute(StarZone &zone, int which, int vers, long endPos, StarDocument &document);
   //! try to read a brush
-  static bool readBrushItem(StarZone &zone, int nVers, long endPos, libstoff::DebugStream &f);
+  static bool readBrushItem(StarZone &zone, int nVers, long endPos, StarDocument &document, libstoff::DebugStream &f);
 
 protected:
   //

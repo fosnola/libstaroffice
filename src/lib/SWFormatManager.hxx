@@ -77,7 +77,7 @@ public:
   bool readSWPatternLCL(StarZone &zone);
 
   //! try to read a number format (find in attribute)
-  bool readNumberFormat(StarZone &zone, long endPos);
+  bool readNumberFormat(StarZone &zone, long endPos, StarDocument &doc);
   //! try to read number formatter type
   bool readNumberFormatter(StarZone &zone);
 

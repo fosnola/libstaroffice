@@ -113,6 +113,46 @@ protected:
   bool m_value;
 };
 
+//! itemSet attribute of StarAttributeInternal
+class StarAttributeItemSet : public StarAttribute
+{
+public:
+  //! constructor
+  StarAttributeItemSet(Type type, std::string const &debugName, int startId, int endId) :
+    StarAttribute(type, debugName), m_startId(startId), m_endId(endId)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarAttributeItemSet(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarDocument &document)
+  {
+    STOFFInputStreamPtr input=zone.input();
+    long pos=input->tell();
+    libstoff::DebugFile &ascFile=zone.ascii();
+    libstoff::DebugStream f;
+    f << "StarAttribute[" << zone.getRecordLevel() << "]:" << m_debugName << ",";
+    bool ok=document.readItemSet(zone, m_startId, m_endId, endPos, document.getCurrentPool().get());
+    if (!ok) f << "###";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return ok && input->tell()<=endPos;
+  }
+
+protected:
+  //! copy constructor
+  StarAttributeItemSet(StarAttributeItemSet const &orig) : StarAttribute(orig), m_startId(orig.m_startId), m_endId(orig.m_endId)
+  {
+  }
+  //! the pool start id
+  int m_startId;
+  //! the pool end id
+  int m_endId;
+};
+
 ////////////////////////////////////////
 //! Internal: the state of a StarAttribute
 struct State {
@@ -135,6 +175,11 @@ protected:
   void addAttributeBool(StarAttribute::Type type, std::string const &debugName, bool defValue)
   {
     m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeBool(type,debugName, defValue));
+  }
+  //! add a itemSet attribute
+  void addAttributeItemSet(StarAttribute::Type type, std::string const &debugName, int startId, int endId)
+  {
+    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeItemSet(type,debugName, startId, endId));
   }
 };
 
@@ -280,6 +325,9 @@ void State::initAttributeMap()
     s << "form[reserved" << type-StarAttribute::XATTR_FTRESERVED2+2 << "]";
     addAttributeVoid(StarAttribute::Type(type), s.str());
   }
+  addAttributeItemSet(StarAttribute::XATTR_SET_LINE,"setLine",1000, 1016);
+  addAttributeItemSet(StarAttribute::XATTR_SET_FILL,"setFill",1018, 1046);
+  addAttributeItemSet(StarAttribute::XATTR_SET_TEXT,"setText",1048, 1065);
 
   // ---- sdr ---- svx_svdattr.cxx
   addAttributeBool(StarAttribute::SDRATTR_SHADOW,"shadow", false); // onOff
@@ -375,6 +423,15 @@ void State::initAttributeMap()
     s << "scene3d[reserved" << type-StarAttribute::SDRATTR_3DSCENE_RESERVED_01+1 << "]";
     addAttributeVoid(StarAttribute::Type(type), s.str());
   }
+
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_SHADOW,"setShadow",1067, 1078);
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_CAPTION,"setCaption",1079, 1094);
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_OUTLINER,"setOutliner",3989, 4037); // EE_ITEMS_START, EE_ITEMS_END
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_MISC,"setMisc",1097, 1125);
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_EDGE,"setEdge",1127, 1145);
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_MEASURE,"setMeasure",1147, 1170);
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_CIRC,"setCircle",1172, 1178);
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_GRAF,"setGraf",1180, 1242);
 }
 
 }
@@ -545,7 +602,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   case StarAttribute::ATTR_SCH_SYMBOL_BRUSH:
     f << (nWhich==StarAttribute::ATTR_CHR_BACKGROUND ? "chrAtrBackground" :
           nWhich==StarAttribute::ATTR_FRM_BACKGROUND ? "background" : "symbol[brush]") << "=" << input->readULong(1) << ",";
-    if (!readBrushItem(zone, nVers, lastPos, f)) break;
+    if (!readBrushItem(zone, nVers, lastPos, document, f)) break;
     break;
   case StarAttribute::ATTR_CHR_ROTATE:
     f << "chrAtrRotate,";
@@ -1375,17 +1432,15 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
         break;
       }
       else if (!text.empty())
-        f << "famDummy=" << text.cstr() << ",";
+        f << "name=" << text.cstr() << ",";
+      input->seek(2, librevenge::RVNG_SEEK_CUR);
     }
-    // TODO
-    static bool first=true;
-    if (first) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: reading a pattern item is not implemented\n"));
-      first=false;
+    // ATTR_PATTERN_START, ATTR_PATTERN_END
+    if (!document.readItemSet(zone, 100, 148, lastPos, document.getCurrentPool().get())) {
+      f << "###itemSet";
+      input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+      break;
     }
-    f << "##";
-    ascFile.addDelimiter(input->tell(),'|');
-    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
     break;
   }
   case StarAttribute::ATTR_SC_PAGE: {
@@ -1513,7 +1568,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       if (nSet) {
         f << nSet << ",";
         SWFormatManager formatManager;
-        if (!formatManager.readNumberFormat(zone, lastPos)) {
+        if (!formatManager.readNumberFormat(zone, lastPos, document)) {
           f << "###";
           break;
         }
@@ -1948,17 +2003,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     break;
   }
 
-  case StarAttribute::XATTR_SET_LINE:
-    f << "setLine,";
-    document.readItemSet(zone, 1000, 1016, lastPos, document.getCurrentPool().get());
-    break;
-  case StarAttribute::XATTR_SET_FILL:
-  case StarAttribute::XATTR_SET_TEXT: {
-    f << (nWhich==StarAttribute::XATTR_SET_FILL ? "setFill" : "setText") << ",";
-    StarFileManager fileManager;
-    fileManager.readSfxItemList(zone);
-    break;
-  }
   case StarAttribute::XATTR_FILLTRANSPARENCE:
   case StarAttribute::XATTR_GRADIENTSTEPCOUNT:
   case StarAttribute::XATTR_FILLBMP_POS:
@@ -2004,26 +2048,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   case StarAttribute::XATTR_FORMTXTSHDWTRANSP:
     f << (nWhich==StarAttribute::XATTR_FORMTXTSTDFORM ? "standart[form]" : "shadowTrans[form]") << "=" << input->readULong(2) << ",";
     break;
-
-  case StarAttribute::SDRATTR_SET_SHADOW:
-  case StarAttribute::SDRATTR_SET_CAPTION:
-  case StarAttribute::SDRATTR_SET_OUTLINER:
-  case StarAttribute::SDRATTR_SET_MISC:
-  case StarAttribute::SDRATTR_SET_EDGE:
-  case StarAttribute::SDRATTR_SET_MEASURE:
-  case StarAttribute::SDRATTR_SET_CIRC:
-  case StarAttribute::SDRATTR_SET_GRAF: {
-    f << (nWhich==StarAttribute::SDRATTR_SET_SHADOW ? "setSdrShadow" :
-          nWhich==StarAttribute::SDRATTR_SET_CAPTION ? "setSdrCaption" :
-          nWhich==StarAttribute::SDRATTR_SET_OUTLINER ? "setSdrOutliner" :
-          nWhich==StarAttribute::SDRATTR_SET_MISC ? "setSdrMisc" :
-          nWhich==StarAttribute::SDRATTR_SET_EDGE ? "setSdrEdge" :
-          nWhich==StarAttribute::SDRATTR_SET_MEASURE ? "setSdrMeasure" :
-          nWhich==StarAttribute::SDRATTR_SET_CIRC ? "setCircle" : "setGraph") << ",";
-    StarFileManager fileManager;
-    fileManager.readSfxItemList(zone);
-    break;
-  }
 
   case StarAttribute::SDRATTR_SHADOW3D:
   case StarAttribute::SDRATTR_SHADOWPERSP:
@@ -2451,7 +2475,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   return true;
 }
 
-bool StarAttributeManager::readBrushItem(StarZone &zone, int nVers, long /*endPos*/, libstoff::DebugStream &f)
+bool StarAttributeManager::readBrushItem(StarZone &zone, int nVers, long /*endPos*/, StarDocument &/*document*/, libstoff::DebugStream &f)
 {
   STOFFInputStreamPtr input=zone.input();
   STOFFColor color;

@@ -258,7 +258,7 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos)
       return true;
     }
     strm.avail_in = (unsigned)codeSize;
-    strm.next_in = (Bytef *)data;
+    strm.next_in = (Bytef *)const_cast<uint8_t *>(data);
 
     std::vector<unsigned char>result;
     result.resize(size_t(uncodeSize),0);
@@ -508,7 +508,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
   uint32_t alignWidth=bitmap.m_width*bitmap.m_bitCount;
   alignWidth=(((alignWidth+31)>>5)<<2);
   long actPos=input->tell();
-  if (actPos+bitmap.m_height*alignWidth>lastPos) {
+  if (actPos+long(bitmap.m_height*alignWidth)>lastPos) {
     STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: the zone seems too short\n"));
     return false;
   }
