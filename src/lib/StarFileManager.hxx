@@ -90,9 +90,6 @@ public:
   //! try to read a edit text object
   static bool readEditTextObject(StarZone &zone, long lastPos, StarDocument &doc);
 
-  //! try to read a SfxItemList(TODO)
-  static bool readSfxItemList(StarZone &zone);
-
 protected:
 
   //

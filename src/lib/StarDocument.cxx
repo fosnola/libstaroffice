@@ -174,7 +174,7 @@ bool StarDocument::parse()
   return true;
 }
 
-bool StarDocument::readItemSet(StarZone &zone, int /*startId*/, int /*endId*/, long lastPos, StarItemPool *pool, bool isDirect)
+bool StarDocument::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*limits*/, long lastPos, StarItemPool *pool, bool isDirect)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();

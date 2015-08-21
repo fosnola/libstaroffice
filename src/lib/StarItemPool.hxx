@@ -81,7 +81,7 @@ public:
     return m_isInside;
   }
   //! try to read a "StyleItemPool" zone
-  static bool readStyle(StarZone &zone, int itemPoolVersion);
+  static bool readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, StarDocument &doc);
 
   //! try to read an attribute
   bool readAttribute(StarZone &zone, int which, int vers, long endPos);

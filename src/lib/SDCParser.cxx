@@ -157,7 +157,7 @@ bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &
   ascFile.addNote(f.str().c_str());
 
   // chtmode2.cxx ChartModel::LoadAttributes
-  if (!readSCHAttributes(zone)) {
+  if (!readSCHAttributes(zone, document)) {
     STOFF_DEBUG_MSG(("SDCParser::readChartDocument: can not open the attributes zone\n"));
   }
   zone.closeSCHHeader("SCChartDocumentAttr");
@@ -179,12 +179,14 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
   ascFile.open(name);
 
   StarFileManager fileManager;
-  // first check for calc: sc_docsh.cxx ScDocShell::LoadCalc and sc_document.cxx: ScDocument::LoadPool
-  uint16_t nId;
-  *input >> nId;
-  if (nId==0x4210 || nId==0x4213) {
+  shared_ptr<StarItemPool> mainPool;
+
+  if (document.getDocumentKind()==STOFFDocument::STOFF_K_SPREADSHEET) {
+    // sc_docsh.cxx ScDocShell::LoadCalc and sc_document.cxx: ScDocument::LoadPool
     long pos=0;
     libstoff::DebugStream f;
+    uint16_t nId;
+    *input >> nId;
     f << "Entries(SfxStyleSheets):id=" << std::hex << nId << std::dec << ",calc,";
     if (!zone.openSCRecord()) {
       STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: can not open main zone\n"));
@@ -195,7 +197,6 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
     long lastPos=zone.getRecordLastPosition();
-    int poolVers=1;
     while (input->tell()+6 < lastPos) {
       pos=input->tell();
       f.str("");
@@ -213,8 +214,9 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
       case 0x4214: {
         f << (nId==0x411 ? "pool" : "pool[edit]") << ",";
         shared_ptr<StarItemPool> pool=document.getNewItemPool(nId==0x4211 ? StarItemPool::T_SpreadsheetPool : StarItemPool::T_EditEnginePool);
-        if (pool && pool->read(zone))
-          poolVers=pool->getVersion();
+        if (pool && pool->read(zone)) {
+          if (nId==0x4214 || !mainPool) mainPool=pool;
+        }
         else {
           STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: can not readPoolZone\n"));
           f << "###";
@@ -225,7 +227,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
       }
       case 0x4212:
         f << "style[pool],";
-        if (!StarItemPool::readStyle(zone, poolVers)) {
+        if (!StarItemPool::readStyle(zone, mainPool, document)) {
           STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: can not readStylePool\n"));
           f << "###";
           input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
@@ -259,19 +261,21 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
     return true;
   }
 
-  // check for chart sch_docshell.cxx SchChartDocShell::Load
-  input->seek(0, librevenge::RVNG_SEEK_SET);
+  // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
+  // chart sch_docshell.cxx SchChartDocShell::Load
   while (!input->isEnd()) {
     long pos=input->tell();
     shared_ptr<StarItemPool> pool=document.getNewItemPool(StarItemPool::T_Unknown); // CHANGEME
-    if (pool && pool->read(zone))
+    if (pool && pool->read(zone)) {
+      if (!mainPool) mainPool=pool;
       continue;
+    }
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
   if (input->isEnd()) return true;
   long pos=input->tell();
-  if (!StarItemPool::readStyle(zone, input->peek()==3 ? 2 : 1))
+  if (!StarItemPool::readStyle(zone, mainPool, document))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (!input->isEnd()) {
     STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: find extra data\n"));
@@ -286,7 +290,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
 // Low level
 //
 ////////////////////////////////////////////////////////////
-bool SDCParser::readSCHAttributes(StarZone &zone)
+bool SDCParser::readSCHAttributes(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -449,13 +453,59 @@ bool SDCParser::readSCHAttributes(StarZone &zone)
   ascFile.addNote(f.str().c_str());
 
   StarFileManager fileManager;
-  for (int i=0; i<10 + 11; ++i) {
-    if (!fileManager.readSfxItemList(zone)) {
+  shared_ptr<StarItemPool> pool=doc.getCurrentPool();
+  if (!pool) {
+    // CHANGEME
+    static bool first=true;
+    if (first) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCHAttributes: can not read a pool, create a false one\n"));
+      first=false;
+    }
+    pool=doc.getNewItemPool(StarItemPool::T_Unknown);
+  }
+  static STOFFVec2i const(titleLimitsVec[])= {
+    STOFFVec2i(4,4) /*SCHATTR_TEXT_ORIENT*/, STOFFVec2i(53,53) /*SCHATTR_TEXT_ORIENT*/,
+    STOFFVec2i(100,100)/*SCHATTR_USER_DEFINED_ATTR*/, STOFFVec2i(1000,1016) /*XATTR_LINE_FIRST, XATTR_LINE_LAST*/,
+    STOFFVec2i(1018,1046) /*XATTR_FILL_FIRST, XATTR_FILL_LAST*/, STOFFVec2i(1067,1078) /*XATTR_SHADOW_FIRST, XATTR_SHADOW_LAST*/,
+    STOFFVec2i(3994,4037) /*EE_ITEMS_START, EE_ITEMS_END*/
+  };
+  std::vector<STOFFVec2i> titleLimits;
+  for (int i=0; i<7; ++i) titleLimits.push_back(titleLimitsVec[i]);
+  static STOFFVec2i const(allAxisLimitsVec[])= {
+    STOFFVec2i(4,4) /*SCHATTR_TEXT_ORIENT*/, STOFFVec2i(53,54) /*SCHATTR_TEXT_ORIENT, SCHATTR_TEXT_OVERLAP*/,
+    STOFFVec2i(85,85) /* SCHATTR_AXIS_SHOWDESCR */, STOFFVec2i(1000,1016) /*XATTR_LINE_FIRST, XATTR_LINE_LAST*/,
+    STOFFVec2i(3994,4037) /*EE_ITEMS_START, EE_ITEMS_END*/, STOFFVec2i(30587,30587) /* SID_TEXTBREAK*/
+  };
+  std::vector<STOFFVec2i> allAxisLimits;
+  for (int i=0; i<6; ++i) allAxisLimits.push_back(allAxisLimitsVec[i]);
+  static STOFFVec2i const(compatAxisLimitsVec[])= {
+    STOFFVec2i(4,39) /*SCHATTR_TEXT_START, SCHATTR_AXISTYPE*/, STOFFVec2i(53,54)/*SCHATTR_TEXT_DEGREES,SCHATTR_TEXT_OVERLAP*/,
+    STOFFVec2i(70,95) /*SCHATTR_AXIS_START,SCHATTR_AXIS_END*/, STOFFVec2i(1000,1016) /*XATTR_LINE_FIRST, XATTR_LINE_LAST*/,
+    STOFFVec2i(3994,4037) /*EE_ITEMS_START, EE_ITEMS_END*/, STOFFVec2i(30587,30587) /* SID_TEXTBREAK*/,
+    STOFFVec2i(10585,10585) /*SID_ATTR_NUMBERFORMAT_VALUE*/
+  };
+  std::vector<STOFFVec2i> compatAxisLimits;
+  for (int i=0; i<7; ++i) compatAxisLimits.push_back(compatAxisLimitsVec[i]);
+  std::vector<STOFFVec2i> gridLimits;
+  gridLimits.push_back(STOFFVec2i(1000,1016)); //XATTR_LINE_FIRST, XATTR_LINE_LAST
+  gridLimits.push_back(STOFFVec2i(100,100)); // SCHATTR_USER_DEFINED_ATTR
+  std::vector<STOFFVec2i> diagramAreaLimits=gridLimits;
+  diagramAreaLimits.push_back(STOFFVec2i(1018,1046)); //XATTR_FILL_FIRST, XATTR_FILL_LAST
+  std::vector<STOFFVec2i> legendLimits=diagramAreaLimits;
+  legendLimits.push_back(STOFFVec2i(1067,1078)); //XATTR_SHADOW_FIRST, XATTR_SHADOW_LAST
+  legendLimits.push_back(STOFFVec2i(3,3)); // SCHATTR_LEGEND_END
+  legendLimits.push_back(STOFFVec2i(3994,4037)); // EE_ITEMS_START, EE_ITEMS_END
+
+  for (int i=0; i<10+11; ++i) {
+    if (!doc.readItemSet(zone, i<6 ? titleLimits : i==6 ? allAxisLimits : i<10 ? compatAxisLimits :
+                         i<17 ? gridLimits : i < 20 ? diagramAreaLimits : legendLimits, lastPos, pool.get(), false) ||
+        input->tell()>lastPos) {
       zone.closeSCHHeader("SCHAttributes");
       return true;
     }
   }
 
+  std::vector<STOFFVec2i> rowLimits(1, STOFFVec2i(0,0)); // CHART_ROW_WHICHPAIRS
   int nLoop = version<4 ? 2 : 3;
   for (int loop=0; loop<nLoop; ++loop) {
     pos=input->tell();
@@ -467,7 +517,7 @@ bool SDCParser::readSCHAttributes(StarZone &zone)
     ascFile.addNote(f.str().c_str());
 
     for (int i=0; i<int(nInt16); ++i) {
-      if (!fileManager.readSfxItemList(zone)) {
+      if (!doc.readItemSet(zone,rowLimits,lastPos, pool.get(), false) || input->tell()>lastPos) {
         zone.closeSCHHeader("SCHAttributes");
         return true;
       }
@@ -576,7 +626,8 @@ bool SDCParser::readSCHAttributes(StarZone &zone)
         ascFile.addNote(f.str().c_str());
 
         for (int i=0; i<int(nInt16); ++i) {
-          if (!fileManager.readSfxItemList(zone)) {
+          if (!doc.readItemSet(zone, gridLimits, lastPos, pool.get(), false) ||
+              input->tell()>lastPos) {
             zone.closeSCHHeader("SCHAttributes");
             return true;
           }
@@ -727,7 +778,7 @@ bool SDCParser::readSCHAttributes(StarZone &zone)
 
   if (version>=11 && input->tell()<lastPos) {
     for (int loop=0; loop<3; ++loop) { // the StockXXXAttr
-      if (!fileManager.readSfxItemList(zone) || input->tell()>lastPos) {
+      if (!doc.readItemSet(zone,rowLimits,lastPos, pool.get(), false) || input->tell()>lastPos) {
         zone.closeSCHHeader("SCHAttributes");
         return true;
       }
@@ -737,6 +788,15 @@ bool SDCParser::readSCHAttributes(StarZone &zone)
   }
 
   if (version>=12) {
+    static STOFFVec2i const(axisLimitsVec[])= {
+      STOFFVec2i(4,6) /*SCHATTR_TEXT_START, SCHATTR_TEXT_END*/, STOFFVec2i(39,39) /*SCHATTR_AXISTYPE*/,
+      STOFFVec2i(53,54)/*SCHATTR_TEXT_DEGREES,SCHATTR_TEXT_OVERLAP*/, STOFFVec2i(70,95) /*SCHATTR_AXIS_START,SCHATTR_AXIS_END*/,
+      STOFFVec2i(100,100) /* SCHATTR_USER_DEFINED_ATTR */, STOFFVec2i(1000,1016) /*XATTR_LINE_FIRST, XATTR_LINE_LAST*/,
+      STOFFVec2i(3994,4037) /*EE_ITEMS_START, EE_ITEMS_END*/, STOFFVec2i(11432,11432) /* SID_ATTR_NUMBERFORMAT_VALUE */,
+      STOFFVec2i(30587,30587) /* SID_TEXTBREAK*/, STOFFVec2i(10585,10585) /*SID_ATTR_NUMBERFORMAT_VALUE*/
+    };
+    std::vector<STOFFVec2i> axisLimits;
+    for (int i=0; i<8; ++i) axisLimits.push_back(axisLimitsVec[i]);
     while (input->tell()<lastPos) {
       pos=input->tell();
       int32_t nAxisId;
@@ -746,7 +806,7 @@ bool SDCParser::readSCHAttributes(StarZone &zone)
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       if (nAxisId==-1) break;
-      if (!fileManager.readSfxItemList(zone) || input->tell()>lastPos) {
+      if (!doc.readItemSet(zone,axisLimits,lastPos, pool.get(), false) || input->tell()>lastPos) {
         zone.closeSCHHeader("SCHAttributes");
         return true;
       }

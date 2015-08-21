@@ -95,7 +95,7 @@ public:
   //! try to read persist data
   bool readPersistData(StarZone &zone, long endPos);
   //! try to read a list of item
-  bool readItemSet(StarZone &zone, int startId, int endId, long endPos, StarItemPool *pool=0, bool isDirect=false);
+  bool readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &limits, long endPos, StarItemPool *pool=0, bool isDirect=false);
 protected:
   //!  the "persist elements" small ole: the list of object
   bool readPersistElements(STOFFInputStreamPtr input, std::string const &name);

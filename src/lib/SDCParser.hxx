@@ -78,7 +78,7 @@ protected:
   // data
   //
   //! try to read the chart attributes
-  bool readSCHAttributes(StarZone &zone);
+  bool readSCHAttributes(StarZone &zone, StarDocument &doc);
   //! try to read the memchart data
   bool readSCHMemChart(StarZone &zone);
 

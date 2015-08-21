@@ -746,7 +746,7 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarDocum
     return false;
   }
   lastPos=pos+6+long(nStructSz);
-  // BinTextObject::CreateData or BinTextObject::CreateData
+  // BinTextObject::CreateData or BinTextObject::CreateData300
   uint16_t version=0;
   bool ownPool=true;
   if (nWhich==0x31) {
@@ -757,7 +757,9 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarDocum
   ascFile.addNote(f.str().c_str());
 
   pos=input->tell();
-  shared_ptr<StarItemPool> pool=doc.getNewItemPool(StarItemPool::T_EditEnginePool);
+  shared_ptr<StarItemPool> pool;
+  if (!ownPool) pool=doc.findItemPool(StarItemPool::T_EditEnginePool, true); // checkme
+  if (!pool) pool=doc.getNewItemPool(StarItemPool::T_EditEnginePool);
   if (ownPool && !pool->read(zone)) {
     STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read a pool\n"));
     ascFile.addPos(pos);
@@ -802,16 +804,22 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarDocum
     uint16_t styleFamily;
     *input >> styleFamily;
     if (styleFamily) f << "styleFam=" << styleFamily << ",";
-    uint16_t nSfxItem;
-    *input >> nSfxItem;
-    if (nSfxItem) {
+    std::vector<STOFFVec2i> limits;
+    limits.push_back(STOFFVec2i(3989, 4033)); // EE_PARA_START 4033: EE_CHAR_END
+    if (!doc.readItemSet(zone, limits, lastPos, pool.get(), false)) {
       STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read item list\n"));
-      f << "nSfx=" << nSfxItem << ",###item list,";
+      f << "###item list,";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       input->seek(lastPos, librevenge::RVNG_SEEK_SET);
       return true;
     }
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+    pos=input->tell();
+    f.str("");
+    f << "EditTextObjectA[para" << i << "]:";
     uint32_t nAttr;
     if (nWhich==0x22)
       *input>>nAttr;
@@ -820,9 +828,9 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarDocum
       *input>>nAttr16;
       nAttr=nAttr16;
     }
-    if (input->tell()+long(nAttr)*6 > lastPos) {
-      STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read item list\n"));
-      f << "###item list,";
+    if (input->tell()+long(nAttr)*8 > lastPos) {
+      STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read attrib list\n"));
+      f << "###attrib list,";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       input->seek(lastPos, librevenge::RVNG_SEEK_SET);
@@ -830,29 +838,16 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarDocum
     }
     f << "attrib=[";
     for (int j=0; j<int(nAttr); ++j) { // checkme, probably bad
-      uint16_t which, start, end;
-      *input >> which >> start >> end;
+      uint16_t which, start, end, surrogate;
+      *input >> which;
+      if (nWhich==0x22) *input >> surrogate;
+      *input >> start >> end;
+      if (nWhich!=0x22) *input >> surrogate;
       f << "wh=" << which << ":";
       f << "pos=" << start << "x" << end << ",";
-      if (!pool->readAttribute(zone, which, 0, lastPos) || input->tell() >lastPos) {
-        STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read an attribute\n"));
-        f << "###attribute,";
-        ascFile.addPos(pos);
-        ascFile.addNote(f.str().c_str());
-        input->seek(lastPos, librevenge::RVNG_SEEK_SET);
-        return true;
-      }
+      f << "surrogate=" << surrogate << ",";
     }
     f << "],";
-    // REMOVE WHEN readAttribute is sure...
-    if (nAttr) {
-      STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read an attribute\n"));
-      f << "##checkme";
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      input->seek(lastPos, librevenge::RVNG_SEEK_SET);
-      return true;
-    }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
   }
@@ -906,46 +901,6 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarDocum
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
   }
-  return true;
-}
-
-bool StarFileManager::readSfxItemList(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  long pos=input->tell();
-  long lastPos=zone.getRecordLevel() ? zone.getRecordLastPosition() : input->size();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-
-  f << "Entries(SfxItemList):";
-  // itemset.cxx: SfxItemSet::Load (ncount)
-  uint16_t n;
-  *input >> n;
-  f << "N=" << n << ",";
-  if (input->tell()+6*n > lastPos) {
-    STOFF_DEBUG_MSG(("StarFileManager::readSfxItemList: can not read a SfxItemList\n"));
-    f << "###,";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-
-    return false;
-  }
-  if (n) {
-    if (lastPos!=pos+2+6*n) {
-      // TODO poolio.cxx SfxItemPool::LoadItem
-      static bool first=true;
-      if (first) {
-        STOFF_DEBUG_MSG(("StarFileManager::readSfxItemList: reading a SfxItem is not implemented\n"));
-        first=false;
-      }
-      f << "##";
-    }
-    else
-      f << "#";
-    input->seek(pos+2+6*n, librevenge::RVNG_SEEK_SET);
-  }
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
   return true;
 }
 

@@ -1496,12 +1496,13 @@ bool StarItemPool::readV1(StarZone &zone)
   return true;
 }
 
-bool StarItemPool::readStyle(StarZone &zone, int poolVersion)
+bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascii=zone.ascii();
   long pos=input->tell();
   libstoff::DebugStream f;
+  int poolVersion=input->peek()==3 ? 2 : 1;
   f << "Entries(SfxStylePool)[" << zone.getRecordLevel() << "]:pool[vers]=" << poolVersion << ",";
   if (poolVersion!=1 && poolVersion!=2) {
     STOFF_DEBUG_MSG(("StarItemPool::readStyle: reading version 1 is not implemented\n"));
@@ -1593,6 +1594,8 @@ bool StarItemPool::readStyle(StarZone &zone, int poolVersion)
     nCount=mRecord.getNumRecords();
   }
   long lastPos=zone.getRecordLevel() ? zone.getRecordLastPosition() : input->size();
+  if (!pool)
+    pool=doc.getNewItemPool(T_Unknown); // CHANGE
   for (int i=0; ok && i<int(nCount); ++i) {
     pos=input->tell();
     if (poolVersion==2) {
@@ -1621,7 +1624,7 @@ bool StarItemPool::readStyle(StarZone &zone, int poolVersion)
       if (poolVersion==1) return true;
       continue;
     }
-    uint16_t nFamily, nMask, nItemCount, nVer;
+    uint16_t nFamily, nMask, nVer;
     *input >> nFamily >> nMask;
     if (nFamily) f << "family=" << nFamily << ",";
     if (nMask) f << "mask=" << nMask << ",";
@@ -1643,23 +1646,18 @@ bool StarItemPool::readStyle(StarZone &zone, int poolVersion)
       nHelpId=tmp;
     }
     if (nHelpId) f << "help[id]=" << nHelpId << ",";
-    *input >> nItemCount;
-    if (nItemCount) {
-      f << "item[count]=" << nItemCount << ",";
-      input->seek(-2, librevenge::RVNG_SEEK_CUR);
-      if (!StarFileManager::readSfxItemList(zone)) {
-        f << "###itemList";
-        ascii.addPos(pos);
-        ascii.addNote(f.str().c_str());
-        if (poolVersion==1) return true;
-        continue;
-      }
-      ascii.addDelimiter(input->tell(),'|');
+    std::vector<STOFFVec2i> limits; // unknown
+    if (!doc.readItemSet(zone, limits, lastPos, pool.get(), false)) {
+      f << "###itemList";
+      ascii.addPos(pos);
+      ascii.addNote(f.str().c_str());
+      if (poolVersion==1) return true;
+      continue;
     }
+    ascii.addDelimiter(input->tell(),'|');
     *input>>nVer>>nSize;
     if (nVer) f << "version=" << nVer << ",";
-    if (input->tell()+long(nSize)>lastPos || (poolVersion==2 && input->tell()+long(nSize)+4<lastPos)) {
-      // be strict while readSfxItemList is not sure
+    if (input->tell()+long(nSize)>lastPos) {
       STOFF_DEBUG_MSG(("StarItemPool::readStyle: something is bad\n"));
       f << "###nSize=" << nSize << ",";
       ascii.addPos(pos);

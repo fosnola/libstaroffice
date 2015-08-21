@@ -118,8 +118,8 @@ class StarAttributeItemSet : public StarAttribute
 {
 public:
   //! constructor
-  StarAttributeItemSet(Type type, std::string const &debugName, int startId, int endId) :
-    StarAttribute(type, debugName), m_startId(startId), m_endId(endId)
+  StarAttributeItemSet(Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits) :
+    StarAttribute(type, debugName), m_limits(limits)
   {
   }
   //! create a new attribute
@@ -135,7 +135,7 @@ public:
     libstoff::DebugFile &ascFile=zone.ascii();
     libstoff::DebugStream f;
     f << "StarAttribute[" << zone.getRecordLevel() << "]:" << m_debugName << ",";
-    bool ok=document.readItemSet(zone, m_startId, m_endId, endPos, document.getCurrentPool().get());
+    bool ok=document.readItemSet(zone, m_limits, endPos, document.getCurrentPool().get());
     if (!ok) f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -144,13 +144,11 @@ public:
 
 protected:
   //! copy constructor
-  StarAttributeItemSet(StarAttributeItemSet const &orig) : StarAttribute(orig), m_startId(orig.m_startId), m_endId(orig.m_endId)
+  StarAttributeItemSet(StarAttributeItemSet const &orig) : StarAttribute(orig), m_limits(orig.m_limits)
   {
   }
-  //! the pool start id
-  int m_startId;
-  //! the pool end id
-  int m_endId;
+  //! the pool limits id
+  std::vector<STOFFVec2i> m_limits;
 };
 
 ////////////////////////////////////////
@@ -177,9 +175,9 @@ protected:
     m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeBool(type,debugName, defValue));
   }
   //! add a itemSet attribute
-  void addAttributeItemSet(StarAttribute::Type type, std::string const &debugName, int startId, int endId)
+  void addAttributeItemSet(StarAttribute::Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits)
   {
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeItemSet(type,debugName, startId, endId));
+    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeItemSet(type,debugName, limits));
   }
 };
 
@@ -247,6 +245,14 @@ void State::initAttributeMap()
   addAttributeBool(StarAttribute::ATTR_SC_PAGE_FORMULAS,"page[formulas]", false);
   addAttributeBool(StarAttribute::ATTR_SC_PAGE_NULLVALS,"page[nullvals]", true);
 
+  std::vector<STOFFVec2i> limits;
+  limits.push_back(STOFFVec2i(142,142)); // BACKGROUND
+  limits.push_back(STOFFVec2i(144,146)); // BORDER->SHADOW
+  limits.push_back(STOFFVec2i(150,151)); // LRSPACE->ULSPACE
+  limits.push_back(STOFFVec2i(155,155)); // PAGESIZE
+  limits.push_back(STOFFVec2i(159,161)); // ON -> SHARED
+  addAttributeItemSet(StarAttribute::ATTR_SC_PAGE_HEADERSET,"setPageHeader",limits);
+  addAttributeItemSet(StarAttribute::ATTR_SC_PAGE_FOOTERSET,"setPageFooter",limits);
   // --- ee --- svx_editdoc.cxx
   addAttributeBool(StarAttribute::ATTR_EE_PARA_ASIANCJKSPACING,"para[asianCJKSpacing]",false);
 
@@ -325,9 +331,13 @@ void State::initAttributeMap()
     s << "form[reserved" << type-StarAttribute::XATTR_FTRESERVED2+2 << "]";
     addAttributeVoid(StarAttribute::Type(type), s.str());
   }
-  addAttributeItemSet(StarAttribute::XATTR_SET_LINE,"setLine",1000, 1016);
-  addAttributeItemSet(StarAttribute::XATTR_SET_FILL,"setFill",1018, 1046);
-  addAttributeItemSet(StarAttribute::XATTR_SET_TEXT,"setText",1048, 1065);
+  limits.resize(1);
+  limits[0]=STOFFVec2i(1000,1016);
+  addAttributeItemSet(StarAttribute::XATTR_SET_LINE,"setLine",limits);
+  limits[0]=STOFFVec2i(1018,1046);
+  addAttributeItemSet(StarAttribute::XATTR_SET_FILL,"setFill",limits);
+  limits[0]=STOFFVec2i(1048,1064);
+  addAttributeItemSet(StarAttribute::XATTR_SET_TEXT,"setText",limits);
 
   // ---- sdr ---- svx_svdattr.cxx
   addAttributeBool(StarAttribute::SDRATTR_SHADOW,"shadow", false); // onOff
@@ -424,14 +434,23 @@ void State::initAttributeMap()
     addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_SHADOW,"setShadow",1067, 1078);
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_CAPTION,"setCaption",1079, 1094);
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_OUTLINER,"setOutliner",3989, 4037); // EE_ITEMS_START, EE_ITEMS_END
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_MISC,"setMisc",1097, 1125);
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_EDGE,"setEdge",1127, 1145);
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_MEASURE,"setMeasure",1147, 1170);
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_CIRC,"setCircle",1172, 1178);
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_GRAF,"setGraf",1180, 1242);
+  limits.resize(1);
+  limits[0]=STOFFVec2i(1067,1078);
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_SHADOW,"setShadow",limits);
+  limits[0]=STOFFVec2i(1080,1094);
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_CAPTION,"setCaption",limits);
+  limits[0]=STOFFVec2i(3989,4037);  // EE_ITEMS_START, EE_ITEMS_END
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_OUTLINER,"setOutliner",limits);
+  limits[0]=STOFFVec2i(1097,1125);
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_MISC,"setMisc",limits);
+  limits[0]=STOFFVec2i(1127,1145);
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_EDGE,"setEdge",limits);
+  limits[0]=STOFFVec2i(1147,1170);
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_MEASURE,"setMeasure",limits);
+  limits[0]=STOFFVec2i(1172,1178);
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_CIRC,"setCircle",limits);
+  limits[0]=STOFFVec2i(1180,1242);
+  addAttributeItemSet(StarAttribute::SDRATTR_SET_GRAF,"setGraf",limits);
 }
 
 }
@@ -1435,8 +1454,10 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
         f << "name=" << text.cstr() << ",";
       input->seek(2, librevenge::RVNG_SEEK_CUR);
     }
-    // ATTR_PATTERN_START, ATTR_PATTERN_END
-    if (!document.readItemSet(zone, 100, 148, lastPos, document.getCurrentPool().get())) {
+
+    std::vector<STOFFVec2i> limits;
+    limits.push_back(STOFFVec2i(100, 148)); // ATTR_PATTERN_START, ATTR_PATTERN_END
+    if (!document.readItemSet(zone, limits, lastPos, document.getCurrentPool().get())) {
       f << "###itemSet";
       input->seek(lastPos, librevenge::RVNG_SEEK_SET);
       break;
@@ -1534,21 +1555,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
         break;
       }
     }
-    break;
-  }
-  case StarAttribute::ATTR_SC_PAGE_HEADERSET:
-  case StarAttribute::ATTR_SC_PAGE_FOOTERSET: {
-    // svx_pageitem.cxx SvxSetItem::Create
-    f << (nWhich==StarAttribute::ATTR_SC_PAGE_HEADERSET ? "page[headerSet]" : "page[footerSet]") << ",";
-    // TODO
-    static bool first=true;
-    if (first) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: reading a header/footer set item is not implemented\n"));
-      first=false;
-    }
-    f << "##";
-    ascFile.addDelimiter(input->tell(),'|');
-    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
     break;
   }
   case StarAttribute::ATTR_EE_PARA_NUMBULLET: {
