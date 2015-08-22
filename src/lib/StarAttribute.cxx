@@ -987,11 +987,12 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     if (nVers>=2)
       f << "textLeft=" << input->readLong(2) << ",";
     if (nVers>=3) {
+      int8_t autofirst;
+      *input >> autofirst;
+      if (autofirst) f << "autofirst=" << int(autofirst) << ",";
       long marker=(long) input->readULong(4);
       if (marker==0x599401FE)
         f << "firstLine[bullet]=" << input->readULong(2);
-      else if (input->tell()==lastPos+3) // normally end by 0
-        input->seek(-3, librevenge::RVNG_SEEK_CUR);
       else
         input->seek(-4, librevenge::RVNG_SEEK_CUR);
     }
@@ -1574,16 +1575,16 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       if (nSet) {
         f << nSet << ",";
         SWFormatManager formatManager;
-        if (!formatManager.readNumberFormat(zone, lastPos, document)) {
+        if (!formatManager.readNumberFormat(zone, lastPos, document) || input->tell()>lastPos) {
           f << "###";
           break;
         }
       }
       else
-        f << "_";
+        f << "_,";
     }
     f << "],";
-    if (nVers>=2) {
+    if (version>=2) {
       *input>>nFeatureFlags;
       f << "nFeatureFlags2=" << nFeatureFlags << ",";
     }

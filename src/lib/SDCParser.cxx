@@ -152,7 +152,7 @@ bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &
     ascFile.addNote(f.str().c_str());
     return true;
   }
-  f << "vers=" << zone.getSCHVersion() << ",";
+  f << "vers=" << zone.getHeaderVersion() << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
@@ -178,7 +178,6 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
 
-  StarFileManager fileManager;
   shared_ptr<StarItemPool> mainPool;
 
   if (document.getDocumentKind()==STOFFDocument::STOFF_K_SPREADSHEET) {
@@ -263,11 +262,34 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
 
   // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
   // chart sch_docshell.cxx SchChartDocShell::Load
+  shared_ptr<StarItemPool> pool;
+  if (document.getDocumentKind()==STOFFDocument::STOFF_K_DRAW) {
+    pool=document.getNewItemPool(StarItemPool::T_XOutdevPool);
+    pool->addSecondaryPool(document.getNewItemPool(StarItemPool::T_EditEnginePool));
+  }
+  else if (document.getDocumentKind()==STOFFDocument::STOFF_K_CHART) {
+    pool=document.getNewItemPool(StarItemPool::T_XOutdevPool);
+    pool->addSecondaryPool(document.getNewItemPool(StarItemPool::T_EditEnginePool));
+    pool->addSecondaryPool(document.getNewItemPool(StarItemPool::T_ChartPool));
+  }
+  else if (document.getDocumentKind()==STOFFDocument::STOFF_K_TEXT)
+    pool=document.getNewItemPool(StarItemPool::T_WriterPool);
+  mainPool=pool;
   while (!input->isEnd()) {
+    // REMOVEME: remove this loop, when creation of secondary pool is checked
     long pos=input->tell();
-    shared_ptr<StarItemPool> pool=document.getNewItemPool(StarItemPool::T_Unknown); // CHANGEME
+    bool extraPool=false;
+    if (!pool) {
+      extraPool=true;
+      pool=document.getNewItemPool(StarItemPool::T_Unknown);
+    }
     if (pool && pool->read(zone)) {
+      if (extraPool) {
+        STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: create extra pool for %d of type %d\n",
+                         (int) document.getDocumentKind(), (int) pool->getType()));
+      }
       if (!mainPool) mainPool=pool;
+      pool.reset();
       continue;
     }
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -304,7 +326,7 @@ bool SDCParser::readSCHAttributes(StarZone &zone, StarDocument &doc)
   libstoff::DebugStream f;
   long lastPos=zone.getRecordLastPosition();
   f << "Entries(SCHAttributes)[" << zone.getRecordLevel() << "]:";
-  int version=zone.getSCHVersion();
+  int version=zone.getHeaderVersion();
   f << "vers=" << version << ",";
   double lightX, lightY, lightZ;
   int16_t nInt16;
@@ -452,7 +474,6 @@ bool SDCParser::readSCHAttributes(StarZone &zone, StarDocument &doc)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  StarFileManager fileManager;
   shared_ptr<StarItemPool> pool=doc.getCurrentPool();
   if (!pool) {
     // CHANGEME
@@ -851,7 +872,7 @@ bool SDCParser::readSCHMemChart(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(SCHMemChart)[" << zone.getRecordLevel() << "]:";
-  int version=zone.getSCHVersion();
+  int version=zone.getHeaderVersion();
   f << "vers=" << version << ",";
   uint16_t nCol, nRow;
   *input >> nCol >> nRow;
@@ -964,7 +985,7 @@ bool SDCParser::readSdrLayer(StarZone &zone)
     ascFile.addNote(f.str().c_str());
     return false;
   }
-  int version=zone.getSDRVersion();
+  int version=zone.getHeaderVersion();
   f << magic << ",nVers=" << version << ",";
 
   if (magic!="DrLy") {
@@ -1021,7 +1042,7 @@ bool SDCParser::readSdrLayerSet(StarZone &zone)
     ascFile.addNote(f.str().c_str());
     return false;
   }
-  int version=zone.getSDRVersion();
+  int version=zone.getHeaderVersion();
   f << magic << ",nVers=" << version << ",";
 
   if (magic!="DrLS") {
@@ -1080,7 +1101,7 @@ bool SDCParser::readSdrModel(StarZone &zone)
     ascFile.addNote(f.str().c_str());
     return false;
   }
-  int version=zone.getSDRVersion();
+  int version=zone.getHeaderVersion();
   f << magic << ",nVers=" << version << ",";
 
   if (magic!="DrMd" || version>17) {
@@ -1302,7 +1323,7 @@ bool SDCParser::readSdrObject(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(SdrObject)[" << zone.getRecordLevel() << "]:";
-  int version=zone.getSDRVersion();
+  int version=zone.getHeaderVersion();
   f << magic << ",nVers=" << version << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -1372,10 +1393,11 @@ bool SDCParser::readSdrPage(StarZone &zone)
     ascFile.addNote(f.str().c_str());
     return false;
   }
-  int version=zone.getSDRVersion();
+  int version=zone.getHeaderVersion();
   f << magic << ",nVers=" << version << ",";
 
   if (magic!="DrPg" && magic!="DrMP") {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("SDCParser::readSdrPage: unexpected magic data\n"));
     f << "###";
     ascFile.addPos(pos);
@@ -1540,7 +1562,7 @@ bool SDCParser::readSdrMPageDesc(StarZone &zone)
     ascFile.addNote(f.str().c_str());
     return false;
   }
-  int version=zone.getSDRVersion();
+  int version=zone.getHeaderVersion();
   f << magic << ",nVers=" << version << ",";
   if (magic!="DrMP") {
     STOFF_DEBUG_MSG(("SDCParser::readSdrMPageDesc: unexpected magic data\n"));
@@ -1589,7 +1611,7 @@ bool SDCParser::readSdrMPageDescList(StarZone &zone)
     ascFile.addNote(f.str().c_str());
     return false;
   }
-  int version=zone.getSDRVersion();
+  int version=zone.getHeaderVersion();
   uint16_t n;
   *input>>n;
   f << magic << ",nVers=" << version << ",N=" << n << ",";

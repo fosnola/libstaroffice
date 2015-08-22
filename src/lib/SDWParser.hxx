@@ -101,6 +101,8 @@ protected:
   //! the main zone
   bool readWriterDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
 
+  //! the drawing layers ?
+  bool readDrawingLayer(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
 protected:
   //! try to read an attribute: 'A'
   bool readSWAttribute(StarZone &zone, StarDocument &doc);

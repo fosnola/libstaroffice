@@ -155,14 +155,20 @@ bool SDWParser::createZones()
         readSwPageStyleSheets(ole,name, document);
         continue;
       }
-      if (base=="StarChartDocument") {
-        SDCParser sdcParser;
-        sdcParser.readChartDocument(ole,name,document);
+
+      if (base=="DrawingLayer") {
+        readDrawingLayer(ole,name,document);
         continue;
       }
       if (base=="SfxStyleSheets") {
         SDCParser sdcParser;
         sdcParser.readSfxStyleSheets(ole,name,document);
+        continue;
+      }
+
+      if (base=="StarChartDocument") {
+        SDCParser sdcParser;
+        sdcParser.readChartDocument(ole,name,document);
         continue;
       }
       if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
@@ -2074,6 +2080,52 @@ bool SDWParser::readSWTOX51List(StarZone &zone)
     zone.closeSWRecord(type, "SWTOX51List");
   }
   zone.closeSWRecord('y', "SWTOX51List");
+  return true;
+}
+
+////////////////////////////////////////////////////////////
+// drawing layer
+////////////////////////////////////////////////////////////
+bool SDWParser::readDrawingLayer(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
+{
+  StarZone zone(input, name, "DrawingLayer");
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  libstoff::DebugFile &ascFile=zone.ascii();
+  ascFile.open(name);
+
+  shared_ptr<StarItemPool> pool=document.getNewItemPool(StarItemPool::T_XOutdevPool);
+  pool->addSecondaryPool(document.getNewItemPool(StarItemPool::T_EditEnginePool));
+
+  while (!input->isEnd()) {
+    // REMOVEME: remove this loop, when creation of secondary pool is checked
+    long pos=input->tell();
+    bool extraPool=false;
+    if (!pool) {
+      extraPool=true;
+      pool=document.getNewItemPool(StarItemPool::T_Unknown);
+    }
+    if (pool && pool->read(zone)) {
+      if (extraPool) {
+        STOFF_DEBUG_MSG(("SDWParser::readDrawingLayer: create extra pool for %d of type %d\n",
+                         (int) document.getDocumentKind(), (int) pool->getType()));
+      }
+      pool.reset();
+      continue;
+    }
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    break;
+  }
+  long pos=input->tell();
+  SDCParser sdcParser;
+  if (!sdcParser.readSdrModel(zone)) { // look like a sdr model, but ...
+    STOFF_DEBUG_MSG(("SDWParser::readDrawingLayer: can not find the drawing model\n"));
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+  }
+  if (!input->isEnd()) {
+    STOFF_DEBUG_MSG(("SDWParser::readDrawingLayer: find extra data\n"));
+    ascFile.addPos(input->tell());
+    ascFile.addNote("Entries(DrawingLayer):###extra");
+  }
   return true;
 }
 

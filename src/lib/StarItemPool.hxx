@@ -62,6 +62,7 @@ class StarZone;
 class StarItemPool
 {
 public:
+  friend struct StarItemPoolInternal::State;
   //! the known item pool
   enum Type { T_ChartPool, T_EditEnginePool, T_SpreadsheetPool, T_VCControlPool, T_WriterPool, T_XOutdevPool, T_Unknown };
   //! constructor
@@ -69,6 +70,8 @@ public:
   //! destructor
   virtual ~StarItemPool();
 
+  //! add a secondary pool
+  void addSecondaryPool(shared_ptr<StarItemPool> secondary);
   //! try to read a "ItemPool" zone
   bool read(StarZone &zone);
   //! returns the pool version
@@ -89,9 +92,9 @@ public:
   bool readItem(StarZone &zone, bool isDirect, long endPos);
 protected:
   //! try to read a "ItemPool" zone (version 1)
-  bool readV1(StarZone &zone);
+  bool readV1(StarZone &zone, StarItemPool *master);
   //! try to read a "ItemPool" zone (version 2)
-  bool readV2(StarZone &zone);
+  bool readV2(StarZone &zone, StarItemPool *master);
 
   //
   // data

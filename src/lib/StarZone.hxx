@@ -68,6 +68,11 @@ public:
   //! close a zone header
   bool closeSCHHeader(std::string const &debugName);
 
+  //! open a version compat header (version+size)
+  bool openVersionCompatHeader();
+  //! close a zone header
+  bool closeVersionCompatHeader(std::string const &debugName);
+
   //! returns the StarOffice version: 3-5
   int getVersion() const
   {
@@ -78,13 +83,8 @@ public:
   {
     return m_documentVersion;
   }
-  //! returns the StarOffice header version (sch zone)
-  int getSCHVersion() const
-  {
-    return m_headerVersionStack.empty() ? 0 : m_headerVersionStack.top();
-  }
-  //! returns the StarOffice header version (sdr zone)
-  int getSDRVersion() const
+  //! returns the StarOffice header version (if set)
+  int getHeaderVersion() const
   {
     return m_headerVersionStack.empty() ? 0 : m_headerVersionStack.top();
   }

@@ -311,6 +311,37 @@ bool StarZone::closeSCHHeader(std::string const &debugName)
   return closeRecord('@', debugName);
 }
 
+bool StarZone::openVersionCompatHeader()
+{
+  long pos=m_input->tell();
+  if (!m_input->checkPosition(pos+6)) return false;
+  // vcompat.cxx: VersionCompat::VersionCompat
+  m_headerVersionStack.push((int) m_input->readULong(2));
+  long len=(long) m_input->readULong(4);
+  long endPos=pos+6+len;
+  if (!m_input->checkPosition(endPos)) {
+    m_headerVersionStack.pop();
+    m_input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  // check the position ends in the current group (if a group is open)
+  if (!m_positionStack.empty() && endPos>m_positionStack.top() && m_positionStack.top()) {
+    STOFF_DEBUG_MSG(("StarZone::openVersionCompatHeader: argh endPosition is not in the current group\n"));
+    m_headerVersionStack.pop();
+    m_input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  m_typeStack.push('*');
+  m_positionStack.push(endPos);
+  return true;
+}
+
+bool StarZone::closeVersionCompatHeader(std::string const &debugName)
+{
+  if (!m_headerVersionStack.empty()) m_headerVersionStack.pop();
+  return closeRecord('*', debugName);
+}
+
 bool StarZone::openSDRHeader(std::string &magic)
 {
   long pos=m_input->tell();

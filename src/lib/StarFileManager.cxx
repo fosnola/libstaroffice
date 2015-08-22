@@ -567,7 +567,7 @@ bool StarFileManager::readOutPlaceObject(STOFFInputStreamPtr input, libstoff::De
 ////////////////////////////////////////////////////////////
 // small zone
 ////////////////////////////////////////////////////////////
-bool StarFileManager::readFont(StarZone &zone, int nVers, long lastPos)
+bool StarFileManager::readFont(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -575,6 +575,14 @@ bool StarFileManager::readFont(StarZone &zone, int nVers, long lastPos)
   // font.cxx:  operator>>( ..., Impl_Font& )
   libstoff::DebugStream f;
   f << "Entries(StarFont)[" << zone.getRecordLevel() << "]:";
+  if (!zone.openVersionCompatHeader()) {
+    STOFF_DEBUG_MSG(("StarFileManager::readFont: can not read the header\n"));
+    f << "###header";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  long lastPos=zone.getRecordLastPosition();
   for (int i=0; i<2; ++i) {
     librevenge::RVNGString string;
     if (!zone.readString(string)||input->tell()>lastPos) {
@@ -582,7 +590,8 @@ bool StarFileManager::readFont(StarZone &zone, int nVers, long lastPos)
       f << "###string";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      return false;
+      zone.closeVersionCompatHeader("StarFont");
+      return true;
     }
     if (!string.empty()) f << (i==0 ? "name" : "style") << "=" << string.cstr() << ",";
   }
@@ -608,7 +617,7 @@ bool StarFileManager::readFont(StarZone &zone, int nVers, long lastPos)
   if (outline) f << "outline,";
   if (shadow) f << "shadow,";
   if (kerning) f << "kerning=" << (int) kerning << ",";
-  if (nVers >= 2) {
+  if (zone.getHeaderVersion() >= 2) {
     bool vertical;
     int8_t relief;
     uint16_t cjkLanguage, emphasisMark;
@@ -620,6 +629,8 @@ bool StarFileManager::readFont(StarZone &zone, int nVers, long lastPos)
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
+
+  zone.closeVersionCompatHeader("StarFont");
   return true;
 }
 

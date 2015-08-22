@@ -73,6 +73,8 @@ public:
   //! try to read a spreadshet style zone: SfxStyleSheets
   bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &document);
 
+  //! try to read a SdrModel zone: "DrMd"
+  bool readSdrModel(StarZone &zone);
 protected:
   //
   // data
@@ -82,8 +84,6 @@ protected:
   //! try to read the memchart data
   bool readSCHMemChart(StarZone &zone);
 
-  //! try to read a SdrModel zone: "DrMd"
-  bool readSdrModel(StarZone &zone);
   //! try to read a SdrLayer zone: "DrLy'
   bool readSdrLayer(StarZone &zone);
   //! try to read a SdrLayerSet zone: "DrLS'

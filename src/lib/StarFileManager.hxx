@@ -85,7 +85,7 @@ public:
   //! try to read a printer zone
   static bool readJobSetUp(StarZone &zone);
   //! try to read a font
-  static bool readFont(StarZone &zone, int nVers, long lastPos);
+  static bool readFont(StarZone &zone);
 
   //! try to read a edit text object
   static bool readEditTextObject(StarZone &zone, long lastPos, StarDocument &doc);

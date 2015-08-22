@@ -288,7 +288,7 @@ struct Version {
 struct State {
   //! constructor
   State(StarDocument &document, StarItemPool::Type type) : m_document(document), m_type(StarItemPool::T_Unknown), m_majorVersion(0), m_minorVersion(0), m_loadingVersion(0),
-    m_name(""), m_currentVersion(0), m_verStart(0), m_verEnd(0), m_versionList(), m_idToAttributeList()
+    m_name(""), m_secondaryPool(), m_currentVersion(0), m_verStart(0), m_verEnd(0), m_versionList(), m_idToAttributeList()
   {
     init(type);
   }
@@ -319,7 +319,9 @@ struct State {
   //! returns true if the value is in expected range
   int isInRange(int which) const
   {
-    return which>=m_verStart&&which<=m_verEnd;
+    if (which>=m_verStart&&which<=m_verEnd) return true;
+    if (m_secondaryPool) return m_secondaryPool->m_state->isInRange(which);
+    return false;
   }
   //! add a new version map
   void addVersionMap(uint16_t nVers, uint16_t nStart, std::vector<int> const &list)
@@ -341,8 +343,9 @@ struct State {
   {
     // polio.cxx: SfxItemPool::GetNewWhich
     if (nFileWhich<m_verStart||nFileWhich>m_verEnd) {
-      // to do implement recursif method
-      STOFF_DEBUG_MSG(("StarItemPoolInternal::State::GetWhich: recursive method is not implemented\n"));
+      if (m_secondaryPool)
+        return m_secondaryPool->m_state->getWhich(nFileWhich);
+      STOFF_DEBUG_MSG(("StarItemPoolInternal::State::GetWhich: can not find a conversion for which=%d\n", nFileWhich));
       return 0;
     }
     if (m_loadingVersion>m_currentVersion) {
@@ -370,6 +373,14 @@ struct State {
     }
     return nFileWhich;
   }
+  // returns the state corresponding to which
+  State *getPoolStateFor(int which)
+  {
+    if (which>=m_verStart&&which<=m_verEnd) return this;
+    if (m_secondaryPool) return m_secondaryPool->m_state->getPoolStateFor(which);
+    return 0;
+  }
+
   //! the document
   StarDocument &m_document;
   //! the document type
@@ -382,6 +393,8 @@ struct State {
   int m_loadingVersion;
   //! the name
   librevenge::RVNGString m_name;
+  //! the secondary pool
+  shared_ptr<StarItemPool> m_secondaryPool;
   //! the current version
   int m_currentVersion;
   //! the minimum version
@@ -763,6 +776,18 @@ StarItemPool::~StarItemPool()
 {
 }
 
+void StarItemPool::addSecondaryPool(shared_ptr<StarItemPool> secondary)
+{
+  if (!secondary) {
+    STOFF_DEBUG_MSG(("StarItemPool::addSecondaryPool: called without pool\n"));
+    return;
+  }
+  if (m_state->m_secondaryPool)
+    m_state->m_secondaryPool->addSecondaryPool(secondary);
+  else
+    m_state->m_secondaryPool=secondary;
+}
+
 int StarItemPool::getVersion() const
 {
   return m_state->m_majorVersion;
@@ -778,8 +803,9 @@ bool StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPo
   if (m_state->m_currentVersion!=m_state->m_loadingVersion)
     which=m_state->getWhich(which);
 
-  if (which<m_state->m_verStart || which>=m_state->m_verStart+int(m_state->m_idToAttributeList.size()) ||
-      !m_state->m_document.getAttributeManager() || !m_state->m_document.getSDWParser()) {
+  StarItemPoolInternal::State *state=m_state->getPoolStateFor(which);
+  if (!state || which<state->m_verStart || which>=state->m_verStart+int(state->m_idToAttributeList.size()) ||
+      !state->m_document.getAttributeManager() || !state->m_document.getSDWParser()) {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
     libstoff::DebugFile &ascii=zone.ascii();
@@ -792,17 +818,14 @@ bool StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPo
     return true;
   }
   zone.openDummyRecord();
-  bool ok=m_state->m_document.getAttributeManager()->readAttribute
-          (zone, m_state->m_idToAttributeList[size_t(which-m_state->m_verStart)], vers, endPos, m_state->m_document);
+  bool ok=state->m_document.getAttributeManager()->readAttribute
+          (zone, state->m_idToAttributeList[size_t(which-state->m_verStart)], vers, endPos, state->m_document);
   zone.closeDummyRecord();
   return ok;
 }
 
 bool StarItemPool::read(StarZone &zone)
 {
-  // reinit all
-  m_state.reset(new StarItemPoolInternal::State(m_state->m_document, m_state->m_type));
-
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
   long endPos=zone.getRecordLevel()>0 ?  zone.getRecordLastPosition() : input->size();
@@ -816,7 +839,17 @@ bool StarItemPool::read(StarZone &zone)
   if ((tag!=0x1111 && tag!=0xbbbb) || nMajorVers<1 || nMajorVers>2)
     return false;
   m_isInside=true;
-  bool ok=nMajorVers==2 ? readV2(zone) : readV1(zone);
+  StarItemPool *master=0, *pool=this;
+  bool ok=false;
+  while (input->tell()<endPos) {
+    if ((nMajorVers==2 && !pool->readV2(zone, master)) ||
+        (nMajorVers==1 && !pool->readV1(zone, master)))
+      break;
+    ok=true;
+    master=pool;
+    pool=pool->m_state->m_secondaryPool.get();
+    if (!pool) break;
+  }
   m_isInside=false;
   return ok;
 }
@@ -915,50 +948,53 @@ bool StarItemPool::readItem(StarZone &zone, bool isDirect, long endPos)
   return true;
 }
 
-bool StarItemPool::readV2(StarZone &zone)
+bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
 {
-  // reinit all
-  m_state.reset(new StarItemPoolInternal::State(m_state->m_document, m_state->m_type));
-
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascii=zone.ascii();
   long endPos=zone.getRecordLevel()>0 ?  zone.getRecordLastPosition() : input->size();
   libstoff::DebugStream f;
   f << "Entries(PoolDef)["<< zone.getRecordLevel() << "]:";
   long pos=input->tell();
-  if (pos+18>endPos) {
-    STOFF_DEBUG_MSG(("StarItemPool::readV2: the zone seems too short\n"));
-    return false;
+  if (master) {
+    f << "secondary,";
+    m_state->m_majorVersion=2;
+    m_state->m_minorVersion=master->m_state->m_minorVersion;
   }
-  uint16_t tag;
-  // poolio.cxx SfxItemPool::Load
-  uint8_t nMajorVers, nMinorVers;
-  *input >> tag >> nMajorVers >> nMinorVers;
-  if (tag==0x1111)
-    f << "v4,";
-  else if (tag==0xbbbb)
-    f << "v5,";
   else {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
+    if (pos+18>endPos) {
+      STOFF_DEBUG_MSG(("StarItemPool::readV2: the zone seems too short\n"));
+      return false;
+    }
+    uint16_t tag;
+    // poolio.cxx SfxItemPool::Load
+    uint8_t nMajorVers, nMinorVers;
+    *input >> tag >> nMajorVers >> nMinorVers;
+    if (tag==0x1111)
+      f << "v4,";
+    else if (tag==0xbbbb)
+      f << "v5,";
+    else {
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+      return false;
+    }
 
-  if (nMajorVers!=2) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  *input>>tag;
-  if (tag!=0xffff) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
+    if (nMajorVers!=2) {
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+      return false;
+    }
+    *input>>tag;
+    if (tag!=0xffff) {
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+      return false;
+    }
 
-  m_state->m_majorVersion=2;
-  m_state->m_minorVersion=int(nMinorVers);
-  f << "version=2,";
-  if (m_state->m_minorVersion) f << "vers[minor]=" << m_state->m_minorVersion << ",";
-  input->seek(4, librevenge::RVNG_SEEK_CUR); // 0,0
-
+    m_state->m_majorVersion=2;
+    m_state->m_minorVersion=int(nMinorVers);
+    f << "version=2,";
+    if (m_state->m_minorVersion) f << "vers[minor]=" << m_state->m_minorVersion << ",";
+    input->seek(4, librevenge::RVNG_SEEK_CUR); // 0,0
+  }
   char type; // always 1
   if (input->peek()!=1 || !zone.openSfxRecord(type)) {
     STOFF_DEBUG_MSG(("StarItemPool::readV2: can not open the sfx record\n"));
@@ -1155,7 +1191,7 @@ bool StarItemPool::readV2(StarZone &zone)
   return true;
 }
 
-bool StarItemPool::readV1(StarZone &zone)
+bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascii=zone.ascii();

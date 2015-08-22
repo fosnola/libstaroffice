@@ -267,7 +267,7 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarDocumen
   if (nStart) f << "nStart=" << nStart << ",";
   if (cBullet) f << "cBullet=" << cBullet << ",";
 
-  uint16_t firstLineOffs, absLSpace, lSpace, nCharTextDist;
+  int16_t firstLineOffs, absLSpace, lSpace, nCharTextDist;
   *input >> firstLineOffs >> absLSpace >> lSpace >> nCharTextDist;
   if (firstLineOffs) f << "firstLineOffs=" << firstLineOffs << ",";
   if (absLSpace) f << "absLSpace=" << absLSpace << ",";
@@ -283,7 +283,8 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarDocumen
       ascFile.addNote(f.str().c_str());
       return false;
     }
-    f << (i==0 ? "prefix" : i==1 ? "suffix" : "style[name]") << "=" << text.cstr() << ",";
+    if (!text.empty())
+      f << (i==0 ? "prefix" : i==1 ? "suffix" : "style[name]") << "=" << text.cstr() << ",";
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -313,7 +314,7 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarDocumen
   if (eVertOrient) f << "vertOrient=" << eVertOrient << ",";
   if (tmp) {
     StarFileManager fileManager;
-    if (!fileManager.readFont(zone, int(nVers), lastPos)) { // unsure about version
+    if (!fileManager.readFont(zone) || input->tell()>lastPos) {
       STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: can not read a font\n"));
       f << "###font";
       ascFile.addPos(pos);
@@ -336,6 +337,8 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarDocumen
     ascFile.addNote(f.str().c_str());
     return false;
   }
+  *input >> tmp;
+  if (tmp) f << "bullet[resSize]=" << tmp << ",";
   *input >> tmp;
   if (tmp) f << "show[symbol],";
   ascFile.addPos(pos);
