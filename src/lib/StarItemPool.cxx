@@ -622,7 +622,7 @@ void State::init(StarItemPool::Type type)
     break;
   }
   case StarItemPool::T_XOutdevPool: {
-    // svx_xpool.cxx XOutdevItemPool::Ctor
+    // svx_xpool.cxx XOutdevItemPool::Ctor and svx_svdattr.cxx SdrItemPool::Ctor
     m_verStart=1000;
     m_verEnd=1333;
     std::vector<int> list;
@@ -1362,154 +1362,124 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
   ascii.addPos(tablePos-6);
   ascii.addNote(f.str().c_str());
 
-  // now read the attribute
-  input->seek(attribPos, librevenge::RVNG_SEEK_SET);
-  pos=input->tell();
+  // now read the attribute and default
   long endDataPos=attribPos+(long) attribSize;
-  f.str("");
-  f << "PoolDef[attrib]:";
-  bool ok=false;
-  if (attribSize!=0)  {
-    *input >> tag;
-    if (tag!=0x2222) {
-      STOFF_DEBUG_MSG(("StarItemPool::readV1: tag is bad \n"));
-      f << "###tag=" << std::hex << tag << std::dec;
-    }
-    else
-      ok=true;
-  }
-  ascii.addPos(attribPos-4);
-  ascii.addNote(f.str().c_str());
   size_t n=0;
-  while (ok) {
-    pos=input->tell();
+  for (int step=0; step<2; ++step) {
+    std::string const what(step==0 ? "attrib" : "default");
     f.str("");
-    f << "PoolDef[attrib" << n << "]:";
-    if (pos+2 > endDataPos) {
-      ok=false;
-
-      STOFF_DEBUG_MSG(("StarItemPool::readV1: can not find last attrib\n"));
-      f << "###noLast,";
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      break;
-    }
-    uint16_t nWhich;
-    *input >> nWhich;
-    if (nWhich==0) {
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      break;
-    }
-
-    static bool first=true;
-    if (first) {
-      STOFF_DEBUG_MSG(("StarItemPool::readV1: reading attribute is not implemented\n"));
-      first=false;
-    }
-    uint16_t nSlot, nVersion, nCount;
-    *input >> nSlot >> nVersion >> nCount;
-    int which=nWhich;
-    if (!m_state->isInRange(which)) {
-      STOFF_DEBUG_MSG(("StarItemPool::readV1: the which value seems bad\n"));
-      f << "###";
-    }
-    f << "wh=" << which << "[" << std::hex << nSlot << std::dec << "], vers=" << nVersion << ", count=" << nCount << ",";
-    ascii.addPos(pos);
-    ascii.addNote(f.str().c_str());
-
-    for (int i=0; i<nCount; ++i) {
+    f << "PoolDef[" << what << "]:";
+    if (step==1) {
       pos=input->tell();
-
+      if (nMinorVers>0) {
+        *input>>tag;
+        if (tag!=0x4444) {
+          STOFF_DEBUG_MSG(("StarItemPool::readV1: default tag is bad \n"));
+          f << "###tag=" << std::hex << tag << std::dec;
+          ascii.addPos(pos);
+          ascii.addNote(f.str().c_str());
+          break;
+        }
+      }
+      ascii.addPos(pos);
+      ascii.addNote(f.str().c_str());
+    }
+    else {
+      input->seek(attribPos, librevenge::RVNG_SEEK_SET);
+      if (attribSize!=0)  {
+        *input >> tag;
+        if (tag!=0x2222) {
+          STOFF_DEBUG_MSG(("StarItemPool::readV1: tag is bad \n"));
+          f << "###tag=" << std::hex << tag << std::dec;
+          break;
+        }
+      }
+      ascii.addPos(attribPos-4);
+      ascii.addNote(f.str().c_str());
+      if (attribSize==0) continue;
+    }
+    bool ok=true;
+    while (ok) {
+      pos=input->tell();
       f.str("");
-      f << "StarAttribute:inPool,wh=" <<  which << ",";
-      if (n >= sizeAttr.size() || pos+(long)sizeAttr[n]>endDataPos) {
+      f << "PoolDef[" << what << "-" << n << "]:";
+      if (pos+2 > endDataPos) {
         ok=false;
-
-        STOFF_DEBUG_MSG(("StarItemPool::readV1: can not find attrib size\n"));
-        f << "###badSize,";
+        STOFF_DEBUG_MSG(("StarItemPool::readV1: can not find some attrib\n"));
+        f << "###noLast,";
         ascii.addPos(pos);
         ascii.addNote(f.str().c_str());
         break;
       }
-      if (!sizeAttr[n]) continue;
-
-      uint16_t nRef;
-      *input>>nRef;
-      f << "ref=" << nRef << ",";
-      if (nRef) {
-        if (!readAttribute(zone, which, (int) nVersion, pos+(long) sizeAttr[n]))
-          f << "###";
-      }
-      if (input->tell()!=pos+(long)sizeAttr[n]) {
-        STOFF_DEBUG_MSG(("StarItemPool::readV1: find extra attrib data\n"));
-        f << "###extra,";
-        if (input->tell()!=pos+2)
-          ascii.addDelimiter(input->tell(),'|');
-        input->seek(pos+(long) sizeAttr[n], librevenge::RVNG_SEEK_SET);
-      }
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      ++n;
-    }
-    if (!ok) break;
-  }
-  if (ok) {
-    pos=input->tell();
-    f.str("");
-    f << "PoolDef[default]:";
-    if (nMinorVers>0) {
-      *input>>tag;
-      if (tag!=0x4444) {
-        STOFF_DEBUG_MSG(("StarItemPool::readV1: default tag is bad \n"));
-        f << "###tag=" << std::hex << tag << std::dec;
+      uint16_t nWhich;
+      *input >> nWhich;
+      if (nWhich==0) {
         ascii.addPos(pos);
         ascii.addNote(f.str().c_str());
-        ok=false;
+        break;
+      }
+
+      static bool first=true;
+      if (first) {
+        STOFF_DEBUG_MSG(("StarItemPool::readV1: reading attribute is not implemented\n"));
+        first=false;
+      }
+      uint16_t nSlot, nVersion, nCount=1;
+      *input >> nSlot >> nVersion;
+      if (step==0) *input >> nCount;
+      int which=nWhich;
+      if (!m_state->isInRange(which)) {
+        STOFF_DEBUG_MSG(("StarItemPool::readV1: the which value seems bad\n"));
+        f << "###";
+      }
+      f << "wh=" << which << "[" << std::hex << nSlot << std::dec << "], vers=" << nVersion << ", count=" << nCount << ",";
+      ascii.addPos(pos);
+      ascii.addNote(f.str().c_str());
+
+      for (int i=0; i<nCount; ++i) {
+        long debAttPos=(step==0 ? input->tell() : pos);
+        pos=input->tell();
+        f.str("");
+        f << "StarAttribute:inPool,wh=" <<  which << ",";
+        if (n >= sizeAttr.size() || debAttPos+(long)sizeAttr[n]>endDataPos ||
+            input->tell()>debAttPos+(long)sizeAttr[n]) {
+          ok=false;
+
+          STOFF_DEBUG_MSG(("StarItemPool::readV1: can not find attrib size\n"));
+          f << "###badSize,";
+          ascii.addPos(pos);
+          ascii.addNote(f.str().c_str());
+          break;
+        }
+        long endAttPos=debAttPos+(long)sizeAttr[n];
+        if (input->tell()==endAttPos) {
+          ascii.addPos(pos);
+          ascii.addNote(f.str().c_str());
+          continue;
+        }
+
+        uint16_t nRef=1;
+        if (step==0) {
+          *input>>nRef;
+          f << "ref=" << nRef << ",";
+        }
+        if (nRef) {
+          if (!readAttribute(zone, which, (int) nVersion, debAttPos+(long) sizeAttr[n]))
+            f << "###";
+        }
+        if (input->tell()!=debAttPos+(long)sizeAttr[n]) {
+          STOFF_DEBUG_MSG(("StarItemPool::readV1: find extra attrib data\n"));
+          f << "###extra,";
+          if (input->tell()!=pos)
+            ascii.addDelimiter(input->tell(),'|');
+          input->seek(debAttPos+(long) sizeAttr[n], librevenge::RVNG_SEEK_SET);
+        }
+        ascii.addPos(pos);
+        ascii.addNote(f.str().c_str());
+        ++n;
       }
     }
-  }
-  if (ok) {
-    ascii.addPos(pos);
-    ascii.addNote(f.str().c_str());
-  }
-
-  while (ok) {
-    pos=input->tell();
-    f.str("");
-    f << "PoolDef[default" << n << "]:";
-    if (pos+2 > endDataPos) {
-      ok=false;
-
-      STOFF_DEBUG_MSG(("StarItemPool::readV1: can not find last attrib\n"));
-      f << "###noLast,";
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      break;
-    }
-    uint16_t nWhich;
-    *input >> nWhich;
-    if (nWhich==0) {
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      break;
-    }
-    uint16_t nSlot, nVersion;
-    *input >> nSlot >> nVersion;
-    f << "wh=" << nWhich << "[" << std::hex << nSlot << std::dec << "], vers=" << nVersion << ",";
-    if (n >= sizeAttr.size() || sizeAttr[n]<6 || pos+(long) sizeAttr[n]>endDataPos) {
-      ok=false;
-
-      STOFF_DEBUG_MSG(("StarItemPool::readV1: can not find attrib size\n"));
-      f << "###badSize,";
-      ascii.addPos(pos);
-      ascii.addNote(f.str().c_str());
-      break;
-    }
-    if (sizeAttr[n]>6) ascii.addDelimiter(input->tell(),'|');
-    input->seek(pos+(long) sizeAttr[n++], librevenge::RVNG_SEEK_SET);
-    ascii.addPos(pos);
-    ascii.addNote(f.str().c_str());
+    if (!ok) break;
   }
 
   input->seek(beginEndPos, librevenge::RVNG_SEEK_SET);

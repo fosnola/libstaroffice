@@ -113,6 +113,47 @@ protected:
   bool m_value;
 };
 
+//! int attribute of StarAttributeInternal
+class StarAttributeInt : public StarAttribute
+{
+public:
+  //! constructor
+  StarAttributeInt(Type type, std::string const &debugName, int intSize, int value) : StarAttribute(type, debugName), m_value(value), m_intSize(intSize)
+  {
+    if (intSize!=1 && intSize!=2 && intSize!=4) {
+      STOFF_DEBUG_MSG(("StarAttributeInternal::StarAttributeInt: bad num size\n"));
+      m_intSize=0;
+    }
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarAttributeInt(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarDocument &/*document*/)
+  {
+    STOFFInputStreamPtr input=zone.input();
+    long pos=input->tell();
+    libstoff::DebugFile &ascFile=zone.ascii();
+    libstoff::DebugStream f;
+    if (m_intSize) m_value=(int) input->readLong(m_intSize);
+    f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return pos+1<=endPos;
+  }
+protected:
+  //! copy constructor
+  StarAttributeInt(StarAttributeInt const &orig) : StarAttribute(orig), m_value(orig.m_value), m_intSize(orig.m_intSize)
+  {
+  }
+  // the int value
+  int m_value;
+  // number of byte 1,2,4
+  int m_intSize;
+};
+
 //! itemSet attribute of StarAttributeInternal
 class StarAttributeItemSet : public StarAttribute
 {
@@ -173,6 +214,11 @@ protected:
   void addAttributeBool(StarAttribute::Type type, std::string const &debugName, bool defValue)
   {
     m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeBool(type,debugName, defValue));
+  }
+  //! add a int attribute
+  void addAttributeInt(StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
+  {
+    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeInt(type,debugName, numBytes, defValue));
   }
   //! add a itemSet attribute
   void addAttributeItemSet(StarAttribute::Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits)
@@ -341,6 +387,10 @@ void State::initAttributeMap()
 
   // ---- sdr ---- svx_svdattr.cxx
   addAttributeBool(StarAttribute::SDRATTR_SHADOW,"shadow", false); // onOff
+  addAttributeInt(StarAttribute::SDRATTR_SHADOWXDIST, "shadow[xDist]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_SHADOWYDIST, "shadow[yDist]",4, 0); // metric
+  addAttributeVoid(StarAttribute::SDRATTR_SHADOW3D, "shadow[3d]");
+  addAttributeVoid(StarAttribute::SDRATTR_SHADOWPERSP, "shadow[persp]");
   for (int type=StarAttribute::SDRATTR_SHADOWRESERVE1; type<=StarAttribute::SDRATTR_SHADOWRESERVE5; ++type) {
     s.str("");
     s << "shadow[reserved" << type-StarAttribute::SDRATTR_SHADOWRESERVE1+1 << "]";
@@ -348,7 +398,12 @@ void State::initAttributeMap()
   }
 
   addAttributeBool(StarAttribute::SDRATTR_CAPTIONFIXEDANGLE,"caption[fixedAngle]", true); // onOff
+  addAttributeInt(StarAttribute::SDRATTR_CAPTIONANGLE, "caption[angle]",4, 0); // angle
+  addAttributeInt(StarAttribute::SDRATTR_CAPTIONGAP, "caption[gap]",4, 0); // metric
   addAttributeBool(StarAttribute::SDRATTR_CAPTIONESCISREL,"caption[esc,isRel]", true); // yesNo
+  addAttributeInt(StarAttribute::SDRATTR_CAPTIONESCREL, "caption[esc,rel]",4, 5000);
+  addAttributeInt(StarAttribute::SDRATTR_CAPTIONESCABS, "caption[esc,abs]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_CAPTIONLINELEN, "caption[line,len]",4, 0); // metric
   addAttributeBool(StarAttribute::SDRATTR_CAPTIONFITLINELEN,"caption[fit,lineLen]", true); // yesNo
   for (int type=StarAttribute::SDRATTR_CAPTIONRESERVE1; type<=StarAttribute::SDRATTR_CAPTIONRESERVE5; ++type) {
     s.str("");
@@ -356,10 +411,20 @@ void State::initAttributeMap()
     addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
+  addAttributeInt(StarAttribute::SDRATTR_ECKENRADIUS, "radius[ecken]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_TEXT_MINFRAMEHEIGHT, "text[min,frameHeight]",4, 0); // metric
   addAttributeBool(StarAttribute::SDRATTR_TEXT_AUTOGROWHEIGHT,"text[autoGrow,height]", true); // onOff
+  addAttributeInt(StarAttribute::SDRATTR_TEXT_LEFTDIST, "text[left,dist]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_TEXT_RIGHTDIST, "text[right,dist]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_TEXT_UPPERDIST, "text[upper,dist]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_TEXT_LOWERDIST, "text[lower,dist]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_TEXT_MAXFRAMEHEIGHT, "text[max,frameHeight]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_TEXT_MINFRAMEWIDTH, "text[min,frameWidth]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_TEXT_MAXFRAMEWIDTH, "text[max,frameWidth]",4, 0); // metric
   addAttributeBool(StarAttribute::SDRATTR_TEXT_AUTOGROWWIDTH,"text[autoGrow,width]", false); // onOff
   addAttributeBool(StarAttribute::SDRATTR_TEXT_ANISTARTINSIDE,"text[ani,startInside]", false); // yesNo
   addAttributeBool(StarAttribute::SDRATTR_TEXT_ANISTOPINSIDE,"text[ani,stopInside]", false); // yesNo
+  addAttributeInt(StarAttribute::SDRATTR_TEXT_ANIAMOUNT, "text[ani,amount]",2, 0);
   addAttributeBool(StarAttribute::SDRATTR_TEXT_CONTOURFRAME,"text[contourFrame]", false); // onOff
   for (int type=StarAttribute::SDRATTR_RESERVE15; type<=StarAttribute::SDRATTR_RESERVE19; ++type) {
     s.str("");
@@ -367,24 +432,44 @@ void State::initAttributeMap()
     addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
+  addAttributeInt(StarAttribute::SDRATTR_EDGENODE1HORZDIST, "edge[node1,hori,dist]",4, 500); // metric
+  addAttributeInt(StarAttribute::SDRATTR_EDGENODE1VERTDIST, "edge[node1,vert,dist]",4, 500); // metric
+  addAttributeInt(StarAttribute::SDRATTR_EDGENODE2HORZDIST, "edge[node2,hori,dist]",4, 500); // metric
+  addAttributeInt(StarAttribute::SDRATTR_EDGENODE2VERTDIST, "edge[node2,vert,dist]",4, 500); // metric
+  addAttributeInt(StarAttribute::SDRATTR_EDGENODE1GLUEDIST, "edge[node1,glue,dist]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_EDGENODE2GLUEDIST, "edge[node2,glue,dist]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_EDGELINE1DELTA, "edge[delta,line1]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_EDGELINE2DELTA, "edge[delta,line2]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_EDGELINE3DELTA, "edge[delta,line3]",4, 0); // metric
   for (int type=StarAttribute::SDRATTR_EDGERESERVE02; type<=StarAttribute::SDRATTR_EDGERESERVE09; ++type) {
     s.str("");
     s << "edge[reserved" << type-StarAttribute::SDRATTR_EDGERESERVE02+2 << "]";
     addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
+  addAttributeInt(StarAttribute::SDRATTR_MEASURELINEDIST, "measure[line,dist]",4, 800); // metric
+  addAttributeInt(StarAttribute::SDRATTR_MEASUREHELPLINEOVERHANG, "measure[help,line,overhang]",4, 200); // metric
+  addAttributeInt(StarAttribute::SDRATTR_MEASUREHELPLINEDIST, "measure[help,line,dist]",4, 100); // metric
+  addAttributeInt(StarAttribute::SDRATTR_MEASUREHELPLINE1LEN, "measure[help,line1,len]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_MEASUREHELPLINE2LEN, "measure[help,line2,len]",4, 0); // metric
   addAttributeBool(StarAttribute::SDRATTR_MEASUREBELOWREFEDGE,"measure[belowRefEdge]", false); // yesNo
   addAttributeBool(StarAttribute::SDRATTR_MEASURETEXTROTA90,"measure[textRot90]", false); // yesNo
   addAttributeBool(StarAttribute::SDRATTR_MEASURETEXTUPSIDEDOWN,"measure[textUpsideDown]", false); // yesNo
+  addAttributeInt(StarAttribute::SDRATTR_MEASUREOVERHANG, "measure[overHang]",4, 600); // metric
   addAttributeBool(StarAttribute::SDRATTR_MEASURESHOWUNIT,"measure[showUnit]", false); // yesNo
-  addAttributeBool(StarAttribute::SDRATTR_MEASURETEXTAUTOANGLE,"measure[text,autoAngle]", true); // yesNo
-  addAttributeBool(StarAttribute::SDRATTR_MEASURETEXTISFIXEDANGLE,"measure[text,fixedAngle]", false); // yesNo
+  addAttributeBool(StarAttribute::SDRATTR_MEASURETEXTAUTOANGLE,"measure[text,isAutoAngle]", true); // yesNo
+  addAttributeInt(StarAttribute::SDRATTR_MEASURETEXTAUTOANGLEVIEW,"measure[text,autoAngle]", 4,31500); // angle
+  addAttributeBool(StarAttribute::SDRATTR_MEASURETEXTISFIXEDANGLE,"measure[text,isFixedAngle]", false); // yesNo
+  addAttributeInt(StarAttribute::SDRATTR_MEASURETEXTFIXEDANGLE,"measure[text,fixedAngle]", 4,0); // angle
+  addAttributeInt(StarAttribute::SDRATTR_MEASUREDECIMALPLACES,"measure[decimal,place]", 2,2);
   for (int type=StarAttribute::SDRATTR_MEASURERESERVE05; type<=StarAttribute::SDRATTR_MEASURERESERVE07; ++type) {
     s.str("");
     s << "measure[reserved" << type-StarAttribute::SDRATTR_MEASURERESERVE05+5 << "]";
     addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
+  addAttributeInt(StarAttribute::SDRATTR_CIRCSTARTANGLE, "circle[angle,start]",4, 0); // sdrAngle
+  addAttributeInt(StarAttribute::SDRATTR_CIRCENDANGLE, "circle[angle,end]",4, 36000); // sdrAngle
   for (int type=StarAttribute::SDRATTR_CIRCRESERVE0; type<=StarAttribute::SDRATTR_CIRCRESERVE3; ++type) {
     s.str("");
     s << "circle[reserved" << type-StarAttribute::SDRATTR_CIRCRESERVE0 << "]";
@@ -394,6 +479,31 @@ void State::initAttributeMap()
   addAttributeBool(StarAttribute::SDRATTR_OBJMOVEPROTECT,"obj[move,protect]", false); // yesNo
   addAttributeBool(StarAttribute::SDRATTR_OBJSIZEPROTECT,"obj[size,protect]", false); // yesNo
   addAttributeBool(StarAttribute::SDRATTR_OBJPRINTABLE,"obj[printable]", false); // yesNo
+
+  addAttributeInt(StarAttribute::SDRATTR_ALLPOSITIONX, "positionX[all]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_ALLPOSITIONY, "positionY[all]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_ALLSIZEWIDTH, "size[all,width]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_ALLSIZEHEIGHT, "size[all,height]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_ONEPOSITIONX, "poitionX[one]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_ONEPOSITIONY, "poitionY[one]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_ONESIZEWIDTH, "size[one,width]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_ONESIZEHEIGHT, "size[one,height]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_LOGICSIZEWIDTH, "size[logic,width]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_LOGICSIZEHEIGHT, "size[logic,height]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_ROTATEANGLE, "rotate[angle]",4, 0); // sdrAngle
+  addAttributeInt(StarAttribute::SDRATTR_SHEARANGLE, "shear[angle]",4, 0); // sdrAngle
+  addAttributeInt(StarAttribute::SDRATTR_MOVEX, "moveX",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_MOVEY, "moveY",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_ROTATEONE, "rotate[one]",4, 0); // sdrAngle
+  addAttributeInt(StarAttribute::SDRATTR_HORZSHEARONE, "shear[horzOne]",4, 0); // sdrAngle
+  addAttributeInt(StarAttribute::SDRATTR_VERTSHEARONE, "shear[vertOne]",4, 0); // sdrAngle
+  addAttributeInt(StarAttribute::SDRATTR_ROTATEALL, "rotate[all]",4, 0); // sdrAngle
+  addAttributeInt(StarAttribute::SDRATTR_HORZSHEARALL, "shear[horzAll]",4, 0); // sdrAngle
+  addAttributeInt(StarAttribute::SDRATTR_VERTSHEARALL, "shear[vertAll]",4, 0); // sdrAngle
+  addAttributeInt(StarAttribute::SDRATTR_TRANSFORMREF1X, "transform[ref1X]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_TRANSFORMREF1Y, "transform[ref1Y]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_TRANSFORMREF2X, "transform[ref2X]",4, 0); // metric
+  addAttributeInt(StarAttribute::SDRATTR_TRANSFORMREF2Y, "transform[ref2Y]",4, 0); // metric
   for (int type=StarAttribute::SDRATTR_NOTPERSISTRESERVE2; type<=StarAttribute::SDRATTR_NOTPERSISTRESERVE15; ++type) {
     s.str("");
     s << "notpersist[reserved" << type-StarAttribute::SDRATTR_NOTPERSISTRESERVE2+2 << "]";
@@ -401,6 +511,11 @@ void State::initAttributeMap()
   }
 
   addAttributeBool(StarAttribute::SDRATTR_GRAFINVERT,"graf[invert]", false); // onOff
+  addAttributeInt(StarAttribute::SDRATTR_GRAFRED, "graf[red]",2, 0); // signed percent
+  addAttributeInt(StarAttribute::SDRATTR_GRAFGREEN, "graf[green]",2, 0); // signed percent
+  addAttributeInt(StarAttribute::SDRATTR_GRAFBLUE, "graf[blue]",2, 0); // signed percent
+  addAttributeInt(StarAttribute::SDRATTR_GRAFLUMINANCE, "graf[luminance]",2, 0); // signed percent
+  addAttributeInt(StarAttribute::SDRATTR_GRAFCONTRAST, "graf[contrats]",2, 0); // signed percent
   for (int type=StarAttribute::SDRATTR_GRAFRESERVE3; type<=StarAttribute::SDRATTR_GRAFRESERVE6; ++type) {
     s.str("");
     s << "graf[reserved" << type-StarAttribute::SDRATTR_GRAFRESERVE3+3 << "]";
@@ -2056,11 +2171,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << (nWhich==StarAttribute::XATTR_FORMTXTSTDFORM ? "standart[form]" : "shadowTrans[form]") << "=" << input->readULong(2) << ",";
     break;
 
-  case StarAttribute::SDRATTR_SHADOW3D:
-  case StarAttribute::SDRATTR_SHADOWPERSP:
-    f << (nWhich==StarAttribute::SDRATTR_SHADOW3D ? "sdrShadow3d" : "sdrShadowPersp") << ",";
-    break;
-
   // name or index
   case StarAttribute::SDRATTR_SHADOWCOLOR: {
     librevenge::RVNGString text;
@@ -2093,11 +2203,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     }
     break;
   }
-  case StarAttribute::SDRATTR_SHADOWXDIST:
-  case StarAttribute::SDRATTR_SHADOWYDIST:
-    f << (nWhich==StarAttribute::SDRATTR_SHADOWXDIST ? "sdrXDist[shadow]" : "sdrYDist[shadow]")
-      << "=" << input->readLong(4) << ",";
-    break;
   case StarAttribute::SDRATTR_SHADOWTRANSPARENCE:
     f << "sdrTransparence[shadow]=" << input->readULong(2) << ",";
     break;
@@ -2106,47 +2211,12 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   case StarAttribute::SDRATTR_CAPTIONESCDIR:
     f << (nWhich==StarAttribute::SDRATTR_CAPTIONTYPE ? "sdrCaption[type]" : "sdrCaption[escDir]") << "=" << input->readULong(2) << ",";
     break;
-  case StarAttribute::SDRATTR_CAPTIONANGLE: // angle
-    f << "sdrCaption[angle]=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_CAPTIONGAP: // metric
-  case StarAttribute::SDRATTR_CAPTIONESCABS:
-  case StarAttribute::SDRATTR_CAPTIONLINELEN:
-    f << (nWhich==StarAttribute::SDRATTR_CAPTIONGAP ? "sdrCaption[gap]" :
-          nWhich==StarAttribute::SDRATTR_CAPTIONESCABS ? "sdrCaption[escAbs]" : "sdrCaption[lineLen]")
-      << "=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_CAPTIONESCREL:
-    f << "sdrCaption[escRel]=" << input->readLong(4) << ",";
-    break;
-
-  case StarAttribute::SDRATTR_ECKENRADIUS: // metric
-  case StarAttribute::SDRATTR_TEXT_MINFRAMEHEIGHT:
-  case StarAttribute::SDRATTR_TEXT_LEFTDIST:
-    f << (nWhich==StarAttribute::SDRATTR_ECKENRADIUS ? "eckenRadius[sdr]":
-          nWhich==StarAttribute::SDRATTR_TEXT_MINFRAMEHEIGHT ? "textMinHeight[sdr]" : "textLeftDist[sdr]")
-      << "=" << input->readLong(4) << ",";
-    break;
   case StarAttribute::SDRATTR_TEXT_FITTOSIZE:
   case StarAttribute::SDRATTR_TEXT_VERTADJUST:
   case StarAttribute::SDRATTR_TEXT_HORZADJUST:
     f << (nWhich==StarAttribute::SDRATTR_TEXT_FITTOSIZE ? "fitToSize[sdr]" :
           nWhich==StarAttribute::SDRATTR_TEXT_VERTADJUST ? "vertAdjust[sdr]" : "horAdjust[sdr]")
       << "=" << input->readULong(2) << ",";
-    break;
-  case StarAttribute::SDRATTR_TEXT_RIGHTDIST: // metric
-  case StarAttribute::SDRATTR_TEXT_UPPERDIST:
-  case StarAttribute::SDRATTR_TEXT_LOWERDIST:
-    f << (nWhich==StarAttribute::SDRATTR_TEXT_RIGHTDIST ? "textRightDist[sdr]" :
-          nWhich==StarAttribute::SDRATTR_TEXT_UPPERDIST ? "textUpperDist[sdr]" : "textLowerDist[sdr]")
-      << "=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_TEXT_MAXFRAMEHEIGHT: // metric
-  case StarAttribute::SDRATTR_TEXT_MINFRAMEWIDTH:
-  case StarAttribute::SDRATTR_TEXT_MAXFRAMEWIDTH:
-    f << (nWhich==StarAttribute::SDRATTR_TEXT_MAXFRAMEHEIGHT ? "maxFrmHeight[sdr]" :
-          nWhich==StarAttribute::SDRATTR_TEXT_MINFRAMEWIDTH ? "minFrmWidth[sdr]" : "maxFrmWidth[sdr]")
-      << "=" << input->readLong(4) << ",";
     break;
   case StarAttribute::SDRATTR_TEXT_ANIKIND:
   case StarAttribute::SDRATTR_TEXT_ANIDIRECTION:
@@ -2155,9 +2225,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   case StarAttribute::SDRATTR_TEXT_ANICOUNT:
   case StarAttribute::SDRATTR_TEXT_ANIDELAY:
     f << (nWhich==StarAttribute::SDRATTR_TEXT_ANICOUNT ? "aniCount" : "aniDelay") << "=" << input->readULong(2) << ",";
-    break;
-  case StarAttribute::SDRATTR_TEXT_ANIAMOUNT:
-    f << "aniAmount=" << input->readLong(2) << ",";
     break;
   case StarAttribute::SDRATTR_AUTOSHAPE_ADJUSTMENT:
     f << "autoShapeAdjust[sdr],";
@@ -2173,29 +2240,8 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   case StarAttribute::SDRATTR_EDGEKIND:
     f << "edge[kind]=" << input->readULong(2) << ",";
     break;
-  case StarAttribute::SDRATTR_EDGENODE1HORZDIST: // metric
-  case StarAttribute::SDRATTR_EDGENODE1VERTDIST:
-  case StarAttribute::SDRATTR_EDGENODE2HORZDIST:
-    f << (nWhich==StarAttribute::SDRATTR_EDGENODE1HORZDIST ? "edgeNode1HorDist" :
-          nWhich==StarAttribute::SDRATTR_EDGENODE1VERTDIST ? "edgeNode1VerDist" : "edgeNode2HorDist")
-      << "=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_EDGENODE2VERTDIST: // metric
-  case StarAttribute::SDRATTR_EDGENODE1GLUEDIST:
-  case StarAttribute::SDRATTR_EDGENODE2GLUEDIST:
-    f << (nWhich==StarAttribute::SDRATTR_EDGENODE2VERTDIST ? "edgeNode1VerDist" :
-          nWhich==StarAttribute::SDRATTR_EDGENODE1GLUEDIST ? "edgeNode1GlueDist" : "edgeNode2GlueDist")
-      << "=" << input->readLong(4) << ",";
-    break;
   case StarAttribute::SDRATTR_EDGELINEDELTAANZ:
     f << "edge[lineDeltaAnz=" << input->readULong(2) << ",";
-    break;
-  case StarAttribute::SDRATTR_EDGELINE1DELTA: // metric
-  case StarAttribute::SDRATTR_EDGELINE2DELTA:
-  case StarAttribute::SDRATTR_EDGELINE3DELTA:
-    f << (nWhich==StarAttribute::SDRATTR_EDGELINE1DELTA ? "edgeLine1Delta" :
-          nWhich==StarAttribute::SDRATTR_EDGELINE2DELTA ? "edgeLine2Delta" : "edgeLine3Delta")
-      << "=" << input->readLong(4) << ",";
     break;
 
   case StarAttribute::SDRATTR_MEASUREKIND:
@@ -2204,21 +2250,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << (nWhich==StarAttribute::SDRATTR_MEASUREKIND ? "measure[kind]" :
           nWhich==StarAttribute::SDRATTR_MEASURETEXTHPOS ? "measure[extHPos]" : "measure[extVPos]")
       << "=" << input->readULong(2) << ",";
-    break;
-  case StarAttribute::SDRATTR_MEASURELINEDIST: // metric
-  case StarAttribute::SDRATTR_MEASUREHELPLINEOVERHANG:
-  case StarAttribute::SDRATTR_MEASUREHELPLINEDIST:
-    f << (nWhich==StarAttribute::SDRATTR_MEASURELINEDIST ? "measure[lineDist]" :
-          nWhich==StarAttribute::SDRATTR_MEASUREHELPLINEOVERHANG ? "measure[helpLineOverHang]" : "measure[helpLineDist]")
-      << "=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_MEASUREHELPLINE1LEN: // metric
-  case StarAttribute::SDRATTR_MEASUREHELPLINE2LEN:
-    f << (nWhich==StarAttribute::SDRATTR_MEASUREHELPLINE1LEN ? "measure[helpLine1Len]" : "measure[helpLine2Len]")
-      << "=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_MEASUREOVERHANG: // metric
-    f << "measure[overHang]=" << input->readLong(4) << ",";
     break;
   case StarAttribute::SDRATTR_MEASUREUNIT: // enum
     f << "measure[unit]=" << input->readULong(2) << ",";
@@ -2237,21 +2268,9 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << format.cstr() << ",";
     break;
   }
-  case StarAttribute::SDRATTR_MEASURETEXTAUTOANGLEVIEW: // sdrAngle
-  case StarAttribute::SDRATTR_MEASURETEXTFIXEDANGLE:
-    f << (nWhich==StarAttribute::SDRATTR_MEASURETEXTAUTOANGLEVIEW ? "measure[autoAngle]" : "measure[fixedAngle]")
-      << "=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_MEASUREDECIMALPLACES: // int16
-    f << "measure[decimalPlaces]=" << input->readLong(2) << ",";
-    break;
 
   case StarAttribute::SDRATTR_CIRCKIND: // enum
     f << "sdrCircle[kind]=" << input->readULong(2) << ",";
-    break;
-  case StarAttribute::SDRATTR_CIRCSTARTANGLE: // sdrAngle
-  case StarAttribute::SDRATTR_CIRCENDANGLE:
-    f << (nWhich==StarAttribute::SDRATTR_CIRCSTARTANGLE ? "circle[start]" : "circle[end]") << "=" << input->readLong(4) << ",";
     break;
 
   case StarAttribute::SDRATTR_LAYERID: // uint16
@@ -2269,87 +2288,20 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << name.cstr() << ",";
     break;
   }
-  case StarAttribute::SDRATTR_ALLPOSITIONX: // metric
-  case StarAttribute::SDRATTR_ALLPOSITIONY:
-  case StarAttribute::SDRATTR_ALLSIZEWIDTH:
-    f << (nWhich==StarAttribute::SDRATTR_ALLPOSITIONX ? "sdrAllPosX" :
-          nWhich==StarAttribute::SDRATTR_ALLPOSITIONY ? "sdrAllPosY" : "allSizeWidth")
-      << "=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_ALLSIZEHEIGHT: // metric
-  case StarAttribute::SDRATTR_ONEPOSITIONX:
-  case StarAttribute::SDRATTR_ONEPOSITIONY:
-    f << (nWhich==StarAttribute::SDRATTR_ALLSIZEHEIGHT ? "sdrAllSizeHeight" :
-          nWhich==StarAttribute::SDRATTR_ONEPOSITIONX ? "sdrOnePosX" : "sdrOnePoxY")
-      << "=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_ONESIZEWIDTH: // metric
-  case StarAttribute::SDRATTR_ONESIZEHEIGHT:
-  case StarAttribute::SDRATTR_LOGICSIZEWIDTH:
-    f << (nWhich==StarAttribute::SDRATTR_ONESIZEWIDTH ? "sdrOneSizeWidth" :
-          nWhich==StarAttribute::SDRATTR_ONESIZEHEIGHT ? "sdrOneSizeHeight" : "sdrLogicSizeWidth")
-      << "=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_LOGICSIZEHEIGHT: // metric
-  case StarAttribute::SDRATTR_MOVEX:
-  case StarAttribute::SDRATTR_MOVEY:
-    f << (nWhich==StarAttribute::SDRATTR_LOGICSIZEHEIGHT ? "sdrLogicSizeHeight" :
-          nWhich==StarAttribute::SDRATTR_MOVEX ? "sdrMoveX" : "sdrMoveY")
-      << "=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_ROTATEANGLE: // sdrAngle
-  case StarAttribute::SDRATTR_SHEARANGLE:
-    f << (nWhich==StarAttribute::SDRATTR_ROTATEANGLE ? "sdrAngle[rotate]" : "sdrAngle[shear]") << "=" << input->readLong(4) << ",";
-    break;
   case StarAttribute::SDRATTR_RESIZEXONE: // sdrFraction
   case StarAttribute::SDRATTR_RESIZEYONE:
     f << (nWhich==StarAttribute::SDRATTR_RESIZEXONE ? "sdrResizeX[one]" : "sdrResizeY[one]") << ","
       << "mult=" << input->readLong(4) << ",div=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_ROTATEONE: // sdrAngle
-  case StarAttribute::SDRATTR_HORZSHEARONE:
-  case StarAttribute::SDRATTR_VERTSHEARONE:
-    f << (nWhich==StarAttribute::SDRATTR_ROTATEONE ? "sdr[rotateOne]" :
-          nWhich==StarAttribute::SDRATTR_HORZSHEARONE ? "sdr[horzShearOne]" : "sdr[vertShearOne]")
-      << "=" << input->readLong(4) << ",";
     break;
   case StarAttribute::SDRATTR_RESIZEXALL: // sdrFraction
   case StarAttribute::SDRATTR_RESIZEYALL:
     f << (nWhich==StarAttribute::SDRATTR_RESIZEXALL ? "sdrResizeX[all]" : "sdrResizeY[all]") << ","
       << "mult=" << input->readLong(4) << ",div=" << input->readLong(4) << ",";
     break;
-  case StarAttribute::SDRATTR_ROTATEALL: // sdrAngle
-  case StarAttribute::SDRATTR_HORZSHEARALL:
-  case StarAttribute::SDRATTR_VERTSHEARALL:
-    f << (nWhich==StarAttribute::SDRATTR_ROTATEALL ? "sdr[rotateAll]" :
-          nWhich==StarAttribute::SDRATTR_HORZSHEARALL ? "sdr[horzShearAll]" : "sdr[vertShearAll]")
-      << "=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_TRANSFORMREF1X: // metric
-  case StarAttribute::SDRATTR_TRANSFORMREF1Y:
-    f << (nWhich==StarAttribute::SDRATTR_TRANSFORMREF1X ? "sdr[transRef1X]" : "sdr[transRef1Y]")
-      << "=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_TRANSFORMREF2X: // metric
-  case StarAttribute::SDRATTR_TRANSFORMREF2Y:
-    f << (nWhich==StarAttribute::SDRATTR_TRANSFORMREF2X ? "sdr[transRef2X]" : "sdr[transRef2Y]")
-      << "=" << input->readLong(4) << ",";
-    break;
   case StarAttribute::SDRATTR_TEXTDIRECTION: // uint16
     f << "sdr[textDirection]=" << input->readULong(2) << ",";
     break;
 
-  case StarAttribute::SDRATTR_GRAFRED: // signed percent
-  case StarAttribute::SDRATTR_GRAFGREEN:
-  case StarAttribute::SDRATTR_GRAFBLUE:
-    f << (nWhich==StarAttribute::SDRATTR_GRAFRED ? "graf[red]" : nWhich==StarAttribute::SDRATTR_GRAFGREEN ? "graf[green]" : "graf[blue]")
-      << "=" << input->readLong(2) << ",";
-    break;
-  case StarAttribute::SDRATTR_GRAFLUMINANCE: // signed percent
-  case StarAttribute::SDRATTR_GRAFCONTRAST:
-    f << (nWhich==StarAttribute::SDRATTR_GRAFLUMINANCE ? "graf[luminance]" : "graf[contrast]")
-      << "=" << input->readLong(2) << ",";
-    break;
   case StarAttribute::SDRATTR_GRAFGAMMA: // uint32
     f << "graf[gamma]=" << input->readULong(4) << ",";
     break;
