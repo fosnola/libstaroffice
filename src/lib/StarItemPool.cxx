@@ -1428,6 +1428,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
       *input >> nSlot >> nVersion;
       if (step==0) *input >> nCount;
       int which=nWhich;
+      // checkme: sometimes, we must use slot
       if (!m_state->isInRange(which)) {
         STOFF_DEBUG_MSG(("StarItemPool::readV1: the which value seems bad\n"));
         f << "###";

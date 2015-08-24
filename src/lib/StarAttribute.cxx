@@ -141,7 +141,7 @@ public:
     f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    return pos+1<=endPos;
+    return input->tell()<=endPos;
   }
 protected:
   //! copy constructor
@@ -152,6 +152,45 @@ protected:
   int m_value;
   // number of byte 1,2,4
   int m_intSize;
+};
+
+//! double attribute of StarAttributeInternal
+class StarAttributeDouble : public StarAttribute
+{
+public:
+  //! constructor
+  StarAttributeDouble(Type type, std::string const &debugName, double value) : StarAttribute(type, debugName), m_value(value)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarAttributeDouble(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarDocument &/*document*/)
+  {
+    STOFFInputStreamPtr input=zone.input();
+    long pos=input->tell();
+    libstoff::DebugFile &ascFile=zone.ascii();
+    libstoff::DebugStream f;
+    *input>>m_value;
+    f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName;
+    if (m_value<0 || m_value>0)
+      f << "=" << m_value << ",";
+    else
+      f << ",";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return input->tell()<=endPos;
+  }
+protected:
+  //! copy constructor
+  StarAttributeDouble(StarAttributeDouble const &orig) : StarAttribute(orig), m_value(orig.m_value)
+  {
+  }
+  // the double value
+  double m_value;
 };
 
 //! itemSet attribute of StarAttributeInternal
@@ -220,6 +259,11 @@ protected:
   {
     m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeInt(type,debugName, numBytes, defValue));
   }
+  //! add a double attribute
+  void addAttributeDouble(StarAttribute::Type type, std::string const &debugName, double defValue)
+  {
+    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeDouble(type,debugName, defValue));
+  }
   //! add a itemSet attribute
   void addAttributeItemSet(StarAttribute::Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits)
   {
@@ -268,6 +312,13 @@ void State::initAttributeMap()
   addAttributeBool(StarAttribute::ATTR_FRM_LAYOUT_SPLIT,"layout[split]", true);
   addAttributeBool(StarAttribute::ATTR_FRM_COLUMNBALANCE,"col[noBalanced]", true);
   addAttributeBool(StarAttribute::ATTR_FRM_FRMATTR_DUMMY9,"grfDummy9", false);
+  addAttributeInt(StarAttribute::ATTR_GRF_ROTATION,"grf[rotation]",2,0);
+  addAttributeInt(StarAttribute::ATTR_GRF_LUMINANCE,"grf[luminance]",2,0);
+  addAttributeInt(StarAttribute::ATTR_GRF_CONTRAST,"grf[contrast]",2,0);
+  addAttributeInt(StarAttribute::ATTR_GRF_CHANNELR,"grf[channelR]",2,0);
+  addAttributeInt(StarAttribute::ATTR_GRF_CHANNELG,"grf[channelG]",2,0);
+  addAttributeInt(StarAttribute::ATTR_GRF_CHANNELB,"grf[channelB]",2,0);
+  addAttributeDouble(StarAttribute::ATTR_GRF_GAMMA,"grf[gamma]",1);
   addAttributeBool(StarAttribute::ATTR_GRF_INVERT,"grfInvert", false);
   for (int type=StarAttribute::ATTR_GRF_DUMMY1; type<=StarAttribute::ATTR_GRF_DUMMY5; ++type) {
     s.str("");
@@ -277,8 +328,10 @@ void State::initAttributeMap()
   // --- sc --- sc_docpool.cxx
 
   addAttributeBool(StarAttribute::ATTR_SC_HYPHENATE,"hyphenate", false);
+  addAttributeInt(StarAttribute::ATTR_SC_ROTATE_VALUE,"rotate[value]",4,0);
   addAttributeBool(StarAttribute::ATTR_SC_VERTICAL_ASIAN,"vertical[asian]", false);
   addAttributeBool(StarAttribute::ATTR_SC_LINEBREAK,"lineBreak", false);
+  addAttributeInt(StarAttribute::ATTR_SC_MERGE_FLAG,"merge[flag]",2,0);
   addAttributeBool(StarAttribute::ATTR_SC_PAGE_HORCENTER,"page[horizontal,center]", false);
   addAttributeBool(StarAttribute::ATTR_SC_PAGE_VERCENTER,"page[vertical,center]", false);
   addAttributeBool(StarAttribute::ATTR_SC_PAGE_ON,"page[on]", true);
@@ -301,7 +354,9 @@ void State::initAttributeMap()
   addAttributeItemSet(StarAttribute::ATTR_SC_PAGE_FOOTERSET,"setPageFooter",limits);
   // --- ee --- svx_editdoc.cxx
   addAttributeBool(StarAttribute::ATTR_EE_PARA_ASIANCJKSPACING,"para[asianCJKSpacing]",false);
-
+  addAttributeVoid(StarAttribute::ATTR_EE_CHR_RUBI_DUMMY, "chr[rubi,dummy]");
+  addAttributeVoid(StarAttribute::ATTR_EE_FEATURE_TAB, "feature[tab]");
+  addAttributeVoid(StarAttribute::ATTR_EE_FEATURE_LINEBR, "feature[linebr]");
   // --- sch --- sch_itempool.cxx
   addAttributeBool(StarAttribute::ATTR_SCH_DATADESCR_SHOW_SYM,"dataDescr[showSym]", false);
 
@@ -309,48 +364,103 @@ void State::initAttributeMap()
   addAttributeBool(StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MIN,"yAxis[autoMin]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MIN,"zAxis[autoMin]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_AXIS_AUTO_MIN,"axis[autoMin]", false);
+  addAttributeDouble(StarAttribute::ATTR_SCH_X_AXIS_MIN,"xAxis[min]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_Y_AXIS_MIN,"yAxis[min]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_Z_AXIS_MIN,"zAxis[min]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_AXIS_MIN,"axis[min]", 0);
   addAttributeBool(StarAttribute::ATTR_SCH_X_AXIS_AUTO_MAX,"xAxis[autoMax]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MAX,"yAxis[autoMax]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MAX,"zAxis[autoMax]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_AXIS_AUTO_MAX,"axis[autoMax]", false);
+  addAttributeDouble(StarAttribute::ATTR_SCH_X_AXIS_MAX,"xAxis[max]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_Y_AXIS_MAX,"yAxis[max]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_Z_AXIS_MAX,"zAxis[max]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_AXIS_MAX,"axis[max]", 0);
   addAttributeBool(StarAttribute::ATTR_SCH_X_AXIS_AUTO_STEP_MAIN,"xAxis[autoStepMain]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_Y_AXIS_AUTO_STEP_MAIN,"yAxis[autoStepMain]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_Z_AXIS_AUTO_STEP_MAIN,"zAxis[autoStepMain]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_AXIS_AUTO_STEP_MAIN,"axis[autoStepMain]", false);
+  addAttributeDouble(StarAttribute::ATTR_SCH_X_AXIS_STEP_MAIN,"xAxis[step,main]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_Y_AXIS_STEP_MAIN,"yAxis[step,main]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_Z_AXIS_STEP_MAIN,"zAxis[step,main]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_AXIS_STEP_MAIN,"axis[step,main]", 0);
   addAttributeBool(StarAttribute::ATTR_SCH_X_AXIS_AUTO_STEP_HELP,"xAxis[autoStepHelp]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_Y_AXIS_AUTO_STEP_HELP,"yAxis[autoStepHelp]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_Z_AXIS_AUTO_STEP_HELP,"zAxis[autoStepHelp]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_AXIS_AUTO_STEP_HELP,"axis[autoStepHelp]", false);
+  addAttributeDouble(StarAttribute::ATTR_SCH_X_AXIS_STEP_HELP,"xAxis[step,help]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_Y_AXIS_STEP_HELP,"yAxis[step,help]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_Z_AXIS_STEP_HELP,"zAxis[step,help]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_AXIS_STEP_HELP,"axis[step,help]", 0);
   addAttributeBool(StarAttribute::ATTR_SCH_X_AXIS_LOGARITHM,"xAxis[logarithm]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_Y_AXIS_LOGARITHM,"yAxis[logarithm]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_Z_AXIS_LOGARITHM,"zAxis[logarithm]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_AXIS_LOGARITHM,"axis[logarithm]", false);
+  addAttributeDouble(StarAttribute::ATTR_SCH_X_AXIS_ORIGIN,"xAxis[origin]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_Y_AXIS_ORIGIN,"yAxis[origin]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_Z_AXIS_ORIGIN,"zAxis[origin]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_AXIS_ORIGIN,"axis[origin]", 0);
   addAttributeBool(StarAttribute::ATTR_SCH_X_AXIS_AUTO_ORIGIN,"xAxis[autoOrigin]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_Y_AXIS_AUTO_ORIGIN,"yAxis[autoOrigin]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_Z_AXIS_AUTO_ORIGIN,"zAxis[autoOrigin]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_AXIS_AUTO_ORIGIN,"axis[autoOrigin]", false);
+  addAttributeInt(StarAttribute::ATTR_SCH_AXISTYPE, "axis[type]",4, 0); // XAxis
+  addAttributeInt(StarAttribute::ATTR_SCH_DUMMY0, "sch[dummy0]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_DUMMY1, "sch[dummy1]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_DUMMY2, "sch[dummy2]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_DUMMY3, "sch[dummy3]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_DUMMY_END, "sch[dummy4]",4, 0);
 
+  addAttributeInt(StarAttribute::ATTR_SCH_STAT_KIND_ERROR, "stat[error,kind]",4, 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_STAT_PERCENT,"stat[percent]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_STAT_BIGERROR,"stat[big,error]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_STAT_CONSTPLUS,"stat[const,plus]", 0);
+  addAttributeDouble(StarAttribute::ATTR_SCH_STAT_CONSTMINUS,"stat[const,minus]", 0);
   addAttributeBool(StarAttribute::ATTR_SCH_STAT_AVERAGE,"stat[average]", false);
+  addAttributeInt(StarAttribute::ATTR_SCH_STAT_REGRESSTYPE, "stat[regress,type]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_STAT_INDICATE, "stat[indicate]",4, 0);
 
+  addAttributeInt(StarAttribute::ATTR_SCH_TEXT_DEGREES, "text[degrees]",4, 0);
   addAttributeBool(StarAttribute::ATTR_SCH_TEXT_OVERLAP,"text[overlap]", false);
+  addAttributeInt(StarAttribute::ATTR_SCH_TEXT_DUMMY0, "text[dummy0]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_TEXT_DUMMY1, "text[dummy1]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_TEXT_DUMMY2, "text[dummy2]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_TEXT_DUMMY3, "text[dummy3]",4, 0);
 
   addAttributeBool(StarAttribute::ATTR_SCH_STYLE_DEEP,"style[deep]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_STYLE_3D,"style[3d]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_STYLE_VERTICAL,"style[vertical]", false);
+  addAttributeInt(StarAttribute::ATTR_SCH_STYLE_BASETYPE, "style[base,type]",4, 0);
   addAttributeBool(StarAttribute::ATTR_SCH_STYLE_LINES,"style[lines]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_STYLE_PERCENT,"style[percent]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_STYLE_STACKED,"style[stacked]", false);
+  addAttributeInt(StarAttribute::ATTR_SCH_STYLE_SPLINES, "style[splines]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_STYLE_SYMBOL, "style[symbol]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_STYLE_SHAPE, "style[shape]",4, 0);
 
+  addAttributeInt(StarAttribute::ATTR_SCH_AXIS, "axis",4, 2);
+  addAttributeInt(StarAttribute::ATTR_SCH_AXIS_TICKS, "axis[ticks]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_AXIS_HELPTICKS, "axis[help,ticks]",4, 2);
   addAttributeBool(StarAttribute::ATTR_SCH_AXIS_SHOWAXIS,"axis[show]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_AXIS_SHOWDESCR,"axis[showDescr]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_AXIS_SHOWMAINGRID,"axis[show,mainGrid]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_AXIS_SHOWHELPGRID,"axis[show,helpGrid]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_AXIS_TOPDOWN,"axis[topDown]", false);
+  addAttributeInt(StarAttribute::ATTR_SCH_AXIS_DUMMY0, "axis[dummy0]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_AXIS_DUMMY1, "axis[dummy1]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_AXIS_DUMMY2, "axis[dummy2]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_AXIS_DUMMY3, "axis[dummy3]",4, 0);
+
+  addAttributeInt(StarAttribute::ATTR_SCH_BAR_OVERLAP, "bar[overlap]",4, 0);
+  addAttributeInt(StarAttribute::ATTR_SCH_BAR_GAPWIDTH, "bar[gap,width]",4, 0);
 
   addAttributeBool(StarAttribute::ATTR_SCH_STOCK_VOLUME,"stock[volume]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_STOCK_UPDOWN,"stock[updown]", false);
 
   // --- xattr --- svx_xpool.cxx
+  addAttributeInt(StarAttribute::XATTR_LINEWIDTH, "line[width]",4, 0); // metric
+  addAttributeInt(StarAttribute::XATTR_LINESTARTWIDTH, "line[start,width]",4, 200); // metric
+  addAttributeInt(StarAttribute::XATTR_LINEENDWIDTH, "line[end,width]",4, 200); // metric
   addAttributeBool(StarAttribute::XATTR_LINESTARTCENTER,"line[startCenter]", false);
   addAttributeBool(StarAttribute::XATTR_LINEENDCENTER,"line[endCenter]", false);
   for (int type=StarAttribute::XATTR_LINERESERVED2; type<=StarAttribute::XATTR_LINERESERVED_LAST; ++type) {
@@ -369,8 +479,12 @@ void State::initAttributeMap()
     addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
+  addAttributeInt(StarAttribute::XATTR_FORMTXTDISTANCE, "formText[distance]",4, 0); // metric
+  addAttributeInt(StarAttribute::XATTR_FORMTXTSTART, "formText[start]",4, 0); // metric
   addAttributeBool(StarAttribute::XATTR_FORMTXTMIRROR,"formText[mirror]", false);
   addAttributeBool(StarAttribute::XATTR_FORMTXTOUTLINE,"formText[outline]", false);
+  addAttributeInt(StarAttribute::XATTR_FORMTXTSHDWXVAL, "formText[shadow,xDist]",4, 0); // metric
+  addAttributeInt(StarAttribute::XATTR_FORMTXTSHDWYVAL, "formText[shadow,yDist]",4, 0); // metric
   addAttributeBool(StarAttribute::XATTR_FORMTXTHIDEFORM,"formText[hide]", false);
   for (int type=StarAttribute::XATTR_FTRESERVED2; type<=StarAttribute::XATTR_FTRESERVED_LAST; ++type) {
     s.str("");
@@ -992,6 +1106,8 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   }
   case StarAttribute::ATTR_TXT_HARDBLANK: // ok no data
     f << "textAtrHardBlank,";
+    if (nVers>=1)
+      f << "char=" << char(input->readULong(1)) << ",";
     break;
 
   // paragraph attribute
@@ -1402,31 +1518,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << "right=" << input->readLong(4) << ",";
     f << "bottom=" << input->readLong(4) << ",";
     break;
-  // no saved ?
-  case StarAttribute::ATTR_GRF_ROTATION: // uint16
-    f << "grfRotation=" << input->readULong(2) << ",";
-    break;
-  case StarAttribute::ATTR_GRF_LUMINANCE: // int16
-    f << "grfLuminance=" << input->readLong(2) << ",";
-    break;
-  case StarAttribute::ATTR_GRF_CONTRAST: // int16
-    f << "grfContrast=" << input->readLong(2) << ",";
-    break;
-  case StarAttribute::ATTR_GRF_CHANNELR: // int16
-    f << "grfChannelR=" << input->readLong(2) << ",";
-    break;
-  case StarAttribute::ATTR_GRF_CHANNELG: // int16
-    f << "grfChannelG=" << input->readLong(2) << ",";
-    break;
-  case StarAttribute::ATTR_GRF_CHANNELB: // int16
-    f << "grfChannelB=" << input->readLong(2) << ",";
-    break;
-  case StarAttribute::ATTR_GRF_GAMMA: { // double
-    double value;
-    *input >> value;
-    f << "grfGamma=" << value << ",";
-    break;
-  }
   case StarAttribute::ATTR_GRF_TRANSPARENCY: // SfxByteItem(0)
     f << "grfTransparency=" << input->readULong(1) << ",";
     break;
@@ -1486,9 +1577,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     // algitem.cxx SvxOrientationItem::Create
     f << "scOrientation=" << input->readULong(2) << ",";
     break;
-  case StarAttribute::ATTR_SC_ROTATE_VALUE:
-    f << "scRotateValue=" << input->readLong(4) << ",";
-    break;
   case StarAttribute::ATTR_SC_ROTATE_MODE:
     // rotmodit.cxx SvxRotateModeItem::Create
     f << "scRotateMode=" << input->readULong(2) << ",";
@@ -1506,9 +1594,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << "scMerge,";
     f << "nCol=" << input->readLong(2) << ",";
     f << "nRow=" << input->readLong(2) << ",";
-    break;
-  case StarAttribute::ATTR_SC_MERGE_FLAG:
-    f << "scMergeFlag=" << input->readLong(2) << ",";
     break;
   case StarAttribute::ATTR_SC_VALUE_FORMAT:
     f << "scValueFormat=" << input->readULong(4) << ",";
@@ -1771,12 +1856,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     }
     break;
   }
-  case StarAttribute::ATTR_EE_CHR_RUBI_DUMMY: // ok no data
-  case StarAttribute::ATTR_EE_FEATURE_TAB:
-  case StarAttribute::ATTR_EE_FEATURE_LINEBR:
-    f << (nWhich==StarAttribute::ATTR_EE_CHR_RUBI_DUMMY ? "eeRubiDummy" :
-          nWhich==StarAttribute::ATTR_EE_FEATURE_TAB ? "eeFeatureTab" : "eeFeatureLineBr") << ",";
-    break;
   case StarAttribute::ATTR_EE_FEATURE_FIELD: {
     f << "eeFeatureField,vers=" << nVers << ",";
     // svx_flditem.cxx SvxFieldItem::Create
@@ -1794,154 +1873,12 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
           nWhich==StarAttribute::ATTR_SCH_TEXT_ORIENT ? "text[orient]" : "text[order]")
       << "=" << input->readULong(2) << ",";
     break;
-  case StarAttribute::ATTR_SCH_X_AXIS_MIN:
-  case StarAttribute::ATTR_SCH_Y_AXIS_MIN:
-  case StarAttribute::ATTR_SCH_Z_AXIS_MIN:
-  case StarAttribute::ATTR_SCH_AXIS_MIN: {
-    double value;
-    *input >> value;
-    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_AUTO_MIN ? "xAxisMin" :
-          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MIN ? "yAxisMin" :
-          nWhich==StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MIN ? "zAxisMin" : "axisMin")
-      << "=" << value << ",";
-    break;
-  }
-  case StarAttribute::ATTR_SCH_X_AXIS_MAX:
-  case StarAttribute::ATTR_SCH_Y_AXIS_MAX:
-  case StarAttribute::ATTR_SCH_Z_AXIS_MAX:
-  case StarAttribute::ATTR_SCH_AXIS_MAX: {
-    double value;
-    *input >> value;
-    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_AUTO_MAX ? "xAxisMax" :
-          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MAX ? "yAxisMax" :
-          nWhich==StarAttribute::ATTR_SCH_Z_AXIS_AUTO_MAX ? "zAxisMax" : "axisMax")
-      << "=" << value << ",";
-    break;
-  }
-  case StarAttribute::ATTR_SCH_X_AXIS_STEP_MAIN:
-  case StarAttribute::ATTR_SCH_Y_AXIS_STEP_MAIN:
-  case StarAttribute::ATTR_SCH_Z_AXIS_STEP_MAIN:
-  case StarAttribute::ATTR_SCH_AXIS_STEP_MAIN: {
-    double value;
-    *input >> value;
-    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_STEP_MAIN ? "xAxisStepMain" :
-          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_STEP_MAIN ? "yAxisStepMain" :
-          nWhich==StarAttribute::ATTR_SCH_Z_AXIS_STEP_MAIN ? "zAxisStepMain" : "axisStepMain")
-      << "=" << value << ",";
-    break;
-  }
-  case StarAttribute::ATTR_SCH_X_AXIS_STEP_HELP:
-  case StarAttribute::ATTR_SCH_Y_AXIS_STEP_HELP:
-  case StarAttribute::ATTR_SCH_Z_AXIS_STEP_HELP:
-  case StarAttribute::ATTR_SCH_AXIS_STEP_HELP: {
-    double value;
-    *input >> value;
-    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_STEP_HELP ? "xAxisStepHelp" :
-          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_STEP_HELP ? "yAxisStepHelp" :
-          nWhich==StarAttribute::ATTR_SCH_Z_AXIS_STEP_HELP ? "zAxisStepHelp" : "axisStepHelp")
-      << "=" << value << ",";
-    break;
-  }
-  case StarAttribute::ATTR_SCH_X_AXIS_ORIGIN:
-  case StarAttribute::ATTR_SCH_Y_AXIS_ORIGIN:
-  case StarAttribute::ATTR_SCH_Z_AXIS_ORIGIN:
-  case StarAttribute::ATTR_SCH_AXIS_ORIGIN: {
-    double value;
-    *input >> value;
-    f << (nWhich==StarAttribute::ATTR_SCH_X_AXIS_AUTO_ORIGIN ? "xAxisOrigin" :
-          nWhich==StarAttribute::ATTR_SCH_Y_AXIS_AUTO_ORIGIN ? "yAxisOrigin" :
-          nWhich==StarAttribute::ATTR_SCH_AXIS_AUTO_ORIGIN ? "zAxisOrigin" : "axisOrigin")
-      << "=" << value << ",";
-    break;
-  }
-  case StarAttribute::ATTR_SCH_AXISTYPE:
-  case StarAttribute::ATTR_SCH_DUMMY0:
-  case StarAttribute::ATTR_SCH_DUMMY1:
-    f << (nWhich==StarAttribute::ATTR_SCH_AXISTYPE ? "axis[type]" : nWhich==StarAttribute::ATTR_SCH_DUMMY0 ? "dummy0[sch]" : "dummy1[sch]")
-      << "=" << input->readLong(4) << ",";
-    break;
-
-  case StarAttribute::ATTR_SCH_DUMMY2:
-  case StarAttribute::ATTR_SCH_DUMMY3:
-  case StarAttribute::ATTR_SCH_DUMMY_END:
-    f << (nWhich==StarAttribute::ATTR_SCH_DUMMY2 ? "dummy2[sch]" : nWhich==StarAttribute::ATTR_SCH_DUMMY3 ? "dummy3[sch]" : "dummyEnd[sch]")
-      << "=" << input->readLong(4) << ",";
-    break;
-
-  case StarAttribute::ATTR_SCH_STAT_KIND_ERROR:
-    f << "statKindError=" << input->readLong(4) << ",";
-    break;
-
-  case StarAttribute::ATTR_SCH_STAT_PERCENT:
-  case StarAttribute::ATTR_SCH_STAT_BIGERROR:
-  case StarAttribute::ATTR_SCH_STAT_CONSTPLUS:
-  case StarAttribute::ATTR_SCH_STAT_CONSTMINUS: {
-    double value;
-    *input>>value;
-    f << (nWhich==StarAttribute::ATTR_SCH_STAT_PERCENT ? "stat[percent]" : nWhich==StarAttribute::ATTR_SCH_STAT_BIGERROR ? "stat[bigError]" :
-          nWhich==StarAttribute::ATTR_SCH_STAT_CONSTPLUS ? "stat[constPlus]" : "stat[constMinus]")
-      << "=" << value << ",";
-    break;
-  }
-
-  case StarAttribute::ATTR_SCH_STAT_REGRESSTYPE:
-  case StarAttribute::ATTR_SCH_STAT_INDICATE:
-  case StarAttribute::ATTR_SCH_TEXT_DEGREES:
-    f << (nWhich==StarAttribute::ATTR_SCH_STAT_REGRESSTYPE ? "stat[regType]" :
-          nWhich==StarAttribute::ATTR_SCH_STAT_INDICATE ? "stat[indicate]" : "stat[textDegree")
-      << "=" << input->readLong(4) << ",";
-    break;
-
-  case StarAttribute::ATTR_SCH_TEXT_DUMMY0:
-  case StarAttribute::ATTR_SCH_TEXT_DUMMY1:
-  case StarAttribute::ATTR_SCH_TEXT_DUMMY2:
-  case StarAttribute::ATTR_SCH_TEXT_DUMMY3:
-    f << (nWhich==StarAttribute::ATTR_SCH_TEXT_DUMMY0 ? "dummy0[sch,text]" :
-          nWhich==StarAttribute::ATTR_SCH_TEXT_DUMMY1 ? "dummy1[sch,text]" :
-          nWhich==StarAttribute::ATTR_SCH_TEXT_DUMMY2 ? "dummy2[sch,text]" : "dummy3[sch,text]")
-      << "=" << input->readLong(4) << ",";
-    break;
-
-  case StarAttribute::ATTR_SCH_STYLE_BASETYPE:
-    f << "baseType[style]=" << input->readLong(4) << ",";
-    break;
-
-  case StarAttribute::ATTR_SCH_STYLE_SPLINES:
-  case StarAttribute::ATTR_SCH_STYLE_SYMBOL:
-  case StarAttribute::ATTR_SCH_STYLE_SHAPE:
-    f << (nWhich==StarAttribute::ATTR_SCH_STYLE_SPLINES ? "splines[style]" :
-          nWhich==StarAttribute::ATTR_SCH_STYLE_SYMBOL ? "symbol[style]" : "shape[style]")
-      << "=" << input->readLong(4);
-    break;
-
-  case StarAttribute::ATTR_SCH_AXIS:
-    f << "axis[sch]=" << input->readLong(4) << ",";
-    break;
-
-  case StarAttribute::ATTR_SCH_AXIS_HELPTICKS:
-  case StarAttribute::ATTR_SCH_AXIS_TICKS:
   case StarAttribute::ATTR_SCH_AXIS_NUMFMT:
   case StarAttribute::ATTR_SCH_AXIS_NUMFMTPERCENT:
-    f << (nWhich==StarAttribute::ATTR_SCH_AXIS_HELPTICKS ? "axis[helpticks]" :
-          nWhich==StarAttribute::ATTR_SCH_AXIS_TICKS ? "axis[ticks]" :
-          nWhich==StarAttribute::ATTR_SCH_AXIS_NUMFMT ? "axis[numfmt]" : "axis[numfmtpercent]")
-      << "=" << input->readLong(4);
+    f << (nWhich==StarAttribute::ATTR_SCH_AXIS_NUMFMT ? "axis[numfmt]" : "axis[numfmtpercent]")
+      << "=" << input->readULong(4);
     break;
 
-  case StarAttribute::ATTR_SCH_AXIS_DUMMY0:
-  case StarAttribute::ATTR_SCH_AXIS_DUMMY1:
-  case StarAttribute::ATTR_SCH_AXIS_DUMMY2:
-    f << (nWhich==StarAttribute::ATTR_SCH_AXIS_DUMMY0 ? "dummy0[sch,axis]" :
-          nWhich==StarAttribute::ATTR_SCH_AXIS_DUMMY1 ? "dummy1[sch,axis]" : "dummy2[sch,axis]")
-      << "=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::ATTR_SCH_AXIS_DUMMY3:
-  case StarAttribute::ATTR_SCH_BAR_OVERLAP:
-  case StarAttribute::ATTR_SCH_BAR_GAPWIDTH:
-    f << (nWhich==StarAttribute::ATTR_SCH_AXIS_DUMMY3 ? "dummy3[sch,axis]" :
-          nWhich==StarAttribute::ATTR_SCH_BAR_OVERLAP ? "bar[overlap]" : "bar[gapwidth]")
-      << "=" << input->readLong(4) << ",";
-    break;
   case StarAttribute::ATTR_SCH_SYMBOL_SIZE:
     f << "symbolSize[sch]=" << input->readLong(4) << "x" << input->readLong(4) << ",";
     break;
@@ -1950,13 +1887,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   case StarAttribute::XATTR_FILLSTYLE:
     f << (nWhich==StarAttribute::XATTR_LINESTYLE ? "line[style]" : "fill[style]")
       << "=" << input->readULong(2) << ",";
-    break;
-  case StarAttribute::XATTR_LINEWIDTH:
-  case StarAttribute::XATTR_LINESTARTWIDTH:
-  case StarAttribute::XATTR_LINEENDWIDTH:
-    f << (nWhich==StarAttribute::XATTR_LINEWIDTH ? "line[width]" :
-          nWhich==StarAttribute::XATTR_LINESTARTWIDTH ? "line[startWidth]" : "line[endWidth]")
-      << "=" << input->readLong(4) << ",";
     break;
   case StarAttribute::XATTR_LINETRANSPARENCE:
     f << "lineTransparence=" << input->readULong(2) << ",";
@@ -2142,7 +2072,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << (nWhich==StarAttribute::XATTR_FILLBMP_TILEOFFSETX ? "bmp[offsX]" : "bmp[offsY]")
       << "=" << input->readULong(2) << ",";
     break;
-  case StarAttribute::XATTR_FILLBMP_POSOFFSETX:
+  case StarAttribute::XATTR_FILLBMP_POSOFFSETX: // 0
   case StarAttribute::XATTR_FILLBMP_POSOFFSETY:
     f << (nWhich==StarAttribute::XATTR_FILLBMP_POSOFFSETX ? "bmp[posOffsX]" : "bmp[posOffsY]")
       << "=" << input->readULong(2) << ",";
@@ -2154,16 +2084,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << (nWhich==StarAttribute::XATTR_FORMTXTSTYLE ? "style[form]" :
           nWhich==StarAttribute::XATTR_FORMTXTADJUST ? "adjust[form]" : "shadow[form]")
       << "=" << input->readULong(2) << ",";
-    break;
-
-  case StarAttribute::XATTR_FORMTXTDISTANCE:
-  case StarAttribute::XATTR_FORMTXTSTART:
-    f << (nWhich==StarAttribute::XATTR_FORMTXTDISTANCE ? "distance[form]" : "start[form]") << "=" << input->readLong(4) << ",";
-    break;
-
-  case StarAttribute::XATTR_FORMTXTSHDWXVAL:
-  case StarAttribute::XATTR_FORMTXTSHDWYVAL:
-    f << (nWhich==StarAttribute::XATTR_FORMTXTSHDWXVAL ? "shadowX[form]" : "shadowY[form]") << "=" << input->readLong(4) << ",";
     break;
 
   case StarAttribute::XATTR_FORMTXTSTDFORM:
