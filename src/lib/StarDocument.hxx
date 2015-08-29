@@ -101,6 +101,8 @@ protected:
   bool readPersistElements(STOFFInputStreamPtr input, std::string const &name);
   //! try to read the document information : "SfxDocumentInformation"
   bool readSfxDocumentInformation(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
+  //! try to read the preview : "SfxPreview"
+  bool readSfxPreview(STOFFInputStreamPtr input, std::string const &name);
   //! try to read the windows information : "SfxWindows"
   bool readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
   //! try to read the "Star Framework Config File"

@@ -131,7 +131,7 @@ bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &
   }
 
   pos=input->tell();
-  if (!readSdrModel(zone)) {
+  if (!readSdrModel(zone, document)) {
     STOFF_DEBUG_MSG(("SDCParser::readChartDocument: can not find the SdrModel\n"));
     ascFile.addPos(pos);
     ascFile.addNote("SCChartDocument:###SdrModel");
@@ -1079,7 +1079,7 @@ bool SDCParser::readSdrLayerSet(StarZone &zone)
   return true;
 }
 
-bool SDCParser::readSdrModel(StarZone &zone)
+bool SDCParser::readSdrModel(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   // first check magic
@@ -1283,7 +1283,7 @@ bool SDCParser::readSdrModel(StarZone &zone)
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     if (magic=="DrLy" && readSdrLayer(zone)) continue;
     if (magic=="DrLS" && readSdrLayerSet(zone)) continue;
-    if ((magic=="DrPg" || magic=="DrMP") && readSdrPage(zone)) continue;
+    if ((magic=="DrPg" || magic=="DrMP") && readSdrPage(zone, doc)) continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     if (!zone.openSDRHeader(magic)) {
@@ -1303,6 +1303,7 @@ bool SDCParser::readSdrModel(StarZone &zone)
   }
 
   zone.closeRecord("SdrModelA1");
+  // in DrawingLayer, find also 0500000001 and 060000000000
   zone.closeSDRHeader("SdrModel");
   return true;
 }
@@ -1358,6 +1359,14 @@ bool SDCParser::readSdrObject(StarZone &zone)
     }
     f << "##";
   }
+  else if (magic=="FM01") { // FmFormInventor
+    static bool first=true;
+    if (first) {
+      STOFF_DEBUG_MSG(("SDCParser::readSdrObject: read FM01 object is not implemented\n"));
+      first=false;
+    }
+    f << "##";
+  }
   else {
     STOFF_DEBUG_MSG(("SDCParser::readSdrObject: find unknown magic\n"));
     f << "###";
@@ -1371,7 +1380,7 @@ bool SDCParser::readSdrObject(StarZone &zone)
   return true;
 }
 
-bool SDCParser::readSdrPage(StarZone &zone)
+bool SDCParser::readSdrPage(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   // first check magic
@@ -1411,15 +1420,56 @@ bool SDCParser::readSdrPage(StarZone &zone)
   f.str("");
   f << "SdrPageDefA[" << zone.getRecordLevel() << "]:";
   // svdpage.cxx SdrPageDef::ReadData
-  if (!zone.openRecord()) { // SdrPageDefA1
-    STOFF_DEBUG_MSG(("SDCParser::readSdrPage: can not open downCompat\n"));
-    f << "###";
+  bool hasExtraData=false;
+  for (int tr=0; tr<2; ++tr) {
+    long lastPos=zone.getRecordLastPosition();
+    if (!zone.openRecord()) { // SdrPageDefA1
+      STOFF_DEBUG_MSG(("SDCParser::readSdrPage: can not open downCompat\n"));
+      f << "###";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      zone.closeSDRHeader("SdrPageDef");
+      return true;
+    }
+    if (tr==1 || zone.getRecordLastPosition()==lastPos)
+      break;
+    // unsure, how we can have some dim and pool here but seems frequent in DrawingLayer
+    uint16_t n;
+    *input >> n;
+    bool ok=false;
+    if (n>1) {
+      STOFF_DEBUG_MSG(("SDCParser::readSdrPage: bad version\n"));
+      f << "###n=" << n << ",";
+      ok=false;
+    }
+    else
+      hasExtraData=true;
+    if (n==1 && input->tell()+8<=zone.getRecordLastPosition())  {
+      f << "dim=[";
+      for (int i=0; i<4; ++i) f << input->readLong(2) << ((i%2) ? "," : "x");
+      f << "],";
+      *input >> n;
+      ok=true;
+    }
+    if (ok && n>1 && input->tell()+2<=zone.getRecordLastPosition()) {
+      STOFF_DEBUG_MSG(("SDCParser::readSdrPage: bad version2\n"));
+      f << "###n2=" << n << ",";
+      ok=false;
+    }
+    if (ok && n==1) {
+      long actPos=input->tell();
+      shared_ptr<StarItemPool> pool=doc.getNewItemPool(StarItemPool::T_VCControlPool);
+      if (!pool || !pool->read(zone))
+        input->seek(actPos, librevenge::RVNG_SEEK_SET);
+    }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeSDRHeader("SdrPageDef");
-    return true;
-  }
 
+    zone.closeRecord("SdrPageDef");
+    pos=input->tell();
+    f.str("");
+    f << "SdrPageDefA[" << zone.getRecordLevel() << "]:";
+  }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   pos=input->tell();
@@ -1534,8 +1584,41 @@ bool SDCParser::readSdrPage(StarZone &zone)
       }
     }
   }
-
   zone.closeRecord("SdrPageDefA1");
+  if (ok && hasExtraData) {
+    lastPos=zone.getRecordLastPosition();
+    int n=0;;
+    while (input->tell()<lastPos) {
+      pos=input->tell();
+      if (!zone.openRecord()) break;
+      f.str("");
+      f << "SdrPageDefB" << ++n << "[" << zone.getRecordLevel() << "]:";
+      if (n==1) {
+        librevenge::RVNGString string;
+        if (!zone.readString(string)) {
+          STOFF_DEBUG_MSG(("SDCParser::readSdrPage: can not find read a string\n"));
+          f << "###string";
+        }
+        else // Controls
+          f << string.cstr() << ",";
+        // then if vers>={13|14|15|16}  671905111105671901000800000000000000
+      }
+      else {
+        STOFF_DEBUG_MSG(("SDCParser::readSdrPage: find some unknown zone\n"));
+        f << "###unknown";
+      }
+      // for version>=16?, find another zone: either an empty zone or a zone which contains many string...
+      if (zone.getRecordLastPosition()!=input->tell()) {
+        ascFile.addDelimiter(input->tell(),'|');
+        f << "#";
+        input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+      }
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      zone.closeRecord("SdrPageDefB");
+    }
+  }
+
   zone.closeSDRHeader("SdrPageDef");
   return true;
 }
@@ -1548,7 +1631,7 @@ bool SDCParser::readSdrMPageDesc(StarZone &zone)
   long pos=input->tell();
   for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
   input->seek(pos, librevenge::RVNG_SEEK_SET);
-  if (magic!="DrMP") return false;
+  if (magic!="DrMD") return false;
 
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
@@ -1564,13 +1647,6 @@ bool SDCParser::readSdrMPageDesc(StarZone &zone)
   }
   int version=zone.getHeaderVersion();
   f << magic << ",nVers=" << version << ",";
-  if (magic!="DrMP") {
-    STOFF_DEBUG_MSG(("SDCParser::readSdrMPageDesc: unexpected magic data\n"));
-    f << "###";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    return false;
-  }
   uint16_t nPageNum;
   *input >> nPageNum;
   f << "pageNum=" << nPageNum << ",";
@@ -1615,14 +1691,6 @@ bool SDCParser::readSdrMPageDescList(StarZone &zone)
   uint16_t n;
   *input>>n;
   f << magic << ",nVers=" << version << ",N=" << n << ",";
-
-  if (magic!="DrML") {
-    STOFF_DEBUG_MSG(("SDCParser::readSdrMPageDescList: unexpected magic data\n"));
-    f << "###";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    return false;
-  }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 

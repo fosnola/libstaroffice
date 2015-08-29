@@ -883,8 +883,9 @@ bool StarItemPool::readItem(StarZone &zone, bool isDirect, long endPos)
         ok=false;
       }
       else if (nLength) {
+        long endAttrPos=input->tell()+long(nLength);
         ascii.addDelimiter(input->tell(),'|');
-        input->seek(nLength, librevenge::RVNG_SEEK_CUR);
+        input->seek(endAttrPos, librevenge::RVNG_SEEK_SET);
       }
     }
     else if (nSurro)
@@ -930,9 +931,15 @@ bool StarItemPool::readItem(StarZone &zone, bool isDirect, long endPos)
       ok=false;
     }
     else if (nLength) {
-      f << "##item,";
-      ascii.addDelimiter(input->tell(),'|');
-      input->seek(nLength, librevenge::RVNG_SEEK_CUR);
+      long endAttrPos=input->tell()+long(nLength);
+      if (!readAttribute(zone, int(nWhich), (int) nVersion, endAttrPos)) {
+        STOFF_DEBUG_MSG(("StarItemPool::readItem: can not read an attribute\n"));
+        f << "###";
+      }
+      if (input->tell()!=endAttrPos) {
+        ascii.addDelimiter(input->tell(),'|');
+        input->seek(endAttrPos, librevenge::RVNG_SEEK_SET);
+      }
     }
     if (ok && input->tell()>endPos) {
       f << "###,";

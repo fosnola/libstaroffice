@@ -68,8 +68,12 @@ public:
 
   //! low level
 
-  //! try to read a bitmap
-  bool readBitmap(StarZone &zone, bool inFileHeader, long lastPos);
+  /** try to read a bitmap
+
+   \note only fill data and type if the bitmap has a file header*/
+  bool readBitmap(StarZone &zone, bool inFileHeader, long lastPos, librevenge::RVNGBinaryData &data, std::string &type);
+  //! try to convert the read data in ppm
+  bool getData(librevenge::RVNGBinaryData &data, std::string &type) const;
 
 protected:
   //! try to read the bitmap information block

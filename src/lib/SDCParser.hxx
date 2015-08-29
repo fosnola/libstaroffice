@@ -74,7 +74,7 @@ public:
   bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &document);
 
   //! try to read a SdrModel zone: "DrMd"
-  bool readSdrModel(StarZone &zone);
+  bool readSdrModel(StarZone &zone, StarDocument &doc);
 protected:
   //
   // data
@@ -91,7 +91,7 @@ protected:
   //! try to read a object zone: "DrOb'
   bool readSdrObject(StarZone &zone);
   //! try to read a Page/MasterPage zone: "DrPg'
-  bool readSdrPage(StarZone &zone);
+  bool readSdrPage(StarZone &zone, StarDocument &doc);
   //! try to read a Master Page descriptor zone: "DrMP'
   bool readSdrMPageDesc(StarZone &zone);
   //! try to read a list of Master Page zone: "DrML'

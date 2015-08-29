@@ -73,7 +73,7 @@ public:
   static bool readMathDocument(STOFFInputStreamPtr input, std::string const &fileName);
 
   //! try to read a embedded picture file: Embedded/PicXXXXXX
-  static bool readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName);
+  static bool readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string &dataType, std::string const &fileName);
 
   // other
 
@@ -86,6 +86,8 @@ public:
   static bool readJobSetUp(StarZone &zone);
   //! try to read a font
   static bool readFont(StarZone &zone);
+  //! try to read a SVGDI object
+  static bool readSVGDI(StarZone &zone);
 
   //! try to read a edit text object
   static bool readEditTextObject(StarZone &zone, long lastPos, StarDocument &doc);

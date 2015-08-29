@@ -40,6 +40,7 @@
 #include <librevenge/librevenge.h>
 
 #include "StarAttribute.hxx"
+#include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarZone.hxx"
 
@@ -157,13 +158,17 @@ bool StarDocument::parse()
       readPersistElements(ole, name);
       continue;
     }
+    if (base=="SfxPreview") {
+      content.setParsed(true);
+      readSfxPreview(ole, name);
+      continue;
+    }
     libstoff::DebugFile asciiFile(ole);
     asciiFile.open(name);
 
     bool ok=false;
     if (base=="SfxDocumentInfo")
       ok=readSfxDocumentInformation(ole, asciiFile);
-    // TODO SfxPreview: GetPreviewMetaFile()
     else if (base=="SfxWindows")
       ok=readSfxWindows(ole, asciiFile);
     else if (base=="Star Framework Config File")
@@ -612,6 +617,30 @@ bool StarDocument::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libsto
   }
   asciiFile.addPos(pos);
   asciiFile.addNote(f.str().c_str());
+
+  return true;
+}
+
+bool StarDocument::readSfxPreview(STOFFInputStreamPtr input, std::string const &name)
+{
+  StarZone zone(input, name, "SfxPreview");
+  libstoff::DebugFile &ascii=zone.ascii();
+  ascii.open(name);
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  StarFileManager fileManager;
+  if (!fileManager.readSVGDI(zone)) {
+    STOFF_DEBUG_MSG(("StarDocument::readSfxPreview: can not find the first image\n"));
+    input->seek(0, librevenge::RVNG_SEEK_SET);
+  }
+  if (input->isEnd()) return true;
+
+  long pos=input->tell();
+  libstoff::DebugStream f;
+  STOFF_DEBUG_MSG(("StarDocument::readSfxPreview: find extra data\n"));
+  f << "Entries(SfxPreview):###extra";
+
+  ascii.addPos(pos);
+  ascii.addNote(f.str().c_str());
 
   return true;
 }

@@ -42,6 +42,7 @@
 #include "StarZone.hxx"
 
 #include "StarAttribute.hxx"
+#include "StarBitmap.hxx"
 #include "StarDocument.hxx"
 #include "StarItemPool.hxx"
 
@@ -293,12 +294,15 @@ bool StarFileManager::readImageDocument(STOFFInputStreamPtr input, librevenge::R
   return true;
 }
 
-bool StarFileManager::readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName)
+bool StarFileManager::readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string &dataType, std::string const &fileName)
 {
   // see this Ole with classic bitmap format
-  libstoff::DebugFile ascii(input);
+  StarZone zone(input, fileName, "EmbeddedPicture");
+
+  libstoff::DebugFile &ascii=zone.ascii();
   ascii.open(fileName);
   data.clear();
+  dataType="";
   // impgraph.cxx: ImpGraphic::ImplReadEmbedded
 
   input->seek(0, librevenge::RVNG_SEEK_SET);
@@ -340,7 +344,6 @@ bool StarFileManager::readEmbeddedPicture(STOFFInputStreamPtr input, librevenge:
     *input >> nOffsX >> nOffsY;
     f << "offset=" << nOffsX << "x" << nOffsY << ",";
   }
-  ascii.addDelimiter(input->tell(),'|');
   if (nLen<10 || input->size()!=input->tell()+nLen) {
     f << "###";
     STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: the length seems bad\n"));
@@ -348,16 +351,48 @@ bool StarFileManager::readEmbeddedPicture(STOFFInputStreamPtr input, librevenge:
     ascii.addNote(f.str().c_str());
     return false;
   }
+  long pictPos=input->tell();
+  int header=(int) input->readULong(2);
+  input->seek(pictPos, librevenge::RVNG_SEEK_SET);
+  std::string extension("pict");
+  if (header==0x4142 || header==0x4d42) {
+    dataType="image/bm";
+    extension="bm";
+#ifdef DEBUG_WITH_FILES
+    StarBitmap bitmap;
+    bitmap.readBitmap(zone, true, input->size(), data, dataType);
+#endif
+  }
+  else if (header==0x5653) {
+#ifdef DEBUG_WITH_FILES
+    readSVGDI(zone);
+#endif
+    dataType="image/svg";
+    extension="svgdi";
+  }
+  else if (header==0xcdd7) {
+    dataType="image/wmf";
+    extension="wmf";
+  }
+  else {
+    dataType="image/pict";
+    f << "###unknown";
+    STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: find unknown format\n"));
+  }
+  f << extension << ",";
+  if (input->tell()==pictPos) ascii.addDelimiter(input->tell(),'|');
   ascii.addPos(0);
   ascii.addNote(f.str().c_str());
-  ascii.skipZone(input->tell()+4, input->size());
-  // CHECKME: compressed, SVGD
+  ascii.skipZone(pictPos+4, input->size());
+
+  input->seek(pictPos, librevenge::RVNG_SEEK_SET);
   if (!input->readEndDataBlock(data)) {
+    data.clear();
     STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: can not read image content\n"));
     return true;
   }
 #ifdef DEBUG_WITH_FILES
-  libstoff::Debug::dumpFile(data, (fileName+".pict").c_str());
+  libstoff::Debug::dumpFile(data, (fileName+"."+extension).c_str());
 #endif
   return true;
 }
@@ -912,6 +947,514 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarDocum
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
   }
+  return true;
+}
+
+bool StarFileManager::readSVGDI(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  long pos=input->tell();
+  long lastPos=zone.getRecordLevel()==0 ? input->size() : zone.getRecordLastPosition();
+  // cvtsvm.cxx: SVMConverter::ImplConvertFromSVM1
+  libstoff::DebugStream f;
+  f << "Entries(ImageSVGDI)[" << zone.getRecordLevel() << "]:";
+  std::string code;
+  for (int i=0; i<5; ++i) code+=(char) input->readULong(1);
+  if (code!="SVGDI") {
+    input->seek(0, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  uint16_t sz;
+  int16_t version;
+  int32_t width, height;
+  *input >> sz >> version >> width >> height;
+  long endPos=pos+5+sz;
+  if (version!=200 || sz<42 || endPos>lastPos) {
+    STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: find unknown version\n"));
+    f << "###";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  f << "size=" << width << "x" << height << ",";
+  // map mode
+  int16_t unit;
+  int32_t orgX, orgY, nXNum, nXDenom, nYNum, nYDenom;
+  *input >> unit >> orgX >> orgY >> nXNum >> nXDenom >> nYNum >> nYDenom;
+  if (unit) f << "unit=" << unit << ",";
+  f << "orig=" << orgX << "x" << orgY << ",";
+  f << "x=" << nXNum << "/" << nXDenom << ",";
+  f << "y=" << nYNum << "/" << nYDenom << ",";
+
+  int32_t nActions;
+  *input >> nActions;
+  f << "actions=" << nActions << ",";
+  if (input->tell()!=endPos)
+    ascFile.addDelimiter(input->tell(),'|');
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  input->seek(endPos, librevenge::RVNG_SEEK_SET);
+  uint32_t nUnicodeCommentActionNumber=0;
+  for (int32_t i=0; i<nActions; ++i) {
+    pos=input->tell();
+    f.str("");
+    f << "ImageSVGDI[" << i << "]:";
+    int16_t type;
+    int32_t nActionSize;
+    *input>>type>>nActionSize;
+    long endDataPos=pos+2+nActionSize;
+    if (nActionSize<4 || endDataPos>lastPos) {
+      STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad size\n"));
+      f << "###";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+      break;
+    }
+    unsigned char col[3];
+    STOFFColor color;
+    int32_t nTmp, nTmp1;
+    librevenge::RVNGString text;
+    switch (type) {
+    case 1:
+      f << "pixel=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      for (int c=0; c<3; ++c) col[c]=(unsigned char)(input->readULong(2)>>8);
+      f << "col=" << STOFFColor(col[0],col[1],col[2]) << ",";
+      break;
+    case 2:
+      f << "point=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      break;
+    case 3:
+      f << "line=" << input->readLong(4) << "x" << input->readLong(4) << "<->"
+        << input->readLong(4) << "x" << input->readLong(4) << ",";
+      break;
+    case 4:
+      f << "rect=" << input->readLong(4) << "x" << input->readLong(4) << "<->"
+        << input->readLong(4) << "x" << input->readLong(4) << ",";
+      *input >> nTmp >> nTmp1;
+      if (nTmp || nTmp1) f << "round=" << nTmp << "x" << nTmp1 << ",";
+      break;
+    case 5:
+      f << "ellipse=" << input->readLong(4) << "x" << input->readLong(4) << "<->"
+        << input->readLong(4) << "x" << input->readLong(4) << ",";
+      break;
+    case 6:
+    case 7:
+      f << (type==6 ? "arc" : "pie")<< "=" << input->readLong(4) << "x" << input->readLong(4) << "<->"
+        << input->readLong(4) << "x" << input->readLong(4) << ",";
+      f << "pt1=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      f << "pt2=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      break;
+    case 8:
+    case 9:
+      f << (type==8 ? "rect[invert]" : "rect[highlight") << "="
+        << input->readLong(4) << "x" << input->readLong(4) << "<->"
+        << input->readLong(4) << "x" << input->readLong(4) << ",";
+      break;
+    case 10:
+    case 11:
+      f << (type==10 ? "polyline" : "polygon") << ",";
+      *input >> nTmp;
+      if (nTmp<0 || input->tell()+8*nTmp>endDataPos) {
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad number of points\n"));
+        f << "###nPts=" << nTmp << ",";
+        break;
+      }
+      f << "pts=[";
+      for (int pt=0; pt<int(nTmp); ++pt) f << input->readLong(4) << "x" << input->readLong(4) << ",";
+      f << "],";
+      break;
+    case 12:
+    case 1024:
+    case 1025:
+    case 1030:
+      f << (type==12 ? "polypoly" : type==1024 ? "transparent[comment]" :
+            type==1025 ? "hatch[comment]" : "gradient[comment]") << ",";
+      *input >> nTmp;
+      for (int poly=0; poly<int(nTmp); ++poly) {
+        *input >> nTmp1;
+        if (nTmp1<0 || input->tell()+8*nTmp1>endDataPos) {
+          STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad number of points\n"));
+          f << "###poly[nPts=" << nTmp1 << "],";
+          break;
+        }
+        f << "poly" << poly << "=[";
+        for (int pt=0; pt<int(nTmp1); ++pt) f << input->readLong(4) << "x" << input->readLong(4) << ",";
+        f << "],";
+      }
+      if (type==1024) {
+        f << "nTrans=" << input->readULong(2) << ",";
+        f << "nComment=" << input->readULong(4) << ",";
+      }
+      if (type==1025) {
+        f << "style=" << input->readULong(2) << ",";
+        for (int c=0; c<3; ++c) col[c]=(unsigned char)(input->readULong(2)>>8);
+        f << "col=" << STOFFColor(col[0],col[1],col[2]) << ",";
+        f << "distance=" << input->readLong(4) << ",";
+        f << "nComment=" << input->readULong(4) << ",";
+      }
+      if (type==1030) {
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: reading gradient is not implemented\n"));
+        f << "###gradient+following";
+        input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
+      }
+      break;
+    case 13:
+    case 15: {
+      f << (type==13 ? "text" : "stretch") << ",";
+      f << "pos=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      int32_t nIndex, nLen;
+      *input>>nIndex>>nLen >> nTmp;
+      if (nIndex) f << "index=" << nIndex << ",";
+      if (nLen) f << "len=" << nLen << ",";
+      if (type==15) f << "nWidth=" << input->readLong(4) << ",";
+      if (nTmp<0 || input->tell()+nTmp>endDataPos) {
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad string\n"));
+        f << "###string";
+        break;
+      }
+      text.clear();
+      for (int c=0; c<int(nTmp); ++c) text.append((char) input->readULong(1));
+      input->seek(1, librevenge::RVNG_SEEK_CUR);
+      f << text.cstr() << ",";
+      if (nUnicodeCommentActionNumber!=(uint32_t) i) break;
+      uint16_t type1;
+      uint32_t len;
+      *input >> type1 >> len;
+      if (long(len)<4 || input->tell()+(long)len>endDataPos) {
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad string\n"));
+        f << "###unicode";
+        break;
+      }
+      if (type1==1032) {
+        text.clear();
+        int nUnicode=int(len-4)/2;
+        for (int c=0; c<nUnicode; ++c) text.append((char) input->readULong(2));
+        f << text.cstr() << ",";
+      }
+      else {
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: unknown data\n"));
+        f << "###unknown";
+        input->seek(long(len)-4, librevenge::RVNG_SEEK_CUR);
+      }
+      break;
+    }
+    case 14: {
+      f << "text[array],";
+      f << "pos=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      int32_t nIndex, nLen, nAryLen;
+      *input>>nIndex>>nLen >> nTmp >> nAryLen;
+      if (nTmp<0 || nAryLen<0 || input->tell()+nTmp+4*nAryLen>endDataPos) {
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad string\n"));
+        f << "###string";
+        break;
+      }
+      text.clear();
+      for (int c=0; c<int(nTmp); ++c) text.append((char) input->readULong(1));
+      input->seek(1, librevenge::RVNG_SEEK_CUR);
+      f << text.cstr() << ",";
+      f << "ary=[";
+      for (int ary=0; ary<int(nAryLen); ++ary) f << input->readLong(4) << ",";
+      f << "],";
+      if (nUnicodeCommentActionNumber!=(uint32_t) i) break;
+      uint16_t type1;
+      uint32_t len;
+      *input >> type1 >> len;
+      if (long(len)<4 || input->tell()+(long)len>endDataPos) {
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad string\n"));
+        f << "###unicode";
+        break;
+      }
+      if (type1==1032) {
+        text.clear();
+        int nUnicode=int(len-4)/2;
+        for (int c=0; c<nUnicode; ++c) text.append((char) input->readULong(2));
+        f << text.cstr() << ",";
+      }
+      else {
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: unknown data\n"));
+        f << "###unknown";
+        input->seek(long(len)-4, librevenge::RVNG_SEEK_CUR);
+      }
+
+      break;
+    }
+    case 16:
+      STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: reading icon is not implemented\n"));
+      f << "###icon";
+      break;
+    case 17:
+    case 18:
+    case 32: {
+      f << (type==17 ? "bitmap" : type==18 ? "bitmap[scale]" : "bitmap[scale2]");
+      f << "pos=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      if (type>=17) f << "scale=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      if (type==32) {
+        f << "pos2=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+        f << "scale2=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      }
+      StarBitmap bitmap;
+      librevenge::RVNGBinaryData data;
+      std::string dataType;
+      if (!bitmap.readBitmap(zone, false, endDataPos, data, dataType))
+        f << "###bitmap,";
+    }
+    case 19:
+      f << "pen,";
+      for (int c=0; c<3; ++c) col[c]=(unsigned char)(input->readULong(2)>>8);
+      color=STOFFColor(col[0],col[1],col[2]);
+      if (!color.isBlack()) f << "col=" << color << ",";
+      f << "penWidth=" << input->readULong(4) << ",";
+      f << "penStyle=" << input->readULong(2) << ",";
+      break;
+    case 20: {
+      f << "font,";
+      for (int c=0; c<2; ++c) {
+        for (int j=0; j<3; ++j) col[j]=(unsigned char)(input->readULong(2)>>8);
+        color=STOFFColor(col[0],col[1],col[2]);
+        if ((c==1&&!color.isWhite()) || (c==0&&!color.isBlack()))
+          f << (c==0 ? "col" : "col[fill]") << "=" << color << ",";
+      }
+      long actPos=input->tell();
+      if (actPos+62>endDataPos) {
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: the zone seems too short\n"));
+        f << "###short";
+        break;
+      }
+      std::string name("");
+      for (int c=0; c<32; ++c) {
+        char ch=(char) input->readULong(1);
+        if (!ch) break;
+        name+=ch;
+      }
+      f << name << ",";
+      input->seek(actPos+32, librevenge::RVNG_SEEK_SET);
+      f << "size=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      int16_t nCharSet, nFamily, nPitch, nAlign, nWeight, nUnderline, nStrikeout, nCharOrient, nLineOrient;
+      bool bItalic, bOutline, bShadow, bTransparent;
+      *input >> nCharSet >> nFamily >> nPitch >> nAlign >> nWeight >> nUnderline >> nStrikeout >> nCharOrient >> nLineOrient;
+      if (nCharSet) f << "char[set]=" << nCharSet << ",";
+      if (nFamily) f << "family=" << nFamily << ",";
+      if (nPitch) f << "pitch=" << nPitch << ",";
+      if (nAlign) f << "align=" << nAlign << ",";
+      if (nWeight) f << "weight=" << nWeight << ",";
+      if (nUnderline) f << "underline=" << nUnderline << ",";
+      if (nStrikeout) f << "strikeout=" << nStrikeout << ",";
+      if (nCharOrient) f << "charOrient=" << nCharOrient << ",";
+      if (nLineOrient) f << "lineOrient=" << nLineOrient << ",";
+      *input >> bItalic >> bOutline >> bShadow >> bTransparent;
+      if (bItalic) f << "italic,";
+      if (bOutline) f << "outline,";
+      if (bShadow) f << "shadow,";
+      if (bTransparent) f << "transparent,";
+      break;
+    }
+    case 21: // unsure
+    case 22:
+      f << (type==21 ? "brush[back]" : "brush[fill]") << ",";
+      for (int j=0; j<3; ++j) col[j]=(unsigned char)(input->readULong(2)>>8);
+      f << STOFFColor(col[0],col[1],col[2]) << ",";
+      input->seek(6, librevenge::RVNG_SEEK_CUR); // unknown
+      f << "style=" << input->readLong(2) << ",";
+      input->seek(2, librevenge::RVNG_SEEK_CUR); // unknown
+      break;
+    case 23:
+      f << "map[mode],";
+      *input >> unit >> orgX >> orgY >> nXNum >> nXDenom >> nYNum >> nYDenom;
+      if (unit) f << "unit=" << unit << ",";
+      f << "orig=" << orgX << "x" << orgY << ",";
+      f << "x=" << nXNum << "/" << nXDenom << ",";
+      f << "y=" << nYNum << "/" << nYDenom << ",";
+      break;
+    case 24: {
+      f << "clip[region],";
+      int16_t clipType, bIntersect;
+      *input >> clipType >> bIntersect;
+      f << "rect=" << input->readLong(4) << "x" << input->readLong(4) << "<->"
+        << input->readLong(4) << "x" << input->readLong(4) << ",";
+      if (bIntersect) f << "intersect,";
+      switch (clipType) {
+      case 0:
+        break;
+      case 1:
+        f << "rect2=" << input->readLong(4) << "x" << input->readLong(4) << "<->"
+          << input->readLong(4) << "x" << input->readLong(4) << ",";
+        break;
+      case 2:
+        *input >> nTmp;
+        if (nTmp<0 || input->tell()+8*nTmp>endDataPos) {
+          STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad number of points\n"));
+          f << "###nPts=" << nTmp << ",";
+          break;
+        }
+        f << "poly=[";
+        for (int pt=0; pt<int(nTmp); ++pt) f << input->readLong(4) << "x" << input->readLong(4) << ",";
+        f << "],";
+        break;
+      case 3:
+        *input >> nTmp;
+        for (int poly=0; poly<int(nTmp); ++poly) {
+          *input >> nTmp1;
+          if (nTmp1<0 || input->tell()+8*nTmp1>endDataPos) {
+            STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad number of points\n"));
+            f << "###poly[nPts=" << nTmp1 << "],";
+            break;
+          }
+          f << "poly" << poly << "=[";
+          for (int pt=0; pt<int(nTmp1); ++pt) f << input->readLong(4) << "x" << input->readLong(4) << ",";
+          f << "],";
+        }
+        break;
+      default:
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: find unknown clip type\n"));
+        f << "###type=" << clipType << ",";
+        break;
+      }
+      break;
+    }
+    case 25:
+      f << "raster=" << input->readULong(2) << ","; // 1 invert, 4,5: xor other paint
+      break;
+    case 26:
+      f << "push,";
+      break;
+    case 27:
+      f << "pop,";
+      break;
+    case 28:
+      f << "clip[move]=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      break;
+    case 29:
+      f << "clip[rect]=" << input->readLong(4) << "x" << input->readLong(4) << "<->"
+        << input->readLong(4) << "x" << input->readLong(4) << ",";
+      break;
+    case 30: // checkme
+    case 1029: {
+      f << (type==30 ? "mtf" : "floatComment") << ",";;
+      // gdimtf.cxx operator>>(... GDIMetaFile )
+      std::string name("");
+      for (int c=0; c<6; ++c) name+=(char) input->readULong(1);
+      if (name!="VCLMTF") {
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: find unexpected header\n"));
+        f << "###name=" << name << ",";
+        break;
+      }
+      if (!zone.openVersionCompatHeader()) {
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: can not open compat header\n"));
+        f << "###compat,";
+        break;
+      }
+      f << "compress=" << input->readULong(4) << ",";
+      // map mode
+      *input >> unit >> orgX >> orgY >> nXNum >> nXDenom >> nYNum >> nYDenom;
+      f << "map=[";
+      if (unit) f << "unit=" << unit << ",";
+      f << "orig=" << orgX << "x" << orgY << ",";
+      f << "x=" << nXNum << "/" << nXDenom << ",";
+      f << "y=" << nYNum << "/" << nYDenom << ",";
+      f << "],";
+      f << "size=" << input->readULong(4) << ",";
+      uint32_t nCount;
+      *input >> nCount;
+      if (nCount) f << "nCount=" << nCount << ",";
+      if (input->tell()!=zone.getRecordLastPosition()) {
+        // for (int act=0; act<nCount; ++act) MetaAction::ReadMetaAction();
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: reading mtf action zones is not implemented\n"));
+        ascFile.addPos(input->tell());
+        ascFile.addNote("ImageSVGDI:###listMeta");
+        input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+      }
+      zone.closeVersionCompatHeader("ImageSVGDI");
+      if (type!=30) {
+        f << "orig=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+        f << "sz=" << input->readULong(4) << ",";
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: reading gradient is not implemented\n"));
+        f << "###gradient+following";
+        input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
+      }
+      break;
+    }
+    case 33: {
+      f << "gradient,";
+      f << "rect=" << input->readLong(4) << "x" << input->readLong(4) << "<->"
+        << input->readLong(4) << "x" << input->readLong(4) << ",";
+      f << "style=" << input->readULong(2) << ",";
+      for (int c=0; c<2; ++c) {
+        for (int j=0; j<3; ++j) col[j]=(unsigned char)(input->readULong(2)>>8);
+        color=STOFFColor(col[0],col[1],col[2]);
+        f << "col" << c << "=" << color << ",";
+      }
+      f << "angle=" << input->readLong(2) << ",";
+      f << "border=" << input->readLong(2) << ",";
+      f << "offs=" << input->readLong(2) << "x" << input->readLong(2) << ",";
+      f << "intensity=" << input->readLong(2) << "<->" << input->readLong(2) << ",";
+      break;
+    }
+    case 1026:
+      f << "refpoint[comment],";
+      f << "pt=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      f << "set=" << input->readULong(1) << ",";
+      f << "nComments=" << input->readULong(4) << ",";
+      break;
+    case 1027:
+      f << "textline[color,comment],";
+      for (int j=0; j<3; ++j) col[j]=(unsigned char)(input->readULong(2)>>8);
+      f << "col=" << STOFFColor(col[0],col[1],col[2]) << ",";
+      f << "set=" << input->readULong(1) << ",";
+      f << "nComments=" << input->readULong(4) << ",";
+      break;
+    case 1028:
+      f << "textline[comment],";
+      f << "pt=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      f << "width=" << input->readLong(4) << ",";
+      f << "strikeOut=" << input->readULong(4) << ",";
+      f << "underline=" << input->readULong(4) << ",";
+      f << "nComments=" << input->readULong(4) << ",";
+      break;
+    case 1031: {
+      f << "comment[comment],";
+      if (!zone.readString(text)) {
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: can not read the text\n"));
+        f << "###text,";
+        break;
+      }
+      f << text.cstr() << ",";
+      f << "value=" << input->readULong(4) << ",";
+      long size=input->readLong(4);
+      if (size<0 || input->tell()+size+4>endDataPos) {
+        STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: size seems bad\n"));
+        f << "###size=" << size << ",";
+        break;
+      }
+      if (size) {
+        f << "###unknown,";
+        ascFile.addDelimiter(input->tell(),'|');
+        input->seek(size, librevenge::RVNG_SEEK_CUR);
+      }
+      f << "nComments=" << input->readULong(4) << ",";
+      break;
+    }
+    case 1032:
+      f << "unicode[next],";
+      nUnicodeCommentActionNumber=uint32_t(i)+1;
+      break;
+    default:
+      STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: find unimplement type\n"));
+      f << "###type=" << type << ",";
+      input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
+      break;
+    }
+    if (input->tell()!=endDataPos) {
+      STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: find extra data\n"));
+      f << "###extra,";
+      ascFile.addDelimiter(input->tell(),'|');
+    }
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
+  }
+
   return true;
 }
 

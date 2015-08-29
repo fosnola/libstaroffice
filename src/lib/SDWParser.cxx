@@ -186,7 +186,8 @@ bool SDWParser::createZones()
       }
       if (base.compare(0,3,"Pic")==0) {
         librevenge::RVNGBinaryData data;
-        fileManager.readEmbeddedPicture(ole,data,name);
+        std::string type;
+        fileManager.readEmbeddedPicture(ole,data,type,name);
         continue;
       }
       // other
@@ -2092,7 +2093,9 @@ bool SDWParser::readDrawingLayer(STOFFInputStreamPtr input, std::string const &n
   input->seek(0, librevenge::RVNG_SEEK_SET);
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
+  // sw_sw3imp.cxx Sw3IoImp::LoadDrawingLayer
 
+  // create this pool from the main's SWG pool
   shared_ptr<StarItemPool> pool=document.getNewItemPool(StarItemPool::T_XOutdevPool);
   pool->addSecondaryPool(document.getNewItemPool(StarItemPool::T_EditEnginePool));
 
@@ -2117,15 +2120,44 @@ bool SDWParser::readDrawingLayer(STOFFInputStreamPtr input, std::string const &n
   }
   long pos=input->tell();
   SDCParser sdcParser;
-  if (!sdcParser.readSdrModel(zone)) { // look like a sdr model, but ...
+  if (!sdcParser.readSdrModel(zone, document)) {
     STOFF_DEBUG_MSG(("SDWParser::readDrawingLayer: can not find the drawing model\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
-  }
-  if (!input->isEnd()) {
-    STOFF_DEBUG_MSG(("SDWParser::readDrawingLayer: find extra data\n"));
     ascFile.addPos(input->tell());
     ascFile.addNote("Entries(DrawingLayer):###extra");
+    return true;
   }
+  if (input->isEnd()) return true;
+  pos=input->tell();
+  uint16_t nSign;
+  *input >> nSign;
+  libstoff::DebugStream f;
+  f << "Entries(DrawingLayer):";
+  bool ok=true;
+  if (nSign!=0x444D && nSign!=0) // 0 seems ok if followed by 0
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+  else {
+    uint16_t n;
+    *input >> n;
+    if (pos+4+4*long(n)>input->size()) {
+      STOFF_DEBUG_MSG(("SDWParser::readDrawingLayer: bad n frame\n"));
+      f << "###pos";
+      ok=false;
+    }
+    else {
+      f << "framePos=[";
+      for (uint16_t i=0; i<n; ++i) f << input->readULong(4) << ",";
+      f << "],";
+    }
+  }
+  if (ok && input->tell()+4==input->size())
+    f << "num[hidden]=" << input->readULong(4) << ",";
+  if (ok && !input->isEnd()) {
+    STOFF_DEBUG_MSG(("SDWParser::readDrawingLayer: find extra data\n"));
+    f << "###extra";
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
   return true;
 }
 

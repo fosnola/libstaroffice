@@ -146,9 +146,11 @@ struct Bitmap {
 //! Internal: the state of a StarBitmap
 struct State {
   //! constructor
-  State()
+  State() : m_bitmap()
   {
   }
+  //! the bitmap
+  Bitmap m_bitmap;
 };
 
 }
@@ -164,11 +166,21 @@ StarBitmap::~StarBitmap()
 {
 }
 
-bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos)
+bool StarBitmap::getData(librevenge::RVNGBinaryData &data, std::string &type) const
 {
+  if (!m_state->m_bitmap.getPPMData(data))
+    return false;
+  type="image/ppm";
+  return true;
+}
+
+bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, librevenge::RVNGBinaryData &result, std::string &type)
+{
+  result.clear();
+  type="";
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  long pos=input->tell();
+  long beginPos=input->tell(), pos=beginPos;
   libstoff::DebugStream f;
   f << "Entries(StarBitmap)[" << zone.getRecordLevel() << "]:";
 
@@ -204,7 +216,7 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  StarBitmapInternal::Bitmap bitmap;
+  StarBitmapInternal::Bitmap &bitmap=m_state->m_bitmap;
   if (!readBitmapInformation(zone, bitmap, lastPos)) return false;
 
   pos=input->tell();
@@ -260,11 +272,11 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos)
     strm.avail_in = (unsigned)codeSize;
     strm.next_in = (Bytef *)const_cast<uint8_t *>(data);
 
-    std::vector<unsigned char>result;
-    result.resize(size_t(uncodeSize),0);
+    std::vector<unsigned char> converted;
+    converted.resize(size_t(uncodeSize),0);
 
     strm.avail_out = uncodeSize;
-    strm.next_out = reinterpret_cast<Bytef *>(&result[0]);
+    strm.next_out = reinterpret_cast<Bytef *>(&converted[0]);
     ret = inflate(&strm, Z_FINISH);
     switch (ret) {
     case Z_NEED_DICT:
@@ -280,7 +292,7 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos)
       break;
     }
     (void)inflateEnd(&strm);
-    shared_ptr<librevenge::RVNGInputStream> newStream(new STOFFStringStream(&result[0], (unsigned)result.size()));
+    shared_ptr<librevenge::RVNGInputStream> newStream(new STOFFStringStream(&converted[0], (unsigned)converted.size()));
     dInput.reset(new STOFFInputStream(newStream, input->readInverted()));
     endDataPos=dInput->size();
 #else
@@ -309,7 +321,7 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos)
     unsigned char col[4]= {0,0,0,255};
     for (int i=0; i<nColors; ++i) {
       for (int c=0; c<numComponent; ++c) col[c]=(unsigned char) dInput->readULong(1);
-      bitmap.m_colorsList.push_back(STOFFColor(col[0],col[1],col[2],col[3]));
+      bitmap.m_colorsList.push_back(STOFFColor(col[2],col[1],col[0],col[3]));
       f << bitmap.m_colorsList.back() << ",";
     }
     f << "],";
@@ -326,7 +338,26 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos)
   }
   ascFile.skipZone(pos,input->tell()-1);
   pos=input->tell();
-  if (pos!=lastPos) {
+
+  if (inFileHeader) {
+    long actPos=input->tell();
+    input->seek(beginPos, librevenge::RVNG_SEEK_SET);
+    if (!input->readDataBlock(lastPos-beginPos,result)) {
+      result.clear();
+      STOFF_DEBUG_MSG(("StarBitmap::readBitmap: can not read the result\n"));
+    }
+    else {
+      type="image/bm";
+#if DEBUG_WITH_FILES
+      static int bitmapNum=0;
+      std::stringstream s;
+      s << "Bitmap" << ++bitmapNum << ".bm";
+      libstoff::Debug::dumpFile(result, s.str().c_str());
+#endif
+    }
+    input->seek(actPos, librevenge::RVNG_SEEK_SET);
+  }
+  if (pos!=lastPos && bitmap.m_compression==0x1004453) {
     STOFF_DEBUG_MSG(("StarBitmap::readBitmap: find extra data\n"));
     ascFile.addDelimiter(pos, '|');
     ascFile.addPos(pos);
@@ -334,15 +365,18 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos)
     input->seek(lastPos, librevenge::RVNG_SEEK_SET);
   }
 #ifdef DEBUG_WITH_FILES
-  librevenge::RVNGBinaryData data;
-  if (!bitmap.getPPMData(data)) {
-    STOFF_DEBUG_MSG(("StarBitmap::readBitmap: can not convert a bitmap\n"));
-  }
-  else {
+  if (1) {
+    librevenge::RVNGBinaryData data;
     static int bitmapNum=0;
     std::stringstream s;
     s << "Bitmap" << ++bitmapNum << ".ppm";
-    libstoff::Debug::dumpFile(data, s.str().c_str());
+
+    data.clear();
+    if (!bitmap.getPPMData(data)) {
+      STOFF_DEBUG_MSG(("StarBitmap::readBitmap: can not convert a bitmap\n"));
+    }
+    else
+      libstoff::Debug::dumpFile(data, s.str().c_str());
   }
 #endif
   return true;
@@ -412,7 +446,7 @@ bool StarBitmap::readBitmapInformation(StarZone &zone, StarBitmapInternal::Bitma
 
 bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::Bitmap &bitmap, long lastPos)
 {
-  // bitmat2.cxx Bitmap::ImplReadDIBBits
+  // bitmap2.cxx Bitmap::ImplReadDIBBits
 
   uint32_t RGBMask[3]= {0,0,0};
   int RGBShift[3]= {0,0,0};
@@ -450,8 +484,8 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
     }
     if (bitmap.m_sizeImage) lastPos= input->tell() + long(bitmap.m_sizeImage);
     bool bit4=bitmap.m_compression==2;
-    bitmap.m_indexDataList.resize(size_t(bitmap.m_height*bitmap.m_width),0);
-    size_t wPos=0;
+    size_t wPos=0, lastWPos=size_t(bitmap.m_height*bitmap.m_width);
+    bitmap.m_indexDataList.resize(size_t(lastWPos),0);
     uint32_t x=0, y=0;
     while (true) {
       if (y>=bitmap.m_height) break;
@@ -460,26 +494,40 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
         int nBytes=(int) input->readULong(1);
         if (nBytes==0) { // new line
           ++y;
-          if (x<bitmap.m_width) wPos+=(bitmap.m_width-x);
           x=0;
+          wPos=size_t(y*bitmap.m_width);
+          continue;
         }
         if (nBytes==1) // end decoding
           break;
-        if (bit4) nBytes=(nBytes+1)/2;
-        if (input->tell()+nBytes > lastPos) {
+        if (nBytes==2) {
+          x = uint32_t(x+input->readULong(1));
+          y = uint32_t(y+input->readULong(1));
+          if (x>=bitmap.m_width) {
+            STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: x seems bad\n"));
+          }
+          if (y>=bitmap.m_height) {
+            STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: y seems bad\n"));
+            break;
+          }
+          wPos=size_t(y*bitmap.m_width+x);
+          continue;
+        }
+        int nRead=(bit4 ? (nBytes+1)/2 : nBytes);
+        if (input->tell()+nRead> lastPos) {
           STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: can not read some lre count(1)\n"));
           return false;
         }
         for (int i=0; i<nBytes; ++i) {
           int val=(int) input->readULong(1);
           if (bit4) {
-            if (++x<=bitmap.m_width) bitmap.m_indexDataList[wPos++]=(val>>4)&0xf;
-            if (++x<=bitmap.m_width) bitmap.m_indexDataList[wPos++]=val&0xf;
+            if (++x<=bitmap.m_width && wPos<lastWPos) bitmap.m_indexDataList[wPos++]=(val>>4)&0xf;
+            if (++i<nBytes && ++x<=bitmap.m_width && wPos<lastWPos) bitmap.m_indexDataList[wPos++]=val&0xf;
           }
-          else if (++x<=bitmap.m_width)
+          else if (++x<=bitmap.m_width && wPos<lastWPos)
             bitmap.m_indexDataList[wPos++]=val;
         }
-        if (!bit4 && (nBytes&1)) // checkme
+        if (nRead&1)
           input->seek(1, librevenge::RVNG_SEEK_CUR);
         continue;
       }
@@ -489,16 +537,16 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
       }
       int val=(int) input->readULong(1);
       if (bit4) {
-        for (int i=0; i<(nCount+1)/2; ++i) {
-          if (++x>bitmap.m_width) break;
+        for (int i=0; i<nCount; ++i) {
+          if (++x>bitmap.m_width||wPos>=lastWPos) break;
           bitmap.m_indexDataList[wPos++]=(val>>4)&0xf;
-          if (++x>bitmap.m_width) break;
+          if (++i>=nCount || ++x>bitmap.m_width||wPos>=lastWPos) break;
           bitmap.m_indexDataList[wPos++]=val&0xf;
         }
       }
       else {
         for (int i=0; i<nCount; ++i) {
-          if (++x>bitmap.m_width) break;
+          if (++x>bitmap.m_width||wPos>=lastWPos) break;
           bitmap.m_indexDataList[wPos++]=val;
         }
       }
