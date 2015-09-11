@@ -151,6 +151,18 @@ SOURCE=..\..\src\lib\StarDocument.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarEncodingChinese.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarEncodingJapanese.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarEncoding.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarFileManager.cxx
 # End Source File
 # Begin Source File
@@ -252,6 +264,18 @@ SOURCE=..\..\src\lib\StarBitmap.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarDocument.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarEncodingChinese.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarEncodingJapanese.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarEncoding.hxx
 # End Source File
 # Begin Source File
 

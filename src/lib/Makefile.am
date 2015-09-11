@@ -49,6 +49,12 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarBitmap.hxx				\
 	StarDocument.cxx			\
 	StarDocument.hxx			\
+	StarEncodingChinese.cxx			\
+	StarEncodingChinese.hxx			\
+	StarEncodingJapanese.cxx		\
+	StarEncodingJapanese.hxx		\
+	StarEncoding.cxx			\
+	StarEncoding.hxx			\
 	StarFileManager.cxx			\
 	StarFileManager.hxx			\
 	StarItemPool.cxx			\
