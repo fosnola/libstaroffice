@@ -901,21 +901,8 @@ bool StarItemPool::readItem(StarZone &zone, bool isDirect, long endPos)
   }
   bool pItem=false;
   if (!isDirect) {
-    if (nWhich) {
-      uint16_t nSurrog;
-      *input>>nSurrog;
-      if (nSurrog==0xffff) {
-        f << "direct,";
-      }
-      else if (nSurrog==0xfff0) {
-        f << "null,";
-        nWhich=0;
-      }
-      else {
-        f << "surrog=" << nSurrog << ",";
-        pItem=true;
-      }
-    }
+    if (nWhich)
+      pItem=loadSurrogate(zone, nWhich, f);
     else
       input->seek(2, librevenge::RVNG_SEEK_CUR);
   }
@@ -952,6 +939,25 @@ bool StarItemPool::readItem(StarZone &zone, bool isDirect, long endPos)
   }
   ascii.addPos(pos);
   ascii.addNote(f.str().c_str());
+  return true;
+}
+
+bool StarItemPool::loadSurrogate(StarZone &zone, uint16_t &nWhich, libstoff::DebugStream &f)
+{
+  // polio.cxx SfxItemPool::LoadSurrogate
+  uint16_t nSurrog;
+  *zone.input()>>nSurrog;
+  if (nSurrog==0xffff) {
+    f << "direct,";
+    return false;
+  }
+  if (nSurrog==0xfff0) {
+    f << "null,";
+    nWhich=0;
+    return false;
+  }
+
+  f << "surrog=" << nSurrog << ",";
   return true;
 }
 

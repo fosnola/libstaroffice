@@ -133,7 +133,7 @@ public:
   // sc record
   //
 
-  //! try to open a SW record: size (32 bytes) + size bytes
+  //! try to open a SC record: size (32 bytes) + size bytes
   bool openSCRecord();
   //! try to close a record
   bool closeSCRecord(std::string const &debugName)

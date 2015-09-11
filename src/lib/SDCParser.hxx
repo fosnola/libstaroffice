@@ -48,6 +48,8 @@
 
 namespace SDCParserInternal
 {
+class Table;
+
 struct State;
 }
 
@@ -68,6 +70,8 @@ public:
   //! destructor
   virtual ~SDCParser();
 
+  //! try to read a chart zone: StarCalcDocument .sdc
+  bool readCalcDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &document);
   //! try to read a chart zone: StarChartDocument .sds
   bool readChartDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &document);
   //! try to read a spreadshet style zone: SfxStyleSheets
@@ -83,6 +87,34 @@ protected:
   bool readSCHAttributes(StarZone &zone, StarDocument &doc);
   //! try to read the memchart data
   bool readSCHMemChart(StarZone &zone);
+
+  //! try to read a SCTable
+  bool readSCTable(StarZone &zone, SDCParserInternal::Table &table, StarDocument &doc);
+  //! try to read a SCColumn
+  bool readSCColumn(StarZone &zone, SDCParserInternal::Table &table, StarDocument &doc, int column, long lastPos);
+  //! try to read a list of data
+  bool readSCData(StarZone &zone, SDCParserInternal::Table &table, StarDocument &doc, int column);
+
+  //! try to read a change trak
+  bool readSCChangeTrack(StarZone &zone, int version, long lastPos);
+  //! try to read a dbData
+  bool readSCDBData(StarZone &zone, int version, long lastPos);
+  //! try to read a dbPivot
+  bool readSCDBPivot(StarZone &zone, int version, long lastPos);
+  //! try to read a formula
+  bool readSCFormula(StarZone &zone, STOFFVec2i const &pos, int version, long lastPos);
+  //! try to read a formula(v3)
+  bool readSCFormula3(StarZone &zone, STOFFVec2i const &pos, int version, long lastPos);
+  //! try to read a matrix
+  bool readSCMatrix(StarZone &zone, int version, long lastPos);
+  //! try to read a query param
+  bool readSCQueryParam(StarZone &zone, int version, long lastPos);
+  //! try to read a token in a formula
+  bool readSCTokenInFormula(StarZone &zone, STOFFVec2i const &pos, int version, long lastPos, libstoff::DebugStream &f);
+  //! try to read a token in a formula (v3)
+  bool readSCTokenInFormula3(StarZone &zone, STOFFVec2i const &pos, bool &endData, long lastPos, libstoff::DebugStream &f);
+  //! try to read a SCOutlineArray
+  bool readSCOutlineArray(StarZone &zone);
 
   //! try to read a SdrLayer zone: "DrLy'
   bool readSdrLayer(StarZone &zone);

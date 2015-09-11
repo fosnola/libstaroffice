@@ -55,6 +55,215 @@
 namespace SDCParserInternal
 {
 ////////////////////////////////////////
+//! Internal: a structure use to read ScMultiRecord zone of a SDCParser
+struct ScMultiRecord {
+  //! constructor
+  ScMultiRecord(StarZone &zone) : m_zone(zone), m_zoneOpened(false), m_actualRecord(0), m_numRecord(0),
+    m_startPos(0), m_endPos(0), m_endContentPos(0), m_endRecordPos(0), m_offsetList(), m_extra("")
+  {
+  }
+  //! destructor
+  ~ScMultiRecord()
+  {
+    if (m_zoneOpened)
+      close("Entries(BADScMultiRecord):###");
+  }
+  //! try to open a zone
+  bool open()
+  {
+    if (m_zoneOpened) {
+      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord: oops a record has been opened\n"));
+      return false;
+    }
+    m_actualRecord=m_numRecord=0;
+    m_startPos=m_endPos=m_endContentPos=m_endRecordPos=0;
+    m_offsetList.clear();
+
+    STOFFInputStreamPtr input=m_zone.input();
+    long pos=input->tell();
+    long lastPos=m_zone.getRecordLevel() ? m_zone.getRecordLastPosition() : input->size();
+    if (!m_zone.openSCRecord()) {
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+      return false;
+    }
+    m_zoneOpened=true;
+    m_startPos=input->tell();
+    m_endPos=m_zone.getRecordLastPosition();
+    // sc_rechead.cxx ScMultipleReadHeader::ScMultipleReadHeader
+    if (m_endPos+6>lastPos) {
+      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::open: oops the zone seems too short\n"));
+      m_extra="###zoneShort,";
+      return false;
+    }
+    input->seek(m_endPos, librevenge::RVNG_SEEK_SET);
+    uint16_t id;
+    uint32_t tableLen;
+    *input>>id >> tableLen;
+    m_endRecordPos=input->tell()+long(tableLen);
+    if (id!=0x4200 || m_endRecordPos > lastPos) {
+      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::open: oops can not find the size data\n"));
+      m_extra="###zoneShort,";
+      m_endRecordPos=0;
+      return false;
+    }
+    m_numRecord=tableLen/4;
+    for (uint32_t i=0; i<m_numRecord; ++i)
+      m_offsetList.push_back((uint32_t) input->readULong(4));
+    input->seek(m_startPos, librevenge::RVNG_SEEK_SET);
+    return true;
+  }
+  //! try to close a zone
+  void close(std::string const &wh)
+  {
+    if (!m_zoneOpened) {
+      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::close: can not find any opened zone\n"));
+      return;
+    }
+    if (m_endContentPos>0) {
+      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::close: argh, the current content is not closed, let close it\n"));
+      closeContent(wh);
+    }
+
+    m_zoneOpened=false;
+    STOFFInputStreamPtr input=m_zone.input();
+    if (input->tell()<m_endPos && input->tell()+4>=m_endPos) { // small diff is possible
+      m_zone.ascii().addDelimiter(input->tell(),'|');
+      input->seek(m_zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+    }
+    else if (input->tell()==m_endPos)
+      input->seek(m_zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+    m_zone.closeSCRecord(wh);
+    if (m_endRecordPos>0)
+      input->seek(m_endRecordPos, librevenge::RVNG_SEEK_SET);
+  }
+  //! returns true if a content is opened
+  bool isContentOpened() const
+  {
+    return m_endContentPos>0;
+  }
+  //! try to go to the new content positon
+  bool openContent(std::string const &wh)
+  {
+    if (m_endContentPos>0) {
+      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::openContent: argh, the current content is not closed, let close it\n"));
+      closeContent(wh);
+    }
+    STOFFInputStreamPtr input=m_zone.input();
+    if (m_actualRecord >= m_numRecord || m_actualRecord >= uint32_t(m_offsetList.size()) ||
+        input->tell()+long(m_offsetList[size_t(m_actualRecord)])>m_endPos)
+      return false;
+    // ScMultipleReadHeader::StartEntry
+    m_endContentPos=input->tell()+long(m_offsetList[size_t(m_actualRecord)]);
+    ++m_actualRecord;
+    return true;
+  }
+  //! try to go to the new content positon
+  bool closeContent(std::string const &wh)
+  {
+    if (m_endContentPos<=0) {
+      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::closeContent: no content opened\n"));
+      return false;
+    }
+    STOFFInputStreamPtr input=m_zone.input();
+    if (input->tell()<m_endContentPos && input->tell()+4>=m_endContentPos) { // small diff is possible ?
+      m_zone.ascii().addDelimiter(input->tell(),'|');
+      input->seek(m_endContentPos, librevenge::RVNG_SEEK_SET);
+    }
+    else if (input->tell()!=m_endContentPos) {
+      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::getContent: find extra data\n"));
+      m_zone.ascii().addPos(input->tell());
+      libstoff::DebugStream f;
+      f << wh << ":###extra";
+      m_zone.ascii().addNote(f.str().c_str());
+      input->seek(m_endContentPos, librevenge::RVNG_SEEK_SET);
+    }
+    m_endContentPos=0;
+    return true;
+  }
+  //! returns the last content position
+  long getContentLastPosition() const
+  {
+    if (m_endContentPos<=0) {
+      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::getContentLastPosition: no content opened\n"));
+      return m_endPos;
+    }
+    return m_endContentPos;
+  }
+
+  //! basic operator<< ; print header data
+  friend std::ostream &operator<<(std::ostream &o, ScMultiRecord const &r)
+  {
+    if (!r.m_zoneOpened) {
+      o << r.m_extra;
+      return o;
+    }
+    if (r.m_numRecord) o << "num[record]=" << r.m_numRecord << ",";
+    if (!r.m_offsetList.empty()) {
+      o << "offset=[";
+      for (size_t i=0; i<r.m_offsetList.size(); ++i) o << r.m_offsetList[i] << ",";
+      o << "],";
+    }
+    o << r.m_extra;
+    return o;
+  }
+protected:
+  //! the main zone
+  StarZone &m_zone;
+  //! true if a SfxRecord has been opened
+  bool m_zoneOpened;
+  //! the actual record
+  uint32_t m_actualRecord;
+  //! the number of record
+  uint32_t m_numRecord;
+  //! the start of data position
+  long m_startPos;
+  //! the end of data position
+  long m_endPos;
+  //! the end of the content position
+  long m_endContentPos;
+  //! the end of the record position
+  long m_endRecordPos;
+  //! the list of offset
+  std::vector<uint32_t> m_offsetList;
+  //! extra data
+  std::string m_extra;
+private:
+  ScMultiRecord(ScMultiRecord const &orig);
+  ScMultiRecord &operator=(ScMultiRecord const &orig);
+};
+
+////////////////////////////////////////
+//! Internal: a table of a SDCParser
+class Table
+{
+public:
+  //! constructor
+  Table(int loadingVers, int maxRow) : m_loadingVersion(loadingVers), m_maxRow(maxRow)
+  {
+  }
+  //! returns the load version
+  int getLoadingVersion() const
+  {
+    return m_loadingVersion;
+  }
+  //! returns the maximum number of columns
+  static int getMaxCols()
+  {
+    return 255;
+  }
+  //! returns the maximum number of row
+  int getMaxRows() const
+  {
+    return m_maxRow;
+  }
+
+  //! the loading version
+  int m_loadingVersion;
+  //! the maximum number of row
+  int m_maxRow;
+};
+
+////////////////////////////////////////
 //! Internal: the state of a SDCParser
 struct State {
   //! constructor
@@ -85,6 +294,828 @@ SDCParser::~SDCParser()
 ////////////////////////////////////////////////////////////
 // main zone
 ////////////////////////////////////////////////////////////
+bool SDCParser::readCalcDocument(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
+{
+  StarZone zone(input, name, "SWChartDocument");
+  libstoff::DebugFile &ascFile=zone.ascii();
+  ascFile.open(name);
+
+  libstoff::DebugStream f;
+  f << "Entries(SCCalcDocument):";
+  // sch_docsh.cxx: ScDocShell::Load then sc_documen2.cxx ScDocument::Load
+  uint16_t nId;
+  *input>>nId;
+  if ((nId!=0x4220 && nId!=0x422d)||!zone.openSCRecord()) {
+    STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read the document id\n"));
+    f << "###";
+    ascFile.addPos(0);
+    ascFile.addNote(f.str().c_str());
+    return true;
+  }
+  ascFile.addPos(0);
+  ascFile.addNote(f.str().c_str());
+  long lastPos=zone.getRecordLastPosition();
+  int version=0, maxRow=8191;
+  while (!input->isEnd() && input->tell()<lastPos) {
+    long pos=input->tell();
+    uint16_t subId;
+    *input>>subId;
+    f.str("");
+    f << "SCCalcDocument[" << std::hex << subId << std::dec << "]:";
+    bool ok=false;
+    switch (subId) {
+    case 0x4222: {
+      f << "table,";
+      SDCParserInternal::Table table(version, maxRow);
+      ok=readSCTable(zone, table, document);
+      break;
+    }
+    case 0x4224: {
+      f << "rangeName,";
+      // sc_rangenam.cxx ScRangeName::Load
+      SDCParserInternal::ScMultiRecord scRecord(zone);
+      ok=scRecord.open();
+      if (!ok) break;
+      uint16_t count, sharedMaxIndex, dummy;
+      if (version >= 3)
+        *input >> sharedMaxIndex >> count;
+      else
+        *input >> sharedMaxIndex >> dummy >> count;
+      f << "index[sharedMax]=" << sharedMaxIndex << ";";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      for (int i=0; i<int(count); ++i)  {
+        pos=input->tell();
+        f.str("");
+        f << "Entries(SCRange):";
+        if (!scRecord.openContent("SCCalcDocument")) {
+          f << "###";
+          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument:can not find some content\n"));
+          ascFile.addPos(pos);
+          ascFile.addNote(f.str().c_str());
+          break;
+        }
+        // sc_rangenam.cxx ScRangeData::ScRangeData
+        long endDataPos=scRecord.getContentLastPosition();
+        librevenge::RVNGString string;
+        if (!zone.readString(string)) {
+          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+          f << "###string";
+          ascFile.addPos(pos);
+          ascFile.addNote(f.str().c_str());
+          continue;
+        }
+        f << string.cstr() << ",";
+        if (version >= 3) {
+          uint32_t nPos;
+          uint16_t rangeType, index;
+          uint8_t nData;
+          *input >> nPos >> rangeType >> index >> nData;
+          int row=int(nPos&0xFFFF);
+          int col=int((nPos>>16)&0xFF);
+          int table=int((nPos>>24)&0xFF);
+          f << "pos=" << row << "x" << col;
+          if (table) f << "x" << table;
+          f << ",";
+          f << "range[type]=" << rangeType << ",";
+          f << "index=" << index << ",";
+          if (nData&0xf) input->seek((nData&0xf), librevenge::RVNG_SEEK_CUR);
+          if (!readSCFormula(zone, STOFFVec2i(row,col), version, endDataPos) || input->tell()>endDataPos)
+            f << "###";
+        }
+        else {
+          uint16_t row, col, table, tokLen, rangeType, index;
+          *input >> col >> row >> table >> rangeType >> index >> tokLen;
+          f << "pos=" << row << "x" << col;
+          if (table) f << "x" << table;
+          f << ",";
+          f << "range[type]=" << rangeType << ",";
+          f << "index=" << index << ",";
+          if (tokLen && (!readSCFormula3(zone, STOFFVec2i(row,col), version, endDataPos) || input->tell()>endDataPos))
+            f << "###";
+        }
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        scRecord.closeContent("SCCalcDocument");
+      }
+      scRecord.close("SCCalcDocument");
+      pos=input->tell();
+      break;
+    }
+    case 0x4225:
+    case 0x4226:
+    case 0x4227:
+    case 0x422e:
+    case 0x422f:
+    case 0x4230:
+    case 0x4231:
+    case 0x4234:
+    case 0x4239: {
+      std::string what(subId==0x4225 ? "dbCollect" : subId==0x4226 ? "dbPivot" :
+                       subId==0x4227 ? "chartCol" : subId==0x422e ? "ddeLinks" :
+                       subId==0x422f ? "areaLinks" : subId==0x4230 ? "condFormats" :
+                       subId==0x4231 ? "validation" : subId==0x4234 ? "detOp" : "dpCollection");
+      f << what << ",";
+      // sc_dbcolect.cxx ScDBCollection::Load and ...
+      SDCParserInternal::ScMultiRecord scRecord(zone);
+      ok=scRecord.open();
+      if (!ok) break;
+
+      long endDataPos=zone.getRecordLastPosition();
+      if (subId==0x4239 && input->readLong(4)!=6) {
+        f << "###version";
+        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument:find unknown version\n"));
+        input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
+        scRecord.close("SCCalcDocument");
+        break;
+      }
+      uint16_t count;
+      *input >> count;
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      bool isOk=true;
+      librevenge::RVNGString string;
+      for (int i=0; i<int(count); ++i)  {
+        pos=input->tell();
+        f.str("");
+        f << "SCCalcDocument:" << what << ",";
+        if (!scRecord.openContent("SCCalcDocument")) {
+          f << "###";
+          isOk=false;
+          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument:can not find some content\n"));
+          ascFile.addPos(pos);
+          ascFile.addNote(f.str().c_str());
+          break;
+        }
+        bool parsed=false, addDebugFile=false;
+        long endData=scRecord.getContentLastPosition();
+        switch (subId) {
+        case 0x4225:
+          parsed=readSCDBData(zone, version, endData);
+          break;
+        case 0x4226:
+          parsed=readSCDBPivot(zone, version, endData);
+          break;
+        case 0x4227: {
+          parsed=addDebugFile=true;
+          uint16_t nTab, nCol1, nRow1, nCol2, nRow2;
+          *input >> nTab >> nCol1 >> nRow1 >> nCol2 >> nRow2;
+          f << "dim=" << nCol1 << "x" << nRow1 << "<->" << nCol2 << "x" << nRow2 << "[" << nTab << "],";
+          if (!zone.readString(string) || input->tell()>endData) {
+            STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+            f << "###string";
+          }
+          else {
+            if (!string.empty()) f << string.cstr() << ",";
+            bool bColHeaders, bRowHeaders;
+            *input >> bColHeaders >> bRowHeaders;
+            if (bColHeaders) f << "col[headers],";
+            if (bRowHeaders) f << "row[headers],";
+          }
+          break;
+        }
+        case 0x422e: {
+          parsed=addDebugFile=true;
+          for (int j=0; j<3; ++j) {
+            if (!zone.readString(string) || input->tell()>endData) {
+              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+              f << "###string";
+              parsed=false;
+              break;
+            }
+            if (string.empty()) continue;
+            f << (j==0 ? "appl" : j==1 ? "topic" : "item") << "=" << string.cstr() << ",";
+          }
+          if (!parsed)
+            break;
+          bool hasValue;
+          *input>>hasValue;
+          if (hasValue && !readSCMatrix(zone, version, endData)) {
+            STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a matrix\n"));
+            f << "###matrix";
+            parsed=false;
+            break;
+          }
+          if (input->tell()>endData) f << "mode=" << input->readULong(1) << ",";
+          break;
+        }
+        case 0x422f: { // checkme
+          parsed=addDebugFile=true;
+          for (int j=0; j<3; ++j) {
+            if (!zone.readString(string) || input->tell()>endData) {
+              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+              f << "###string";
+              parsed=false;
+              break;
+            }
+            if (string.empty()) continue;
+            f << (j==0 ? "file" : j==1 ? "filter" : "source") << "=" << string.cstr() << ",";
+          }
+          if (!parsed)
+            break;
+          f << "range=" << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
+          if (input->tell()<endData) {
+            if (!zone.readString(string) || input->tell()>endData) {
+              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+              f << "###string";
+              parsed=false;
+              break;
+            }
+            else if (!string.empty())
+              f << "options=" << string.cstr() << ",";
+          }
+          break;
+        }
+        case 0x4230: {
+          addDebugFile=parsed=true;
+          // sc_conditio.cxx ScConditionalFormat::ScConditionalFormat
+          uint32_t key;
+          uint16_t entryCount;
+          *input >> key >> entryCount;
+          f << "key=" << key << ",";
+          if (!entryCount) break;
+          scRecord.closeContent("SCCalcDocument");
+          f << "entries=[";
+          for (int e=0; e<int(entryCount); ++e) {
+            f << "[";
+            if (!scRecord.openContent("SCCalcDocument")) {
+              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument:can not find some content\n"));
+              f << "###";
+              isOk=parsed=false;
+              break;
+            }
+            if (!zone.readString(string)) {
+              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument:can not read a string\n"));
+              isOk=parsed=false;
+              f << "###string,";
+              break;
+            }
+            f << "],";
+            scRecord.closeContent("SCCalcDocument");
+          }
+          f << "],";
+          break;
+        }
+        case 0x4231: {
+          addDebugFile=parsed=true;
+          // sc_validat.cxx
+          uint32_t key;
+          uint16_t mode;
+          bool showInput;
+          *input >> key >> mode >> showInput;
+          f << "key=" << key << ",";
+          f << "mode=" << mode << ",";
+          if (showInput) f << "show[input],";
+          for (int j=0; j<2; ++j) {
+            if (!zone.readString(string) || input->tell()>endData) {
+              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+              parsed=false;
+              f << "###string";
+              break;
+            }
+            if (string.empty()) continue;
+            f << (j==0 ? "title" : "message") << "=" << string.cstr() << ",";
+          }
+          if (!parsed) break;
+          bool showError;
+          *input >> showError;
+          if (showError) f << "show[error],";
+          for (int j=0; j<2; ++j) {
+            if (!zone.readString(string) || input->tell()>endData) {
+              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+              parsed=false;
+              f << "###string";
+              break;
+            }
+            if (string.empty()) continue;
+            f << (j==0 ? "error[title]" : "error[message]") << "=" << string.cstr() << ",";
+          }
+          if (!parsed) break;
+          f << "style[error]=" << input->readULong(2) << ",";
+          break;
+        }
+        case 0x4234: {
+          addDebugFile=parsed=true;
+          // sc_detdata.cxx
+          f << "range=" << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
+          f << "op=" << input->readULong(2) << ",";
+          break;
+        }
+        case 0x4239: {
+          addDebugFile=parsed=true;
+          // sc_dpobject.cxx ScDPObject::LoadNew
+          uint8_t dType;
+          *input >> dType;
+          switch (dType) {
+          case 0:
+            f << "range=" << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
+            parsed=readSCQueryParam(zone, version, endData);
+            break;
+          case 1:
+            for (int j=0; j<2; ++j) {
+              if (!zone.readString(string) || input->tell()>endData) {
+                STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+                parsed=false;
+                f << "###string";
+                break;
+              }
+              if (string.empty()) continue;
+              f << (j==0 ? "name" : "object") << "=" << string.cstr() << ",";
+            }
+            if (!parsed) break;
+            f << "type=" << input->readULong(2) << ",";
+            if (input->readULong(1)) f << "native,";
+            break;
+          case 2:
+            for (int j=0; j<5; ++j) {
+              if (!zone.readString(string) || input->tell()>endData) {
+                STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+                parsed=false;
+                f << "###string";
+                break;
+              }
+              if (string.empty()) continue;
+              static char const*(wh[])= {"serviceName","source","name","user","pass"};
+              f << wh[j] << "=" << string.cstr() << ",";
+            }
+            break;
+          default:
+            STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: unexpected sub type\n"));
+            f << "###subType=" << int(dType) << ",";
+            parsed=false;
+            break;
+          }
+          if (!parsed) break;
+          f << "out[range]=" << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
+          // ScDPSaveData::Load
+          uint32_t nDim;
+          *input >> nDim;
+          for (uint32_t j=0; j<nDim; ++j) {
+            f << "dim" << j << "=[";
+            if (!zone.readString(string) || input->tell()>endData) {
+              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+              parsed=false;
+              f << "###string";
+              break;
+            }
+            if (!string.empty()) f << string.cstr() << ",";
+            bool isDataLayout, dupFlag, subTotalDef;
+            uint16_t orientation, function, showEmptyMode, subTotalCount, extra;
+            int32_t hierarchy;
+            *input >> isDataLayout >> dupFlag >> orientation >> function >> hierarchy
+                   >> showEmptyMode >> subTotalDef >> subTotalCount;
+            if (isDataLayout) f << "isDataLayout,";
+            if (dupFlag) f << "dupFlag,";
+            if (orientation) f << "orientation=" << orientation << ",";
+            if (function) f << "function=" << function << ",";
+            if (hierarchy) f << "hierarchy=" << hierarchy << ",";
+            if (showEmptyMode) f << "showEmptyMode=" << showEmptyMode << ",";
+            if (subTotalDef) f << "subTotalDef,";
+            if (input->tell()+2*long(subTotalCount)>endData) {
+              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read function list\n"));
+              parsed=false;
+              f << "###totalFuncs";
+              break;
+            }
+            f << "funcs=[";
+            for (int k=0; k<int(subTotalCount); ++k) f << input->readULong(2) << ",";
+            f << "],";
+            *input >> extra;
+            if (extra) input->seek(extra, librevenge::RVNG_SEEK_CUR);
+            uint32_t nMember;
+            *input >> nMember;
+            for (uint32_t k=0; k<nMember; ++k) {
+              f << "member" << k << "[";
+              if (!zone.readString(string) || input->tell()>endData) {
+                STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+                parsed=false;
+                f << "###string";
+                break;
+              }
+              if (!string.empty()) f << string.cstr() << ",";
+              uint16_t visibleMode, showDetailMode;
+              *input >> visibleMode >> showDetailMode >> extra;
+              if (visibleMode) f << "visibleMode=" << visibleMode << ",";
+              if (showDetailMode) f << "showDetailMode=" << showDetailMode << ",";
+              if (extra) input->seek(extra, librevenge::RVNG_SEEK_CUR);
+              f << "],";
+            }
+            if (!parsed) break;
+            f << "],";
+          }
+          if (!parsed) break;
+          uint16_t colGrandMode, rowGrandMode, ignoreEmptyMode, repeatEmptyMode, extra;
+          *input >> colGrandMode >> rowGrandMode >> ignoreEmptyMode >> repeatEmptyMode >> extra;
+          f << "grandMode=" << colGrandMode << "x" << rowGrandMode << ",";
+          if (ignoreEmptyMode) f << "ignoreEmptyMode=" << ignoreEmptyMode << ",";
+          if (repeatEmptyMode) f << "repeatEmptyMode=" << repeatEmptyMode << ",";
+          if (extra) input->seek(extra, librevenge::RVNG_SEEK_CUR);
+          //
+          if (input->tell()<endData) {
+            for (int j=0; j<2; ++j) {
+              if (!zone.readString(string) || input->tell()>endData) {
+                STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+                parsed=false;
+                f << "###string";
+                break;
+              }
+              if (string.empty()) continue;
+              f << (j==0 ? "tableName" : "tableTab") << "=" << string.cstr() << ",";
+            }
+          }
+          break;
+        }
+        default:
+          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: unexpected type\n"));
+          f << "###type,";
+          addDebugFile=parsed=true;
+          input->seek(endData, librevenge::RVNG_SEEK_SET);
+          break;
+        }
+        if (!parsed) {
+          addDebugFile=true;
+          f << "###";
+          input->seek(endData, librevenge::RVNG_SEEK_SET);
+        }
+        if (addDebugFile) {
+          ascFile.addPos(pos);
+          ascFile.addNote(f.str().c_str());
+        }
+        if (scRecord.isContentOpened()) scRecord.closeContent("SCCalcDocument");
+        if (!isOk) break;
+      }
+      if (isOk && subId==0x4225 && input->tell()<endDataPos) {
+        pos=input->tell();
+        f.str("");
+        f << "SCCalcDocument:dbCollect, nEntry=" << input->readULong(2) << ",";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+      }
+      scRecord.close("SCCalcDocument");
+      pos=input->tell();
+      break;
+    }
+    default:
+      break;
+    }
+    if (ok) {
+      if (pos!=input->tell()) {
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+      }
+      continue;
+    }
+    input->seek(pos+2, librevenge::RVNG_SEEK_SET);
+    if (!zone.openSCRecord()) {
+      STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not open the zone record\n"));
+      f << "###";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      break;
+    }
+    long endPos=zone.getRecordLastPosition();
+    uint16_t vers;
+    librevenge::RVNGString string;
+    switch (subId) {
+    case 0x4221: {
+      f << "docFlags,";
+      *input>>vers;
+      version=(int) vers;
+      f << "vers=" << vers << ",";
+      if (!zone.readString(string)) {
+        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+        f << "###string";
+        break;
+      }
+      else if (!string.empty())
+        f << "pageStyle=" << string.cstr() << ",";
+      f << "protected=" << input->readULong(1) << ",";
+      if (!zone.readString(string)) {
+        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+        f << "###string";
+        break;
+      }
+      else if (!string.empty())
+        f << "passwd=" << string.cstr() << ",";
+      if (input->tell()<endPos) f << "language=" << input->readULong(2) << ",";
+      if (input->tell()<endPos) f << "autoCalc=" << input->readULong(1) << ",";
+      if (input->tell()<endPos) f << "visibleTab=" << input->readULong(2) << ",";
+      if (input->tell()<endPos) {
+        *input>>vers;
+        version=(int) vers;
+        f << "vers=" << vers << ",";
+      }
+      if (input->tell()<endPos) {
+        uint16_t nMaxRow;
+        *input>>nMaxRow;
+        maxRow=(int) nMaxRow;
+        if (nMaxRow!=8191) f << "maxRow=" << nMaxRow << ",";
+      }
+      break;
+    }
+    case 0x4223: {
+      // sc_documen9.cxx ScDocument::LoadDrawLayer, sc_drwlayer.cxx ScDrawLayer::Load
+      f << "drawing,";
+      while (input->tell()<endPos) {
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+
+        pos=input->tell();
+        *input >> nId;
+        f.str("");
+        f << "SCCalcDocument[drawing-" << std::hex << nId << std::dec << "]:";
+        if (!zone.openSCRecord()) {
+          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not open a record\n"));
+          f << "###record";
+          break;
+        }
+        switch (nId) {
+        case 0x4260: {
+          f << "pool,";
+          shared_ptr<StarItemPool> pool=document.getNewItemPool(StarItemPool::T_XOutdevPool);
+          pool->addSecondaryPool(document.getNewItemPool(StarItemPool::T_EditEnginePool));
+          if (!pool->read(zone))
+            input->seek(pos, librevenge::RVNG_SEEK_SET);
+          break;
+        }
+        case 0x4261:
+          f << "sdrModel,";
+          if (!readSdrModel(zone,document))
+            input->seek(pos, librevenge::RVNG_SEEK_SET);
+          break;
+        default:
+          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: find unexpected type\n"));
+          f << "###unknown";
+          input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+          break;
+        }
+        zone.closeSCRecord("SCCalcDocument");
+      }
+      break;
+    }
+    case 0x4228: {
+      f << "numFormats,";
+      SWFormatManager formatManager;
+      if (!formatManager.readNumberFormatter(zone))
+        f << "###";
+      break;
+    }
+    case 0x4229: {
+      f << "docOptions,vers=" << version << ",";
+      // sc_docoptio.cxx void ScDocOptions::Load
+      bool bIsIgnoreCase, bIsIter=false;
+      uint16_t nIterCount, nPrecStandardFormat, nDay, nMonth, nYear;
+      double fIterEps;
+      *input >> bIsIgnoreCase;
+      if (version>=2) {
+        uint8_t val;
+        *input >> val;
+        if (val!=0 && val!=1)
+          input->seek(-1, librevenge::RVNG_SEEK_CUR);
+        else
+          bIsIter=(val!=0);
+      }
+      *input >> nIterCount;
+      *input >> fIterEps >> nPrecStandardFormat >> nDay >> nMonth >> nYear;
+      if (bIsIgnoreCase) f << "ignore[case],";
+      if (bIsIter) f << "isIter,";
+      if (nIterCount) f << "iterCount=" << nIterCount << ",";
+      if (nPrecStandardFormat) f << "precStandartFormat=" << nPrecStandardFormat << ",";
+      if (fIterEps<0||fIterEps>0) f << "iter[eps]=" << fIterEps << ",";
+      f << "date=" << nMonth << "/" << nDay << "/" << nYear << ",";
+      if (input->tell()+1==endPos)
+        f << "unkn=" << input->readULong(1) << ",";
+      if (input->tell()<endPos)
+        f << "tabs[distance]=" << input->readULong(2) << ",";
+      if (input->tell()<endPos)
+        f << "calc[asShown]=" << input->readULong(1) << ",";
+      if (input->tell()<endPos)
+        f << "match[wholeCell]=" << input->readULong(1) << ",";
+      if (input->tell()<endPos)
+        f << "autoSpell=" << input->readULong(1) << ",";
+      if (input->tell()<endPos)
+        f << "lookUpColRowNames=" << input->readULong(1) << ",";
+      if (input->tell()<endPos) {
+        uint16_t nYear2000;
+        *input >> nYear2000;
+        if (input->tell()<endPos)
+          *input >> nYear2000;
+        else
+          nYear2000 += 1901;
+        f << "year[2000]=" << nYear2000 << ",";
+      }
+      break;
+    }
+    case 0x422a: {
+      f << "viewOptions,";
+      // sc_viewopti.cxx operator>>(... ScViewOptions)
+      for (int i=0; i<=9; ++i) {
+        bool val;
+        *input >> val;
+        if (val) f << "opt" << i << ",";
+      }
+      for (int i=0; i<3; ++i) {
+        uint8_t type;
+        *input >> type;
+        if (type) f << "type" << i << "=" << int(type) << ",";
+      }
+      STOFFColor col;
+      if (!input->readColor(col)) {
+        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a color\n"));
+        f << "###color";
+        break;
+      }
+      f << "col=" << col << ",";
+      if (!zone.readString(string)) {
+        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+        f << "###string";
+        break;
+      }
+      else if (!string.empty())
+        f << "name=" << string.cstr() << ",";
+      if (input->tell()<endPos)
+        f << "opt[helplines]=" << input->readULong(1) << ",";
+      if (input->tell()<endPos) {
+        // ScGridOptions operator >>
+        uint32_t drawX, drawY, divisionX, divisionY, snapX, snapY;
+        *input >> drawX >> drawY >> divisionX >> divisionY >> snapX >> snapY;
+        f << "grid[draw]=" << drawX << "x" << drawY << ",";
+        f << "grid[division]=" << divisionX << "x" << divisionY << ",";
+        f << "grid[snap]=" << snapX << "x" << snapY << ",";
+        bool useSnap, synchronize, visibleGrid, equalGrid;
+        *input >> useSnap >> synchronize >> visibleGrid >> equalGrid;
+        if (useSnap) f << "grid[useSnap],";
+        if (synchronize) f << "grid[synchronize],";
+        if (visibleGrid) f << "grid[visible],";
+        if (equalGrid) f << "grid[equal],";
+      }
+      if (input->tell()<endPos)
+        f << "hideAutoSpell=" << input->readULong(1) << ",";
+      if (input->tell()<endPos)
+        f << "opt[anchor]=" << input->readULong(1) << ",";
+      if (input->tell()<endPos)
+        f << "opt[pageBreak]=" << input->readULong(1) << ",";
+      if (input->tell()<endPos)
+        f << "opt[solidHandles]=" << input->readULong(1) << ",";
+      if (input->tell()<endPos)
+        f << "opt[clipMarks]=" << input->readULong(1) << ",";
+      if (input->tell()<endPos)
+        f << "opt[bigHandles]=" << input->readULong(1) << ",";
+      break;
+    }
+    case 0x422b: {
+      f << "printer,";
+      StarFileManager fileManager;
+      if (!fileManager.readJobSetUp(zone)) break;
+      break;
+    }
+    case 0x422c:
+      f << "charset,";
+      input->seek(1, librevenge::RVNG_SEEK_CUR); // GUI, dummy
+      f << "set=" << input->readULong(1) << ",";
+      break;
+    case 0x4232:
+    case 0x4233: {
+      f << (subId==4232 ? "colNameRange" : "rowNameRange") << ",";
+      // sc_rangelst.cxx ScRangePairList::Load(
+      uint32_t n;
+      *input >> n;
+      if (!n) break;
+      f << "ranges=[";
+      if (version<0x12) {
+        if (input->tell()+8*long(n) > endPos) {
+          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read some ranges\n"));
+          f << "###ranges";
+          break;
+        }
+        for (uint32_t i=0; i<n; ++i)
+          f << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
+      }
+      else {
+        if (input->tell()+16*long(n) > endPos) {
+          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read some ranges\n"));
+          f << "###ranges";
+          break;
+        }
+        for (uint32_t i=0; i<n; ++i)
+          f << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ":"
+            << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
+      }
+      f << "],";
+      break;
+    }
+    case 0x4235: {
+      f << "consolidateParam,";
+      uint8_t funct;
+      uint16_t nCol, nRow, nTab, nCount;
+      bool byCol, byRow, byReference;
+      *input >> nCol >> nRow >> nTab >> byCol >> byRow >> byReference >> funct >> nCount;
+      f << "cell=" << nCol << "x" << nRow << "x" << nTab << ",";
+      if (byCol) f << "byCol,";
+      if (byRow) f << "byRow,";
+      if (byReference) f << "byReference,";
+      f << "funct=" << funct << ",";
+      if (!nCount) break;
+      if (input->tell()+10*long(nCount) > endPos) {
+        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read some area\n"));
+        f << "###area";
+        break;
+      }
+      for (int i=0; i<int(nCount); ++i) {
+        uint16_t nCol2, nRow2;
+        *input >> nTab >> nCol >> nRow >> nCol2 >> nRow2;
+        f << nCol << "x" << nRow << "<->" << nCol2 << "x" << nRow2 << "[" << nTab << "],";
+      }
+      break;
+    }
+    case 0x4236: {
+      f << "changeTrack,";
+      uint16_t loadVers;
+      *input >> loadVers;
+      f << "load[version]=" << loadVers << ",";
+      if (loadVers&0xff00) {
+        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: unknown version\n"));
+        f << "###version";
+        break;
+      }
+      // sc_chgtrack.cxx ScChangeTrack::Load
+      if (!readSCChangeTrack(zone,int(loadVers),endPos))
+        f << "###";
+      break;
+    }
+    case 0x4237: {
+      f << "changeViewSetting,";
+      // sc_chgviset.cxx ScChangeViewSettings::Load
+      bool bShowIt, bIsDate, bIsAuthor, bEveryoneButMe, bIsRange;
+      uint8_t dateMode;
+      uint32_t date1, time1, date2, time2;
+      *input >> bShowIt >> bIsDate >> dateMode >> date1 >> time1 >> date2 >> time2 >> bIsAuthor >> bEveryoneButMe;
+      if (bShowIt) f << "show,";
+      if (bIsDate) f << "isDate,";
+      f << "mode[date]=" << int(dateMode) << ",";
+      f << "firstDate=" << date1 << ",";
+      f << "firstTime=" << time1 << ",";
+      f << "lastDate=" << date2 << ",";
+      f << "lastTime=" << time2 << ",";
+      if (bIsAuthor) f << "isAuthor,";
+      if (bEveryoneButMe) f << "everyoneButMe,";
+      if (!zone.readString(string)) {
+        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+        f << "###string";
+        break;
+      }
+      else if (!string.empty())
+        f << "author=" << string.cstr() << ",";
+      *input >> bIsRange;
+      if (bIsRange) f << "isRange,";
+      if (!zone.openSCRecord()) {
+        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not open the range list record\n"));
+        f << "###";
+        break;
+      }
+      uint32_t nRange;
+      *input >> nRange;
+      if (input->tell()+8*long(nRange)<=zone.getRecordLastPosition()) {
+        f << "ranges=[";
+        for (uint32_t j=0; j<nRange; ++j)
+          f << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
+        f << "],";
+      }
+      else {
+        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: bad num rangen"));
+        f << "###nRange=" << nRange << ",";
+      }
+      zone.closeSCRecord("SCCalcDocument");
+      if (input->tell()<lastPos) {
+        bool bShowAccepted, bShowRejected;
+        *input >> bShowAccepted >> bShowRejected;
+        if (bShowAccepted) f << "show[accepted],";
+        if (bShowRejected) f << "show[rejected],";
+      }
+      if (input->tell()<lastPos) {
+        bool isComment;
+        *input >> isComment;
+        if (isComment) f << "isComment,";
+      }
+      break;
+    }
+    case 0x4238:
+      f << "linkUp[mode]=" << input->readULong(1) << ",";
+      break;
+    default:
+      f << "##";
+      input->seek(endPos, librevenge::RVNG_SEEK_SET);
+    }
+    if (pos!=endPos) {
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+    }
+    zone.closeSCRecord("SCCalcDocument");
+  }
+  zone.closeSCRecord("SCCalcDocument");
+  return true;
+}
+
 bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
 {
   StarZone zone(input, name, "SWChartDocument");
@@ -312,6 +1343,1464 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
 // Low level
 //
 ////////////////////////////////////////////////////////////
+bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, StarDocument &doc)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+
+  // sc_table2.cxx ScTable::Load
+  if (!zone.openSCRecord()) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  long lastPos=zone.getRecordLastPosition();
+  f << "Entries(SCTable)[" << zone.getRecordLevel() << "]:";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  librevenge::RVNGString string;
+  while (input->tell()<lastPos) {
+    pos=input->tell();
+    uint16_t id;
+    *input>>id;
+    f.str("");
+    f << "SCTable[" << std::hex << id << std::dec << "]:";
+    if (id==0x4240) {
+      SDCParserInternal::ScMultiRecord scRecord(zone);
+      f << "columns,";
+      if (!scRecord.open()) {
+        input->seek(pos,librevenge::RVNG_SEEK_SET);
+        STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not find the column header \n"));
+        f << "###";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        break;
+      }
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      int nCol=0;
+      long endDataPos=zone.getRecordLastPosition();
+      while (input->tell()<endDataPos) {
+        if (table.getLoadingVersion()>=6) {
+          pos=input->tell();
+          nCol=(int) input->readULong(1);
+          f.str("");
+          f << "SCTable:C" << nCol << ",";
+          ascFile.addPos(pos);
+          ascFile.addNote(f.str().c_str());
+        }
+        else if (nCol>table.getMaxCols())
+          break;
+        pos=input->tell();
+        if (!scRecord.openContent("SCTable")) {
+          STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not open a column \n"));
+          ascFile.addPos(pos);
+          ascFile.addNote("SCTable-C###");
+          break;
+        }
+        if (!readSCColumn(zone,table,doc, nCol, scRecord.getContentLastPosition())) {
+          ascFile.addPos(pos);
+          ascFile.addNote("SCTable-C###");
+          input->seek(scRecord.getContentLastPosition(), librevenge::RVNG_SEEK_SET);
+        }
+        scRecord.closeContent("SCTable");
+        ++nCol;
+      }
+      scRecord.close("SCTable");
+      continue;
+    }
+    if (!zone.openSCRecord()) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not open the zone record\n"));
+      f << "###";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      break;
+    }
+    long endDataPos=zone.getRecordLastPosition();
+    switch (id) {
+    case 0x4241: {
+      f << "dim,";
+      f << "col[width]=[";
+      uint16_t rep;
+      bool ok=true;
+      for (int i=0; i<=table.getMaxCols();) {
+        uint16_t val;
+        *input>>rep >> val;
+        if (input->tell()>endDataPos) {
+          ok=false;
+          break;
+        }
+        if (rep>1)
+          f << val << "x" << rep << ",";
+        else if (rep==1)
+          f << val << ",";
+        i+=int(rep);
+      }
+      f << "],col[flag]=[";
+      for (int i=0; i<=table.getMaxCols();) {
+        uint8_t flags;
+        *input>>rep >> flags;
+        if (input->tell()>endDataPos) {
+          ok=false;
+          break;
+        }
+        if (rep>1)
+          f << int(flags) << "x" << (rep+1) << ",";
+        else if (rep)
+          f << int(flags) << ",";
+        i+=int(rep);
+      }
+      f << "],row[height]=[";
+      for (int i=0; i<=table.getMaxRows();) {
+        uint16_t val;
+        *input>>rep >> val;
+        if (input->tell()>endDataPos) {
+          ok=false;
+          break;
+        }
+        if (rep>1)
+          f << val << "x" << (rep+1) << ",";
+        else if (rep==1)
+          f << val << ",";
+        i+=int(rep);
+      }
+      f << "],row[flag]=[";
+      for (int i=0; i<=table.getMaxRows();) {
+        uint8_t flags;
+        *input>>rep >> flags;
+        if (input->tell()>endDataPos) {
+          ok=false;
+          break;
+        }
+        if (rep>1)
+          f << int(flags) << "x" << (rep+1) << ",";
+        else if (rep==1)
+          f << int(flags) << ",";
+        i+=int(rep);
+      }
+      f << "],";
+      if (!ok) {
+        STOFF_DEBUG_MSG(("SDCParser::readSCTable: somethings went bad\n"));
+        f << "###bound";
+        break;
+      }
+      break;
+    }
+    case 0x4242: {
+      f << "tabOptions,";
+      bool ok=true;
+      bool bVal;
+      for (int i=0; i<3; ++i) {
+        if (!zone.readString(string) || input->tell()>endDataPos) {
+          STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not read a string\n"));
+          f << "###string" << i;
+          ok=false;
+          break;
+        }
+        if (!string.empty()) {
+          static char const *(wh[])= {"name", "comment", "pass"};
+          f << wh[i] << "=" << string.cstr() << ",";
+        }
+        if (i==2) break;
+        *input>>bVal;
+        if (bVal) f << (i==0 ? "scenario," : "protected") << ",";
+      }
+      if (!ok) break;
+      *input>> bVal;
+      if (bVal) {
+        f << "outlineTable,";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+
+        for (int i=0; i<2; ++i) {
+          pos=input->tell();
+          if (!readSCOutlineArray(zone)) {
+            STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not open the zone record\n"));
+            ok=false;
+            input->seek(pos,librevenge::RVNG_SEEK_SET);
+            break;
+          }
+        }
+        f.str("");
+        f << "SCTable[tabOptionsB]:";
+        pos=input->tell();
+        if (!ok) {
+          f << "###outline,";
+          break;
+        }
+      }
+      if (input->tell()<endDataPos) {
+        if (!zone.readString(string) || input->tell()>endDataPos) {
+          STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not read a string\n"));
+          f << "###pageStyle";
+          break;
+        }
+        if (!string.empty())
+          f << "pageStyle=" << string.cstr() << ",";
+      }
+      if (input->tell()<endDataPos) {
+        *input >> bVal;
+        if (bVal) f << "oneRange=" << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
+        for (int i=0; i<2; ++i)
+          f << "range" << i << "=" << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
+      }
+      if (input->tell()<endDataPos)
+        f << "isVisible=" << input->readULong(1);
+      if (input->tell()<endDataPos) {
+        uint16_t nCount;
+        *input>>nCount;
+        if (input->tell()+8*long(nCount)>endDataPos) {
+          STOFF_DEBUG_MSG(("SDCParser::readSCTable: bad nCount\n"));
+          f << "###nCount=" << nCount << ",";
+          break;
+        }
+        f << "ranges=[";
+        for (int i=0; i<int(nCount); ++i)
+          f << "range" << i << "=" << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
+        f << "],";
+      }
+      if (input->tell()<endDataPos) {
+        STOFFColor color;
+        if (!input->readColor(color)) {
+          STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not read a color\n"));
+          f << "###color";
+          break;
+        }
+        f << "scenario[color]=" << color << ",";
+        f << "scenario[flags]=" << input->readULong(2) << ",";
+        f << "scenario[active]=" << input->readULong(1) << ",";
+      }
+      break;
+    }
+    case 0x4243: {
+      f << "tabLink,";
+      f << "mode=" << input->readULong(1) << ",";
+      bool ok=true;
+      for (int i=0; i<3; ++i) {
+        if (!zone.readString(string) || input->tell()>endDataPos) {
+          STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not read a string\n"));
+          f << "###string" << i;
+          ok=false;
+          break;
+        }
+        if (string.empty()) continue;
+        static char const *(wh[])= {"doc", "flt", "tab"};
+        f << "link[" << wh[i] << "]=" << string.cstr() << ",";
+      }
+      if (!ok) break;
+      if (input->tell()<endDataPos)
+        f << "bRelUrl=" << input->readULong(1) << ",";
+      if (input->tell()<endDataPos) {
+        if (!zone.readString(string) || input->tell()>endDataPos) {
+          STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not read a string\n"));
+          f << "###opt";
+          break;
+        }
+        if (string.empty()) continue;
+        f << "link[opt]=" << string.cstr() << ",";
+      }
+      break;
+    }
+    default:
+      STOFF_DEBUG_MSG(("SDCParser::readSCTable: find unexpected type\n"));
+      f << "###";
+      input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
+    }
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    zone.closeSCRecord("SCTable");
+  }
+  zone.closeSCRecord("SCTable");
+  return true;
+}
+
+bool SDCParser::readSCColumn(StarZone &zone, SDCParserInternal::Table &table, StarDocument &doc,
+                             int column, long lastPos)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+
+  // sc_column2.cxx ScColumn::Load
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SCColumn)-C" << column << "[" << zone.getRecordLevel() << "]:";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  librevenge::RVNGString string;
+  while (input->tell()<lastPos) {
+    pos=input->tell();
+    uint16_t id;
+    *input>>id;
+    f.str("");
+    f << "SCColumn[" << std::hex << id << std::dec << "]:";
+    if (id==0x4250 && readSCData(zone,table,doc,column)) {
+      f << "data,";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      continue;
+    }
+    input->seek(pos+2, librevenge::RVNG_SEEK_SET);
+    bool ok=zone.openSCRecord();
+    if (!ok || zone.getRecordLastPosition()>lastPos) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCColumn:can not open record\n"));
+      f << "###";
+      if (ok) zone.closeSCRecord("SCColumn");
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      break;
+    }
+    long endDataPos=zone.getRecordLastPosition();
+    switch (id) {
+    case 0x4251: {
+      f << "notes,";
+      uint16_t nCount;
+      *input >> nCount;
+      f << "n=" << nCount << ",";
+      for (int i=0; i<nCount; ++i) {
+        f << "note" << i << "[pos=" << input->readULong(2) << ",";
+        // sc_cell.cxx ScBaseCell::LoadNotes, ScPostIt operator>>
+        for (int j=0; j<3; ++j) {
+          if (!zone.readString(string)||input->tell()>endDataPos) {
+            STOFF_DEBUG_MSG(("SDCParser::readSCColumn:can not read a string\n"));
+            f << "###string" << j;
+            ok=false;
+            break;
+          }
+          if (string.empty()) continue;
+          static char const *(wh[])= {"note","date","author"};
+          f << wh[j] << "=" << string.cstr() << ",";
+        }
+        if (!ok) break;
+        f << "],";
+      }
+      break;
+    }
+    case 0x4252: {
+      f << "attrib,";
+      // sc_attarray.cxx ScAttrArray::Load
+      uint16_t nCount;
+      *input >> nCount;
+      f << "n=" << nCount << ",";
+      shared_ptr<StarItemPool> pool=doc.getNewItemPool(StarItemPool::T_SpreadsheetPool); // FIXME
+      f << "attrib=[";
+      for (int i=0; i<nCount; ++i) {
+        f << input->readULong(2) << ":";
+        uint16_t nWhich=149; // ATTR_PATTERN
+        if (!pool->loadSurrogate(zone, nWhich, f) || input->tell()>endDataPos) {
+          STOFF_DEBUG_MSG(("SDCParser::readSCColumn:can not read a attrib\n"));
+          f << "###attrib";
+          break;
+        }
+      }
+      f << "],";
+      break;
+    }
+    default:
+      STOFF_DEBUG_MSG(("SDCParser::readSCColumn: find unexpected type\n"));
+      f << "###";
+      input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
+    }
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    zone.closeSCRecord("SCColumn");
+  }
+  input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  return true;
+}
+
+bool SDCParser::readSCData(StarZone &zone, SDCParserInternal::Table &table, StarDocument &doc, int column)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+
+  // sc_column2.cxx ScColumn::LoadData
+  SDCParserInternal::ScMultiRecord scRecord(zone);
+  if (!scRecord.open()) {
+    input->seek(pos,librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SCData)[C" << column << "-" << zone.getRecordLevel() << "]:" << scRecord;
+  int count=(int) input->readULong(2);
+  f << "count=" << count << ",";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  long lastPos=zone.getRecordLastPosition();
+  int const version=table.getLoadingVersion();
+  for (int i=0; i<count; ++i) {
+    pos=input->tell();
+    f.str("");
+    f << "SCData-" << i << ":";
+    if (input->tell()+4>lastPos) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCData:can not read some data\n"));
+      f << "###";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      break;
+    }
+    int row=(int) input->readULong(2);
+    f << "row=" << row << ",";
+    uint8_t what;
+    *input>>what;
+    bool ok=true;
+    switch (what) {
+    case 1: { // value
+      // sc_cell2.cxx
+      f << "value,";
+      if (version>=7) {
+        uint8_t unkn;
+        *input>>unkn;
+        if (unkn&0xf) input->seek((unkn&0xf), librevenge::RVNG_SEEK_CUR);
+      }
+      double value; // checkme
+      *input >> value;
+      f << "val=" << value << ",";
+      break;
+    }
+    case 2:
+    case 6: {
+      // sc_cell2.cxx
+      f << (what==2 ? "string" : "symbol") << ",";
+      if (version>=7) {
+        uint8_t unkn;
+        *input>>unkn;
+        if (unkn&0xf) input->seek((unkn&0xf), librevenge::RVNG_SEEK_CUR);
+      }
+      librevenge::RVNGString text;
+      if (!zone.readString(text)) {
+        STOFF_DEBUG_MSG(("SDCParser::readSCData: can not open some text \n"));
+        f << "###text";
+        ok=false;
+        break;
+      }
+      f << "val=" << text.cstr() << ",";
+      break;
+    }
+    case 3: {
+      // sc_cell.cxx
+      f << "formula,";
+      if (!scRecord.openContent("SCData")) {
+        STOFF_DEBUG_MSG(("SDCParser::readSCData: can not open a formula \n"));
+        f << "###formula";
+        ok=false;
+        break;
+      }
+      long endDataPos=scRecord.getContentLastPosition();
+      if (version>=8) {
+        int cData=int(input->readULong(1));
+        if ((cData&0x10) && (cData&0xf)>=4) {
+          f << "format=" <<input->readULong(4)<<",";
+          cData-=4;
+        }
+        if (cData&0xf) input->seek((cData&0xf), librevenge::RVNG_SEEK_CUR);
+        uint8_t cFlags;
+        *input >> cFlags;
+        f << "formatType=" << input->readLong(2) << ",";
+        if (cFlags&8) {
+          double ergValue;
+          *input >> ergValue;
+          f << "ergValue=" << ergValue << ",";
+        }
+        if (cFlags&0x10) {
+          librevenge::RVNGString text;
+          if (!zone.readString(text)) {
+            STOFF_DEBUG_MSG(("SDCParser::readSCData: can not open some text\n"));
+            f << "###text";
+            ascFile.addDelimiter(input->tell(),'|');
+            input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
+            scRecord.closeContent("SCData");
+            break;
+          }
+          else if (!text.empty())
+            f << "val=" << text.cstr() << ",";
+        }
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        pos=input->tell();
+        f.str("");
+        f << "SCData[formula]:";
+
+        if (!readSCFormula(zone, STOFFVec2i(row,column), version, endDataPos) || input->tell()>endDataPos) {
+          f << "###";
+          scRecord.closeContent("SCData");
+          ascFile.addDelimiter(input->tell(),'|');
+          input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
+          break;
+        }
+        pos=input->tell();
+        if ((cFlags&3)==1 && input->tell()<endDataPos)
+          f << "cols=" << input->readULong(2) << ",rows=" << input->readULong(2) << ",";
+      }
+      else {
+        if (version>=2) input->seek(2, librevenge::RVNG_SEEK_CUR);
+        f << "matrix[flags]=" << input->readULong(1) << ",";
+        uint16_t codeLen;
+        *input>>codeLen;
+        if (codeLen && (!readSCFormula3(zone, STOFFVec2i(row,column), version, endDataPos) || input->tell()>endDataPos))
+          f << "###";
+      }
+      if (input->tell()!=endDataPos) {
+        f << "##";
+        ascFile.addDelimiter(input->tell(),'|');
+        input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
+      }
+      scRecord.closeContent("SCData");
+      break;
+    }
+    case 4: {
+      // sc_cell2.cxx
+      f << "note";
+      if (version>=7) {
+        uint8_t unkn;
+        *input>>unkn;
+        if (unkn&0xf) input->seek((unkn&0xf), librevenge::RVNG_SEEK_CUR);
+      }
+      break;
+    }
+    case 5: {
+      // sc_cell2.cxx
+      f << "edit";
+      if (version>=7) {
+        uint8_t unkn;
+        *input>>unkn;
+        if (unkn&0xf) input->seek((unkn&0xf), librevenge::RVNG_SEEK_CUR);
+      }
+      StarFileManager fileManager;
+      if (!fileManager.readEditTextObject(zone, lastPos, doc) || input->tell()>lastPos) {
+        STOFF_DEBUG_MSG(("SDCParser::readSCData: can not open some edit text \n"));
+        f << "###edit";
+        ok=false;
+        break;
+      }
+      break;
+    }
+    default:
+      STOFF_DEBUG_MSG(("SDCParser::readSCData: find unexpected type\n"));
+      f << "###type=" << what;
+      ok=false;
+      break;
+    }
+    if (!ok || pos!=input->tell()) {
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+    }
+    if (!ok) break;
+  }
+  scRecord.close("SCData");
+  return true;
+}
+
+// sc_chgtrack.cxx ScChangeActionContent::ScChangeActionContent
+
+bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SCChangeTrack)[" << zone.getRecordLevel() << "]:";
+  // sc_chgtrack.cxx ScChangeTrack::Load
+
+  if (!zone.openSCRecord()) {
+    STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: can not find string collection\n"));
+    ascFile.addDelimiter(input->tell(),'|');
+    f << "###strings";
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+    return true;
+  }
+  bool bDup;
+  uint16_t count, limit, delta;
+  *input >> bDup >> count >> limit >> delta;
+  if (bDup) f << "bDups,";
+  if (limit) f << "limit=" << limit << ",";
+  if (delta) f << "delta=" << delta << ",";
+  long endData=zone.getRecordLastPosition();
+  librevenge::RVNGString string;
+  for (int16_t i=0; i<count; ++i) {
+    if (!zone.readString(string) || input->tell() > endData) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: can not open some string\n"));
+      f << "###string";
+      ascFile.addDelimiter(input->tell(),'|');
+      input->seek(endData, librevenge::RVNG_SEEK_SET);
+      break;
+    }
+    else if (!string.empty())
+      f << "string" << i << "=" << string.cstr() << ",";
+  }
+  zone.closeSCRecord("SCChangeTrack");
+
+  uint32_t nCount, nActionMax, nLastAction, nGeneratedCount;
+  *input >> nCount >> nActionMax >> nLastAction >> nGeneratedCount;
+  if (nCount) f << "count=" << nCount << ",";
+  if (nActionMax) f << "actionMax=" << nActionMax << ",";
+  if (nLastAction) f << "lastAction=" << nLastAction << ",";
+
+  for (int s=0; s<2; ++s) {
+    if (s==1) {
+      pos=input->tell();
+      f.str("");
+      f << "Entries(SCChangeTrack)[A]:";
+    }
+    SDCParserInternal::ScMultiRecord scRecord(zone);
+    if (!scRecord.open()) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: can not find the action list\n"));
+      ascFile.addDelimiter(input->tell(),'|');
+      f << "###actions";
+      input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+      return true;
+    }
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+    for (uint32_t i=0; i<(s==0 ? nGeneratedCount:nCount); ++i) {
+      f.str("");
+      f << "Entries(SCChangeTrack)[A" << i << "]:";
+      if (!scRecord.openContent("SCChangeTrack")) {
+        f << "###";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack:can not read an action\n"));
+        break;
+      }
+      endData=scRecord.getContentLastPosition();
+
+      uint8_t type;
+      *input >> type;
+      uint32_t col, row, tab, date, time, action, rejAction, state;
+      *input >> col >> row >> tab >> date >> time >> action >> rejAction >> state;
+      f << "cell=" << col << "x" << row << "[" << tab << "],";
+      f << "date=" << date << ",";
+      f << "time=" << time << ",";
+      if (action) f << "action=" << action << ",";
+      if (rejAction) f << "rejAction=" << rejAction << ",";
+      if (state) f << "state=" << state << ",";
+      if (!zone.readString(string) || input->tell() > endData) {
+        STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: can not open some string\n"));
+        f << "###string";
+        ascFile.addDelimiter(input->tell(),'|');
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        scRecord.closeContent("SCChangeTrack");
+        continue;
+      }
+      if (!string.empty())
+        f << "comment" << i << "=" << string.cstr() << ",";
+      if (s==0 && type!=8) {
+        f << "###type";
+        STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack:the type seems bad\n"));
+      }
+      switch (type) {
+      case 1:
+      case 2:
+      case 3:
+      case 9:
+        f << "insert[" << (type==1 ? "cols" : type==2 ? "rows" : type==9 ? "tab" : "reject") << "],";
+        break;
+      case 4:
+      case 5:
+      case 6: {
+        f << "delete[" << (type==4 ? "cols" : type==5 ? "rows" : "tab") << "],";
+        uint32_t pCutOff;
+        uint16_t cutOff, dx, dy;
+        *input >> pCutOff >> cutOff >> dx >> dy;
+        if (pCutOff) f << "pCutOff=" << pCutOff << ",";
+        if (cutOff) f << "cutOff=" << cutOff << ",";
+        f << "delta=" << dx << "x" << dy << ",";
+        break;
+      }
+      case 7:
+        f << "move,";
+        *input >> col >> row >> tab;
+        f << "fromCell=" << col << "x" << row << "[" << tab << "],";
+        break;
+      case 8: {
+        bool ok=true;
+        for (int j=0; j<2; ++j) {
+          if (!zone.readString(string) || input->tell() > endData) {
+            STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: can not open some string\n"));
+            f << "###string";
+            ok=false;
+            break;
+          }
+          if (string.empty()) continue;
+          f << (j==0 ? "oldValue" : "newValue") << "=" << string.cstr() << ",";
+        }
+        if (!ok) break;
+        uint32_t oldContent, newContent;
+        *input >> oldContent >> newContent;
+        if (oldContent) f << "oldContent=" << oldContent << ",";
+        if (newContent) f << "newContent=" << newContent << ",";
+        SDCParserInternal::ScMultiRecord scRecord2(zone);
+        if (!scRecord2.open()) {
+          STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: can not find the cell action\n"));
+          f << "###cells";
+          break;
+        }
+        STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: reading cell action is not implemented\n"));
+        f << "###cells,";
+        // fixme: call readSCData with only one cell
+        input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+        scRecord2.close("SCChangeTrack");
+        break;
+      }
+      default:
+        STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack:unknown type\n"));
+        f << "###type=" << (int) type << ",";
+        break;
+      }
+      scRecord.closeContent("SCChangeTrack");
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+    }
+    scRecord.close("SCChangeTrack");
+  }
+
+  pos=input->tell();
+  f.str("");
+  f << "Entries(SCChangeTrack)[L]:";
+  SDCParserInternal::ScMultiRecord scRecord(zone);
+  if (!scRecord.open()) {
+    STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: can not find the action list\n"));
+    ascFile.addDelimiter(input->tell(),'|');
+    f << "###link";
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+    return true;
+  }
+  while (scRecord.openContent("SCChangeTrack")) {
+    pos=input->tell();
+    f.str("");
+    f << "Entries(SCChangeTrack)[L]:###";
+    static bool first=true;
+    if (first) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: reading the action links is not implemented\n"));
+      first=false;
+    }
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    input->seek(scRecord.getContentLastPosition(), librevenge::RVNG_SEEK_SET);
+    scRecord.closeContent("SCChangeTrack");
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  if (input->tell()!=lastPos) {
+    STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: find extra data\n"));
+    ascFile.addDelimiter(input->tell(),'|');
+    f << "###extra";
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return true;
+
+}
+
+bool SDCParser::readSCDBData(StarZone &zone, int /*version*/, long lastPos)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SCDBData)[" << zone.getRecordLevel() << "]:";
+  // sc_dbcolect.cxx ScDBData::Load
+  librevenge::RVNGString string;
+  if (!zone.readString(string)) {
+    STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some text\n"));
+    f << "###name";
+    ascFile.addDelimiter(input->tell(),'|');
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  f << "name=" << string.cstr() << ",";
+  uint16_t nTable, nStartCol, nStartRow, nEndCol, nEndRow;
+  *input >> nTable >> nStartCol >> nStartRow >> nEndCol >> nEndRow;
+  if (nTable) f << "table=" << nTable << ",";
+  f << "dim=" << nStartCol << "x" << nStartRow << "<->" << nEndCol << "x" << nEndRow << ",";
+  bool bByRow, bHasHeader, bSortCaseSens, bIncludePattern, bSortInplace;
+  *input >> bByRow >> bHasHeader >> bSortCaseSens >> bIncludePattern >> bSortInplace;
+  if (bByRow) f << "byRow,";
+  if (bHasHeader) f << "hasHeader,";
+  if (bSortCaseSens) f << "sortCaseSens,";
+  if (bIncludePattern) f << "includePattern,";
+  if (bSortInplace) f << "sortInPlace,";
+  uint16_t nSortDestTab, nSortDestCol, nSortDestRow;
+  *input >> nSortDestTab >> nSortDestCol >> nSortDestRow;
+  f << "dest[sort]=" << nSortDestCol << "x" << nSortDestCol << "x" << nSortDestTab << ",";
+  bool bQueryInplace, bQueryCaseSen, bQueryRegExp, bQueryDuplicate;
+  *input >> bQueryInplace >> bQueryCaseSen >> bQueryRegExp >> bQueryDuplicate;
+  if (bQueryInplace) f << "query[inPlace],";
+  if (bQueryCaseSen) f << "query[caseSen],";
+  if (bQueryRegExp) f << "query[regExp],";
+  if (bQueryDuplicate) f << "query[duplicate],";
+  uint16_t nQueryDestTab, nQueryDestCol, nQueryDestRow;
+  *input >> nQueryDestTab >> nQueryDestCol >> nQueryDestRow;
+  f << "dest[query]=" << nQueryDestCol << "x" << nQueryDestCol << "x" << nQueryDestTab << ",";
+  bool bSubRemoveOnly, bSubReplace, bSubPagebreak, bSubCaseSens, bSubDoSort,
+       bSubAscending, bSubIncludePattern, bSubUserDef;
+  bool bDBImport, bDBNative;
+  *input >> bSubRemoveOnly >> bSubReplace >> bSubPagebreak >> bSubCaseSens
+         >> bSubDoSort >> bSubAscending >> bSubIncludePattern >> bSubUserDef
+         >> bDBImport;
+  if (bSubRemoveOnly) f << "subRemoveOnly,";
+  if (bSubReplace) f << "subReplace,";
+  if (bSubPagebreak) f << "subPagebreak,";
+  if (bSubCaseSens) f << "subCaseSens,";
+  if (bSubDoSort) f << "subDoSort,";
+  if (bSubAscending) f << "subAscending,";
+  if (bSubIncludePattern) f << "subIncludePattern,";
+  if (bSubUserDef) f << "subUserDef,";
+  if (bDBImport) f << "dbImport,";
+  for (int i=0; i<2; ++i) {
+    if (!zone.readString(string)) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some text\n"));
+      f << "###name";
+      ascFile.addDelimiter(input->tell(),'|');
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+    if (!string.empty())
+      f << (i==0 ? "dbName" : "dbStatement") << "=" << string.cstr() << ",";
+  }
+  *input >> bDBNative;
+  if (bDBNative) f << "dbNative,";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  pos=input->tell();
+  f.str("");
+  f << "SCDBData:";
+  if (input->tell()+3*4>lastPos) {
+    STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read sort data\n"));
+    f << "###name";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  for (int i=0; i<3; ++i) {
+    bool doSort, doAscend;
+    uint16_t sortField;
+    *input>>doSort>>sortField >> doAscend;
+    if (doSort) f << "sort" << i << "=" << sortField << "[" << int(doAscend) << "],";
+  }
+  for (int i=0; i<8; ++i) {
+    bool doQuery, queryByString;
+    uint16_t queryField;
+    uint8_t queryOp, queryConnect;
+    double val;
+    *input >> doQuery >> queryField >> queryOp >> queryByString;
+    if (!zone.readString(string)||input->tell()>lastPos) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some text\n"));
+      f << "###name";
+      ascFile.addDelimiter(input->tell(),'|');
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+    *input>>val >> queryConnect;
+    if (!doQuery) continue;
+    f << "query" << i << "=[";
+    f << string.cstr() << ",";
+    f << "field=" << queryField << ",";
+    f << "op=" << (int)queryOp << ",";
+    if (queryByString) f << "byString,";
+    if (!string.empty()) f << string.cstr() << ",";
+    if (val<0 || val>0) f << "val=" << val << ",";
+    f << "connect=" << (int)queryConnect << ",";
+    f << "],";
+  }
+  for (int i=0; i<3; ++i) {
+    bool doSubTotal;
+    uint16_t field, count;
+    *input >> doSubTotal >> field >> count;
+    if (input->tell() + 3*long(count) > lastPos) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some subTotal\n"));
+      f << "###subTotal";
+      ascFile.addDelimiter(input->tell(),'|');
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+    if (!doSubTotal && !count) continue;
+    f << "subTotal" << i << "=[";
+    f << "field=" << field  << ",[";
+    for (int c=0; c<int(count); ++c)
+      f << input->readULong(2) << ":" << input->readULong(1) << ",";
+    f << "],";
+  }
+  if (input->tell()<lastPos)
+    f << "index=" << input->readULong(2) << ",";
+  if (input->tell()<lastPos)
+    f << "dbSelect=" << input->readULong(1) << ",";
+  if (input->tell()<lastPos)
+    f << "dbSQL=" << input->readULong(1) << ",";
+  if (input->tell()<lastPos) {
+    f << "subUserIndex=" << input->readULong(2) << ",";
+    f << "sortUserDef=" << input->readULong(1) << ",";
+    f << "sortUserIndex=" << input->readULong(2) << ",";
+  }
+  if (input->tell()<lastPos) {
+    f << "doSize=" << input->readULong(1) << ",";
+    f << "keepFmt=" << input->readULong(1) << ",";
+  }
+  if (input->tell()<lastPos)
+    f << "stripData=" << input->readULong(1) << ",";
+  if (input->tell()<lastPos)
+    f << "dbType=" << input->readULong(1) << ",";
+  if (input->tell()<lastPos) {
+    bool isAdvanced;
+    *input >> isAdvanced;
+    if (isAdvanced)
+      f << "advSource=" << std::hex << input->readULong(4) << "x" << input->readULong(4) << std::dec << ",";
+  }
+  if (input->tell()!=lastPos) {
+    STOFF_DEBUG_MSG(("SDCParser::readSCDBData: find extra data\n"));
+    ascFile.addDelimiter(input->tell(),'|');
+    f << "###extra";
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return true;
+}
+
+bool SDCParser::readSCDBPivot(StarZone &zone, int version, long lastPos)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SCDBPivot)[" << zone.getRecordLevel() << "]:";
+  // sc_pivot.cxx ScPivot::Load
+  bool hasHeader;
+  *input >> hasHeader;
+  if (hasHeader) f << "hasHeader,";
+  for (int i=0; i<2; ++i) {
+    uint16_t col1, row1, col2, row2, table;
+    *input >> col1 >> row1 >> col2 >> row2 >> table;
+    f << (i==0 ? "src":"dest") << "="
+      << col1 << "x" << row1 << "<->" << col2 << "x" << row2 << "[" << table << "],";
+  }
+  for (int i=0; i<3; ++i) {
+    uint16_t nCount;
+    *input >> nCount;
+    if (input->tell()+6*int(nCount) >lastPos) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some fields\n"));
+      f << "###fields";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+
+    if (!nCount) continue;
+    f << (i==0 ? "col" : i==1 ? "row" : "data") << "=[";
+    for (int c=0; c<int(nCount); ++c) {
+      if (version >= 7) {
+        uint8_t unkn;
+        *input>>unkn;
+        if (unkn&0xf) input->seek((unkn&0xf), librevenge::RVNG_SEEK_CUR);
+      }
+      f << "[";
+      f << "col=" << input->readLong(2) << ",";
+      f << "mask=" << input->readULong(2) << ",";
+      f << "count=" << input->readULong(2) << ",";
+      f << "],";
+    }
+    f << "],";
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  pos=input->tell();
+  f << "SCDBPivot:";
+  if (!readSCQueryParam(zone, version, lastPos)) {
+    f << "###query";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  pos=input->tell();
+  bool bIgnoreEmpty, bDectectCat;
+  *input >> bIgnoreEmpty >> bDectectCat;
+  if (bIgnoreEmpty) f << "ignore[empty],";
+  if (bDectectCat) f << "detect[cat],";
+  if (input->tell()<lastPos) {
+    bool makeTotalCol, makeTotalRow;
+    *input >> makeTotalCol >> makeTotalRow;
+    if (makeTotalCol) f << "make[totalCol],";
+    if (makeTotalRow) f << "make[totalRow],";
+  }
+  if (input->tell()<lastPos) {
+    librevenge::RVNGString string;
+    for (int i=0; i<2; ++i) {
+      if (!zone.readString(string)||input->tell()>lastPos) {
+        STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some text\n"));
+        f << "###string";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        return false;
+      }
+      if (!string.empty())
+        f << (i==0 ? "name": "tag") << "=" << string.cstr() << ",";
+    }
+    uint16_t count;
+    *input >> count;
+    for (int i=0; i<int(count); ++i) {
+      if (!zone.readString(string)||input->tell()>lastPos) {
+        STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some text\n"));
+        f << "###string";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        return false;
+      }
+      if (!string.empty())
+        f << "colName" << i << "=" << string.cstr() << ",";
+    }
+  }
+  if (input->tell()!=lastPos) {
+    STOFF_DEBUG_MSG(("SDCParser::readSCDBPivot: find extra data\n"));
+    ascFile.addDelimiter(input->tell(),'|');
+    f << "###extra";
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return true;
+}
+
+bool SDCParser::readSCFormula(StarZone &zone, STOFFVec2i const &cell, int version, long lastPos)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SCFormula)[" << zone.getRecordLevel() << "]:";
+  uint8_t fFlags;
+  *input>>fFlags;
+  if (fFlags&0xf) input->seek((fFlags&0xf), librevenge::RVNG_SEEK_CUR);
+  f << "cMode=" << input->readULong(1) << ","; // if (version<0x201) old mode
+  if (fFlags&0x10) f << "nRefs=" << input->readLong(2) << ",";
+  if (fFlags&0x20) f << "nErrors=" << input->readULong(2) << ",";
+  if (fFlags&0x40) { // token
+    uint16_t nLen;
+    *input>>nLen;
+    f << "formula=[";
+    for (int tok=0; tok<nLen; ++tok) {
+      if (!readSCTokenInFormula(zone, cell, version, lastPos, f) || input->tell()>lastPos) {
+        f << "###";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        return false;
+      }
+    }
+    f << "],";
+  }
+  if (fFlags&0x80) {
+    uint16_t nRPN;
+    *input >> nRPN;
+    f << "rpn=[";
+    for (int rpn=0; rpn<int(nRPN); ++rpn) {
+      uint8_t b1;
+      *input >> b1;
+      if (b1==0xff) {
+        if (!readSCTokenInFormula(zone, cell, version, lastPos, f)) {
+          f << "###";
+          ascFile.addPos(pos);
+          ascFile.addNote(f.str().c_str());
+          return false;
+        }
+      }
+      else if (b1&0x40)
+        f << "[Index" << ((b1&0x3f) & (input->readULong(1)<<6)) << "]";
+      else
+        f << "[Index" << int(b1) << "]";
+      if (input->tell()>lastPos) {
+        f << "###";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        return false;
+      }
+    }
+    f << "],";
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return true;
+}
+
+bool SDCParser::readSCMatrix(StarZone &zone, int /*version*/, long lastPos)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SCMatrix)[" << zone.getRecordLevel() << "]:";
+  // sc_scmatrix.cxx ScMatrix::ScMatrix
+  uint16_t nCol, nRow;
+  *input >> nCol >> nRow;
+  f << "dim=" << nCol << "x" << nRow << ",";
+  int nCell=int(nCol)*int(nRow);
+  bool ok=true;
+  f << "values=[";
+  for (int i=0; i<nCell; ++i) {
+    uint8_t type;
+    *input>>type;
+    if ((i%nCol)==0) f << "[";
+    switch (type) {
+    case 0:
+      f << "_,";
+      break;
+    case 1: {
+      double val;
+      *input>>val;
+      f << val << ",";
+      break;
+    }
+    case 2: {
+      librevenge::RVNGString string;
+      if (!zone.readString(string)) {
+        STOFF_DEBUG_MSG(("SDCParser::readSCMatrix: can not read a string\n"));
+        f << "###string";
+        ok=false;
+        break;
+      }
+      f << string.cstr() << ",";
+      break;
+    }
+    default:
+      STOFF_DEBUG_MSG(("SDCParser::readSCMatrix: find unexpected type\n"));
+      f << "###type=" << int(type) << ",";
+      ok=false;
+      break;
+    }
+    if (!ok) break;
+    if (input->tell()>lastPos) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCMatrix: the zone is too short\n"));
+      f << "###short,";
+      ok=false;
+      break;
+    }
+    if ((i%nCol)==0) f << "],";
+  }
+  f << "],";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok && input->tell()<=lastPos;
+}
+bool SDCParser::readSCQueryParam(StarZone &zone, int /*version*/, long lastPos)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+
+  if (!zone.openSCRecord()) return false;
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SCQueryParam)[" << zone.getRecordLevel() << "]:";
+  // sc_global2.cxx ScQueryParam::Load
+  uint16_t nCol1, nRow1, nCol2, nRow2, nDestTab, nDestCol, nDestRow;
+  bool bHasHeader, bInplace, bCaseSens, bRegExp, bDuplicate, bByRow;
+  *input >> nCol1 >> nRow1 >> nCol2 >> nRow2 >> nDestTab >> nDestCol >> nDestRow;
+  f << "dim=" << nCol1 << "x" << nRow1 << "<->" << nCol2 << "x" << nRow2 << ",";
+  f << "dest=" << nDestCol << "x" << nDestRow << "x" << nDestTab << ",";
+  *input >> bHasHeader >> bInplace >> bCaseSens >> bRegExp >> bDuplicate >> bByRow;
+  if (bHasHeader) f << "hasHeader,";
+  if (bInplace) f << "inPlace,";
+  if (bCaseSens) f << "caseSens,";
+  if (bRegExp) f << "regExp,";
+  if (bDuplicate) f << "duplicate,";
+  if (bByRow) f << "byRow,";
+  librevenge::RVNGString string;
+  for (int i=0; i<8; ++i) {
+    bool doQuery, queryByString;
+    uint8_t op, connect;
+    uint16_t nField;
+    double val;
+    *input >> doQuery >> queryByString >> op >> connect >> nField >> val;
+    if (!zone.readString(string)||input->tell()>lastPos) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some text\n"));
+      f << "###string";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      zone.closeSCRecord("SCQueryParam");
+      return false;
+    }
+    if (!doQuery) continue;
+    f << "query" << i << "=[";
+    if (queryByString) f << "byString,";
+    f << "op=" << int(op) << ",";
+    f << "connect=" << int(connect) << ",";
+    f << "field=" << nField << ",";
+    f << "val=" << val << ",";
+    if (!string.empty()) f << string.cstr() << ",";
+    f << "],";
+  }
+  zone.closeSCRecord("SCQueryParam");
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return true;
+}
+
+bool SDCParser::readSCFormula3(StarZone &zone, STOFFVec2i const &cell, int /*version*/, long lastPos)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SCFormula)[" << zone.getRecordLevel() << "]:";
+  for (int tok=0; tok<512; ++tok) {
+    bool endData;
+    if (!readSCTokenInFormula3(zone, cell, endData, lastPos, f) || input->tell()>lastPos) {
+      f << "###";
+      break;
+    }
+    if (endData) break;
+  }
+
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return true;
+}
+
+bool SDCParser::readSCTokenInFormula(StarZone &zone, STOFFVec2i const &/*cell*/, int /*vers*/, long lastPos, libstoff::DebugStream &f)
+{
+  STOFFInputStreamPtr input=zone.input();
+  // sc_token.cxx ScRawToken::Load
+  uint16_t nOp;
+  uint8_t type;
+  *input >> nOp >> type;
+  bool ok=true;
+  switch (type) {
+  case 0: {
+    bool val;
+    *input>>val;
+    f << "[" << val << "]";
+    break;
+  }
+  case 1: {
+    double val;
+    *input>>val;
+    f << "[" << val << "]";
+    break;
+  }
+  case 2: // string
+  case 8: // external
+  default: { // ?
+    if (type==8) f << "[cByte=" << input->readULong(1) << "]";
+    uint8_t nBytes;
+    *input >> nBytes;
+    if (input->tell()+int(nBytes)>lastPos) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCTokenInFormula: can not read text zone\n"));
+      f << "###text";
+      ok=false;
+      break;
+    }
+    librevenge::RVNGString text;
+    for (int i=0; i<int(nBytes); ++i) text.append((char) input->readULong(1));
+    f << "[" << text.cstr() << "]";
+    break;
+  }
+  case 3:
+  case 4: {
+    int16_t nCol, nRow, nTab;
+    uint8_t nByte;
+    f << "[";
+    *input >> nCol >> nRow >> nTab >> nByte;
+    f << nRow << "x" << nCol;
+    if (nTab) f << "x" << nTab;
+    if (nByte) f << ":" << int(nByte); // vers<10 diff
+    if (type==4) {
+      *input >> nCol >> nRow >> nTab >> nByte;
+      f << "<->" << nRow << "x" << nCol;
+      if (nTab) f << "x" << nTab;
+      if (nByte) f << ":" << int(nByte); // vers<10 diff
+    }
+    f << "]";
+    break;
+  }
+  case 6:
+    f << "[index" << input->readULong(2) << "]";
+    break;
+  case 7: {
+    uint8_t nByte;
+    *input >> nByte;
+    if (input->tell()+2*int(nByte)>lastPos) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCTokenInFormula: can not read the jump\n"));
+      f << "###jump";
+      ok=false;
+      break;
+    }
+    f << "[J" << (int) nByte << ",";
+    for (int i=0; i<(int) nByte; ++i) f << input->readLong(2) << ",";
+    f << "]";
+    break;
+  }
+  case 0x70:
+    f << "[missing]";
+    break;
+  case 0x71:
+    f << "[error]";
+    break;
+  }
+  return ok && input->tell()<=lastPos;
+}
+
+bool SDCParser::readSCTokenInFormula3(StarZone &zone, STOFFVec2i const &/*cell*/, bool &endData, long lastPos, libstoff::DebugStream &f)
+{
+  endData=false;
+  STOFFInputStreamPtr input=zone.input();
+  // sc_token.cxx ScRawToken::Load30
+  uint16_t nOp;
+  *input >> nOp;
+  bool ok=true;
+  switch (nOp) {
+  case 0: {
+    uint8_t type;
+    *input >> type;
+    switch (type) {
+    case 0: {
+      bool val;
+      *input>>val;
+      f << val;
+      break;
+    }
+    case 1: {
+      double val;
+      *input>>val;
+      f << val << ",";
+      break;
+    }
+    case 2: {
+      librevenge::RVNGString text;
+      if (!zone.readString(text)) {
+        STOFF_DEBUG_MSG(("SDCParser::readSCTokenInFormula3: can not read text zone\n"));
+        f << "###text";
+        ok=false;
+        break;
+      }
+      f << "\"" << text.cstr() << "\"";
+      break;
+    }
+    case 3: {
+      int16_t nCol, nRow, nTab;
+      uint8_t relCol, relRow, relTab, oldFlag;
+      *input >> nCol >> nRow >> nTab >> relCol >> relRow >> relTab >> oldFlag;
+      f << nRow << "x" << nCol;
+      if (nTab) f << "x" << nTab;
+      f << "[" << int(relCol) << "," << int(relRow) << "," << int(relTab) << "," << int(oldFlag) << "]";
+      break;
+    }
+    case 4: {
+      int16_t nCol1, nRow1, nTab1, nCol2, nRow2, nTab2;
+      uint8_t relCol1, relRow1, relTab1, oldFlag1, relCol2, relRow2, relTab2, oldFlag2;
+      *input >> nCol1 >> nRow1 >> nTab1 >> nCol2 >> nRow2 >> nTab2
+             >> relCol1 >> relRow1 >> relTab1 >> relCol2 >> relRow2 >> relTab2
+             >> oldFlag1 >> oldFlag2;
+      f << nRow1 << "x" << nCol1;
+      if (nTab1) f << "x" << nTab1;
+      f << "[" << int(relCol1) << "," << int(relRow1) << "," << int(relTab1) << "," << int(oldFlag1) << "]";
+      f << ":" << nRow2 << "x" << nCol2;
+      if (nTab2) f << "x" << nTab2;
+      f << "[" << int(relCol2) << "," << int(relRow2) << "," << int(relTab2) << "," << int(oldFlag2) << "]";
+      break;
+    }
+    default:
+      f << "##type=" << int(type) << ",";
+      ok=false;
+      break;
+    }
+    break;
+  }
+  case 2: // stop
+    endData=true;
+    break;
+  case 3: { // external
+    librevenge::RVNGString text;
+    if (!zone.readString(text)) {
+      STOFF_DEBUG_MSG(("SDCParser::readSCTokenInFormula3: can not read external zone\n"));
+      f << "###external";
+      ok=false;
+      break;
+    }
+    f << "\"" << text.cstr() << "\"";
+    break;
+  }
+  case 4: { // name
+    uint16_t index;
+    *input >> index;
+    f << "I[" << index << "]";
+    break;
+  }
+  case 5: // jump 3
+    f << "if(";
+    break;
+  case 6: // jump=maxjumpcount
+    f << "choose(";
+    break;
+  default:
+    f << "f" << nOp << ",";
+    break;
+  }
+  return ok && input->tell()<=lastPos;
+}
+
+bool SDCParser::readSCOutlineArray(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+
+  SDCParserInternal::ScMultiRecord scRecord(zone);
+  if (!scRecord.open()) {
+    input->seek(pos,librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SCOutlineArray)[" << zone.getRecordLevel() << "]:";
+  int depth=(int) input->readULong(2);
+  f << "depth=" << depth << ",";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  for (int lev=0; lev<depth; ++lev) {
+    pos=input->tell();
+    f.str("");
+    f << "SCOutlineArray-" << lev << ",";
+    int count=(int) input->readULong(2);
+    f << "entries=[";
+    for (int i=0; i<count; ++i) {
+      if (!scRecord.openContent("SCOutlineArray")) {
+        f << "###";
+        STOFF_DEBUG_MSG(("SDCParser::readSCOutlineArray:can not find some content\n"));
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        scRecord.close("SCOutlineArray");
+        return true;
+      }
+      f << "[start=" << input->readULong(2) << ",sz=" << input->readULong(2) << ",";
+      bool hidden, visible;
+      *input >> hidden >> visible;
+      if (hidden) f << "hidden,";
+      if (visible) f << "visible,";
+      f << "],";
+      scRecord.closeContent("SCOutlineArray");
+    }
+    f << "],";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+  }
+  scRecord.close("SCOutlineArray");
+  return true;
+}
+
 bool SDCParser::readSCHAttributes(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();

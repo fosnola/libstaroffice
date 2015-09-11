@@ -90,6 +90,9 @@ public:
   bool readAttribute(StarZone &zone, int which, int vers, long endPos);
   //! read a item
   bool readItem(StarZone &zone, bool isDirect, long endPos);
+  //! try to load a surrogate
+  bool loadSurrogate(StarZone &zone, uint16_t &nWhich, libstoff::DebugStream &f);
+
 protected:
   //! try to read a "ItemPool" zone (version 1)
   bool readV1(StarZone &zone, StarItemPool *master);

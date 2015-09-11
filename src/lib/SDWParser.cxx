@@ -166,6 +166,11 @@ bool SDWParser::createZones()
         continue;
       }
 
+      if (base=="StarCalcDocument") {
+        SDCParser sdcParser;
+        sdcParser.readCalcDocument(ole,name,document);
+        continue;
+      }
       if (base=="StarChartDocument") {
         SDCParser sdcParser;
         sdcParser.readChartDocument(ole,name,document);
