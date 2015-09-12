@@ -41,6 +41,7 @@
 
 #include "StarEncodingChinese.hxx"
 #include "StarEncodingJapanese.hxx"
+#include "StarEncodingTradChinese.hxx"
 #include "StarItemPool.hxx"
 #include "StarZone.hxx"
 #include "STOFFStringStream.hxx"
@@ -83,7 +84,10 @@ bool StarEncoding::read(STOFFInputStreamPtr &input, StarEncoding::Encoding encod
     return StarEncodingJapanese::readJapanese212(input, encoding, endPos, string, limits);
   if (encoding==E_EUC_JP)
     return StarEncodingJapanese::readJapaneseEUC(input, encoding, endPos, string, limits);
-  if (encoding==E_GBK || encoding==E_GB_2312 || encoding==E_GBT_12345 || encoding==E_MS_936 || encoding==E_APPLE_CHINSIMP)
+  if (encoding==E_BIG5 || encoding==E_MS_950 || encoding==E_APPLE_CHINTRAD)
+    return StarEncodingTradChinese::readChinese1(input, encoding, endPos, string, limits);
+  if (encoding==E_GBK || encoding==E_GB_2312  || encoding==E_EUC_CN ||
+      encoding==E_GBT_12345 || encoding==E_MS_936 || encoding==E_APPLE_CHINSIMP)
     return StarEncodingChinese::readChinese1(input, encoding, endPos, string, limits);
 
   long pos=input->tell();
@@ -1125,13 +1129,9 @@ bool StarEncoding::read(STOFFInputStreamPtr &input, StarEncoding::Encoding encod
     unicode=(uint32_t) val[c-0x80];
     break;
   }
-  case E_APPLE_CHINTRAD:
   case E_APPLE_KOREAN:
 
   case E_MS_949:
-  case E_MS_950:
-  case E_BIG5:
-  case E_EUC_CN:
   case E_KOI8_R: {
     if (c<0x80) break;
     static int const(val[])= {
@@ -1330,12 +1330,16 @@ bool StarEncoding::read(STOFFInputStreamPtr &input, StarEncoding::Encoding encod
   case E_APPLE_CHINSIMP: // already done
   case E_MS_936: // already done
   case E_GB_2312: // already done
+  case E_EUC_CN:  // already done
   case E_GBT_12345: // already done
   case E_GBK: // already done
   case E_APPLE_JAPANESE: // already done
   case E_JIS_X_0208: // already done
   case E_JIS_X_0212: // already done
   case E_EUC_JP: // already done
+  case E_APPLE_CHINTRAD: // already done
+  case E_MS_950: // already done
+  case E_BIG5: // already done
   case E_DONTKNOW:
   default:
     STOFF_DEBUG_MSG(("StarEncoding::read: unimplemented encoding %d\n", int(encoding)));

@@ -53,6 +53,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarEncodingChinese.hxx			\
 	StarEncodingJapanese.cxx		\
 	StarEncodingJapanese.hxx		\
+	StarEncodingTradChinese.cxx		\
+	StarEncodingTradChinese.hxx		\
 	StarEncoding.cxx			\
 	StarEncoding.hxx			\
 	StarFileManager.cxx			\

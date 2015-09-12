@@ -32,11 +32,11 @@
 */
 
 /*
- * StarEncoding to read/parse some Chinese encoding in StarOffice documents
+ * StarEncoding to read/parse some traditional Chinese encoding in StarOffice documents
  *
  */
-#ifndef STAR_ENCODING_CHINESE
-#  define STAR_ENCODING_CHINESE
+#ifndef STAR_ENCODING_TRAD_CHINESE
+#  define STAR_ENCODING_TRAD_CHINESE
 
 #include <vector>
 
@@ -48,21 +48,21 @@
 class StarDocument;
 class StarZone;
 
-/** \brief the main class to read/.. some Chinese encoding in StarOffice documents
+/** \brief the main class to read/.. some traditional Chinese encoding in StarOffice documents
  *
  *
  *
  */
-class StarEncodingChinese
+class StarEncodingTradChinese
 {
 public:
 
   //! constructor
-  StarEncodingChinese();
+  StarEncodingTradChinese();
   //! destructor
-  virtual ~StarEncodingChinese();
+  virtual ~StarEncodingTradChinese();
 
-  /** try to read a caracter and add it to string: E_GBK, E_GB_2312, E_GBT_12345, E_MS_936 and E_APPLE_CHINSIMP*/
+  /** try to read a caracter and add it to string: */
   static bool readChinese1(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
                            librevenge::RVNGString &string, std::vector<unsigned long> &limits);
 protected:

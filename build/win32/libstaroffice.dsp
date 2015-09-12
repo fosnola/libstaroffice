@@ -159,6 +159,10 @@ SOURCE=..\..\src\lib\StarEncodingJapanese.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarEncodingTradChinese.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarEncoding.cxx
 # End Source File
 # Begin Source File
@@ -272,6 +276,10 @@ SOURCE=..\..\src\lib\StarEncodingChinese.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarEncodingJapanese.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarEncodingTradChinese.hxx
 # End Source File
 # Begin Source File
 

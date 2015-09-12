@@ -59,8 +59,8 @@ StarEncodingChinese::~StarEncodingChinese()
 bool StarEncodingChinese::readChinese1(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
                                        librevenge::RVNGString &string, std::vector<unsigned long> &limits)
 {
-  if (encoding!=StarEncoding::E_GBK && encoding!=StarEncoding::E_GB_2312 && encoding!=StarEncoding::E_GBT_12345 &&
-      encoding!=StarEncoding::E_MS_936 && encoding!=StarEncoding::E_APPLE_CHINSIMP) {
+  if (encoding!=StarEncoding::E_GBK && encoding!=StarEncoding::E_GB_2312 && encoding!=StarEncoding::E_EUC_CN
+      && encoding!=StarEncoding::E_GBT_12345 && encoding!=StarEncoding::E_MS_936 && encoding!=StarEncoding::E_APPLE_CHINSIMP) {
     STOFF_DEBUG_MSG(("StarEncodingChinese::readChinese1: unknown encoding\n"));
     return false;
   }
