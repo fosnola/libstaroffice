@@ -901,7 +901,7 @@ bool SDCParser::readCalcDocument(STOFFInputStreamPtr input, std::string const &n
         if (input->tell()<endPos)
           *input >> nYear2000;
         else
-          nYear2000 += 1901;
+          nYear2000 = uint16_t(nYear2000+1901);
         f << "year[2000]=" << nYear2000 << ",";
       }
       break;
