@@ -62,7 +62,7 @@ public:
   //! destructor
   virtual ~StarEncodingChinese();
 
-  /** try to read a caracter and add it to string: E_GBK, E_GB_2312, E_GBT_12345, E_MS_936 and E_APPLE_CHINSIMP*/
+  /** try to read a caracter and add it to string: E_GBK, E_GB_2312, E_EUC_CN, E_GBT_12345, E_MS_936 and E_APPLE_CHINSIMP*/
   static bool readChinese1(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
                            librevenge::RVNGString &string, std::vector<unsigned long> &limits);
 protected:

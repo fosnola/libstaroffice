@@ -313,6 +313,22 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\StarEncodingKorean.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File RelativePath="..\..\src\lib\StarEncodingOtherKorean.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\StarEncodingTradChinese.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -416,6 +432,10 @@
 			<File RelativePath="..\..\src\lib\StarEncodingChinese.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarEncodingJapanese.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\StarEncodingKorean.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\StarEncodingOtherKorean.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarEncodingTradChinese.hxx">
 			</File>

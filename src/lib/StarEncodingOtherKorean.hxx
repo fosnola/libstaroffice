@@ -32,11 +32,11 @@
 */
 
 /*
- * StarEncoding to read/parse some traditional Chinese encoding in StarOffice documents
+ * StarEncoding to read/parse some other Korean encoding in StarOffice documents
  *
  */
-#ifndef STAR_ENCODING_TRAD_CHINESE
-#  define STAR_ENCODING_TRAD_CHINESE
+#ifndef STAR_ENCODING_OTHER_KOREAN
+#  define STAR_ENCODING_OTHER_KOREAN
 
 #include <vector>
 
@@ -48,23 +48,26 @@
 class StarDocument;
 class StarZone;
 
-/** \brief the main class to read/.. some traditional Chinese encoding in StarOffice documents
+/** \brief the main class to read/.. some other Korean encoding in StarOffice documents
  *
  *
  *
  */
-class StarEncodingTradChinese
+class StarEncodingOtherKorean
 {
 public:
 
   //! constructor
-  StarEncodingTradChinese();
+  StarEncodingOtherKorean();
   //! destructor
-  virtual ~StarEncodingTradChinese();
+  virtual ~StarEncodingOtherKorean();
 
-  /** try to read a caracter and add it to string: E_EUC_CNE_BIG5, E_MS_950, E_APPLE_CHINTRAD */
-  static bool readChinese1(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-                           librevenge::RVNGString &string, std::vector<unsigned long> &limits);
+  /** try to read a caracter and add it to string: BIG5_HKSCS */
+  static bool readKoreanBig5(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
+                             librevenge::RVNGString &string, std::vector<unsigned long> &limits);
+  /** try to read a caracter and add it to string: MS_1361 */
+  static bool readKoreanMS1361(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
+                               librevenge::RVNGString &string, std::vector<unsigned long> &limits);
 protected:
   //
   // data
