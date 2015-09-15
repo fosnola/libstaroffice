@@ -63,11 +63,11 @@ public:
   virtual ~StarEncodingOtherKorean();
 
   /** try to read a caracter and add it to string: BIG5_HKSCS */
-  static bool readKoreanBig5(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-                             librevenge::RVNGString &string, std::vector<unsigned long> &limits);
+  static bool readKoreanBig5(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding,
+                             std::vector<uint32_t> &dest);
   /** try to read a caracter and add it to string: MS_1361 */
-  static bool readKoreanMS1361(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-                               librevenge::RVNGString &string, std::vector<unsigned long> &limits);
+  static bool readKoreanMS1361(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding,
+                               std::vector<uint32_t> &dest);
 protected:
   //
   // data

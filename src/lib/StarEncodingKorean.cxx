@@ -56,22 +56,22 @@ StarEncodingKorean::~StarEncodingKorean()
 {
 }
 
-bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-                                     librevenge::RVNGString &string, std::vector<unsigned long> &limits)
+bool StarEncodingKorean::readKorean1
+(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest)
 {
   if (encoding!=StarEncoding::E_MS_949 && encoding!=StarEncoding::E_EUC_KR && encoding!=StarEncoding::E_APPLE_KOREAN) {
     STOFF_DEBUG_MSG(("StarEncodingKorean::readKorean1: unknown encoding\n"));
     return false;
   }
-  long pos=input->tell();
-  if (pos+1>endPos) return false;
-  if (limits.back()!=string.size())
-    limits.push_back(string.size());
-  int c=(int) input->readULong(1), c2;
+  if (pos>=src.size()) return false;
+  int c=(int) src[pos++], c2=0;
+  if (c>=0x81 && c<=0xfe) {
+    if (pos>=src.size()) return false;
+    c2=(int) src[pos++];
+  }
   uint32_t unicode=uint32_t(c);
   switch (c) {
   case 0x81:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xAC02, 0xAC03, 0xAC05, 0xAC06, 0xAC0B, 0xAC0C, 0xAC0D, /* 0x40 */
@@ -105,7 +105,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x82:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xAD14, 0xAD15, 0xAD16, 0xAD17, 0xAD19, 0xAD1A, 0xAD1B, /* 0x40 */
@@ -139,7 +138,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x83:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xADFA, 0xADFB, 0xADFD, 0xADFE, 0xAE02, 0xAE03, 0xAE04, /* 0x40 */
@@ -173,7 +171,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x84:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xAEE6, 0xAEE7, 0xAEE9, 0xAEEA, 0xAEEC, 0xAEEE, 0xAEEF, /* 0x40 */
@@ -207,7 +204,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x85:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xAFBF, 0xAFC1, 0xAFC2, 0xAFC3, 0xAFC4, 0xAFC5, 0xAFC6, /* 0x40 */
@@ -241,7 +237,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x86:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xB0A5, 0xB0A6, 0xB0A7, 0xB0AA, 0xB0B0, 0xB0B2, 0xB0B6, /* 0x40 */
@@ -275,7 +270,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x87:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xB19E, 0xB19F, 0xB1A0, 0xB1A1, 0xB1A2, 0xB1A3, 0xB1A4, /* 0x40 */
@@ -309,7 +303,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x88:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xB26F, 0xB270, 0xB271, 0xB272, 0xB273, 0xB276, 0xB277, /* 0x40 */
@@ -343,7 +336,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x89:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xB366, 0xB368, 0xB36A, 0xB36C, 0xB36D, 0xB36F, 0xB372, /* 0x40 */
@@ -377,7 +369,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8a:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xB445, 0xB446, 0xB447, 0xB448, 0xB449, 0xB44A, 0xB44B, /* 0x40 */
@@ -411,7 +402,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8b:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xB51E, 0xB51F, 0xB520, 0xB521, 0xB522, 0xB523, 0xB526, /* 0x40 */
@@ -445,7 +435,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8c:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xB600, 0xB601, 0xB602, 0xB603, 0xB604, 0xB605, 0xB606, /* 0x40 */
@@ -479,7 +468,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8d:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xB6C3, 0xB6C4, 0xB6C5, 0xB6C6, 0xB6C7, 0xB6C8, 0xB6C9, /* 0x40 */
@@ -513,7 +501,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8e:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xB79F, 0xB7A1, 0xB7A2, 0xB7A3, 0xB7A4, 0xB7A5, 0xB7A6, /* 0x40 */
@@ -547,7 +534,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8f:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xB885, 0xB886, 0xB887, 0xB888, 0xB889, 0xB88A, 0xB88B, /* 0x40 */
@@ -581,7 +567,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x90:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xB95A, 0xB95B, 0xB95D, 0xB95E, 0xB95F, 0xB961, 0xB962, /* 0x40 */
@@ -615,7 +600,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x91:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xBA47, 0xBA4A, 0xBA4C, 0xBA4F, 0xBA50, 0xBA51, 0xBA52, /* 0x40 */
@@ -649,7 +633,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x92:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xBB28, 0xBB2A, 0xBB2C, 0xBB2D, 0xBB2E, 0xBB2F, 0xBB30, /* 0x40 */
@@ -683,7 +666,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x93:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xBC03, 0xBC04, 0xBC05, 0xBC06, 0xBC07, 0xBC0A, 0xBC0E, /* 0x40 */
@@ -717,7 +699,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x94:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xBCFE, 0xBCFF, 0xBD00, 0xBD01, 0xBD02, 0xBD03, 0xBD06, /* 0x40 */
@@ -751,7 +732,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x95:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xBDD2, 0xBDD3, 0xBDD6, 0xBDD7, 0xBDD9, 0xBDDA, 0xBDDB, /* 0x40 */
@@ -785,7 +765,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x96:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xBEB8, 0xBEB9, 0xBEBA, 0xBEBB, 0xBEBC, 0xBEBD, 0xBEBE, /* 0x40 */
@@ -819,7 +798,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x97:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xBF83, 0xBF84, 0xBF85, 0xBF86, 0xBF87, 0xBF88, 0xBF89, /* 0x40 */
@@ -853,7 +831,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x98:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xC040, 0xC041, 0xC042, 0xC043, 0xC044, 0xC045, 0xC046, /* 0x40 */
@@ -887,7 +864,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x99:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xC132, 0xC133, 0xC134, 0xC135, 0xC137, 0xC13A, 0xC13B, /* 0x40 */
@@ -921,7 +897,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x9a:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xC224, 0xC225, 0xC226, 0xC227, 0xC22A, 0xC22C, 0xC22E, /* 0x40 */
@@ -955,7 +930,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x9b:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xC310, 0xC311, 0xC312, 0xC316, 0xC317, 0xC319, 0xC31A, /* 0x40 */
@@ -989,7 +963,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x9c:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xC3DB, 0xC3DD, 0xC3DE, 0xC3E1, 0xC3E3, 0xC3E4, 0xC3E5, /* 0x40 */
@@ -1023,7 +996,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x9d:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xC4AA, 0xC4AB, 0xC4AC, 0xC4AD, 0xC4AE, 0xC4AF, 0xC4B0, /* 0x40 */
@@ -1057,7 +1029,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x9e:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xC596, 0xC599, 0xC59A, 0xC59B, 0xC59D, 0xC59E, 0xC59F, /* 0x40 */
@@ -1091,7 +1062,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x9f:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xC6A8, 0xC6AA, 0xC6AB, 0xC6AC, 0xC6AD, 0xC6AE, 0xC6AF, /* 0x40 */
@@ -1125,7 +1095,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa0:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xC7B8, 0xC7B9, 0xC7BA, 0xC7BB, 0xC7BE, 0xC7C2, 0xC7C3, /* 0x40 */
@@ -1159,7 +1128,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa1:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xC8A5, 0xC8A6, 0xC8A7, 0xC8A9, 0xC8AA, 0xC8AB, 0xC8AC, /* 0x40 */
@@ -1193,7 +1161,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa2:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xC910, 0xC912, 0xC913, 0xC914, 0xC915, 0xC916, 0xC917, /* 0x40 */
@@ -1224,7 +1191,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa3:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xC971, 0xC972, 0xC973, 0xC975, 0xC976, 0xC977, 0xC978, /* 0x40 */
@@ -1258,7 +1224,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa4:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xC9DE, 0xC9DF, 0xC9E1, 0xC9E3, 0xC9E5, 0xC9E6, 0xC9E8, /* 0x40 */
@@ -1292,7 +1257,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa5:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xf8) {
       static int const(val[])= {
         0xCA47, 0xCA48, 0xCA49, 0xCA4A, 0xCA4B, 0xCA4E, 0xCA4F, /* 0x40 */
@@ -1326,7 +1290,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa6:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfc) {
       static int const(val[])= {
         0xCAA8, 0xCAA9, 0xCAAA, 0xCAAB, 0xCAAC, 0xCAAD, 0xCAAE, /* 0x40 */
@@ -1357,7 +1320,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa7:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xef) {
       static int const(val[])= {
         0xCB0B, 0xCB0C, 0xCB0D, 0xCB0E, 0xCB0F, 0xCB11, 0xCB12, /* 0x40 */
@@ -1389,7 +1351,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa8:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xCB6D, 0xCB6E, 0xCB6F, 0xCB70, 0xCB71, 0xCB72, 0xCB73, /* 0x40 */
@@ -1423,7 +1384,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa9:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xCBC5, 0xCBC6, 0xCBC7, 0xCBC8, 0xCBC9, 0xCBCA, 0xCBCB, /* 0x40 */
@@ -1457,7 +1417,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xaa:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfb) {
       static int const(val[])= {
         0xCC25, 0xCC26, 0xCC2A, 0xCC2B, 0xCC2D, 0xCC2F, 0xCC31, /* 0x40 */
@@ -1490,7 +1449,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xab:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xCC94, 0xCC95, 0xCC96, 0xCC97, 0xCC9A, 0xCC9B, 0xCC9D, /* 0x40 */
@@ -1523,7 +1481,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xac:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xf9) {
       static int const(val[])= {
         0xCCFE, 0xCCFF, 0xCD00, 0xCD02, 0xCD03, 0xCD04, 0xCD05, /* 0x40 */
@@ -1556,7 +1513,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xad:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xa0) {
       static int const(val[])= {
         0xCD61, 0xCD62, 0xCD63, 0xCD65, 0xCD66, 0xCD67, 0xCD68, /* 0x40 */
@@ -1579,7 +1535,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xae:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xa0) {
       static int const(val[])= {
         0xCDC6, 0xCDC7, 0xCDC8, 0xCDC9, 0xCDCA, 0xCDCB, 0xCDCD, /* 0x40 */
@@ -1602,7 +1557,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xaf:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xa0) {
       static int const(val[])= {
         0xCE2C, 0xCE2D, 0xCE2E, 0xCE2F, 0xCE32, 0xCE34, 0xCE36, /* 0x40 */
@@ -1625,7 +1579,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb0:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xCE9A, 0xCE9B, 0xCE9C, 0xCE9D, 0xCE9E, 0xCE9F, 0xCEA2, /* 0x40 */
@@ -1659,7 +1612,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb1:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xCF02, 0xCF03, 0xCF05, 0xCF06, 0xCF07, 0xCF09, 0xCF0A, /* 0x40 */
@@ -1693,7 +1645,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb2:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xCF6D, 0xCF6E, 0xCF6F, 0xCF72, 0xCF73, 0xCF75, 0xCF76, /* 0x40 */
@@ -1727,7 +1678,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb3:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xCFCC, 0xCFCD, 0xCFCE, 0xCFCF, 0xCFD0, 0xCFD1, 0xCFD2, /* 0x40 */
@@ -1761,7 +1711,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb4:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD02E, 0xD02F, 0xD030, 0xD031, 0xD032, 0xD033, 0xD036, /* 0x40 */
@@ -1795,7 +1744,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb5:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD095, 0xD096, 0xD097, 0xD098, 0xD099, 0xD09A, 0xD09B, /* 0x40 */
@@ -1829,7 +1777,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb6:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD105, 0xD106, 0xD107, 0xD108, 0xD109, 0xD10A, 0xD10B, /* 0x40 */
@@ -1863,7 +1810,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb7:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD16E, 0xD16F, 0xD170, 0xD171, 0xD172, 0xD173, 0xD174, /* 0x40 */
@@ -1897,7 +1843,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb8:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD1D0, 0xD1D1, 0xD1D2, 0xD1D3, 0xD1D4, 0xD1D5, 0xD1D6, /* 0x40 */
@@ -1931,7 +1876,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb9:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD22A, 0xD22B, 0xD22E, 0xD22F, 0xD231, 0xD232, 0xD233, /* 0x40 */
@@ -1965,7 +1909,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xba:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD28D, 0xD28E, 0xD28F, 0xD292, 0xD293, 0xD294, 0xD296, /* 0x40 */
@@ -1999,7 +1942,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xbb:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD2FB, 0xD2FC, 0xD2FD, 0xD2FE, 0xD2FF, 0xD302, 0xD304, /* 0x40 */
@@ -2033,7 +1975,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xbc:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD36A, 0xD36B, 0xD36C, 0xD36D, 0xD36E, 0xD36F, 0xD370, /* 0x40 */
@@ -2067,7 +2008,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xbd:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD3D7, 0xD3D9, 0xD3DA, 0xD3DB, 0xD3DC, 0xD3DD, 0xD3DE, /* 0x40 */
@@ -2101,7 +2041,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xbe:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD438, 0xD439, 0xD43A, 0xD43B, 0xD43C, 0xD43D, 0xD43E, /* 0x40 */
@@ -2135,7 +2074,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xbf:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD49E, 0xD49F, 0xD4A0, 0xD4A1, 0xD4A2, 0xD4A3, 0xD4A4, /* 0x40 */
@@ -2169,7 +2107,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc0:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD4FE, 0xD4FF, 0xD500, 0xD501, 0xD502, 0xD503, 0xD505, /* 0x40 */
@@ -2203,7 +2140,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc1:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD564, 0xD566, 0xD567, 0xD56A, 0xD56C, 0xD56E, 0xD56F, /* 0x40 */
@@ -2237,7 +2173,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc2:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD5CA, 0xD5CB, 0xD5CD, 0xD5CE, 0xD5CF, 0xD5D1, 0xD5D3, /* 0x40 */
@@ -2271,7 +2206,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc3:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD63D, 0xD63E, 0xD63F, 0xD641, 0xD642, 0xD643, 0xD644, /* 0x40 */
@@ -2305,7 +2239,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc4:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD6AB, 0xD6AD, 0xD6AE, 0xD6AF, 0xD6B1, 0xD6B2, 0xD6B3, /* 0x40 */
@@ -2339,7 +2272,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc5:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD715, 0xD716, 0xD717, 0xD71A, 0xD71B, 0xD71D, 0xD71E, /* 0x40 */
@@ -2373,7 +2305,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc6:
-    c2=(int) input->readULong(1);
     if (c2>=0x41 && c2<=0xfe) {
       static int const(val[])= {
         0xD78D, 0xD78E, 0xD78F, 0xD791, 0xD792, 0xD793, 0xD794, /* 0x40 */
@@ -2407,7 +2338,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc7:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0xD408, 0xD41D, 0xD440, 0xD444, 0xD45C, 0xD460, 0xD464, /* 0xA0 */
@@ -2429,7 +2359,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc8:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0xD624, 0xD62D, 0xD638, 0xD639, 0xD63C, 0xD640, 0xD645, /* 0xA0 */
@@ -2451,7 +2380,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xca:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x4F3D, 0x4F73, 0x5047, 0x50F9, 0x52A0, 0x53EF, 0x5475, /* 0xA0 */
@@ -2473,7 +2401,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xcb:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x5323, 0x5CAC, 0x7532, 0x80DB, 0x9240, 0x9598, 0x525B, /* 0xA0 */
@@ -2495,7 +2422,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xcc:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x77BC, 0x9210, 0x9ED4, 0x52AB, 0x602F, 0x8FF2, 0x5048, /* 0xA0 */
@@ -2517,7 +2443,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xcd:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x68E8, 0x6EAA, 0x754C, 0x7678, 0x78CE, 0x7A3D, 0x7CFB, /* 0xA0 */
@@ -2539,7 +2464,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xce:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x79D1, 0x83D3, 0x8A87, 0x8AB2, 0x8DE8, 0x904E, 0x934B, /* 0xA0 */
@@ -2561,7 +2485,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xcf:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x5340, 0x53E3, 0x53E5, 0x548E, 0x5614, 0x5775, 0x57A2, /* 0xA0 */
@@ -2583,7 +2506,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd0:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x9B3C, 0xF907, 0x53EB, 0x572D, 0x594E, 0x63C6, 0x69FB, /* 0xA0 */
@@ -2605,7 +2527,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd1:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x671E, 0x671F, 0x675E, 0x68CB, 0x68C4, 0x6A5F, 0x6B3A, /* 0xA0 */
@@ -2627,7 +2548,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd2:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x7D0D, 0xF926, 0xF927, 0x8872, 0x56CA, 0x5A18, 0xF928, /* 0xA0 */
@@ -2649,7 +2569,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd3:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x4E39, 0x4EB6, 0x4F46, 0x55AE, 0x5718, 0x58C7, 0x5F56, /* 0xA0 */
@@ -2671,7 +2590,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd4:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x68F9, 0x6AC2, 0x6DD8, 0x6E21, 0x6ED4, 0x6FE4, 0x71FE, /* 0xA0 */
@@ -2693,7 +2611,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd5:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x863F, 0x87BA, 0x88F8, 0x908F, 0xF95C, 0x6D1B, 0x70D9, /* 0xA0 */
@@ -2715,7 +2632,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd6:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x7149, 0x7489, 0x7DF4, 0x806F, 0x84EE, 0x8F26, 0x9023, /* 0xA0 */
@@ -2737,7 +2653,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd7:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x907C, 0x9B27, 0x9F8D, 0x58D8, 0x5A41, 0x5C62, 0x6A13, /* 0xA0 */
@@ -2759,7 +2674,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd8:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x7ACB, 0x7B20, 0x7C92, 0x6469, 0x746A, 0x75F2, 0x78BC, /* 0xA0 */
@@ -2781,7 +2695,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd9:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x8511, 0x51A5, 0x540D, 0x547D, 0x660E, 0x669D, 0x6927, /* 0xA0 */
@@ -2803,7 +2716,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xda:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x6C76, 0x7D0A, 0x7D0B, 0x805E, 0x868A, 0x9580, 0x96EF, /* 0xA0 */
@@ -2825,7 +2737,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xdb:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x767C, 0x8DCB, 0x91B1, 0x9262, 0x9AEE, 0x9B43, 0x5023, /* 0xA0 */
@@ -2847,7 +2758,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xdc:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x78A7, 0x8617, 0x95E2, 0x9739, 0xF965, 0x535E, 0x5F01, /* 0xA0 */
@@ -2869,7 +2779,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xdd:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x5B5A, 0x5B75, 0x5BCC, 0x5E9C, 0xF966, 0x6276, 0x6577, /* 0xA0 */
@@ -2891,7 +2800,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xde:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x813E, 0x81C2, 0x83F2, 0x871A, 0x88E8, 0x8AB9, 0x8B6C, /* 0xA0 */
@@ -2913,7 +2821,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xdf:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x5098, 0x522A, 0x5C71, 0x6563, 0x6C55, 0x73CA, 0x7523, /* 0xA0 */
@@ -2935,7 +2842,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe0:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x80E5, 0x8212, 0x85AF, 0x897F, 0x8A93, 0x901D, 0x92E4, /* 0xA0 */
@@ -2957,7 +2863,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe1:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x8056, 0x8072, 0x8165, 0x8AA0, 0x9192, 0x4E16, 0x52E2, /* 0xA0 */
@@ -2979,7 +2884,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe2:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x620D, 0x624B, 0x6388, 0x641C, 0x6536, 0x6578, 0x6A39, /* 0xA0 */
@@ -3001,7 +2905,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe3:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x5D69, 0x745F, 0x819D, 0x8768, 0x6FD5, 0x62FE, 0x7FD2, /* 0xA0 */
@@ -3023,7 +2926,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe4:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0xF972, 0x6DF1, 0x700B, 0x751A, 0x82AF, 0x8AF6, 0x4EC0, /* 0xA0 */
@@ -3045,7 +2947,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe5:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x6AFB, 0x7F4C, 0x9DAF, 0x9E1A, 0x4E5F, 0x503B, 0x51B6, /* 0xA0 */
@@ -3067,7 +2968,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe6:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0xF983, 0x6B5F, 0x6C5D, 0xF984, 0x74B5, 0x7916, 0xF985, /* 0xA0 */
@@ -3089,7 +2989,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe7:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0xF9A6, 0x95BB, 0x9AE5, 0x9E7D, 0x66C4, 0xF9A7, 0x71C1, /* 0xA0 */
@@ -3111,7 +3010,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe8:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x70CF, 0x71AC, 0x7352, 0x7B7D, 0x8708, 0x8AA4, 0x9C32, /* 0xA0 */
@@ -3133,7 +3031,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe9:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x7A88, 0x7AAF, 0x7E47, 0x7E5E, 0x8000, 0x8170, 0xF9C2, /* 0xA0 */
@@ -3155,7 +3052,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xea:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x904B, 0x9695, 0x96F2, 0x97FB, 0x851A, 0x9B31, 0x4E90, /* 0xA0 */
@@ -3177,7 +3073,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xeb:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x6FE1, 0x7336, 0x7337, 0xF9CC, 0x745C, 0x7531, 0xF9CD, /* 0xA0 */
@@ -3199,7 +3094,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xec:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x8B70, 0x91AB, 0x4E8C, 0x4EE5, 0x4F0A, 0xF9DD, 0xF9DE, /* 0xA0 */
@@ -3221,7 +3115,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xed:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0xF9F7, 0xF9F8, 0xF9F9, 0x4ECD, 0x5269, 0x5B55, 0x82BF, /* 0xA0 */
@@ -3243,7 +3136,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xee:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x969C, 0x518D, 0x54C9, 0x5728, 0x5BB0, 0x624D, 0x6750, /* 0xA0 */
@@ -3265,7 +3157,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xef:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x714E, 0x7420, 0x7530, 0x7538, 0x7551, 0x7672, 0x7B4C, /* 0xA0 */
@@ -3287,7 +3178,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf0:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x975C, 0x9802, 0x9F0E, 0x5236, 0x5291, 0x557C, 0x5824, /* 0xA0 */
@@ -3309,7 +3199,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf1:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x8E2A, 0x8E35, 0x937E, 0x9418, 0x4F50, 0x5750, 0x5DE6, /* 0xA0 */
@@ -3331,7 +3220,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf2:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x54AB, 0x5730, 0x5740, 0x5FD7, 0x6301, 0x6307, 0x646F, /* 0xA0 */
@@ -3353,7 +3241,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf3:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x93F6, 0x96C6, 0x5FB5, 0x61F2, 0x6F84, 0x4E14, 0x4F98, /* 0xA0 */
@@ -3375,7 +3262,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf4:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x8CAC, 0x51C4, 0x59BB, 0x60BD, 0x8655, 0x501C, 0xF9FF, /* 0xA0 */
@@ -3397,7 +3283,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf5:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x6912, 0x695A, 0x6A35, 0x7092, 0x7126, 0x785D, 0x7901, /* 0xA0 */
@@ -3419,7 +3304,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf6:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x8D05, 0x53D6, 0x5439, 0x5634, 0x5A36, 0x5C31, 0x708A, /* 0xA0 */
@@ -3441,7 +3325,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf7:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x9438, 0x5451, 0x5606, 0x5766, 0x5F48, 0x619A, 0x6B4E, /* 0xA0 */
@@ -3463,7 +3346,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf8:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x962A, 0x516B, 0x53ED, 0x634C, 0x4F69, 0x5504, 0x6096, /* 0xA0 */
@@ -3485,7 +3367,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf9:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x54C1, 0x7A1F, 0x6953, 0x8AF7, 0x8C4A, 0x98A8, 0x99AE, /* 0xA0 */
@@ -3507,7 +3388,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xfa:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0xFA08, 0xFA09, 0x9805, 0x4EA5, 0x5055, 0x54B3, 0x5793, /* 0xA0 */
@@ -3529,7 +3409,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xfb:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x5F62, 0x6CC2, 0x6ECE, 0x7005, 0x7050, 0x70AF, 0x7192, /* 0xA0 */
@@ -3551,7 +3430,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xfc:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x798D, 0x79BE, 0x82B1, 0x83EF, 0x8A71, 0x8B41, 0x8CA8, /* 0xA0 */
@@ -3573,7 +3451,6 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xfd:
-    c2=(int) input->readULong(1);
     if (c2>=0xa1 && c2<=0xfe) {
       static int const(val[])= {
         0x723B, 0x80B4, 0x9175, 0x9A4D, 0x4FAF, 0x5019, 0x539A, /* 0xA0 */
@@ -3596,18 +3473,16 @@ bool StarEncodingKorean::readKorean1(STOFFInputStreamPtr &input, StarEncoding::E
     break;
   default:
     if (c==0xc9 || c==0xfe) {
-      c2=(int) input->readULong(1);
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
       break;
     }
     break;
   }
-  if (unicode)
-    libstoff::appendUnicode(unicode, string);
-  else {
+  if (!unicode) {
     STOFF_DEBUG_MSG(("StarEncodingKorean::readKorean1: unknown caracter %x\n", (unsigned int)c));
   }
-  return input->tell()<=endPos;
+  dest.push_back(unicode);
+  return true;
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

@@ -50,24 +50,10 @@
 
 #include "StarEncoding.hxx"
 
-/** Internal: the structures of a StarEncoding */
-namespace StarEncodingInternal
-{
-////////////////////////////////////////
-//! Internal: the state of a StarEncoding
-struct State {
-  //! constructor
-  State()
-  {
-  }
-};
-
-}
-
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarEncoding::StarEncoding() : m_state(new StarEncodingInternal::State)
+StarEncoding::StarEncoding()
 {
 }
 
@@ -75,33 +61,41 @@ StarEncoding::~StarEncoding()
 {
 }
 
-bool StarEncoding::read(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-                        librevenge::RVNGString &string, std::vector<unsigned long> &limits)
+bool StarEncoding::convert(std::vector<uint8_t> const &src, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest)
+{
+  size_t pos=0;
+  while (pos<src.size()) {
+    size_t actPos=pos;
+    if (!read(src, pos, encoding, dest) && actPos>=pos)
+      break;
+  }
+  return !dest.empty() || src.empty();
+}
+
+bool StarEncoding::read
+(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest)
 {
   if (encoding==E_SHIFT_JIS || encoding==E_MS_932 || encoding==E_APPLE_JAPANESE)
-    return StarEncodingJapanese::readJapanese1(input, encoding, endPos, string, limits);
+    return StarEncodingJapanese::readJapanese1(src, pos, encoding, dest);
   if (encoding==E_JIS_X_0208)
-    return StarEncodingJapanese::readJapanese208(input, encoding, endPos, string, limits);
+    return StarEncodingJapanese::readJapanese208(src, pos, encoding, dest);
   if (encoding==E_JIS_X_0212)
-    return StarEncodingJapanese::readJapanese212(input, encoding, endPos, string, limits);
+    return StarEncodingJapanese::readJapanese212(src, pos, encoding, dest);
   if (encoding==E_EUC_JP)
-    return StarEncodingJapanese::readJapaneseEUC(input, encoding, endPos, string, limits);
+    return StarEncodingJapanese::readJapaneseEUC(src, pos, encoding, dest);
   if (encoding==E_BIG5 || encoding==E_MS_950 || encoding==E_APPLE_CHINTRAD)
-    return StarEncodingTradChinese::readChinese1(input, encoding, endPos, string, limits);
+    return StarEncodingTradChinese::readChinese1(src, pos, encoding, dest);
   if (encoding==E_GBK || encoding==E_GB_2312  || encoding==E_EUC_CN ||
       encoding==E_GBT_12345 || encoding==E_MS_936 || encoding==E_APPLE_CHINSIMP)
-    return StarEncodingChinese::readChinese1(input, encoding, endPos, string, limits);
+    return StarEncodingChinese::readChinese1(src, pos, encoding, dest);
   if (encoding==E_MS_949 && encoding==E_EUC_KR && encoding==E_APPLE_KOREAN)
-    return StarEncodingKorean::readKorean1(input, encoding, endPos, string, limits);
+    return StarEncodingKorean::readKorean1(src, pos, encoding, dest);
   if (encoding==E_BIG5_HKSCS)
-    return StarEncodingOtherKorean::readKoreanBig5(input, encoding, endPos, string, limits);
+    return StarEncodingOtherKorean::readKoreanBig5(src, pos, encoding, dest);
   if (encoding==E_MS_1361)
-    return StarEncodingOtherKorean::readKoreanMS1361(input, encoding, endPos, string, limits);
-  long pos=input->tell();
-  if (pos+1>endPos) return false;
-  if (limits.back()!=string.size())
-    limits.push_back(string.size());
-  int c=(int) input->readULong(1);
+    return StarEncodingOtherKorean::readKoreanMS1361(src, pos, encoding, dest);
+  if (pos>=src.size()) return false;
+  int c=(int) src[pos++];
   uint32_t unicode=uint32_t(c);
   switch (encoding) {
   case E_ASCII_US: // use the same as MS1252
@@ -1161,24 +1155,21 @@ bool StarEncoding::read(STOFFInputStreamPtr &input, StarEncoding::Encoding encod
   }
   case E_UTF7: {
     // we must decode the complete string here
-    input->seek(-1, librevenge::RVNG_SEEK_CUR);
-    while (input->tell()<endPos) {
-      c=(int) input->readULong(1);
+    --pos;
+    while (pos < src.size()) {
+      c=(int) src[pos++];
       if (c!=int('+')) {
-        libstoff::appendUnicode(uint32_t(c), string);
-        limits.push_back(string.size());
+        dest.push_back(uint32_t(c));
         continue;
       }
       bool firstWrite=false;
       int nBits=0;
       uint32_t actValue=0;
-      while (input->tell()<endPos) {
-        c=(int) input->readULong(1);
+      while (pos<src.size()) {
+        c=(int) src[pos++];
         if (c=='-') {
-          if (!firstWrite) { // +- is +
-            string.append('+');
-            limits.push_back(string.size());
-          }
+          if (!firstWrite) // +- is +
+            dest.push_back((uint32_t) '+');
           else if (nBits>=6) {
             STOFF_DEBUG_MSG(("StarEncoding::read: arrgh nBits=%d\n", nBits));
           }
@@ -1207,7 +1198,6 @@ bool StarEncoding::read(STOFFInputStreamPtr &input, StarEncoding::Encoding encod
         };
         if (c>=0x80 || charToId[c]==0xff) {
           STOFF_DEBUG_MSG(("StarEncoding::read: arrgh find for %x\n", (unsigned int)c));
-          input->seek(-1, librevenge::RVNG_SEEK_CUR);
           return false;
         }
         nBits+=6;
@@ -1215,8 +1205,7 @@ bool StarEncoding::read(STOFFInputStreamPtr &input, StarEncoding::Encoding encod
         if (nBits<16) continue;
         unicode=uint32_t((actValue>>(nBits-16))&0xffff);
         actValue=actValue&((1<<(nBits-16))-1);
-        libstoff::appendUnicode(unicode, string);
-        limits.push_back(string.size());
+        dest.push_back(unicode);
         nBits-=16;
       }
     }
@@ -1224,7 +1213,7 @@ bool StarEncoding::read(STOFFInputStreamPtr &input, StarEncoding::Encoding encod
   }
   case E_UTF8: { // create string directly
     bool bad=false;
-    int numExtra=0;
+    size_t numExtra=0;
     if ((c&0x80)==0x80) {
       if ((c&0x40)==0) bad=true;
       else if ((c&0x20)==0) numExtra=1;
@@ -1234,18 +1223,18 @@ bool StarEncoding::read(STOFFInputStreamPtr &input, StarEncoding::Encoding encod
       else if ((c&0x2)==0) numExtra=5;
       else bad=true;
     }
-    if (bad||input->tell()+numExtra>endPos) {
+    if (bad||pos+numExtra>src.size()) {
       STOFF_DEBUG_MSG(("StarEncoding::read: can not read some caracter for %x\n", (unsigned int)c));
       return false;
     }
-    string.append(char(c));
-    for (int i=0; i<numExtra; ++i) {
-      c=(char)input->readULong(1);
+    dest.push_back(uint32_t(c));
+    for (size_t i=0; i<numExtra; ++i) {
+      c=(char)src[pos++];
       if ((c&0xc0)!=0x80) {
         STOFF_DEBUG_MSG(("StarEncoding::read: some extra caracter seems bad for %x, try to correct\n", (unsigned int)c));
         c=(c&0x3f)|0x80;
       }
-      string.append((char)c);
+      dest.push_back((uint32_t)c);
     }
     return true;
   }
@@ -1274,9 +1263,9 @@ bool StarEncoding::read(STOFFInputStreamPtr &input, StarEncoding::Encoding encod
   }
   case E_ISCII_DEVANAGARI: {
     if (c==0x9) {
-      c=(int) input->readULong(1);
+      if (pos>=src.size()) return false;
+      c=(int) src[pos++];
       if (c<1 || c>0x6f) {
-        input->seek(-1, librevenge::RVNG_SEEK_CUR);
         STOFF_DEBUG_MSG(("StarEncoding::read: find unexpected char 0x09%x\n", (unsigned int)(c)));
         break;
       }
@@ -1320,11 +1309,12 @@ bool StarEncoding::read(STOFFInputStreamPtr &input, StarEncoding::Encoding encod
     unicode=0xfec0+uint32_t(c);
     break;
   case E_UCS4: // assume bigendian
-    unicode=uint32_t((unicode<<8)|input->readULong(1));
-    unicode=uint32_t((unicode<<16)|input->readULong(2));
+    if (pos+3>=src.size()) return false;
+    for (int i=0; i<3; ++i) unicode=uint32_t((unicode<<8)|src[pos++]);
     break;
   case E_UCS2: // assume bigendian
-    unicode=uint32_t((unicode<<8)|input->readULong(1));
+    if (pos+3>=src.size()) return false;
+    unicode=uint32_t((unicode<<8)|src[pos++]);
     break;
   case E_SHIFT_JIS: // already done
   case E_MS_932: // already done
@@ -1351,11 +1341,10 @@ bool StarEncoding::read(STOFFInputStreamPtr &input, StarEncoding::Encoding encod
     STOFF_DEBUG_MSG(("StarEncoding::read: unimplemented encoding %d\n", int(encoding)));
     break;
   }
-  if (unicode)
-    libstoff::appendUnicode(unicode, string);
-  else {
+  if (!unicode) {
     STOFF_DEBUG_MSG(("StarEncoding::read: unknown caracter %x\n", (unsigned int)c));
   }
-  return input->tell()<=endPos;
+  dest.push_back(unicode);
+  return true;
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

@@ -43,14 +43,6 @@
 #include "STOFFDebug.hxx"
 #include "STOFFInputStream.hxx"
 
-namespace StarEncodingInternal
-{
-struct State;
-}
-
-class StarDocument;
-class StarZone;
-
 /** \brief the main class to read/.. some basic encoding in StarOffice documents
  *
  *
@@ -86,20 +78,16 @@ public:
   //! destructor
   virtual ~StarEncoding();
 
-  /** try to read a caracter and add it to string
+  //! try to convert a list of character and transforms it a unicode's list
+  static bool convert(std::vector<uint8_t> const &src, Encoding encoding, std::vector<uint32_t> &dest);
+
+protected:
+  /** try to read a character and add it to string
 
       \note: normally, we only read caracter one by one but sometimes,
       we need to read a complete set of caracters (utf7, ...). limits can be use
       to retrieve the "original" caracters.*/
-  static bool read(STOFFInputStreamPtr &input, Encoding encoding, long endPos,
-                   librevenge::RVNGString &string, std::vector<unsigned long> &limits);
-protected:
-  //
-  // data
-  //
-private:
-  //! the state
-  shared_ptr<StarEncodingInternal::State> m_state;
+  static bool read(std::vector<uint8_t> const &src, size_t &pos, Encoding encoding, std::vector<uint32_t> &dest);
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

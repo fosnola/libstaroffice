@@ -63,17 +63,13 @@ public:
   virtual ~StarEncodingJapanese();
 
   /** try to read a caracter and add it to string: MS932, SHIFT_JIS, APPLE_JAPANESE*/
-  static bool readJapanese1(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-                            librevenge::RVNGString &string, std::vector<unsigned long> &limits);
+  static bool readJapanese1(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest);
   /** try to read a caracter and add it to string: EUC_JP*/
-  static bool readJapaneseEUC(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-                              librevenge::RVNGString &string, std::vector<unsigned long> &limits);
+  static bool readJapaneseEUC(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest);
   /** try to read a caracter and add it to string: JIS_X_0208*/
-  static bool readJapanese208(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-                              librevenge::RVNGString &string, std::vector<unsigned long> &limits);
+  static bool readJapanese208(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest);
   /** try to read a caracter and add it to string: JIS_X_0212*/
-  static bool readJapanese212(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-                              librevenge::RVNGString &string, std::vector<unsigned long> &limits);
+  static bool readJapanese212(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest);
 protected:
   //
   // data

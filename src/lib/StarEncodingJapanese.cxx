@@ -56,25 +56,25 @@ StarEncodingJapanese::~StarEncodingJapanese()
 {
 }
 
-bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-    librevenge::RVNGString &string, std::vector<unsigned long> &limits)
+bool StarEncodingJapanese::readJapanese1
+(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest)
 {
   if (encoding!=StarEncoding::E_SHIFT_JIS && encoding!=StarEncoding::E_MS_932 && encoding!=StarEncoding::E_APPLE_JAPANESE) {
     STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese1: unknown encoding\n"));
     return false;
   }
-  long pos=input->tell();
-  if (pos+1>endPos) return false;
-  if (limits.back()!=string.size())
-    limits.push_back(string.size());
-  int c=(int) input->readULong(1), c2;
+  if (pos>=src.size()) return false;
+  int c=(int) src[pos++], c2=0;
+  if ((c>=0x81 && c<=0x9f) || (c>=0xa1 && c<=0xfc)) {
+    if (pos>=src.size()) return false;
+    c2=(int) src[pos++];
+  }
   uint32_t unicode=uint32_t(c);
   switch (c) {
   case 0x80:
     unicode=0x5c;
     break;
   case 0x81:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x3000, 0x3001, 0x3002, 0xFF0C, 0xFF0E, 0x30FB, 0xFF1A, 0xFF1B, /* 0x40 */
@@ -108,7 +108,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x82:
-    c2=(int) input->readULong(1);
     if (c2>=0x4f && c2<=0xf1) {
       static int const(val[])= {
         /* 0x40 */
@@ -142,7 +141,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x83:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xd7) {
       static int const(val[])= {
         0x30A1, 0x30A2, 0x30A3, 0x30A4, 0x30A5, 0x30A6, 0x30A7, 0x30A8, /* 0x40 */
@@ -172,7 +170,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x84:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xbe) {
       static int const(val[])= {
         0x0410, 0x0411, 0x0412, 0x0413, 0x0414, 0x0415, 0x0401, 0x0416, /* 0x40 */
@@ -198,7 +195,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x85:
-    c2=(int) input->readULong(1);
     if (encoding==StarEncoding::E_APPLE_JAPANESE && c2>=0x40 && c2<=0xf4) {
       static int const(val[])= {
         0x2460, 0x2461, 0x2462, 0x2463, 0x2464, 0x2465, 0x2466, 0x2467, /* 0x40 */
@@ -229,10 +225,9 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=(uint32_t) val[c2-0x40];
     }
     else
-      unicode=(unicode<<8)+(uint32_t)input->readULong(1);
+      unicode=(unicode<<8)+(uint32_t) c2;
     break;
   case 0x86:
-    c2=(int) input->readULong(1);
     if (encoding==StarEncoding::E_APPLE_JAPANESE && c2>=0x40 && c2<=0xd2) {
       static int const(val[])= {
         0x339C, 0x339F, 0x339D, 0x33A0, 0x33A4, 	 0, 0x33A1, 0x33A5, /* 0x40 */
@@ -259,10 +254,9 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=(uint32_t) val[c2-0x40];
     }
     else
-      unicode=(unicode<<8)+(uint32_t)input->readULong(1);
+      unicode=(unicode<<8)+(uint32_t)c2;
     break;
   case 0x87:
-    c2=(int) input->readULong(1);
     if (encoding!=StarEncoding::E_APPLE_JAPANESE && c2>=0x40 && c2<=0x9c) {
       static int const(val[])= {
         0x2460, 0x2461, 0x2462, 0x2463, 0x2464, 0x2465, 0x2466, 0x2467, /* 0x40 */
@@ -310,10 +304,9 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=(uint32_t) val[c2-0x40];
     }
     else
-      unicode=(unicode<<8)+(uint32_t)input->readULong(1);
+      unicode=(unicode<<8)+(uint32_t)c2;
     break;
   case 0x88:
-    c2=(int) input->readULong(1);
     if (encoding!=StarEncoding::E_APPLE_JAPANESE && c2>=0x9f && c2<=0xfc) {
       static int const(val[])= {
         /* 0x90 */
@@ -363,10 +356,9 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=(uint32_t) val[c2-0x40];
     }
     else
-      unicode=(unicode<<8)+(uint32_t)input->readULong(1);
+      unicode=(unicode<<8)+(uint32_t)c2;
     break;
   case 0x89:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x9662, 0x9670, 0x96A0, 0x97FB, 0x540B, 0x53F3, 0x5B87, 0x70CF, /* 0x40 */
@@ -400,7 +392,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8a:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x9B41, 0x6666, 0x68B0, 0x6D77, 0x7070, 0x754C, 0x7686, 0x7D75, /* 0x40 */
@@ -434,7 +425,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8b:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x6A5F, 0x5E30, 0x6BC5, 0x6C17, 0x6C7D, 0x757F, 0x7948, 0x5B63, /* 0x40 */
@@ -468,7 +458,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8c:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x6398, 0x7A9F, 0x6C93, 0x9774, 0x8F61, 0x7AAA, 0x718A, 0x9688, /* 0x40 */
@@ -502,7 +491,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8d:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x540E, 0x5589, 0x5751, 0x57A2, 0x597D, 0x5B54, 0x5B5D, 0x5B8F, /* 0x40 */
@@ -536,7 +524,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8e:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x5BDF, 0x62F6, 0x64AE, 0x64E6, 0x672D, 0x6BBA, 0x85A9, 0x96D1, /* 0x40 */
@@ -570,7 +557,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8f:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x5B97, 0x5C31, 0x5DDE, 0x4FEE, 0x6101, 0x62FE, 0x6D32, 0x79C0, /* 0x40 */
@@ -604,7 +590,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x90:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x62ED, 0x690D, 0x6B96, 0x71ED, 0x7E54, 0x8077, 0x8272, 0x89E6, /* 0x40 */
@@ -638,7 +623,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x91:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x7E4A, 0x7FA8, 0x817A, 0x821B, 0x8239, 0x85A6, 0x8A6E, 0x8CCE, /* 0x40 */
@@ -672,7 +656,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x92:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x53E9, 0x4F46, 0x9054, 0x8FB0, 0x596A, 0x8131, 0x5DFD, 0x7AEA, /* 0x40 */
@@ -706,7 +689,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x93:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x90B8, 0x912D, 0x91D8, 0x9F0E, 0x6CE5, 0x6458, 0x64E2, 0x6575, /* 0x40 */
@@ -740,7 +722,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x94:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x5982, 0x5C3F, 0x97EE, 0x4EFB, 0x598A, 0x5FCD, 0x8A8D, 0x6FE1, /* 0x40 */
@@ -774,7 +755,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x95:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x9F3B, 0x67CA, 0x7A17, 0x5339, 0x758B, 0x9AED, 0x5F66, 0x819D, /* 0x40 */
@@ -808,7 +788,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x96:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x6CD5, 0x6CE1, 0x70F9, 0x7832, 0x7E2B, 0x80DE, 0x82B3, 0x840C, /* 0x40 */
@@ -842,7 +821,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x97:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x8AED, 0x8F38, 0x552F, 0x4F51, 0x512A, 0x52C7, 0x53CB, 0x5BA5, /* 0x40 */
@@ -876,7 +854,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x98:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x84EE, 0x9023, 0x932C, 0x5442, 0x9B6F, 0x6AD3, 0x7089, 0x8CC2, /* 0x40 */
@@ -910,7 +887,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x99:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x50C9, 0x50CA, 0x50B3, 0x50C2, 0x50D6, 0x50DE, 0x50E5, 0x50ED, /* 0x40 */
@@ -944,7 +920,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x9a:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x54AB, 0x54C2, 0x54A4, 0x54BE, 0x54BC, 0x54D8, 0x54E5, 0x54E6, /* 0x40 */
@@ -978,7 +953,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x9b:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x5978, 0x5981, 0x599D, 0x4F5E, 0x4FAB, 0x59A3, 0x59B2, 0x59C6, /* 0x40 */
@@ -1012,7 +986,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x9c:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x5ED6, 0x5EE3, 0x5EDD, 0x5EDA, 0x5EDB, 0x5EE2, 0x5EE1, 0x5EE8, /* 0x40 */
@@ -1046,7 +1019,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x9d:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x621E, 0x6221, 0x622A, 0x622E, 0x6230, 0x6232, 0x6233, 0x6241, /* 0x40 */
@@ -1080,7 +1052,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x9e:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x66C4, 0x66B8, 0x66D6, 0x66DA, 0x66E0, 0x663F, 0x66E6, 0x66E9, /* 0x40 */
@@ -1114,7 +1085,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x9f:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x6A97, 0x8617, 0x6ABB, 0x6AC3, 0x6AC2, 0x6AB8, 0x6AB3, 0x6AAC, /* 0x40 */
@@ -1148,7 +1118,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe0:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x6F3E, 0x6F13, 0x6EF7, 0x6F86, 0x6F7A, 0x6F78, 0x6F81, 0x6F80, /* 0x40 */
@@ -1182,7 +1151,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe1:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x74E0, 0x74E3, 0x74E7, 0x74E9, 0x74EE, 0x74F2, 0x74F0, 0x74F1, /* 0x40 */
@@ -1216,7 +1184,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe2:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x78E7, 0x78DA, 0x78FD, 0x78F4, 0x7907, 0x7912, 0x7911, 0x7919, /* 0x40 */
@@ -1250,7 +1217,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe3:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x7D02, 0x7D1C, 0x7D15, 0x7D0A, 0x7D45, 0x7D4B, 0x7D2E, 0x7D32, /* 0x40 */
@@ -1284,7 +1250,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe4:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x968B, 0x8146, 0x813E, 0x8153, 0x8151, 0x80FC, 0x8171, 0x816E, /* 0x40 */
@@ -1318,7 +1283,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe5:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x8541, 0x8602, 0x854B, 0x8555, 0x8580, 0x85A4, 0x8588, 0x8591, /* 0x40 */
@@ -1352,7 +1316,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe6:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x8966, 0x8964, 0x896D, 0x896A, 0x896F, 0x8974, 0x8977, 0x897E, /* 0x40 */
@@ -1386,7 +1349,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe7:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x8E47, 0x8E49, 0x8E4C, 0x8E50, 0x8E48, 0x8E59, 0x8E64, 0x8E60, /* 0x40 */
@@ -1420,7 +1382,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe8:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x9319, 0x9322, 0x931A, 0x9323, 0x933A, 0x9335, 0x933B, 0x935C, /* 0x40 */
@@ -1454,7 +1415,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe9:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x9871, 0x9874, 0x9873, 0x98AA, 0x98AF, 0x98B1, 0x98B6, 0x98C4, /* 0x40 */
@@ -1488,7 +1448,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xea:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xa4) {
       static int const(val[])= {
         0x9D5D, 0x9D5E, 0x9D64, 0x9D51, 0x9D50, 0x9D59, 0x9D72, 0x9D89, /* 0x40 */
@@ -1512,7 +1471,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xeb:
-    c2=(int) input->readULong(1);
     if (encoding==StarEncoding::E_APPLE_JAPANESE && c2>=0x51 && c2<=0x7a) {
       static int const(val[])= {
         0xFE33, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, /* 0x50 */
@@ -1525,10 +1483,9 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=(uint32_t) val[c2-0x51];
     }
     else
-      unicode=(unicode<<8)+(uint32_t) input->readULong(1);
+      unicode=(unicode<<8)+(uint32_t) c2;
     break;
   case 0xed:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x7E8A, 0x891C, 0x9348, 0x9288, 0x84DC, 0x4FC9, 0x70BB, 0x6631, /* 0x40 */
@@ -1562,7 +1519,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xee:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x72BE, 0x7324, 0xFA16, 0x7377, 0x73BD, 0x73C9, 0x73D6, 0x73E3, /* 0x40 */
@@ -1596,7 +1552,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xfa:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x2170, 0x2171, 0x2172, 0x2173, 0x2174, 0x2175, 0x2176, 0x2177, /* 0x40 */
@@ -1630,7 +1585,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xfb:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x6D96, 0x6DAC, 0x6DCF, 0x6DF8, 0x6DF2, 0x6DFC, 0x6E39, 0x6E5C, /* 0x40 */
@@ -1664,7 +1618,6 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xfc:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0x4b) {
       static int const(val[])= {
         0x9ADC, 0x9B75, 0x9B72, 0x9B8F, 0x9BB1, 0x9BBB, 0x9C00, 0x9D70, /* 0x40 */
@@ -1690,64 +1643,60 @@ bool StarEncodingJapanese::readJapanese1(STOFFInputStreamPtr &input, StarEncodin
     else if (c>0xa0 && c<0xe0)
       unicode=0xfec0+(uint32_t) c;
     else if (c==0xec || (c>=0xef && c<=0xf9))
-      unicode=(unicode<<8)+(uint32_t)input->readULong(1);
+      unicode=(unicode<<8)+(uint32_t)c2;
     break;
   }
-  if (unicode)
-    libstoff::appendUnicode(unicode, string);
-  else {
+  if (!unicode) {
     STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese1: unknown caracter %x\n", (unsigned int)c));
   }
-  return input->tell()<=endPos;
+  dest.push_back(unicode);
+  return true;
 }
 
-bool StarEncodingJapanese::readJapaneseEUC(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-    librevenge::RVNGString &string, std::vector<unsigned long> &limits)
+bool StarEncodingJapanese::readJapaneseEUC
+(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest)
 {
   if (encoding!=StarEncoding::E_EUC_JP) {
     STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapaneseEUC: unknown encoding\n"));
     return false;
   }
-  long pos=input->tell();
-  if (pos+2>endPos) return false;
-  if (limits.back()!=string.size())
-    limits.push_back(string.size());
-  int c=(int) input->readULong(1);
+  if (pos>=src.size()) return false;
+  int c=src[pos++];
   uint32_t unicode=uint32_t(c);
-  if (c<=0x7f)
-    libstoff::appendUnicode(unicode, string);
-  else if (c==0x8e) {
-    c=(int) input->readULong(1);
+  if (c<=0x7f) {
+    dest.push_back(unicode);
+    return true;
+  }
+
+  if (c==0x8e) {
+    if (pos>=src.size()) return false;
+    c=(int) src[pos++];
     if (c>=0xa1&&c<=0xdf)
-      libstoff::appendUnicode(uint32_t(0xff61+(c-0xa1)), string);
+      dest.push_back(uint32_t(0xff61+(c-0xa1)));
     else {
       STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapaneseEUC: unknown char %x\n",(unsigned int) c));
-      input->seek(-1, librevenge::RVNG_SEEK_CUR);
       return false;
     }
   }
   else if (c==0x8f)
-    return readJapanese212(input, encoding, endPos, string, limits);
+    return readJapanese212(src, pos, encoding, dest);
   else {
-    input->seek(-1, librevenge::RVNG_SEEK_CUR);
-    return readJapanese208(input, encoding, endPos, string, limits);
+    --pos;
+    return readJapanese208(src, pos, encoding, dest);
   }
-  return input->tell()<=endPos;
+  return true;
 }
 
-bool StarEncodingJapanese::readJapanese208(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-    librevenge::RVNGString &string, std::vector<unsigned long> &limits)
+bool StarEncodingJapanese::readJapanese208
+(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest)
 {
   if (encoding!=StarEncoding::E_JIS_X_0208 && encoding!=StarEncoding::E_EUC_JP) {
     STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese208: unknown encoding\n"));
     return false;
   }
-  long pos=input->tell();
-  if (pos+1>endPos) return false;
-  if (limits.back()!=string.size())
-    limits.push_back(string.size());
   int const trailOff=StarEncoding::E_EUC_JP ? 0x80 : 0;
-  int c=(int) input->readULong(1), c2=(int) input->readULong(1);
+  if (pos+1>=src.size()) return false;
+  int c=(int) src[pos++], c2=src[pos++];
   if (c<trailOff || c2<trailOff) {
     STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese208: bad trail off\n"));
     return false;
@@ -3375,27 +3324,23 @@ bool StarEncodingJapanese::readJapanese208(STOFFInputStreamPtr &input, StarEncod
       unicode=0;
     break;
   }
-  if (unicode)
-    libstoff::appendUnicode(unicode, string);
-  else {
+  if (!unicode) {
     STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese208: unknown caracter %x\n", (unsigned int)c));
   }
-  return input->tell()<=endPos;
+  dest.push_back(unicode);
+  return true;
 }
 
-bool StarEncodingJapanese::readJapanese212(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-    librevenge::RVNGString &string, std::vector<unsigned long> &limits)
+bool StarEncodingJapanese::readJapanese212
+(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest)
 {
   if (encoding!=StarEncoding::E_JIS_X_0212 && encoding!=StarEncoding::E_EUC_JP) {
     STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese212: unknown encoding\n"));
     return false;
   }
-  long pos=input->tell();
-  if (pos+1>endPos) return false;
-  if (limits.back()!=string.size())
-    limits.push_back(string.size());
   int const trailOff=StarEncoding::E_EUC_JP ? 0x80 : 0;
-  int c=(int) input->readULong(1), c2=(int) input->readULong(1);
+  if (pos+1>=src.size()) return false;
+  int c=(int) src[pos++], c2=src[pos++];
   if (c<trailOff || c2<trailOff) {
     STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese212: bad trail off\n"));
     return false;
@@ -4822,11 +4767,10 @@ bool StarEncodingJapanese::readJapanese212(STOFFInputStreamPtr &input, StarEncod
       unicode=0;
     break;
   }
-  if (unicode)
-    libstoff::appendUnicode(unicode, string);
-  else {
+  if (!unicode) {
     STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese212: unknown caracter %x\n", (unsigned int)c));
   }
-  return input->tell()<=endPos;
+  dest.push_back(unicode);
+  return true;
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

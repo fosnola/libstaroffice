@@ -63,8 +63,7 @@ public:
   virtual ~StarEncodingChinese();
 
   /** try to read a caracter and add it to string: E_GBK, E_GB_2312, E_EUC_CN, E_GBT_12345, E_MS_936 and E_APPLE_CHINSIMP*/
-  static bool readChinese1(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-                           librevenge::RVNGString &string, std::vector<unsigned long> &limits);
+  static bool readChinese1(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest);
 protected:
   //
   // data

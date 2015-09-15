@@ -63,8 +63,7 @@ public:
   virtual ~StarEncodingKorean();
 
   /** try to read a caracter and add it to string: E_MS_949, E_EUC_KR, E_APPLE_KOREAN*/
-  static bool readKorean1(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-                          librevenge::RVNGString &string, std::vector<unsigned long> &limits);
+  static bool readKorean1(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest);
 protected:
   //
   // data

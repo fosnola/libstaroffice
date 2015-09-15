@@ -56,22 +56,23 @@ StarEncodingTradChinese::~StarEncodingTradChinese()
 {
 }
 
-bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncoding::Encoding encoding, long endPos,
-    librevenge::RVNGString &string, std::vector<unsigned long> &limits)
+bool StarEncodingTradChinese::readChinese1
+(std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest)
 {
   if (encoding!=StarEncoding::E_BIG5 && encoding!=StarEncoding::E_MS_950 && encoding!=StarEncoding::E_APPLE_CHINTRAD) {
     STOFF_DEBUG_MSG(("StarEncodingTradChinese::readChinese1: unknown encoding\n"));
     return false;
   }
-  long pos=input->tell();
-  if (pos+1>endPos) return false;
-  if (limits.back()!=string.size())
-    limits.push_back(string.size());
-  int c=(int) input->readULong(1), c2;
+  if (pos>=src.size()) return false;
+  int c=(int) src[pos++], c2=0;
+  if (c!=0xa0 && c>=(encoding==StarEncoding::E_APPLE_CHINTRAD ? 0x83 : 0x81) &&
+      c<=(encoding==StarEncoding::E_APPLE_CHINTRAD ? 0xfc : 0xfe)) {
+    if (pos>=src.size()) return false;
+    c2=(int) src[pos++];
+  }
   uint32_t unicode=uint32_t(c);
   switch (c) {
   case 0xa1:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x3000, 0xFF0C, 0x3001, 0x3002, 0xFF0E, 0x2027, 0xFF1B, 0xFF1A, /* 0x40 */
@@ -105,7 +106,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa2:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0xFF3C, 0x2215, 0xFE68, 0xFF04, 0xFFE5, 0x3012, 0xFFE0, 0xFFE1, /* 0x40 */
@@ -139,7 +139,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa3:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0xFF57, 0xFF58, 0xFF59, 0xFF5A, 0x0391, 0x0392, 0x0393, 0x0394, /* 0x40 */
@@ -173,7 +172,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa4:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x4E00, 0x4E59, 0x4E01, 0x4E03, 0x4E43, 0x4E5D, 0x4E86, 0x4E8C, /* 0x40 */
@@ -207,7 +205,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa5:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x4E16, 0x4E15, 0x4E14, 0x4E18, 0x4E3B, 0x4E4D, 0x4E4F, 0x4E4E, /* 0x40 */
@@ -241,7 +238,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa6:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x5171, 0x518D, 0x51B0, 0x5217, 0x5211, 0x5212, 0x520E, 0x5216, /* 0x40 */
@@ -275,7 +271,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa7:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x4F5C, 0x4F60, 0x4F2F, 0x4F4E, 0x4F36, 0x4F59, 0x4F5D, 0x4F48, /* 0x40 */
@@ -309,7 +304,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa8:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6753, 0x6757, 0x6B65, 0x6BCF, 0x6C42, 0x6C5E, 0x6C99, 0x6C81, /* 0x40 */
@@ -343,7 +337,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xa9:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x5496, 0x5478, 0x5495, 0x5480, 0x547B, 0x5477, 0x5484, 0x5492, /* 0x40 */
@@ -377,7 +370,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xaa:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6607, 0x670D, 0x670B, 0x676D, 0x678B, 0x6795, 0x6771, 0x679C, /* 0x40 */
@@ -411,7 +403,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xab:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x9642, 0x96B9, 0x96E8, 0x9752, 0x975E, 0x4E9F, 0x4EAD, 0x4EAE, /* 0x40 */
@@ -445,7 +436,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xac:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x62EF, 0x62EC, 0x62FE, 0x62F4, 0x6311, 0x6302, 0x653F, 0x6545, /* 0x40 */
@@ -479,7 +469,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xad:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8010, 0x800D, 0x8011, 0x8036, 0x80D6, 0x80E5, 0x80DA, 0x80C3, /* 0x40 */
@@ -513,7 +502,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xae:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x54E6, 0x5527, 0x5507, 0x54FD, 0x550F, 0x5703, 0x5704, 0x57C2, /* 0x40 */
@@ -547,7 +535,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xaf:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6D6C, 0x6D89, 0x6D6E, 0x6D5A, 0x6D74, 0x6D69, 0x6D8C, 0x6D8A, /* 0x40 */
@@ -581,7 +568,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb0:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8654, 0x868A, 0x86AA, 0x8693, 0x86A4, 0x86A9, 0x868C, 0x86A3, /* 0x40 */
@@ -615,7 +601,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb1:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x5A3C, 0x5A62, 0x5A5A, 0x5A46, 0x5A4A, 0x5B70, 0x5BC7, 0x5BC5, /* 0x40 */
@@ -649,7 +634,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb2:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6BEB, 0x6BEC, 0x6C2B, 0x6D8E, 0x6DBC, 0x6DF3, 0x6DD9, 0x6DB2, /* 0x40 */
@@ -683,7 +667,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb3:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8386, 0x83A7, 0x8655, 0x5F6A, 0x86C7, 0x86C0, 0x86B6, 0x86C4, /* 0x40 */
@@ -717,7 +700,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb4:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x5A77, 0x5A9A, 0x5A7F, 0x5A92, 0x5A9B, 0x5AA7, 0x5B73, 0x5B71, /* 0x40 */
@@ -751,7 +733,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb5:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6E89, 0x6E19, 0x6E4E, 0x6E63, 0x6E44, 0x6E72, 0x6E69, 0x6E5F, /* 0x40 */
@@ -785,7 +766,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb6:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8A54, 0x8A5B, 0x8A50, 0x8A46, 0x8A34, 0x8A3A, 0x8A36, 0x8A56, /* 0x40 */
@@ -819,7 +799,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb7:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x5AB3, 0x5AC2, 0x5AB2, 0x5D69, 0x5D6F, 0x5E4C, 0x5E79, 0x5EC9, /* 0x40 */
@@ -853,7 +832,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb8:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x7779, 0x776A, 0x776C, 0x775C, 0x7765, 0x7768, 0x7762, 0x77EE, /* 0x40 */
@@ -887,7 +865,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xb9:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8F9F, 0x8FB2, 0x904B, 0x904A, 0x9053, 0x9042, 0x9054, 0x903C, /* 0x40 */
@@ -921,7 +898,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xba:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x613F, 0x614B, 0x6177, 0x6162, 0x6163, 0x615F, 0x615A, 0x6158, /* 0x40 */
@@ -955,7 +931,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xbb:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x7F70, 0x7FE0, 0x7FE1, 0x7FDF, 0x805E, 0x805A, 0x8087, 0x8150, /* 0x40 */
@@ -989,7 +964,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xbc:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x5287, 0x5288, 0x5289, 0x528D, 0x528A, 0x52F0, 0x53B2, 0x562E, /* 0x40 */
@@ -1023,7 +997,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xbd:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x747E, 0x7480, 0x757F, 0x7620, 0x7629, 0x761F, 0x7624, 0x7626, /* 0x40 */
@@ -1057,7 +1030,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xbe:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8F25, 0x9069, 0x906E, 0x9068, 0x906D, 0x9077, 0x9130, 0x912D, /* 0x40 */
@@ -1091,7 +1063,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xbf:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6FC3, 0x6FA4, 0x6FC1, 0x6FA7, 0x6FB3, 0x6FC0, 0x6FB9, 0x6FB6, /* 0x40 */
@@ -1125,7 +1096,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc0:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x9310, 0x9326, 0x9321, 0x9315, 0x932E, 0x9319, 0x95BB, 0x96A7, /* 0x40 */
@@ -1159,7 +1129,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc1:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x77A7, 0x77AD, 0x77EF, 0x78F7, 0x78FA, 0x78F4, 0x78EF, 0x7901, /* 0x40 */
@@ -1193,7 +1162,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc2:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x99FF, 0x9BAE, 0x9BAB, 0x9BAA, 0x9BAD, 0x9D3B, 0x9D3F, 0x9E8B, /* 0x40 */
@@ -1227,7 +1195,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc3:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x97AD, 0x97F9, 0x984D, 0x984F, 0x984C, 0x984E, 0x9853, 0x98BA, /* 0x40 */
@@ -1261,7 +1228,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc4:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x9858, 0x985B, 0x98BC, 0x9945, 0x9949, 0x9A16, 0x9A19, 0x9B0D, /* 0x40 */
@@ -1295,7 +1261,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc5:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8B77, 0x8B7D, 0x8D13, 0x8E8A, 0x8E8D, 0x8E8B, 0x8F5F, 0x8FAF, /* 0x40 */
@@ -1329,7 +1294,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc6:
-    c2=(int) input->readULong(1);
     if (encoding==StarEncoding::E_BIG5 && c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8B96, 0x8277, 0x8D1B, 0x91C0, 0x946A, 0x9742, 0x9748, 0x9744, /* 0x40 */
@@ -1376,7 +1340,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc7:
-    c2=(int) input->readULong(1);
     if (encoding==StarEncoding::E_BIG5 && c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
         0x30A8, 0x30A9, 0x30AA, 0x30AB, 0x30AC, 0x30AD, 0x30AE, 0x30AF, /* 0x40 */
@@ -1410,7 +1373,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xc9:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x4E42, 0x4E5C, 0x51F5, 0x531A, 0x5382, 0x4E07, 0x4E0C, 0x4E47, /* 0x40 */
@@ -1444,7 +1406,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xca:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6C4C, 0x7071, 0x725E, 0x72B4, 0x72B5, 0x738E, 0x752A, 0x767F, /* 0x40 */
@@ -1478,7 +1439,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xcb:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6759, 0x6755, 0x674C, 0x6748, 0x675D, 0x674D, 0x675A, 0x674B, /* 0x40 */
@@ -1512,7 +1472,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xcc:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x5768, 0x577D, 0x590C, 0x5945, 0x59B5, 0x59BA, 0x59CF, 0x59CE, /* 0x40 */
@@ -1546,7 +1505,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xcd:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6CD2, 0x6CDD, 0x6CB4, 0x6C8A, 0x6C9D, 0x6C80, 0x6CDE, 0x6CC0, /* 0x40 */
@@ -1580,7 +1538,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xce:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x54C3, 0x830D, 0x54B7, 0x54AE, 0x54D6, 0x54B6, 0x54C5, 0x54C6, /* 0x40 */
@@ -1614,7 +1571,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xcf:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x67DC, 0x67BB, 0x67F8, 0x67D8, 0x67C0, 0x67B7, 0x67C5, 0x67EB, /* 0x40 */
@@ -1648,7 +1604,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd0:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x7A7E, 0x7AD1, 0x7B00, 0x7B01, 0x7C7A, 0x7C78, 0x7C79, 0x7C7F, /* 0x40 */
@@ -1682,7 +1637,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd1:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x550A, 0x54FB, 0x54F7, 0x54F8, 0x54E0, 0x550E, 0x5503, 0x550B, /* 0x40 */
@@ -1716,7 +1670,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd2:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6BE8, 0x6BE3, 0x6BE2, 0x6BE7, 0x6C25, 0x6D7A, 0x6D63, 0x6D64, /* 0x40 */
@@ -1750,7 +1703,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd3:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x7B04, 0x7B13, 0x7B05, 0x7B0F, 0x7B08, 0x7B0A, 0x7B0E, 0x7B09, /* 0x40 */
@@ -1784,7 +1736,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd4:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x914E, 0x914F, 0x91D5, 0x91E2, 0x91DA, 0x965C, 0x965F, 0x96BC, /* 0x40 */
@@ -1818,7 +1769,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd5:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x5D30, 0x5D12, 0x5D23, 0x5D1F, 0x5D2E, 0x5E3E, 0x5E34, 0x5EB1, /* 0x40 */
@@ -1852,7 +1802,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd6:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6DD0, 0x6DF2, 0x6DD3, 0x6DFD, 0x6DD7, 0x6DCD, 0x6DE3, 0x6DBB, /* 0x40 */
@@ -1886,7 +1835,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd7:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x801E, 0x801B, 0x8047, 0x8043, 0x8048, 0x8118, 0x8125, 0x8119, /* 0x40 */
@@ -1920,7 +1868,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd8:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x91EB, 0x91F7, 0x91E8, 0x91EE, 0x957A, 0x9586, 0x9588, 0x967C, /* 0x40 */
@@ -1954,7 +1901,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xd9:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x60F2, 0x610A, 0x6116, 0x6105, 0x60F5, 0x6113, 0x60F8, 0x60FC, /* 0x40 */
@@ -1988,7 +1934,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xda:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6E68, 0x6E5C, 0x6E61, 0x6E31, 0x6E28, 0x6E60, 0x6E71, 0x6E6B, /* 0x40 */
@@ -2022,7 +1967,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xdb:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x7F66, 0x7FA2, 0x7FA0, 0x7FA1, 0x7FD7, 0x8051, 0x804F, 0x8050, /* 0x40 */
@@ -2056,7 +2000,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xdc:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8EF9, 0x8EE6, 0x8EEE, 0x8EE5, 0x8EF5, 0x8EE7, 0x8EE8, 0x8EF6, /* 0x40 */
@@ -2090,7 +2033,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xdd:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x5AB7, 0x5AC0, 0x5ACA, 0x5AB4, 0x5AB6, 0x5ACD, 0x5AB9, 0x5A90, /* 0x40 */
@@ -2124,7 +2066,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xde:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6BF9, 0x6BF7, 0x6BF8, 0x6E9B, 0x6ED6, 0x6EC8, 0x6E8F, 0x6EC0, /* 0x40 */
@@ -2158,7 +2099,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xdf:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x7A1B, 0x7A10, 0x7AA3, 0x7AA2, 0x7A9E, 0x7AEB, 0x7B66, 0x7B64, /* 0x40 */
@@ -2192,7 +2132,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe0:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x89E1, 0x89E0, 0x89E2, 0x89DC, 0x89E6, 0x8A76, 0x8A86, 0x8A7F, /* 0x40 */
@@ -2226,7 +2165,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe1:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x51D8, 0x5280, 0x5281, 0x52E9, 0x52EB, 0x5330, 0x53AC, 0x5627, /* 0x40 */
@@ -2260,7 +2198,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe2:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x69A0, 0x69CE, 0x6996, 0x69B0, 0x69AC, 0x69BC, 0x6991, 0x6999, /* 0x40 */
@@ -2294,7 +2231,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe3:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x7997, 0x7988, 0x7992, 0x7990, 0x7A2B, 0x7A4A, 0x7A30, 0x7A2F, /* 0x40 */
@@ -2328,7 +2264,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe4:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x88F0, 0x88EC, 0x88EB, 0x899D, 0x89A1, 0x899F, 0x899E, 0x89E9, /* 0x40 */
@@ -2362,7 +2297,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe5:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x565A, 0x5640, 0x5633, 0x563D, 0x562C, 0x563E, 0x5638, 0x562A, /* 0x40 */
@@ -2396,7 +2330,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe6:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6F8D, 0x6F89, 0x6F8C, 0x6F62, 0x6F4F, 0x6F85, 0x6F5A, 0x6F96, /* 0x40 */
@@ -2430,7 +2363,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe7:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x819E, 0x8195, 0x81A2, 0x8199, 0x8197, 0x8216, 0x824F, 0x8253, /* 0x40 */
@@ -2464,7 +2396,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe8:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8E14, 0x8E12, 0x8E18, 0x8E13, 0x8E1C, 0x8E17, 0x8E1A, 0x8F2C, /* 0x40 */
@@ -2498,7 +2429,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xe9:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x5673, 0x5666, 0x5663, 0x566D, 0x5672, 0x565E, 0x5677, 0x571C, /* 0x40 */
@@ -2532,7 +2462,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xea:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6FA2, 0x6FC9, 0x6FAB, 0x6FCD, 0x6FAF, 0x6FB2, 0x6FB0, 0x71C5, /* 0x40 */
@@ -2566,7 +2495,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xeb:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8540, 0x8546, 0x8564, 0x8541, 0x8562, 0x8544, 0x8551, 0x8547, /* 0x40 */
@@ -2600,7 +2528,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xec:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x930B, 0x92FE, 0x9309, 0x9300, 0x92FB, 0x9316, 0x95BC, 0x95CD, /* 0x40 */
@@ -2634,7 +2561,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xed:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x6A95, 0x6A83, 0x6AA8, 0x6AA4, 0x6A91, 0x6A7F, 0x6AA6, 0x6A9A, /* 0x40 */
@@ -2668,7 +2594,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xee:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8577, 0x857C, 0x8589, 0x85A1, 0x857A, 0x8578, 0x8557, 0x858E, /* 0x40 */
@@ -2702,7 +2627,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xef:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x979E, 0x979D, 0x97D5, 0x97D4, 0x97F1, 0x9841, 0x9844, 0x984A, /* 0x40 */
@@ -2736,7 +2660,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf0:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x74B8, 0x74C0, 0x74B5, 0x74C1, 0x74BE, 0x74B6, 0x74BB, 0x74C2, /* 0x40 */
@@ -2770,7 +2693,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf1:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8E5B, 0x8E5A, 0x8E61, 0x8E5D, 0x8E69, 0x8E54, 0x8F46, 0x8F47, /* 0x40 */
@@ -2804,7 +2726,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf2:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x5FBF, 0x61FB, 0x6507, 0x6510, 0x650D, 0x6509, 0x650C, 0x650E, /* 0x40 */
@@ -2838,7 +2759,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf3:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8B51, 0x8B42, 0x8B52, 0x8B57, 0x8C43, 0x8C77, 0x8C76, 0x8C9A, /* 0x40 */
@@ -2872,7 +2792,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf4:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x56B5, 0x56B3, 0x58E3, 0x5B45, 0x5DC6, 0x5DC7, 0x5EEE, 0x5EEF, /* 0x40 */
@@ -2906,7 +2825,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf5:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x93FC, 0x940C, 0x93F6, 0x9411, 0x9406, 0x95DE, 0x95E0, 0x95DF, /* 0x40 */
@@ -2940,7 +2858,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf6:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8829, 0x881D, 0x881B, 0x8820, 0x8824, 0x881C, 0x882B, 0x884A, /* 0x40 */
@@ -2974,7 +2891,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf7:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x7CF4, 0x7CF1, 0x7E91, 0x7F4F, 0x7F87, 0x81DE, 0x826B, 0x8634, /* 0x40 */
@@ -3008,7 +2924,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf8:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x8B8C, 0x8B8E, 0x8B8B, 0x8B88, 0x8C45, 0x8D19, 0x8E98, 0x8F64, /* 0x40 */
@@ -3042,7 +2957,6 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0xf9:
-    c2=(int) input->readULong(1);
     if (c2>=0x40 && c2<=0xfe) {
       static int const(val[])= {
         0x7E98, 0x7E9B, 0x7E99, 0x81E0, 0x81E1, 0x8646, 0x8647, 0x8648, /* 0x40 */
@@ -3090,15 +3004,14 @@ bool StarEncodingTradChinese::readChinese1(STOFFInputStreamPtr &input, StarEncod
     if (c<0x80 || c==0xa0)
       break;
     if ((c>=0x81 && c<=0xa0) || c==0xc8 || (c>=0xfa && c<=0xfe))
-      unicode=(unicode<<8)+(uint32_t)input->readULong(1);
+      unicode=(unicode<<8)+(uint32_t)c2;
     break;
   }
-  if (unicode)
-    libstoff::appendUnicode(unicode, string);
-  else {
+  if (!unicode) {
     STOFF_DEBUG_MSG(("StarEncodingTradChinese::readTradChinese1: unknown caracter %x\n", (unsigned int)c));
   }
-  return input->tell()<=endPos;
+  dest.push_back(unicode);
+  return true;
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
