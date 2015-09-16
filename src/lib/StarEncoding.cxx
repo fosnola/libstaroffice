@@ -44,9 +44,6 @@
 #include "StarEncodingKorean.hxx"
 #include "StarEncodingOtherKorean.hxx"
 #include "StarEncodingTradChinese.hxx"
-#include "StarItemPool.hxx"
-#include "StarZone.hxx"
-#include "STOFFStringStream.hxx"
 
 #include "StarEncoding.hxx"
 

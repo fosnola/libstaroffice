@@ -40,13 +40,7 @@
 
 #include <vector>
 
-#include "STOFFDebug.hxx"
-#include "STOFFInputStream.hxx"
-
 #include "StarEncoding.hxx"
-
-class StarDocument;
-class StarZone;
 
 /** \brief the main class to read/.. some other Korean encoding in StarOffice documents
  *

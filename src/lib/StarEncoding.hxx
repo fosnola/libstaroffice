@@ -40,8 +40,7 @@
 
 #include <vector>
 
-#include "STOFFDebug.hxx"
-#include "STOFFInputStream.hxx"
+#include "libstaroffice_internal.hxx"
 
 /** \brief the main class to read/.. some basic encoding in StarOffice documents
  *

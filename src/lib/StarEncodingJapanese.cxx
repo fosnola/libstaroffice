@@ -39,10 +39,6 @@
 
 #include <librevenge/librevenge.h>
 
-#include "StarItemPool.hxx"
-#include "StarZone.hxx"
-#include "STOFFStringStream.hxx"
-
 #include "StarEncodingJapanese.hxx"
 
 ////////////////////////////////////////////////////////////
