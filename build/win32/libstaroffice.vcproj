@@ -345,6 +345,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\StarEncryption.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\StarFileManager.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -440,6 +448,8 @@
 			<File RelativePath="..\..\src\lib\StarEncodingTradChinese.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarEncoding.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\StarEncryption.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarFileManager.hxx">
 			</File>

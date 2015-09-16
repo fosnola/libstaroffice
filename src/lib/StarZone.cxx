@@ -39,6 +39,8 @@
 
 #include <librevenge/librevenge.h>
 
+#include "StarEncryption.hxx"
+
 #include "StarZone.hxx"
 
 ////////////////////////////////////////////////////////////
@@ -205,8 +207,12 @@ bool StarZone::readSWHeader()
   m_documentVersion=(int) m_input->readULong(2);
   f << "docVersion=" << std::hex << m_documentVersion << std::dec << ",";
   int fFlags=(int) m_input->readULong(2);
+  bool hasPasswd=false;
   if (fFlags&2) f << "hasBlockName,";
-  if (fFlags&8) f << "hasPasswd,";
+  if (fFlags&8) {
+    hasPasswd=true;
+    f << "hasPasswd,";
+  }
   if (fFlags&0x100) f << "hasPGNums,";
   if (fFlags&0x8000) {
     f << "#badFile,";
@@ -246,13 +252,22 @@ bool StarZone::readSWHeader()
   if (val) f << "redline=" << std::hex << val << std::dec << ",";
   val=(int) m_input->readULong(1);
   if (val) f << "compVers=" << val << ",";
-  m_input->seek(16, librevenge::RVNG_SEEK_CUR); // checkme
+  std::vector<uint8_t> passwd;
+  for (int i=0; i<16; ++i) passwd.push_back((uint8_t) m_input->readULong(1));
   m_encoding=(int) m_input->readULong(1);
   if (val) f << "charSet[encoding]=" << m_encoding << ",";
   val=(int) m_input->readULong(1);
   if (val) f << "f0=" << val << ",";
-  f << "date=" << m_input->readULong(4) << ",";
-  f << "time=" << m_input->readULong(4) << ",";
+  uint32_t date, time;
+  *m_input >> date >> time;
+  f << "date=" << date << ",";
+  f << "time=" << time << ",";
+  if (hasPasswd) {
+    StarEncryption encryptor;
+    if (!encryptor.guessPassword(date,time,passwd) || !encryptor.checkPassword(date,time,passwd)) {
+      STOFF_DEBUG_MSG(("StarZone::readZoneHeader: can not find the password\n"));
+    }
+  }
   if (hSz==0x2e +64 && (fFlags&2)) {
     std::string string("");
     for (int i=0; i<64; ++i) {

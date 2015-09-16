@@ -190,6 +190,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\..\src\lib\StarEncryption.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\src\lib\StarFileManager.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -239,6 +243,7 @@
     <ClInclude Include="..\..\src\lib\StarEncodingOtherKorean.hxx" />
     <ClInclude Include="..\..\src\lib\StarEncodingTradChinese.hxx" />
     <ClInclude Include="..\..\src\lib\StarEncoding.hxx" />
+    <ClInclude Include="..\..\src\lib\StarEncryption.hxx" />
     <ClInclude Include="..\..\src\lib\StarFileManager.hxx" />
     <ClInclude Include="..\..\src\lib\StarItemPool.hxx" />
     <ClInclude Include="..\..\src\lib\StarZone.hxx" />

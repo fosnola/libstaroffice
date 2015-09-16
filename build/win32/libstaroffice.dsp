@@ -175,6 +175,10 @@ SOURCE=..\..\src\lib\StarEncoding.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarEncryption.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarFileManager.cxx
 # End Source File
 # Begin Source File
@@ -300,6 +304,10 @@ SOURCE=..\..\src\lib\StarEncodingTradChinese.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarEncoding.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarEncryption.hxx
 # End Source File
 # Begin Source File
 

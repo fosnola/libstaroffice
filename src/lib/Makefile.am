@@ -61,6 +61,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarEncodingTradChinese.hxx		\
 	StarEncoding.cxx			\
 	StarEncoding.hxx			\
+	StarEncryption.cxx			\
+	StarEncryption.hxx			\
 	StarFileManager.cxx			\
 	StarFileManager.hxx			\
 	StarItemPool.cxx			\
