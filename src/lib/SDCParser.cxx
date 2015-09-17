@@ -295,8 +295,9 @@ SDCParser::~SDCParser()
 // main zone
 ////////////////////////////////////////////////////////////
 bool SDCParser::readCalcDocument(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
+try
 {
-  StarZone zone(input, name, "SWChartDocument");
+  StarZone zone(input, name, "SWChartDocument", document.getPassword());
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
 
@@ -1115,10 +1116,15 @@ bool SDCParser::readCalcDocument(STOFFInputStreamPtr input, std::string const &n
   zone.closeSCRecord("SCCalcDocument");
   return true;
 }
+catch (...)
+{
+  return false;
+}
 
 bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
+try
 {
-  StarZone zone(input, name, "SWChartDocument");
+  StarZone zone(input, name, "SWChartDocument", document.getPassword());
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
 
@@ -1201,10 +1207,14 @@ bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &
 
   return true;
 }
+catch (...)
+{
+  return false;
+}
 
 bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
 {
-  StarZone zone(input, name, "SfxStyleSheets");
+  StarZone zone(input, name, "SfxStyleSheets", document.getPassword());
   input->seek(0, librevenge::RVNG_SEEK_SET);
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);

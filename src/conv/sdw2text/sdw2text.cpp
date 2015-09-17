@@ -56,7 +56,8 @@ int printUsage()
   printf(" -i                Display document metadata instead of the text\n");
   printf(" -h                Shows this help message\n");
   printf(" -o file.txt       Define the output[default stdout]\n");
-  printf(" -v:               Output sdw2text version \n");
+  printf(" -p password       Gives the document password\n");
+  printf(" -v                Output sdw2text version \n");
   printf("\n");
   return -1;
 }
@@ -73,17 +74,21 @@ int main(int argc, char *argv[])
     return printUsage();
 
   char const *output = 0;
+  char const *password=0;
   bool isInfo = false;
   bool printHelp=false;
   int ch;
 
-  while ((ch = getopt(argc, argv, "hio:v")) != -1) {
+  while ((ch = getopt(argc, argv, "hio:p:v")) != -1) {
     switch (ch) {
     case 'i':
       isInfo=true;
       break;
     case 'o':
       output=optarg;
+      break;
+    case 'p':
+      password=optarg;
       break;
     case 'v':
       printVersion();
@@ -126,7 +131,7 @@ int main(int argc, char *argv[])
         return 1;
       }
       librevenge::RVNGTextDrawingGenerator documentGenerator(pages);
-      error=STOFFDocument::parse(&input, &documentGenerator);
+      error=STOFFDocument::parse(&input, &documentGenerator, password);
       if (error == STOFFDocument::STOFF_R_OK && !pages.size()) {
         printf("ERROR: find no graphics!\n");
         return 1;
@@ -135,7 +140,7 @@ int main(int argc, char *argv[])
     }
     else if (kind == STOFFDocument::STOFF_K_SPREADSHEET || kind == STOFFDocument::STOFF_K_DATABASE) {
       librevenge::RVNGTextSpreadsheetGenerator documentGenerator(pages, isInfo);
-      error=STOFFDocument::parse(&input, &documentGenerator);
+      error=STOFFDocument::parse(&input, &documentGenerator, password);
       if (error == STOFFDocument::STOFF_R_OK && !pages.size()) {
         printf("ERROR: find no sheets!\n");
         return 1;
@@ -148,7 +153,7 @@ int main(int argc, char *argv[])
         return 1;
       }
       librevenge::RVNGTextPresentationGenerator documentGenerator(pages);
-      error=STOFFDocument::parse(&input, &documentGenerator);
+      error=STOFFDocument::parse(&input, &documentGenerator, password);
       if (error == STOFFDocument::STOFF_R_OK && !pages.size()) {
         printf("ERROR: find no slides!\n");
         return 1;
@@ -157,7 +162,7 @@ int main(int argc, char *argv[])
     }
     else {
       librevenge::RVNGTextTextGenerator documentGenerator(document, isInfo);
-      error=STOFFDocument::parse(&input, &documentGenerator);
+      error=STOFFDocument::parse(&input, &documentGenerator, password);
     }
   }
   catch (STOFFDocument::Result const &err) {
@@ -173,6 +178,8 @@ int main(int argc, char *argv[])
     fprintf(stderr, "ERROR: Parse Exception!\n");
   else if (error == STOFFDocument::STOFF_R_OLE_ERROR)
     fprintf(stderr, "ERROR: File is an OLE document!\n");
+  else if (error != STOFFDocument::STOFF_R_PASSWORD_MISSMATCH_ERROR)
+    fprintf(stderr, "ERROR: Bad password!\n");
   else if (error != STOFFDocument::STOFF_R_OK)
     fprintf(stderr, "ERROR: Unknown Error!\n");
 

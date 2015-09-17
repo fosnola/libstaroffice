@@ -48,7 +48,7 @@
 /** small namespace use to define private class/method used by STOFFDocument */
 namespace STOFFDocumentInternal
 {
-shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header);
+shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
 STOFFHeader *getHeader(STOFFInputStreamPtr &input, bool strict);
 bool checkHeader(STOFFInputStreamPtr &input, STOFFHeader &header, bool strict);
 }
@@ -99,6 +99,11 @@ catch (libstoff::ParseException)
   STOFF_DEBUG_MSG(("STOFFDocument::parse: Parse exception trapped\n"));
   return STOFF_R_PARSE_ERROR;
 }
+catch (libstoff::WrongPasswordException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: Parse password trapped\n"));
+  return STOFF_R_PASSWORD_MISSMATCH_ERROR;
+}
 catch (...)
 {
   //fixme: too generic
@@ -121,6 +126,11 @@ catch (libstoff::ParseException)
 {
   STOFF_DEBUG_MSG(("STOFFDocument::parse: Parse exception trapped\n"));
   return STOFF_R_PARSE_ERROR;
+}
+catch (libstoff::WrongPasswordException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: Parse password trapped\n"));
+  return STOFF_R_PASSWORD_MISSMATCH_ERROR;
 }
 catch (...)
 {
@@ -145,6 +155,11 @@ catch (libstoff::ParseException)
   STOFF_DEBUG_MSG(("STOFFDocument::parse: Parse exception trapped\n"));
   return STOFF_R_PARSE_ERROR;
 }
+catch (libstoff::WrongPasswordException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: Parse password trapped\n"));
+  return STOFF_R_PASSWORD_MISSMATCH_ERROR;
+}
 catch (...)
 {
   //fixme: too generic
@@ -152,7 +167,7 @@ catch (...)
   return STOFF_R_UNKNOWN_ERROR;
 }
 
-STOFFDocument::Result STOFFDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *documentInterface, char const * /*password*/)
+STOFFDocument::Result STOFFDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *documentInterface, char const *password)
 try
 {
   if (!input)
@@ -162,7 +177,7 @@ try
   shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
 
   if (!header.get()) return STOFF_R_UNKNOWN_ERROR;
-  shared_ptr<STOFFTextParser> parser=STOFFDocumentInternal::getTextParserFromHeader(ip, header.get());
+  shared_ptr<STOFFTextParser> parser=STOFFDocumentInternal::getTextParserFromHeader(ip, header.get(), password);
   if (!parser) return STOFF_R_UNKNOWN_ERROR;
   parser->parse(documentInterface);
 
@@ -177,6 +192,11 @@ catch (libstoff::ParseException)
 {
   STOFF_DEBUG_MSG(("STOFFDocument::parse: Parse exception trapped\n"));
   return STOFF_R_PARSE_ERROR;
+}
+catch (libstoff::WrongPasswordException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: Parse password trapped\n"));
+  return STOFF_R_PASSWORD_MISSMATCH_ERROR;
 }
 catch (...)
 {
@@ -269,7 +289,7 @@ catch (...)
 }
 
 /** Factory wrapper to construct a parser corresponding to an text header */
-shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header)
+shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd)
 {
   shared_ptr<STOFFTextParser> parser;
   if (!header)
@@ -279,7 +299,9 @@ shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, 
     return parser;
 #endif
   try {
-    parser.reset(new SDWParser(input, header));
+    SDWParser *sdwParser=new SDWParser(input, header);
+    parser.reset(sdwParser);
+    if (passwd) sdwParser->setDocumentPassword(passwd);
   }
   catch (...) {
   }
@@ -290,7 +312,7 @@ shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, 
 bool checkHeader(STOFFInputStreamPtr &input, STOFFHeader &header, bool strict)
 try
 {
-  shared_ptr<STOFFParser> parser=getTextParserFromHeader(input, &header);
+  shared_ptr<STOFFParser> parser=getTextParserFromHeader(input, &header, 0);
   if (!parser)
     return false;
   return parser->checkHeader(&header, strict);

@@ -70,7 +70,11 @@ public:
   SDWParser(STOFFInputStreamPtr input, STOFFHeader *header);
   //! destructor
   virtual ~SDWParser();
-
+  //! set the document password
+  void setDocumentPassword(char const *passwd)
+  {
+    m_password=passwd;
+  }
   //! checks if the document header is correct (or not)
   bool checkHeader(STOFFHeader *header, bool strict=false);
 
@@ -96,7 +100,7 @@ protected:
   //! the page style
   bool readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
   //! the rulers?
-  bool readSwNumRuleList(STOFFInputStreamPtr input, std::string const &fileName);
+  bool readSwNumRuleList(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
 
   //! the main zone
   bool readWriterDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
@@ -158,6 +162,8 @@ protected:
   // data
   //
 
+  //! the password
+  char const *m_password;
   //! the ole parser
   shared_ptr<STOFFOLEParser> m_oleParser;
   //! the state

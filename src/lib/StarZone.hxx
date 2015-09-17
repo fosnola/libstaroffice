@@ -41,7 +41,10 @@
 #include <vector>
 #include <stack>
 
+#include "libstaroffice_internal.hxx"
 #include "STOFFDebug.hxx"
+
+class StarEncryption;
 
 /** \brief a zone in a StarOffice file
  *
@@ -52,12 +55,14 @@ class StarZone
 {
 public:
   //! constructor
-  StarZone(STOFFInputStreamPtr input, std::string const &ascName, std::string const &zoneName);
+  StarZone(STOFFInputStreamPtr input, std::string const &ascName, std::string const &zoneName, char const *password);
   //! destructor
   virtual ~StarZone();
   //! read the zone header present in a SW file
   bool readSWHeader();
 
+  //! check encryption
+  bool checkEncryption(uint32_t date, uint32_t time, std::vector<uint8_t> const &passwd);
   //! open a zone header present in a SDR file
   bool openSDRHeader(std::string &magic);
   //! close a zone header
@@ -247,6 +252,8 @@ protected:
   std::stack<int> m_headerVersionStack;
   //! the zone encoding
   int m_encoding;
+  //! the encryption
+  shared_ptr<StarEncryption> m_encryption;
   //! the file ascii name
   std::string m_asciiName;
   //! the zone name

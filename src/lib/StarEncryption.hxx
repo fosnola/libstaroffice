@@ -55,7 +55,7 @@ public:
   //! constructor knowing the original password
   StarEncryption(std::string const &password);
   //! destructor
-  ~StarEncryption() {}
+  virtual ~StarEncryption() {}
 
   //! decodes a string
   bool decode(std::vector<uint8_t> &data) const

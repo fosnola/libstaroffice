@@ -64,8 +64,8 @@ class StarDocument
 {
 public:
   //! constructor
-  StarDocument(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory,
-               shared_ptr<StarAttributeManager> attributeManager, SDWParser *parser);
+  StarDocument(STOFFInputStreamPtr input, char const *passwd, shared_ptr<STOFFOLEParser> oleParser,
+               shared_ptr<STOFFOLEParser::OleDirectory> directory, shared_ptr<StarAttributeManager> attributeManager, SDWParser *parser);
   //! destructor
   virtual ~StarDocument();
 
@@ -77,6 +77,11 @@ public:
   bool parse();
   //! returns the document kind
   STOFFDocument::Kind getDocumentKind() const;
+  //! returns the document password (the password given by the user)
+  char const *getPassword() const
+  {
+    return m_password;
+  }
   //! return the attribute manager
   shared_ptr<StarAttributeManager> getAttributeManager();
 
@@ -114,6 +119,8 @@ protected:
 
   //! the input
   STOFFInputStreamPtr m_input;
+  //! the document password
+  char const *m_password;
   //! the main ole parser
   shared_ptr<STOFFOLEParser> m_oleParser;
   //! the directory

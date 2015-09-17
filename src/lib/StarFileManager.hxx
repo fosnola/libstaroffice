@@ -70,10 +70,10 @@ public:
   //! try to read a image zone: "StarImageDocument" or "StarImageDocument 4.0
   static bool readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName);
   //! try to read a math zone: "StarMathDocument" (v 3 or v4) .sdf
-  static bool readMathDocument(STOFFInputStreamPtr input, std::string const &fileName);
+  static bool readMathDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
 
   //! try to read a embedded picture file: Embedded/PicXXXXXX
-  static bool readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string &dataType, std::string const &fileName);
+  static bool readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string &dataType, std::string const &fileName, StarDocument &doc);
 
   // other
 

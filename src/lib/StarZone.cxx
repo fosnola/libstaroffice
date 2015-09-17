@@ -46,10 +46,12 @@
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarZone::StarZone(STOFFInputStreamPtr inputStream, std::string const &ascName, std::string const &zoneName) :
-  m_input(inputStream), m_ascii(inputStream), m_version(0), m_documentVersion(0), m_headerVersionStack(), m_encoding(0), m_asciiName(ascName), m_zoneName(zoneName),
+StarZone::StarZone(STOFFInputStreamPtr inputStream, std::string const &ascName, std::string const &zoneName, char const *password) :
+  m_input(inputStream), m_ascii(inputStream), m_version(0), m_documentVersion(0), m_headerVersionStack(), m_encoding(0), m_encryption(), m_asciiName(ascName), m_zoneName(zoneName),
   m_typeStack(), m_positionStack(), m_beginToEndMap(), m_flagEndZone(), m_poolList()
 {
+  if (password)
+    m_encryption.reset(new StarEncryption(password));
 }
 
 StarZone::~StarZone()
@@ -140,6 +142,22 @@ bool StarZone::readStringsPool()
   closeSWRecord(type, "SWPoolList");
   m_ascii.addPos(pos);
   m_ascii.addNote(f.str().c_str());
+  return true;
+}
+
+bool StarZone::checkEncryption(uint32_t date, uint32_t time, std::vector<uint8_t> const &passwd)
+{
+  if ((!date && !time) || passwd.empty())
+    return true;
+  if (m_encryption && m_encryption->checkPassword(date,time,passwd))
+    return true;
+  if (!m_encryption) m_encryption.reset(new StarEncryption);
+
+  if (!m_encryption->guessPassword(date,time,passwd) || !m_encryption->checkPassword(date,time,passwd)) {
+    STOFF_DEBUG_MSG(("StarZone::readZoneHeader: can not find the password\n"));
+    throw libstoff::WrongPasswordException();
+  }
+  STOFF_DEBUG_MSG(("StarZone::readZoneHeader: find a potential password, let continue\n"));
   return true;
 }
 
@@ -262,12 +280,8 @@ bool StarZone::readSWHeader()
   *m_input >> date >> time;
   f << "date=" << date << ",";
   f << "time=" << time << ",";
-  if (hasPasswd) {
-    StarEncryption encryptor;
-    if (!encryptor.guessPassword(date,time,passwd) || !encryptor.checkPassword(date,time,passwd)) {
-      STOFF_DEBUG_MSG(("StarZone::readZoneHeader: can not find the password\n"));
-    }
-  }
+  if (hasPasswd)
+    checkEncryption(date,time,passwd);
   if (hSz==0x2e +64 && (fFlags&2)) {
     std::string string("");
     for (int i=0; i<64; ++i) {

@@ -31,7 +31,9 @@
 */
 
 #include <stdio.h>
-#include <string.h>
+#include <unistd.h>
+
+#include <cstring>
 
 #include <librevenge/librevenge.h>
 #include <librevenge-generators/librevenge-generators.h>
@@ -52,9 +54,10 @@ int printUsage()
   printf("Usage: sdw2raw [OPTION] <StarOffice Document>\n");
   printf("\n");
   printf("Options:\n");
-  printf("\t--callgraph:   Display the call graph nesting level\n");
-  printf("\t-h, --help:    Shows this help message\n");
-  printf("\t-v, --version:       Output sdw2raw version \n");
+  printf("\t-c:                Display the call graph nesting level\n");
+  printf("\t-h:                Shows this help message\n");
+  printf("\t-p password:       Gives the document password\n");
+  printf("\t-v:                Output sdw2raw version \n");
   return -1;
 }
 
@@ -66,27 +69,34 @@ int printVersion()
 
 int main(int argc, char *argv[])
 {
-  bool printIndentLevel = false;
-  char *file = NULL;
+  bool printIndentLevel = false, printHelp = false;
+  char *file = 0;
+  char const *password=0;
+  int ch;
 
-  if (argc < 2)
-    return printUsage();
-
-  for (int i = 1; i < argc; i++) {
-    if (!strcmp(argv[i], "--callgraph"))
+  while ((ch = getopt(argc, argv, "chvp:")) != -1) {
+    switch (ch) {
+    case 'c':
       printIndentLevel = true;
-    else if (!strcmp(argv[i], "-v") || !strcmp(argv[i], "--version"))
-      return printVersion();
-    else if (!file && strncmp(argv[i], "--", 2) && strcmp(argv[i], "-h"))
-      file = argv[i];
-    else
-      return printUsage();
+      break;
+    case 'v':
+      printVersion();
+      return 0;
+    case 'p':
+      password=optarg;
+      break;
+    default:
+    case 'h':
+      printHelp = true;
+      break;
+    }
+  }
+  if (argc != 1+optind || printHelp) {
+    printUsage();
+    return -1;
   }
 
-  if (!file)
-    return printUsage();
-
-
+  file=argv[optind];
   librevenge::RVNGFileStream input(file);
 
   STOFFDocument::Kind kind;
@@ -106,19 +116,19 @@ int main(int argc, char *argv[])
   try {
     if (kind == STOFFDocument::STOFF_K_DRAW) {
       librevenge::RVNGRawDrawingGenerator documentGenerator(printIndentLevel);
-      error=STOFFDocument::parse(&input, &documentGenerator);
+      error=STOFFDocument::parse(&input, &documentGenerator,password);
     }
     else if (kind == STOFFDocument::STOFF_K_SPREADSHEET || kind == STOFFDocument::STOFF_K_DATABASE) {
       librevenge::RVNGRawSpreadsheetGenerator documentGenerator(printIndentLevel);
-      error=STOFFDocument::parse(&input, &documentGenerator);
+      error=STOFFDocument::parse(&input, &documentGenerator,password);
     }
     else if (kind == STOFFDocument::STOFF_K_PRESENTATION) {
       librevenge::RVNGRawPresentationGenerator documentGenerator(printIndentLevel);
-      error=STOFFDocument::parse(&input, &documentGenerator);
+      error=STOFFDocument::parse(&input, &documentGenerator,password);
     }
     else {
       librevenge::RVNGRawTextGenerator documentGenerator(printIndentLevel);
-      error=STOFFDocument::parse(&input, &documentGenerator);
+      error=STOFFDocument::parse(&input, &documentGenerator,password);
     }
   }
   catch (STOFFDocument::Result const &err) {
@@ -134,6 +144,8 @@ int main(int argc, char *argv[])
     fprintf(stderr, "ERROR: Parse Exception!\n");
   else if (error == STOFFDocument::STOFF_R_OLE_ERROR)
     fprintf(stderr, "ERROR: File is an OLE document!\n");
+  else if (error != STOFFDocument::STOFF_R_PASSWORD_MISSMATCH_ERROR)
+    fprintf(stderr, "ERROR: Bad password!\n");
   else if (error != STOFFDocument::STOFF_R_OK)
     fprintf(stderr, "ERROR: Unknown Error!\n");
 

@@ -294,10 +294,11 @@ bool StarFileManager::readImageDocument(STOFFInputStreamPtr input, librevenge::R
   return true;
 }
 
-bool StarFileManager::readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string &dataType, std::string const &fileName)
+bool StarFileManager::readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string &dataType, std::string const &fileName, StarDocument &doc)
+try
 {
   // see this Ole with classic bitmap format
-  StarZone zone(input, fileName, "EmbeddedPicture");
+  StarZone zone(input, fileName, "EmbeddedPicture", doc.getPassword());
 
   libstoff::DebugFile &ascii=zone.ascii();
   ascii.open(fileName);
@@ -396,6 +397,10 @@ bool StarFileManager::readEmbeddedPicture(STOFFInputStreamPtr input, librevenge:
 #endif
   return true;
 }
+catch (...)
+{
+  return false;
+}
 
 bool StarFileManager::readOleObject(STOFFInputStreamPtr input, std::string const &fileName)
 {
@@ -416,9 +421,10 @@ bool StarFileManager::readOleObject(STOFFInputStreamPtr input, std::string const
   return true;
 }
 
-bool StarFileManager::readMathDocument(STOFFInputStreamPtr input, std::string const &fileName)
+bool StarFileManager::readMathDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc)
+try
 {
-  StarZone zone(input, fileName, "MathDocument"); // use encoding RTL_TEXTENCODING_MS_1252
+  StarZone zone(input, fileName, "MathDocument", doc.getPassword()); // use encoding RTL_TEXTENCODING_MS_1252
   libstoff::DebugFile &ascii=zone.ascii();
   ascii.open(fileName);
 
@@ -568,6 +574,10 @@ bool StarFileManager::readMathDocument(STOFFInputStreamPtr input, std::string co
       break;
   }
   return true;
+}
+catch (...)
+{
+  return false;
 }
 
 bool StarFileManager::readOutPlaceObject(STOFFInputStreamPtr input, libstoff::DebugFile &ascii)

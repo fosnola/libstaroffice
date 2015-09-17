@@ -71,9 +71,10 @@ private:
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarDocument::StarDocument(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory,
+StarDocument::StarDocument(STOFFInputStreamPtr input, char const *passwd,
+                           shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory,
                            shared_ptr<StarAttributeManager> attributeManager, SDWParser *sdwParser) :
-  m_input(input), m_oleParser(oleParser), m_directory(directory), m_state(new StarDocumentInternal::State(attributeManager))
+  m_input(input), m_password(passwd), m_oleParser(oleParser), m_directory(directory), m_state(new StarDocumentInternal::State(attributeManager))
 {
   m_state->m_sdwParser=sdwParser;
 }
@@ -147,7 +148,7 @@ bool StarDocument::parse()
     ole->setReadInverted(true);
     if (base=="VCPool") {
       content.setParsed(true);
-      StarZone zone(ole, name, "VCPool");
+      StarZone zone(ole, name, "VCPool", m_password);
       zone.ascii().open(name);
       ole->seek(0, librevenge::RVNG_SEEK_SET);
       getNewItemPool(StarItemPool::T_VCControlPool)->read(zone);
@@ -233,7 +234,7 @@ bool StarDocument::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*
 
 bool StarDocument::readPersistElements(STOFFInputStreamPtr input, std::string const &name)
 {
-  StarZone zone(input, name, "PersistsElement");
+  StarZone zone(input, name, "PersistsElement", m_password);
   libstoff::DebugFile &ascii=zone.ascii();
   ascii.open(name);
   input->seek(0, librevenge::RVNG_SEEK_SET);
@@ -623,7 +624,7 @@ bool StarDocument::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libsto
 
 bool StarDocument::readSfxPreview(STOFFInputStreamPtr input, std::string const &name)
 {
-  StarZone zone(input, name, "SfxPreview");
+  StarZone zone(input, name, "SfxPreview", m_password);
   libstoff::DebugFile &ascii=zone.ascii();
   ascii.open(name);
   input->seek(0, librevenge::RVNG_SEEK_SET);

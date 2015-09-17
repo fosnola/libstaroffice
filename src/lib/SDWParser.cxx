@@ -72,7 +72,7 @@ struct State {
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
 SDWParser::SDWParser(STOFFInputStreamPtr input, STOFFHeader *header) :
-  STOFFTextParser(input, header),  m_oleParser(), m_state()
+  STOFFTextParser(input, header), m_password(0), m_oleParser(), m_state()
 {
   init();
 }
@@ -123,7 +123,7 @@ bool SDWParser::createZones()
   for (size_t d=0; d<listDir.size(); ++d) {
     if (!listDir[d]) continue;
     shared_ptr<StarAttributeManager> attrManager(new StarAttributeManager);
-    StarDocument document(getInput(), m_oleParser, listDir[d], attrManager, this);
+    StarDocument document(getInput(), m_password, m_oleParser, listDir[d], attrManager, this);
     // Ole-Object has persist elements, so...
     if (listDir[d]->m_hasCompObj) document.parse();
     STOFFOLEParser::OleDirectory &direct=*listDir[d];
@@ -148,7 +148,7 @@ bool SDWParser::createZones()
       }
       ole->setReadInverted(true);
       if (base=="SwNumRules") {
-        readSwNumRuleList(ole, name);
+        readSwNumRuleList(ole, name, document);
         continue;
       }
       if (base=="SwPageStyleSheets") {
@@ -182,7 +182,7 @@ bool SDWParser::createZones()
         continue;
       }
       if (base=="StarMathDocument") {
-        fileManager.readMathDocument(ole,name);
+        fileManager.readMathDocument(ole,name,document);
         continue;
       }
       if (base=="StarWriterDocument") {
@@ -192,7 +192,7 @@ bool SDWParser::createZones()
       if (base.compare(0,3,"Pic")==0) {
         librevenge::RVNGBinaryData data;
         std::string type;
-        fileManager.readEmbeddedPicture(ole,data,type,name);
+        fileManager.readEmbeddedPicture(ole,data,type,name,document);
         continue;
       }
       // other
@@ -237,9 +237,10 @@ void SDWParser::createDocument(librevenge::RVNGTextInterface *documentInterface)
 // Intermediate level
 //
 ////////////////////////////////////////////////////////////
-bool SDWParser::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &name)
+bool SDWParser::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &name, StarDocument &doc)
+try
 {
-  StarZone zone(input, name, "SWNumRuleList");
+  StarZone zone(input, name, "SWNumRuleList", doc.getPassword());
   if (!zone.readSWHeader()) {
     STOFF_DEBUG_MSG(("SDWParser::readSwNumRuleList: can not read the header\n"));
     return false;
@@ -306,10 +307,15 @@ bool SDWParser::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &
   }
   return true;
 }
+catch (...)
+{
+  return false;
+}
 
 bool SDWParser::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &name, StarDocument &doc)
+try
 {
-  StarZone zone(input, name, "SWPageStyleSheets");
+  StarZone zone(input, name, "SWPageStyleSheets", doc.getPassword());
   if (!zone.readSWHeader()) {
     STOFF_DEBUG_MSG(("SDWParser::readSwPageStyleSheets: can not read the header\n"));
     return false;
@@ -373,6 +379,10 @@ bool SDWParser::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string con
   }
 
   return true;
+}
+catch (...)
+{
+  return false;
 }
 
 bool SDWParser::readSWPageDef(StarZone &zone, StarDocument &doc)
@@ -2093,8 +2103,9 @@ bool SDWParser::readSWTOX51List(StarZone &zone)
 // drawing layer
 ////////////////////////////////////////////////////////////
 bool SDWParser::readDrawingLayer(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
+try
 {
-  StarZone zone(input, name, "DrawingLayer");
+  StarZone zone(input, name, "DrawingLayer", document.getPassword());
   input->seek(0, librevenge::RVNG_SEEK_SET);
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
@@ -2165,13 +2176,18 @@ bool SDWParser::readDrawingLayer(STOFFInputStreamPtr input, std::string const &n
   ascFile.addNote(f.str().c_str());
   return true;
 }
+catch (...)
+{
+  return false;
+}
 
 ////////////////////////////////////////////////////////////
 // main zone
 ////////////////////////////////////////////////////////////
 bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const &name, StarDocument &doc)
+try
 {
-  StarZone zone(input, name, "SWWriterDocument");
+  StarZone zone(input, name, "SWWriterDocument", doc.getPassword());
   if (!zone.readSWHeader()) {
     STOFF_DEBUG_MSG(("SDWParser::readWriterDocument: can not read the header\n"));
     return false;
@@ -2391,6 +2407,10 @@ bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const 
     ascFile.addNote("SWWriterDocument:##extra");
   }
   return true;
+}
+catch (...)
+{
+  return false;
 }
 ////////////////////////////////////////////////////////////
 //

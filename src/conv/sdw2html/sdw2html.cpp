@@ -55,6 +55,7 @@ int printUsage()
   printf("\n");
   printf("Options:\n");
   printf("\t-h:                Shows this help message\n");
+  printf("\t-p password:       Gives the document password\n");
   printf("\t-v:                Output sdw2html version \n");
   return -1;
 }
@@ -68,14 +69,18 @@ int printVersion()
 int main(int argc, char *argv[])
 {
   char const *file = 0;
+  char const *password=0;
   bool printHelp=false;
   int ch;
 
-  while ((ch = getopt(argc, argv, "hv")) != -1) {
+  while ((ch = getopt(argc, argv, "hvp:")) != -1) {
     switch (ch) {
     case 'v':
       printVersion();
       return 0;
+    case 'p':
+      password=optarg;
+      break;
     default:
     case 'h':
       printHelp = true;
@@ -110,7 +115,7 @@ int main(int argc, char *argv[])
   librevenge::RVNGString document;
   try {
     librevenge::RVNGHTMLTextGenerator documentGenerator(document);
-    error = STOFFDocument::parse(&input, &documentGenerator);
+    error = STOFFDocument::parse(&input, &documentGenerator, password);
   }
   catch (STOFFDocument::Result &err) {
     error=err;
@@ -124,6 +129,8 @@ int main(int argc, char *argv[])
     fprintf(stderr, "ERROR: Parse Exception!\n");
   else if (error == STOFFDocument::STOFF_R_OLE_ERROR)
     fprintf(stderr, "ERROR: File is an OLE document!\n");
+  else if (error != STOFFDocument::STOFF_R_PASSWORD_MISSMATCH_ERROR)
+    fprintf(stderr, "ERROR: Bad password!\n");
   else if (error != STOFFDocument::STOFF_R_OK)
     fprintf(stderr, "ERROR: Unknown Error!\n");
   if (error != STOFFDocument::STOFF_R_OK)
