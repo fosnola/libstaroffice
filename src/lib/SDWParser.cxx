@@ -48,6 +48,7 @@
 #include "StarDocument.hxx"
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
+#include "StarObjectChart.hxx"
 #include "StarZone.hxx"
 
 #include "SDWParser.hxx"
@@ -122,10 +123,15 @@ bool SDWParser::createZones()
   std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > listDir=m_oleParser->getDirectoryList();
   for (size_t d=0; d<listDir.size(); ++d) {
     if (!listDir[d]) continue;
-    shared_ptr<StarAttributeManager> attrManager(new StarAttributeManager);
-    StarDocument document(getInput(), m_password, m_oleParser, listDir[d], attrManager, this);
+    shared_ptr<StarDocument> document
+    (new StarDocument(getInput(), m_password, m_oleParser, listDir[d], this));
+    if (document->getDocumentKind()==STOFFDocument::STOFF_K_CHART) {
+      StarObjectChart chart(document);
+      chart.parse();
+      continue;
+    }
     // Ole-Object has persist elements, so...
-    if (listDir[d]->m_hasCompObj) document.parse();
+    if (listDir[d]->m_hasCompObj) document->parse();
     STOFFOLEParser::OleDirectory &direct=*listDir[d];
     std::vector<std::string> unparsedOLEs=direct.getUnparsedOles();
     size_t numUnparsed = unparsedOLEs.size();
@@ -148,32 +154,27 @@ bool SDWParser::createZones()
       }
       ole->setReadInverted(true);
       if (base=="SwNumRules") {
-        readSwNumRuleList(ole, name, document);
+        readSwNumRuleList(ole, name, *document);
         continue;
       }
       if (base=="SwPageStyleSheets") {
-        readSwPageStyleSheets(ole,name, document);
+        readSwPageStyleSheets(ole,name, *document);
         continue;
       }
 
       if (base=="DrawingLayer") {
-        readDrawingLayer(ole,name,document);
+        readDrawingLayer(ole,name,*document);
         continue;
       }
       if (base=="SfxStyleSheets") {
         SDCParser sdcParser;
-        sdcParser.readSfxStyleSheets(ole,name,document);
+        sdcParser.readSfxStyleSheets(ole,name,*document);
         continue;
       }
 
       if (base=="StarCalcDocument") {
         SDCParser sdcParser;
-        sdcParser.readCalcDocument(ole,name,document);
-        continue;
-      }
-      if (base=="StarChartDocument") {
-        SDCParser sdcParser;
-        sdcParser.readChartDocument(ole,name,document);
+        sdcParser.readCalcDocument(ole,name,*document);
         continue;
       }
       if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
@@ -182,17 +183,17 @@ bool SDWParser::createZones()
         continue;
       }
       if (base=="StarMathDocument") {
-        fileManager.readMathDocument(ole,name,document);
+        fileManager.readMathDocument(ole,name,*document);
         continue;
       }
       if (base=="StarWriterDocument") {
-        readWriterDocument(ole,name, document);
+        readWriterDocument(ole,name, *document);
         continue;
       }
       if (base.compare(0,3,"Pic")==0) {
         librevenge::RVNGBinaryData data;
         std::string type;
-        fileManager.readEmbeddedPicture(ole,data,type,name,document);
+        fileManager.readEmbeddedPicture(ole,data,type,name,*document);
         continue;
       }
       // other

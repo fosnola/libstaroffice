@@ -202,6 +202,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\..\src\lib\StarObjectChart.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\src\lib\StarZone.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -246,6 +250,7 @@
     <ClInclude Include="..\..\src\lib\StarEncryption.hxx" />
     <ClInclude Include="..\..\src\lib\StarFileManager.hxx" />
     <ClInclude Include="..\..\src\lib\StarItemPool.hxx" />
+    <ClInclude Include="..\..\src\lib\StarObjectChart.hxx" />
     <ClInclude Include="..\..\src\lib\StarZone.hxx" />
     <ClInclude Include="..\..\src\lib\SWFieldManager.hxx" />
     <ClInclude Include="..\..\src\lib\SWFormatManager.hxx" />

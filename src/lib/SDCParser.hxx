@@ -72,8 +72,6 @@ public:
 
   //! try to read a chart zone: StarCalcDocument .sdc
   bool readCalcDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &document);
-  //! try to read a chart zone: StarChartDocument .sds
-  bool readChartDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &document);
   //! try to read a spreadshet style zone: SfxStyleSheets
   bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &document);
 
@@ -83,11 +81,6 @@ protected:
   //
   // data
   //
-  //! try to read the chart attributes
-  bool readSCHAttributes(StarZone &zone, StarDocument &doc);
-  //! try to read the memchart data
-  bool readSCHMemChart(StarZone &zone);
-
   //! try to read a SCTable
   bool readSCTable(StarZone &zone, SDCParserInternal::Table &table, StarDocument &doc);
   //! try to read a SCColumn

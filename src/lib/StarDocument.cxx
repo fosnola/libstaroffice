@@ -52,8 +52,7 @@ namespace StarDocumentInternal
 //! the state of a StarDocument
 struct State {
   //! constructor
-  State(shared_ptr<StarAttributeManager> attributeManager) :
-    m_poolList(), m_attributeManager(attributeManager), m_sdwParser(0)
+  State() : m_poolList(), m_attributeManager(new StarAttributeManager), m_sdwParser(0)
   {
   }
   //! the list of pool
@@ -72,9 +71,8 @@ private:
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
 StarDocument::StarDocument(STOFFInputStreamPtr input, char const *passwd,
-                           shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory,
-                           shared_ptr<StarAttributeManager> attributeManager, SDWParser *sdwParser) :
-  m_input(input), m_password(passwd), m_oleParser(oleParser), m_directory(directory), m_state(new StarDocumentInternal::State(attributeManager))
+                           shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *sdwParser) :
+  m_input(input), m_password(passwd), m_oleParser(oleParser), m_directory(directory), m_state(new StarDocumentInternal::State())
 {
   m_state->m_sdwParser=sdwParser;
 }
