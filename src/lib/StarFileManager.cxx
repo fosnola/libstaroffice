@@ -421,10 +421,11 @@ bool StarFileManager::readOleObject(STOFFInputStreamPtr input, std::string const
   return true;
 }
 
-bool StarFileManager::readMathDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc)
+bool StarFileManager::readMathDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &/*doc*/)
 try
 {
-  StarZone zone(input, fileName, "MathDocument", doc.getPassword()); // use encoding RTL_TEXTENCODING_MS_1252
+  // checkme this zone can not be encoded
+  StarZone zone(input, fileName, "MathDocument", 0); // use encoding RTL_TEXTENCODING_MS_1252
   libstoff::DebugFile &ascii=zone.ascii();
   ascii.open(fileName);
 

@@ -513,8 +513,9 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
       for (int c=0; c < sSz; ++c) text+=(char) input->readULong(1);
       f << text;
     }
-    else if (type==0x40) // readme 8bytes
-      f << "dateTime,";
+    else if (type==0x40) {
+      f << "dateTime,"; // readme 8 byte
+    }
     else {
       STOFF_DEBUG_MSG(("STOFFOLEParser::readSummaryInformation: find unknown type\n"));
       f << "#type=" << std::hex << type << std::dec << ",";

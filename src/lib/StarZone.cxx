@@ -59,6 +59,12 @@ StarZone::~StarZone()
   m_ascii.reset();
 }
 
+void StarZone::setInput(STOFFInputStreamPtr input)
+{
+  m_input=input;
+  m_ascii.setStream(input);
+}
+
 bool StarZone::readString(librevenge::RVNGString &string, int /*encoding*/) const
 {
   int sSz=(int) m_input->readULong(2);

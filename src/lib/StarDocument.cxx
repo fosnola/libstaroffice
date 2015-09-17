@@ -462,7 +462,7 @@ bool StarDocument::readSfxDocumentInformation(STOFFInputStreamPtr input, libstof
   *input >> nVersion >> bPasswd >> nUS >> bPGraphic >> bQTemplate;
   if (nVersion) f << "vers=" << std::hex << nVersion << std::dec << ",";
   if (nUS) f << "encoding=" << nUS << ","; // need to load encoding here
-  if (bPasswd) f << "passwd,";
+  if (bPasswd) f << "passwd,"; // the password does not seems to be kept/used in this block
   if (bPGraphic) f << "portableGraphic,";
   if (bQTemplate) f << "queryTemplate,";
   ascii.addPos(0);

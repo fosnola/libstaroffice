@@ -216,6 +216,8 @@ public:
   {
     return m_input;
   }
+  //! reset the current input
+  void setInput(STOFFInputStreamPtr input);
   //! returns the ascii file
   libstoff::DebugFile &ascii()
   {

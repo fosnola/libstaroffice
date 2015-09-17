@@ -39,6 +39,8 @@
 
 #include <librevenge/librevenge.h>
 
+#include "STOFFStringStream.hxx"
+
 #include "StarEncryption.hxx"
 
 ////////////////////////////////////////////////////////////
@@ -181,6 +183,38 @@ bool StarEncryption::findEncryptedPassword(std::vector<uint8_t> const &src, std:
     if (calcC0c1!=c0c1) return false;
   }
   return true;
+}
+
+STOFFInputStreamPtr StarEncryption::decodeStream(STOFFInputStreamPtr input, uint8_t mask)
+{
+  if (!mask || !input || input->size()==0) return input;
+
+  STOFFInputStreamPtr res;
+  unsigned long numRead=0;
+  long dataSize=input->size();
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  const uint8_t *data=input->read(size_t(dataSize), numRead);
+  if (!data || numRead!=(unsigned long) dataSize) {
+    STOFF_DEBUG_MSG(("StarEncryption::decodeStream: can not read the original stream\n"));
+    return res;
+  }
+  uint8_t *finalData=new uint8_t[numRead];
+  if (!finalData) return res;
+  uint8_t *finalDataPtr=finalData;
+  for (long l=0; l<dataSize; ++l, ++data)
+    *(finalDataPtr++) = uint8_t((*data>>4)|(*data<<4))^mask;
+  shared_ptr<STOFFStringStream> stream(new STOFFStringStream((const unsigned char *)finalData,(unsigned int) dataSize));
+  delete[] finalData;
+  if (!stream) return res;
+  res.reset(new STOFFInputStream(stream, input->readInverted()));
+  if (res) res->seek(0, librevenge::RVNG_SEEK_SET);
+  return res;
+}
+
+uint8_t StarEncryption::getMaskToDecodeStream(uint8_t src, uint8_t dest)
+{
+  uint8_t nibbleSrc=uint8_t((src>>4)|(src<<4));
+  return nibbleSrc^dest;
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

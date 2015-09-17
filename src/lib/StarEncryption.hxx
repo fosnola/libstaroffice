@@ -40,6 +40,7 @@
 
 #include <vector>
 
+#include "libstaroffice_internal.hxx"
 #include "STOFFDebug.hxx"
 
 /** \brief the main class to read/.. some basic encryption in StarOffice documents
@@ -86,6 +87,19 @@ public:
    */
   bool guessPassword(uint32_t date, uint32_t time, std::vector<uint8_t> const &cryptDateTime);
 
+  //! decode a zone given a mask
+  static STOFFInputStreamPtr decodeStream(STOFFInputStreamPtr input, uint8_t mask);
+  /** retrieves a mask needed to decode a stream knowing a src and dest bytes
+
+      \note given a passwd, SvStream creates a mask from the passwd and used it to
+            decode a stream, thus we need only this mask for decoding a crypt stream.
+
+            Moreover as this method is used to crypt a StarCalcDocument stream,
+            and we know that a valid StarCalcDocument stream must begin by XX42,
+            we can easily retrieve the password mask and use it to uncrypt
+            this stream...
+  */
+  static uint8_t getMaskToDecodeStream(uint8_t src, uint8_t dest);
 protected:
   //! decodes a string
   static bool decode(std::vector<uint8_t> &data, std::vector<uint8_t> const &cryptPasswd);

@@ -41,13 +41,14 @@
 
 #include "STOFFOLEParser.hxx"
 
-#include "StarFileManager.hxx"
 #include "StarAttribute.hxx"
-#include "SWFieldManager.hxx"
-#include "SWFormatManager.hxx"
+#include "StarEncryption.hxx"
 #include "StarDocument.hxx"
+#include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarZone.hxx"
+#include "SWFieldManager.hxx"
+#include "SWFormatManager.hxx"
 
 #include "SDCParser.hxx"
 
@@ -297,15 +298,28 @@ SDCParser::~SDCParser()
 bool SDCParser::readCalcDocument(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
 try
 {
-  StarZone zone(input, name, "SWChartDocument", document.getPassword());
+  StarZone zone(input, name, "SWCalcDocument", document.getPassword()); // checkme: do we need to pass the password
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
 
   libstoff::DebugStream f;
   f << "Entries(SCCalcDocument):";
-  // sch_docsh.cxx: ScDocShell::Load then sc_documen2.cxx ScDocument::Load
+  // sc_docsh.cxx: ScDocShell::Load then sc_documen2.cxx ScDocument::Load
   uint16_t nId;
   *input>>nId;
+  if ((nId>>8)!=0x42) {
+    /* if the zone has a password, we can retrieve it knowing that nId must begin by 0x42
+
+       TODO: we must also check if the user has given a password and
+       if the user mask does correspond to the real mask.
+    */
+    input=StarEncryption::decodeStream(input, StarEncryption::getMaskToDecodeStream(uint8_t(nId>>8), 0x42));
+    if (input) {
+      zone.setInput(input);
+      input->seek(0, librevenge::RVNG_SEEK_SET);
+      *input>>nId;
+    }
+  }
   if ((nId!=0x4220 && nId!=0x422d)||!zone.openSCRecord()) {
     STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read the document id\n"));
     f << "###";
@@ -797,7 +811,7 @@ try
         break;
       }
       else if (!string.empty())
-        f << "passwd=" << string.cstr() << ",";
+        f << "passwd=" << string.cstr() << ","; // the uncrypted table password, safe to ignore
       if (input->tell()<endPos) f << "language=" << input->readULong(2) << ",";
       if (input->tell()<endPos) f << "autoCalc=" << input->readULong(1) << ",";
       if (input->tell()<endPos) f << "visibleTab=" << input->readULong(2) << ",";
@@ -1124,7 +1138,7 @@ catch (...)
 bool SDCParser::readChartDocument(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
 try
 {
-  StarZone zone(input, name, "SWChartDocument", document.getPassword());
+  StarZone zone(input, name, "SWChartDocument", document.getPassword()); // checkme
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
 
