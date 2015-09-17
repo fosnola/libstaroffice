@@ -32,11 +32,11 @@
 */
 
 /*
- * Parser to convert sdc StarOffice document
+ * Parser to read StarOffice spreadsheet zones
  *
  */
-#ifndef SDC_PARSER
-#  define SDC_PARSER
+#ifndef STAR_OBJECT_SPREADSHEET
+#  define STAR_OBJECT_SPREADSHEET
 
 #include <vector>
 
@@ -46,7 +46,7 @@
 
 #include "STOFFParser.hxx"
 
-namespace SDCParserInternal
+namespace StarObjectSpreadsheetInternal
 {
 class Table;
 
@@ -62,13 +62,13 @@ class StarZone;
  *
  *
  */
-class SDCParser
+class StarObjectSpreadsheet
 {
 public:
   //! constructor
-  SDCParser();
+  StarObjectSpreadsheet();
   //! destructor
-  virtual ~SDCParser();
+  virtual ~StarObjectSpreadsheet();
 
   //! try to read a chart zone: StarCalcDocument .sdc
   bool readCalcDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &document);
@@ -80,11 +80,11 @@ protected:
   // data
   //
   //! try to read a SCTable
-  bool readSCTable(StarZone &zone, SDCParserInternal::Table &table, StarDocument &doc);
+  bool readSCTable(StarZone &zone, StarObjectSpreadsheetInternal::Table &table, StarDocument &doc);
   //! try to read a SCColumn
-  bool readSCColumn(StarZone &zone, SDCParserInternal::Table &table, StarDocument &doc, int column, long lastPos);
+  bool readSCColumn(StarZone &zone, StarObjectSpreadsheetInternal::Table &table, StarDocument &doc, int column, long lastPos);
   //! try to read a list of data
-  bool readSCData(StarZone &zone, SDCParserInternal::Table &table, StarDocument &doc, int column);
+  bool readSCData(StarZone &zone, StarObjectSpreadsheetInternal::Table &table, StarDocument &doc, int column);
 
   //! try to read a change trak
   bool readSCChangeTrack(StarZone &zone, int version, long lastPos);
@@ -108,7 +108,7 @@ protected:
   bool readSCOutlineArray(StarZone &zone);
 
   //! the state
-  shared_ptr<SDCParserInternal::State> m_state;
+  shared_ptr<StarObjectSpreadsheetInternal::State> m_state;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

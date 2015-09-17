@@ -16,8 +16,6 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_LIBADD  =
 libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_DEPENDENCIES = @LIBSTAROFFICE_WIN32_RESOURCE@
 libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_LDFLAGS = $(version_info) -export-dynamic -no-undefined
 libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES = \
-	SDCParser.cxx				\
-	SDCParser.hxx				\
 	SDWParser.cxx				\
 	SDWParser.hxx				\
 	STOFFDebug.cxx				\
@@ -71,6 +69,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarObjectChart.hxx			\
 	StarObjectDraw.cxx			\
 	StarObjectDraw.hxx			\
+	StarObjectSpreadsheet.cxx		\
+	StarObjectSpreadsheet.hxx		\
 	StarZone.cxx				\
 	StarZone.hxx				\
 	SWFieldManager.cxx			\

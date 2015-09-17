@@ -169,14 +169,6 @@
 	</References>
 	<Files>
 		<FiltercName="Source Files" Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
-			<File RelativePath="..\..\src\lib\SDCParser.cxx">
-				<FileConfiguration Name="Release|Win32">
-					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
-				</FileConfiguration>
-				<FileConfiguration Name="Debug|Win32">
-					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
 			<File RelativePath="..\..\src\lib\SDWParser.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -385,6 +377,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\StarObjectSpreadsheet.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\StarZone.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -419,8 +419,6 @@
 			</File>
 		</Filter>
 		<Filter Name="Header Files" Filter="h;hpp;hxx;hm;inl">
-			<File RelativePath="..\..\src\lib\SDCParser.hxx">
-			</File>
 			<File RelativePath="..\..\src\lib\SDWParser.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFDebug.hxx">
@@ -474,6 +472,8 @@
 			<File RelativePath="..\..\src\lib\StarObjectChart.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarObjectDraw.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\StarObjectSpreadsheet.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarZone.hxx">
 			</File>

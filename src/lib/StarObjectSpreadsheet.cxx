@@ -51,13 +51,13 @@
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
 
-#include "SDCParser.hxx"
+#include "StarObjectSpreadsheet.hxx"
 
-/** Internal: the structures of a SDCParser */
-namespace SDCParserInternal
+/** Internal: the structures of a StarObjectSpreadsheet */
+namespace StarObjectSpreadsheetInternal
 {
 ////////////////////////////////////////
-//! Internal: a structure use to read ScMultiRecord zone of a SDCParser
+//! Internal: a structure use to read ScMultiRecord zone of a StarObjectSpreadsheet
 struct ScMultiRecord {
   //! constructor
   ScMultiRecord(StarZone &zone) : m_zone(zone), m_zoneOpened(false), m_actualRecord(0), m_numRecord(0),
@@ -74,7 +74,7 @@ struct ScMultiRecord {
   bool open()
   {
     if (m_zoneOpened) {
-      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord: oops a record has been opened\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::ScMultiRecord: oops a record has been opened\n"));
       return false;
     }
     m_actualRecord=m_numRecord=0;
@@ -93,7 +93,7 @@ struct ScMultiRecord {
     m_endPos=m_zone.getRecordLastPosition();
     // sc_rechead.cxx ScMultipleReadHeader::ScMultipleReadHeader
     if (m_endPos+6>lastPos) {
-      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::open: oops the zone seems too short\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::ScMultiRecord::open: oops the zone seems too short\n"));
       m_extra="###zoneShort,";
       return false;
     }
@@ -103,7 +103,7 @@ struct ScMultiRecord {
     *input>>id >> tableLen;
     m_endRecordPos=input->tell()+long(tableLen);
     if (id!=0x4200 || m_endRecordPos > lastPos) {
-      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::open: oops can not find the size data\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::ScMultiRecord::open: oops can not find the size data\n"));
       m_extra="###zoneShort,";
       m_endRecordPos=0;
       return false;
@@ -118,11 +118,11 @@ struct ScMultiRecord {
   void close(std::string const &wh)
   {
     if (!m_zoneOpened) {
-      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::close: can not find any opened zone\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::ScMultiRecord::close: can not find any opened zone\n"));
       return;
     }
     if (m_endContentPos>0) {
-      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::close: argh, the current content is not closed, let close it\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::ScMultiRecord::close: argh, the current content is not closed, let close it\n"));
       closeContent(wh);
     }
 
@@ -147,7 +147,7 @@ struct ScMultiRecord {
   bool openContent(std::string const &wh)
   {
     if (m_endContentPos>0) {
-      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::openContent: argh, the current content is not closed, let close it\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::ScMultiRecord::openContent: argh, the current content is not closed, let close it\n"));
       closeContent(wh);
     }
     STOFFInputStreamPtr input=m_zone.input();
@@ -163,7 +163,7 @@ struct ScMultiRecord {
   bool closeContent(std::string const &wh)
   {
     if (m_endContentPos<=0) {
-      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::closeContent: no content opened\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::ScMultiRecord::closeContent: no content opened\n"));
       return false;
     }
     STOFFInputStreamPtr input=m_zone.input();
@@ -172,7 +172,7 @@ struct ScMultiRecord {
       input->seek(m_endContentPos, librevenge::RVNG_SEEK_SET);
     }
     else if (input->tell()!=m_endContentPos) {
-      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::getContent: find extra data\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::ScMultiRecord::getContent: find extra data\n"));
       m_zone.ascii().addPos(input->tell());
       libstoff::DebugStream f;
       f << wh << ":###extra";
@@ -186,7 +186,7 @@ struct ScMultiRecord {
   long getContentLastPosition() const
   {
     if (m_endContentPos<=0) {
-      STOFF_DEBUG_MSG(("SDCParserInternal::ScMultiRecord::getContentLastPosition: no content opened\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::ScMultiRecord::getContentLastPosition: no content opened\n"));
       return m_endPos;
     }
     return m_endContentPos;
@@ -235,7 +235,7 @@ private:
 };
 
 ////////////////////////////////////////
-//! Internal: a table of a SDCParser
+//! Internal: a table of a StarObjectSpreadsheet
 class Table
 {
 public:
@@ -266,7 +266,7 @@ public:
 };
 
 ////////////////////////////////////////
-//! Internal: the state of a SDCParser
+//! Internal: the state of a StarObjectSpreadsheet
 struct State {
   //! constructor
   State()
@@ -279,11 +279,11 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SDCParser::SDCParser() : m_state(new SDCParserInternal::State)
+StarObjectSpreadsheet::StarObjectSpreadsheet() : m_state(new StarObjectSpreadsheetInternal::State)
 {
 }
 
-SDCParser::~SDCParser()
+StarObjectSpreadsheet::~StarObjectSpreadsheet()
 {
 }
 
@@ -296,7 +296,7 @@ SDCParser::~SDCParser()
 ////////////////////////////////////////////////////////////
 // main zone
 ////////////////////////////////////////////////////////////
-bool SDCParser::readCalcDocument(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
+bool StarObjectSpreadsheet::readCalcDocument(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
 try
 {
   StarZone zone(input, name, "SWCalcDocument", document.getPassword()); // checkme: do we need to pass the password
@@ -322,7 +322,7 @@ try
     }
   }
   if ((nId!=0x4220 && nId!=0x422d)||!zone.openSCRecord()) {
-    STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read the document id\n"));
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read the document id\n"));
     f << "###";
     ascFile.addPos(0);
     ascFile.addNote(f.str().c_str());
@@ -342,14 +342,14 @@ try
     switch (subId) {
     case 0x4222: {
       f << "table,";
-      SDCParserInternal::Table table(version, maxRow);
+      StarObjectSpreadsheetInternal::Table table(version, maxRow);
       ok=readSCTable(zone, table, document);
       break;
     }
     case 0x4224: {
       f << "rangeName,";
       // sc_rangenam.cxx ScRangeName::Load
-      SDCParserInternal::ScMultiRecord scRecord(zone);
+      StarObjectSpreadsheetInternal::ScMultiRecord scRecord(zone);
       ok=scRecord.open();
       if (!ok) break;
       uint16_t count, sharedMaxIndex, dummy;
@@ -366,7 +366,7 @@ try
         f << "Entries(SCRange):";
         if (!scRecord.openContent("SCCalcDocument")) {
           f << "###";
-          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument:can not find some content\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument:can not find some content\n"));
           ascFile.addPos(pos);
           ascFile.addNote(f.str().c_str());
           break;
@@ -375,7 +375,7 @@ try
         long endDataPos=scRecord.getContentLastPosition();
         librevenge::RVNGString string;
         if (!zone.readString(string)) {
-          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
           f << "###string";
           ascFile.addPos(pos);
           ascFile.addNote(f.str().c_str());
@@ -433,14 +433,14 @@ try
                        subId==0x4231 ? "validation" : subId==0x4234 ? "detOp" : "dpCollection");
       f << what << ",";
       // sc_dbcolect.cxx ScDBCollection::Load and ...
-      SDCParserInternal::ScMultiRecord scRecord(zone);
+      StarObjectSpreadsheetInternal::ScMultiRecord scRecord(zone);
       ok=scRecord.open();
       if (!ok) break;
 
       long endDataPos=zone.getRecordLastPosition();
       if (subId==0x4239 && input->readLong(4)!=6) {
         f << "###version";
-        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument:find unknown version\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument:find unknown version\n"));
         input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
         scRecord.close("SCCalcDocument");
         break;
@@ -458,7 +458,7 @@ try
         if (!scRecord.openContent("SCCalcDocument")) {
           f << "###";
           isOk=false;
-          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument:can not find some content\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument:can not find some content\n"));
           ascFile.addPos(pos);
           ascFile.addNote(f.str().c_str());
           break;
@@ -478,7 +478,7 @@ try
           *input >> nTab >> nCol1 >> nRow1 >> nCol2 >> nRow2;
           f << "dim=" << nCol1 << "x" << nRow1 << "<->" << nCol2 << "x" << nRow2 << "[" << nTab << "],";
           if (!zone.readString(string) || input->tell()>endData) {
-            STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+            STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
             f << "###string";
           }
           else {
@@ -494,7 +494,7 @@ try
           parsed=addDebugFile=true;
           for (int j=0; j<3; ++j) {
             if (!zone.readString(string) || input->tell()>endData) {
-              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+              STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
               f << "###string";
               parsed=false;
               break;
@@ -507,7 +507,7 @@ try
           bool hasValue;
           *input>>hasValue;
           if (hasValue && !readSCMatrix(zone, version, endData)) {
-            STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a matrix\n"));
+            STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a matrix\n"));
             f << "###matrix";
             parsed=false;
             break;
@@ -519,7 +519,7 @@ try
           parsed=addDebugFile=true;
           for (int j=0; j<3; ++j) {
             if (!zone.readString(string) || input->tell()>endData) {
-              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+              STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
               f << "###string";
               parsed=false;
               break;
@@ -532,7 +532,7 @@ try
           f << "range=" << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
           if (input->tell()<endData) {
             if (!zone.readString(string) || input->tell()>endData) {
-              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+              STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
               f << "###string";
               parsed=false;
               break;
@@ -555,13 +555,13 @@ try
           for (int e=0; e<int(entryCount); ++e) {
             f << "[";
             if (!scRecord.openContent("SCCalcDocument")) {
-              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument:can not find some content\n"));
+              STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument:can not find some content\n"));
               f << "###";
               isOk=parsed=false;
               break;
             }
             if (!zone.readString(string)) {
-              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument:can not read a string\n"));
+              STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument:can not read a string\n"));
               isOk=parsed=false;
               f << "###string,";
               break;
@@ -584,7 +584,7 @@ try
           if (showInput) f << "show[input],";
           for (int j=0; j<2; ++j) {
             if (!zone.readString(string) || input->tell()>endData) {
-              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+              STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
               parsed=false;
               f << "###string";
               break;
@@ -598,7 +598,7 @@ try
           if (showError) f << "show[error],";
           for (int j=0; j<2; ++j) {
             if (!zone.readString(string) || input->tell()>endData) {
-              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+              STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
               parsed=false;
               f << "###string";
               break;
@@ -630,7 +630,7 @@ try
           case 1:
             for (int j=0; j<2; ++j) {
               if (!zone.readString(string) || input->tell()>endData) {
-                STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+                STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
                 parsed=false;
                 f << "###string";
                 break;
@@ -645,7 +645,7 @@ try
           case 2:
             for (int j=0; j<5; ++j) {
               if (!zone.readString(string) || input->tell()>endData) {
-                STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+                STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
                 parsed=false;
                 f << "###string";
                 break;
@@ -656,7 +656,7 @@ try
             }
             break;
           default:
-            STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: unexpected sub type\n"));
+            STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: unexpected sub type\n"));
             f << "###subType=" << int(dType) << ",";
             parsed=false;
             break;
@@ -669,7 +669,7 @@ try
           for (uint32_t j=0; j<nDim; ++j) {
             f << "dim" << j << "=[";
             if (!zone.readString(string) || input->tell()>endData) {
-              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+              STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
               parsed=false;
               f << "###string";
               break;
@@ -688,7 +688,7 @@ try
             if (showEmptyMode) f << "showEmptyMode=" << showEmptyMode << ",";
             if (subTotalDef) f << "subTotalDef,";
             if (input->tell()+2*long(subTotalCount)>endData) {
-              STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read function list\n"));
+              STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read function list\n"));
               parsed=false;
               f << "###totalFuncs";
               break;
@@ -703,7 +703,7 @@ try
             for (uint32_t k=0; k<nMember; ++k) {
               f << "member" << k << "[";
               if (!zone.readString(string) || input->tell()>endData) {
-                STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+                STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
                 parsed=false;
                 f << "###string";
                 break;
@@ -730,7 +730,7 @@ try
           if (input->tell()<endData) {
             for (int j=0; j<2; ++j) {
               if (!zone.readString(string) || input->tell()>endData) {
-                STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+                STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
                 parsed=false;
                 f << "###string";
                 break;
@@ -742,7 +742,7 @@ try
           break;
         }
         default:
-          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: unexpected type\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: unexpected type\n"));
           f << "###type,";
           addDebugFile=parsed=true;
           input->seek(endData, librevenge::RVNG_SEEK_SET);
@@ -783,7 +783,7 @@ try
     }
     input->seek(pos+2, librevenge::RVNG_SEEK_SET);
     if (!zone.openSCRecord()) {
-      STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not open the zone record\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not open the zone record\n"));
       f << "###";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -799,7 +799,7 @@ try
       version=(int) vers;
       f << "vers=" << vers << ",";
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
         f << "###string";
         break;
       }
@@ -807,7 +807,7 @@ try
         f << "pageStyle=" << string.cstr() << ",";
       f << "protected=" << input->readULong(1) << ",";
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
         f << "###string";
         break;
       }
@@ -841,7 +841,7 @@ try
         f.str("");
         f << "SCCalcDocument[drawing-" << std::hex << nId << std::dec << "]:";
         if (!zone.openSCRecord()) {
-          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not open a record\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not open a record\n"));
           f << "###record";
           break;
         }
@@ -860,7 +860,7 @@ try
             input->seek(pos, librevenge::RVNG_SEEK_SET);
           break;
         default:
-          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: find unexpected type\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: find unexpected type\n"));
           f << "###unknown";
           input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
           break;
@@ -937,13 +937,13 @@ try
       }
       STOFFColor col;
       if (!input->readColor(col)) {
-        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a color\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a color\n"));
         f << "###color";
         break;
       }
       f << "col=" << col << ",";
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
         f << "###string";
         break;
       }
@@ -1000,7 +1000,7 @@ try
       f << "ranges=[";
       if (version<0x12) {
         if (input->tell()+8*long(n) > endPos) {
-          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read some ranges\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read some ranges\n"));
           f << "###ranges";
           break;
         }
@@ -1009,7 +1009,7 @@ try
       }
       else {
         if (input->tell()+16*long(n) > endPos) {
-          STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read some ranges\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read some ranges\n"));
           f << "###ranges";
           break;
         }
@@ -1033,7 +1033,7 @@ try
       f << "funct=" << funct << ",";
       if (!nCount) break;
       if (input->tell()+10*long(nCount) > endPos) {
-        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read some area\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read some area\n"));
         f << "###area";
         break;
       }
@@ -1050,7 +1050,7 @@ try
       *input >> loadVers;
       f << "load[version]=" << loadVers << ",";
       if (loadVers&0xff00) {
-        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: unknown version\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: unknown version\n"));
         f << "###version";
         break;
       }
@@ -1076,7 +1076,7 @@ try
       if (bIsAuthor) f << "isAuthor,";
       if (bEveryoneButMe) f << "everyoneButMe,";
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
         f << "###string";
         break;
       }
@@ -1085,7 +1085,7 @@ try
       *input >> bIsRange;
       if (bIsRange) f << "isRange,";
       if (!zone.openSCRecord()) {
-        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: can not open the range list record\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not open the range list record\n"));
         f << "###";
         break;
       }
@@ -1098,7 +1098,7 @@ try
         f << "],";
       }
       else {
-        STOFF_DEBUG_MSG(("SDCParser::readCalcDocument: bad num rangen"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: bad num rangen"));
         f << "###nRange=" << nRange << ",";
       }
       zone.closeSCRecord("SCCalcDocument");
@@ -1136,7 +1136,7 @@ catch (...)
   return false;
 }
 
-bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
+bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
 {
   StarZone zone(input, name, "SfxStyleSheets", document.getPassword());
   input->seek(0, librevenge::RVNG_SEEK_SET);
@@ -1153,7 +1153,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
     *input >> nId;
     f << "Entries(SfxStyleSheets):id=" << std::hex << nId << std::dec << ",calc,";
     if (!zone.openSCRecord()) {
-      STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: can not open main zone\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSfxStyleSheets: can not open main zone\n"));
       f << "###";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -1167,7 +1167,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
       *input >> nId;
       f << "SfxStyleSheets-1:id=" << std::hex << nId << std::dec << ",";
       if (!zone.openSCRecord()) {
-        STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: can not open second zone\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSfxStyleSheets: can not open second zone\n"));
         f << "###";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -1182,7 +1182,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
           if (nId==0x4214 || !mainPool) mainPool=pool;
         }
         else {
-          STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: can not readPoolZone\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSfxStyleSheets: can not readPoolZone\n"));
           f << "###";
           input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
           break;
@@ -1192,7 +1192,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
       case 0x4212:
         f << "style[pool],";
         if (!StarItemPool::readStyle(zone, mainPool, document)) {
-          STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: can not readStylePool\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSfxStyleSheets: can not readStylePool\n"));
           f << "###";
           input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
           break;
@@ -1206,7 +1206,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
         break;
       }
       default:
-        STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: find unexpected tag\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSfxStyleSheets: find unexpected tag\n"));
         input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
         f << "###";
         break;
@@ -1218,7 +1218,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
     zone.closeSCRecord("SfxStyleSheets");
 
     if (!input->isEnd()) {
-      STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: find extra data\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSfxStyleSheets: find extra data\n"));
       ascFile.addPos(input->tell());
       ascFile.addNote("SfxStyleSheets:###extra");
     }
@@ -1245,7 +1245,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
     }
     if (pool && pool->read(zone)) {
       if (extraPool) {
-        STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: create extra pool for %d of type %d\n",
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSfxStyleSheets: create extra pool for %d of type %d\n",
                          (int) document.getDocumentKind(), (int) pool->getType()));
       }
       if (!mainPool) mainPool=pool;
@@ -1260,7 +1260,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
   if (!StarItemPool::readStyle(zone, mainPool, document))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (!input->isEnd()) {
-    STOFF_DEBUG_MSG(("SDCParser::readSfxStyleSheets: find extra data\n"));
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSfxStyleSheets: find extra data\n"));
     ascFile.addPos(input->tell());
     ascFile.addNote("Entries(SfxStyleSheets):###extra");
   }
@@ -1272,7 +1272,7 @@ bool SDCParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const 
 // Low level
 //
 ////////////////////////////////////////////////////////////
-bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, StarDocument &doc)
+bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInternal::Table &table, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -1297,11 +1297,11 @@ bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, Sta
     f.str("");
     f << "SCTable[" << std::hex << id << std::dec << "]:";
     if (id==0x4240) {
-      SDCParserInternal::ScMultiRecord scRecord(zone);
+      StarObjectSpreadsheetInternal::ScMultiRecord scRecord(zone);
       f << "columns,";
       if (!scRecord.open()) {
         input->seek(pos,librevenge::RVNG_SEEK_SET);
-        STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not find the column header \n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTable: can not find the column header \n"));
         f << "###";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -1324,7 +1324,7 @@ bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, Sta
           break;
         pos=input->tell();
         if (!scRecord.openContent("SCTable")) {
-          STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not open a column \n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTable: can not open a column \n"));
           ascFile.addPos(pos);
           ascFile.addNote("SCTable-C###");
           break;
@@ -1341,7 +1341,7 @@ bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, Sta
       continue;
     }
     if (!zone.openSCRecord()) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not open the zone record\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTable: can not open the zone record\n"));
       f << "###";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -1411,7 +1411,7 @@ bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, Sta
       }
       f << "],";
       if (!ok) {
-        STOFF_DEBUG_MSG(("SDCParser::readSCTable: somethings went bad\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTable: somethings went bad\n"));
         f << "###bound";
         break;
       }
@@ -1423,7 +1423,7 @@ bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, Sta
       bool bVal;
       for (int i=0; i<3; ++i) {
         if (!zone.readString(string) || input->tell()>endDataPos) {
-          STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not read a string\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTable: can not read a string\n"));
           f << "###string" << i;
           ok=false;
           break;
@@ -1446,7 +1446,7 @@ bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, Sta
         for (int i=0; i<2; ++i) {
           pos=input->tell();
           if (!readSCOutlineArray(zone)) {
-            STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not open the zone record\n"));
+            STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTable: can not open the zone record\n"));
             ok=false;
             input->seek(pos,librevenge::RVNG_SEEK_SET);
             break;
@@ -1462,7 +1462,7 @@ bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, Sta
       }
       if (input->tell()<endDataPos) {
         if (!zone.readString(string) || input->tell()>endDataPos) {
-          STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not read a string\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTable: can not read a string\n"));
           f << "###pageStyle";
           break;
         }
@@ -1481,7 +1481,7 @@ bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, Sta
         uint16_t nCount;
         *input>>nCount;
         if (input->tell()+8*long(nCount)>endDataPos) {
-          STOFF_DEBUG_MSG(("SDCParser::readSCTable: bad nCount\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTable: bad nCount\n"));
           f << "###nCount=" << nCount << ",";
           break;
         }
@@ -1493,7 +1493,7 @@ bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, Sta
       if (input->tell()<endDataPos) {
         STOFFColor color;
         if (!input->readColor(color)) {
-          STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not read a color\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTable: can not read a color\n"));
           f << "###color";
           break;
         }
@@ -1509,7 +1509,7 @@ bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, Sta
       bool ok=true;
       for (int i=0; i<3; ++i) {
         if (!zone.readString(string) || input->tell()>endDataPos) {
-          STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not read a string\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTable: can not read a string\n"));
           f << "###string" << i;
           ok=false;
           break;
@@ -1523,7 +1523,7 @@ bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, Sta
         f << "bRelUrl=" << input->readULong(1) << ",";
       if (input->tell()<endDataPos) {
         if (!zone.readString(string) || input->tell()>endDataPos) {
-          STOFF_DEBUG_MSG(("SDCParser::readSCTable: can not read a string\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTable: can not read a string\n"));
           f << "###opt";
           break;
         }
@@ -1533,7 +1533,7 @@ bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, Sta
       break;
     }
     default:
-      STOFF_DEBUG_MSG(("SDCParser::readSCTable: find unexpected type\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTable: find unexpected type\n"));
       f << "###";
       input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
     }
@@ -1545,8 +1545,8 @@ bool SDCParser::readSCTable(StarZone &zone, SDCParserInternal::Table &table, Sta
   return true;
 }
 
-bool SDCParser::readSCColumn(StarZone &zone, SDCParserInternal::Table &table, StarDocument &doc,
-                             int column, long lastPos)
+bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetInternal::Table &table, StarDocument &doc,
+    int column, long lastPos)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -1573,7 +1573,7 @@ bool SDCParser::readSCColumn(StarZone &zone, SDCParserInternal::Table &table, St
     input->seek(pos+2, librevenge::RVNG_SEEK_SET);
     bool ok=zone.openSCRecord();
     if (!ok || zone.getRecordLastPosition()>lastPos) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCColumn:can not open record\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCColumn:can not open record\n"));
       f << "###";
       if (ok) zone.closeSCRecord("SCColumn");
       ascFile.addPos(pos);
@@ -1592,7 +1592,7 @@ bool SDCParser::readSCColumn(StarZone &zone, SDCParserInternal::Table &table, St
         // sc_cell.cxx ScBaseCell::LoadNotes, ScPostIt operator>>
         for (int j=0; j<3; ++j) {
           if (!zone.readString(string)||input->tell()>endDataPos) {
-            STOFF_DEBUG_MSG(("SDCParser::readSCColumn:can not read a string\n"));
+            STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCColumn:can not read a string\n"));
             f << "###string" << j;
             ok=false;
             break;
@@ -1618,7 +1618,7 @@ bool SDCParser::readSCColumn(StarZone &zone, SDCParserInternal::Table &table, St
         f << input->readULong(2) << ":";
         uint16_t nWhich=149; // ATTR_PATTERN
         if (!pool->loadSurrogate(zone, nWhich, f) || input->tell()>endDataPos) {
-          STOFF_DEBUG_MSG(("SDCParser::readSCColumn:can not read a attrib\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCColumn:can not read a attrib\n"));
           f << "###attrib";
           break;
         }
@@ -1627,7 +1627,7 @@ bool SDCParser::readSCColumn(StarZone &zone, SDCParserInternal::Table &table, St
       break;
     }
     default:
-      STOFF_DEBUG_MSG(("SDCParser::readSCColumn: find unexpected type\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCColumn: find unexpected type\n"));
       f << "###";
       input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
     }
@@ -1639,13 +1639,13 @@ bool SDCParser::readSCColumn(StarZone &zone, SDCParserInternal::Table &table, St
   return true;
 }
 
-bool SDCParser::readSCData(StarZone &zone, SDCParserInternal::Table &table, StarDocument &doc, int column)
+bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInternal::Table &table, StarDocument &doc, int column)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
 
   // sc_column2.cxx ScColumn::LoadData
-  SDCParserInternal::ScMultiRecord scRecord(zone);
+  StarObjectSpreadsheetInternal::ScMultiRecord scRecord(zone);
   if (!scRecord.open()) {
     input->seek(pos,librevenge::RVNG_SEEK_SET);
     return false;
@@ -1665,7 +1665,7 @@ bool SDCParser::readSCData(StarZone &zone, SDCParserInternal::Table &table, Star
     f.str("");
     f << "SCData-" << i << ":";
     if (input->tell()+4>lastPos) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCData:can not read some data\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCData:can not read some data\n"));
       f << "###";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -1701,7 +1701,7 @@ bool SDCParser::readSCData(StarZone &zone, SDCParserInternal::Table &table, Star
       }
       librevenge::RVNGString text;
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("SDCParser::readSCData: can not open some text \n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCData: can not open some text \n"));
         f << "###text";
         ok=false;
         break;
@@ -1713,7 +1713,7 @@ bool SDCParser::readSCData(StarZone &zone, SDCParserInternal::Table &table, Star
       // sc_cell.cxx
       f << "formula,";
       if (!scRecord.openContent("SCData")) {
-        STOFF_DEBUG_MSG(("SDCParser::readSCData: can not open a formula \n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCData: can not open a formula \n"));
         f << "###formula";
         ok=false;
         break;
@@ -1737,7 +1737,7 @@ bool SDCParser::readSCData(StarZone &zone, SDCParserInternal::Table &table, Star
         if (cFlags&0x10) {
           librevenge::RVNGString text;
           if (!zone.readString(text)) {
-            STOFF_DEBUG_MSG(("SDCParser::readSCData: can not open some text\n"));
+            STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCData: can not open some text\n"));
             f << "###text";
             ascFile.addDelimiter(input->tell(),'|');
             input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
@@ -1800,7 +1800,7 @@ bool SDCParser::readSCData(StarZone &zone, SDCParserInternal::Table &table, Star
       }
       StarFileManager fileManager;
       if (!fileManager.readEditTextObject(zone, lastPos, doc) || input->tell()>lastPos) {
-        STOFF_DEBUG_MSG(("SDCParser::readSCData: can not open some edit text \n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCData: can not open some edit text \n"));
         f << "###edit";
         ok=false;
         break;
@@ -1808,7 +1808,7 @@ bool SDCParser::readSCData(StarZone &zone, SDCParserInternal::Table &table, Star
       break;
     }
     default:
-      STOFF_DEBUG_MSG(("SDCParser::readSCData: find unexpected type\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCData: find unexpected type\n"));
       f << "###type=" << what;
       ok=false;
       break;
@@ -1825,7 +1825,7 @@ bool SDCParser::readSCData(StarZone &zone, SDCParserInternal::Table &table, Star
 
 // sc_chgtrack.cxx ScChangeActionContent::ScChangeActionContent
 
-bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
+bool StarObjectSpreadsheet::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -1836,7 +1836,7 @@ bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
   // sc_chgtrack.cxx ScChangeTrack::Load
 
   if (!zone.openSCRecord()) {
-    STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: can not find string collection\n"));
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack: can not find string collection\n"));
     ascFile.addDelimiter(input->tell(),'|');
     f << "###strings";
     input->seek(lastPos, librevenge::RVNG_SEEK_SET);
@@ -1852,7 +1852,7 @@ bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
   librevenge::RVNGString string;
   for (int16_t i=0; i<count; ++i) {
     if (!zone.readString(string) || input->tell() > endData) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: can not open some string\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack: can not open some string\n"));
       f << "###string";
       ascFile.addDelimiter(input->tell(),'|');
       input->seek(endData, librevenge::RVNG_SEEK_SET);
@@ -1875,9 +1875,9 @@ bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
       f.str("");
       f << "Entries(SCChangeTrack)[A]:";
     }
-    SDCParserInternal::ScMultiRecord scRecord(zone);
+    StarObjectSpreadsheetInternal::ScMultiRecord scRecord(zone);
     if (!scRecord.open()) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: can not find the action list\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack: can not find the action list\n"));
       ascFile.addDelimiter(input->tell(),'|');
       f << "###actions";
       input->seek(lastPos, librevenge::RVNG_SEEK_SET);
@@ -1893,7 +1893,7 @@ bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
         f << "###";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack:can not read an action\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack:can not read an action\n"));
         break;
       }
       endData=scRecord.getContentLastPosition();
@@ -1909,7 +1909,7 @@ bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
       if (rejAction) f << "rejAction=" << rejAction << ",";
       if (state) f << "state=" << state << ",";
       if (!zone.readString(string) || input->tell() > endData) {
-        STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: can not open some string\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack: can not open some string\n"));
         f << "###string";
         ascFile.addDelimiter(input->tell(),'|');
         ascFile.addPos(pos);
@@ -1921,7 +1921,7 @@ bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
         f << "comment" << i << "=" << string.cstr() << ",";
       if (s==0 && type!=8) {
         f << "###type";
-        STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack:the type seems bad\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack:the type seems bad\n"));
       }
       switch (type) {
       case 1:
@@ -1951,7 +1951,7 @@ bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
         bool ok=true;
         for (int j=0; j<2; ++j) {
           if (!zone.readString(string) || input->tell() > endData) {
-            STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: can not open some string\n"));
+            STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack: can not open some string\n"));
             f << "###string";
             ok=false;
             break;
@@ -1964,13 +1964,13 @@ bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
         *input >> oldContent >> newContent;
         if (oldContent) f << "oldContent=" << oldContent << ",";
         if (newContent) f << "newContent=" << newContent << ",";
-        SDCParserInternal::ScMultiRecord scRecord2(zone);
+        StarObjectSpreadsheetInternal::ScMultiRecord scRecord2(zone);
         if (!scRecord2.open()) {
-          STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: can not find the cell action\n"));
+          STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack: can not find the cell action\n"));
           f << "###cells";
           break;
         }
-        STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: reading cell action is not implemented\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack: reading cell action is not implemented\n"));
         f << "###cells,";
         // fixme: call readSCData with only one cell
         input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
@@ -1978,7 +1978,7 @@ bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
         break;
       }
       default:
-        STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack:unknown type\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack:unknown type\n"));
         f << "###type=" << (int) type << ",";
         break;
       }
@@ -1992,9 +1992,9 @@ bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
   pos=input->tell();
   f.str("");
   f << "Entries(SCChangeTrack)[L]:";
-  SDCParserInternal::ScMultiRecord scRecord(zone);
+  StarObjectSpreadsheetInternal::ScMultiRecord scRecord(zone);
   if (!scRecord.open()) {
-    STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: can not find the action list\n"));
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack: can not find the action list\n"));
     ascFile.addDelimiter(input->tell(),'|');
     f << "###link";
     input->seek(lastPos, librevenge::RVNG_SEEK_SET);
@@ -2006,7 +2006,7 @@ bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
     f << "Entries(SCChangeTrack)[L]:###";
     static bool first=true;
     if (first) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: reading the action links is not implemented\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack: reading the action links is not implemented\n"));
       first=false;
     }
     ascFile.addPos(pos);
@@ -2018,7 +2018,7 @@ bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
   ascFile.addNote(f.str().c_str());
 
   if (input->tell()!=lastPos) {
-    STOFF_DEBUG_MSG(("SDCParser::readSCChangeTrack: find extra data\n"));
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack: find extra data\n"));
     ascFile.addDelimiter(input->tell(),'|');
     f << "###extra";
     input->seek(lastPos, librevenge::RVNG_SEEK_SET);
@@ -2029,7 +2029,7 @@ bool SDCParser::readSCChangeTrack(StarZone &zone, int /*version*/, long lastPos)
 
 }
 
-bool SDCParser::readSCDBData(StarZone &zone, int /*version*/, long lastPos)
+bool StarObjectSpreadsheet::readSCDBData(StarZone &zone, int /*version*/, long lastPos)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -2040,7 +2040,7 @@ bool SDCParser::readSCDBData(StarZone &zone, int /*version*/, long lastPos)
   // sc_dbcolect.cxx ScDBData::Load
   librevenge::RVNGString string;
   if (!zone.readString(string)) {
-    STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some text\n"));
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCDBData: can not read some text\n"));
     f << "###name";
     ascFile.addDelimiter(input->tell(),'|');
     ascFile.addPos(pos);
@@ -2088,7 +2088,7 @@ bool SDCParser::readSCDBData(StarZone &zone, int /*version*/, long lastPos)
   if (bDBImport) f << "dbImport,";
   for (int i=0; i<2; ++i) {
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some text\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCDBData: can not read some text\n"));
       f << "###name";
       ascFile.addDelimiter(input->tell(),'|');
       ascFile.addPos(pos);
@@ -2106,7 +2106,7 @@ bool SDCParser::readSCDBData(StarZone &zone, int /*version*/, long lastPos)
   f.str("");
   f << "SCDBData:";
   if (input->tell()+3*4>lastPos) {
-    STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read sort data\n"));
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCDBData: can not read sort data\n"));
     f << "###name";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -2125,7 +2125,7 @@ bool SDCParser::readSCDBData(StarZone &zone, int /*version*/, long lastPos)
     double val;
     *input >> doQuery >> queryField >> queryOp >> queryByString;
     if (!zone.readString(string)||input->tell()>lastPos) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some text\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCDBData: can not read some text\n"));
       f << "###name";
       ascFile.addDelimiter(input->tell(),'|');
       ascFile.addPos(pos);
@@ -2149,7 +2149,7 @@ bool SDCParser::readSCDBData(StarZone &zone, int /*version*/, long lastPos)
     uint16_t field, count;
     *input >> doSubTotal >> field >> count;
     if (input->tell() + 3*long(count) > lastPos) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some subTotal\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCDBData: can not read some subTotal\n"));
       f << "###subTotal";
       ascFile.addDelimiter(input->tell(),'|');
       ascFile.addPos(pos);
@@ -2189,7 +2189,7 @@ bool SDCParser::readSCDBData(StarZone &zone, int /*version*/, long lastPos)
       f << "advSource=" << std::hex << input->readULong(4) << "x" << input->readULong(4) << std::dec << ",";
   }
   if (input->tell()!=lastPos) {
-    STOFF_DEBUG_MSG(("SDCParser::readSCDBData: find extra data\n"));
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCDBData: find extra data\n"));
     ascFile.addDelimiter(input->tell(),'|');
     f << "###extra";
     input->seek(lastPos, librevenge::RVNG_SEEK_SET);
@@ -2199,7 +2199,7 @@ bool SDCParser::readSCDBData(StarZone &zone, int /*version*/, long lastPos)
   return true;
 }
 
-bool SDCParser::readSCDBPivot(StarZone &zone, int version, long lastPos)
+bool StarObjectSpreadsheet::readSCDBPivot(StarZone &zone, int version, long lastPos)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -2221,7 +2221,7 @@ bool SDCParser::readSCDBPivot(StarZone &zone, int version, long lastPos)
     uint16_t nCount;
     *input >> nCount;
     if (input->tell()+6*int(nCount) >lastPos) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some fields\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCDBData: can not read some fields\n"));
       f << "###fields";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -2269,7 +2269,7 @@ bool SDCParser::readSCDBPivot(StarZone &zone, int version, long lastPos)
     librevenge::RVNGString string;
     for (int i=0; i<2; ++i) {
       if (!zone.readString(string)||input->tell()>lastPos) {
-        STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some text\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCDBData: can not read some text\n"));
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -2282,7 +2282,7 @@ bool SDCParser::readSCDBPivot(StarZone &zone, int version, long lastPos)
     *input >> count;
     for (int i=0; i<int(count); ++i) {
       if (!zone.readString(string)||input->tell()>lastPos) {
-        STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some text\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCDBData: can not read some text\n"));
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -2293,7 +2293,7 @@ bool SDCParser::readSCDBPivot(StarZone &zone, int version, long lastPos)
     }
   }
   if (input->tell()!=lastPos) {
-    STOFF_DEBUG_MSG(("SDCParser::readSCDBPivot: find extra data\n"));
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCDBPivot: find extra data\n"));
     ascFile.addDelimiter(input->tell(),'|');
     f << "###extra";
     input->seek(lastPos, librevenge::RVNG_SEEK_SET);
@@ -2303,7 +2303,7 @@ bool SDCParser::readSCDBPivot(StarZone &zone, int version, long lastPos)
   return true;
 }
 
-bool SDCParser::readSCFormula(StarZone &zone, STOFFVec2i const &cell, int version, long lastPos)
+bool StarObjectSpreadsheet::readSCFormula(StarZone &zone, STOFFVec2i const &cell, int version, long lastPos)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -2364,7 +2364,7 @@ bool SDCParser::readSCFormula(StarZone &zone, STOFFVec2i const &cell, int versio
   return true;
 }
 
-bool SDCParser::readSCMatrix(StarZone &zone, int /*version*/, long lastPos)
+bool StarObjectSpreadsheet::readSCMatrix(StarZone &zone, int /*version*/, long lastPos)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -2395,7 +2395,7 @@ bool SDCParser::readSCMatrix(StarZone &zone, int /*version*/, long lastPos)
     case 2: {
       librevenge::RVNGString string;
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SDCParser::readSCMatrix: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCMatrix: can not read a string\n"));
         f << "###string";
         ok=false;
         break;
@@ -2404,14 +2404,14 @@ bool SDCParser::readSCMatrix(StarZone &zone, int /*version*/, long lastPos)
       break;
     }
     default:
-      STOFF_DEBUG_MSG(("SDCParser::readSCMatrix: find unexpected type\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCMatrix: find unexpected type\n"));
       f << "###type=" << int(type) << ",";
       ok=false;
       break;
     }
     if (!ok) break;
     if (input->tell()>lastPos) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCMatrix: the zone is too short\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCMatrix: the zone is too short\n"));
       f << "###short,";
       ok=false;
       break;
@@ -2423,7 +2423,7 @@ bool SDCParser::readSCMatrix(StarZone &zone, int /*version*/, long lastPos)
   ascFile.addNote(f.str().c_str());
   return ok && input->tell()<=lastPos;
 }
-bool SDCParser::readSCQueryParam(StarZone &zone, int /*version*/, long lastPos)
+bool StarObjectSpreadsheet::readSCQueryParam(StarZone &zone, int /*version*/, long lastPos)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -2453,7 +2453,7 @@ bool SDCParser::readSCQueryParam(StarZone &zone, int /*version*/, long lastPos)
     double val;
     *input >> doQuery >> queryByString >> op >> connect >> nField >> val;
     if (!zone.readString(string)||input->tell()>lastPos) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCDBData: can not read some text\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCDBData: can not read some text\n"));
       f << "###string";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -2476,7 +2476,7 @@ bool SDCParser::readSCQueryParam(StarZone &zone, int /*version*/, long lastPos)
   return true;
 }
 
-bool SDCParser::readSCFormula3(StarZone &zone, STOFFVec2i const &cell, int /*version*/, long lastPos)
+bool StarObjectSpreadsheet::readSCFormula3(StarZone &zone, STOFFVec2i const &cell, int /*version*/, long lastPos)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -2498,7 +2498,7 @@ bool SDCParser::readSCFormula3(StarZone &zone, STOFFVec2i const &cell, int /*ver
   return true;
 }
 
-bool SDCParser::readSCTokenInFormula(StarZone &zone, STOFFVec2i const &/*cell*/, int /*vers*/, long lastPos, libstoff::DebugStream &f)
+bool StarObjectSpreadsheet::readSCTokenInFormula(StarZone &zone, STOFFVec2i const &/*cell*/, int /*vers*/, long lastPos, libstoff::DebugStream &f)
 {
   STOFFInputStreamPtr input=zone.input();
   // sc_token.cxx ScRawToken::Load
@@ -2526,7 +2526,7 @@ bool SDCParser::readSCTokenInFormula(StarZone &zone, STOFFVec2i const &/*cell*/,
     uint8_t nBytes;
     *input >> nBytes;
     if (input->tell()+int(nBytes)>lastPos) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCTokenInFormula: can not read text zone\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTokenInFormula: can not read text zone\n"));
       f << "###text";
       ok=false;
       break;
@@ -2561,7 +2561,7 @@ bool SDCParser::readSCTokenInFormula(StarZone &zone, STOFFVec2i const &/*cell*/,
     uint8_t nByte;
     *input >> nByte;
     if (input->tell()+2*int(nByte)>lastPos) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCTokenInFormula: can not read the jump\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTokenInFormula: can not read the jump\n"));
       f << "###jump";
       ok=false;
       break;
@@ -2581,7 +2581,7 @@ bool SDCParser::readSCTokenInFormula(StarZone &zone, STOFFVec2i const &/*cell*/,
   return ok && input->tell()<=lastPos;
 }
 
-bool SDCParser::readSCTokenInFormula3(StarZone &zone, STOFFVec2i const &/*cell*/, bool &endData, long lastPos, libstoff::DebugStream &f)
+bool StarObjectSpreadsheet::readSCTokenInFormula3(StarZone &zone, STOFFVec2i const &/*cell*/, bool &endData, long lastPos, libstoff::DebugStream &f)
 {
   endData=false;
   STOFFInputStreamPtr input=zone.input();
@@ -2609,7 +2609,7 @@ bool SDCParser::readSCTokenInFormula3(StarZone &zone, STOFFVec2i const &/*cell*/
     case 2: {
       librevenge::RVNGString text;
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("SDCParser::readSCTokenInFormula3: can not read text zone\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTokenInFormula3: can not read text zone\n"));
         f << "###text";
         ok=false;
         break;
@@ -2653,7 +2653,7 @@ bool SDCParser::readSCTokenInFormula3(StarZone &zone, STOFFVec2i const &/*cell*/
   case 3: { // external
     librevenge::RVNGString text;
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("SDCParser::readSCTokenInFormula3: can not read external zone\n"));
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTokenInFormula3: can not read external zone\n"));
       f << "###external";
       ok=false;
       break;
@@ -2680,12 +2680,12 @@ bool SDCParser::readSCTokenInFormula3(StarZone &zone, STOFFVec2i const &/*cell*/
   return ok && input->tell()<=lastPos;
 }
 
-bool SDCParser::readSCOutlineArray(StarZone &zone)
+bool StarObjectSpreadsheet::readSCOutlineArray(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
 
-  SDCParserInternal::ScMultiRecord scRecord(zone);
+  StarObjectSpreadsheetInternal::ScMultiRecord scRecord(zone);
   if (!scRecord.open()) {
     input->seek(pos,librevenge::RVNG_SEEK_SET);
     return false;
@@ -2707,7 +2707,7 @@ bool SDCParser::readSCOutlineArray(StarZone &zone)
     for (int i=0; i<count; ++i) {
       if (!scRecord.openContent("SCOutlineArray")) {
         f << "###";
-        STOFF_DEBUG_MSG(("SDCParser::readSCOutlineArray:can not find some content\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCOutlineArray:can not find some content\n"));
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
         scRecord.close("SCOutlineArray");

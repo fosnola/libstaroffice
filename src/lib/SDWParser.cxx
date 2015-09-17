@@ -41,7 +41,7 @@
 
 #include "STOFFOLEParser.hxx"
 
-#include "SDCParser.hxx"
+#include "StarObjectSpreadsheet.hxx"
 #include "StarAttribute.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
@@ -173,13 +173,13 @@ bool SDWParser::createZones()
         continue;
       }
       if (base=="SfxStyleSheets") {
-        SDCParser sdcParser;
+        StarObjectSpreadsheet sdcParser;
         sdcParser.readSfxStyleSheets(ole,name,*document);
         continue;
       }
 
       if (base=="StarCalcDocument") {
-        SDCParser sdcParser;
+        StarObjectSpreadsheet sdcParser;
         sdcParser.readCalcDocument(ole,name,*document);
         continue;
       }
