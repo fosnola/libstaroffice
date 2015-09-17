@@ -76,16 +76,16 @@ bool StarEncryption::decode(std::vector<uint8_t> &data, std::vector<uint8_t> con
   }
 
   std::vector<uint8_t> cryptBuf(cryptPasswd);
-  uint8_t *dataPtr=data.data();
-  uint8_t *cryptPtr=cryptBuf.data();
+  uint8_t *dataPtr=&(data[0]);
+  uint8_t *cryptPtr=&(cryptBuf[0]);
   size_t cryptPos=0;
   for (size_t c=0; c<data.size(); ++c) {
     *dataPtr=*dataPtr ^ *cryptPtr ^ uint8_t(cryptBuf[0]*cryptPos);
-    *cryptPtr += (cryptPos<15 ? *(cryptPtr+1) : cryptBuf[0]);
+    *cryptPtr = uint8_t(*cryptPtr+(cryptPos<15 ? *(cryptPtr+1) : cryptBuf[0]));
     if (*cryptPtr==0) *cryptPtr=1;
     if (++cryptPos >= 16) {
       cryptPos=0;
-      cryptPtr=cryptBuf.data();
+      cryptPtr=&(cryptBuf[0]);
     }
     else
       ++cryptPtr;

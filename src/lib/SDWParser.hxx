@@ -168,6 +168,9 @@ protected:
   shared_ptr<STOFFOLEParser> m_oleParser;
   //! the state
   shared_ptr<SDWParserInternal::State> m_state;
+private:
+  SDWParser(SDWParser const &orig);
+  SDWParser &operator=(SDWParser const &orig);
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
