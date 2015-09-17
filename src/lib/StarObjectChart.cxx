@@ -46,8 +46,8 @@
 #include "StarDocument.hxx"
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
+#include "StarObjectDraw.hxx"
 #include "StarZone.hxx"
-#include "SDCParser.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
 
@@ -125,8 +125,9 @@ bool StarObjectChart::parse()
       readChartDocument(ole,name);
       continue;
     }
-    // BasicManager2
-    STOFF_DEBUG_MSG(("StarObjectChart::readChartDocument: find unexpected ole %s\n", name.c_str()));
+    if (base!="BasicManager2") {
+      STOFF_DEBUG_MSG(("StarObjectChart::parse: find unexpected ole %s\n", name.c_str()));
+    }
     libstoff::DebugFile asciiFile(ole);
     asciiFile.open(name);
 
@@ -186,8 +187,7 @@ try
   }
 
   pos=input->tell();
-  SDCParser sdcParser;
-  if (!sdcParser.readSdrModel(zone, *m_document)) {
+  if (!StarObjectDraw::readSdrModel(zone, *m_document)) {
     STOFF_DEBUG_MSG(("StarObjectChart::readChartDocument: can not find the SdrModel\n"));
     ascFile.addPos(pos);
     ascFile.addNote("SCChartDocument:###SdrModel");
@@ -238,12 +238,11 @@ bool StarObjectChart::readSfxStyleSheets(STOFFInputStreamPtr input, std::string 
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
   if (!m_document || m_document->getDocumentKind()!=STOFFDocument::STOFF_K_CHART) {
-    STOFF_DEBUG_MSG(("StarObjectChart::readChartDocument: called with unexpected document\n"));
+    STOFF_DEBUG_MSG(("StarObjectChart::readSfxStyleSheets: called with unexpected document\n"));
     ascFile.addPos(0);
     ascFile.addNote("Entries(SfxStyleSheets)");
     return false;
   }
-  shared_ptr<StarItemPool> mainPool;
 
   // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
   // chart sch_docshell.cxx SchChartDocShell::Load
@@ -251,7 +250,7 @@ bool StarObjectChart::readSfxStyleSheets(STOFFInputStreamPtr input, std::string 
   pool->addSecondaryPool(m_document->getNewItemPool(StarItemPool::T_EditEnginePool));
   pool->addSecondaryPool(m_document->getNewItemPool(StarItemPool::T_ChartPool));
 
-  mainPool=pool;
+  shared_ptr<StarItemPool> mainPool=pool;
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
     long pos=input->tell();
@@ -262,8 +261,7 @@ bool StarObjectChart::readSfxStyleSheets(STOFFInputStreamPtr input, std::string 
     }
     if (pool && pool->read(zone)) {
       if (extraPool) {
-        STOFF_DEBUG_MSG(("StarObjectChart::readSfxStyleSheets: create extra pool for %d of type %d\n",
-                         (int) m_document->getDocumentKind(), (int) pool->getType()));
+        STOFF_DEBUG_MSG(("StarObjectChart::readSfxStyleSheets: create extra pool of type %d\n", (int) pool->getType()));
       }
       if (!mainPool) mainPool=pool;
       pool.reset();

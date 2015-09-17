@@ -69,6 +69,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarItemPool.hxx			\
 	StarObjectChart.cxx			\
 	StarObjectChart.hxx			\
+	StarObjectDraw.cxx			\
+	StarObjectDraw.hxx			\
 	StarZone.cxx				\
 	StarZone.hxx				\
 	SWFieldManager.cxx			\

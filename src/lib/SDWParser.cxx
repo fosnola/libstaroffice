@@ -49,6 +49,7 @@
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarObjectChart.hxx"
+#include "StarObjectDraw.hxx"
 #include "StarZone.hxx"
 
 #include "SDWParser.hxx"
@@ -128,6 +129,11 @@ bool SDWParser::createZones()
     if (document->getDocumentKind()==STOFFDocument::STOFF_K_CHART) {
       StarObjectChart chart(document);
       chart.parse();
+      continue;
+    }
+    if (document->getDocumentKind()==STOFFDocument::STOFF_K_DRAW) {
+      StarObjectDraw draw(document);
+      draw.parse();
       continue;
     }
     // Ole-Object has persist elements, so...
@@ -2136,8 +2142,7 @@ try
     break;
   }
   long pos=input->tell();
-  SDCParser sdcParser;
-  if (!sdcParser.readSdrModel(zone, document)) {
+  if (!StarObjectDraw::readSdrModel(zone, document)) {
     STOFF_DEBUG_MSG(("SDWParser::readDrawingLayer: can not find the drawing model\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     ascFile.addPos(input->tell());

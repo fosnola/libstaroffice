@@ -75,8 +75,6 @@ public:
   //! try to read a spreadshet style zone: SfxStyleSheets
   bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &document);
 
-  //! try to read a SdrModel zone: "DrMd"
-  bool readSdrModel(StarZone &zone, StarDocument &doc);
 protected:
   //
   // data
@@ -108,19 +106,6 @@ protected:
   bool readSCTokenInFormula3(StarZone &zone, STOFFVec2i const &pos, bool &endData, long lastPos, libstoff::DebugStream &f);
   //! try to read a SCOutlineArray
   bool readSCOutlineArray(StarZone &zone);
-
-  //! try to read a SdrLayer zone: "DrLy'
-  bool readSdrLayer(StarZone &zone);
-  //! try to read a SdrLayerSet zone: "DrLS'
-  bool readSdrLayerSet(StarZone &zone);
-  //! try to read a object zone: "DrOb'
-  bool readSdrObject(StarZone &zone);
-  //! try to read a Page/MasterPage zone: "DrPg'
-  bool readSdrPage(StarZone &zone, StarDocument &doc);
-  //! try to read a Master Page descriptor zone: "DrMP'
-  bool readSdrMPageDesc(StarZone &zone);
-  //! try to read a list of Master Page zone: "DrML'
-  bool readSdrMPageDescList(StarZone &zone);
 
   //! the state
   shared_ptr<SDCParserInternal::State> m_state;

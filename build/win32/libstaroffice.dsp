@@ -191,6 +191,10 @@ SOURCE=..\..\src\lib\StarObjectChart.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarObjectDraw.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarZone.cxx
 # End Source File
 # Begin Source File
@@ -324,6 +328,10 @@ SOURCE=..\..\src\lib\StarItemPool.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarObjectChart.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarObjectDraw.hxx
 # End Source File
 # Begin Source File
 
