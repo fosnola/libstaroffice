@@ -40,11 +40,8 @@
 
 #include <vector>
 
-#include "STOFFDebug.hxx"
-#include "STOFFEntry.hxx"
-#include "STOFFInputStream.hxx"
-
-#include "STOFFParser.hxx"
+#include "libstaroffice_internal.hxx"
+#include "StarObject.hxx"
 
 namespace StarObjectSpreadsheetInternal
 {
@@ -53,8 +50,6 @@ class Table;
 struct State;
 }
 
-class StarAttribute;
-class StarObject;
 class StarZone;
 
 /** \brief the main class to read a StarOffice sdc file
@@ -62,11 +57,11 @@ class StarZone;
  *
  *
  */
-class StarObjectSpreadsheet
+class StarObjectSpreadsheet : public StarObject
 {
 public:
   //! constructor
-  StarObjectSpreadsheet(shared_ptr<StarObject> document);
+  StarObjectSpreadsheet(StarObject const &orig, bool duplicateState);
   //! destructor
   virtual ~StarObjectSpreadsheet();
   //! try to parse the current object
@@ -109,8 +104,6 @@ protected:
   //! try to read a SCOutlineArray
   bool readSCOutlineArray(StarZone &zone);
 
-  //! the main document
-  shared_ptr<StarObject> m_document;
   //! the state
   shared_ptr<StarObjectSpreadsheetInternal::State> m_state;
 };

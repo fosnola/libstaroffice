@@ -279,7 +279,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectSpreadsheet::StarObjectSpreadsheet(shared_ptr<StarObject> document) : m_document(document), m_state(new StarObjectSpreadsheetInternal::State)
+StarObjectSpreadsheet::StarObjectSpreadsheet(StarObject const &orig, bool duplicateState) : StarObject::StarObject(orig, duplicateState), m_state(new StarObjectSpreadsheetInternal::State)
 {
 }
 
@@ -298,13 +298,12 @@ StarObjectSpreadsheet::~StarObjectSpreadsheet()
 ////////////////////////////////////////////////////////////
 bool StarObjectSpreadsheet::parse()
 {
-  if (!m_document || !m_document->getOLEDirectory() || !m_document->getOLEDirectory()->m_input) {
+  if (!getOLEDirectory() || !getOLEDirectory()->m_input) {
     STOFF_DEBUG_MSG(("StarObjectSpreadsheet::parser: error, incomplete document\n"));
     return false;
   }
-  STOFFOLEParser::OleDirectory &directory=*m_document->getOLEDirectory();
-  // Ole-Object has persist elements, so...
-  if (directory.m_hasCompObj) m_document->parse();
+  STOFFOLEParser::OleDirectory &directory=*getOLEDirectory();
+  StarObject::parse();
   std::vector<std::string> unparsedOLEs=directory.getUnparsedOles();
   size_t numUnparsed = unparsedOLEs.size();
   STOFFInputStreamPtr input=directory.m_input;
@@ -352,7 +351,7 @@ bool StarObjectSpreadsheet::parse()
 bool StarObjectSpreadsheet::readCalcDocument(STOFFInputStreamPtr input, std::string const &name)
 try
 {
-  StarZone zone(input, name, "SWCalcDocument", m_document ? m_document->getPassword() : 0); // checkme: do we need to pass the password
+  StarZone zone(input, name, "SWCalcDocument", getPassword()); // checkme: do we need to pass the password
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
 
@@ -361,7 +360,7 @@ try
   // sc_docsh.cxx: ScDocShell::Load then sc_documen2.cxx ScDocument::Load
   uint16_t nId;
   *input>>nId;
-  if ((nId>>8)!=0x42 && m_document) {
+  if ((nId>>8)!=0x42) {
     /* if the zone has a password, we can retrieve it knowing that nId must begin by 0x42
 
        TODO: we must also check if the user has given a password and
@@ -374,7 +373,7 @@ try
       *input>>nId;
     }
   }
-  if (!m_document || (nId!=0x4220 && nId!=0x422d) || !zone.openSCRecord()) {
+  if ((nId!=0x4220 && nId!=0x422d) || !zone.openSCRecord()) {
     STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read the document id\n"));
     f << "###";
     ascFile.addPos(0);
@@ -901,15 +900,15 @@ try
         switch (nId) {
         case 0x4260: {
           f << "pool,";
-          shared_ptr<StarItemPool> pool=m_document->getNewItemPool(StarItemPool::T_XOutdevPool);
-          pool->addSecondaryPool(m_document->getNewItemPool(StarItemPool::T_EditEnginePool));
+          shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
+          pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
           if (!pool->read(zone))
             input->seek(pos, librevenge::RVNG_SEEK_SET);
           break;
         }
         case 0x4261:
           f << "sdrModel,";
-          if (!StarObjectDraw::readSdrModel(zone,*m_document))
+          if (!StarObjectDraw::readSdrModel(zone,*this))
             input->seek(pos, librevenge::RVNG_SEEK_SET);
           break;
         default:
@@ -1191,7 +1190,7 @@ catch (...)
 
 bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name)
 {
-  StarZone zone(input, name, "SfxStyleSheets", m_document ? m_document->getPassword() : 0);
+  StarZone zone(input, name, "SfxStyleSheets", getPassword());
   input->seek(0, librevenge::RVNG_SEEK_SET);
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
@@ -1203,7 +1202,7 @@ bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::s
   uint16_t nId;
   *input >> nId;
   f << "Entries(SfxStyleSheets):id=" << std::hex << nId << std::dec << ",calc,";
-  if (!m_document || m_document->getDocumentKind()!=STOFFDocument::STOFF_K_SPREADSHEET || !zone.openSCRecord()) {
+  if (getDocumentKind()!=STOFFDocument::STOFF_K_SPREADSHEET || !zone.openSCRecord()) {
     STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSfxStyleSheets: can not open main zone\n"));
     f << "###";
     ascFile.addPos(pos);
@@ -1228,7 +1227,7 @@ bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::s
     case 0x4211:
     case 0x4214: {
       f << (nId==0x411 ? "pool" : "pool[edit]") << ",";
-      shared_ptr<StarItemPool> pool=m_document->getNewItemPool(nId==0x4211 ? StarItemPool::T_SpreadsheetPool : StarItemPool::T_EditEnginePool);
+      shared_ptr<StarItemPool> pool=getNewItemPool(nId==0x4211 ? StarItemPool::T_SpreadsheetPool : StarItemPool::T_EditEnginePool);
       if (pool && pool->read(zone)) {
         if (nId==0x4214 || !mainPool) mainPool=pool;
       }
@@ -1242,7 +1241,7 @@ bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::s
     }
     case 0x4212:
       f << "style[pool],";
-      if (!StarItemPool::readStyle(zone, mainPool, *m_document)) {
+      if (!StarItemPool::readStyle(zone, mainPool, *this)) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSfxStyleSheets: can not readStylePool\n"));
         f << "###";
         input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
@@ -1621,12 +1620,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
       uint16_t nCount;
       *input >> nCount;
       f << "n=" << nCount << ",";
-      if (!m_document) {
-        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCColumn:call with not document\n"));
-        f << "###";
-        break;
-      }
-      shared_ptr<StarItemPool> pool=m_document->getNewItemPool(StarItemPool::T_SpreadsheetPool); // FIXME
+      shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_SpreadsheetPool); // FIXME
       f << "attrib=[";
       for (int i=0; i<nCount; ++i) {
         f << input->readULong(2) << ":";
@@ -1813,7 +1807,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
         if (unkn&0xf) input->seek((unkn&0xf), librevenge::RVNG_SEEK_CUR);
       }
       StarFileManager fileManager;
-      if (!m_document || !fileManager.readEditTextObject(zone, lastPos, *m_document) || input->tell()>lastPos) {
+      if (!fileManager.readEditTextObject(zone, lastPos, *this) || input->tell()>lastPos) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCData: can not open some edit text \n"));
         f << "###edit";
         ok=false;

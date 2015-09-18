@@ -43,6 +43,8 @@
 
 #include "libstaroffice_internal.hxx"
 
+#include "StarObject.hxx"
+
 namespace StarObjectDrawInternal
 {
 struct State;
@@ -56,11 +58,11 @@ class StarZone;
  * \note currently, it contains only static function :-~
  *
  */
-class StarObjectDraw
+class StarObjectDraw : public StarObject
 {
 public:
   //! constructor
-  StarObjectDraw(shared_ptr<StarObject> document);
+  StarObjectDraw(StarObject const &orig, bool duplicateState);
   //! destructor
   virtual ~StarObjectDraw();
   //! try to parse the current object
@@ -90,8 +92,6 @@ protected:
   // data
   //
 
-  //! the main document
-  shared_ptr<StarObject> m_document;
   //! the state
   shared_ptr<StarObjectDrawInternal::State> m_state;
 };

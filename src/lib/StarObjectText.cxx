@@ -71,8 +71,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectText::StarObjectText(shared_ptr<StarObject> document) :
-  m_document(document), m_state(new StarObjectTextInternal::State)
+StarObjectText::StarObjectText(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_state(new StarObjectTextInternal::State)
 {
 }
 
@@ -85,13 +84,12 @@ StarObjectText::~StarObjectText()
 ////////////////////////////////////////////////////////////
 bool StarObjectText::parse()
 {
-  if (!m_document || !m_document->getOLEDirectory() || !m_document->getOLEDirectory()->m_input) {
+  if (!getOLEDirectory() || !getOLEDirectory()->m_input) {
     STOFF_DEBUG_MSG(("StarObjectText::parser: error, incomplete document\n"));
     return false;
   }
-  STOFFOLEParser::OleDirectory &directory=*m_document->getOLEDirectory();
-  // Ole-Object has persist elements, so...
-  if (directory.m_hasCompObj) m_document->parse();
+  STOFFOLEParser::OleDirectory &directory=*getOLEDirectory();
+  StarObject::parse();
   std::vector<std::string> unparsedOLEs=directory.getUnparsedOles();
   size_t numUnparsed = unparsedOLEs.size();
   STOFFInputStreamPtr input=directory.m_input;
@@ -114,16 +112,16 @@ bool StarObjectText::parse()
     }
     ole->setReadInverted(true);
     if (base=="SwNumRules") {
-      readSwNumRuleList(ole, name, *m_document);
+      readSwNumRuleList(ole, name);
       continue;
     }
     if (base=="SwPageStyleSheets") {
-      readSwPageStyleSheets(ole,name, *m_document);
+      readSwPageStyleSheets(ole,name);
       continue;
     }
 
     if (base=="DrawingLayer") {
-      readDrawingLayer(ole,name,*m_document);
+      readDrawingLayer(ole,name);
       continue;
     }
     if (base=="SfxStyleSheets") {
@@ -131,7 +129,7 @@ bool StarObjectText::parse()
       continue;
     }
     if (base=="StarWriterDocument") {
-      readWriterDocument(ole,name, *m_document);
+      readWriterDocument(ole,name);
       continue;
     }
     if (base!="BasicManager2") {
@@ -151,12 +149,12 @@ bool StarObjectText::parse()
 
 bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name)
 {
-  StarZone zone(input, name, "SfxStyleSheets", m_document ? m_document->getPassword() : 0);
+  StarZone zone(input, name, "SfxStyleSheets", getPassword());
   input->seek(0, librevenge::RVNG_SEEK_SET);
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
 
-  if (!m_document || m_document->getDocumentKind()!=STOFFDocument::STOFF_K_TEXT) {
+  if (getDocumentKind()!=STOFFDocument::STOFF_K_TEXT) {
     STOFF_DEBUG_MSG(("StarObjectChart::readSfxStyleSheets: called with unexpected document\n"));
     ascFile.addPos(0);
     ascFile.addNote("Entries(SfxStyleSheets)");
@@ -164,7 +162,7 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
   }
   // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
   // chart sch_docshell.cxx SchChartDocShell::Load
-  shared_ptr<StarItemPool> pool=m_document->getNewItemPool(StarItemPool::T_WriterPool);
+  shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_WriterPool);
   shared_ptr<StarItemPool> mainPool=pool;
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
@@ -172,7 +170,7 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
     bool extraPool=false;
     if (!pool) {
       extraPool=true;
-      pool=m_document->getNewItemPool(StarItemPool::T_Unknown);
+      pool=getNewItemPool(StarItemPool::T_Unknown);
     }
     if (pool && pool->read(zone)) {
       if (extraPool) {
@@ -187,7 +185,7 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
   }
   if (input->isEnd()) return true;
   long pos=input->tell();
-  if (!StarItemPool::readStyle(zone, mainPool, *m_document))
+  if (!StarItemPool::readStyle(zone, mainPool, *this))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (!input->isEnd()) {
     STOFF_DEBUG_MSG(("StarObjectText::readSfxStyleSheets: find extra data\n"));
@@ -202,10 +200,10 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
 // Intermediate level
 //
 ////////////////////////////////////////////////////////////
-bool StarObjectText::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &name, StarObject &doc)
+bool StarObjectText::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &name)
 try
 {
-  StarZone zone(input, name, "SWNumRuleList", doc.getPassword());
+  StarZone zone(input, name, "SWNumRuleList", getPassword());
   if (!zone.readSWHeader()) {
     STOFF_DEBUG_MSG(("StarObjectText::readSwNumRuleList: can not read the header\n"));
     return false;
@@ -277,10 +275,10 @@ catch (...)
   return false;
 }
 
-bool StarObjectText::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &name, StarObject &doc)
+bool StarObjectText::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &name)
 try
 {
-  StarZone zone(input, name, "SWPageStyleSheets", doc.getPassword());
+  StarZone zone(input, name, "SWPageStyleSheets", getPassword());
   if (!zone.readSWHeader()) {
     STOFF_DEBUG_MSG(("StarObjectText::readSwPageStyleSheets: can not read the header\n"));
     return false;
@@ -313,7 +311,7 @@ try
       f << "N=" << N << ",";
       zone.closeFlagZone();
       for (int i=0; i<N; ++i) {
-        if (!readSWPageDef(zone, doc))
+        if (!readSWPageDef(zone))
           break;
       }
       break;
@@ -350,7 +348,7 @@ catch (...)
   return false;
 }
 
-bool StarObjectText::readSWPageDef(StarZone &zone, StarObject &doc)
+bool StarObjectText::readSWPageDef(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -393,7 +391,7 @@ bool StarObjectText::readSWPageDef(StarZone &zone, StarObject &doc)
   while (input->tell() < lastPos) {
     pos=input->tell();
     int rType=input->peek();
-    if (rType=='S' && readSWAttributeList(zone, doc))
+    if (rType=='S' && readSWAttributeList(zone, *this))
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -586,7 +584,7 @@ bool StarObjectText::readSWBookmarkList(StarZone &zone)
   return true;
 }
 
-bool StarObjectText::readSWContent(StarZone &zone, StarObject &doc)
+bool StarObjectText::readSWContent(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -624,10 +622,10 @@ bool StarObjectText::readSWContent(StarZone &zone, StarObject &doc)
     bool done=false;
     switch (cType) {
     case 'E':
-      done=readSWTable(zone, doc);
+      done=readSWTable(zone);
       break;
     case 'G':
-      done=readSWGraphNode(zone, doc);
+      done=readSWGraphNode(zone);
       break;
     case 'I':
       done=readSWSection(zone);
@@ -636,11 +634,11 @@ bool StarObjectText::readSWContent(StarZone &zone, StarObject &doc)
       done=readSWOLENode(zone);
       break;
     case 'T':
-      done=readSWTextZone(zone, doc);
+      done=readSWTextZone(zone);
       break;
     case 'l': // related to link
     case 'o': // format: safe to ignore
-      done=formatManager.readSWFormatDef(zone,char(cType),doc);
+      done=formatManager.readSWFormatDef(zone,char(cType),*this);
       break;
     case 'v':
       done=readSWNodeRedline(zone);
@@ -927,7 +925,7 @@ bool StarObjectText::readSWFootNoteInfo(StarZone &zone)
   return true;
 }
 
-bool StarObjectText::readSWGraphNode(StarZone &zone, StarObject &doc)
+bool StarObjectText::readSWGraphNode(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -981,7 +979,7 @@ bool StarObjectText::readSWGraphNode(StarZone &zone, StarObject &doc)
 
     switch (rType) {
     case 'S':
-      done=readSWAttributeList(zone, doc);
+      done=readSWAttributeList(zone, *this);
       break;
     case 'X':
       done=readSWImageMap(zone);
@@ -1554,7 +1552,7 @@ bool StarObjectText::readSWSection(StarZone &zone)
   return true;
 }
 
-bool StarObjectText::readSWTable(StarZone &zone, StarObject &doc)
+bool StarObjectText::readSWTable(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1580,7 +1578,7 @@ bool StarObjectText::readSWTable(StarZone &zone, StarObject &doc)
 
   long lastPos=zone.getRecordLastPosition();
   SWFormatManager formatManager;
-  if (input->peek()=='f') formatManager.readSWFormatDef(zone, 'f', doc);
+  if (input->peek()=='f') formatManager.readSWFormatDef(zone, 'f', *this);
   if (input->peek()=='Y') {
     SWFieldManager fieldManager;
     fieldManager.readField(zone,'Y');
@@ -1598,7 +1596,7 @@ bool StarObjectText::readSWTable(StarZone &zone, StarObject &doc)
 
   while (input->tell()<lastPos && input->peek()=='L') {
     pos=input->tell();
-    if (readSWTableLine(zone, doc))
+    if (readSWTableLine(zone))
       continue;
     pos=input->tell();
     STOFF_DEBUG_MSG(("StarObjectText::readSWTable: can not read a table line\n"));
@@ -1609,7 +1607,7 @@ bool StarObjectText::readSWTable(StarZone &zone, StarObject &doc)
   return true;
 }
 
-bool StarObjectText::readSWTableBox(StarZone &zone, StarObject &doc)
+bool StarObjectText::readSWTableBox(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1632,12 +1630,12 @@ bool StarObjectText::readSWTableBox(StarZone &zone, StarObject &doc)
   ascFile.addNote(f.str().c_str());
 
   SWFormatManager formatManager;
-  if (input->peek()=='f') formatManager.readSWFormatDef(zone,'f',doc);
-  if (input->peek()=='N') readSWContent(zone, doc);
+  if (input->peek()=='f') formatManager.readSWFormatDef(zone,'f',*this);
+  if (input->peek()=='N') readSWContent(zone);
   long lastPos=zone.getRecordLastPosition();
   while (input->tell()<lastPos) {
     pos=input->tell();
-    if (readSWTableLine(zone, doc)) continue;
+    if (readSWTableLine(zone)) continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
@@ -1645,7 +1643,7 @@ bool StarObjectText::readSWTableBox(StarZone &zone, StarObject &doc)
   return true;
 }
 
-bool StarObjectText::readSWTableLine(StarZone &zone, StarObject &doc)
+bool StarObjectText::readSWTableLine(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1667,12 +1665,12 @@ bool StarObjectText::readSWTableLine(StarZone &zone, StarObject &doc)
   ascFile.addNote(f.str().c_str());
   SWFormatManager formatManager;
   if (input->peek()=='f')
-    formatManager.readSWFormatDef(zone,'f',doc);
+    formatManager.readSWFormatDef(zone,'f',*this);
 
   long lastPos=zone.getRecordLastPosition();
   while (input->tell()<lastPos) {
     pos=input->tell();
-    if (readSWTableBox(zone, doc))
+    if (readSWTableBox(zone))
       continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
@@ -1681,7 +1679,7 @@ bool StarObjectText::readSWTableLine(StarZone &zone, StarObject &doc)
   return true;
 }
 
-bool StarObjectText::readSWTextZone(StarZone &zone, StarObject &doc)
+bool StarObjectText::readSWTextZone(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1733,17 +1731,17 @@ bool StarObjectText::readSWTextZone(StarZone &zone, StarObject &doc)
 
     switch (rType) {
     case 'A':
-      done=readSWAttribute(zone, doc);
+      done=readSWAttribute(zone, *this);
       break;
     case 'R':
       done=readSWNumRule(zone,'R');
       break;
     case 'S':
-      done=readSWAttributeList(zone, doc);
+      done=readSWAttributeList(zone, *this);
       break;
     case 'l': // related to link
     case 'o': // format: safe to ignore
-      done=formatManager.readSWFormatDef(zone,char(rType), doc);
+      done=formatManager.readSWFormatDef(zone,char(rType), *this);
       break;
     case 'v':
       done=readSWNodeRedline(zone);
@@ -1817,7 +1815,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone, StarObject &doc)
   return true;
 }
 
-bool StarObjectText::readSWTOXList(StarZone &zone, StarObject &doc)
+bool StarObjectText::readSWTOXList(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1952,7 +1950,7 @@ bool StarObjectText::readSWTOXList(StarZone &zone, StarObject &doc)
 
     if ((fl&0x10)) {
       while (input->tell()<zone.getRecordLastPosition() && input->peek()=='s') {
-        if (!formatManager.readSWFormatDef(zone,'s', doc)) {
+        if (!formatManager.readSWFormatDef(zone,'s', *this)) {
           STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read some format\n"));
           f << "###format,";
           break;
@@ -2067,18 +2065,18 @@ bool StarObjectText::readSWTOX51List(StarZone &zone)
 ////////////////////////////////////////////////////////////
 // drawing layer
 ////////////////////////////////////////////////////////////
-bool StarObjectText::readDrawingLayer(STOFFInputStreamPtr input, std::string const &name, StarObject &document)
+bool StarObjectText::readDrawingLayer(STOFFInputStreamPtr input, std::string const &name)
 try
 {
-  StarZone zone(input, name, "DrawingLayer", document.getPassword());
+  StarZone zone(input, name, "DrawingLayer", getPassword());
   input->seek(0, librevenge::RVNG_SEEK_SET);
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
   // sw_sw3imp.cxx Sw3IoImp::LoadDrawingLayer
 
   // create this pool from the main's SWG pool
-  shared_ptr<StarItemPool> pool=document.getNewItemPool(StarItemPool::T_XOutdevPool);
-  pool->addSecondaryPool(document.getNewItemPool(StarItemPool::T_EditEnginePool));
+  shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
+  pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
 
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
@@ -2086,12 +2084,12 @@ try
     bool extraPool=false;
     if (!pool) {
       extraPool=true;
-      pool=document.getNewItemPool(StarItemPool::T_Unknown);
+      pool=getNewItemPool(StarItemPool::T_Unknown);
     }
     if (pool && pool->read(zone)) {
       if (extraPool) {
         STOFF_DEBUG_MSG(("StarObjectText::readDrawingLayer: create extra pool for %d of type %d\n",
-                         (int) document.getDocumentKind(), (int) pool->getType()));
+                         (int) getDocumentKind(), (int) pool->getType()));
       }
       pool.reset();
       continue;
@@ -2100,7 +2098,7 @@ try
     break;
   }
   long pos=input->tell();
-  if (!StarObjectDraw::readSdrModel(zone, document)) {
+  if (!StarObjectDraw::readSdrModel(zone, *this)) {
     STOFF_DEBUG_MSG(("StarObjectText::readDrawingLayer: can not find the drawing model\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     ascFile.addPos(input->tell());
@@ -2148,10 +2146,10 @@ catch (...)
 ////////////////////////////////////////////////////////////
 // main zone
 ////////////////////////////////////////////////////////////
-bool StarObjectText::readWriterDocument(STOFFInputStreamPtr input, std::string const &name, StarObject &doc)
+bool StarObjectText::readWriterDocument(STOFFInputStreamPtr input, std::string const &name)
 try
 {
-  StarZone zone(input, name, "SWWriterDocument", doc.getPassword());
+  StarZone zone(input, name, "SWWriterDocument", getPassword());
   if (!zone.readSWHeader()) {
     STOFF_DEBUG_MSG(("StarObjectText::readWriterDocument: can not read the header\n"));
     return false;
@@ -2183,7 +2181,7 @@ try
       done=readSWDBName(zone);
       break;
     case 'F':
-      done=formatManager.readSWFlyFrameList(zone, doc);
+      done=formatManager.readSWFlyFrameList(zone, *this);
       break;
     case 'J':
       done=readSWJobSetUp(zone);
@@ -2192,7 +2190,7 @@ try
       done=readSWMacroTable(zone);
       break;
     case 'N':
-      done=readSWContent(zone, doc);
+      done=readSWContent(zone);
       break;
     case 'U': // layout info, no code, ignored by LibreOffice
       done=readSWLayoutInfo(zone);
@@ -2214,7 +2212,7 @@ try
       done=formatManager.readSWNumberFormatterList(zone);
       break;
     case 'u':
-      done=readSWTOXList(zone, doc);
+      done=readSWTOXList(zone);
       break;
     case 'y':
       done=readSWTOX51List(zone);

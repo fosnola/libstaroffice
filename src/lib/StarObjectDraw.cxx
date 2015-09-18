@@ -69,7 +69,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectDraw::StarObjectDraw(shared_ptr<StarObject> document) : m_document(document), m_state(new StarObjectDrawInternal::State)
+StarObjectDraw::StarObjectDraw(StarObject const &orig, bool duplicateState) : StarObject::StarObject(orig, duplicateState), m_state(new StarObjectDrawInternal::State)
 {
 }
 
@@ -88,13 +88,12 @@ StarObjectDraw::~StarObjectDraw()
 ////////////////////////////////////////////////////////////
 bool StarObjectDraw::parse()
 {
-  if (!m_document || !m_document->getOLEDirectory() || !m_document->getOLEDirectory()->m_input) {
+  if (!getOLEDirectory() || !getOLEDirectory()->m_input) {
     STOFF_DEBUG_MSG(("StarObjectDraw::parser: error, incomplete document\n"));
     return false;
   }
-  STOFFOLEParser::OleDirectory &directory=*m_document->getOLEDirectory();
-  // Ole-Object has persist elements, so...
-  if (directory.m_hasCompObj) m_document->parse();
+  STOFFOLEParser::OleDirectory &directory=*getOLEDirectory();
+  StarObject::parse();
   std::vector<std::string> unparsedOLEs=directory.getUnparsedOles();
   size_t numUnparsed = unparsedOLEs.size();
   STOFFInputStreamPtr input=directory.m_input;
@@ -137,12 +136,12 @@ bool StarObjectDraw::parse()
 
 bool StarObjectDraw::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name)
 {
-  StarZone zone(input, name, "SfxStyleSheets", m_document ? m_document->getPassword() : 0);
+  StarZone zone(input, name, "SfxStyleSheets", getPassword());
   input->seek(0, librevenge::RVNG_SEEK_SET);
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
 
-  if (!m_document || m_document->getDocumentKind()!=STOFFDocument::STOFF_K_DRAW) {
+  if (getDocumentKind()!=STOFFDocument::STOFF_K_DRAW) {
     STOFF_DEBUG_MSG(("StarObjectChart::readSfxStyleSheets: called with unexpected document\n"));
     ascFile.addPos(0);
     ascFile.addNote("Entries(SfxStyleSheets)");
@@ -150,8 +149,8 @@ bool StarObjectDraw::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
   }
   // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
   // chart sch_docshell.cxx SchChartDocShell::Load
-  shared_ptr<StarItemPool> pool=m_document->getNewItemPool(StarItemPool::T_XOutdevPool);
-  pool->addSecondaryPool(m_document->getNewItemPool(StarItemPool::T_EditEnginePool));
+  shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
+  pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
   shared_ptr<StarItemPool> mainPool=pool;
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
@@ -159,7 +158,7 @@ bool StarObjectDraw::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
     bool extraPool=false;
     if (!pool) {
       extraPool=true;
-      pool=m_document->getNewItemPool(StarItemPool::T_Unknown);
+      pool=getNewItemPool(StarItemPool::T_Unknown);
     }
     if (pool && pool->read(zone)) {
       if (extraPool) {
@@ -174,7 +173,7 @@ bool StarObjectDraw::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
   }
   if (input->isEnd()) return true;
   long pos=input->tell();
-  if (!StarItemPool::readStyle(zone, mainPool, *m_document))
+  if (!StarItemPool::readStyle(zone, mainPool, *this))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (!input->isEnd()) {
     STOFF_DEBUG_MSG(("StarObjectDraw::readSfxStyleSheets: find extra data\n"));

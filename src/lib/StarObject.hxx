@@ -52,7 +52,6 @@ namespace StarObjectInternal
 struct State;
 }
 
-class SDWParser;
 class StarAttributeManager;
 
 /** \brief an object corresponding to an OLE directory
@@ -64,7 +63,7 @@ class StarObject
 {
 public:
   //! constructor
-  StarObject(char const *passwd, shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *parser);
+  StarObject(char const *passwd, shared_ptr<STOFFOLEParser::OleDirectory> directory);
   //! destructor
   virtual ~StarObject();
 
@@ -98,8 +97,6 @@ public:
   shared_ptr<StarItemPool> findItemPool(StarItemPool::Type type, bool isInside);
   //! returns the current inside pool
   shared_ptr<StarItemPool> getCurrentPool();
-  //! returns a SDWParser(REMOVEME)
-  SDWParser *getSDWParser();
 
   //! try to read persist data
   bool readPersistData(StarZone &zone, long endPos);
@@ -123,6 +120,8 @@ protected:
   // data
   //
 protected:
+  //! copy constructor
+  StarObject(StarObject const &orig, bool duplicateState);
   //! the document password
   char const *m_password;
   //! the directory
@@ -132,7 +131,6 @@ protected:
   shared_ptr<StarObjectInternal::State> m_state;
 
 private:
-  StarObject(StarObject const &orig);
   StarObject &operator=(StarObject const &orig);
 };
 

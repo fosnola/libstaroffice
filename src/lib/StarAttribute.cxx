@@ -39,11 +39,11 @@
 
 #include <librevenge/librevenge.h>
 
-#include "SDWParser.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
 #include "StarBitmap.hxx"
 #include "StarObject.hxx"
+#include "StarObjectText.hxx"
 #include "StarFileManager.hxx"
 #include "StarZone.hxx"
 
@@ -66,7 +66,7 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeVoid(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long /*endPos*/, StarObject &/*document*/)
+  virtual bool read(StarZone &zone, int /*vers*/, long /*endPos*/, StarObject &/*object*/)
   {
     STOFFInputStreamPtr input=zone.input();
     libstoff::DebugFile &ascFile=zone.ascii();
@@ -108,7 +108,7 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeBool(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*document*/)
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
   {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
@@ -147,7 +147,7 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeInt(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*document*/)
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
   {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
@@ -188,7 +188,7 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeUInt(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*document*/)
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
   {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
@@ -225,7 +225,7 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeDouble(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*document*/)
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
   {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
@@ -264,7 +264,7 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeColor(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*document*/)
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
   {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
@@ -310,14 +310,14 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeItemSet(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &document)
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &object)
   {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
     libstoff::DebugFile &ascFile=zone.ascii();
     libstoff::DebugStream f;
     f << "StarAttribute[" << zone.getRecordLevel() << "]:" << m_debugName << ",";
-    bool ok=document.readItemSet(zone, m_limits, endPos, document.getCurrentPool().get());
+    bool ok=object.readItemSet(zone, m_limits, endPos, object.getCurrentPool().get());
     if (!ok) f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -933,7 +933,7 @@ StarAttributeManager::~StarAttributeManager()
 {
 }
 
-bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, long lastPos, StarObject &document)
+bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, long lastPos, StarObject &object)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -944,7 +944,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   if (m_state->m_whichToAttributeMap.find(nWhich)!=m_state->m_whichToAttributeMap.end() &&
       m_state->m_whichToAttributeMap.find(nWhich)->second) {
     shared_ptr<StarAttribute> attrib=m_state->m_whichToAttributeMap.find(nWhich)->second->create();
-    if (!attrib || !attrib->read(zone, nVers, lastPos, document)) {
+    if (!attrib || !attrib->read(zone, nVers, lastPos, object)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read an attribute\n"));
       f << "###bad";
       ascFile.addPos(pos);
@@ -1040,7 +1040,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   case StarAttribute::ATTR_SCH_SYMBOL_BRUSH:
     f << (nWhich==StarAttribute::ATTR_CHR_BACKGROUND ? "chrAtrBackground" :
           nWhich==StarAttribute::ATTR_FRM_BACKGROUND ? "background" : "symbol[brush]") << "=" << input->readULong(1) << ",";
-    if (!readBrushItem(zone, nVers, lastPos, document, f)) break;
+    if (!readBrushItem(zone, nVers, lastPos, object, f)) break;
     break;
   case StarAttribute::ATTR_CHR_ROTATE:
     f << "chrAtrRotate,";
@@ -1242,9 +1242,9 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << "textAtrFlycnt,";
     SWFormatManager formatManager;
     if (input->peek()=='o')
-      formatManager.readSWFormatDef(zone,'o', document);
+      formatManager.readSWFormatDef(zone,'o', object);
     else
-      formatManager.readSWFormatDef(zone,'l', document);
+      formatManager.readSWFormatDef(zone,'l', object);
     break;
   }
   case StarAttribute::ATTR_TXT_FTN: {
@@ -1260,7 +1260,8 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     if (!string.empty())
       f << "aNumber=" << string.cstr() << ",";
     // no sure, find this attribute once with a content here, so ...
-    if (!document.getSDWParser()->readSWContent(zone, document)) {
+    StarObjectText text(object, false); // checkme
+    if (!text.readSWContent(zone)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the content\n"));
       f << "###aContent,";
       break;
@@ -1420,7 +1421,13 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << "pageCntnt,";
     while (input->tell()<lastPos) {
       long actPos=input->tell();
-      if (input->peek()!='N' || !document.getSDWParser()->readSWContent(zone, document) || input->tell()<=actPos) {
+      if (input->peek()!='N') {
+        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: find unknown pageCntnt child\n"));
+        f << "###child";
+        break;
+      }
+      StarObjectText text(object, false); // checkme
+      if (!text.readSWContent(zone) || input->tell()<=actPos) {
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: find unknown pageCntnt child\n"));
         f << "###child";
         break;
@@ -1435,7 +1442,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     if (actPos==lastPos)
       break;
     SWFormatManager formatManager;
-    formatManager.readSWFormatDef(zone,'r',document);
+    formatManager.readSWFormatDef(zone,'r',object);
     break;
   }
   case StarAttribute::ATTR_FRM_PROTECT:
@@ -1604,7 +1611,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   }
   case StarAttribute::ATTR_FRM_URL:
     f << "url,";
-    if (!SDWParser::readSWImageMap(zone))
+    if (!StarObjectText::readSWImageMap(zone))
       break;
     if (nVers>=1) {
       librevenge::RVNGString text;
@@ -1778,7 +1785,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
 
     std::vector<STOFFVec2i> limits;
     limits.push_back(STOFFVec2i(100, 148)); // ATTR_PATTERN_START, ATTR_PATTERN_END
-    if (!document.readItemSet(zone, limits, lastPos, document.getCurrentPool().get())) {
+    if (!object.readItemSet(zone, limits, lastPos, object.getCurrentPool().get())) {
       f << "###itemSet";
       input->seek(lastPos, librevenge::RVNG_SEEK_SET);
       break;
@@ -1859,7 +1866,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     for (int i=0; i<3; ++i) {
       long actPos=input->tell();
       StarFileManager fileManager;
-      if (!fileManager.readEditTextObject(zone, lastPos, document) || input->tell()>lastPos) {
+      if (!fileManager.readEditTextObject(zone, lastPos, object) || input->tell()>lastPos) {
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a text object\n"));
         ascFile.addPos(actPos);
         ascFile.addNote("StarAttribute:###editTextObject");
@@ -1886,7 +1893,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       if (nSet) {
         f << nSet << ",";
         SWFormatManager formatManager;
-        if (!formatManager.readNumberFormat(zone, lastPos, document) || input->tell()>lastPos) {
+        if (!formatManager.readNumberFormat(zone, lastPos, object) || input->tell()>lastPos) {
           f << "###";
           break;
         }
@@ -1968,7 +1975,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   case StarAttribute::ATTR_EE_FEATURE_FIELD: {
     f << "eeFeatureField,vers=" << nVers << ",";
     // svx_flditem.cxx SvxFieldItem::Create
-    if (!document.readPersistData(zone, lastPos)) break;
+    if (!object.readPersistData(zone, lastPos)) break;
     return true;
   }
 
@@ -2256,7 +2263,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   return true;
 }
 
-bool StarAttributeManager::readBrushItem(StarZone &zone, int nVers, long /*endPos*/, StarObject &/*document*/, libstoff::DebugStream &f)
+bool StarAttributeManager::readBrushItem(StarZone &zone, int nVers, long /*endPos*/, StarObject &/*object*/, libstoff::DebugStream &f)
 {
   STOFFInputStreamPtr input=zone.input();
   STOFFColor color;

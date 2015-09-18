@@ -40,11 +40,10 @@
 #include <librevenge/librevenge.h>
 
 #include "StarAttribute.hxx"
-#include "StarObject.hxx"
 #include "StarFileManager.hxx"
+#include "StarObject.hxx"
+#include "StarObjectText.hxx"
 #include "StarZone.hxx"
-
-#include "SDWParser.hxx"
 
 #include "SWFormatManager.hxx"
 
@@ -136,7 +135,7 @@ bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &doc
   while (input->tell()<lastPos) {
     pos=(int) input->tell();
     int rType=input->peek();
-    if (rType=='S' && SDWParser::readSWAttributeList(zone, doc))
+    if (rType=='S' && StarObjectText::readSWAttributeList(zone, doc))
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);

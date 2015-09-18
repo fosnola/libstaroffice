@@ -52,17 +52,18 @@ namespace StarObjectInternal
 //! the state of a StarObject
 struct State {
   //! constructor
-  State() : m_poolList(), m_attributeManager(new StarAttributeManager), m_sdwParser(0)
+  State() : m_poolList(), m_attributeManager(new StarAttributeManager)
+  {
+  }
+  //! copy constructor
+  State(State const &orig) : m_poolList(orig.m_poolList), m_attributeManager(orig.m_attributeManager)
   {
   }
   //! the list of pool
   std::vector<shared_ptr<StarItemPool> > m_poolList;
   //! the attribute manager
   shared_ptr<StarAttributeManager> m_attributeManager;
-  //! the sdw parser REMOVEME
-  SDWParser *m_sdwParser;
 private:
-  State(State const &orig);
   State operator=(State const &orig);
 };
 }
@@ -70,10 +71,17 @@ private:
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObject::StarObject(char const *passwd, shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *sdwParser) :
+StarObject::StarObject(char const *passwd, shared_ptr<STOFFOLEParser::OleDirectory> directory) :
   m_password(passwd), m_directory(directory), m_state(new StarObjectInternal::State())
 {
-  m_state->m_sdwParser=sdwParser;
+}
+
+StarObject::StarObject(StarObject const &orig, bool duplicateState) : m_password(orig.m_password), m_directory(orig.m_directory), m_state()
+{
+  if (duplicateState)
+    m_state.reset(new StarObjectInternal::State(*orig.m_state));
+  else
+    m_state.reset(new StarObjectInternal::State);
 }
 
 StarObject::~StarObject()
@@ -115,11 +123,6 @@ shared_ptr<StarItemPool> StarObject::findItemPool(StarItemPool::Type type, bool 
     return pool;
   }
   return shared_ptr<StarItemPool>();
-}
-
-SDWParser *StarObject::getSDWParser()
-{
-  return m_state->m_sdwParser;
 }
 
 bool StarObject::parse()

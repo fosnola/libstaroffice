@@ -70,7 +70,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectChart::StarObjectChart(shared_ptr<StarObject> document) : m_document(document), m_state(new StarObjectChartInternal::State)
+StarObjectChart::StarObjectChart(StarObject const &orig, bool duplicateState) : StarObject::StarObject(orig, duplicateState), m_state(new StarObjectChartInternal::State)
 {
 }
 
@@ -89,13 +89,12 @@ StarObjectChart::~StarObjectChart()
 ////////////////////////////////////////////////////////////
 bool StarObjectChart::parse()
 {
-  if (!m_document || !m_document->getOLEDirectory() || !m_document->getOLEDirectory()->m_input) {
+  if (!getOLEDirectory() || !getOLEDirectory()->m_input) {
     STOFF_DEBUG_MSG(("StarObjectChart::parser: error, incomplete document\n"));
     return false;
   }
-  STOFFOLEParser::OleDirectory &directory=*m_document->getOLEDirectory();
-  // Ole-Object has persist elements, so...
-  if (directory.m_hasCompObj) m_document->parse();
+  STOFFOLEParser::OleDirectory &directory=*getOLEDirectory();
+  StarObject::parse();
   std::vector<std::string> unparsedOLEs=directory.getUnparsedOles();
   size_t numUnparsed = unparsedOLEs.size();
   STOFFInputStreamPtr input=directory.m_input;
@@ -143,14 +142,14 @@ bool StarObjectChart::parse()
 bool StarObjectChart::readChartDocument(STOFFInputStreamPtr input, std::string const &name)
 try
 {
-  StarZone zone(input, name, "SWChartDocument", m_document ? m_document->getPassword() : 0); // checkme
+  StarZone zone(input, name, "SWChartDocument", getPassword()); // checkme
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
 
   libstoff::DebugStream f;
   f << "Entries(SCChartDocument):";
   // sch_docshell.cxx: SchChartDocShell::Load
-  if (!m_document || !zone.openRecord()) {
+  if (!zone.openRecord()) {
     STOFF_DEBUG_MSG(("StarObjectChart::readChartDocument: can not find header zone\n"));
     f << "###";
     ascFile.addPos(0);
@@ -170,7 +169,7 @@ try
   ascFile.addPos(0);
   ascFile.addNote(f.str().c_str());
   long pos=input->tell(), lastPos= zone.getRecordLastPosition();
-  shared_ptr<StarItemPool> pool=m_document->getNewItemPool(StarItemPool::T_VCControlPool);
+  shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_VCControlPool);
   if (!pool || !pool->read(zone))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
 
@@ -187,7 +186,7 @@ try
   }
 
   pos=input->tell();
-  if (!StarObjectDraw::readSdrModel(zone, *m_document)) {
+  if (!StarObjectDraw::readSdrModel(zone, *this)) {
     STOFF_DEBUG_MSG(("StarObjectChart::readChartDocument: can not find the SdrModel\n"));
     ascFile.addPos(pos);
     ascFile.addNote("SCChartDocument:###SdrModel");
@@ -233,11 +232,11 @@ catch (...)
 
 bool StarObjectChart::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name)
 {
-  StarZone zone(input, name, "SfxStyleSheets", m_document ? m_document->getPassword() : 0);
+  StarZone zone(input, name, "SfxStyleSheets", getPassword());
   input->seek(0, librevenge::RVNG_SEEK_SET);
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
-  if (!m_document || m_document->getDocumentKind()!=STOFFDocument::STOFF_K_CHART) {
+  if (getDocumentKind()!=STOFFDocument::STOFF_K_CHART) {
     STOFF_DEBUG_MSG(("StarObjectChart::readSfxStyleSheets: called with unexpected document\n"));
     ascFile.addPos(0);
     ascFile.addNote("Entries(SfxStyleSheets)");
@@ -246,9 +245,9 @@ bool StarObjectChart::readSfxStyleSheets(STOFFInputStreamPtr input, std::string 
 
   // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
   // chart sch_docshell.cxx SchChartDocShell::Load
-  shared_ptr<StarItemPool> pool=m_document->getNewItemPool(StarItemPool::T_XOutdevPool);
-  pool->addSecondaryPool(m_document->getNewItemPool(StarItemPool::T_EditEnginePool));
-  pool->addSecondaryPool(m_document->getNewItemPool(StarItemPool::T_ChartPool));
+  shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
+  pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
+  pool->addSecondaryPool(getNewItemPool(StarItemPool::T_ChartPool));
 
   shared_ptr<StarItemPool> mainPool=pool;
   while (!input->isEnd()) {
@@ -257,7 +256,7 @@ bool StarObjectChart::readSfxStyleSheets(STOFFInputStreamPtr input, std::string 
     bool extraPool=false;
     if (!pool) {
       extraPool=true;
-      pool=m_document->getNewItemPool(StarItemPool::T_Unknown);
+      pool=getNewItemPool(StarItemPool::T_Unknown);
     }
     if (pool && pool->read(zone)) {
       if (extraPool) {
@@ -272,7 +271,7 @@ bool StarObjectChart::readSfxStyleSheets(STOFFInputStreamPtr input, std::string 
   }
   if (input->isEnd()) return true;
   long pos=input->tell();
-  if (!StarItemPool::readStyle(zone, mainPool, *m_document))
+  if (!StarItemPool::readStyle(zone, mainPool, *this))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (!input->isEnd()) {
     STOFF_DEBUG_MSG(("StarObjectChart::readSfxStyleSheets: find extra data\n"));
@@ -293,7 +292,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
   long pos=input->tell();
 
   // chtmode2.cxx ChartModel::LoadAttributes
-  if (!zone.openSCHHeader() || !m_document) {
+  if (!zone.openSCHHeader()) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -449,7 +448,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  shared_ptr<StarItemPool> pool=m_document->getCurrentPool();
+  shared_ptr<StarItemPool> pool=getCurrentPool();
   if (!pool) {
     // CHANGEME
     static bool first=true;
@@ -457,7 +456,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
       STOFF_DEBUG_MSG(("StarObjectChart::readSCHAttributes: can not read a pool, create a false one\n"));
       first=false;
     }
-    pool=m_document->getNewItemPool(StarItemPool::T_Unknown);
+    pool=getNewItemPool(StarItemPool::T_Unknown);
   }
   static STOFFVec2i const(titleLimitsVec[])= {
     STOFFVec2i(4,4) /*SCHATTR_TEXT_ORIENT*/, STOFFVec2i(53,53) /*SCHATTR_TEXT_ORIENT*/,
@@ -493,8 +492,8 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
   legendLimits.push_back(STOFFVec2i(3994,4037)); // EE_ITEMS_START, EE_ITEMS_END
 
   for (int i=0; i<10+11; ++i) {
-    if (!m_document->readItemSet(zone, i<6 ? titleLimits : i==6 ? allAxisLimits : i<10 ? compatAxisLimits :
-                                 i<17 ? gridLimits : i < 20 ? diagramAreaLimits : legendLimits, lastPos, pool.get(), false) ||
+    if (!readItemSet(zone, i<6 ? titleLimits : i==6 ? allAxisLimits : i<10 ? compatAxisLimits :
+                     i<17 ? gridLimits : i < 20 ? diagramAreaLimits : legendLimits, lastPos, pool.get(), false) ||
         input->tell()>lastPos) {
       zone.closeSCHHeader("SCHAttributes");
       return true;
@@ -513,7 +512,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
     ascFile.addNote(f.str().c_str());
 
     for (int i=0; i<int(nInt16); ++i) {
-      if (!m_document->readItemSet(zone,rowLimits,lastPos, pool.get(), false) || input->tell()>lastPos) {
+      if (!readItemSet(zone,rowLimits,lastPos, pool.get(), false) || input->tell()>lastPos) {
         zone.closeSCHHeader("SCHAttributes");
         return true;
       }
@@ -622,7 +621,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
         ascFile.addNote(f.str().c_str());
 
         for (int i=0; i<int(nInt16); ++i) {
-          if (!m_document->readItemSet(zone, gridLimits, lastPos, pool.get(), false) ||
+          if (!readItemSet(zone, gridLimits, lastPos, pool.get(), false) ||
               input->tell()>lastPos) {
             zone.closeSCHHeader("SCHAttributes");
             return true;
@@ -774,7 +773,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
 
   if (version>=11 && input->tell()<lastPos) {
     for (int loop=0; loop<3; ++loop) { // the StockXXXAttr
-      if (!m_document->readItemSet(zone,rowLimits,lastPos, pool.get(), false) || input->tell()>lastPos) {
+      if (!readItemSet(zone,rowLimits,lastPos, pool.get(), false) || input->tell()>lastPos) {
         zone.closeSCHHeader("SCHAttributes");
         return true;
       }
@@ -802,7 +801,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       if (nAxisId==-1) break;
-      if (!m_document->readItemSet(zone,axisLimits,lastPos, pool.get(), false) || input->tell()>lastPos) {
+      if (!readItemSet(zone,axisLimits,lastPos, pool.get(), false) || input->tell()>lastPos) {
         zone.closeSCHHeader("SCHAttributes");
         return true;
       }

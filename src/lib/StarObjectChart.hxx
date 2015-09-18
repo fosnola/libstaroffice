@@ -42,13 +42,13 @@
 #include <string>
 
 #include "libstaroffice_internal.hxx"
+#include "StarObject.hxx"
 
 namespace StarObjectChartInternal
 {
 struct State;
 }
 
-class StarObject;
 class StarZone;
 
 /** \brief the main class to read a StarOffice chart
@@ -56,11 +56,11 @@ class StarZone;
  *
  *
  */
-class StarObjectChart
+class StarObjectChart : public StarObject
 {
 public:
   //! constructor
-  StarObjectChart(shared_ptr<StarObject> document);
+  StarObjectChart(StarObject const &orig, bool duplicateState);
   //! destructor
   virtual ~StarObjectChart();
   //! try to parse the current object
@@ -80,8 +80,6 @@ protected:
   //! try to read the memchart data
   bool readSCHMemChart(StarZone &zone);
 
-  //! the main document
-  shared_ptr<StarObject> m_document;
   //! the state
   shared_ptr<StarObjectChartInternal::State> m_state;
 };
