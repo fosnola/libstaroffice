@@ -32,11 +32,11 @@
 */
 
 /*
- * class to parse/store the main ole document
+ * class to parse/store an object corresponding to an OLE directory
  *
  */
-#ifndef STAR_DOCUMENT
-#  define STAR_DOCUMENT
+#ifndef STAR_OBJECT
+#  define STAR_OBJECT
 
 #include <vector>
 #include <stack>
@@ -47,7 +47,7 @@
 
 #include "StarItemPool.hxx"
 
-namespace StarDocumentInternal
+namespace StarObjectInternal
 {
 struct State;
 }
@@ -55,18 +55,18 @@ struct State;
 class SDWParser;
 class StarAttributeManager;
 
-/** \brief a main ole in a StarOffice file
+/** \brief an object corresponding to an OLE directory
  *
  *
  *
  */
-class StarDocument
+class StarObject
 {
 public:
   //! constructor
-  StarDocument(char const *passwd, shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *parser);
+  StarObject(char const *passwd, shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *parser);
   //! destructor
-  virtual ~StarDocument();
+  virtual ~StarObject();
 
   //
   // basic
@@ -129,11 +129,11 @@ protected:
   shared_ptr<STOFFOLEParser::OleDirectory> m_directory;
 
   //! the state
-  shared_ptr<StarDocumentInternal::State> m_state;
+  shared_ptr<StarObjectInternal::State> m_state;
 
 private:
-  StarDocument(StarDocument const &orig);
-  StarDocument &operator=(StarDocument const &orig);
+  StarObject(StarObject const &orig);
+  StarObject &operator=(StarObject const &orig);
 };
 
 #endif

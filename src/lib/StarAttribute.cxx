@@ -43,7 +43,7 @@
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
 #include "StarBitmap.hxx"
-#include "StarDocument.hxx"
+#include "StarObject.hxx"
 #include "StarFileManager.hxx"
 #include "StarZone.hxx"
 
@@ -66,7 +66,7 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeVoid(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long /*endPos*/, StarDocument &/*document*/)
+  virtual bool read(StarZone &zone, int /*vers*/, long /*endPos*/, StarObject &/*document*/)
   {
     STOFFInputStreamPtr input=zone.input();
     libstoff::DebugFile &ascFile=zone.ascii();
@@ -108,7 +108,7 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeBool(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarDocument &/*document*/)
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*document*/)
   {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
@@ -147,7 +147,7 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeInt(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarDocument &/*document*/)
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*document*/)
   {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
@@ -188,7 +188,7 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeUInt(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarDocument &/*document*/)
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*document*/)
   {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
@@ -225,7 +225,7 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeDouble(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarDocument &/*document*/)
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*document*/)
   {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
@@ -264,7 +264,7 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeColor(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarDocument &/*document*/)
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*document*/)
   {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
@@ -310,7 +310,7 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeItemSet(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarDocument &document)
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &document)
   {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
@@ -933,7 +933,7 @@ StarAttributeManager::~StarAttributeManager()
 {
 }
 
-bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, long lastPos, StarDocument &document)
+bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, long lastPos, StarObject &document)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -2256,7 +2256,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   return true;
 }
 
-bool StarAttributeManager::readBrushItem(StarZone &zone, int nVers, long /*endPos*/, StarDocument &/*document*/, libstoff::DebugStream &f)
+bool StarAttributeManager::readBrushItem(StarZone &zone, int nVers, long /*endPos*/, StarObject &/*document*/, libstoff::DebugStream &f)
 {
   STOFFInputStreamPtr input=zone.input();
   STOFFColor color;

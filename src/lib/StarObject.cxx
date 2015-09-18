@@ -44,12 +44,12 @@
 #include "StarItemPool.hxx"
 #include "StarZone.hxx"
 
-#include "StarDocument.hxx"
+#include "StarObject.hxx"
 
-/** Internal: the structures of a StarDocument */
-namespace StarDocumentInternal
+/** Internal: the structures of a StarObject */
+namespace StarObjectInternal
 {
-//! the state of a StarDocument
+//! the state of a StarObject
 struct State {
   //! constructor
   State() : m_poolList(), m_attributeManager(new StarAttributeManager), m_sdwParser(0)
@@ -70,34 +70,34 @@ private:
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarDocument::StarDocument(char const *passwd, shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *sdwParser) :
-  m_password(passwd), m_directory(directory), m_state(new StarDocumentInternal::State())
+StarObject::StarObject(char const *passwd, shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *sdwParser) :
+  m_password(passwd), m_directory(directory), m_state(new StarObjectInternal::State())
 {
   m_state->m_sdwParser=sdwParser;
 }
 
-StarDocument::~StarDocument()
+StarObject::~StarObject()
 {
 }
 
-STOFFDocument::Kind StarDocument::getDocumentKind() const
+STOFFDocument::Kind StarObject::getDocumentKind() const
 {
   return m_directory ? m_directory->m_kind : STOFFDocument::STOFF_K_UNKNOWN;
 }
 
-shared_ptr<StarAttributeManager> StarDocument::getAttributeManager()
+shared_ptr<StarAttributeManager> StarObject::getAttributeManager()
 {
   return m_state->m_attributeManager;
 }
 
-shared_ptr<StarItemPool> StarDocument::getNewItemPool(StarItemPool::Type type)
+shared_ptr<StarItemPool> StarObject::getNewItemPool(StarItemPool::Type type)
 {
   shared_ptr<StarItemPool> pool(new StarItemPool(*this, type));
   m_state->m_poolList.push_back(pool);
   return pool;
 }
 
-shared_ptr<StarItemPool> StarDocument::getCurrentPool()
+shared_ptr<StarItemPool> StarObject::getCurrentPool()
 {
   for (size_t i=m_state->m_poolList.size(); i>0;) {
     shared_ptr<StarItemPool> pool=m_state->m_poolList[--i];
@@ -106,7 +106,7 @@ shared_ptr<StarItemPool> StarDocument::getCurrentPool()
   return shared_ptr<StarItemPool>();
 }
 
-shared_ptr<StarItemPool> StarDocument::findItemPool(StarItemPool::Type type, bool isInside)
+shared_ptr<StarItemPool> StarObject::findItemPool(StarItemPool::Type type, bool isInside)
 {
   for (size_t i=m_state->m_poolList.size(); i>0;) {
     shared_ptr<StarItemPool> pool=m_state->m_poolList[--i];
@@ -117,19 +117,19 @@ shared_ptr<StarItemPool> StarDocument::findItemPool(StarItemPool::Type type, boo
   return shared_ptr<StarItemPool>();
 }
 
-SDWParser *StarDocument::getSDWParser()
+SDWParser *StarObject::getSDWParser()
 {
   return m_state->m_sdwParser;
 }
 
-bool StarDocument::parse()
+bool StarObject::parse()
 {
   if (!m_directory) {
-    STOFF_DEBUG_MSG(("StarDocument::readPersistElements: can not find directory\n"));
+    STOFF_DEBUG_MSG(("StarObject::readPersistElements: can not find directory\n"));
     return false;
   }
   if (!m_directory->m_hasCompObj) {
-    STOFF_DEBUG_MSG(("StarDocument::readPersistElements: called with unknown document\n"));
+    STOFF_DEBUG_MSG(("StarObject::readPersistElements: called with unknown document\n"));
   }
   for (size_t i = 0; i < m_directory->m_contentList.size(); ++i) {
     STOFFOLEParser::OleContent &content=m_directory->m_contentList[i];
@@ -140,7 +140,7 @@ bool StarDocument::parse()
     if (m_directory->m_input)
       ole = m_directory->m_input->getSubStreamByName(name.c_str());
     if (!ole.get()) {
-      STOFF_DEBUG_MSG(("StarDocument::createZones: error: can not find OLE part: \"%s\"\n", name.c_str()));
+      STOFF_DEBUG_MSG(("StarObject::createZones: error: can not find OLE part: \"%s\"\n", name.c_str()));
       continue;
     }
 
@@ -179,7 +179,7 @@ bool StarDocument::parse()
   return true;
 }
 
-bool StarDocument::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*limits*/, long lastPos, StarItemPool *pool, bool isDirect)
+bool StarObject::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*limits*/, long lastPos, StarItemPool *pool, bool isDirect)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -193,7 +193,7 @@ bool StarDocument::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*
   f << "N=" << n << ",";
   if (!pool) {
     if (input->tell()+6*n > lastPos) {
-      STOFF_DEBUG_MSG(("StarDocument::readItemSet: can not read a SfxItemSet\n"));
+      STOFF_DEBUG_MSG(("StarObject::readItemSet: can not read a SfxItemSet\n"));
       f << "###,";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -205,7 +205,7 @@ bool StarDocument::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*
         // TODO poolio.cxx SfxItemPool::LoadItem
         static bool first=true;
         if (first) {
-          STOFF_DEBUG_MSG(("StarDocument::readItemSet: reading a SfxItem is not implemented without pool\n"));
+          STOFF_DEBUG_MSG(("StarObject::readItemSet: reading a SfxItem is not implemented without pool\n"));
           first=false;
         }
         f << "##noPool";
@@ -231,7 +231,7 @@ bool StarDocument::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*
   return true;
 }
 
-bool StarDocument::readPersistElements(STOFFInputStreamPtr input, std::string const &name)
+bool StarObject::readPersistElements(STOFFInputStreamPtr input, std::string const &name)
 {
   StarZone zone(input, name, "PersistsElement", m_password);
   libstoff::DebugFile &ascii=zone.ascii();
@@ -241,7 +241,7 @@ bool StarDocument::readPersistElements(STOFFInputStreamPtr input, std::string co
   f << "Entries(Persists):";
   // persist.cxx: SvPersist::LoadContent
   if (input->size()<21 || input->readLong(1)!=2) {
-    STOFF_DEBUG_MSG(("StarDocument::readPersistElements: data seems bad\n"));
+    STOFF_DEBUG_MSG(("StarObject::readPersistElements: data seems bad\n"));
     f << "###";
     ascii.addPos(0);
     ascii.addNote(f.str().c_str());
@@ -250,14 +250,14 @@ bool StarDocument::readPersistElements(STOFFInputStreamPtr input, std::string co
   int hasElt=(int) input->readLong(1);
   if (hasElt==1) {
     if (input->size()<29) {
-      STOFF_DEBUG_MSG(("StarDocument::readPersistElements: flag hasData, but zone seems too short\n"));
+      STOFF_DEBUG_MSG(("StarObject::readPersistElements: flag hasData, but zone seems too short\n"));
       f << "###";
       hasElt=0;
     }
     f << "hasData,";
   }
   else if (hasElt) {
-    STOFF_DEBUG_MSG(("StarDocument::readPersistElements: flag hasData seems bad\n"));
+    STOFF_DEBUG_MSG(("StarObject::readPersistElements: flag hasData seems bad\n"));
     f << "#hasData=" << hasElt << ",";
     hasElt=0;
   }
@@ -271,7 +271,7 @@ bool StarDocument::readPersistElements(STOFFInputStreamPtr input, std::string co
     N=(int) input->readULong(4);
     f << "dSz=" << dSz << ",N=" << N << ",";
     if (!dSz || 7+dSz+18>input->size()) {
-      STOFF_DEBUG_MSG(("StarDocument::readPersistElements: data size seems bad\n"));
+      STOFF_DEBUG_MSG(("StarObject::readPersistElements: data size seems bad\n"));
       f << "###dSz";
       dSz=0;
       N=0;
@@ -287,7 +287,7 @@ bool StarDocument::readPersistElements(STOFFInputStreamPtr input, std::string co
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     f.str("");
     f << "Persists-A" << i << ":";
-    STOFF_DEBUG_MSG(("StarDocument::readPersistElements: data %d seems bad\n", i));
+    STOFF_DEBUG_MSG(("StarObject::readPersistElements: data %d seems bad\n", i));
     f << "###";
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());
@@ -307,7 +307,7 @@ bool StarDocument::readPersistElements(STOFFInputStreamPtr input, std::string co
   return true;
 }
 
-bool StarDocument::readPersistData(StarZone &zone, long lastPos)
+bool StarObject::readPersistData(StarZone &zone, long lastPos)
 {
   // pstm.cxx SvPersistStream::ReadObj
   STOFFInputStreamPtr input=zone.input();
@@ -335,7 +335,7 @@ bool StarDocument::readPersistData(StarZone &zone, long lastPos)
   if (id) f << "id=" << id << ",";
   if (classId) f << "id[class]=" << classId << ",";
   if (!ok || !hdr || input->tell()>lastPos) {
-    STOFF_DEBUG_MSG(("StarDocument::readPersistData: find unexpected header\n"));
+    STOFF_DEBUG_MSG(("StarObject::readPersistData: find unexpected header\n"));
     f << "###header";
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());
@@ -349,7 +349,7 @@ bool StarDocument::readPersistData(StarZone &zone, long lastPos)
   if (hdr&0x20) {
     ok=zone.openSCRecord();
     if (!ok || zone.getRecordLastPosition()>lastPos) {
-      STOFF_DEBUG_MSG(("StarDocument::readPersistData: can not open main zone\n"));
+      STOFF_DEBUG_MSG(("StarObject::readPersistData: can not open main zone\n"));
       if (ok) zone.closeSCRecord("PersistData");
       f << "###,";
       ascii.addPos(pos);
@@ -384,7 +384,7 @@ bool StarDocument::readPersistData(StarZone &zone, long lastPos)
       for (int i=0; i<2; ++i) {
         librevenge::RVNGString text;
         if (!zone.readString(text) || input->tell()>lastPos) {
-          STOFF_DEBUG_MSG(("StarDocument::readPersistData: can not read a string\n"));
+          STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read a string\n"));
           f << "##string";
           break;
         }
@@ -414,7 +414,7 @@ bool StarDocument::readPersistData(StarZone &zone, long lastPos)
       break;
     }
     default:
-      STOFF_DEBUG_MSG(("StarDocument::readPersistData: unknown class id\n"));
+      STOFF_DEBUG_MSG(("StarObject::readPersistData: unknown class id\n"));
       f << "##classId";
       break;
     }
@@ -430,7 +430,7 @@ bool StarDocument::readPersistData(StarZone &zone, long lastPos)
   return true;
 }
 
-bool StarDocument::readSfxDocumentInformation(STOFFInputStreamPtr input, libstoff::DebugFile &ascii)
+bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, libstoff::DebugFile &ascii)
 {
   input->seek(0, librevenge::RVNG_SEEK_SET);
 
@@ -440,7 +440,7 @@ bool StarDocument::readSfxDocumentInformation(STOFFInputStreamPtr input, libstof
   // see sfx2_docinf.cxx
   int sSz=(int) input->readULong(2);
   if (2+sSz>input->size()) {
-    STOFF_DEBUG_MSG(("StarDocument::readSfxDocumentInformation: header seems bad\n"));
+    STOFF_DEBUG_MSG(("StarObject::readSfxDocumentInformation: header seems bad\n"));
     f << "###sSz=" << sSz << ",";
     ascii.addPos(0);
     ascii.addNote(f.str().c_str());
@@ -449,7 +449,7 @@ bool StarDocument::readSfxDocumentInformation(STOFFInputStreamPtr input, libstof
   std::string text("");
   for (int i=0; i<sSz; ++i) text+=(char) input->readULong(1);
   if (text!="SfxDocumentInfo") {
-    STOFF_DEBUG_MSG(("StarDocument::readSfxDocumentInformation: header seems bad\n"));
+    STOFF_DEBUG_MSG(("StarObject::readSfxDocumentInformation: header seems bad\n"));
     f << "###text=" << text << ",";
     ascii.addPos(0);
     ascii.addNote(f.str().c_str());
@@ -486,7 +486,7 @@ bool StarDocument::readSfxDocumentInformation(STOFFInputStreamPtr input, libstof
         expectedSz=2+dSz;
     }
     if (pos+expectedSz+(i<3 ? 8 : 0)>input->size()) {
-      STOFF_DEBUG_MSG(("StarDocument::readSfxDocumentInformation: can not read string %d\n", i));
+      STOFF_DEBUG_MSG(("StarObject::readSfxDocumentInformation: can not read string %d\n", i));
       f << "###";
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
@@ -509,7 +509,7 @@ bool StarDocument::readSfxDocumentInformation(STOFFInputStreamPtr input, libstof
   f.str("");
   f << "SfxDocInfo-B:";
   if (pos+8>input->size()) {
-    STOFF_DEBUG_MSG(("StarDocument::readSfxDocumentInformation: last zone seems too short\n"));
+    STOFF_DEBUG_MSG(("StarObject::readSfxDocumentInformation: last zone seems too short\n"));
     f << "###";
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());
@@ -542,7 +542,7 @@ bool StarDocument::readSfxDocumentInformation(STOFFInputStreamPtr input, libstof
   return true;
 }
 
-bool StarDocument::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name)
+bool StarObject::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name)
 {
   StarZone zone(input, name, "SfxStyleSheets", getPassword());
   input->seek(0, librevenge::RVNG_SEEK_SET);
@@ -567,7 +567,7 @@ bool StarDocument::readSfxStyleSheets(STOFFInputStreamPtr input, std::string con
     }
     if (pool && pool->read(zone)) {
       if (extraPool) {
-        STOFF_DEBUG_MSG(("StarDocument::readSfxStyleSheets: create extra pool for %d of type %d\n",
+        STOFF_DEBUG_MSG(("StarObject::readSfxStyleSheets: create extra pool for %d of type %d\n",
                          (int) getDocumentKind(), (int) pool->getType()));
       }
       if (!mainPool) mainPool=pool;
@@ -582,14 +582,14 @@ bool StarDocument::readSfxStyleSheets(STOFFInputStreamPtr input, std::string con
   if (!StarItemPool::readStyle(zone, mainPool, *this))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (!input->isEnd()) {
-    STOFF_DEBUG_MSG(("StarDocument::readSfxStyleSheets: find extra data\n"));
+    STOFF_DEBUG_MSG(("StarObject::readSfxStyleSheets: find extra data\n"));
     ascFile.addPos(input->tell());
     ascFile.addNote("Entries(SfxStyleSheets):###extra");
   }
   return true;
 }
 
-bool StarDocument::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libstoff::DebugFile &asciiFile)
+bool StarObject::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libstoff::DebugFile &asciiFile)
 {
   input->seek(0, librevenge::RVNG_SEEK_SET);
   libstoff::DebugStream f;
@@ -598,7 +598,7 @@ bool StarDocument::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libsto
   std::string header("");
   for (int i=0; i<26; ++i) header+=(char) input->readULong(1);
   if (!input->checkPosition(33)||header!="Star Framework Config File") {
-    STOFF_DEBUG_MSG(("StarDocument::readStarFrameworkConfigFile: the header seems bad\n"));
+    STOFF_DEBUG_MSG(("StarObject::readStarFrameworkConfigFile: the header seems bad\n"));
     f << "###" << header;
     asciiFile.addPos(0);
     asciiFile.addNote(f.str().c_str());
@@ -612,7 +612,7 @@ bool StarDocument::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libsto
   if (fileVersion!=26) f << "vers=" << fileVersion << ",";
   long pos=long(lDirPos);
   if (!input->checkPosition(pos+2)) {
-    STOFF_DEBUG_MSG(("StarDocument::readStarFrameworkConfigFile: dir pos is bad\n"));
+    STOFF_DEBUG_MSG(("StarObject::readStarFrameworkConfigFile: dir pos is bad\n"));
     f << "###dirPos" << pos << ",";
     asciiFile.addPos(0);
     asciiFile.addNote(f.str().c_str());
@@ -636,13 +636,13 @@ bool StarDocument::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libsto
     if (nType) f << "nType=" << nType << ",";
     if (lPos!=-1) {
       if (!input->checkPosition(long(lPos))) {
-        STOFF_DEBUG_MSG(("StarDocument::readStarFrameworkConfigFile: a item position seems bad\n"));
+        STOFF_DEBUG_MSG(("StarObject::readStarFrameworkConfigFile: a item position seems bad\n"));
         f << "###";
       }
       else {
         static bool first=true;
         if (first) {
-          STOFF_DEBUG_MSG(("StarDocument::readStarFrameworkConfigFile: Ohhh find some item\n"));
+          STOFF_DEBUG_MSG(("StarObject::readStarFrameworkConfigFile: Ohhh find some item\n"));
           first=true;
         }
         asciiFile.addPos(long(lPos));
@@ -653,7 +653,7 @@ bool StarDocument::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libsto
     }
     int strSz=(int) input->readULong(2);
     if (!input->checkPosition(input->tell()+strSz)) {
-      STOFF_DEBUG_MSG(("StarDocument::readStarFrameworkConfigFile: a item seems bad\n"));
+      STOFF_DEBUG_MSG(("StarObject::readStarFrameworkConfigFile: a item seems bad\n"));
       f << "###item,";
       break;
     }
@@ -668,7 +668,7 @@ bool StarDocument::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libsto
   return true;
 }
 
-bool StarDocument::readSfxPreview(STOFFInputStreamPtr input, std::string const &name)
+bool StarObject::readSfxPreview(STOFFInputStreamPtr input, std::string const &name)
 {
   StarZone zone(input, name, "SfxPreview", m_password);
   libstoff::DebugFile &ascii=zone.ascii();
@@ -676,14 +676,14 @@ bool StarDocument::readSfxPreview(STOFFInputStreamPtr input, std::string const &
   input->seek(0, librevenge::RVNG_SEEK_SET);
   StarFileManager fileManager;
   if (!fileManager.readSVGDI(zone)) {
-    STOFF_DEBUG_MSG(("StarDocument::readSfxPreview: can not find the first image\n"));
+    STOFF_DEBUG_MSG(("StarObject::readSfxPreview: can not find the first image\n"));
     input->seek(0, librevenge::RVNG_SEEK_SET);
   }
   if (input->isEnd()) return true;
 
   long pos=input->tell();
   libstoff::DebugStream f;
-  STOFF_DEBUG_MSG(("StarDocument::readSfxPreview: find extra data\n"));
+  STOFF_DEBUG_MSG(("StarObject::readSfxPreview: find extra data\n"));
   f << "Entries(SfxPreview):###extra";
 
   ascii.addPos(pos);
@@ -692,7 +692,7 @@ bool StarDocument::readSfxPreview(STOFFInputStreamPtr input, std::string const &
   return true;
 }
 
-bool StarDocument::readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugFile &ascii)
+bool StarObject::readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugFile &ascii)
 {
   input->seek(0, librevenge::RVNG_SEEK_SET);
   libstoff::DebugStream f;
@@ -718,7 +718,7 @@ bool StarDocument::readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugFile
     ascii.addNote(f.str().c_str());
   }
   if (!input->isEnd()) {
-    STOFF_DEBUG_MSG(("StarDocument::readSfxWindows: find extra data\n"));
+    STOFF_DEBUG_MSG(("StarObject::readSfxWindows: find extra data\n"));
     ascii.addPos(input->tell());
     ascii.addNote("SfWindows:extra###");
   }

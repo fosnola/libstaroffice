@@ -51,7 +51,7 @@ namespace StarItemPoolInternal
 struct State;
 }
 
-class StarDocument;
+class StarObject;
 class StarZone;
 
 /** \brief the main class to read/.. some basic StarOffice SfxItemItemPool itemPools
@@ -66,7 +66,7 @@ public:
   //! the known item pool
   enum Type { T_ChartPool, T_EditEnginePool, T_SpreadsheetPool, T_VCControlPool, T_WriterPool, T_XOutdevPool, T_Unknown };
   //! constructor
-  StarItemPool(StarDocument &document, Type type);
+  StarItemPool(StarObject &document, Type type);
   //! destructor
   virtual ~StarItemPool();
 
@@ -84,7 +84,7 @@ public:
     return m_isInside;
   }
   //! try to read a "StyleItemPool" zone
-  static bool readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, StarDocument &doc);
+  static bool readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, StarObject &doc);
 
   //! try to read an attribute
   bool readAttribute(StarZone &zone, int which, int vers, long endPos);

@@ -43,7 +43,7 @@
 
 #include "StarAttribute.hxx"
 #include "StarBitmap.hxx"
-#include "StarDocument.hxx"
+#include "StarObject.hxx"
 #include "StarItemPool.hxx"
 
 #include "StarFileManager.hxx"
@@ -294,7 +294,7 @@ bool StarFileManager::readImageDocument(STOFFInputStreamPtr input, librevenge::R
   return true;
 }
 
-bool StarFileManager::readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string &dataType, std::string const &fileName, StarDocument &doc)
+bool StarFileManager::readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string &dataType, std::string const &fileName, StarObject &doc)
 try
 {
   // see this Ole with classic bitmap format
@@ -421,7 +421,7 @@ bool StarFileManager::readOleObject(STOFFInputStreamPtr input, std::string const
   return true;
 }
 
-bool StarFileManager::readMathDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &/*doc*/)
+bool StarFileManager::readMathDocument(STOFFInputStreamPtr input, std::string const &fileName, StarObject &/*doc*/)
 try
 {
   // checkme this zone can not be encoded
@@ -781,7 +781,7 @@ bool StarFileManager::readJobSetUp(StarZone &zone)
   return true;
 }
 
-bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarDocument &doc)
+bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarObject &doc)
 {
   // svx_editobj.cxx EditTextObject::Create
   STOFFInputStreamPtr input=zone.input();

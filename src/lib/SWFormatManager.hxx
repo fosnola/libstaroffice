@@ -50,7 +50,7 @@ struct State;
 }
 
 class StarZone;
-class StarDocument;
+class StarObject;
 
 /** \brief the main class to read/.. a StarOffice sdw format
  *
@@ -66,18 +66,18 @@ public:
   virtual ~SWFormatManager();
 
   //! try to read a format zone : 'f' or 'l' or 'o' or 'r' or 's'(in TOCX)
-  bool readSWFormatDef(StarZone &zone, char kind, StarDocument &doc);
+  bool readSWFormatDef(StarZone &zone, char kind, StarObject &doc);
   //! try to read a number format zone : 'n'
   bool readSWNumberFormat(StarZone &zone);
   //! try to read a number formatter type : 'q'
   bool readSWNumberFormatterList(StarZone &zone);
   //! try to read a fly frame list : 'F' (list of 'l' or 'o')
-  bool readSWFlyFrameList(StarZone &zone, StarDocument &doc);
+  bool readSWFlyFrameList(StarZone &zone, StarObject &doc);
   //! try to read a format pattern LCL : 'P' (list of 'D') (child of a TOXs)
   bool readSWPatternLCL(StarZone &zone);
 
   //! try to read a number format (find in attribute)
-  bool readNumberFormat(StarZone &zone, long endPos, StarDocument &doc);
+  bool readNumberFormat(StarZone &zone, long endPos, StarObject &doc);
   //! try to read number formatter type
   bool readNumberFormatter(StarZone &zone);
 

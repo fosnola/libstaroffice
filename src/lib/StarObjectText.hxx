@@ -49,7 +49,7 @@ struct State;
 }
 
 class StarAttributeManager;
-class StarDocument;
+class StarObject;
 class StarZone;
 
 /** \brief the main class to read a StarOffice sdw file
@@ -62,7 +62,7 @@ class StarObjectText
   friend class StarAttributeManager;
 public:
   //! constructor
-  StarObjectText(shared_ptr<StarDocument> document);
+  StarObjectText(shared_ptr<StarObject> document);
   //! destructor
   virtual ~StarObjectText();
 
@@ -72,7 +72,7 @@ public:
   //! try to read a image map zone : 'X'
   static bool readSWImageMap(StarZone &zone);
   //! try to read a attribute list: 'S'
-  static bool readSWAttributeList(StarZone &zone, StarDocument &doc);
+  static bool readSWAttributeList(StarZone &zone, StarObject &doc);
 
 protected:
   //
@@ -80,24 +80,24 @@ protected:
   //
 
   //! the page style
-  bool readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
+  bool readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &fileName, StarObject &doc);
   //! try to read a text style zone: SfxStyleSheets
   bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
   //! the rulers?
-  bool readSwNumRuleList(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
+  bool readSwNumRuleList(STOFFInputStreamPtr input, std::string const &fileName, StarObject &doc);
   //! the main zone
-  bool readWriterDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
+  bool readWriterDocument(STOFFInputStreamPtr input, std::string const &fileName, StarObject &doc);
 
   //! the drawing layers ?
-  bool readDrawingLayer(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
+  bool readDrawingLayer(STOFFInputStreamPtr input, std::string const &fileName, StarObject &doc);
 
 protected:
   //! try to read an attribute: 'A'
-  static bool readSWAttribute(StarZone &zone, StarDocument &doc);
+  static bool readSWAttribute(StarZone &zone, StarObject &doc);
   //! try a list of bookmark field : 'a'
   bool readSWBookmarkList(StarZone &zone);
   //! try to read some content : 'N'
-  bool readSWContent(StarZone &zone, StarDocument &doc);
+  bool readSWContent(StarZone &zone, StarObject &doc);
   //! try to read a DBName zone : 'D'
   bool readSWDBName(StarZone &zone);
   //! try to read a dictionary table : 'j'
@@ -107,7 +107,7 @@ protected:
   //! try to read a footnode node : '1'
   bool readSWFootNoteInfo(StarZone &zone);
   //! try to read a OLE node : 'g'
-  bool readSWGraphNode(StarZone &zone, StarDocument &doc);
+  bool readSWGraphNode(StarZone &zone, StarObject &doc);
   //! try to read a SW zone setup : 'J'
   bool readSWJobSetUp(StarZone &zone);
   //! try to read a layout information zone : 'Y'
@@ -123,21 +123,21 @@ protected:
   //! try to read a OLE node : 'O'
   bool readSWOLENode(StarZone &zone);
   //! try to read a list of page style : 'p'
-  bool readSWPageDef(StarZone &zone, StarDocument &doc);
+  bool readSWPageDef(StarZone &zone, StarObject &doc);
   //! try to read a list of redline : 'V' (list of 'R' list of 'D')
   bool readSWRedlineList(StarZone &zone);
   //! try to read a section : 'I'
   bool readSWSection(StarZone &zone);
   //! try to read a table : 'E'
-  bool readSWTable(StarZone &zone, StarDocument &doc);
+  bool readSWTable(StarZone &zone, StarObject &doc);
   //! try to read a table box : 't'
-  bool readSWTableBox(StarZone &zone, StarDocument &doc);
+  bool readSWTableBox(StarZone &zone, StarObject &doc);
   //! try to read a table line : 'L'
-  bool readSWTableLine(StarZone &zone, StarDocument &doc);
+  bool readSWTableLine(StarZone &zone, StarObject &doc);
   //! try to read some content : 'T'
-  bool readSWTextZone(StarZone &zone, StarDocument &doc);
+  bool readSWTextZone(StarZone &zone, StarObject &doc);
   //! try to read a list of TOX : 'u' ( list of 'x')
-  bool readSWTOXList(StarZone &zone, StarDocument &doc);
+  bool readSWTOXList(StarZone &zone, StarObject &doc);
   //! try to read a list of TOX51 : 'y' ( list of 'x')
   bool readSWTOX51List(StarZone &zone);
   //
@@ -145,7 +145,7 @@ protected:
   //
 
   //! the ole document
-  shared_ptr<StarDocument> m_document;
+  shared_ptr<StarObject> m_document;
   //! the state
   shared_ptr<StarObjectTextInternal::State> m_state;
 private:

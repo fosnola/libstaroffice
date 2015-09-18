@@ -48,7 +48,7 @@ namespace StarObjectChartInternal
 struct State;
 }
 
-class StarDocument;
+class StarObject;
 class StarZone;
 
 /** \brief the main class to read a StarOffice chart
@@ -60,7 +60,7 @@ class StarObjectChart
 {
 public:
   //! constructor
-  StarObjectChart(shared_ptr<StarDocument> document);
+  StarObjectChart(shared_ptr<StarObject> document);
   //! destructor
   virtual ~StarObjectChart();
   //! try to parse the current object
@@ -81,7 +81,7 @@ protected:
   bool readSCHMemChart(StarZone &zone);
 
   //! the main document
-  shared_ptr<StarDocument> m_document;
+  shared_ptr<StarObject> m_document;
   //! the state
   shared_ptr<StarObjectChartInternal::State> m_state;
 };

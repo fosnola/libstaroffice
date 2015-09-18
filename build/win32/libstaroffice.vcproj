@@ -281,14 +281,6 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
-			<File RelativePath="..\..\src\lib\StarDocument.cxx">
-				<FileConfiguration Name="Release|Win32">
-					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
-				</FileConfiguration>
-				<FileConfiguration Name="Debug|Win32">
-					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
 			<File RelativePath="..\..\src\lib\StarEncodingChinese.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -354,6 +346,14 @@
 				</FileConfiguration>
 			</File>
 			<File RelativePath="..\..\src\lib\StarItemPool.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File RelativePath="..\..\src\lib\StarObject.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
 				</FileConfiguration>
@@ -457,8 +457,6 @@
 			</File>
 			<File RelativePath="..\..\src\lib\StarBitmap.hxx">
 			</File>
-			<File RelativePath="..\..\src\lib\StarDocument.hxx">
-			</File>
 			<File RelativePath="..\..\src\lib\StarEncodingChinese.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarEncodingJapanese.hxx">
@@ -476,6 +474,8 @@
 			<File RelativePath="..\..\src\lib\StarFileManager.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarItemPool.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\StarObject.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarObjectChart.hxx">
 			</File>

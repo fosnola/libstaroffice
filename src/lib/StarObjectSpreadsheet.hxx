@@ -54,7 +54,7 @@ struct State;
 }
 
 class StarAttribute;
-class StarDocument;
+class StarObject;
 class StarZone;
 
 /** \brief the main class to read a StarOffice sdc file
@@ -66,7 +66,7 @@ class StarObjectSpreadsheet
 {
 public:
   //! constructor
-  StarObjectSpreadsheet(shared_ptr<StarDocument> document);
+  StarObjectSpreadsheet(shared_ptr<StarObject> document);
   //! destructor
   virtual ~StarObjectSpreadsheet();
   //! try to parse the current object
@@ -110,7 +110,7 @@ protected:
   bool readSCOutlineArray(StarZone &zone);
 
   //! the main document
-  shared_ptr<StarDocument> m_document;
+  shared_ptr<StarObject> m_document;
   //! the state
   shared_ptr<StarObjectSpreadsheetInternal::State> m_state;
 };

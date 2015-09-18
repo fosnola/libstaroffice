@@ -40,7 +40,7 @@
 #include <librevenge/librevenge.h>
 
 #include "StarAttribute.hxx"
-#include "StarDocument.hxx"
+#include "StarObject.hxx"
 #include "StarFileManager.hxx"
 #include "StarZone.hxx"
 
@@ -73,7 +73,7 @@ SWFormatManager::~SWFormatManager()
 {
 }
 
-bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, StarDocument &doc)
+bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -243,7 +243,7 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
   return true;
 }
 
-bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarDocument &doc)
+bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarObject &doc)
 {
   // svx_numitem.cxx SvxNumberFormat::SvxNumberFormat
   STOFFInputStreamPtr input=zone.input();
@@ -547,7 +547,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
   return true;
 }
 
-bool SWFormatManager::readSWFlyFrameList(StarZone &zone, StarDocument &doc)
+bool SWFormatManager::readSWFlyFrameList(StarZone &zone, StarObject &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();

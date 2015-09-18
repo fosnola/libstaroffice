@@ -50,7 +50,7 @@ struct State;
 }
 
 class StarZone;
-class StarDocument;
+class StarObject;
 
 class StarAttribute
 {
@@ -733,7 +733,7 @@ public:
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const=0;
   //! read an attribute zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarDocument &document)=0;
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &document)=0;
   //! returns the debug name
   std::string const &getDebugName() const
   {
@@ -776,9 +776,9 @@ public:
 
 
   //! try to read an attribute
-  bool readAttribute(StarZone &zone, int which, int vers, long endPos, StarDocument &document);
+  bool readAttribute(StarZone &zone, int which, int vers, long endPos, StarObject &document);
   //! try to read a brush
-  static bool readBrushItem(StarZone &zone, int nVers, long endPos, StarDocument &document, libstoff::DebugStream &f);
+  static bool readBrushItem(StarZone &zone, int nVers, long endPos, StarObject &document, libstoff::DebugStream &f);
 
 protected:
   //

@@ -41,7 +41,7 @@
 
 #include "StarAttribute.hxx"
 #include "StarFileManager.hxx"
-#include "StarDocument.hxx"
+#include "StarObject.hxx"
 #include "StarZone.hxx"
 
 #include "StarItemPool.hxx"
@@ -287,7 +287,7 @@ struct Version {
 //! Internal: the state of a StarItemPool
 struct State {
   //! constructor
-  State(StarDocument &document, StarItemPool::Type type) : m_document(document), m_type(StarItemPool::T_Unknown), m_majorVersion(0), m_minorVersion(0), m_loadingVersion(0),
+  State(StarObject &document, StarItemPool::Type type) : m_document(document), m_type(StarItemPool::T_Unknown), m_majorVersion(0), m_minorVersion(0), m_loadingVersion(0),
     m_name(""), m_secondaryPool(), m_currentVersion(0), m_verStart(0), m_verEnd(0), m_versionList(), m_idToAttributeList()
   {
     init(type);
@@ -382,7 +382,7 @@ struct State {
   }
 
   //! the document
-  StarDocument &m_document;
+  StarObject &m_document;
   //! the document type
   StarItemPool::Type m_type;
   //! the majorVersion
@@ -767,7 +767,7 @@ void State::init(StarItemPool::Type type)
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarItemPool::StarItemPool(StarDocument &doc, StarItemPool::Type type) :
+StarItemPool::StarItemPool(StarObject &doc, StarItemPool::Type type) :
   m_isInside(false), m_state(new StarItemPoolInternal::State(doc, type))
 {
 }
@@ -1516,7 +1516,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
   return true;
 }
 
-bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, StarDocument &doc)
+bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, StarObject &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascii=zone.ascii();

@@ -45,8 +45,6 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarAttribute.hxx			\
 	StarBitmap.cxx				\
 	StarBitmap.hxx				\
-	StarDocument.cxx			\
-	StarDocument.hxx			\
 	StarEncodingChinese.cxx			\
 	StarEncodingChinese.hxx			\
 	StarEncodingJapanese.cxx		\
@@ -65,6 +63,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarFileManager.hxx			\
 	StarItemPool.cxx			\
 	StarItemPool.hxx			\
+	StarObject.cxx				\
+	StarObject.hxx				\
 	StarObjectChart.cxx			\
 	StarObjectChart.hxx			\
 	StarObjectDraw.cxx			\

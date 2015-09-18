@@ -43,7 +43,7 @@
 
 #include "StarAttribute.hxx"
 #include "StarEncryption.hxx"
-#include "StarDocument.hxx"
+#include "StarObject.hxx"
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarObjectDraw.hxx"
@@ -70,7 +70,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectChart::StarObjectChart(shared_ptr<StarDocument> document) : m_document(document), m_state(new StarObjectChartInternal::State)
+StarObjectChart::StarObjectChart(shared_ptr<StarObject> document) : m_document(document), m_state(new StarObjectChartInternal::State)
 {
 }
 

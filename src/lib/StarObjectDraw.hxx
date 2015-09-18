@@ -48,7 +48,7 @@ namespace StarObjectDrawInternal
 struct State;
 }
 
-class StarDocument;
+class StarObject;
 class StarZone;
 
 /** \brief the main class to read a StarOffice draw
@@ -60,13 +60,13 @@ class StarObjectDraw
 {
 public:
   //! constructor
-  StarObjectDraw(shared_ptr<StarDocument> document);
+  StarObjectDraw(shared_ptr<StarObject> document);
   //! destructor
   virtual ~StarObjectDraw();
   //! try to parse the current object
   bool parse();
   //! try to read a SdrModel zone: "DrMd"
-  static bool readSdrModel(StarZone &zone, StarDocument &doc);
+  static bool readSdrModel(StarZone &zone, StarObject &doc);
 
 protected:
   //! try to read a draw style zone: SfxStyleSheets
@@ -79,7 +79,7 @@ protected:
   //! try to read a object zone: "DrOb'
   static bool readSdrObject(StarZone &zone);
   //! try to read a Page/MasterPage zone: "DrPg'
-  static bool readSdrPage(StarZone &zone, StarDocument &doc);
+  static bool readSdrPage(StarZone &zone, StarObject &doc);
   //! try to read a Master Page descriptor zone: "DrMP'
   static bool readSdrMPageDesc(StarZone &zone);
   //! try to read a list of Master Page zone: "DrML'
@@ -91,7 +91,7 @@ protected:
   //
 
   //! the main document
-  shared_ptr<StarDocument> m_document;
+  shared_ptr<StarObject> m_document;
   //! the state
   shared_ptr<StarObjectDrawInternal::State> m_state;
 };

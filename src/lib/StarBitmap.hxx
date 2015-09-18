@@ -50,7 +50,7 @@ struct Bitmap;
 struct State;
 }
 
-class StarDocument;
+class StarObject;
 class StarZone;
 
 /** \brief the main class to read/.. some basic bitmap/pattern in StarOffice documents

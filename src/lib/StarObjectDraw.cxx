@@ -43,7 +43,7 @@
 
 #include "StarAttribute.hxx"
 #include "StarEncryption.hxx"
-#include "StarDocument.hxx"
+#include "StarObject.hxx"
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarZone.hxx"
@@ -69,7 +69,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectDraw::StarObjectDraw(shared_ptr<StarDocument> document) : m_document(document), m_state(new StarObjectDrawInternal::State)
+StarObjectDraw::StarObjectDraw(shared_ptr<StarObject> document) : m_document(document), m_state(new StarObjectDrawInternal::State)
 {
 }
 
@@ -306,7 +306,7 @@ bool StarObjectDraw::readSdrLayerSet(StarZone &zone)
   return true;
 }
 
-bool StarObjectDraw::readSdrModel(StarZone &zone, StarDocument &doc)
+bool StarObjectDraw::readSdrModel(StarZone &zone, StarObject &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   // first check magic
@@ -607,7 +607,7 @@ bool StarObjectDraw::readSdrObject(StarZone &zone)
   return true;
 }
 
-bool StarObjectDraw::readSdrPage(StarZone &zone, StarDocument &doc)
+bool StarObjectDraw::readSdrPage(StarZone &zone, StarObject &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   // first check magic
