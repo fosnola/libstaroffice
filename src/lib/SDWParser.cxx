@@ -41,7 +41,6 @@
 
 #include "STOFFOLEParser.hxx"
 
-#include "StarObjectSpreadsheet.hxx"
 #include "StarAttribute.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
@@ -50,6 +49,7 @@
 #include "StarItemPool.hxx"
 #include "StarObjectChart.hxx"
 #include "StarObjectDraw.hxx"
+#include "StarObjectSpreadsheet.hxx"
 #include "StarZone.hxx"
 
 #include "SDWParser.hxx"
@@ -136,6 +136,11 @@ bool SDWParser::createZones()
       draw.parse();
       continue;
     }
+    if (document->getDocumentKind()==STOFFDocument::STOFF_K_SPREADSHEET) {
+      StarObjectSpreadsheet spreadsheet(document);
+      spreadsheet.parse();
+      continue;
+    }
     // Ole-Object has persist elements, so...
     if (listDir[d]->m_hasCompObj) document->parse();
     STOFFOLEParser::OleDirectory &direct=*listDir[d];
@@ -173,16 +178,10 @@ bool SDWParser::createZones()
         continue;
       }
       if (base=="SfxStyleSheets") {
-        StarObjectSpreadsheet sdcParser;
-        sdcParser.readSfxStyleSheets(ole,name,*document);
+        readSfxStyleSheets(ole,name,*document);
         continue;
       }
 
-      if (base=="StarCalcDocument") {
-        StarObjectSpreadsheet sdcParser;
-        sdcParser.readCalcDocument(ole,name,*document);
-        continue;
-      }
       if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
         librevenge::RVNGBinaryData data;
         fileManager.readImageDocument(ole,data,name);
@@ -244,6 +243,55 @@ void SDWParser::createDocument(librevenge::RVNGTextInterface *documentInterface)
 // Intermediate level
 //
 ////////////////////////////////////////////////////////////
+bool SDWParser::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
+{
+  StarZone zone(input, name, "SfxStyleSheets", document.getPassword());
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  libstoff::DebugFile &ascFile=zone.ascii();
+  ascFile.open(name);
+
+  // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
+  // chart sch_docshell.cxx SchChartDocShell::Load
+  shared_ptr<StarItemPool> pool;
+  if (document.getDocumentKind()==STOFFDocument::STOFF_K_DRAW) {
+    pool=document.getNewItemPool(StarItemPool::T_XOutdevPool);
+    pool->addSecondaryPool(document.getNewItemPool(StarItemPool::T_EditEnginePool));
+  }
+  else if (document.getDocumentKind()==STOFFDocument::STOFF_K_TEXT)
+    pool=document.getNewItemPool(StarItemPool::T_WriterPool);
+  shared_ptr<StarItemPool>  mainPool=pool;
+  while (!input->isEnd()) {
+    // REMOVEME: remove this loop, when creation of secondary pool is checked
+    long pos=input->tell();
+    bool extraPool=false;
+    if (!pool) {
+      extraPool=true;
+      pool=document.getNewItemPool(StarItemPool::T_Unknown);
+    }
+    if (pool && pool->read(zone)) {
+      if (extraPool) {
+        STOFF_DEBUG_MSG(("SDWParser::readSfxStyleSheets: create extra pool for %d of type %d\n",
+                         (int) document.getDocumentKind(), (int) pool->getType()));
+      }
+      if (!mainPool) mainPool=pool;
+      pool.reset();
+      continue;
+    }
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    break;
+  }
+  if (input->isEnd()) return true;
+  long pos=input->tell();
+  if (!StarItemPool::readStyle(zone, mainPool, document))
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+  if (!input->isEnd()) {
+    STOFF_DEBUG_MSG(("SDWParser::readSfxStyleSheets: find extra data\n"));
+    ascFile.addPos(input->tell());
+    ascFile.addNote("Entries(SfxStyleSheets):###extra");
+  }
+  return true;
+}
+
 bool SDWParser::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &name, StarDocument &doc)
 try
 {

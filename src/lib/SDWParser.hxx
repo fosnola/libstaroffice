@@ -101,12 +101,13 @@ protected:
   bool readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
   //! the rulers?
   bool readSwNumRuleList(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
-
   //! the main zone
   bool readWriterDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
 
   //! the drawing layers ?
   bool readDrawingLayer(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
+  //! try to read a spreadshet style zone: SfxStyleSheets
+  bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &document);
 protected:
   //! try to read an attribute: 'A'
   bool readSWAttribute(StarZone &zone, StarDocument &doc);

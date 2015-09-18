@@ -66,25 +66,27 @@ class StarObjectSpreadsheet
 {
 public:
   //! constructor
-  StarObjectSpreadsheet();
+  StarObjectSpreadsheet(shared_ptr<StarDocument> document);
   //! destructor
   virtual ~StarObjectSpreadsheet();
-
-  //! try to read a chart zone: StarCalcDocument .sdc
-  bool readCalcDocument(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &document);
-  //! try to read a spreadshet style zone: SfxStyleSheets
-  bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &document);
+  //! try to parse the current object
+  bool parse();
 
 protected:
   //
   // data
   //
+  //! try to read a chart zone: StarCalcDocument .sdc
+  bool readCalcDocument(STOFFInputStreamPtr input, std::string const &fileName);
+  //! try to read a spreadshet style zone: SfxStyleSheets
+  bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
+
   //! try to read a SCTable
-  bool readSCTable(StarZone &zone, StarObjectSpreadsheetInternal::Table &table, StarDocument &doc);
+  bool readSCTable(StarZone &zone, StarObjectSpreadsheetInternal::Table &table);
   //! try to read a SCColumn
-  bool readSCColumn(StarZone &zone, StarObjectSpreadsheetInternal::Table &table, StarDocument &doc, int column, long lastPos);
+  bool readSCColumn(StarZone &zone, StarObjectSpreadsheetInternal::Table &table, int column, long lastPos);
   //! try to read a list of data
-  bool readSCData(StarZone &zone, StarObjectSpreadsheetInternal::Table &table, StarDocument &doc, int column);
+  bool readSCData(StarZone &zone, StarObjectSpreadsheetInternal::Table &table, int column);
 
   //! try to read a change trak
   bool readSCChangeTrack(StarZone &zone, int version, long lastPos);
@@ -107,6 +109,8 @@ protected:
   //! try to read a SCOutlineArray
   bool readSCOutlineArray(StarZone &zone);
 
+  //! the main document
+  shared_ptr<StarDocument> m_document;
   //! the state
   shared_ptr<StarObjectSpreadsheetInternal::State> m_state;
 };
