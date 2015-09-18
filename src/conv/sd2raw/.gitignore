@@ -5,6 +5,6 @@
 *.o
 Makefile
 Makefile.in
-sdw2raw
+sd2raw
 *.rc
 *.exe

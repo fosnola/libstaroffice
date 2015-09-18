@@ -51,19 +51,19 @@
 
 int printUsage()
 {
-  printf("Usage: sdw2raw [OPTION] <StarOffice Document>\n");
+  printf("Usage: sd2raw [OPTION] <StarOffice Document>\n");
   printf("\n");
   printf("Options:\n");
   printf("\t-c:                Display the call graph nesting level\n");
   printf("\t-h:                Shows this help message\n");
   printf("\t-p password:       Gives the document password\n");
-  printf("\t-v:                Output sdw2raw version \n");
+  printf("\t-v:                Output sd2raw version \n");
   return -1;
 }
 
 int printVersion()
 {
-  printf("sdw2raw %s\n", VERSION);
+  printf("sd2raw %s\n", VERSION);
   return 0;
 }
 

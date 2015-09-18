@@ -14,11 +14,11 @@ VS_VERSION_INFO VERSIONINFO
       BLOCK "040904B0"
       BEGIN
 	VALUE "CompanyName", "The libstaroffice developer community"
-	VALUE "FileDescription", "sdw2raw"
+	VALUE "FileDescription", "sd2raw"
 	VALUE "FileVersion", "@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@.@STAROFFICE_MICRO_VERSION@.BUILDNUMBER"
-	VALUE "InternalName", "sdw2raw"
+	VALUE "InternalName", "sd2raw"
 	VALUE "LegalCopyright", "Copyright (C) 2002-2006 William Lachance, Marc Maurer, Fridrich Strba, other contributers"
-	VALUE "OriginalFilename", "sdw2raw.exe"
+	VALUE "OriginalFilename", "sd2raw.exe"
 	VALUE "ProductName", "libstaroffice"
 	VALUE "ProductVersion", "@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@.@STAROFFICE_MICRO_VERSION@"
       END
