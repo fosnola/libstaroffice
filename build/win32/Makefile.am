@@ -6,16 +6,16 @@ EXTRA_DIST = \
 	libstaroffice.dsp		\
 	sdw2html.dsp			\
 	sdw2raw.dsp			\
-	sdw2text.dsp			\
+	sd2text.dsp			\
 					\
 	libstaroffice.vcproj.sln	\
 	libstaroffice.vcproj		\
 	sdw2html.vcproj			\
 	sdw2raw.vcproj			\
-	sdw2text.vcproj			\
+	sd2text.vcproj			\
 					\
 	libstaroffice.vcxproj.sln	\
 	libstaroffice.vcxproj		\
 	sdw2html.vcxproj		\
 	sdw2raw.vcxproj			\
-	sdw2text.vcxproj
+	sd2text.vcxproj

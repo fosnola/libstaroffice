@@ -6,7 +6,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdw2html", "sdw2html.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdw2raw", "sdw2raw.vcxproj", "{0E6CBB23-DFDC-4194-A2CC-F030F6B7D730}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdw2text", "sdw2text.vcxproj", "{FCB2AC04-1AE5-4E43-A80B-BBAA9FA00F5A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sd2text", "sd2text.vcxproj", "{FCB2AC04-1AE5-4E43-A80B-BBAA9FA00F5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

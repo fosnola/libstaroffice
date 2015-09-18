@@ -61,14 +61,14 @@ AS_CASE([$host],
 		LIBSTAROFFICE_STREAM_WIN32_RESOURCE=libstaroffice-stream-win32res.lo
 		SDW2HTML_WIN32_RESOURCE=sdw2html-win32res.lo
 		SDW2RAW_WIN32_RESOURCE=sdw2raw-win32res.lo
-		SDW2TEXT_WIN32_RESOURCE=sdw2text-win32res.lo
+		SD2TEXT_WIN32_RESOURCE=sd2text-win32res.lo
 	], [
 		native_win32=no
 		LIBSTAROFFICE_WIN32_RESOURCE=
 		LIBSTAROFFICE_STREAM_WIN32_RESOURCE=
 		SDW2HTML_WIN32_RESOURCE=
 		SDW2RAW_WIN32_RESOURCE=
-		SDW2TEXT_WIN32_RESOURCE=
+		SD2TEXT_WIN32_RESOURCE=
 	]
 )
 AM_CONDITIONAL(OS_WIN32, [test "x$native_win32" = "xyes"])
@@ -76,7 +76,7 @@ AC_SUBST(LIBSTAROFFICE_WIN32_RESOURCE)
 AC_SUBST(LIBSTAROFFICE_STREAM_WIN32_RESOURCE)
 AC_SUBST(SDW2HTML_WIN32_RESOURCE)
 AC_SUBST(SDW2RAW_WIN32_RESOURCE)
-AC_SUBST(SDW2TEXT_WIN32_RESOURCE)
+AC_SUBST(SD2TEXT_WIN32_RESOURCE)
 
 AC_MSG_CHECKING([for Win32 platform in general])
 AS_CASE([$host],
@@ -375,8 +375,8 @@ src/conv/sdw2html/Makefile
 src/conv/sdw2html/sdw2html.rc
 src/conv/sdw2raw/Makefile
 src/conv/sdw2raw/sdw2raw.rc
-src/conv/sdw2text/Makefile
-src/conv/sdw2text/sdw2text.rc
+src/conv/sd2text/Makefile
+src/conv/sd2text/sd2text.rc
 src/lib/Makefile
 src/lib/libstaroffice.rc
 docs/Makefile

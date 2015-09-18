@@ -50,21 +50,21 @@
 
 int printUsage()
 {
-  printf("Usage: sdw2text [OPTION] <StarOffice Document>\n");
+  printf("Usage: sd2text [OPTION] <StarOffice Document>\n");
   printf("\n");
   printf("Options:\n");
   printf(" -i                Display document metadata instead of the text\n");
   printf(" -h                Shows this help message\n");
   printf(" -o file.txt       Define the output[default stdout]\n");
   printf(" -p password       Gives the document password\n");
-  printf(" -v                Output sdw2text version \n");
+  printf(" -v                Output sd2text version \n");
   printf("\n");
   return -1;
 }
 
 int printVersion()
 {
-  printf("sdw2text %s\n", VERSION);
+  printf("sd2text %s\n", VERSION);
   return 0;
 }
 

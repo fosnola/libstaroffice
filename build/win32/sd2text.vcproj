@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="sdw2text"
+	Name="sd2text"
 	ProjectGUID="{FCB2AC04-1AE5-4E43-A80B-BBAA9FA00F5A}"
 	TargetFrameworkVersion="0"
 	>
@@ -38,7 +38,7 @@
 				Name="VCMIDLTool"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/sdw2text.tlb"
+				TypeLibraryName=".\Debug/sd2text.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -49,7 +49,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				TreatWChar_tAsBuiltInType="false"
-				PrecompiledHeaderFile=".\Debug/sdw2text.pch"
+				PrecompiledHeaderFile=".\Debug/sd2text.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
 				ProgramDataBaseFileName=".\Debug/"
@@ -71,12 +71,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libstaroffice-0.0.lib librevenge-stream-0.0.lib librevenge-0.0.lib"
-				OutputFile="Debug\bin\sdw2text.exe"
+				OutputFile="Debug\bin\sd2text.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="Debug\lib,$(LIBREVENGE_LIB_DIR)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug/sdw2text.pdb"
+				ProgramDatabaseFile=".\Debug/sd2text.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -93,7 +93,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/sdw2text.bsc"
+				OutputFile=".\Debug/sd2text.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -129,7 +129,7 @@
 				Name="VCMIDLTool"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release/sdw2text.tlb"
+				TypeLibraryName=".\Release/sd2text.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -139,7 +139,7 @@
 				PreprocessorDefinitions="NDEBUG;WIN32;_CONSOLE"
 				RuntimeLibrary="2"
 				TreatWChar_tAsBuiltInType="false"
-				PrecompiledHeaderFile=".\Release/sdw2text.pch"
+				PrecompiledHeaderFile=".\Release/sd2text.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
 				ProgramDataBaseFileName=".\Release/"
@@ -160,11 +160,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="librevenge-stream-0.0.lib libstaroffice-0.0.lib librevenge-0.0.lib"
-				OutputFile="Release\bin\sdw2text.exe"
+				OutputFile="Release\bin\sd2text.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="Release\lib,$(LIBREVENGE_LIB_DIR)"
-				ProgramDatabaseFile=".\Release/sdw2text.pdb"
+				ProgramDatabaseFile=".\Release/sd2text.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -181,7 +181,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/sdw2text.bsc"
+				OutputFile=".\Release/sd2text.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -202,7 +202,7 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			>
 			<File
-				RelativePath="..\..\src\conv\sdw2text\sdw2text.cpp"
+				RelativePath="..\..\src\conv\sd2text\sd2text.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"

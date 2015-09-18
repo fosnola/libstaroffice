@@ -5,6 +5,6 @@
 *.o
 Makefile
 Makefile.in
-sdw2text
+sd2text
 *.rc
 *.exe

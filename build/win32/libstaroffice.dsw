@@ -46,7 +46,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "sdw2text"=".\sdw2text.dsp" - Package Owner=<4>
+Project: "sd2text"=".\sd2text.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
