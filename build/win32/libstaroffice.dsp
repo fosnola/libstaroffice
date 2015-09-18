@@ -195,6 +195,10 @@ SOURCE=..\..\src\lib\StarObjectSpreadsheet.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarObjectText.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarZone.cxx
 # End Source File
 # Begin Source File
@@ -332,6 +336,10 @@ SOURCE=..\..\src\lib\StarObjectDraw.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarObjectSpreadsheet.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarObjectText.hxx
 # End Source File
 # Begin Source File
 

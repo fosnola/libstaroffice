@@ -70,9 +70,8 @@ private:
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarDocument::StarDocument(STOFFInputStreamPtr input, char const *passwd,
-                           shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *sdwParser) :
-  m_input(input), m_password(passwd), m_oleParser(oleParser), m_directory(directory), m_state(new StarDocumentInternal::State())
+StarDocument::StarDocument(char const *passwd, shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *sdwParser) :
+  m_password(passwd), m_directory(directory), m_state(new StarDocumentInternal::State())
 {
   m_state->m_sdwParser=sdwParser;
 }
@@ -125,7 +124,7 @@ SDWParser *StarDocument::getSDWParser()
 
 bool StarDocument::parse()
 {
-  if (!m_oleParser || !m_directory) {
+  if (!m_directory) {
     STOFF_DEBUG_MSG(("StarDocument::readPersistElements: can not find directory\n"));
     return false;
   }
@@ -137,7 +136,9 @@ bool StarDocument::parse()
     if (content.isParsed()) continue;
     std::string name = content.getOleName();
     std::string const &base = content.getBaseName();
-    STOFFInputStreamPtr ole = m_input->getSubStreamByName(name.c_str());
+    STOFFInputStreamPtr ole;
+    if (m_directory->m_input)
+      ole = m_directory->m_input->getSubStreamByName(name.c_str());
     if (!ole.get()) {
       STOFF_DEBUG_MSG(("StarDocument::createZones: error: can not find OLE part: \"%s\"\n", name.c_str()));
       continue;
@@ -538,6 +539,53 @@ bool StarDocument::readSfxDocumentInformation(STOFFInputStreamPtr input, libstof
   ascii.addPos(pos);
   ascii.addNote(f.str().c_str());
 
+  return true;
+}
+
+bool StarDocument::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name)
+{
+  StarZone zone(input, name, "SfxStyleSheets", getPassword());
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  libstoff::DebugFile &ascFile=zone.ascii();
+  ascFile.open(name);
+
+  // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
+  // chart sch_docshell.cxx SchChartDocShell::Load
+  shared_ptr<StarItemPool> pool;
+  if (getDocumentKind()==STOFFDocument::STOFF_K_DRAW) {
+    pool=getNewItemPool(StarItemPool::T_XOutdevPool);
+    pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
+  }
+  shared_ptr<StarItemPool>  mainPool=pool;
+  while (!input->isEnd()) {
+    // REMOVEME: remove this loop, when creation of secondary pool is checked
+    long pos=input->tell();
+    bool extraPool=false;
+    if (!pool) {
+      extraPool=true;
+      pool=getNewItemPool(StarItemPool::T_Unknown);
+    }
+    if (pool && pool->read(zone)) {
+      if (extraPool) {
+        STOFF_DEBUG_MSG(("StarDocument::readSfxStyleSheets: create extra pool for %d of type %d\n",
+                         (int) getDocumentKind(), (int) pool->getType()));
+      }
+      if (!mainPool) mainPool=pool;
+      pool.reset();
+      continue;
+    }
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    break;
+  }
+  if (input->isEnd()) return true;
+  long pos=input->tell();
+  if (!StarItemPool::readStyle(zone, mainPool, *this))
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+  if (!input->isEnd()) {
+    STOFF_DEBUG_MSG(("StarDocument::readSfxStyleSheets: find extra data\n"));
+    ascFile.addPos(input->tell());
+    ascFile.addNote("Entries(SfxStyleSheets):###extra");
+  }
   return true;
 }
 

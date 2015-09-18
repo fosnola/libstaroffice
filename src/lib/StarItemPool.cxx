@@ -805,7 +805,7 @@ bool StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPo
 
   StarItemPoolInternal::State *state=m_state->getPoolStateFor(which);
   if (!state || which<state->m_verStart || which>=state->m_verStart+int(state->m_idToAttributeList.size()) ||
-      !state->m_document.getAttributeManager() || !state->m_document.getSDWParser()) {
+      !state->m_document.getAttributeManager()) {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
     libstoff::DebugFile &ascii=zone.ascii();

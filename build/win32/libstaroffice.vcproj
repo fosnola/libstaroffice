@@ -385,6 +385,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\StarObjectText.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\StarZone.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -474,6 +482,8 @@
 			<File RelativePath="..\..\src\lib\StarObjectDraw.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarObjectSpreadsheet.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\StarObjectText.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarZone.hxx">
 			</File>

@@ -32,21 +32,18 @@
 */
 
 /*
- * Parser to convert sdw StarOffice document
+ * Parser to convert a text zone/OLE in a StarOffice document
  *
  */
-#ifndef SDW_PARSER
-#  define SDW_PARSER
+#ifndef STAR_OBJECT_TEXT
+#  define STAR_OBJECT_TEXT
 
 #include <vector>
 
+#include "libstaroffice_internal.hxx"
 #include "STOFFDebug.hxx"
-#include "STOFFEntry.hxx"
-#include "STOFFInputStream.hxx"
 
-#include "STOFFParser.hxx"
-
-namespace SDWParserInternal
+namespace StarObjectTextInternal
 {
 struct State;
 }
@@ -54,31 +51,23 @@ struct State;
 class StarAttributeManager;
 class StarDocument;
 class StarZone;
-class STOFFOLEParser;
-class SWFormatManager;
+
 /** \brief the main class to read a StarOffice sdw file
  *
  *
  *
  */
-class SDWParser : public STOFFTextParser
+class StarObjectText
 {
   friend class StarAttributeManager;
 public:
   //! constructor
-  SDWParser(STOFFInputStreamPtr input, STOFFHeader *header);
+  StarObjectText(shared_ptr<StarDocument> document);
   //! destructor
-  virtual ~SDWParser();
-  //! set the document password
-  void setDocumentPassword(char const *passwd)
-  {
-    m_password=passwd;
-  }
-  //! checks if the document header is correct (or not)
-  bool checkHeader(STOFFHeader *header, bool strict=false);
+  virtual ~StarObjectText();
 
-  // the main parse function
-  void parse(librevenge::RVNGTextInterface *documentInterface);
+  // try to parse all zone
+  bool parse();
 
   //! try to read a image map zone : 'X'
   static bool readSWImageMap(StarZone &zone);
@@ -86,21 +75,14 @@ public:
   static bool readSWAttributeList(StarZone &zone, StarDocument &doc);
 
 protected:
-  //! inits all internal variables
-  void init();
-
-  //! creates the listener which will be associated to the document
-  void createDocument(librevenge::RVNGTextInterface *documentInterface);
-
-  //! parses the different OLE, ...
-  bool createZones();
-
   //
   // low level
   //
 
   //! the page style
   bool readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
+  //! try to read a text style zone: SfxStyleSheets
+  bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
   //! the rulers?
   bool readSwNumRuleList(STOFFInputStreamPtr input, std::string const &fileName, StarDocument &doc);
   //! the main zone
@@ -162,15 +144,13 @@ protected:
   // data
   //
 
-  //! the password
-  char const *m_password;
-  //! the ole parser
-  shared_ptr<STOFFOLEParser> m_oleParser;
+  //! the ole document
+  shared_ptr<StarDocument> m_document;
   //! the state
-  shared_ptr<SDWParserInternal::State> m_state;
+  shared_ptr<StarObjectTextInternal::State> m_state;
 private:
-  SDWParser(SDWParser const &orig);
-  SDWParser &operator=(SDWParser const &orig);
+  StarObjectText(StarObjectText const &orig);
+  StarObjectText &operator=(StarObjectText const &orig);
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

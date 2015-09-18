@@ -69,7 +69,7 @@ public:
   static bool readSdrModel(StarZone &zone, StarDocument &doc);
 
 protected:
-  //! try to read a chart style zone: SfxStyleSheets
+  //! try to read a draw style zone: SfxStyleSheets
   bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
 
   //! try to read a SdrLayer zone: "DrLy'

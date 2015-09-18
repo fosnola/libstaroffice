@@ -177,7 +177,7 @@ public:
   /** Internal: internal method to keep ole directory and their content */
   struct OleDirectory {
     //! constructor
-    OleDirectory(std::string const &dir) : m_dir(dir), m_contentList(), m_kind(STOFFDocument::STOFF_K_UNKNOWN),
+    OleDirectory(STOFFInputStreamPtr input, std::string const &dir) : m_input(input), m_dir(dir), m_contentList(), m_kind(STOFFDocument::STOFF_K_UNKNOWN),
       m_hasCompObj(false), m_clsName(""), m_clipName("") { }
     //! add a new base file
     void addNewBase(std::string const &base)
@@ -197,6 +197,8 @@ public:
       }
       return res;
     }
+    //! the main input
+    STOFFInputStreamPtr m_input;
     /**the dir name*/
     std::string m_dir;
     /**the list of base name*/

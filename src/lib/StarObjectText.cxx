@@ -50,23 +50,20 @@
 #include "StarObjectChart.hxx"
 #include "StarObjectDraw.hxx"
 #include "StarObjectSpreadsheet.hxx"
-#include "StarObjectText.hxx"
 #include "StarZone.hxx"
 
-#include "SDWParser.hxx"
+#include "StarObjectText.hxx"
 
-/** Internal: the structures of a SDWParser */
-namespace SDWParserInternal
+/** Internal: the structures of a StarObjectText */
+namespace StarObjectTextInternal
 {
 ////////////////////////////////////////
-//! Internal: the state of a SDWParser
+//! Internal: the state of a StarObjectText
 struct State {
   //! constructor
-  State() : m_actPage(0), m_numPages(0)
+  State()
   {
   }
-
-  int m_actPage /** the actual page */, m_numPages /** the number of page of the final document */;
 };
 
 }
@@ -74,169 +71,143 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SDWParser::SDWParser(STOFFInputStreamPtr input, STOFFHeader *header) :
-  STOFFTextParser(input, header), m_password(0), m_oleParser(), m_state()
-{
-  init();
-}
-
-SDWParser::~SDWParser()
+StarObjectText::StarObjectText(shared_ptr<StarDocument> document) :
+  m_document(document), m_state(new StarObjectTextInternal::State)
 {
 }
 
-void SDWParser::init()
+StarObjectText::~StarObjectText()
 {
-  setAsciiName("main-1");
-
-  m_state.reset(new SDWParserInternal::State);
 }
 
 ////////////////////////////////////////////////////////////
 // the parser
 ////////////////////////////////////////////////////////////
-void SDWParser::parse(librevenge::RVNGTextInterface *docInterface)
+bool StarObjectText::parse()
 {
-  if (!getInput().get() || !checkHeader(0L))  throw(libstoff::ParseException());
-  bool ok = true;
-  try {
-    // create the asciiFile
-    checkHeader(0L);
-    ok = createZones();
-    if (ok) {
-      createDocument(docInterface);
+  if (!m_document || !m_document->getOLEDirectory() || !m_document->getOLEDirectory()->m_input) {
+    STOFF_DEBUG_MSG(("StarObjectText::parser: error, incomplete document\n"));
+    return false;
+  }
+  STOFFOLEParser::OleDirectory &directory=*m_document->getOLEDirectory();
+  // Ole-Object has persist elements, so...
+  if (directory.m_hasCompObj) m_document->parse();
+  std::vector<std::string> unparsedOLEs=directory.getUnparsedOles();
+  size_t numUnparsed = unparsedOLEs.size();
+  STOFFInputStreamPtr input=directory.m_input;
+  StarFileManager fileManager;
+  for (size_t i = 0; i < numUnparsed; i++) {
+    std::string const &name = unparsedOLEs[i];
+    STOFFInputStreamPtr ole = input->getSubStreamByName(name.c_str());
+    if (!ole.get()) {
+      STOFF_DEBUG_MSG(("StarObjectText::parse: error: can not find OLE part: \"%s\"\n", name.c_str()));
+      continue;
     }
-    ascii().reset();
-  }
-  catch (...) {
-    STOFF_DEBUG_MSG(("SDWParser::parse: exception catched when parsing\n"));
-    ok = false;
-  }
 
-  if (!ok) throw(libstoff::ParseException());
+    std::string::size_type pos = name.find_last_of('/');
+    std::string dir(""), base;
+    if (pos == std::string::npos) base = name;
+    else if (pos == 0) base = name.substr(1);
+    else {
+      dir = name.substr(0,pos);
+      base = name.substr(pos+1);
+    }
+    ole->setReadInverted(true);
+    if (base=="SwNumRules") {
+      readSwNumRuleList(ole, name, *m_document);
+      continue;
+    }
+    if (base=="SwPageStyleSheets") {
+      readSwPageStyleSheets(ole,name, *m_document);
+      continue;
+    }
+    
+    if (base=="DrawingLayer") {
+      readDrawingLayer(ole,name,*m_document);
+      continue;
+    }
+    if (base=="SfxStyleSheets") {
+      readSfxStyleSheets(ole,name);
+      continue;
+    }
+    if (base=="StarWriterDocument") {
+      readWriterDocument(ole,name, *m_document);
+      continue;
+    }
+    if (base!="BasicManager2") {
+      STOFF_DEBUG_MSG(("StarObjectText::parse: find unexpected ole %s\n", name.c_str()));
+    }
+    libstoff::DebugFile asciiFile(ole);
+    asciiFile.open(name);
+
+    libstoff::DebugStream f;
+    f << "Entries(" << base << "):";
+    asciiFile.addPos(0);
+    asciiFile.addNote(f.str().c_str());
+    asciiFile.reset();
+  }
+  return true;
 }
 
-
-bool SDWParser::createZones()
+bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name)
 {
-  m_oleParser.reset(new STOFFOLEParser);
-  m_oleParser->parse(getInput());
+  StarZone zone(input, name, "SfxStyleSheets", m_document ? m_document->getPassword() : 0);
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  libstoff::DebugFile &ascFile=zone.ascii();
+  ascFile.open(name);
 
-  // send the final data
-  std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > listDir=m_oleParser->getDirectoryList();
-  for (size_t d=0; d<listDir.size(); ++d) {
-    if (!listDir[d]) continue;
-    shared_ptr<StarDocument> document(new StarDocument(m_password, listDir[d], this));
-    if (document->getDocumentKind()==STOFFDocument::STOFF_K_CHART) {
-      StarObjectChart chart(document);
-      chart.parse();
-      continue;
-    }
-    if (document->getDocumentKind()==STOFFDocument::STOFF_K_DRAW) {
-      StarObjectDraw draw(document);
-      draw.parse();
-      continue;
-    }
-    if (document->getDocumentKind()==STOFFDocument::STOFF_K_SPREADSHEET) {
-      StarObjectSpreadsheet spreadsheet(document);
-      spreadsheet.parse();
-      continue;
-    }
-    if (document->getDocumentKind()==STOFFDocument::STOFF_K_TEXT) {
-      StarObjectText text(document);
-      text.parse();
-      continue;
-    }
-    // Ole-Object has persist elements, so...
-    if (listDir[d]->m_hasCompObj) document->parse();
-    STOFFOLEParser::OleDirectory &direct=*listDir[d];
-    std::vector<std::string> unparsedOLEs=direct.getUnparsedOles();
-    size_t numUnparsed = unparsedOLEs.size();
-    StarFileManager fileManager;
-    for (size_t i = 0; i < numUnparsed; i++) {
-      std::string const &name = unparsedOLEs[i];
-      STOFFInputStreamPtr ole = getInput()->getSubStreamByName(name.c_str());
-      if (!ole.get()) {
-        STOFF_DEBUG_MSG(("SDWParser::createZones: error: can not find OLE part: \"%s\"\n", name.c_str()));
-        continue;
-      }
-
-      std::string::size_type pos = name.find_last_of('/');
-      std::string dir(""), base;
-      if (pos == std::string::npos) base = name;
-      else if (pos == 0) base = name.substr(1);
-      else {
-        dir = name.substr(0,pos);
-        base = name.substr(pos+1);
-      }
-      ole->setReadInverted(true);
-      if (base=="SfxStyleSheets") {
-        document->readSfxStyleSheets(ole,name);
-        continue;
-      }
-
-      if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
-        librevenge::RVNGBinaryData data;
-        fileManager.readImageDocument(ole,data,name);
-        continue;
-      }
-      if (base=="StarMathDocument") {
-        fileManager.readMathDocument(ole,name,*document);
-        continue;
-      }
-      if (base.compare(0,3,"Pic")==0) {
-        librevenge::RVNGBinaryData data;
-        std::string type;
-        fileManager.readEmbeddedPicture(ole,data,type,name,*document);
-        continue;
-      }
-      // other
-      if (base=="Ole-Object") {
-        fileManager.readOleObject(ole,name);
-        continue;
-      }
-      libstoff::DebugFile asciiFile(ole);
-      asciiFile.open(name);
-
-      bool ok=false;
-      if (base=="OutPlace Object")
-        ok=fileManager.readOutPlaceObject(ole, asciiFile);
-      if (!ok) {
-        libstoff::DebugStream f;
-        if (base=="Standard") // can be Standard or STANDARD
-          f << "Entries(STANDARD):";
-        else
-          f << "Entries(" << base << "):";
-        asciiFile.addPos(0);
-        asciiFile.addNote(f.str().c_str());
-      }
-      asciiFile.reset();
-    }
+  if (!m_document || m_document->getDocumentKind()!=STOFFDocument::STOFF_K_TEXT) {
+    STOFF_DEBUG_MSG(("StarObjectChart::readSfxStyleSheets: called with unexpected document\n"));
+    ascFile.addPos(0);
+    ascFile.addNote("Entries(SfxStyleSheets)");
+    return false;
   }
-  return false;
+  // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
+  // chart sch_docshell.cxx SchChartDocShell::Load
+  shared_ptr<StarItemPool> pool=m_document->getNewItemPool(StarItemPool::T_WriterPool);
+  shared_ptr<StarItemPool> mainPool=pool;
+  while (!input->isEnd()) {
+    // REMOVEME: remove this loop, when creation of secondary pool is checked
+    long pos=input->tell();
+    bool extraPool=false;
+    if (!pool) {
+      extraPool=true;
+      pool=m_document->getNewItemPool(StarItemPool::T_Unknown);
+    }
+    if (pool && pool->read(zone)) {
+      if (extraPool) {
+        STOFF_DEBUG_MSG(("StarObjectText::readSfxStyleSheets: create extra pool of type %d\n", (int) pool->getType()));
+      }
+      if (!mainPool) mainPool=pool;
+      pool.reset();
+      continue;
+    }
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    break;
+  }
+  if (input->isEnd()) return true;
+  long pos=input->tell();
+  if (!StarItemPool::readStyle(zone, mainPool, *m_document))
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+  if (!input->isEnd()) {
+    STOFF_DEBUG_MSG(("StarObjectText::readSfxStyleSheets: find extra data\n"));
+    ascFile.addPos(input->tell());
+    ascFile.addNote("Entries(SfxStyleSheets):###extra");
+  }
+  return true;
 }
-
-////////////////////////////////////////////////////////////
-// create the document
-////////////////////////////////////////////////////////////
-void SDWParser::createDocument(librevenge::RVNGTextInterface *documentInterface)
-{
-  if (!documentInterface) return;
-  STOFF_DEBUG_MSG(("SDWParser::createDocument: not implemented exist\n"));
-  return;
-}
-
 
 ////////////////////////////////////////////////////////////
 //
 // Intermediate level
 //
 ////////////////////////////////////////////////////////////
-bool SDWParser::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &name, StarDocument &doc)
+bool StarObjectText::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &name, StarDocument &doc)
 try
 {
   StarZone zone(input, name, "SWNumRuleList", doc.getPassword());
   if (!zone.readSWHeader()) {
-    STOFF_DEBUG_MSG(("SDWParser::readSwNumRuleList: can not read the header\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSwNumRuleList: can not read the header\n"));
     return false;
   }
   zone.readStringsPool();
@@ -263,7 +234,7 @@ try
       f << "N=" << N << ",";
       zone.closeFlagZone();
       if (input->tell()+3*N>zone.getRecordLastPosition()) {
-        STOFF_DEBUG_MSG(("SDWParser::readSwNumRuleList: nExtraOutline seems bad\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSwNumRuleList: nExtraOutline seems bad\n"));
         f << "###,";
         break;
       }
@@ -274,13 +245,13 @@ try
       break;
     }
     case '?':
-      STOFF_DEBUG_MSG(("SDWParser::readSwNumRuleList: reading inHugeRecord(TEST_HUGE_DOCS) is not implemented\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSwNumRuleList: reading inHugeRecord(TEST_HUGE_DOCS) is not implemented\n"));
       break;
     case 'Z':
       done=true;
       break;
     default:
-      STOFF_DEBUG_MSG(("SDWParser::readSwNumRuleList: find unimplemented type\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSwNumRuleList: find unimplemented type\n"));
       f << "###type,";
       break;
     }
@@ -295,7 +266,7 @@ try
       break;
   }
   if (!input->isEnd()) {
-    STOFF_DEBUG_MSG(("SDWParser::readSwNumRuleList: find extra data\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSwNumRuleList: find extra data\n"));
     ascFile.addPos(input->tell());
     ascFile.addNote("SWNumRuleList:###extra");
   }
@@ -306,12 +277,12 @@ catch (...)
   return false;
 }
 
-bool SDWParser::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &name, StarDocument &doc)
+bool StarObjectText::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &name, StarDocument &doc)
 try
 {
   StarZone zone(input, name, "SWPageStyleSheets", doc.getPassword());
   if (!zone.readSWHeader()) {
-    STOFF_DEBUG_MSG(("SDWParser::readSwPageStyleSheets: can not read the header\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSwPageStyleSheets: can not read the header\n"));
     return false;
   }
   zone.readStringsPool();
@@ -351,7 +322,7 @@ try
       done=true;
       break;
     default:
-      STOFF_DEBUG_MSG(("SDWParser::readSwPageStyleSheets: find unknown data\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSwPageStyleSheets: find unknown data\n"));
       f << "###";
       break;
     }
@@ -367,7 +338,7 @@ try
   }
 
   if (!input->isEnd()) {
-    STOFF_DEBUG_MSG(("SDWParser::readSwPageStyleSheets: find extra data\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSwPageStyleSheets: find extra data\n"));
     ascFile.addPos(input->tell());
     ascFile.addNote("SWPageStyleSheets:##extra");
   }
@@ -379,7 +350,7 @@ catch (...)
   return false;
 }
 
-bool SDWParser::readSWPageDef(StarZone &zone, StarDocument &doc)
+bool StarObjectText::readSWPageDef(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -397,7 +368,7 @@ bool SDWParser::readSWPageDef(StarZone &zone, StarDocument &doc)
   int val=(int) input->readULong(2);
   librevenge::RVNGString poolName;
   if (!zone.getPoolName(val, poolName)) {
-    STOFF_DEBUG_MSG(("SDWParser::readSwPageDef: can not find a pool name\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSwPageDef: can not find a pool name\n"));
     f << "###nId=" << val << ",";
   }
   else if (!poolName.empty())
@@ -449,7 +420,7 @@ bool SDWParser::readSWPageDef(StarZone &zone, StarDocument &doc)
       if (val) f << "penWidth=" << val << ",";
       STOFFColor col;
       if (!input->readColor(col)) {
-        STOFF_DEBUG_MSG(("SDWParser::readSwPageDef: can not read a color\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSwPageDef: can not read a color\n"));
         f << "###color,";
       }
       else if (!col.isBlack())
@@ -457,7 +428,7 @@ bool SDWParser::readSWPageDef(StarZone &zone, StarDocument &doc)
       break;
     }
     default:
-      STOFF_DEBUG_MSG(("SDWParser::readSwPageDef: find unknown type\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSwPageDef: find unknown type\n"));
       f << "###type,";
       break;
     }
@@ -469,7 +440,7 @@ bool SDWParser::readSWPageDef(StarZone &zone, StarDocument &doc)
   return true;
 }
 
-bool SDWParser::readSWAttribute(StarZone &zone, StarDocument &doc)
+bool StarObjectText::readSWAttribute(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -499,7 +470,7 @@ bool SDWParser::readSWAttribute(StarZone &zone, StarDocument &doc)
   else if (which>=0x5000 && which<=0x5022) which+=-0x5000+(int) StarAttribute::ATTR_FRM_FILL_ORDER;
   else if (which>=0x6000 && which<=0x6013) which+=-0x6000+(int) StarAttribute::ATTR_GRF_MIRRORGRF;
   else {
-    STOFF_DEBUG_MSG(("SDWParser::readSWAttribute: find unexpected which value\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSWAttribute: find unexpected which value\n"));
     which=-1;
     f << "###";
   }
@@ -518,7 +489,7 @@ bool SDWParser::readSWAttribute(StarZone &zone, StarDocument &doc)
   return true;
 }
 
-bool SDWParser::readSWAttributeList(StarZone &zone, StarDocument &doc)
+bool StarObjectText::readSWAttributeList(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -543,7 +514,7 @@ bool SDWParser::readSWAttributeList(StarZone &zone, StarDocument &doc)
   return true;
 }
 
-bool SDWParser::readSWBookmarkList(StarZone &zone)
+bool StarObjectText::readSWBookmarkList(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -573,14 +544,14 @@ bool SDWParser::readSWBookmarkList(StarZone &zone)
     bool ok=true;
     if (!zone.readString(text)) {
       ok=false;
-      STOFF_DEBUG_MSG(("SDWParser::readSWBookmarkList: can not read shortName\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWBookmarkList: can not read shortName\n"));
       f << "###short";
     }
     else
       f << text.cstr();
     if (ok && !zone.readString(text)) {
       ok=false;
-      STOFF_DEBUG_MSG(("SDWParser::readSWBookmarkList: can not read name\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWBookmarkList: can not read name\n"));
       f << "###";
     }
     else
@@ -598,7 +569,7 @@ bool SDWParser::readSWBookmarkList(StarZone &zone)
     if (ok && input->tell()<zone.getRecordLastPosition()) {
       for (int i=0; i<4; ++i) { // start[aMac:aLib],end[aMac:Alib]
         if (!zone.readString(text)) {
-          STOFF_DEBUG_MSG(("SDWParser::readSWBookmarkList: can not read macro name\n"));
+          STOFF_DEBUG_MSG(("StarObjectText::readSWBookmarkList: can not read macro name\n"));
           f << "###macro";
           break;
         }
@@ -615,7 +586,7 @@ bool SDWParser::readSWBookmarkList(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWContent(StarZone &zone, StarDocument &doc)
+bool StarObjectText::readSWContent(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -692,7 +663,7 @@ bool SDWParser::readSWContent(StarZone &zone, StarDocument &doc)
       f << "rep=" << input->readULong(4) << ",";
       break;
     default:
-      STOFF_DEBUG_MSG(("SDWParser::readSWContent: find unexpected type\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWContent: find unexpected type\n"));
       f << "###";
     }
     ascFile.addPos(pos);
@@ -703,7 +674,7 @@ bool SDWParser::readSWContent(StarZone &zone, StarDocument &doc)
   return true;
 }
 
-bool SDWParser::readSWDBName(StarZone &zone)
+bool StarObjectText::readSWDBName(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -718,7 +689,7 @@ bool SDWParser::readSWDBName(StarZone &zone)
   f << "Entries(SWDBName)[" << zone.getRecordLevel() << "]:";
   librevenge::RVNGString text("");
   if (!zone.readString(text)) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWDBName: can not read a string\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSWDBName: can not read a string\n"));
     f << "###string";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -729,7 +700,7 @@ bool SDWParser::readSWDBName(StarZone &zone)
     f << "sStr=" << text.cstr() << ",";
   if (zone.isCompatibleWith(0xf,0x101)) {
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWDBName: can not read a SQL string\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWDBName: can not read a SQL string\n"));
       f << "###SQL";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -741,7 +712,7 @@ bool SDWParser::readSWDBName(StarZone &zone)
   }
   if (zone.isCompatibleWith(0x11,0x22)) {
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWDBName: can not read a table name string\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWDBName: can not read a table name string\n"));
       f << "###tableName";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -758,12 +729,12 @@ bool SDWParser::readSWDBName(StarZone &zone)
       f << "dbData=[";
       for (int i=0; i<nCount; ++i) {
         if (input->tell()>=zone.getRecordLastPosition()) {
-          STOFF_DEBUG_MSG(("SDWParser::readSWDBName: can not read a DBData\n"));
+          STOFF_DEBUG_MSG(("StarObjectText::readSWDBName: can not read a DBData\n"));
           f << "###";
           break;
         }
         if (!zone.readString(text)) {
-          STOFF_DEBUG_MSG(("SDWParser::readSWDBName: can not read a table name string\n"));
+          STOFF_DEBUG_MSG(("StarObjectText::readSWDBName: can not read a table name string\n"));
           f << "###dbDataName";
           break;
         }
@@ -780,7 +751,7 @@ bool SDWParser::readSWDBName(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWDictionary(StarZone &zone)
+bool StarObjectText::readSWDictionary(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -799,7 +770,7 @@ bool SDWParser::readSWDictionary(StarZone &zone)
     pos=input->tell();
     f << "[";
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWDictionary: can not read a string\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWDictionary: can not read a string\n"));
       f << "###string,";
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
@@ -818,7 +789,7 @@ bool SDWParser::readSWDictionary(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWEndNoteInfo(StarZone &zone)
+bool StarObjectText::readSWEndNoteInfo(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -847,7 +818,7 @@ bool SDWParser::readSWEndNoteInfo(StarZone &zone)
     librevenge::RVNGString text("");
     for (int i=0; i<2; ++i) {
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("SDWParser::readSWEndNoteInfo: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSWEndNoteInfo: can not read a string\n"));
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -859,7 +830,7 @@ bool SDWParser::readSWEndNoteInfo(StarZone &zone)
     }
   }
   if (input->tell()<zone.getRecordLastPosition()) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWEndNoteInfo: find extra data\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSWEndNoteInfo: find extra data\n"));
     f << "###";
   }
   ascFile.addPos(pos);
@@ -868,7 +839,7 @@ bool SDWParser::readSWEndNoteInfo(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWFootNoteInfo(StarZone &zone)
+bool StarObjectText::readSWFootNoteInfo(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -886,7 +857,7 @@ bool SDWParser::readSWFootNoteInfo(StarZone &zone)
   if (old) {
     for (int i=0; i<2; ++i) {
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("SDWParser::readSWFootNoteInfo: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSWFootNoteInfo: can not read a string\n"));
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -916,7 +887,7 @@ bool SDWParser::readSWFootNoteInfo(StarZone &zone)
   if (zone.isCompatibleWith(0x203)) {
     for (int i=0; i<2; ++i) {
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("SDWParser::readSWFootNoteInfo: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSWFootNoteInfo: can not read a string\n"));
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -935,7 +906,7 @@ bool SDWParser::readSWFootNoteInfo(StarZone &zone)
     zone.closeFlagZone();
     for (int i=0; i<2; ++i) {
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("SDWParser::readSWFootNoteInfo: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSWFootNoteInfo: can not read a string\n"));
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -947,7 +918,7 @@ bool SDWParser::readSWFootNoteInfo(StarZone &zone)
     }
   }
   if (input->tell()<zone.getRecordLastPosition()) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWFootNoteInfo: find extra data\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSWFootNoteInfo: find extra data\n"));
     f << "###";
   }
   ascFile.addPos(pos);
@@ -956,7 +927,7 @@ bool SDWParser::readSWFootNoteInfo(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWGraphNode(StarZone &zone, StarDocument &doc)
+bool StarObjectText::readSWGraphNode(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -978,7 +949,7 @@ bool SDWParser::readSWGraphNode(StarZone &zone, StarDocument &doc)
   zone.closeFlagZone();
   for (int i=0; i<2; ++i) {
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWGraphNode: can not read a string\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWGraphNode: can not read a string\n"));
       f << "###string";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -990,7 +961,7 @@ bool SDWParser::readSWGraphNode(StarZone &zone, StarDocument &doc)
   }
   if (zone.isCompatibleWith(0x101)) {
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWGraphNode: can not read a objName\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWGraphNode: can not read a objName\n"));
       f << "###textRepl";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -1040,7 +1011,7 @@ bool SDWParser::readSWGraphNode(StarZone &zone, StarDocument &doc)
           // poly.cxx operator>>
           int numPoints=(int) input->readULong(2);
           if (input->tell()+8*numPoints>lastPos) {
-            STOFF_DEBUG_MSG(("SDWParser::readSWGraphNode: can not read a polygon\n"));
+            STOFF_DEBUG_MSG(("StarObjectText::readSWGraphNode: can not read a polygon\n"));
             f << "###poly";
             break;
           }
@@ -1052,7 +1023,7 @@ bool SDWParser::readSWGraphNode(StarZone &zone, StarDocument &doc)
       break;
     }
     default:
-      STOFF_DEBUG_MSG(("SDWParser::readSWGraphNode: find unexpected type\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWGraphNode: find unexpected type\n"));
       f << "###";
       break;
     }
@@ -1065,7 +1036,7 @@ bool SDWParser::readSWGraphNode(StarZone &zone, StarDocument &doc)
   return true;
 }
 
-bool SDWParser::readSWImageMap(StarZone &zone)
+bool StarObjectText::readSWImageMap(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1084,7 +1055,7 @@ bool SDWParser::readSWImageMap(StarZone &zone)
   zone.closeFlagZone();
   librevenge::RVNGString string;
   if (!zone.readString(string)) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWImageMap: can not read url\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSWImageMap: can not read url\n"));
     f << "###url";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -1097,7 +1068,7 @@ bool SDWParser::readSWImageMap(StarZone &zone)
   if (zone.isCompatibleWith(0x11,0x22, 0x101)) {
     for (int i=0; i<2; ++i) {
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SDWParser::readSWImageMap: can not read string\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSWImageMap: can not read string\n"));
         f << "###string";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -1114,14 +1085,14 @@ bool SDWParser::readSWImageMap(StarZone &zone)
     std::string cMagic("");
     for (int i=0; i<6; ++i) cMagic+=(char) input->readULong(1);
     if (cMagic!="SDIMAP") {
-      STOFF_DEBUG_MSG(("SDWParser::readSWImageMap: cMagic is bad\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWImageMap: cMagic is bad\n"));
       f << "###cMagic=" << cMagic << ",";
     }
     else {
       input->seek(2, librevenge::RVNG_SEEK_CUR);
       for (int i=0; i<3; ++i) {
         if (!zone.readString(string)) {
-          STOFF_DEBUG_MSG(("SDWParser::readSWImageMap: can not read string\n"));
+          STOFF_DEBUG_MSG(("StarObjectText::readSWImageMap: can not read string\n"));
           f << "###string";
           ascFile.addPos(pos);
           ascFile.addNote(f.str().c_str());
@@ -1135,7 +1106,7 @@ bool SDWParser::readSWImageMap(StarZone &zone)
           f << "nCount=" << input->readULong(2) << ",";
       }
       if (input->tell()<zone.getRecordLastPosition()) {
-        STOFF_DEBUG_MSG(("SDWParser::readSWImageMap: find imapCompat data, not implemented\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSWImageMap: find imapCompat data, not implemented\n"));
         // svt_imap3.cxx IMapCompat::IMapCompat
         ascFile.addPos(input->tell());
         ascFile.addNote("SWImageMap:###IMapCompat");
@@ -1149,7 +1120,7 @@ bool SDWParser::readSWImageMap(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWJobSetUp(StarZone &zone)
+bool StarObjectText::readSWJobSetUp(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1177,7 +1148,7 @@ bool SDWParser::readSWJobSetUp(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWLayoutInfo(StarZone &zone)
+bool StarObjectText::readSWLayoutInfo(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1220,7 +1191,7 @@ bool SDWParser::readSWLayoutInfo(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWLayoutSub(StarZone &zone)
+bool StarObjectText::readSWLayoutSub(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1246,7 +1217,7 @@ bool SDWParser::readSWLayoutSub(StarZone &zone)
   val=(int) input->readULong(1);
   if (val) f << "f3=" << std::hex << val << std::dec << ",";
   if (input->tell()+(val&0xf)+expectedSz>lastPos) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWLayoutSub: the zone seems too short\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSWLayoutSub: the zone seems too short\n"));
     f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -1276,7 +1247,7 @@ bool SDWParser::readSWLayoutSub(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWMacroTable(StarZone &zone)
+bool StarObjectText::readSWMacroTable(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1304,7 +1275,7 @@ bool SDWParser::readSWMacroTable(StarZone &zone)
     bool ok=true;
     for (int i=0; i<2; ++i) {
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SDWParser::readSWMacroTable: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSWMacroTable: can not read a string\n"));
         f << "###,";
         ok=false;
         break;
@@ -1322,7 +1293,7 @@ bool SDWParser::readSWMacroTable(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWNodeRedline(StarZone &zone)
+bool StarObjectText::readSWNodeRedline(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1347,7 +1318,7 @@ bool SDWParser::readSWNodeRedline(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWNumRule(StarZone &zone, char cKind)
+bool StarObjectText::readSWNumRule(StarZone &zone, char cKind)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1389,7 +1360,7 @@ bool SDWParser::readSWNumRule(StarZone &zone, char cKind)
   long lastPos=zone.getRecordLastPosition();
   f << "nFormat=" << nFormat << ",";
   if (input->tell()+nFormat>lastPos) {
-    STOFF_DEBUG_MSG(("SDWParser::readSwNumRule: nFormat seems bad\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSwNumRule: nFormat seems bad\n"));
     f << "###,";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -1407,7 +1378,7 @@ bool SDWParser::readSWNumRule(StarZone &zone, char cKind)
   for (int i=0; i<nKnownFormat; ++i) {
     pos=input->tell();
     if (formatManager.readSWNumberFormat(zone)) continue;
-    STOFF_DEBUG_MSG(("SDWParser::readSwNumRule: can not read a format\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSwNumRule: can not read a format\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
@@ -1416,7 +1387,7 @@ bool SDWParser::readSWNumRule(StarZone &zone, char cKind)
   return true;
 }
 
-bool SDWParser::readSWOLENode(StarZone &zone)
+bool StarObjectText::readSWOLENode(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1432,7 +1403,7 @@ bool SDWParser::readSWOLENode(StarZone &zone)
 
   librevenge::RVNGString text;
   if (!zone.readString(text)) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWOLENode: can not read a objName\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSWOLENode: can not read a objName\n"));
     f << "###objName";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -1443,7 +1414,7 @@ bool SDWParser::readSWOLENode(StarZone &zone)
     f << "objName=" << text.cstr() << ",";
   if (zone.isCompatibleWith(0x101)) {
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWOLENode: can not read a objName\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWOLENode: can not read a objName\n"));
       f << "###textRepl";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -1459,7 +1430,7 @@ bool SDWParser::readSWOLENode(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWRedlineList(StarZone &zone)
+bool StarObjectText::readSWRedlineList(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1480,7 +1451,7 @@ bool SDWParser::readSWRedlineList(StarZone &zone)
     f.str("");
     f << "SWRedline:";
     if (input->peek()!='R' || !zone.openSWRecord(type)) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWRedlineList: find extra data\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWRedlineList: find extra data\n"));
       f << "###";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -1498,7 +1469,7 @@ bool SDWParser::readSWRedlineList(StarZone &zone)
       f.str("");
       f << "SWRedline-" << i << ":";
       if (input->peek()!='D' || !zone.openSWRecord(type)) {
-        STOFF_DEBUG_MSG(("SDWParser::readSWRedlineList: can not read a redline\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSWRedlineList: can not read a redline\n"));
         f << "###";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -1516,7 +1487,7 @@ bool SDWParser::readSWRedlineList(StarZone &zone)
       f << "time=" << input->readULong(4) << ",";
       librevenge::RVNGString text;
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("SDWParser::readSWRedlineList: can not read the comment\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSWRedlineList: can not read the comment\n"));
         f << "###comment";
       }
       else if (!text.empty())
@@ -1531,7 +1502,7 @@ bool SDWParser::readSWRedlineList(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWSection(StarZone &zone)
+bool StarObjectText::readSWSection(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1548,7 +1519,7 @@ bool SDWParser::readSWSection(StarZone &zone)
   librevenge::RVNGString text;
   for (int i=0; i<2; ++i) {
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWSection: can not read a string\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWSection: can not read a string\n"));
       f << "###string";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -1567,7 +1538,7 @@ bool SDWParser::readSWSection(StarZone &zone)
   zone.closeFlagZone();
   if (zone.isCompatibleWith(0xd)) {
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWSection: can not read a linkName\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWSection: can not read a linkName\n"));
       f << "###linkName";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -1583,7 +1554,7 @@ bool SDWParser::readSWSection(StarZone &zone)
   return true;
 }
 
-bool SDWParser::readSWTable(StarZone &zone, StarDocument &doc)
+bool StarObjectText::readSWTable(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1618,7 +1589,7 @@ bool SDWParser::readSWTable(StarZone &zone, StarDocument &doc)
     pos=input->tell();
     if (readSWNodeRedline(zone))
       continue;
-    STOFF_DEBUG_MSG(("SDWParser::readSWTable: can not read a red line\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSWTable: can not read a red line\n"));
     ascFile.addPos(pos);
     ascFile.addNote("SWTableDef:###redline");
     zone.closeSWRecord('E',"SWTableDef");
@@ -1630,7 +1601,7 @@ bool SDWParser::readSWTable(StarZone &zone, StarDocument &doc)
     if (readSWTableLine(zone, doc))
       continue;
     pos=input->tell();
-    STOFF_DEBUG_MSG(("SDWParser::readSWTable: can not read a table line\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSWTable: can not read a table line\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
@@ -1638,7 +1609,7 @@ bool SDWParser::readSWTable(StarZone &zone, StarDocument &doc)
   return true;
 }
 
-bool SDWParser::readSWTableBox(StarZone &zone, StarDocument &doc)
+bool StarObjectText::readSWTableBox(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1674,7 +1645,7 @@ bool SDWParser::readSWTableBox(StarZone &zone, StarDocument &doc)
   return true;
 }
 
-bool SDWParser::readSWTableLine(StarZone &zone, StarDocument &doc)
+bool StarObjectText::readSWTableLine(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1710,7 +1681,7 @@ bool SDWParser::readSWTableLine(StarZone &zone, StarDocument &doc)
   return true;
 }
 
-bool SDWParser::readSWTextZone(StarZone &zone, StarDocument &doc)
+bool StarObjectText::readSWTextZone(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1739,7 +1710,7 @@ bool SDWParser::readSWTextZone(StarZone &zone, StarDocument &doc)
 
   librevenge::RVNGString text;
   if (!zone.readString(text)) {
-    STOFF_DEBUG_MSG(("SDWParser::readSWTextZone: can not read main text\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSWTextZone: can not read main text\n"));
     f << "###text";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -1825,7 +1796,7 @@ bool SDWParser::readSWTextZone(StarZone &zone, StarDocument &doc)
       zone.closeFlagZone();
       int N =(int) input->readULong(2);
       if (input->tell()+4*N>zone.getRecordLastPosition()) {
-        STOFF_DEBUG_MSG(("SDWParser::readSWTextZone: find bad count\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSWTextZone: find bad count\n"));
         f << "###N=" << N << ",";
         break;
       }
@@ -1835,7 +1806,7 @@ bool SDWParser::readSWTextZone(StarZone &zone, StarDocument &doc)
       break;
     }
     default:
-      STOFF_DEBUG_MSG(("SDWParser::readSWTextZone: find unexpected type\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWTextZone: find unexpected type\n"));
       f << "###";
     }
     ascFile.addPos(pos);
@@ -1846,7 +1817,7 @@ bool SDWParser::readSWTextZone(StarZone &zone, StarDocument &doc)
   return true;
 }
 
-bool SDWParser::readSWTOXList(StarZone &zone, StarDocument &doc)
+bool StarObjectText::readSWTOXList(StarZone &zone, StarDocument &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1884,7 +1855,7 @@ bool SDWParser::readSWTOXList(StarZone &zone, StarDocument &doc)
     f << "cFormFlags=" << input->readULong(1) << ",";
     zone.closeFlagZone();
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWTOXList: can not read aName\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read aName\n"));
       f << "###aName";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -1894,7 +1865,7 @@ bool SDWParser::readSWTOXList(StarZone &zone, StarDocument &doc)
     if (!string.empty())
       f << "aName=" << string.cstr() << ",";
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWTOXList: can not read aTitle\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read aTitle\n"));
       f << "###aTitle";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -1909,7 +1880,7 @@ bool SDWParser::readSWTOXList(StarZone &zone, StarDocument &doc)
     }
     else {
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SDWParser::readSWTOXList: can not read aDummy\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read aDummy\n"));
         f << "###aDummy";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -1952,7 +1923,7 @@ bool SDWParser::readSWTOXList(StarZone &zone, StarDocument &doc)
       int nCount=(int) input->readULong(2);
       f << "nCount=" << nCount << ",";
       if (input->tell()+2*nCount>lastRecordPos) {
-        STOFF_DEBUG_MSG(("SDWParser::readSWTOXList: can not read some string id\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read some string id\n"));
         f << "###styleId";
         ok=false;
         break;
@@ -1982,7 +1953,7 @@ bool SDWParser::readSWTOXList(StarZone &zone, StarDocument &doc)
     if ((fl&0x10)) {
       while (input->tell()<zone.getRecordLastPosition() && input->peek()=='s') {
         if (!formatManager.readSWFormatDef(zone,'s', doc)) {
-          STOFF_DEBUG_MSG(("SDWParser::readSWTOXList: can not read some format\n"));
+          STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read some format\n"));
           f << "###format,";
           break;
         }
@@ -1996,7 +1967,7 @@ bool SDWParser::readSWTOXList(StarZone &zone, StarDocument &doc)
   return true;
 }
 
-bool SDWParser::readSWTOX51List(StarZone &zone)
+bool StarObjectText::readSWTOX51List(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -2029,7 +2000,7 @@ bool SDWParser::readSWTOX51List(StarZone &zone)
     }
     else {
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SDWParser::readSWTOX51List: can not read typeName\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSWTOX51List: can not read typeName\n"));
         f << "###typeName";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -2040,7 +2011,7 @@ bool SDWParser::readSWTOX51List(StarZone &zone)
         f << "typeName=" << string.cstr() << ",";
     }
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SDWParser::readSWTOX51List: can not read aTitle\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readSWTOX51List: can not read aTitle\n"));
       f << "###aTitle";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -2061,7 +2032,7 @@ bool SDWParser::readSWTOX51List(StarZone &zone)
     bool ok=true;
     for (int i=0; i<N; ++i) {
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SDWParser::readSWTOX51List: can not read a pattern name\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readSWTOX51List: can not read a pattern name\n"));
         f << "###pat";
         ok=false;
         break;
@@ -2096,7 +2067,7 @@ bool SDWParser::readSWTOX51List(StarZone &zone)
 ////////////////////////////////////////////////////////////
 // drawing layer
 ////////////////////////////////////////////////////////////
-bool SDWParser::readDrawingLayer(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
+bool StarObjectText::readDrawingLayer(STOFFInputStreamPtr input, std::string const &name, StarDocument &document)
 try
 {
   StarZone zone(input, name, "DrawingLayer", document.getPassword());
@@ -2119,7 +2090,7 @@ try
     }
     if (pool && pool->read(zone)) {
       if (extraPool) {
-        STOFF_DEBUG_MSG(("SDWParser::readDrawingLayer: create extra pool for %d of type %d\n",
+        STOFF_DEBUG_MSG(("StarObjectText::readDrawingLayer: create extra pool for %d of type %d\n",
                          (int) document.getDocumentKind(), (int) pool->getType()));
       }
       pool.reset();
@@ -2130,7 +2101,7 @@ try
   }
   long pos=input->tell();
   if (!StarObjectDraw::readSdrModel(zone, document)) {
-    STOFF_DEBUG_MSG(("SDWParser::readDrawingLayer: can not find the drawing model\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readDrawingLayer: can not find the drawing model\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     ascFile.addPos(input->tell());
     ascFile.addNote("Entries(DrawingLayer):###extra");
@@ -2149,7 +2120,7 @@ try
     uint16_t n;
     *input >> n;
     if (pos+4+4*long(n)>input->size()) {
-      STOFF_DEBUG_MSG(("SDWParser::readDrawingLayer: bad n frame\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readDrawingLayer: bad n frame\n"));
       f << "###pos";
       ok=false;
     }
@@ -2162,7 +2133,7 @@ try
   if (ok && input->tell()+4==input->size())
     f << "num[hidden]=" << input->readULong(4) << ",";
   if (ok && !input->isEnd()) {
-    STOFF_DEBUG_MSG(("SDWParser::readDrawingLayer: find extra data\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readDrawingLayer: find extra data\n"));
     f << "###extra";
   }
   ascFile.addPos(pos);
@@ -2177,12 +2148,12 @@ catch (...)
 ////////////////////////////////////////////////////////////
 // main zone
 ////////////////////////////////////////////////////////////
-bool SDWParser::readWriterDocument(STOFFInputStreamPtr input, std::string const &name, StarDocument &doc)
+bool StarObjectText::readWriterDocument(STOFFInputStreamPtr input, std::string const &name, StarDocument &doc)
 try
 {
   StarZone zone(input, name, "SWWriterDocument", doc.getPassword());
   if (!zone.readSWHeader()) {
-    STOFF_DEBUG_MSG(("SDWParser::readWriterDocument: can not read the header\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readWriterDocument: can not read the header\n"));
     return false;
   }
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -2269,7 +2240,7 @@ try
     case '$': // unknown, seems to store an object name
       f << "dollarZone,";
       if (input->tell()+7>lastPos) {
-        STOFF_DEBUG_MSG(("SDWParser::readWriterDocument: zone seems to short\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readWriterDocument: zone seems to short\n"));
         break;
       }
       for (int i=0; i<5; ++i) { // f0=f1=1
@@ -2277,7 +2248,7 @@ try
         if (val) f << "f" << i << "=" << val << ",";
       }
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SDWParser::readWriterDocument: can not read main string\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readWriterDocument: can not read main string\n"));
         f << "###string";
         break;
       }
@@ -2296,7 +2267,7 @@ try
       f << "nDividerCountBy=" << input->readULong(2) << ",";
       zone.closeFlagZone();
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SDWParser::readWriterDocument: can not read sDivider string\n"));
+        STOFF_DEBUG_MSG(("StarObjectText::readWriterDocument: can not read sDivider string\n"));
         f << "###sDivider";
         break;
       }
@@ -2313,7 +2284,7 @@ try
       f << "n4=" << input->readULong(1) << ",";
       for (int i=0; i<2; ++i) {
         if (!zone.readString(string)) {
-          STOFF_DEBUG_MSG(("SDWParser::readWriterDocument: can not read a string\n"));
+          STOFF_DEBUG_MSG(("StarObjectText::readWriterDocument: can not read a string\n"));
           f << "###string";
           break;
         }
@@ -2374,7 +2345,7 @@ try
       if (zone.isCompatibleWith(0x6)) {
         f << "cType=" << input->readULong(1) << ",";
         if (!zone.readString(string)) {
-          STOFF_DEBUG_MSG(("SDWParser::readWriterDocument: can not read passwd string\n"));
+          STOFF_DEBUG_MSG(("StarObjectText::readWriterDocument: can not read passwd string\n"));
           f << "###passwd";
         }
         else
@@ -2385,7 +2356,7 @@ try
       endZone=true;
       break;
     default:
-      STOFF_DEBUG_MSG(("SDWParser::readWriterDocument: find unexpected type\n"));
+      STOFF_DEBUG_MSG(("StarObjectText::readWriterDocument: find unexpected type\n"));
       f << "###type,";
     }
     ascFile.addPos(pos);
@@ -2395,7 +2366,7 @@ try
       break;
   }
   if (!input->isEnd()) {
-    STOFF_DEBUG_MSG(("SDWParser::readWriterDocument: find extra data\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readWriterDocument: find extra data\n"));
     ascFile.addPos(input->tell());
     ascFile.addNote("SWWriterDocument:##extra");
   }
@@ -2410,23 +2381,6 @@ catch (...)
 // Low level
 //
 ////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////
-// read the header
-////////////////////////////////////////////////////////////
-bool SDWParser::checkHeader(STOFFHeader *header, bool /*strict*/)
-{
-  *m_state = SDWParserInternal::State();
-
-  STOFFInputStreamPtr input = getInput();
-  if (!input || !input->hasDataFork() || !input->isStructured())
-    return false;
-
-  if (header)
-    header->reset(1);
-
-  return true;
-}
 
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

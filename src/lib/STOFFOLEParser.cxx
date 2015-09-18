@@ -291,7 +291,7 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
     STOFF_DEBUG_MSG(("OLEName=%s\n", name.c_str()));
 #endif
     if (listsByDir.find(dir)==listsByDir.end() || !listsByDir.find(dir)->second) {
-      shared_ptr<STOFFOLEParser::OleDirectory> newDir(new STOFFOLEParser::OleDirectory(dir));
+      shared_ptr<STOFFOLEParser::OleDirectory> newDir(new STOFFOLEParser::OleDirectory(file, dir));
       listsByDir[dir]=newDir;
       m_state->m_oleList.push_back(newDir);
     }

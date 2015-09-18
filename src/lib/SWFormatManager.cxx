@@ -136,7 +136,7 @@ bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, StarDocument &d
   while (input->tell()<lastPos) {
     pos=(int) input->tell();
     int rType=input->peek();
-    if (rType=='S' && doc.getSDWParser()->readSWAttributeList(zone, doc))
+    if (rType=='S' && SDWParser::readSWAttributeList(zone, doc))
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);

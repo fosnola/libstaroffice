@@ -298,7 +298,7 @@ StarObjectSpreadsheet::~StarObjectSpreadsheet()
 ////////////////////////////////////////////////////////////
 bool StarObjectSpreadsheet::parse()
 {
-  if (!m_document || !m_document->getDocumentInput() || !m_document->getOLEParser() || !m_document->getOLEDirectory()) {
+  if (!m_document || !m_document->getOLEDirectory() || !m_document->getOLEDirectory()->m_input) {
     STOFF_DEBUG_MSG(("StarObjectSpreadsheet::parser: error, incomplete document\n"));
     return false;
   }
@@ -307,7 +307,7 @@ bool StarObjectSpreadsheet::parse()
   if (directory.m_hasCompObj) m_document->parse();
   std::vector<std::string> unparsedOLEs=directory.getUnparsedOles();
   size_t numUnparsed = unparsedOLEs.size();
-  STOFFInputStreamPtr input=m_document->getDocumentInput();
+  STOFFInputStreamPtr input=directory.m_input;
   StarFileManager fileManager;
   for (size_t i = 0; i < numUnparsed; i++) {
     std::string const &name = unparsedOLEs[i];

@@ -64,8 +64,7 @@ class StarDocument
 {
 public:
   //! constructor
-  StarDocument(STOFFInputStreamPtr input, char const *passwd, shared_ptr<STOFFOLEParser> oleParser,
-               shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *parser);
+  StarDocument(char const *passwd, shared_ptr<STOFFOLEParser::OleDirectory> directory, SDWParser *parser);
   //! destructor
   virtual ~StarDocument();
 
@@ -81,16 +80,6 @@ public:
   char const *getPassword() const
   {
     return m_password;
-  }
-  //! returns the main input
-  STOFFInputStreamPtr getDocumentInput()
-  {
-    return m_input;
-  }
-  //! returns the document ole parser
-  shared_ptr<STOFFOLEParser> getOLEParser()
-  {
-    return m_oleParser;
   }
   //! returns the object directory
   shared_ptr<STOFFOLEParser::OleDirectory> getOLEDirectory()
@@ -114,6 +103,8 @@ public:
 
   //! try to read persist data
   bool readPersistData(StarZone &zone, long endPos);
+  //! try to read a spreadshet style zone: SfxStyleSheets
+  bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name);
   //! try to read a list of item
   bool readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &limits, long endPos, StarItemPool *pool=0, bool isDirect=false);
 protected:
@@ -132,12 +123,8 @@ protected:
   // data
   //
 protected:
-  //! the input
-  STOFFInputStreamPtr m_input;
   //! the document password
   char const *m_password;
-  //! the main ole parser
-  shared_ptr<STOFFOLEParser> m_oleParser;
   //! the directory
   shared_ptr<STOFFOLEParser::OleDirectory> m_directory;
 
