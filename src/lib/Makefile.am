@@ -24,19 +24,30 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFDebug.hxx				\
 	STOFFDocument.cxx			\
 	STOFFEntry.hxx				\
+	STOFFFont.cxx				\
+	STOFFFont.hxx				\
 	STOFFGraphicDecoder.cxx			\
 	STOFFGraphicDecoder.hxx			\
 	STOFFHeader.cxx				\
 	STOFFHeader.hxx				\
 	STOFFInputStream.cxx			\
 	STOFFInputStream.hxx			\
+	STOFFList.cxx				\
+	STOFFList.hxx				\
+	STOFFListener.hxx			\
 	STOFFOLEParser.cxx			\
 	STOFFOLEParser.hxx			\
+	STOFFPageSpan.cxx			\
+	STOFFPageSpan.hxx			\
+	STOFFParagraph.cxx			\
+	STOFFParagraph.hxx			\
 	STOFFParser.cxx				\
 	STOFFParser.hxx				\
 	STOFFPosition.hxx			\
 	STOFFPropertyHandler.cxx		\
 	STOFFPropertyHandler.hxx		\
+	STOFFSection.cxx			\
+	STOFFSection.hxx			\
 	STOFFSpreadsheetDecoder.cxx		\
 	STOFFSpreadsheetDecoder.hxx		\
 	STOFFStringStream.cxx			\

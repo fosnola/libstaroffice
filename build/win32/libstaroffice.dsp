@@ -103,6 +103,10 @@ SOURCE=..\..\src\lib\STOFFDocument.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFFont.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFGraphicDecoder.cxx
 # End Source File
 # Begin Source File
@@ -115,7 +119,19 @@ SOURCE=..\..\src\lib\STOFFInputStream.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFList.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFOLEParser.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFPageSpan.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFParagraph.cxx
 # End Source File
 # Begin Source File
 
@@ -124,6 +140,10 @@ SOURCE=..\..\src\lib\STOFFParser.cxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFPropertyHandler.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFSection.cxx
 # End Source File
 # Begin Source File
 
@@ -247,6 +267,10 @@ SOURCE=..\..\src\lib\STOFFEntry.hxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFFont.hxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFGraphicDecoder.hxx
 # End Source File
 # Begin Source File
@@ -259,7 +283,23 @@ SOURCE=..\..\src\lib\STOFFInputStream.hxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFList.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFListener.hxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFOLEParser.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFPageSpan.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFParagraph.hxx
 # End Source File
 # Begin Source File
 
@@ -272,6 +312,10 @@ SOURCE=..\..\src\lib\STOFFPosition.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFPropertyHandler.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFSection.hxx
 # End Source File
 # Begin Source File
 

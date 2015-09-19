@@ -458,17 +458,24 @@ struct STOFFEmbeddedObject {
 };
 
 // forward declarations of basic classes and smart pointers
+class STOFFFont;
+class STOFFParagraph;
+class STOFFSection;
+class STOFFPageSpan;
+
 class STOFFEntry;
 class STOFFHeader;
-class STOFFPageSpan;
 class STOFFParser;
 class STOFFPosition;
 
 class STOFFInputStream;
+class STOFFListener;
 class STOFFParserState;
 class STOFFSubDocument;
 //! a smart pointer of STOFFInputStream
 typedef shared_ptr<STOFFInputStream> STOFFInputStreamPtr;
+//! a smart pointer of STOFFListener
+typedef shared_ptr<STOFFListener> STOFFListenerPtr;
 //! a smart pointer of STOFFParserState
 typedef shared_ptr<STOFFParserState> STOFFParserStatePtr;
 //! a smart pointer of STOFFSubDocument
@@ -1106,6 +1113,8 @@ typedef STOFFBox2<long> STOFFBox2l;
 // some geometrical function
 namespace libstoff
 {
+//! factor to convert from one unit to other
+float getScaleFactor(librevenge::RVNGUnit orig, librevenge::RVNGUnit dest);
 //! rotate a point around center, angle is given in degree
 STOFFVec2f rotatePointAroundCenter(STOFFVec2f const &point, STOFFVec2f const &center, float angle);
 //! rotate a bdox and returns the final bdbox, angle is given in degree

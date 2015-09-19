@@ -201,6 +201,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\STOFFFont.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\STOFFGraphicDecoder.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -225,7 +233,31 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\STOFFList.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\STOFFOLEParser.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File RelativePath="..\..\src\lib\STOFFPageSpan.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File RelativePath="..\..\src\lib\STOFFParagraph.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
 				</FileConfiguration>
@@ -242,6 +274,14 @@
 				</FileConfiguration>
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFPropertyHandler.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File RelativePath="..\..\src\lib\STOFFSection.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
 				</FileConfiguration>
@@ -443,19 +483,31 @@
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFEntry.hxx">
 			</File>
+			<File RelativePath="..\..\src\lib\STOFFFont.hxx">
+			</File>
 			<File RelativePath="..\..\src\lib\STOFFGraphicDecoder.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFHeader.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFInputStream.hxx">
 			</File>
+			<File RelativePath="..\..\src\lib\STOFFList.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\STOFFListener.hxx">
+			</File>
 			<File RelativePath="..\..\src\lib\STOFFOLEParser.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\STOFFPageSpan.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\STOFFParagraph.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFParser.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFPosition.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFPropertyHandler.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\STOFFSection.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFSpreadsheetDecoder.hxx">
 			</File>

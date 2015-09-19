@@ -456,6 +456,41 @@ STOFFBox2f rotateBoxFromCenter(STOFFBox2f const &box, float angle)
   return STOFFBox2f(minPt,maxPt);
 }
 
+float getScaleFactor(librevenge::RVNGUnit orig, librevenge::RVNGUnit dest)
+{
+  float actSc = 1.0, newSc = 1.0;
+  switch (orig) {
+  case librevenge::RVNG_TWIP:
+    break;
+  case librevenge::RVNG_POINT:
+    actSc=20;
+    break;
+  case librevenge::RVNG_INCH:
+    actSc = 1440;
+    break;
+  case librevenge::RVNG_PERCENT:
+  case librevenge::RVNG_GENERIC:
+  case librevenge::RVNG_UNIT_ERROR:
+  default:
+    STOFF_DEBUG_MSG(("libstoff::getScaleFactor %d unit must not appear\n", int(orig)));
+  }
+  switch (dest) {
+  case librevenge::RVNG_TWIP:
+    break;
+  case librevenge::RVNG_POINT:
+    newSc=20;
+    break;
+  case librevenge::RVNG_INCH:
+    newSc = 1440;
+    break;
+  case librevenge::RVNG_PERCENT:
+  case librevenge::RVNG_GENERIC:
+  case librevenge::RVNG_UNIT_ERROR:
+  default:
+    STOFF_DEBUG_MSG(("libstoff::getScaleFactor %d unit must not appear\n", int(dest)));
+  }
+  return actSc/newSc;
+}
 // debug message
 #ifdef DEBUG
 void printDebugMsg(const char *format, ...)

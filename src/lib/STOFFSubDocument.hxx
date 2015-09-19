@@ -65,12 +65,10 @@ public:
     return !operator!=(doc);
   }
 
-#if 0
   /** virtual parse function
    *
    * this function is called to parse the subdocument */
   virtual void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType subDocumentType) = 0;
-#endif
 
 protected:
   //! the main zone parser
