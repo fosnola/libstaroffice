@@ -248,10 +248,14 @@ bool SDCParser::checkHeader(STOFFHeader *header, bool /*strict*/)
   STOFFInputStreamPtr input = getInput();
   if (!input || !input->hasDataFork() || !input->isStructured())
     return false;
-
-  if (header)
-    header->reset(1);
-
+  STOFFInputStreamPtr calcInput=input->getSubStreamByName("StarCalcDocument");
+  if (!calcInput)
+    return false;
+  if (header) {
+    header->reset(1, STOFFDocument::STOFF_K_SPREADSHEET);
+    calcInput->seek(1, librevenge::RVNG_SEEK_SET);
+    header->setEncrypted(input->readULong(1)!=0x42);
+  }
   return true;
 }
 

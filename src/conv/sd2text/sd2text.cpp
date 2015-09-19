@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "ERROR: Parse Exception!\n");
   else if (error == STOFFDocument::STOFF_R_OLE_ERROR)
     fprintf(stderr, "ERROR: File is an OLE document!\n");
-  else if (error != STOFFDocument::STOFF_R_PASSWORD_MISSMATCH_ERROR)
+  else if (error == STOFFDocument::STOFF_R_PASSWORD_MISSMATCH_ERROR)
     fprintf(stderr, "ERROR: Bad password!\n");
   else if (error != STOFFDocument::STOFF_R_OK)
     fprintf(stderr, "ERROR: Unknown Error!\n");

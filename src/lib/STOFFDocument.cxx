@@ -144,16 +144,6 @@ catch (...)
 STOFFDocument::Result STOFFDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGSpreadsheetInterface *documentInterface, char const *password)
 try
 {
-  STOFF_DEBUG_MSG(("STOFFDocument::parse[spreadsheet]: is not implemented\n"));
-  return STOFF_R_UNKNOWN_ERROR;
-}
-catch (libstoff::FileException)
-{
-  STOFF_DEBUG_MSG(("STOFFDocument::parse: File exception trapped\n"));
-  return STOFF_R_FILE_ACCESS_ERROR;
-}
-catch (libstoff::ParseException)
-{
   if (!input)
     return STOFF_R_UNKNOWN_ERROR;
 
@@ -164,8 +154,17 @@ catch (libstoff::ParseException)
   shared_ptr<STOFFSpreadsheetParser> parser=STOFFDocumentInternal::getSpreadsheetParserFromHeader(ip, header.get(), password);
   if (!parser) return STOFF_R_UNKNOWN_ERROR;
   parser->parse(documentInterface);
-
   return STOFF_R_OK;
+}
+catch (libstoff::FileException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: File exception trapped\n"));
+  return STOFF_R_FILE_ACCESS_ERROR;
+}
+catch (libstoff::ParseException)
+{
+  STOFF_DEBUG_MSG(("STOFFDocument::parse: Parse exception trapped\n"));
+  return STOFF_R_PARSE_ERROR;
 }
 catch (libstoff::WrongPasswordException)
 {
