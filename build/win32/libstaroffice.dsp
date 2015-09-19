@@ -87,6 +87,10 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=..\..\src\lib\SDCParser.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\SDWParser.cxx
 # End Source File
 # Begin Source File
@@ -224,6 +228,10 @@ SOURCE=..\..\inc\libstaroffice\libstaroffice.hxx
 # Begin Source File
 
 SOURCE=..\..\inc\libstaroffice\STOFFDocument.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\SDCParser.hxx
 # End Source File
 # Begin Source File
 

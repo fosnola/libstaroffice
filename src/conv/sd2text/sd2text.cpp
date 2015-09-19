@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     confidence = STOFFDocument::STOFF_C_NONE;
   }
 
-  if (confidence != STOFFDocument::STOFF_C_EXCELLENT) {
+  if (confidence != STOFFDocument::STOFF_C_EXCELLENT && confidence != STOFFDocument::STOFF_C_SUPPORTED_ENCRYPTION) {
     printf("ERROR: Unsupported file format!\n");
     return 1;
   }

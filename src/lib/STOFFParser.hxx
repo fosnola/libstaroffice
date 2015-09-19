@@ -154,5 +154,18 @@ protected:
   STOFFTextParser(STOFFParserStatePtr state) : STOFFParser(state) {}
 };
 
+/** virtual class which defines the ancestor of all spreadsheet zone parser */
+class STOFFSpreadsheetParser : public STOFFParser
+{
+public:
+  //! virtual function used to parse the input
+  virtual void parse(librevenge::RVNGSpreadsheetInterface *documentInterface) = 0;
+protected:
+  //! constructor (protected)
+  STOFFSpreadsheetParser(STOFFInputStreamPtr input, STOFFHeader *header) : STOFFParser(STOFFParserState::Spreadsheet, input, header) {}
+  //! constructor using a state
+  STOFFSpreadsheetParser(STOFFParserStatePtr state) : STOFFParser(state) {}
+};
+
 #endif /* STOFFPARSER_H */
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

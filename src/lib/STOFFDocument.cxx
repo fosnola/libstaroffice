@@ -35,6 +35,7 @@
  * libstoff API: implementation of main interface functions
  */
 
+#include "SDCParser.hxx"
 #include "SDWParser.hxx"
 
 #include "STOFFHeader.hxx"
@@ -49,6 +50,7 @@
 namespace STOFFDocumentInternal
 {
 shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
+shared_ptr<STOFFSpreadsheetParser> getSpreadsheetParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
 STOFFHeader *getHeader(STOFFInputStreamPtr &input, bool strict);
 bool checkHeader(STOFFInputStreamPtr &input, STOFFHeader &header, bool strict);
 }
@@ -74,7 +76,7 @@ try
   if (!header.get())
     return STOFF_C_NONE;
   kind = (STOFFDocument::Kind)header->getKind();
-  return STOFF_C_EXCELLENT;
+  return header->isEncrypted() ? STOFF_C_SUPPORTED_ENCRYPTION : STOFF_C_EXCELLENT;
 }
 catch (...)
 {
@@ -139,7 +141,7 @@ catch (...)
   return STOFF_R_UNKNOWN_ERROR;
 }
 
-STOFFDocument::Result STOFFDocument::parse(librevenge::RVNGInputStream */*input*/, librevenge::RVNGSpreadsheetInterface */*documentInterface*/, char const *)
+STOFFDocument::Result STOFFDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGSpreadsheetInterface *documentInterface, char const *password)
 try
 {
   STOFF_DEBUG_MSG(("STOFFDocument::parse[spreadsheet]: is not implemented\n"));
@@ -152,8 +154,18 @@ catch (libstoff::FileException)
 }
 catch (libstoff::ParseException)
 {
-  STOFF_DEBUG_MSG(("STOFFDocument::parse: Parse exception trapped\n"));
-  return STOFF_R_PARSE_ERROR;
+  if (!input)
+    return STOFF_R_UNKNOWN_ERROR;
+
+  STOFFInputStreamPtr ip(new STOFFInputStream(input, false));
+  shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
+
+  if (!header.get()) return STOFF_R_UNKNOWN_ERROR;
+  shared_ptr<STOFFSpreadsheetParser> parser=STOFFDocumentInternal::getSpreadsheetParserFromHeader(ip, header.get(), password);
+  if (!parser) return STOFF_R_UNKNOWN_ERROR;
+  parser->parse(documentInterface);
+
+  return STOFF_R_OK;
 }
 catch (libstoff::WrongPasswordException)
 {
@@ -297,6 +309,9 @@ shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, 
 #ifndef DEBUG
   if (header->getKind()!=STOFFDocument::STOFF_K_TEXT)
     return parser;
+#else
+  if (header->getKind()==STOFFDocument::STOFF_K_SPREADSHEET)
+    return parser;
 #endif
   try {
     SDWParser *sdwParser=new SDWParser(input, header);
@@ -308,13 +323,29 @@ shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, 
   return parser;
 }
 
+/** Factory wrapper to construct a parser corresponding to an spreadsheet header */
+shared_ptr<STOFFSpreadsheetParser> getSpreadsheetParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd)
+{
+  shared_ptr<STOFFSpreadsheetParser> parser;
+  if (!header || header->getKind()!=STOFFDocument::STOFF_K_SPREADSHEET)
+    return parser;
+  try {
+    SDCParser *sdcParser=new SDCParser(input, header);
+    parser.reset(sdcParser);
+    if (passwd) sdcParser->setDocumentPassword(passwd);
+  }
+  catch (...) {
+  }
+  return parser;
+}
+
 /** Wrapper to check a basic header of a mac file */
 bool checkHeader(STOFFInputStreamPtr &input, STOFFHeader &header, bool strict)
 try
 {
   shared_ptr<STOFFParser> parser=getTextParserFromHeader(input, &header, 0);
-  if (!parser)
-    return false;
+  if (!parser) parser=getSpreadsheetParserFromHeader(input, &header, 0);
+  if (!parser) return false;
   return parser->checkHeader(&header, strict);
 }
 catch (...)

@@ -101,12 +101,23 @@ public:
   {
     m_docKind = kind;
   }
-
+  //! returns true if the file is encypted
+  bool isEncrypted() const
+  {
+    return m_isEncrypted;
+  }
+  //! set the encryption mode
+  void setEncrypted(bool encrypted)
+  {
+    m_isEncrypted=encrypted;
+  }
 private:
   /** the document version */
   int m_version;
   /** the document kind */
   Kind m_docKind;
+  /** flag to know if the file is encrypted */
+  bool m_isEncrypted;
 };
 
 #endif /* STOFFHEADER_H */
