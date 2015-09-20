@@ -1,0 +1,1764 @@
+/* -*- Mode: C++; c-default-style: "k&r"; indent-tabs-mode: nil; tab-width: 2; c-basic-offset: 2 -*- */
+
+/* libstaroffice
+* Version: MPL 2.0 / LGPLv2+
+*
+* The contents of this file are subject to the Mozilla Public License Version
+* 2.0 (the "License"); you may not use this file except in compliance with
+* the License or as specified alternatively below. You may obtain a copy of
+* the License at http://www.mozilla.org/MPL/
+*
+* Software distributed under the License is distributed on an "AS IS" basis,
+* WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+* for the specific language governing rights and limitations under the
+* License.
+*
+* Major Contributor(s):
+* Copyright (C) 2002 William Lachance (wrlach@gmail.com)
+* Copyright (C) 2002,2004 Marc Maurer (uwog@uwog.net)
+* Copyright (C) 2004-2006 Fridrich Strba (fridrich.strba@bluewin.ch)
+* Copyright (C) 2006, 2007 Andrew Ziem
+* Copyright (C) 2011, 2012 Alonso Laurent (alonso@loria.fr)
+*
+*
+* All Rights Reserved.
+*
+* For minor contributions see the git repository.
+*
+* Alternatively, the contents of this file may be used under the terms of
+* the GNU Lesser General Public License Version 2 or later (the "LGPLv2+"),
+* in which case the provisions of the LGPLv2+ are applicable
+* instead of those above.
+*/
+
+/** \file STOFFSpreadsheetListener.cxx
+ * Implements STOFFSpreadsheetListener: the libstaroffice spreadsheet processor listener
+ *
+ * \note this class is the only class which does the interface with
+ * the librevenge::RVNGSpreadsheetInterface
+ */
+
+#include <cmath>
+#include <cstring>
+#include <iomanip>
+#include <sstream>
+#include <time.h>
+
+#include <librevenge/librevenge.h>
+
+#include "libstaroffice_internal.hxx"
+
+#include "STOFFCell.hxx"
+#include "STOFFChart.hxx"
+#include "STOFFFont.hxx"
+#include "STOFFInputStream.hxx"
+#include "STOFFList.hxx"
+#include "STOFFPageSpan.hxx"
+#include "STOFFParagraph.hxx"
+#include "STOFFParser.hxx"
+#include "STOFFPosition.hxx"
+#include "STOFFSection.hxx"
+#include "STOFFSubDocument.hxx"
+#include "STOFFTable.hxx"
+
+#include "STOFFSpreadsheetListener.hxx"
+
+//! Internal and low level namespace to define the states of STOFFSpreadsheetListener
+namespace STOFFSpreadsheetListenerInternal
+{
+//! a enum to define basic break bit
+enum { PageBreakBit=0x1, ColumnBreakBit=0x2 };
+//! a class to store the document state of a STOFFSpreadsheetListener
+struct DocumentState {
+  //! constructor
+  DocumentState(std::vector<STOFFPageSpan> const &pageList) :
+    m_pageList(pageList), m_pageSpan(), m_metaData(), m_footNoteNumber(0), m_smallPictureNumber(0),
+    m_isDocumentStarted(false), m_isSheetOpened(false), m_isSheetRowOpened(false),
+    m_sentListMarkers(), m_numberingIdMap(),
+    m_subDocuments()
+  {
+  }
+  //! destructor
+  ~DocumentState()
+  {
+  }
+
+  //! the pages definition
+  std::vector<STOFFPageSpan> m_pageList;
+  //! the current page span
+  STOFFPageSpan m_pageSpan;
+  //! the document meta data
+  librevenge::RVNGPropertyList m_metaData;
+
+  int m_footNoteNumber /** footnote number*/;
+
+  int m_smallPictureNumber /** number of small picture */;
+  bool m_isDocumentStarted /** a flag to know if the document is open */;
+  bool m_isSheetOpened /** a flag to know if a sheet is open */;
+  bool m_isSheetRowOpened /** a flag to know if a row is open */;
+  /// the list of marker corresponding to sent list
+  std::vector<int> m_sentListMarkers;
+  /** a map cell's format to id */
+  std::map<STOFFCell::Format,int,STOFFCell::CompareFormat> m_numberingIdMap;
+  std::vector<STOFFSubDocumentPtr> m_subDocuments; /** list of document actually open */
+
+private:
+  DocumentState(const DocumentState &);
+  DocumentState &operator=(const DocumentState &);
+};
+
+/** the state of a STOFFSpreadsheetListener */
+struct State {
+  //! constructor
+  State();
+  //! destructor
+  ~State() { }
+  //! returns true if we are in a text zone
+  bool canWriteText() const
+  {
+    if (m_isSheetCellOpened || m_isHeaderFooterOpened) return true;
+    return m_isTextboxOpened || m_isTableCellOpened || m_isNote;
+  }
+
+  //! a buffer to stored the text
+  librevenge::RVNGString m_textBuffer;
+  //! the number of tabs to add
+  int m_numDeferredTabs;
+
+  //! the font
+  STOFFFont m_font;
+  //! the paragraph
+  STOFFParagraph m_paragraph;
+
+  shared_ptr<STOFFList> m_list;
+
+  bool m_isPageSpanOpened;
+  bool m_isHeaderFooterOpened /** a flag to know if the header footer is started */;
+  bool m_isFrameOpened;
+  bool m_isTextboxOpened;
+
+  bool m_isHeaderFooterWithoutParagraph;
+
+  bool m_isSpanOpened;
+  bool m_isParagraphOpened;
+  bool m_isListElementOpened;
+
+  bool m_firstParagraphInPageSpan;
+
+  bool m_isSheetColumnOpened;
+  bool m_isSheetCellOpened;
+
+  bool m_isTableOpened;
+  bool m_isTableRowOpened;
+  bool m_isTableColumnOpened;
+  bool m_isTableCellOpened;
+
+  unsigned m_currentPage;
+  int m_numPagesRemainingInSpan;
+  int m_currentPageNumber;
+
+  std::vector<bool> m_listOrderedLevels; //! a stack used to know what is open
+
+  bool m_inSubDocument;
+
+  bool m_isNote;
+  bool m_inLink;
+  libstoff::SubDocumentType m_subDocumentType;
+
+private:
+  State(const State &);
+  State &operator=(const State &);
+};
+
+State::State() :
+  m_textBuffer(""), m_numDeferredTabs(0),
+
+  m_font("Times New Roman",12), // default time 12
+
+  m_paragraph(),
+
+  m_list(),
+
+  m_isPageSpanOpened(false), m_isHeaderFooterOpened(false),
+  m_isFrameOpened(false), m_isTextboxOpened(false),
+  m_isHeaderFooterWithoutParagraph(false),
+
+  m_isSpanOpened(false), m_isParagraphOpened(false), m_isListElementOpened(false),
+
+  m_firstParagraphInPageSpan(true),
+
+  m_isSheetColumnOpened(false),
+  m_isSheetCellOpened(false),
+
+  m_isTableOpened(false), m_isTableRowOpened(false), m_isTableColumnOpened(false),
+  m_isTableCellOpened(false),
+
+  m_currentPage(0), m_numPagesRemainingInSpan(0), m_currentPageNumber(1),
+
+  m_listOrderedLevels(),
+
+  m_inSubDocument(false),
+  m_isNote(false), m_inLink(false),
+  m_subDocumentType(libstoff::DOC_NONE)
+{
+}
+}
+
+STOFFSpreadsheetListener::STOFFSpreadsheetListener(STOFFParserState &parserState, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface) : STOFFListener(),
+  m_ds(new STOFFSpreadsheetListenerInternal::DocumentState(pageList)), m_ps(new STOFFSpreadsheetListenerInternal::State), m_psStack(),
+  m_parserState(parserState), m_documentInterface(documentInterface)
+{
+}
+
+STOFFSpreadsheetListener::STOFFSpreadsheetListener(STOFFParserState &parserState, STOFFBox2f const &box, librevenge::RVNGSpreadsheetInterface *documentInterface) : STOFFListener(),
+  m_ds(), m_ps(new STOFFSpreadsheetListenerInternal::State), m_psStack(), m_parserState(parserState), m_documentInterface(documentInterface)
+{
+  STOFFPageSpan pageSpan;
+  pageSpan.setMargins(0);
+  pageSpan.setPageSpan(1);
+  pageSpan.setFormWidth(box.size().x()/72.);
+  pageSpan.setFormLength(box.size().y()/72.);
+  m_ds.reset(new STOFFSpreadsheetListenerInternal::DocumentState(std::vector<STOFFPageSpan>(1, pageSpan)));
+}
+
+
+STOFFSpreadsheetListener::~STOFFSpreadsheetListener()
+{
+}
+
+///////////////////
+// text data
+///////////////////
+bool STOFFSpreadsheetListener::canWriteText() const
+{
+  return m_ps->canWriteText();
+}
+
+void STOFFSpreadsheetListener::insertChar(uint8_t character)
+{
+  if (!m_ps->canWriteText()) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertChar: called outside a text zone\n"));
+    return;
+  }
+  if (character >= 0x80) {
+    STOFFSpreadsheetListener::insertUnicode(character);
+    return;
+  }
+  _flushDeferredTabs();
+  if (!m_ps->m_isSpanOpened) _openSpan();
+  m_ps->m_textBuffer.append((char) character);
+}
+
+void STOFFSpreadsheetListener::insertUnicode(uint32_t val)
+{
+  if (!m_ps->canWriteText()) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertUnicode: called outside a text zone\n"));
+    return;
+  }
+
+  // undef character, we skip it
+  if (val == 0xfffd) return;
+
+  _flushDeferredTabs();
+  if (!m_ps->m_isSpanOpened) _openSpan();
+  libstoff::appendUnicode(val, m_ps->m_textBuffer);
+}
+
+void STOFFSpreadsheetListener::insertUnicodeString(librevenge::RVNGString const &str)
+{
+  if (!m_ps->canWriteText()) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertUnicodeString: called outside a text zone\n"));
+    return;
+  }
+
+  _flushDeferredTabs();
+  if (!m_ps->m_isSpanOpened) _openSpan();
+  m_ps->m_textBuffer.append(str);
+}
+
+void STOFFSpreadsheetListener::insertEOL(bool soft)
+{
+  if (!m_ps->canWriteText()) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertEOL: called outside a text zone\n"));
+    return;
+  }
+
+  if (!m_ps->m_isParagraphOpened && !m_ps->m_isListElementOpened)
+    _openSpan();
+  _flushDeferredTabs();
+
+  if (soft) {
+    if (m_ps->m_isSpanOpened)
+      _flushText();
+    m_documentInterface->insertLineBreak();
+  }
+  else if (m_ps->m_isParagraphOpened)
+    _closeParagraph();
+
+  // sub/superscript must not survive a new line
+  m_ps->m_font.set(STOFFFont::Script());
+}
+
+void STOFFSpreadsheetListener::insertTab()
+{
+  if (!m_ps->canWriteText()) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertTab: called outside a text zone\n"));
+    return;
+  }
+
+  if (!m_ps->m_isParagraphOpened) {
+    m_ps->m_numDeferredTabs++;
+    return;
+  }
+  if (m_ps->m_isSpanOpened) _flushText();
+  m_ps->m_numDeferredTabs++;
+  _flushDeferredTabs();
+}
+
+void STOFFSpreadsheetListener::insertBreak(STOFFSpreadsheetListener::BreakType)
+{
+  STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertBreak: make not sense\n"));
+  return;
+}
+
+///////////////////
+// font/paragraph function
+///////////////////
+void STOFFSpreadsheetListener::setFont(STOFFFont const &font)
+{
+  if (font == m_ps->m_font) return;
+
+  // check if id and size are defined, if not used the previous fields
+  STOFFFont finalFont(font);
+  if (!font.getFontName().empty())
+    finalFont.setFontName(m_ps->m_font.getFontName());
+  if (font.size() <= 0)
+    finalFont.setSize(m_ps->m_font.size());
+  if (finalFont == m_ps->m_font) return;
+
+  _closeSpan();
+  m_ps->m_font = finalFont;
+}
+
+STOFFFont const &STOFFSpreadsheetListener::getFont() const
+{
+  return m_ps->m_font;
+}
+
+bool STOFFSpreadsheetListener::isParagraphOpened() const
+{
+  return m_ps->m_isParagraphOpened;
+}
+
+void STOFFSpreadsheetListener::setParagraph(STOFFParagraph const &para)
+{
+  if (para==m_ps->m_paragraph) return;
+
+  m_ps->m_paragraph=para;
+}
+
+STOFFParagraph const &STOFFSpreadsheetListener::getParagraph() const
+{
+  return m_ps->m_paragraph;
+}
+
+///////////////////
+// field/link :
+///////////////////
+void STOFFSpreadsheetListener::insertField(STOFFField const &field)
+{
+  if (!m_ps->canWriteText()) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertField: called outside a text zone\n"));
+    return;
+  }
+
+  switch (field.m_type) {
+  case STOFFField::None:
+    break;
+  case STOFFField::PageCount:
+  case STOFFField::PageNumber:
+  case STOFFField::Title: {
+    _flushDeferredTabs();
+    _flushText();
+    _openSpan();
+    librevenge::RVNGPropertyList propList;
+    if (field.m_type==STOFFField::Title) {
+      propList.insert("librevenge:field-type", "text:title");
+      m_documentInterface->insertField(propList);
+    }
+    else {
+      propList.insert("style:num-format", libstoff::numberingTypeToString(field.m_numberingType).c_str());
+      if (field.m_type == STOFFField::PageNumber) {
+        propList.insert("librevenge:field-type", "text:page-number");
+        m_documentInterface->insertField(propList);
+      }
+      else {
+        propList.insert("librevenge:field-type", "text:page-count");
+        m_documentInterface->insertField(propList);
+      }
+    }
+    break;
+  }
+  case STOFFField::Database:
+    if (field.m_data.length())
+      STOFFSpreadsheetListener::insertUnicodeString(field.m_data.c_str());
+    else
+      STOFFSpreadsheetListener::insertUnicodeString("#DATAFIELD#");
+    break;
+  case STOFFField::Date:
+  case STOFFField::Time: {
+    std::string format(field.m_DTFormat);
+    if (format.length()==0) {
+      if (field.m_type==STOFFField::Date)
+        format="%m/%d/%y";
+      else
+        format="%I:%M:%S %p";
+    }
+    time_t now = time(0L);
+    struct tm timeinfo;
+    if (localtime_r(&now, &timeinfo)) {
+      char buf[256];
+      strftime(buf, 256, format.c_str(), &timeinfo);
+      STOFFSpreadsheetListener::insertUnicodeString(librevenge::RVNGString(buf));
+    }
+    break;
+  }
+  default:
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertField: must not be called with type=%d\n", int(field.m_type)));
+    break;
+  }
+}
+
+void STOFFSpreadsheetListener::openLink(STOFFLink const &link)
+{
+  if (!m_ps->canWriteText()) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openLink: called outside a text zone\n"));
+    return;
+  }
+  if (m_ps->m_inLink) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener:openLink: a link is already opened\n"));
+    return;
+  }
+  if (!m_ps->m_isSpanOpened) _openSpan();
+  librevenge::RVNGPropertyList propList;
+  link.addTo(propList);
+  m_documentInterface->openLink(propList);
+  _pushParsingState();
+  m_ps->m_inLink=true;
+// we do not want any close open paragraph in a link
+  m_ps->m_isParagraphOpened=true;
+}
+
+void STOFFSpreadsheetListener::closeLink()
+{
+  if (!m_ps->m_inLink) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener:closeLink: can not close a link\n"));
+    return;
+  }
+  if (m_ps->m_isSpanOpened) _closeSpan();
+  m_documentInterface->closeLink();
+  _popParsingState();
+}
+
+///////////////////
+// document
+///////////////////
+void STOFFSpreadsheetListener::setDocumentLanguage(std::string locale)
+{
+  if (!locale.length()) return;
+  m_ds->m_metaData.insert("librevenge:language", locale.c_str());
+}
+
+bool STOFFSpreadsheetListener::isDocumentStarted() const
+{
+  return m_ds->m_isDocumentStarted;
+}
+
+void STOFFSpreadsheetListener::startDocument()
+{
+  if (m_ds->m_isDocumentStarted) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::startDocument: the document is already started\n"));
+    return;
+  }
+
+  m_documentInterface->startDocument(librevenge::RVNGPropertyList());
+  m_ds->m_isDocumentStarted = true;
+
+  m_documentInterface->setDocumentMetaData(m_ds->m_metaData);
+}
+
+void STOFFSpreadsheetListener::endDocument(bool sendDelayedSubDoc)
+{
+  if (!m_ds->m_isDocumentStarted) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::endDocument: the document is not started\n"));
+    return;
+  }
+
+  if (!m_ps->m_isPageSpanOpened) {
+    // we must call by hand openPageSpan to avoid sending any header/footer documents
+    if (!sendDelayedSubDoc) _openPageSpan(false);
+    _openSpan();
+  }
+
+  if (m_ps->m_isTableOpened)
+    closeTable();
+  if (m_ps->m_isParagraphOpened)
+    _closeParagraph();
+
+  m_ps->m_paragraph.m_listLevelIndex = 0;
+  _changeList(); // flush the list exterior
+
+  // close the document nice and tight
+  if (m_ds->m_isSheetOpened)
+    closeSheet();
+
+  _closePageSpan();
+  m_documentInterface->endDocument();
+  m_ds->m_isDocumentStarted = false;
+}
+
+///////////////////
+// page
+///////////////////
+bool STOFFSpreadsheetListener::isPageSpanOpened() const
+{
+  return m_ps->m_isPageSpanOpened;
+}
+
+STOFFPageSpan const &STOFFSpreadsheetListener::getPageSpan()
+{
+  if (!m_ps->m_isPageSpanOpened)
+    _openPageSpan();
+  return m_ds->m_pageSpan;
+}
+
+
+void STOFFSpreadsheetListener::_openPageSpan(bool sendHeaderFooters)
+{
+  if (m_ps->m_isPageSpanOpened)
+    return;
+
+  if (!m_ds->m_isDocumentStarted)
+    startDocument();
+
+  if (m_ds->m_pageList.size()==0) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::_openPageSpan: can not find any page\n"));
+    throw libstoff::ParseException();
+  }
+  unsigned actPage = 0;
+  std::vector<STOFFPageSpan>::iterator it = m_ds->m_pageList.begin();
+  ++m_ps->m_currentPage;
+  while (true) {
+    actPage+=(unsigned)it->getPageSpan();
+    if (actPage >= m_ps->m_currentPage)
+      break;
+    if (++it == m_ds->m_pageList.end()) {
+      STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::_openPageSpan: can not find current page, use the previous one\n"));
+      --it;
+      break;
+    }
+  }
+  STOFFPageSpan &currentPage = *it;
+
+  librevenge::RVNGPropertyList propList;
+  currentPage.getPageProperty(propList);
+  propList.insert("librevenge:is-last-page-span", ++it==m_ds->m_pageList.end());
+
+  if (!m_ps->m_isPageSpanOpened)
+    m_documentInterface->openPageSpan(propList);
+
+  m_ps->m_isPageSpanOpened = true;
+  m_ds->m_pageSpan = currentPage;
+
+  // we insert the header footer
+  if (sendHeaderFooters)
+    currentPage.sendHeaderFooters(this);
+
+  // first paragraph in span (necessary for resetting page number)
+  m_ps->m_firstParagraphInPageSpan = true;
+  m_ps->m_numPagesRemainingInSpan = (currentPage.getPageSpan() - 1);
+}
+
+void STOFFSpreadsheetListener::_closePageSpan()
+{
+  if (!m_ps->m_isPageSpanOpened)
+    return;
+
+  m_documentInterface->closePageSpan();
+  m_ps->m_isPageSpanOpened = false;
+}
+
+///////////////////
+// header/footer
+///////////////////
+bool STOFFSpreadsheetListener::isHeaderFooterOpened() const
+{
+  return m_ps->m_isHeaderFooterOpened;
+}
+
+bool STOFFSpreadsheetListener::insertHeader(STOFFSubDocumentPtr subDocument, librevenge::RVNGPropertyList const &extras)
+{
+  if (m_ps->m_isHeaderFooterOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertHeader: Oops a header/footer is already opened\n"));
+    return false;
+  }
+  librevenge::RVNGPropertyList propList(extras);
+  m_documentInterface->openHeader(propList);
+  handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER);
+  m_documentInterface->closeHeader();
+  return true;
+}
+
+bool STOFFSpreadsheetListener::insertFooter(STOFFSubDocumentPtr subDocument, librevenge::RVNGPropertyList const &extras)
+{
+  if (m_ps->m_isHeaderFooterOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertFooter: Oops a header/footer is already opened\n"));
+    return false;
+  }
+  librevenge::RVNGPropertyList propList(extras);
+  m_documentInterface->openFooter(propList);
+  handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER);
+  m_documentInterface->closeFooter();
+  return true;
+}
+
+///////////////////
+// section
+///////////////////
+STOFFSection const &STOFFSpreadsheetListener::getSection() const
+{
+  STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::getSection: make no sense\n"));
+  static STOFFSection const badSection;
+  return badSection;
+}
+
+bool STOFFSpreadsheetListener::openSection(STOFFSection const &)
+{
+  STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openSection: make no sense\n"));
+  return false;
+}
+
+bool STOFFSpreadsheetListener::closeSection()
+{
+  STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::closeSection: make no sense\n"));
+  return false;
+}
+
+///////////////////
+// paragraph
+///////////////////
+void STOFFSpreadsheetListener::_openParagraph()
+{
+  if (!m_ps->canWriteText())
+    return;
+
+  if (m_ps->m_isParagraphOpened || m_ps->m_isListElementOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::_openParagraph: a paragraph (or a list) is already opened"));
+    return;
+  }
+
+  librevenge::RVNGPropertyList propList;
+  m_ps->m_paragraph.addTo(propList, false);
+  if (!m_ps->m_isParagraphOpened)
+    m_documentInterface->openParagraph(propList);
+
+  _resetParagraphState();
+  m_ps->m_firstParagraphInPageSpan = false;
+}
+
+void STOFFSpreadsheetListener::_closeParagraph()
+{
+  // we can not close a paragraph in a link
+  if (m_ps->m_inLink)
+    return;
+  if (m_ps->m_isListElementOpened) {
+    _closeListElement();
+    return;
+  }
+
+  if (m_ps->m_isParagraphOpened) {
+    if (m_ps->m_isSpanOpened)
+      _closeSpan();
+
+    m_documentInterface->closeParagraph();
+  }
+
+  m_ps->m_isParagraphOpened = false;
+  m_ps->m_paragraph.m_listLevelIndex = 0;
+}
+
+void STOFFSpreadsheetListener::_resetParagraphState(const bool isListElement)
+{
+  m_ps->m_isListElementOpened = isListElement;
+  m_ps->m_isParagraphOpened = true;
+  m_ps->m_isHeaderFooterWithoutParagraph = false;
+}
+
+///////////////////
+// list
+///////////////////
+void STOFFSpreadsheetListener::_openListElement()
+{
+  if (!m_ps->canWriteText())
+    return;
+
+  if (m_ps->m_isParagraphOpened || m_ps->m_isListElementOpened)
+    return;
+
+  librevenge::RVNGPropertyList propList;
+  m_ps->m_paragraph.addTo(propList, false);
+  // check if we must change the start value
+  int startValue=m_ps->m_paragraph.m_listStartValue.get();
+  if (startValue > 0 && m_ps->m_list && m_ps->m_list->getStartValueForNextElement() != startValue) {
+    propList.insert("text:start-value", startValue);
+    m_ps->m_list->setStartValueForNextElement(startValue);
+  }
+
+  if (m_ps->m_list) m_ps->m_list->openElement();
+  m_documentInterface->openListElement(propList);
+  _resetParagraphState(true);
+}
+
+void STOFFSpreadsheetListener::_closeListElement()
+{
+  if (m_ps->m_isListElementOpened) {
+    if (m_ps->m_isSpanOpened)
+      _closeSpan();
+
+    if (m_ps->m_list) m_ps->m_list->closeElement();
+    m_documentInterface->closeListElement();
+  }
+
+  m_ps->m_isListElementOpened = m_ps->m_isParagraphOpened = false;
+}
+
+int STOFFSpreadsheetListener::_getListId() const
+{
+  size_t newLevel= (size_t) m_ps->m_paragraph.m_listLevelIndex.get();
+  if (newLevel == 0) return -1;
+  int newListId = m_ps->m_paragraph.m_listId.get();
+  if (newListId > 0) return newListId;
+  static bool first = true;
+  if (first) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::_getListId: the list id is not set, try to find a new one\n"));
+    first = false;
+  }
+  shared_ptr<STOFFList> list=m_parserState.m_listManager->getNewList
+                             (m_ps->m_list, int(newLevel), *m_ps->m_paragraph.m_listLevel);
+  if (!list) return -1;
+  return list->getId();
+}
+
+void STOFFSpreadsheetListener::_changeList()
+{
+  if (!m_ps->canWriteText())
+    return;
+
+  if (m_ps->m_isParagraphOpened)
+    _closeParagraph();
+
+  size_t actualLevel = m_ps->m_listOrderedLevels.size();
+  size_t newLevel= (size_t) m_ps->m_paragraph.m_listLevelIndex.get();
+  int newListId = newLevel>0 ? _getListId() : -1;
+  bool changeList = newLevel &&
+                    (m_ps->m_list && m_ps->m_list->getId()!=newListId);
+  size_t minLevel = changeList ? 0 : newLevel;
+  while (actualLevel > minLevel) {
+    if (m_ps->m_listOrderedLevels[--actualLevel])
+      m_documentInterface->closeOrderedListLevel();
+    else
+      m_documentInterface->closeUnorderedListLevel();
+  }
+
+  if (newLevel) {
+    shared_ptr<STOFFList> theList;
+
+    theList=m_parserState.m_listManager->getList(newListId);
+    if (!theList) {
+      STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::_changeList: can not find any list\n"));
+      m_ps->m_listOrderedLevels.resize(actualLevel);
+      return;
+    }
+    m_parserState.m_listManager->needToSend(newListId, m_ds->m_sentListMarkers);
+    m_ps->m_list = theList;
+    m_ps->m_list->setLevel((int)newLevel);
+  }
+
+  m_ps->m_listOrderedLevels.resize(newLevel, false);
+  if (actualLevel == newLevel) return;
+
+  for (size_t i=actualLevel+1; i<= newLevel; i++) {
+    bool ordered = m_ps->m_list->isNumeric(int(i));
+    m_ps->m_listOrderedLevels[i-1] = ordered;
+
+    librevenge::RVNGPropertyList level;
+    m_ps->m_list->addTo(int(i), level);
+    if (ordered)
+      m_documentInterface->openOrderedListLevel(level);
+    else
+      m_documentInterface->openUnorderedListLevel(level);
+  }
+}
+
+///////////////////
+// span
+///////////////////
+void STOFFSpreadsheetListener::_openSpan()
+{
+  if (m_ps->m_isSpanOpened || !m_ps->canWriteText())
+    return;
+
+  if (!m_ps->m_isParagraphOpened && !m_ps->m_isListElementOpened) {
+    _changeList();
+    if (*m_ps->m_paragraph.m_listLevelIndex == 0)
+      _openParagraph();
+    else
+      _openListElement();
+  }
+
+  librevenge::RVNGPropertyList propList;
+  m_ps->m_font.addTo(propList);
+
+  m_documentInterface->openSpan(propList);
+
+  m_ps->m_isSpanOpened = true;
+}
+
+void STOFFSpreadsheetListener::_closeSpan()
+{
+  // better not to close a link...
+  if (!m_ps->m_isSpanOpened)
+    return;
+
+  _flushText();
+  m_documentInterface->closeSpan();
+  m_ps->m_isSpanOpened = false;
+}
+
+///////////////////
+// text (send data)
+///////////////////
+void STOFFSpreadsheetListener::_flushDeferredTabs()
+{
+  if (m_ps->m_numDeferredTabs == 0 || !m_ps->canWriteText())
+    return;
+  if (!m_ps->m_font.hasDecorationLines()) {
+    if (!m_ps->m_isSpanOpened) _openSpan();
+    for (; m_ps->m_numDeferredTabs > 0; m_ps->m_numDeferredTabs--)
+      m_documentInterface->insertTab();
+    return;
+  }
+
+  STOFFFont oldFont(m_ps->m_font);
+  m_ps->m_font.resetDecorationLines();
+  _closeSpan();
+  _openSpan();
+  for (; m_ps->m_numDeferredTabs > 0; m_ps->m_numDeferredTabs--)
+    m_documentInterface->insertTab();
+  setFont(oldFont);
+}
+
+void STOFFSpreadsheetListener::_flushText()
+{
+  if (m_ps->m_textBuffer.len() == 0  || !m_ps->canWriteText()) return;
+
+  // when some many ' ' follows each other, call insertSpace
+  librevenge::RVNGString tmpText;
+  int numConsecutiveSpaces = 0;
+  librevenge::RVNGString::Iter i(m_ps->m_textBuffer);
+  for (i.rewind(); i.next();) {
+    if (*(i()) == 0x20) // this test is compatible with unicode format
+      numConsecutiveSpaces++;
+    else
+      numConsecutiveSpaces = 0;
+
+    if (numConsecutiveSpaces > 1) {
+      if (tmpText.len() > 0) {
+        m_documentInterface->insertText(tmpText);
+        tmpText.clear();
+      }
+      m_documentInterface->insertSpace();
+    }
+    else
+      tmpText.append(i());
+  }
+  m_documentInterface->insertText(tmpText);
+  m_ps->m_textBuffer.clear();
+}
+
+///////////////////
+// Note/Comment/picture/textbox
+///////////////////
+void STOFFSpreadsheetListener::insertNote(STOFFNote const &note, STOFFSubDocumentPtr &subDocument)
+{
+  if (m_ps->m_isNote) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertNote try to insert a note recursively (ignored)\n"));
+    return;
+  }
+  if (!canWriteText()) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertNote called outside a text zone (ignored)\n"));
+    return;
+  }
+  m_ps->m_isNote = true;
+  if (m_ps->m_isHeaderFooterOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertNote try to insert a note in a header/footer\n"));
+    /** Must not happen excepted in corrupted document, so we do the minimum.
+    	Note that we have no choice, either we begin by closing the paragraph,
+    	... or we reprogram handleSubDocument.
+    */
+    if (m_ps->m_isParagraphOpened)
+      _closeParagraph();
+    int prevListLevel = *m_ps->m_paragraph.m_listLevelIndex;
+    m_ps->m_paragraph.m_listLevelIndex = 0;
+    _changeList(); // flush the list exterior
+    handleSubDocument(subDocument, libstoff::DOC_NOTE);
+    m_ps->m_paragraph.m_listLevelIndex = prevListLevel;
+  }
+  else {
+    if (!m_ps->m_isParagraphOpened)
+      _openParagraph();
+    else {
+      _flushText();
+      _closeSpan();
+    }
+
+    librevenge::RVNGPropertyList propList;
+    if (note.m_label.len())
+      propList.insert("text:label", librevenge::RVNGPropertyFactory::newStringProp(note.m_label));
+    if (note.m_type == STOFFNote::FootNote) {
+      if (note.m_number >= 0)
+        m_ds->m_footNoteNumber = note.m_number;
+      else
+        m_ds->m_footNoteNumber++;
+      propList.insert("librevenge:number", m_ds->m_footNoteNumber);
+      m_documentInterface->openFootnote(propList);
+      handleSubDocument(subDocument, libstoff::DOC_NOTE);
+      m_documentInterface->closeFootnote();
+    }
+    else {
+      STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertNote try to insert a unexpected note\n"));
+    }
+  }
+  m_ps->m_isNote = false;
+}
+
+void STOFFSpreadsheetListener::insertComment(STOFFSubDocumentPtr &subDocument)
+{
+  if (m_ps->m_isNote) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertComment try to insert a comment in a note (ignored)\n"));
+    return;
+  }
+  if (!canWriteText()) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertComment called outside a text zone (ignored)\n"));
+    return;
+  }
+
+  if (!m_ps->m_isSheetCellOpened) {
+    if (!m_ps->m_isParagraphOpened)
+      _openParagraph();
+    else {
+      _flushText();
+      _closeSpan();
+    }
+  }
+  else if (m_ps->m_isParagraphOpened)
+    _closeParagraph();
+
+  librevenge::RVNGPropertyList propList;
+  m_documentInterface->openComment(propList);
+
+  m_ps->m_isNote = true;
+  handleSubDocument(subDocument, libstoff::DOC_COMMENT_ANNOTATION);
+
+  m_documentInterface->closeComment();
+  m_ps->m_isNote = false;
+}
+
+///////////////////
+// frame
+///////////////////
+bool STOFFSpreadsheetListener::openGroup(STOFFPosition const &/*pos*/)
+{
+  STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openGroup is not implemented\n"));
+  return false;
+}
+
+void STOFFSpreadsheetListener::closeGroup()
+{
+}
+
+bool STOFFSpreadsheetListener::openFrame(STOFFPosition const &pos)
+{
+  if (!m_ds->m_isSheetOpened || m_ds->m_isSheetRowOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame insert a frame outside a sheet is not implemented\n"));
+    return false;
+  }
+  if (m_ps->m_isFrameOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame: called but a frame is already opened\n"));
+    return false;
+  }
+  STOFFPosition fPos(pos);
+  switch (pos.m_anchorTo) {
+  case STOFFPosition::Page:
+    break;
+  case STOFFPosition::Paragraph:
+    if (m_ps->m_isParagraphOpened)
+      _flushText();
+    else
+      _openParagraph();
+    break;
+  case STOFFPosition::Unknown:
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame: UNKNOWN position, insert as char position\n"));
+  // fallthrough intended
+  case STOFFPosition::CharBaseLine:
+  case STOFFPosition::Char:
+    if (m_ps->m_isSpanOpened)
+      _flushText();
+    else
+      _openSpan();
+    break;
+  case STOFFPosition::Frame:
+    if (!m_ds->m_subDocuments.size()) {
+      STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame: can not determine the frame\n"));
+      return false;
+    }
+    if (m_ps->m_subDocumentType==libstoff::DOC_HEADER_FOOTER) {
+      STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame: called with Frame position in header footer, switch to paragraph\n"));
+      if (m_ps->m_isParagraphOpened)
+        _flushText();
+      else
+        _openParagraph();
+      fPos.m_anchorTo=STOFFPosition::Paragraph;
+    }
+    break;
+  default:
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame: can not determine the anchor\n"));
+    return false;
+  }
+
+  librevenge::RVNGPropertyList propList;
+  //style.addFrameTo(propList);
+  if (!propList["draw:fill"])
+    propList.insert("draw:fill","none");
+  _handleFrameParameters(propList, fPos);
+  m_documentInterface->openFrame(propList);
+
+  m_ps->m_isFrameOpened = true;
+  return true;
+}
+
+void STOFFSpreadsheetListener::closeFrame()
+{
+  if (!m_ps->m_isFrameOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::closeFrame: called but no frame is already opened\n"));
+    return;
+  }
+  m_documentInterface->closeFrame();
+  m_ps->m_isFrameOpened = false;
+}
+
+void STOFFSpreadsheetListener::_handleFrameParameters
+(librevenge::RVNGPropertyList &propList, STOFFPosition const &pos)
+{
+  STOFFVec2f origin = pos.origin();
+  librevenge::RVNGUnit unit = pos.unit();
+  float inchFactor=pos.getInvUnitScale(librevenge::RVNG_INCH);
+  float pointFactor = pos.getInvUnitScale(librevenge::RVNG_POINT);
+
+  if (pos.size()[0]>0)
+    propList.insert("svg:width", double(pos.size()[0]), unit);
+  else if (pos.size()[0]<0)
+    propList.insert("fo:min-width", double(-pos.size()[0]), unit);
+  if (pos.size()[1]>0)
+    propList.insert("svg:height", double(pos.size()[1]), unit);
+  else if (pos.size()[1]<0)
+    propList.insert("fo:min-height", double(-pos.size()[1]), unit);
+  if (pos.order() > 0)
+    propList.insert("draw:z-index", pos.order());
+  if (pos.naturalSize().x() > 4*pointFactor && pos.naturalSize().y() > 4*pointFactor) {
+    propList.insert("librevenge:naturalWidth", pos.naturalSize().x(), pos.unit());
+    propList.insert("librevenge:naturalHeight", pos.naturalSize().y(), pos.unit());
+  }
+  STOFFVec2f TLClip = (1.f/pointFactor)*pos.leftTopClipping();
+  STOFFVec2f RBClip = (1.f/pointFactor)*pos.rightBottomClipping();
+  if (TLClip[0] > 0 || TLClip[1] > 0 || RBClip[0] > 0 || RBClip[1] > 0) {
+    // in ODF1.2 we need to separate the value with ,
+    std::stringstream s;
+    s << "rect(" << TLClip[1] << "pt " << RBClip[0] << "pt "
+      <<  RBClip[1] << "pt " << TLClip[0] << "pt)";
+    propList.insert("fo:clip", s.str().c_str());
+  }
+
+  if (pos.m_wrapping ==  STOFFPosition::WDynamic)
+    propList.insert("style:wrap", "dynamic");
+  else if (pos.m_wrapping ==  STOFFPosition::WBackground) {
+    propList.insert("style:wrap", "run-through");
+    propList.insert("style:run-through", "background");
+  }
+  else if (pos.m_wrapping ==  STOFFPosition::WForeground) {
+    propList.insert("style:wrap", "run-through");
+    propList.insert("style:run-through", "foreground");
+  }
+  else if (pos.m_wrapping ==  STOFFPosition::WParallel) {
+    propList.insert("style:wrap", "parallel");
+    propList.insert("style:run-through", "foreground");
+  }
+  else if (pos.m_wrapping ==  STOFFPosition::WRunThrough)
+    propList.insert("style:wrap", "run-through");
+  else
+    propList.insert("style:wrap", "none");
+
+  if (pos.m_anchorTo == STOFFPosition::Paragraph ||
+      pos.m_anchorTo == STOFFPosition::Frame) {
+    std::string what= pos.m_anchorTo == STOFFPosition::Paragraph ?
+                      "paragraph" : "frame";
+    propList.insert("text:anchor-type", what.c_str());
+    propList.insert("style:vertical-rel", what.c_str());
+    propList.insert("style:horizontal-rel", what.c_str());
+    double w = m_ds->m_pageSpan.getPageWidth() - m_ps->m_paragraph.getMarginsWidth();
+    w *= inchFactor;
+    switch (pos.m_xPos) {
+    case STOFFPosition::XRight:
+      if (origin[0] < 0.0 || origin[0] > 0.0) {
+        propList.insert("style:horizontal-pos", "from-left");
+        propList.insert("svg:x", double(origin[0] - pos.size()[0] + w), unit);
+      }
+      else
+        propList.insert("style:horizontal-pos", "right");
+      break;
+    case STOFFPosition::XCenter:
+      if (origin[0] < 0.0 || origin[0] > 0.0) {
+        propList.insert("style:horizontal-pos", "from-left");
+        propList.insert("svg:x", double(origin[0] - pos.size()[0]/2.0 + w/2.0), unit);
+      }
+      else
+        propList.insert("style:horizontal-pos", "center");
+      break;
+    case STOFFPosition::XLeft:
+    case STOFFPosition::XFull:
+    default:
+      if (origin[0] < 0.0 || origin[0] > 0.0) {
+        propList.insert("style:horizontal-pos", "from-left");
+        propList.insert("svg:x", double(origin[0]), unit);
+      }
+      else
+        propList.insert("style:horizontal-pos", "left");
+      break;
+    }
+
+    if (origin[1] < 0.0 || origin[1] > 0.0) {
+      propList.insert("style:vertical-pos", "from-top");
+      propList.insert("svg:y", double(origin[1]), unit);
+    }
+    else
+      propList.insert("style:vertical-pos", "top");
+    return;
+  }
+
+  if (pos.m_anchorTo == STOFFPosition::Page) {
+    // Page position seems to do not use the page margin...
+    propList.insert("text:anchor-type", "page");
+    if (pos.page() > 0) propList.insert("text:anchor-page-number", pos.page());
+    double w = m_ds->m_pageSpan.getFormWidth();
+    double h = m_ds->m_pageSpan.getFormLength();
+    w *= inchFactor;
+    h *= inchFactor;
+
+    propList.insert("style:vertical-rel", "page");
+    propList.insert("style:horizontal-rel", "page");
+    double newPosition;
+    switch (pos.m_yPos) {
+    case STOFFPosition::YFull:
+      propList.insert("svg:height", double(h), unit);
+    // fallthrough intended
+    case STOFFPosition::YTop:
+      if (origin[1] < 0.0 || origin[1] > 0.0) {
+        propList.insert("style:vertical-pos", "from-top");
+        newPosition = origin[1];
+        if (newPosition > h -pos.size()[1])
+          newPosition = h - pos.size()[1];
+        propList.insert("svg:y", double(newPosition), unit);
+      }
+      else
+        propList.insert("style:vertical-pos", "top");
+      break;
+    case STOFFPosition::YCenter:
+      if (origin[1] < 0.0 || origin[1] > 0.0) {
+        propList.insert("style:vertical-pos", "from-top");
+        newPosition = (h - pos.size()[1])/2.0;
+        if (newPosition > h -pos.size()[1]) newPosition = h - pos.size()[1];
+        propList.insert("svg:y", double(newPosition), unit);
+      }
+      else
+        propList.insert("style:vertical-pos", "middle");
+      break;
+    case STOFFPosition::YBottom:
+      if (origin[1] < 0.0 || origin[1] > 0.0) {
+        propList.insert("style:vertical-pos", "from-top");
+        newPosition = h - pos.size()[1]-origin[1];
+        if (newPosition > h -pos.size()[1]) newPosition = h -pos.size()[1];
+        else if (newPosition < 0) newPosition = 0;
+        propList.insert("svg:y", double(newPosition), unit);
+      }
+      else
+        propList.insert("style:vertical-pos", "bottom");
+      break;
+    default:
+      break;
+    }
+
+    switch (pos.m_xPos) {
+    case STOFFPosition::XFull:
+      propList.insert("svg:width", double(w), unit);
+    // fallthrough intended
+    case STOFFPosition::XLeft:
+      if (origin[0] < 0.0 || origin[0] > 0.0) {
+        propList.insert("style:horizontal-pos", "from-left");
+        propList.insert("svg:x", double(origin[0]), unit);
+      }
+      else
+        propList.insert("style:horizontal-pos", "left");
+      break;
+    case STOFFPosition::XRight:
+      if (origin[0] < 0.0 || origin[0] > 0.0) {
+        propList.insert("style:horizontal-pos", "from-left");
+        propList.insert("svg:x",double(w - pos.size()[0] + origin[0]), unit);
+      }
+      else
+        propList.insert("style:horizontal-pos", "right");
+      break;
+    case STOFFPosition::XCenter:
+      if (origin[0] < 0.0 || origin[0] > 0.0) {
+        propList.insert("style:horizontal-pos", "from-left");
+        propList.insert("svg:x", double((w - pos.size()[0])/2. + origin[0]), unit);
+      }
+      else
+        propList.insert("style:horizontal-pos", "center");
+      break;
+    default:
+      break;
+    }
+    return;
+  }
+  if (pos.m_anchorTo != STOFFPosition::Char &&
+      pos.m_anchorTo != STOFFPosition::CharBaseLine &&
+      pos.m_anchorTo != STOFFPosition::Unknown) return;
+
+  propList.insert("text:anchor-type", "as-char");
+  if (pos.m_anchorTo == STOFFPosition::CharBaseLine)
+    propList.insert("style:vertical-rel", "baseline");
+  else
+    propList.insert("style:vertical-rel", "line");
+  switch (pos.m_yPos) {
+  case STOFFPosition::YFull:
+  case STOFFPosition::YTop:
+    if (origin[1] < 0.0 || origin[1] > 0.0) {
+      propList.insert("style:vertical-pos", "from-top");
+      propList.insert("svg:y", double(origin[1]), unit);
+    }
+    else
+      propList.insert("style:vertical-pos", "top");
+    break;
+  case STOFFPosition::YCenter:
+    if (origin[1] < 0.0 || origin[1] > 0.0) {
+      propList.insert("style:vertical-pos", "from-top");
+      propList.insert("svg:y", double(origin[1] - pos.size()[1]/2.0), unit);
+    }
+    else
+      propList.insert("style:vertical-pos", "middle");
+    break;
+  case STOFFPosition::YBottom:
+  default:
+    if (origin[1] < 0.0 || origin[1] > 0.0) {
+      propList.insert("style:vertical-pos", "from-top");
+      propList.insert("svg:y", double(origin[1] - pos.size()[1]), unit);
+    }
+    else
+      propList.insert("style:vertical-pos", "bottom");
+    break;
+  }
+}
+
+///////////////////
+// subdocument
+///////////////////
+void STOFFSpreadsheetListener::handleSubDocument(STOFFSubDocumentPtr subDocument, libstoff::SubDocumentType subDocumentType)
+{
+  _pushParsingState();
+  _startSubDocument();
+  m_ps->m_subDocumentType = subDocumentType;
+
+  m_ps->m_isPageSpanOpened = true;
+  m_ps->m_list.reset();
+
+  switch (subDocumentType) {
+  case libstoff::DOC_TEXT_BOX:
+    m_ps->m_isTextboxOpened = true;
+    m_ds->m_pageSpan.setMargins(0.0);
+    break;
+  case libstoff::DOC_HEADER_FOOTER:
+    m_ps->m_isHeaderFooterWithoutParagraph = true;
+    m_ps->m_isHeaderFooterOpened = true;
+    break;
+  case libstoff::DOC_CHART_ZONE:
+    m_ps->m_isTextboxOpened = true;
+    break;
+  case libstoff::DOC_NONE:
+  case libstoff::DOC_CHART:
+  case libstoff::DOC_NOTE:
+  case libstoff::DOC_SHEET:
+  case libstoff::DOC_TABLE:
+  case libstoff::DOC_COMMENT_ANNOTATION:
+  case libstoff::DOC_GRAPHIC_GROUP:
+  default:
+    break;
+  }
+
+  // Check whether the document is calling itself
+  bool sendDoc = true;
+  for (size_t i = 0; i < m_ds->m_subDocuments.size(); i++) {
+    if (!subDocument)
+      break;
+    if (subDocument == m_ds->m_subDocuments[i]) {
+      STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::handleSubDocument: recursif call, stop...\n"));
+      sendDoc = false;
+      break;
+    }
+  }
+  if (sendDoc) {
+    if (subDocument) {
+      m_ds->m_subDocuments.push_back(subDocument);
+      shared_ptr<STOFFListener> listen(this, STOFF_shared_ptr_noop_deleter<STOFFSpreadsheetListener>());
+      try {
+        subDocument->parse(listen, subDocumentType);
+      }
+      catch (...) {
+        STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::handleSubDocument exception catched \n"));
+      }
+      m_ds->m_subDocuments.pop_back();
+    }
+    if (m_ps->m_isHeaderFooterWithoutParagraph)
+      _openSpan();
+  }
+
+  _endSubDocument();
+  _popParsingState();
+}
+
+bool STOFFSpreadsheetListener::isSubDocumentOpened(libstoff::SubDocumentType &subdocType) const
+{
+  if (!m_ps->m_inSubDocument)
+    return false;
+  subdocType = m_ps->m_subDocumentType;
+  return true;
+}
+
+void STOFFSpreadsheetListener::_startSubDocument()
+{
+  m_ds->m_isDocumentStarted = true;
+  m_ps->m_inSubDocument = true;
+}
+
+void STOFFSpreadsheetListener::_endSubDocument()
+{
+  if (m_ps->m_isTableOpened)
+    closeTable();
+  if (m_ps->m_isSpanOpened)
+    _closeSpan();
+  if (m_ps->m_isParagraphOpened)
+    _closeParagraph();
+
+  m_ps->m_paragraph.m_listLevelIndex=0;
+  _changeList(); // flush the list exterior
+}
+
+///////////////////
+// sheet
+///////////////////
+void STOFFSpreadsheetListener::openSheet(std::vector<float> const &colWidth, librevenge::RVNGUnit unit, librevenge::RVNGString const &name)
+{
+  if (m_ds->m_isSheetOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openSheet: called with m_isSheetOpened=true\n"));
+    return;
+  }
+  if (!m_ps->m_isPageSpanOpened)
+    _openPageSpan();
+  if (m_ps->m_isParagraphOpened)
+    _closeParagraph();
+
+  _pushParsingState();
+  _startSubDocument();
+  m_ps->m_subDocumentType = libstoff::DOC_SHEET;
+  m_ps->m_isPageSpanOpened = true;
+
+  librevenge::RVNGPropertyList propList;
+  librevenge::RVNGPropertyListVector columns;
+  size_t nCols = colWidth.size();
+  for (size_t c = 0; c < nCols; c++) {
+    librevenge::RVNGPropertyList column;
+    column.insert("style:column-width", colWidth[c], unit);
+    columns.append(column);
+  }
+  propList.insert("librevenge:columns", columns);
+  if (!name.empty())
+    propList.insert("librevenge:sheet-name", name);
+  m_documentInterface->openSheet(propList);
+  m_ds->m_isSheetOpened = true;
+}
+
+void STOFFSpreadsheetListener::closeSheet()
+{
+  if (!m_ds->m_isSheetOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::closeSheet: called with m_isSheetOpened=false\n"));
+    return;
+  }
+
+  m_ds->m_isSheetOpened = false;
+  m_documentInterface->closeSheet();
+  _endSubDocument();
+  _popParsingState();
+}
+
+void STOFFSpreadsheetListener::openSheetRow(float h, librevenge::RVNGUnit unit)
+{
+  if (m_ds->m_isSheetRowOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openSheetRow: called with m_isSheetRowOpened=true\n"));
+    return;
+  }
+  if (!m_ds->m_isSheetOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openSheetRow: called with m_isSheetOpened=false\n"));
+    return;
+  }
+  librevenge::RVNGPropertyList propList;
+  if (h > 0)
+    propList.insert("style:row-height", h, unit);
+  else if (h < 0)
+    propList.insert("style:min-row-height", -h, unit);
+  m_documentInterface->openSheetRow(propList);
+  m_ds->m_isSheetRowOpened = true;
+}
+
+void STOFFSpreadsheetListener::closeSheetRow()
+{
+  if (!m_ds->m_isSheetRowOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openSheetRow: called with m_isSheetRowOpened=false\n"));
+    return;
+  }
+  m_ds->m_isSheetRowOpened = false;
+  m_documentInterface->closeSheetRow();
+}
+
+void STOFFSpreadsheetListener::openSheetCell(STOFFCell const &cell, STOFFCellContent const &content)
+{
+  if (!m_ds->m_isSheetRowOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openSheetCell: called with m_isSheetRowOpened=false\n"));
+    return;
+  }
+  if (m_ps->m_isSheetCellOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openSheetCell: called with m_isSheetCellOpened=true\n"));
+    closeSheetCell();
+  }
+
+  librevenge::RVNGPropertyList propList;
+  cell.addTo(propList);
+  STOFFCell::Format const &format=cell.getFormat();
+  if (!format.hasBasicFormat()) {
+    int numberingId=-1;
+    std::stringstream name;
+    if (m_ds->m_numberingIdMap.find(format)!=m_ds->m_numberingIdMap.end()) {
+      numberingId=m_ds->m_numberingIdMap.find(format)->second;
+      name << "Numbering" << numberingId;
+    }
+    else {
+      numberingId=(int) m_ds->m_numberingIdMap.size();
+      name << "Numbering" << numberingId;
+
+      librevenge::RVNGPropertyList numList;
+      if (format.getNumberingProperties(numList)) {
+        numList.insert("librevenge:name", name.str().c_str());
+        m_documentInterface->defineSheetNumberingStyle(numList);
+        m_ds->m_numberingIdMap[format]=numberingId;
+      }
+      else
+        numberingId=-1;
+    }
+    if (numberingId>=0)
+      propList.insert("librevenge:numbering-name", name.str().c_str());
+  }
+  // formula
+  if (content.m_formula.size()) {
+    librevenge::RVNGPropertyListVector formulaVect;
+    for (size_t i=0; i < content.m_formula.size(); ++i)
+      formulaVect.append(content.m_formula[i].getPropertyList());
+    propList.insert("librevenge:formula", formulaVect);
+  }
+  bool hasFormula=!content.m_formula.empty();
+  if (content.isValueSet() || hasFormula) {
+    bool hasValue=content.isValueSet();
+    if (hasFormula && (content.m_value >= 0 && content.m_value <= 0))
+      hasValue=false;
+    switch (format.m_format) {
+    case STOFFCell::F_TEXT:
+      if (!hasValue) break;
+      propList.insert("librevenge:value-type", format.getValueType().c_str());
+      propList.insert("librevenge:value", content.m_value, librevenge::RVNG_GENERIC);
+      break;
+    case STOFFCell::F_NUMBER:
+      propList.insert("librevenge:value-type", format.getValueType().c_str());
+      if (!hasValue) break;
+      propList.insert("librevenge:value", content.m_value, librevenge::RVNG_GENERIC);
+      break;
+    case STOFFCell::F_BOOLEAN:
+      propList.insert("librevenge:value-type", "boolean");
+      if (!hasValue) break;
+      propList.insert("librevenge:value", content.m_value, librevenge::RVNG_GENERIC);
+      break;
+    case STOFFCell::F_DATE: {
+      propList.insert("librevenge:value-type", "date");
+      if (!hasValue) break;
+      int Y=0, M=0, D=0;
+      if (!STOFFCellContent::double2Date(content.m_value, Y, M, D)) break;
+      propList.insert("librevenge:year", Y);
+      propList.insert("librevenge:month", M);
+      propList.insert("librevenge:day", D);
+      break;
+    }
+    case STOFFCell::F_TIME: {
+      propList.insert("librevenge:value-type", "time");
+      if (!hasValue) break;
+      int H=0, M=0, S=0;
+      if (!STOFFCellContent::double2Time(std::fmod(content.m_value,1.),H,M,S))
+        break;
+      propList.insert("librevenge:hours", H);
+      propList.insert("librevenge:minutes", M);
+      propList.insert("librevenge:seconds", S);
+      break;
+    }
+    case STOFFCell::F_UNKNOWN:
+      if (!hasValue) break;
+      propList.insert("librevenge:value-type", format.getValueType().c_str());
+      propList.insert("librevenge:value", content.m_value, librevenge::RVNG_GENERIC);
+      break;
+    default:
+      break;
+    }
+  }
+
+  m_ps->m_isSheetCellOpened = true;
+  m_documentInterface->openSheetCell(propList);
+}
+
+void STOFFSpreadsheetListener::closeSheetCell()
+{
+  if (!m_ps->m_isSheetCellOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::closeSheetCell: called with m_isSheetCellOpened=false\n"));
+    return;
+  }
+
+  _closeParagraph();
+
+  m_ps->m_isSheetCellOpened = false;
+  m_documentInterface->closeSheetCell();
+}
+
+void STOFFSpreadsheetListener::insertTable(STOFFPosition const &pos, STOFFTable &table)
+{
+  if (!m_ds->m_isSheetOpened || m_ds->m_isSheetRowOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertTable insert a table outside a sheet is not implemented\n"));
+    return;
+  }
+  if (!openFrame(pos)) return;
+
+  _pushParsingState();
+  _startSubDocument();
+  m_ps->m_subDocumentType = libstoff::DOC_TABLE;
+
+  shared_ptr<STOFFListener> listen(this, STOFF_shared_ptr_noop_deleter<STOFFSpreadsheetListener>());
+  try {
+    table.sendTable(listen);
+  }
+  catch (...) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertTable exception catched \n"));
+  }
+  _endSubDocument();
+  _popParsingState();
+
+  closeFrame();
+}
+
+
+///////////////////
+// chart
+///////////////////
+void STOFFSpreadsheetListener::insertChart
+(STOFFPosition const &pos, STOFFChart &chart)
+{
+  if (!m_ds->m_isSheetOpened || m_ds->m_isSheetRowOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertChart outside a chart in a sheet is not implemented\n"));
+    return;
+  }
+  if (!openFrame(pos)) return;
+
+  _pushParsingState();
+  _startSubDocument();
+  m_ps->m_subDocumentType = libstoff::DOC_CHART;
+
+  shared_ptr<STOFFSpreadsheetListener> listen(this, STOFF_shared_ptr_noop_deleter<STOFFSpreadsheetListener>());
+  try {
+    chart.sendChart(listen, m_documentInterface);
+  }
+  catch (...) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertChart exception catched \n"));
+  }
+  _endSubDocument();
+  _popParsingState();
+
+  closeFrame();
+}
+
+void STOFFSpreadsheetListener::openTable(STOFFTable const &table)
+{
+  if (m_ps->m_isFrameOpened || m_ps->m_isTableOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openTable: no frame is already open...\n"));
+    return;
+  }
+
+  if (m_ps->m_isParagraphOpened)
+    _closeParagraph();
+
+  // default value: which can be redefined by table
+  librevenge::RVNGPropertyList propList;
+  propList.insert("table:align", "left");
+  propList.insert("fo:margin-left", *m_ps->m_paragraph.m_margins[1], *m_ps->m_paragraph.m_marginsUnit);
+
+  _pushParsingState();
+  _startSubDocument();
+  m_ps->m_subDocumentType = libstoff::DOC_TABLE;
+
+  table.addTablePropertiesTo(propList);
+  m_documentInterface->openTable(propList);
+  m_ps->m_isTableOpened = true;
+}
+
+void STOFFSpreadsheetListener::closeTable()
+{
+  if (!m_ps->m_isTableOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::closeTable: called with m_isTableOpened=false\n"));
+    return;
+  }
+
+  m_ps->m_isTableOpened = false;
+  _endSubDocument();
+  m_documentInterface->closeTable();
+
+  _popParsingState();
+}
+
+void STOFFSpreadsheetListener::openTableRow(float h, librevenge::RVNGUnit unit, bool headerRow)
+{
+  if (m_ps->m_isTableRowOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openTableRow: called with m_isTableRowOpened=true\n"));
+    return;
+  }
+  if (!m_ps->m_isTableOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openTableRow: called with m_isTableOpened=false\n"));
+    return;
+  }
+  librevenge::RVNGPropertyList propList;
+  propList.insert("librevenge:is-header-row", headerRow);
+
+  if (h > 0)
+    propList.insert("style:row-height", h, unit);
+  else if (h < 0)
+    propList.insert("style:min-row-height", -h, unit);
+  m_documentInterface->openTableRow(propList);
+  m_ps->m_isTableRowOpened = true;
+}
+
+void STOFFSpreadsheetListener::closeTableRow()
+{
+  if (!m_ps->m_isTableRowOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openTableRow: called with m_isTableRowOpened=false\n"));
+    return;
+  }
+  m_ps->m_isTableRowOpened = false;
+  m_documentInterface->closeTableRow();
+}
+
+void STOFFSpreadsheetListener::addEmptyTableCell(STOFFVec2i const &pos, STOFFVec2i span)
+{
+  if (!m_ps->m_isTableRowOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::addEmptyTableCell: called with m_isTableRowOpened=false\n"));
+    return;
+  }
+  if (m_ps->m_isTableCellOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::addEmptyTableCell: called with m_isTableCellOpened=true\n"));
+    closeTableCell();
+  }
+  librevenge::RVNGPropertyList propList;
+  propList.insert("librevenge:column", pos[0]);
+  propList.insert("librevenge:row", pos[1]);
+  propList.insert("table:number-columns-spanned", span[0]);
+  propList.insert("table:number-rows-spanned", span[1]);
+  m_documentInterface->openTableCell(propList);
+  m_documentInterface->closeTableCell();
+}
+
+void STOFFSpreadsheetListener::openTableCell(STOFFCell const &cell)
+{
+  if (!m_ps->m_isTableRowOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openTableCell: called with m_isTableRowOpened=false\n"));
+    return;
+  }
+  if (m_ps->m_isTableCellOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openTableCell: called with m_isTableCellOpened=true\n"));
+    closeTableCell();
+  }
+
+  librevenge::RVNGPropertyList propList;
+  cell.addTo(propList);
+  m_ps->m_isTableCellOpened = true;
+  m_documentInterface->openTableCell(propList);
+}
+
+void STOFFSpreadsheetListener::closeTableCell()
+{
+  if (!m_ps->m_isTableCellOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::closeTableCell: called with m_isTableCellOpened=false\n"));
+    return;
+  }
+
+  _closeParagraph();
+  m_ps->m_paragraph.m_listLevelIndex=0;
+  _changeList(); // flush the list exterior
+
+  m_ps->m_isTableCellOpened = false;
+  m_documentInterface->closeTableCell();
+}
+
+///////////////////
+// others
+///////////////////
+
+// ---------- state stack ------------------
+shared_ptr<STOFFSpreadsheetListenerInternal::State> STOFFSpreadsheetListener::_pushParsingState()
+{
+  shared_ptr<STOFFSpreadsheetListenerInternal::State> actual = m_ps;
+  m_psStack.push_back(actual);
+  m_ps.reset(new STOFFSpreadsheetListenerInternal::State);
+
+  m_ps->m_isNote = actual->m_isNote;
+
+  return actual;
+}
+
+void STOFFSpreadsheetListener::_popParsingState()
+{
+  if (m_psStack.size()==0) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::_popParsingState: psStack is empty()\n"));
+    throw libstoff::ParseException();
+  }
+  m_ps = m_psStack.back();
+  m_psStack.pop_back();
+}
+// vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

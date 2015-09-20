@@ -31,18 +31,23 @@
 * instead of those above.
 */
 
-//#include "STOFFTextListener.hxx"
+#include "libstaroffice_internal.hxx"
+
+#include "STOFFList.hxx"
+#include "STOFFSpreadsheetListener.hxx"
 
 #include "STOFFParser.hxx"
 
 STOFFParserState::STOFFParserState(STOFFParserState::Type type, STOFFInputStreamPtr input, STOFFHeader *header) :
   m_type(type), m_kind(STOFFDocument::STOFF_K_TEXT), m_version(0), m_input(input), m_header(header),
+  m_pageSpan(), m_listManager(), m_spreadsheetListener(),
   m_asciiFile(input)
 {
   if (header) {
     m_version=header->getVersion();
     m_kind=header->getKind();
   }
+  m_listManager.reset(new STOFFListManager);
 }
 
 STOFFParserState::~STOFFParserState()
@@ -57,6 +62,17 @@ STOFFParser::STOFFParser(STOFFParserState::Type type, STOFFInputStreamPtr input,
 
 STOFFParser::~STOFFParser()
 {
+}
+
+void STOFFParser::setSpreadsheetListener(STOFFSpreadsheetListenerPtr &listener)
+{
+  m_parserState->m_spreadsheetListener=listener;
+}
+
+void STOFFParser::resetSpreadsheetListener()
+{
+  if (getSpreadsheetListener()) getSpreadsheetListener()->endDocument();
+  m_parserState->m_spreadsheetListener.reset();
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

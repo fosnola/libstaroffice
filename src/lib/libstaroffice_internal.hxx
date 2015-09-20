@@ -459,6 +459,7 @@ struct STOFFEmbeddedObject {
 
 // forward declarations of basic classes and smart pointers
 class STOFFFont;
+class STOFFList;
 class STOFFParagraph;
 class STOFFSection;
 class STOFFPageSpan;
@@ -470,14 +471,20 @@ class STOFFPosition;
 
 class STOFFInputStream;
 class STOFFListener;
+class STOFFListManager;
 class STOFFParserState;
+class STOFFSpreadsheetListener;
 class STOFFSubDocument;
 //! a smart pointer of STOFFInputStream
 typedef shared_ptr<STOFFInputStream> STOFFInputStreamPtr;
 //! a smart pointer of STOFFListener
 typedef shared_ptr<STOFFListener> STOFFListenerPtr;
+//! a smart pointer of STOFFListManager
+typedef shared_ptr<STOFFListManager> STOFFListManagerPtr;
 //! a smart pointer of STOFFParserState
 typedef shared_ptr<STOFFParserState> STOFFParserStatePtr;
+//! a smart pointer of STOFFSpreadsheetListener
+typedef shared_ptr<STOFFSpreadsheetListener> STOFFSpreadsheetListenerPtr;
 //! a smart pointer of STOFFSubDocument
 typedef shared_ptr<STOFFSubDocument> STOFFSubDocumentPtr;
 

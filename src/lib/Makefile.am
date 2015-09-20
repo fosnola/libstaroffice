@@ -20,6 +20,10 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	SDCParser.hxx				\
 	SDWParser.cxx				\
 	SDWParser.hxx				\
+	STOFFCell.cxx				\
+	STOFFCell.hxx				\
+	STOFFChart.cxx				\
+	STOFFChart.hxx				\
 	STOFFDebug.cxx				\
 	STOFFDebug.hxx				\
 	STOFFDocument.cxx			\
@@ -50,10 +54,14 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFSection.hxx			\
 	STOFFSpreadsheetDecoder.cxx		\
 	STOFFSpreadsheetDecoder.hxx		\
+	STOFFSpreadsheetListener.cxx		\
+	STOFFSpreadsheetListener.hxx		\
 	STOFFStringStream.cxx			\
 	STOFFStringStream.hxx			\
 	STOFFSubDocument.cxx			\
 	STOFFSubDocument.hxx			\
+	STOFFTable.cxx				\
+	STOFFTable.hxx				\
 	StarAttribute.cxx			\
 	StarAttribute.hxx			\
 	StarBitmap.cxx				\

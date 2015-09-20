@@ -131,6 +131,7 @@ protected:
   shared_ptr<StarObjectInternal::State> m_state;
 
 private:
+  StarObject(StarObject const &orig);
   StarObject &operator=(StarObject const &orig);
 };
 

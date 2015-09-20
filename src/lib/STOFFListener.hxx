@@ -90,15 +90,6 @@ public:
   // ------ text data -----------
   //! adds a basic character, ..
   virtual void insertChar(uint8_t character)=0;
-  /** insert a character using the font converter to find the utf8
-      character */
-  virtual void insertCharacter(unsigned char c)=0;
-  /** insert a character using the font converter to find the utf8
-      character and if needed, input to read extra character.
-
-      \return the number of extra character read
-   */
-  virtual int insertCharacter(unsigned char c, STOFFInputStreamPtr &input, long endPos=-1)=0;
   /** adds an unicode character.
    *  By convention if \a character=0xfffd(undef), no character is added */
   virtual void insertUnicode(uint32_t character)=0;
@@ -135,7 +126,6 @@ public:
   //! close a link
   virtual void closeLink()=0;
 
-#if 0
   // ------- table -----------------
   /** open a table*/
   virtual void openTable(STOFFTable const &table) = 0;
@@ -151,7 +141,6 @@ public:
   virtual void closeTableCell() = 0;
   /** add empty cell */
   virtual void addEmptyTableCell(STOFFVec2i const &pos, STOFFVec2i span=STOFFVec2i(1,1)) = 0;
-#endif
 
   // ------- section ---------------
   /** returns true if we can add open a section, add page break, ... */

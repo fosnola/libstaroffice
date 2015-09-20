@@ -43,6 +43,7 @@
 
 #include "STOFFEntry.hxx"
 #include "STOFFHeader.hxx"
+#include "STOFFPageSpan.hxx"
 
 /** a class to define the parser state */
 class STOFFParserState
@@ -64,6 +65,13 @@ public:
   STOFFInputStreamPtr m_input;
   //! the header
   STOFFHeader *m_header;
+  //! the actual document size
+  STOFFPageSpan m_pageSpan;
+
+  //! the list manager
+  STOFFListManagerPtr m_listManager;
+  //! the spreadsheet listener
+  STOFFSpreadsheetListenerPtr m_spreadsheetListener;
 
   //! the debug file
   libstoff::DebugFile m_asciiFile;
@@ -102,6 +110,41 @@ public:
   {
     return m_parserState->m_input;
   }
+  //! returns the actual page dimension
+  STOFFPageSpan const &getPageSpan() const
+  {
+    return m_parserState->m_pageSpan;
+  }
+  //! returns the actual page dimension
+  STOFFPageSpan &getPageSpan()
+  {
+    return m_parserState->m_pageSpan;
+  }
+  //! returns the form length
+  double getFormLength() const
+  {
+    return m_parserState->m_pageSpan.getFormLength();
+  }
+  //! returns the form width
+  double getFormWidth() const
+  {
+    return m_parserState->m_pageSpan.getFormWidth();
+  }
+  //! returns the page length (form length without margin )
+  double getPageLength() const
+  {
+    return m_parserState->m_pageSpan.getPageLength();
+  }
+  //! returns the page width (form width without margin )
+  double getPageWidth() const
+  {
+    return m_parserState->m_pageSpan.getPageWidth();
+  }
+  //! returns the spreadsheet listener
+  STOFFSpreadsheetListenerPtr &getSpreadsheetListener()
+  {
+    return m_parserState->m_spreadsheetListener;
+  }
   //! a DebugFile used to write what we recognize when we parse the document
   libstoff::DebugFile &ascii()
   {
@@ -118,6 +161,10 @@ protected:
   {
     m_parserState->m_version = vers;
   }
+  //! sets the spreadsheet listener
+  void setSpreadsheetListener(STOFFSpreadsheetListenerPtr &listener);
+  //! resets the listener
+  void resetSpreadsheetListener();
   //! Debugging: change the default ascii file
   void setAsciiName(char const *name)
   {

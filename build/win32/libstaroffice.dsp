@@ -95,6 +95,14 @@ SOURCE=..\..\src\lib\SDWParser.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFCell.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFChart.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFDebug.cxx
 # End Source File
 # Begin Source File
@@ -151,11 +159,19 @@ SOURCE=..\..\src\lib\STOFFSpreadsheetDecoder.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFSpreadsheetListener.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFStringStream.cxx
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFSubDocument.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFTable.cxx
 # End Source File
 # Begin Source File
 
@@ -259,6 +275,14 @@ SOURCE=..\..\src\lib\SDWParser.hxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFCell.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFChart.hxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFDebug.hxx
 # End Source File
 # Begin Source File
@@ -323,11 +347,19 @@ SOURCE=..\..\src\lib\STOFFSpreadsheetDecoder.hxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFSpreadsheetListener.hxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFStringStream.hxx
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFSubDocument.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFTable.hxx
 # End Source File
 # Begin Source File
 
