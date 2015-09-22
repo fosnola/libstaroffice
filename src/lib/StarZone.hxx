@@ -196,7 +196,7 @@ public:
   }
 
   //! try to read an unicode string
-  bool readString(librevenge::RVNGString &string, int encoding=-1) const;
+  bool readString(std::vector<uint32_t> &string, int encoding=-1) const;
   //! try to read a pool of strings
   bool readStringsPool();
   //! try to return a pool name

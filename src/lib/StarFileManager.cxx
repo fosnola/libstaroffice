@@ -451,7 +451,7 @@ try
   f << "vers=" << std::hex << lVersion << std::dec << ",";
   ascii.addPos(0);
   ascii.addNote(f.str().c_str());
-  librevenge::RVNGString text;
+  std::vector<uint32_t> text;
   while (!input->isEnd()) {
     long pos=input->tell();
     int8_t cTag;
@@ -468,7 +468,7 @@ try
         done=false;
         break;
       }
-      f << text.cstr();
+      f << libstoff::getString(text).cstr();
       break;
     case 'D':
       for (int i=0; i<4; ++i) {
@@ -478,7 +478,7 @@ try
           done=false;
           break;
         }
-        if (!text.empty()) f << "str" << i << "=" << text.cstr() << ",";
+        if (!text.empty()) f << "str" << i << "=" << libstoff::getString(text).cstr() << ",";
         if (i==1 || i==2) {
           uint32_t date, time;
           *input >> date >> time;
@@ -515,7 +515,7 @@ try
           done=false;
           break;
         }
-        f << text.cstr() << ",";
+        f << libstoff::getString(text).cstr() << ",";
         *input >> nData1 >> nData2 >> nData3 >> nData4;
         if (nData1) f << "familly=" << nData1 << ",";
         if (nData2) f << "encoding=" << nData2 << ",";
@@ -553,7 +553,7 @@ try
         done=false;
         break;
       }
-      f << text.cstr() << ",";
+      f << libstoff::getString(text).cstr() << ",";
       uint16_t n;
       *input>>n;
       if (n) f << "n=" << n << ",";
@@ -630,7 +630,7 @@ bool StarFileManager::readFont(StarZone &zone)
   }
   long lastPos=zone.getRecordLastPosition();
   for (int i=0; i<2; ++i) {
-    librevenge::RVNGString string;
+    std::vector<uint32_t> string;
     if (!zone.readString(string)||input->tell()>lastPos) {
       STOFF_DEBUG_MSG(("StarFileManager::readFont: can not read a string\n"));
       f << "###string";
@@ -639,7 +639,7 @@ bool StarFileManager::readFont(StarZone &zone)
       zone.closeVersionCompatHeader("StarFont");
       return true;
     }
-    if (!string.empty()) f << (i==0 ? "name" : "style") << "=" << string.cstr() << ",";
+    if (!string.empty()) f << (i==0 ? "name" : "style") << "=" << libstoff::getString(string).cstr() << ",";
   }
   f << "size=" << input->readLong(4) << "x" << input->readLong(4) << ",";
   uint16_t eCharSet, eFamily, ePitch, eWeight, eUnderline, eStrikeOut, eItalic, eLanguage, eWidthType;
@@ -754,7 +754,7 @@ bool StarFileManager::readJobSetUp(StarZone &zone)
       f.str("");
       f << "JobSetUp[values]:";
       if (nSystem==0xfffe) {
-        librevenge::RVNGString text;
+        std::vector<uint32_t> text;
         while (input->tell()<lastPos) {
           for (int i=0; i<2; ++i) {
             if (!zone.readString(text)) {
@@ -762,7 +762,7 @@ bool StarFileManager::readJobSetUp(StarZone &zone)
               ok=false;
               break;
             }
-            f << text.cstr() << (i==0 ? ':' : ',');
+            f << libstoff::getString(text).cstr() << (i==0 ? ':' : ',');
           }
           if (!ok)
             break;
@@ -846,7 +846,7 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarObjec
     f.str("");
     f << "EditTextObject[para" << i << "]:";
     for (int j=0; j<2; ++j) {
-      librevenge::RVNGString text;
+      std::vector<uint32_t> text;
       if (!zone.readString(text) || input->tell()>lastPos) {
         STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read a strings\n"));
         f << "###strings,";
@@ -856,7 +856,7 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarObjec
         return true;
       }
       else if (!text.empty())
-        f << (j==0 ? "name" : "style") << "=" << text.cstr() << ",";
+        f << (j==0 ? "name" : "style") << "=" << libstoff::getString(text).cstr() << ",";
     }
     uint16_t styleFamily;
     *input >> styleFamily;
@@ -935,7 +935,7 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarObjec
     f << "strings=[";
     for (int i=0; unicodeString && i<int(nPara); ++i) {
       for (int s=0; s<2; ++s) {
-        librevenge::RVNGString text;
+        std::vector<uint32_t> text;
         if (!zone.readString(text) || input->tell()>lastPos) {
           STOFF_DEBUG_MSG(("StarFileManager::readEditTextObject: can not read a strings\n"));
           f << "###strings,";
@@ -944,7 +944,7 @@ bool StarFileManager::readEditTextObject(StarZone &zone, long lastPos, StarObjec
         if (text.empty())
           f << "_,";
         else
-          f << text.cstr() << ",";
+          f << libstoff::getString(text).cstr() << ",";
       }
     }
     f << "],";
@@ -1026,7 +1026,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
     unsigned char col[3];
     STOFFColor color;
     int32_t nTmp, nTmp1;
-    librevenge::RVNGString text;
+    std::vector<uint32_t> text;
     switch (type) {
     case 1:
       f << "pixel=" << input->readLong(4) << "x" << input->readLong(4) << ",";
@@ -1126,9 +1126,9 @@ bool StarFileManager::readSVGDI(StarZone &zone)
         break;
       }
       text.clear();
-      for (int c=0; c<int(nTmp); ++c) text.append((char) input->readULong(1));
+      for (int c=0; c<int(nTmp); ++c) text.push_back((uint32_t) input->readULong(1));
       input->seek(1, librevenge::RVNG_SEEK_CUR);
-      f << text.cstr() << ",";
+      f << libstoff::getString(text).cstr() << ",";
       if (nUnicodeCommentActionNumber!=(uint32_t) i) break;
       uint16_t type1;
       uint32_t len;
@@ -1141,8 +1141,8 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       if (type1==1032) {
         text.clear();
         int nUnicode=int(len-4)/2;
-        for (int c=0; c<nUnicode; ++c) text.append((char) input->readULong(2));
-        f << text.cstr() << ",";
+        for (int c=0; c<nUnicode; ++c) text.push_back((uint32_t) input->readULong(2));
+        f << libstoff::getString(text).cstr() << ",";
       }
       else {
         STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: unknown data\n"));
@@ -1162,9 +1162,9 @@ bool StarFileManager::readSVGDI(StarZone &zone)
         break;
       }
       text.clear();
-      for (int c=0; c<int(nTmp); ++c) text.append((char) input->readULong(1));
+      for (int c=0; c<int(nTmp); ++c) text.push_back((uint32_t) input->readULong(1));
       input->seek(1, librevenge::RVNG_SEEK_CUR);
-      f << text.cstr() << ",";
+      f << libstoff::getString(text).cstr() << ",";
       f << "ary=[";
       for (int ary=0; ary<int(nAryLen); ++ary) f << input->readLong(4) << ",";
       f << "],";
@@ -1180,8 +1180,8 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       if (type1==1032) {
         text.clear();
         int nUnicode=int(len-4)/2;
-        for (int c=0; c<nUnicode; ++c) text.append((char) input->readULong(2));
-        f << text.cstr() << ",";
+        for (int c=0; c<nUnicode; ++c) text.push_back((uint32_t) input->readULong(2));
+        f << libstoff::getString(text).cstr() << ",";
       }
       else {
         STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: unknown data\n"));
@@ -1430,7 +1430,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
         f << "###text,";
         break;
       }
-      f << text.cstr() << ",";
+      f << libstoff::getString(text).cstr() << ",";
       f << "value=" << input->readULong(4) << ",";
       long size=input->readLong(4);
       if (size<0 || input->tell()+size+4>endDataPos) {

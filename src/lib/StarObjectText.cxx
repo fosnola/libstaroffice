@@ -538,7 +538,7 @@ bool StarObjectText::readSWBookmarkList(StarZone &zone)
       break;
     }
 
-    librevenge::RVNGString text("");
+    std::vector<uint32_t> text;
     bool ok=true;
     if (!zone.readString(text)) {
       ok=false;
@@ -546,14 +546,14 @@ bool StarObjectText::readSWBookmarkList(StarZone &zone)
       f << "###short";
     }
     else
-      f << text.cstr();
+      f << libstoff::getString(text).cstr();
     if (ok && !zone.readString(text)) {
       ok=false;
       STOFF_DEBUG_MSG(("StarObjectText::readSWBookmarkList: can not read name\n"));
       f << "###";
     }
     else
-      f << text.cstr();
+      f << libstoff::getString(text).cstr();
     if (ok) {
       zone.openFlagZone();
       int val=(int) input->readULong(2);
@@ -572,7 +572,7 @@ bool StarObjectText::readSWBookmarkList(StarZone &zone)
           break;
         }
         else if (!text.empty())
-          f << "macro" << i << "=" << text.cstr();
+          f << "macro" << i << "=" << libstoff::getString(text).cstr();
       }
     }
     ascFile.addPos(pos);
@@ -685,7 +685,7 @@ bool StarObjectText::readSWDBName(StarZone &zone)
   // sw_sw3num.cxx: InDBName
   libstoff::DebugStream f;
   f << "Entries(SWDBName)[" << zone.getRecordLevel() << "]:";
-  librevenge::RVNGString text("");
+  std::vector<uint32_t> text;
   if (!zone.readString(text)) {
     STOFF_DEBUG_MSG(("StarObjectText::readSWDBName: can not read a string\n"));
     f << "###string";
@@ -695,7 +695,7 @@ bool StarObjectText::readSWDBName(StarZone &zone)
     return true;
   }
   if (!text.empty())
-    f << "sStr=" << text.cstr() << ",";
+    f << "sStr=" << libstoff::getString(text).cstr() << ",";
   if (zone.isCompatibleWith(0xf,0x101)) {
     if (!zone.readString(text)) {
       STOFF_DEBUG_MSG(("StarObjectText::readSWDBName: can not read a SQL string\n"));
@@ -706,7 +706,7 @@ bool StarObjectText::readSWDBName(StarZone &zone)
       return true;
     }
     if (!text.empty())
-      f << "sSQL=" << text.cstr() << ",";
+      f << "sSQL=" << libstoff::getString(text).cstr() << ",";
   }
   if (zone.isCompatibleWith(0x11,0x22)) {
     if (!zone.readString(text)) {
@@ -718,7 +718,7 @@ bool StarObjectText::readSWDBName(StarZone &zone)
       return true;
     }
     if (!text.empty())
-      f << "sTableName=" << text.cstr() << ",";
+      f << "sTableName=" << libstoff::getString(text).cstr() << ",";
   }
   if (zone.isCompatibleWith(0x12,0x22, 0x101)) {
     int nCount=(int) input->readULong(2);
@@ -736,7 +736,7 @@ bool StarObjectText::readSWDBName(StarZone &zone)
           f << "###dbDataName";
           break;
         }
-        f << text.cstr() << ":";
+        f << libstoff::getString(text).cstr() << ":";
         f << input->readULong(4) << "<->"; // selStart
         f << input->readULong(4) << ","; // selEnd
       }
@@ -763,7 +763,7 @@ bool StarObjectText::readSWDictionary(StarZone &zone)
   libstoff::DebugStream f;
   f << "Entries(SWDictionary)[" << zone.getRecordLevel() << "]:";
   long lastPos=zone.getRecordLastPosition();
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   while (input->tell()<lastPos) {
     pos=input->tell();
     f << "[";
@@ -774,7 +774,7 @@ bool StarObjectText::readSWDictionary(StarZone &zone)
       break;
     }
     if (!string.empty())
-      f << string.cstr() << ",";
+      f << libstoff::getString(string).cstr() << ",";
     f << "nLanguage=" << input->readULong(2) << ",";
     f << "nCount=" << input->readULong(2) << ",";
     f << "c=" << input->readULong(1) << ",";
@@ -813,7 +813,7 @@ bool StarObjectText::readSWEndNoteInfo(StarZone &zone)
   zone.closeFlagZone();
 
   if (zone.isCompatibleWith(0x203)) {
-    librevenge::RVNGString text("");
+    std::vector<uint32_t> text;
     for (int i=0; i<2; ++i) {
       if (!zone.readString(text)) {
         STOFF_DEBUG_MSG(("StarObjectText::readSWEndNoteInfo: can not read a string\n"));
@@ -824,7 +824,7 @@ bool StarObjectText::readSWEndNoteInfo(StarZone &zone)
         return true;
       }
       if (!text.empty())
-        f << (i==0 ? "prefix":"suffix") << "=" << text.cstr() << ",";
+        f << (i==0 ? "prefix":"suffix") << "=" << libstoff::getString(text).cstr() << ",";
     }
   }
   if (input->tell()<zone.getRecordLastPosition()) {
@@ -851,7 +851,7 @@ bool StarObjectText::readSWFootNoteInfo(StarZone &zone)
   libstoff::DebugStream f;
   f << "Entries(SWFootNoteInfo)[" << zone.getRecordLevel() << "]:";
   bool old=!zone.isCompatibleWith(0x201);
-  librevenge::RVNGString text("");
+  std::vector<uint32_t> text;
   if (old) {
     for (int i=0; i<2; ++i) {
       if (!zone.readString(text)) {
@@ -862,7 +862,7 @@ bool StarObjectText::readSWFootNoteInfo(StarZone &zone)
         zone.closeSWRecord('1', "SWFootNoteInfo");
       }
       if (!text.empty())
-        f << (i==0 ? "quoVadis":"ergoSum") << "=" << text.cstr() << ",";
+        f << (i==0 ? "quoVadis":"ergoSum") << "=" << libstoff::getString(text).cstr() << ",";
     }
   }
   int fl=zone.openFlagZone();
@@ -893,7 +893,7 @@ bool StarObjectText::readSWFootNoteInfo(StarZone &zone)
         return true;
       }
       if (!text.empty())
-        f << (i==0 ? "prefix":"suffix") << "=" << text.cstr() << ",";
+        f << (i==0 ? "prefix":"suffix") << "=" << libstoff::getString(text).cstr() << ",";
     }
   }
 
@@ -912,7 +912,7 @@ bool StarObjectText::readSWFootNoteInfo(StarZone &zone)
         return true;
       }
       if (!text.empty())
-        f << (i==0 ? "quoVadis":"ergoSum") << "=" << text.cstr() << ",";
+        f << (i==0 ? "quoVadis":"ergoSum") << "=" << libstoff::getString(text).cstr() << ",";
     }
   }
   if (input->tell()<zone.getRecordLastPosition()) {
@@ -939,7 +939,7 @@ bool StarObjectText::readSWGraphNode(StarZone &zone)
   libstoff::DebugStream f;
   f << "Entries(SWGraphNode)[" << zone.getRecordLevel() << "]:";
 
-  librevenge::RVNGString text;
+  std::vector<uint32_t> text;
   int fl=zone.openFlagZone();
   if (fl&0x10) f << "link,";
   if (fl&0x20) f << "empty,";
@@ -955,7 +955,7 @@ bool StarObjectText::readSWGraphNode(StarZone &zone)
       return true;
     }
     if (!text.empty())
-      f << (i==0 ? "grfName" : "fltName") << "=" << text.cstr() << ",";
+      f << (i==0 ? "grfName" : "fltName") << "=" << libstoff::getString(text).cstr() << ",";
   }
   if (zone.isCompatibleWith(0x101)) {
     if (!zone.readString(text)) {
@@ -967,7 +967,7 @@ bool StarObjectText::readSWGraphNode(StarZone &zone)
       return true;
     }
     if (!text.empty())
-      f << "textRepl=" << text.cstr() << ",";
+      f << "textRepl=" << libstoff::getString(text).cstr() << ",";
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -1051,7 +1051,7 @@ bool StarObjectText::readSWImageMap(StarZone &zone)
   int flag=zone.openFlagZone();
   if (flag&0xF0) f << "fl=" << flag << ",";
   zone.closeFlagZone();
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   if (!zone.readString(string)) {
     STOFF_DEBUG_MSG(("StarObjectText::readSWImageMap: can not read url\n"));
     f << "###url";
@@ -1062,7 +1062,7 @@ bool StarObjectText::readSWImageMap(StarZone &zone)
     return true;
   }
   if (!string.empty())
-    f << "url=" << string.cstr() << ",";
+    f << "url=" << libstoff::getString(string).cstr() << ",";
   if (zone.isCompatibleWith(0x11,0x22, 0x101)) {
     for (int i=0; i<2; ++i) {
       if (!zone.readString(string)) {
@@ -1075,7 +1075,7 @@ bool StarObjectText::readSWImageMap(StarZone &zone)
         return true;
       }
       if (string.empty()) continue;
-      f << (i==0 ? "target" : "dummy") << "=" << string.cstr() << ",";
+      f << (i==0 ? "target" : "dummy") << "=" << libstoff::getString(string).cstr() << ",";
     }
   }
   if (flag&0x20) {
@@ -1099,7 +1099,7 @@ bool StarObjectText::readSWImageMap(StarZone &zone)
           return true;
         }
         if (!string.empty())
-          f << (i==0 ? "target" : i==1 ? "dummy1" : "dummy2") << "=" << string.cstr() << ",";
+          f << (i==0 ? "target" : i==1 ? "dummy1" : "dummy2") << "=" << libstoff::getString(string).cstr() << ",";
         if (i==1)
           f << "nCount=" << input->readULong(2) << ",";
       }
@@ -1261,7 +1261,7 @@ bool StarObjectText::readSWMacroTable(StarZone &zone)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   long lastPos=zone.getRecordLastPosition();
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   while (input->tell()<lastPos) {
     pos=input->tell();
     if (input->peek()!='m' || !zone.openSWRecord(type)) {
@@ -1279,7 +1279,7 @@ bool StarObjectText::readSWMacroTable(StarZone &zone)
         break;
       }
       if (!string.empty())
-        f << string.cstr() << ",";
+        f << libstoff::getString(string).cstr() << ",";
     }
     if (ok && zone.isCompatibleWith(0x102))
       f << "scriptType=" << input->readULong(2) << ",";
@@ -1399,7 +1399,7 @@ bool StarObjectText::readSWOLENode(StarZone &zone)
   libstoff::DebugStream f;
   f << "Entries(SWOLENode)[" << zone.getRecordLevel() << "]:";
 
-  librevenge::RVNGString text;
+  std::vector<uint32_t> text;
   if (!zone.readString(text)) {
     STOFF_DEBUG_MSG(("StarObjectText::readSWOLENode: can not read a objName\n"));
     f << "###objName";
@@ -1409,7 +1409,7 @@ bool StarObjectText::readSWOLENode(StarZone &zone)
     return true;
   }
   if (!text.empty())
-    f << "objName=" << text.cstr() << ",";
+    f << "objName=" << libstoff::getString(text).cstr() << ",";
   if (zone.isCompatibleWith(0x101)) {
     if (!zone.readString(text)) {
       STOFF_DEBUG_MSG(("StarObjectText::readSWOLENode: can not read a objName\n"));
@@ -1420,7 +1420,7 @@ bool StarObjectText::readSWOLENode(StarZone &zone)
       return true;
     }
     if (!text.empty())
-      f << "textRepl=" << text.cstr() << ",";
+      f << "textRepl=" << libstoff::getString(text).cstr() << ",";
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -1483,13 +1483,13 @@ bool StarObjectText::readSWRedlineList(StarZone &zone)
 
       f << "date=" << input->readULong(4) << ",";
       f << "time=" << input->readULong(4) << ",";
-      librevenge::RVNGString text;
+      std::vector<uint32_t> text;
       if (!zone.readString(text)) {
         STOFF_DEBUG_MSG(("StarObjectText::readSWRedlineList: can not read the comment\n"));
         f << "###comment";
       }
       else if (!text.empty())
-        f << text.cstr();
+        f << libstoff::getString(text).cstr();
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       zone.closeSWRecord('D', "SWRedline");
@@ -1514,7 +1514,7 @@ bool StarObjectText::readSWSection(StarZone &zone)
   libstoff::DebugStream f;
   f << "Entries(SWSection)[" << zone.getRecordLevel() << "]:";
 
-  librevenge::RVNGString text;
+  std::vector<uint32_t> text;
   for (int i=0; i<2; ++i) {
     if (!zone.readString(text)) {
       STOFF_DEBUG_MSG(("StarObjectText::readSWSection: can not read a string\n"));
@@ -1525,7 +1525,7 @@ bool StarObjectText::readSWSection(StarZone &zone)
       return true;
     }
     if (text.empty()) continue;
-    f << (i==0 ? "name" : "cond") << "=" << text.cstr() << ",";
+    f << (i==0 ? "name" : "cond") << "=" << libstoff::getString(text).cstr() << ",";
   }
   int fl=zone.openFlagZone();
   if (fl&0x10) f << "hidden,";
@@ -1544,7 +1544,7 @@ bool StarObjectText::readSWSection(StarZone &zone)
       return true;
     }
     else if (!text.empty())
-      f << "linkName=" << text.cstr() << ",";
+      f << "linkName=" << libstoff::getString(text).cstr() << ",";
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -1706,7 +1706,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone)
     f << "nCondColl=" << input->readULong(2) << ",";
   zone.closeFlagZone();
 
-  librevenge::RVNGString text;
+  std::vector<uint32_t> text;
   if (!zone.readString(text)) {
     STOFF_DEBUG_MSG(("StarObjectText::readSWTextZone: can not read main text\n"));
     f << "###text";
@@ -1716,7 +1716,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone)
     return true;
   }
   else if (!text.empty())
-    f << text.cstr();
+    f << libstoff::getString(text).cstr();
 
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -1831,7 +1831,7 @@ bool StarObjectText::readSWTOXList(StarZone &zone)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   long lastPos=zone.getRecordLastPosition();
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   while (input->tell()<lastPos) {
     pos=input->tell();
     int rType=input->peek();
@@ -1861,7 +1861,7 @@ bool StarObjectText::readSWTOXList(StarZone &zone)
       continue;
     }
     if (!string.empty())
-      f << "aName=" << string.cstr() << ",";
+      f << "aName=" << libstoff::getString(string).cstr() << ",";
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read aTitle\n"));
       f << "###aTitle";
@@ -1871,7 +1871,7 @@ bool StarObjectText::readSWTOXList(StarZone &zone)
       continue;
     }
     if (!string.empty())
-      f << "aTitle=" << string.cstr() << ",";
+      f << "aTitle=" << libstoff::getString(string).cstr() << ",";
     if (zone.isCompatibleWith(0x215)) {
       f << "nOLEOptions=" << input->readULong(2) << ",";
       f << "nMainStyleIdx=" << input->readULong(2) << ",";
@@ -1886,7 +1886,7 @@ bool StarObjectText::readSWTOXList(StarZone &zone)
         continue;
       }
       if (!string.empty())
-        f << "aDummy=" << string.cstr() << ",";
+        f << "aDummy=" << libstoff::getString(string).cstr() << ",";
     }
 
     int N=(int) input->readULong(1);
@@ -1981,7 +1981,7 @@ bool StarObjectText::readSWTOX51List(StarZone &zone)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   long lastPos=zone.getRecordLastPosition();
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   while (input->tell()<lastPos) {
     pos=input->tell();
     if (input->peek()!='x' || !zone.openSWRecord(type)) {
@@ -1991,10 +1991,11 @@ bool StarObjectText::readSWTOX51List(StarZone &zone)
     f << "SWTOX51List:";
     if (zone.isCompatibleWith(0x201)) {
       int strId=(int) input->readULong(2);
-      if (strId!=0xFFFF && !zone.getPoolName(strId, string))
+      librevenge::RVNGString poolName;
+      if (strId!=0xFFFF && !zone.getPoolName(strId, poolName))
         f << "###nPoolId=" << strId << ",";
-      else if (strId!=0xFFFF && !string.empty())
-        f << string.cstr() << ",";
+      else if (strId!=0xFFFF && !poolName.empty())
+        f << poolName.cstr() << ",";
     }
     else {
       if (!zone.readString(string)) {
@@ -2006,7 +2007,7 @@ bool StarObjectText::readSWTOX51List(StarZone &zone)
         continue;
       }
       if (!string.empty())
-        f << "typeName=" << string.cstr() << ",";
+        f << "typeName=" << libstoff::getString(string).cstr() << ",";
     }
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("StarObjectText::readSWTOX51List: can not read aTitle\n"));
@@ -2017,7 +2018,7 @@ bool StarObjectText::readSWTOX51List(StarZone &zone)
       continue;
     }
     if (!string.empty())
-      f << "aTitle=" << string.cstr() << ",";
+      f << "aTitle=" << libstoff::getString(string).cstr() << ",";
     int fl=zone.openFlagZone();
     f << "nCreateType=" << input->readLong(2) << ",";
     f << "nType=" << input->readULong(1) << ",";
@@ -2036,7 +2037,7 @@ bool StarObjectText::readSWTOX51List(StarZone &zone)
         break;
       }
       if (!string.empty())
-        f << string.cstr() << ",";
+        f << libstoff::getString(string).cstr() << ",";
     }
     f << "],";
     if (!ok) {
@@ -2233,7 +2234,7 @@ try
     f << "SWWriterDocument[" << type << "]:";
     long lastPos=zone.getRecordLastPosition();
     bool endZone=false;
-    librevenge::RVNGString string;
+    std::vector<uint32_t> string;
     switch (type) {
     case '$': // unknown, seems to store an object name
       f << "dollarZone,";
@@ -2251,7 +2252,7 @@ try
         break;
       }
       else if (!string.empty())
-        f << string.cstr();
+        f << libstoff::getString(string).cstr();
       break;
     case '5': {
       // sw_sw3misc.cxx InLineNumberInfo
@@ -2270,7 +2271,7 @@ try
         break;
       }
       else if (!string.empty())
-        f << string.cstr();
+        f << libstoff::getString(string).cstr();
       break;
     }
     case '6':
@@ -2287,7 +2288,7 @@ try
           break;
         }
         else if (!string.empty())
-          f << (i==0 ? "sAutoMarkURL" : "s2") << "=" << string.cstr() << ",";
+          f << (i==0 ? "sAutoMarkURL" : "s2") << "=" << libstoff::getString(string).cstr() << ",";
       }
       break;
     case '7': { // config, ignored by LibreOffice, and find no code
@@ -2347,7 +2348,7 @@ try
           f << "###passwd";
         }
         else
-          f << "cryptedPasswd=" << string.cstr() << ",";
+          f << "cryptedPasswd=" << libstoff::getString(string).cstr() << ",";
       }
       break;
     case 'Z':

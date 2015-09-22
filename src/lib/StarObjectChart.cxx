@@ -420,7 +420,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
   f << "SCHAttributesB:";
   for (int i=0; i<5; ++i) {
     bool bShow;
-    librevenge::RVNGString string;
+    std::vector<uint32_t> string;
     *input>>bShow;
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("StarObjectChart::readSCHAttributes: can not read a string\n"));
@@ -432,7 +432,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
       return true;
     }
     static char const *(wh[])= {"mainTitle", "subTitle", "xAxisTitle", "yAxisTitle", "zAxisTitle" };
-    f << wh[i] << "=" << string.cstr();
+    f << wh[i] << "=" << libstoff::getString(string).cstr();
     if (bShow) f << ":show";
     f << ",";
   }
@@ -564,7 +564,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
     f << "SCHAttributes[moreData]:";
 
     for (int i=0; i<4; ++i) {
-      librevenge::RVNGString string;
+      std::vector<uint32_t> string;
       if (!zone.readString(string)||input->tell()>lastPos) {
         STOFF_DEBUG_MSG(("StarObjectChart::readSCHAttributes: can not read a string\n"));
         f << "###string,";
@@ -574,7 +574,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
         zone.closeSCHHeader("SCHAttributes");
         return true;
       }
-      if (!string.empty()) f << "someData" << i << "=" << string.cstr() << ",";
+      if (!string.empty()) f << "someData" << i << "=" << libstoff::getString(string).cstr() << ",";
     }
     if (moreData>=3) {
       double fSpotIntensity;
@@ -883,7 +883,7 @@ bool StarObjectChart::readSCHMemChart(StarZone &zone)
   *input>>charSet;
   if (charSet) f << "charSet=" << charSet << ",";
   for (int i=0; i<5+int(nCol)+int(nRow); ++i) {
-    librevenge::RVNGString string;
+    std::vector<uint32_t> string;
     if (!zone.readString(string) || input->tell()>lastPos) {
       STOFF_DEBUG_MSG(("StarObjectChart::readSCHMemChart: can not read a title\n"));
       f << "###title";
@@ -895,12 +895,12 @@ bool StarObjectChart::readSCHMemChart(StarZone &zone)
     if (string.empty()) continue;
     if (i<5) {
       static char const *(wh[])= {"mainTitle","subTitle","xAxisTitle","yAxisTitle","zAxisTitle"};
-      f << wh[i] << "=" << string.cstr() << ",";
+      f << wh[i] << "=" << libstoff::getString(string).cstr() << ",";
     }
     else if (i<5+int(nCol))
-      f << "colTitle" << i-5 << "=" << string.cstr() << ",";
+      f << "colTitle" << i-5 << "=" << libstoff::getString(string).cstr() << ",";
     else
-      f << "rowTitle" << i-5-int(nCol) << "=" << string.cstr() << ",";
+      f << "rowTitle" << i-5-int(nCol) << "=" << libstoff::getString(string).cstr() << ",";
   }
   *input >> nDataType;
   if (nDataType) f << "dataType=" << nDataType << ",";

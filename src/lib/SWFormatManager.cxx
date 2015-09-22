@@ -108,7 +108,7 @@ bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &doc
     readName=(moreFlags&0x20);
   else
     readName=(stringId==0xffff);
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   if (readName) {
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("SWFormatManager::readSWFormatDef: can not read the name\n"));
@@ -120,13 +120,14 @@ bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &doc
       return true;
     }
     else if (!string.empty())
-      f << string.cstr() << ",";
+      f << libstoff::getString(string).cstr() << ",";
   }
   else if (stringId!=0xffff) {
-    if (!zone.getPoolName(stringId, string))
+    librevenge::RVNGString poolName;
+    if (!zone.getPoolName(stringId, poolName))
       f << "###nPoolId=" << stringId << ",";
-    else if (!string.empty())
-      f << string.cstr() << ",";
+    else if (!poolName.empty())
+      f << poolName.cstr() << ",";
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -167,7 +168,7 @@ bool SWFormatManager::readSWNumberFormat(StarZone &zone)
   libstoff::DebugStream f;
   f << "Entries(SWNumbFormat)[" << zone.getRecordLevel() << "]:";
   // sw_sw3num.cxx Sw3IoImp::InNumFmt
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   for (int i=0; i<4; ++i) {
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("SWFormatManager::readSWNumberFormat: can not read a string\n"));
@@ -180,7 +181,7 @@ bool SWFormatManager::readSWNumberFormat(StarZone &zone)
     }
     if (string.empty()) continue;
     static char const *(wh[])= {"prefix", "postfix", "fontname", "fontstyle"};
-    f << wh[i] << "=" << string.cstr() << ",";
+    f << wh[i] << "=" << libstoff::getString(string).cstr() << ",";
   }
   f << "nFmt=" << input->readULong(2) << ",";
   f << "eType=" << input->readULong(1) << ",";
@@ -274,7 +275,7 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarObject 
   if (nCharTextDist) f << "nCharTextDist=" << nCharTextDist << ",";
 
   for (int i=0; i<3; ++i) {
-    librevenge::RVNGString text;
+    std::vector<uint32_t> text;
     if (!zone.readString(text)) {
       STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: can not read the format string\n"));
       f << "###string";
@@ -283,7 +284,7 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarObject 
       return false;
     }
     if (!text.empty())
-      f << (i==0 ? "prefix" : i==1 ? "suffix" : "style[name]") << "=" << text.cstr() << ",";
+      f << (i==0 ? "prefix" : i==1 ? "suffix" : "style[name]") << "=" << libstoff::getString(text).cstr() << ",";
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -433,7 +434,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
     }
     long endFieldPos=input->tell()+fieldSize[n++];
 
-    librevenge::RVNGString text;
+    std::vector<uint32_t> text;
     if (!zone.readString(text)) {
       STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not read the format string\n"));
       f << "###string";
@@ -441,7 +442,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
       ascFile.addNote(f.str().c_str());
       break;
     }
-    f << text.cstr() << ",";
+    f << libstoff::getString(text).cstr() << ",";
     val=(int) input->readULong(2);
     if (val) f << "eType=" << val << ",";
     for (int i=0; i<2; ++i) { // checkme
@@ -476,7 +477,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
           ok=false;
           break;
         }
-        f << text.cstr() << ":" << input->readULong(2) << ",";
+        f << libstoff::getString(text).cstr() << ":" << input->readULong(2) << ",";
       }
       if (!ok) break;
       val=(int) input->readLong(2);
@@ -498,7 +499,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
         break;
       }
       if (!text.empty())
-        f << text.cstr() << ",";
+        f << libstoff::getString(text).cstr() << ",";
       f << "],";
     }
     if (input->tell()>endFieldPos) {
@@ -513,7 +514,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
     }
     else {
       if (!text.empty())
-        f << "comment=" << text.cstr() << ",";
+        f << "comment=" << libstoff::getString(text).cstr() << ",";
     }
 
     if (ok && input->tell()!=endFieldPos) {
@@ -596,7 +597,7 @@ bool SWFormatManager::readSWPatternLCL(StarZone &zone)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   while (input->tell()<lastPos) {
     pos=input->tell();
     if (input->peek()!='D' || !zone.openSWRecord(type)) {
@@ -638,7 +639,7 @@ bool SWFormatManager::readSWPatternLCL(StarZone &zone)
         f << "###type,";
         break;
       }
-      f << string.cstr() << ",";
+      f << libstoff::getString(string).cstr() << ",";
       break;
     }
     case 5:

@@ -368,7 +368,7 @@ bool StarObject::readPersistData(StarZone &zone, long lastPos)
       long actPos=input->tell();
       uint8_t val;
       *input>>val;
-      librevenge::RVNGString text;
+      std::vector<uint32_t> text;
       if (!zone.readString(text)||input->tell()>=lastPos) {
         input->seek(actPos, librevenge::RVNG_SEEK_SET);
         f << "##classId";
@@ -376,7 +376,7 @@ bool StarObject::readPersistData(StarZone &zone, long lastPos)
       }
       f << "objData,";
       if (val) f << "f0=" << int(val) << ","; // 0 or 1
-      f << text.cstr() << ",";
+      f << libstoff::getString(text).cstr() << ",";
       break;
     }
     case 3: { // flditem.cxx:void SvxURLField::Load
@@ -385,14 +385,14 @@ bool StarObject::readPersistData(StarZone &zone, long lastPos)
       *input >> format;
       if (format) f << "format=" << format << ",";
       for (int i=0; i<2; ++i) {
-        librevenge::RVNGString text;
+        std::vector<uint32_t> text;
         if (!zone.readString(text) || input->tell()>lastPos) {
           STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read a string\n"));
           f << "##string";
           break;
         }
         else if (!text.empty())
-          f << (i==0 ? "url" : "representation") << "=" << text.cstr() << ",";
+          f << (i==0 ? "url" : "representation") << "=" << libstoff::getString(text).cstr() << ",";
       }
       if (input->tell()==lastPos)
         break;

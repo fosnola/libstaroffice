@@ -98,20 +98,21 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
   }
 
   int val;
-  librevenge::RVNGString name, poolName;
+  std::vector<uint32_t> name;
+  librevenge::RVNGString poolName;
   long lastPos=zone.getRecordLastPosition();
   switch (fieldType) {
   case 0: { // default
     f << "default,";
     if (cKind=='Y' || !zone.isCompatibleWith(0x202)) {
       if (!zone.isCompatibleWith(0xa)) {
-        if (!zone.readString(poolName)) {
+        if (!zone.readString(name)) {
           f << "###string,";
           STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
           break;
         }
         else
-          f << poolName.cstr() << ",";
+          f << libstoff::getString(name).cstr() << ",";
       }
       else {
         val=(int) input->readULong(2);
@@ -137,7 +138,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
         break;
       }
       else if (!name.empty())
-        f << "expand=" << name.cstr() << ",";
+        f << "expand=" << libstoff::getString(name).cstr() << ",";
       if (zone.isCompatibleWith(0xa))
         f << "cFlag=" << std::hex << input->readULong(1) << std::dec << ",";
       if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
@@ -179,19 +180,19 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "value=" << name.cstr() << ",";
+      f << "value=" << libstoff::getString(name).cstr() << ",";
     break;
   }
   case 1: { // userfld
     f << "user,";
     if (!zone.isCompatibleWith(0xa)) {
-      if (!zone.readString(poolName)) {
+      if (!zone.readString(name)) {
         f << "###string,";
         STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
         break;
       }
       else
-        f << poolName.cstr() << ",";
+        f << libstoff::getString(name).cstr() << ",";
     }
     else {
       val=(int) input->readULong(2);
@@ -201,14 +202,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
         f << poolName.cstr() << ",";
     }
     if (cKind!='Y' && zone.isCompatibleWith(0xa)) break;
-    librevenge::RVNGString text("");
+    std::vector<uint32_t> text;
     if (!zone.readString(text)) {
       f << "###aContent,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a aContent\n"));
       break;
     }
     else
-      f << text.cstr() << ",";
+      f << libstoff::getString(text).cstr() << ",";
     if (!zone.isCompatibleWith(0x0202)) {
       if (!zone.readString(text)) {
         f << "###aValue,";
@@ -216,7 +217,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
         break;
       }
       else
-        f << text.cstr() << ",";
+        f << libstoff::getString(text).cstr() << ",";
     }
     else {
       double res;
@@ -244,7 +245,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "name=" << name.cstr() << ",";
+      f << "name=" << libstoff::getString(name).cstr() << ",";
     break;
   case 3:
     f << "dbNameField,";
@@ -281,7 +282,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
         break;
       }
       else if (!name.empty())
-        f << "userString=" << name.cstr() << ",";
+        f << "userString=" << libstoff::getString(name).cstr() << ",";
       if (zone.isCompatibleWith(0x14,0x22) && (nSub==1 || nSub==2))
         f << "nOff=" << input->readLong(2) << ",";
       break;
@@ -293,7 +294,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "userString=" << name.cstr() << ",";
+      f << "userString=" << libstoff::getString(name).cstr() << ",";
     break;
   case 7:
     f << "inAuthorField,";
@@ -305,7 +306,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
         break;
       }
       else if (!name.empty())
-        f << "expand=" << name.cstr() << ",";
+        f << "expand=" << libstoff::getString(name).cstr() << ",";
     }
     break;
   case 8:
@@ -333,14 +334,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "aText=" << name.cstr() << ",";
+      f << "aText=" << libstoff::getString(name).cstr() << ",";
     if (!zone.readString(name)) {
       f << "###string,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
       break;
     }
     else if (!name.empty())
-      f << "expand=" << name.cstr() << ",";
+      f << "expand=" << libstoff::getString(name).cstr() << ",";
     if (!zone.isCompatibleWith(0x202))
       f << "nSub=" << input->readULong(2) << ",";
     break;
@@ -357,7 +358,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
         break;
       }
       else if (!name.empty())
-        f << "formula=" << name.cstr() << ",";
+        f << "formula=" << libstoff::getString(name).cstr() << ",";
       if (cFlags & 0x10) {
         if (!zone.readString(name)) {
           f << "###prompt,";
@@ -365,7 +366,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
           break;
         }
         else if (!name.empty())
-          f << "prompt=" << name.cstr() << ",";
+          f << "prompt=" << libstoff::getString(name).cstr() << ",";
       }
       if (cFlags & 0x20) {
         f << "nSeqVal=" << input->readULong(2) << ",";
@@ -378,7 +379,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
           break;
         }
         else if (!name.empty())
-          f << "expand=" << name.cstr() << ",";
+          f << "expand=" << libstoff::getString(name).cstr() << ",";
       }
       break;
     }
@@ -388,13 +389,13 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       f << "nType=" << nType << ",";
     }
     if (!zone.isCompatibleWith(0xa)) {
-      if (!zone.readString(poolName)) {
+      if (!zone.readString(name)) {
         f << "###string,";
         STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
         break;
       }
       else
-        f << poolName.cstr() << ",";
+        f << libstoff::getString(name).cstr() << ",";
     }
     else {
       val=(int) input->readULong(2);
@@ -422,14 +423,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "formula=" << name.cstr() << ",";
+      f << "formula=" << libstoff::getString(name).cstr() << ",";
     if (!zone.readString(name)) {
       f << "###expand,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
       break;
     }
     else if (!name.empty())
-      f << "expand=" << name.cstr() << ",";
+      f << "expand=" << libstoff::getString(name).cstr() << ",";
     if ((cFlags & 0x10) && zone.isCompatibleWith(0x10)) {
       if (!zone.readString(name)) {
         f << "###prompt,";
@@ -437,7 +438,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
         break;
       }
       else if (!name.empty())
-        f << "prompt=" << name.cstr() << ",";
+        f << "prompt=" << libstoff::getString(name).cstr() << ",";
     }
     if (cFlags & 0x20)
       f << "nSeqNo=" << input->readULong(2) << ",";
@@ -453,14 +454,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "aName=" << name.cstr() << ",";
+      f << "aName=" << libstoff::getString(name).cstr() << ",";
     if (!zone.readString(name)) {
       f << "###string,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
       break;
     }
     else if (!name.empty())
-      f << "expand=" << name.cstr() << ",";
+      f << "expand=" << libstoff::getString(name).cstr() << ",";
     if (zone.isCompatibleWith(0x21,0x22)) {
       f << "fmt=" << input->readULong(2) << ",";
       f << "subType=" << input->readULong(2) << ",";
@@ -484,14 +485,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "aText=" << name.cstr() << ",";
+      f << "aText=" << libstoff::getString(name).cstr() << ",";
     if (!zone.readString(name)) {
       f << "###string,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
       break;
     }
     else if (!name.empty())
-      f << "aCond=" << name.cstr() << ",";
+      f << "aCond=" << libstoff::getString(name).cstr() << ",";
     if (!zone.isCompatibleWith(0x202))
       f << "nSubType=" << input->readULong(2) << ",";
     break;
@@ -506,14 +507,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "aAuthor=" << name.cstr() << ",";
+      f << "aAuthor=" << libstoff::getString(name).cstr() << ",";
     if (!zone.readString(name)) {
       f << "###string,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
       break;
     }
     else if (!name.empty())
-      f << "aText=" << name.cstr() << ",";
+      f << "aText=" << libstoff::getString(name).cstr() << ",";
     break;
   case 15:
     f << "fixDateField,";
@@ -546,14 +547,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "aContent=" << name.cstr() << ",";
+      f << "aContent=" << libstoff::getString(name).cstr() << ",";
     if (!zone.readString(name)) {
       f << "###string,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
       break;
     }
     else if (!name.empty())
-      f << "aPrompt=" << name.cstr() << ",";
+      f << "aPrompt=" << libstoff::getString(name).cstr() << ",";
     if (!zone.isCompatibleWith(0x202))
       f << "nSubType=" << input->readULong(2) << ",";
     break;
@@ -567,14 +568,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "aName=" << name.cstr() << ",";
+      f << "aName=" << libstoff::getString(name).cstr() << ",";
     if (!zone.readString(name)) {
       f << "###string,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
       break;
     }
     else if (!name.empty())
-      f << "aText=" << name.cstr() << ",";
+      f << "aText=" << libstoff::getString(name).cstr() << ",";
     break;
   case 22: { // ddefld
     f << "link,";
@@ -590,13 +591,13 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
     val=(int) input->readULong(2);
     f << "nType=" << val << ",";
     if (!zone.isCompatibleWith(0xa)) {
-      if (!zone.readString(poolName)) {
+      if (!zone.readString(name)) {
         f << "###string,";
         STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
         break;
       }
       else
-        f << poolName.cstr() << ",";
+        f << libstoff::getString(name).cstr() << ",";
     }
     else {
       val=(int) input->readULong(2);
@@ -605,14 +606,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       else if (!poolName.empty())
         f << poolName.cstr() << ",";
     }
-    librevenge::RVNGString text("");
+    std::vector<uint32_t> text;
     if (!zone.readString(text)) {
       f << "###text,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a text\n"));
       break;
     }
     else
-      f << text.cstr() << ",";
+      f << libstoff::getString(text).cstr() << ",";
     break;
   }
   case 23:
@@ -625,14 +626,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "aFormula=" << name.cstr() << ",";
+      f << "aFormula=" << libstoff::getString(name).cstr() << ",";
     if (!zone.readString(name)) {
       f << "###string,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
       break;
     }
     else if (!name.empty())
-      f << "aText=" << name.cstr() << ",";
+      f << "aText=" << libstoff::getString(name).cstr() << ",";
     if (!zone.isCompatibleWith(0x202))
       f << "nSub=" << input->readULong(2) << ",";
     break;
@@ -647,7 +648,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "aCond=" << name.cstr() << ",";
+      f << "aCond=" << libstoff::getString(name).cstr() << ",";
     break;
   case 25:
     f << "inDocInfoField,";
@@ -663,7 +664,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
         break;
       }
       else if (!name.empty())
-        f << "aContent=" << name.cstr() << ",";
+        f << "aContent=" << libstoff::getString(name).cstr() << ",";
       if (flag&1) {
         double res;
         bool isNan;
@@ -691,14 +692,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "aCond=" << name.cstr() << ",";
+      f << "aCond=" << libstoff::getString(name).cstr() << ",";
     if (!zone.readString(name)) {
       f << "###string,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
       break;
     }
     else if (!name.empty())
-      f << "aName=" << name.cstr() << ",";
+      f << "aName=" << libstoff::getString(name).cstr() << ",";
     if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
       val=(int) input->readULong(2);
       if (!zone.getPoolName(val, poolName))
@@ -718,14 +719,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << (inverted ? "aNumber=" : "aCond=") << name.cstr() << ",";
+      f << (inverted ? "aNumber=" : "aCond=") << libstoff::getString(name).cstr() << ",";
     if (!zone.readString(name)) {
       f << "###string,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
       break;
     }
     else if (!name.empty())
-      f << (inverted ? "aCond=" : "aNumber=") << name.cstr() << ",";
+      f << (inverted ? "aCond=" : "aNumber=") << libstoff::getString(name).cstr() << ",";
     if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
       val=(int) input->readULong(2);
       if (!zone.getPoolName(val, poolName))
@@ -758,7 +759,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "aData" << name.cstr() << ",";
+      f << "aData" << libstoff::getString(name).cstr() << ",";
     if (!zone.isCompatibleWith(0x202))
       f << "nSubType=" << input->readULong(2);
     else if (zone.isCompatibleWith(0x204)) {
@@ -768,7 +769,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
         break;
       }
       else if (!name.empty())
-        f << "aExpand" << name.cstr() << ",";
+        f << "aExpand" << libstoff::getString(name).cstr() << ",";
     }
     break;
   case 31:
@@ -788,7 +789,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "aText=" << name.cstr() << ",";
+      f << "aText=" << libstoff::getString(name).cstr() << ",";
     break;
   case 33:
     f << "InINertField31,";
@@ -800,14 +801,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "aURL=" << name.cstr() << ",";
+      f << "aURL=" << libstoff::getString(name).cstr() << ",";
     if (!zone.readString(name)) {
       f << "###string,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
       break;
     }
     else if (!name.empty())
-      f << "text=" << name.cstr() << ",";
+      f << "text=" << libstoff::getString(name).cstr() << ",";
     if (zone.isCompatibleWith(0x11,0x22)) {
       if (!zone.readString(name)) {
         f << "###string,";
@@ -815,7 +816,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
         break;
       }
       else if (!name.empty())
-        f << "target=" << name.cstr() << ",";
+        f << "target=" << libstoff::getString(name).cstr() << ",";
     }
     if (zone.isCompatibleWith(0x11,0x13)) {
       int nCnt=(int) input->readULong(2);
@@ -833,14 +834,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
           break;
         }
         else if (!name.empty())
-          f << name.cstr() << ":";
+          f << libstoff::getString(name).cstr() << ":";
         if (!zone.readString(name)) {
           f << "###string,";
           STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
           break;
         }
         else if (!name.empty())
-          f << name.cstr();
+          f << libstoff::getString(name).cstr();
         f << ",";
       }
       f << "],";
@@ -856,14 +857,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "text=" << name.cstr() << ",";
+      f << "text=" << libstoff::getString(name).cstr() << ",";
     if (!zone.readString(name)) {
       f << "###string,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
       break;
     }
     else if (!name.empty())
-      f << "help=" << name.cstr() << ",";
+      f << "help=" << libstoff::getString(name).cstr() << ",";
     break;
   case 35: {
     f << "InScriptFld,";
@@ -875,14 +876,14 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     else if (!name.empty())
-      f << "type=" << name.cstr() << ",";
+      f << "type=" << libstoff::getString(name).cstr() << ",";
     if (!zone.readString(name)) {
       f << "###string,";
       STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
       break;
     }
     else if (!name.empty())
-      f << "code=" << name.cstr() << ",";
+      f << "code=" << libstoff::getString(name).cstr() << ",";
     if (zone.isCompatibleWith(0x200))
       f << "cFlags=" << input->readULong(1) << ",";
     break;

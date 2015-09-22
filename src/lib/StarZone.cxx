@@ -65,16 +65,16 @@ void StarZone::setInput(STOFFInputStreamPtr ip)
   m_ascii.setStream(ip);
 }
 
-bool StarZone::readString(librevenge::RVNGString &string, int /*encoding*/) const
+bool StarZone::readString(std::vector<uint32_t> &string, int /*encoding*/) const
 {
   int sSz=(int) m_input->readULong(2);
-  string="";
+  string.clear();
   if (!m_input->checkPosition(m_input->tell()+sSz)) {
     STOFF_DEBUG_MSG(("StarZone::readString: the sSz seems bad\n"));
     return false;
   }
   // fixme use encoding
-  for (int c=0; c<sSz; ++c) string.append((char) m_input->readULong(1));
+  for (int c=0; c<sSz; ++c) string.push_back((uint32_t) m_input->readULong(1));
   return true;
 }
 
@@ -103,7 +103,7 @@ bool StarZone::readStringsPool()
     f << "n=" << n << ",";
     m_ascii.addPos(pos);
     m_ascii.addNote(f.str().c_str());
-    librevenge::RVNGString string;
+    std::vector<uint32_t> string;
     for (int i=0; i<n; ++i) {
       pos=m_input->tell();
       f.str("");
@@ -113,8 +113,8 @@ bool StarZone::readStringsPool()
         m_input->seek(pos, librevenge::RVNG_SEEK_SET);
         break;
       }
-      m_poolList.push_back(string);
-      f << string.cstr() << ",";
+      m_poolList.push_back(libstoff::getString(string));
+      f << m_poolList.back().cstr() << ",";
       m_ascii.addPos(pos);
       m_ascii.addNote(f.str().c_str());
     }
@@ -127,7 +127,7 @@ bool StarZone::readStringsPool()
     m_ascii.addPos(pos);
     m_ascii.addNote(f.str().c_str());
 
-    librevenge::RVNGString string;
+    std::vector<uint32_t> string;
     for (int i=0; i<n; ++i) { // checkme
       pos=m_input->tell();
       f.str("");
@@ -139,8 +139,8 @@ bool StarZone::readStringsPool()
         m_input->seek(pos, librevenge::RVNG_SEEK_SET);
         break;
       }
-      m_poolList.push_back(string);
-      f << string.cstr() << ",";
+      m_poolList.push_back(libstoff::getString(string));
+      f << m_poolList.back().cstr() << ",";
       m_ascii.addPos(pos);
       m_ascii.addNote(f.str().c_str());
     }

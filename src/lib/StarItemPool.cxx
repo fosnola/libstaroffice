@@ -1039,14 +1039,14 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
     f << "loadingVersion=" << val << ",";
     m_state->m_loadingVersion=val;
   }
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   if (!zone.readString(string)) {
     STOFF_DEBUG_MSG(("StarItemPool::readV2: can not readV2 the name\n"));
     f << "###name";
   }
   if (!string.empty()) {
-    m_state->setPoolName(string);
-    f << "name[ext]=" << string.cstr() << ",";
+    m_state->setPoolName(libstoff::getString(string));
+    f << "name[ext]=" << libstoff::getString(string).cstr() << ",";
   }
   zone.closeSfxRecord(type1, "PoolDef");
 
@@ -1247,7 +1247,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
     m_state->m_loadingVersion=int(nLoadingVersion);
     if (nLoadingVersion) f << "vers[loading]=" << nLoadingVersion << ",";
   }
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   if (!zone.readString(string)) {
     STOFF_DEBUG_MSG(("StarItemPool::readV1: can not read the name\n"));
     f << "###name";
@@ -1257,8 +1257,8 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
     return false;
   }
   if (!string.empty()) {
-    m_state->setPoolName(string);
-    f << "name[ext]=" << string.cstr() << ",";
+    m_state->setPoolName(libstoff::getString(string));
+    f << "name[ext]=" << libstoff::getString(string).cstr() << ",";
   }
   uint32_t attribSize;
   *input>>attribSize;
@@ -1626,7 +1626,7 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
     f.str("");
     f << "SfxStylePool[data" << i << "]:";
     bool readOk=true;
-    librevenge::RVNGString text;
+    std::vector<uint32_t> text;
     for (int j=0; j<3; ++j) {
       if (!zone.readString(text) || input->tell()>=lastPos) {
         STOFF_DEBUG_MSG(("StarItemPool::readStyle: can not find a string\n"));
@@ -1636,7 +1636,7 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
       }
       if (text.empty()) continue;
       static char const *(wh[])= {"name","parent","follow"};
-      f << wh[j] << "=" << text.cstr() << ",";
+      f << wh[j] << "=" << libstoff::getString(text).cstr() << ",";
     }
     if (!readOk) {
       ascii.addPos(pos);
@@ -1656,7 +1656,7 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
       if (poolVersion==1) return true;
       continue;
     }
-    if (!text.empty()) f << "help[file]=" << text.cstr() << ",";
+    if (!text.empty()) f << "help[file]=" << libstoff::getString(text).cstr() << ",";
     uint32_t nHelpId, nSize;
     if (helpIdSize32)
       *input>>nHelpId;

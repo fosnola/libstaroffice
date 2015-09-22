@@ -59,6 +59,21 @@ uint8_t readU8(librevenge::RVNGInputStream *input)
   return *p;
 }
 
+librevenge::RVNGString getString(std::vector<uint32_t> const &unicode)
+{
+  librevenge::RVNGString res("");
+  for (size_t i=0; i<unicode.size(); ++i) {
+    if (unicode[i]<0x20 && unicode[i]!=0x9 && unicode[i]!=0xd) {
+      STOFF_DEBUG_MSG(("libstoff::getString: find odd char %x\n", (unsigned int)unicode[i]));
+    }
+    else if (unicode[i]<0x80)
+      res.append((char) unicode[i]);
+    else
+      appendUnicode(unicode[i], res);
+  }
+  return res;
+}
+
 void appendUnicode(uint32_t val, librevenge::RVNGString &buffer)
 {
   uint8_t first;
@@ -491,6 +506,7 @@ float getScaleFactor(librevenge::RVNGUnit orig, librevenge::RVNGUnit dest)
   }
   return actSc/newSc;
 }
+
 // debug message
 #ifdef DEBUG
 void printDebugMsg(const char *format, ...)

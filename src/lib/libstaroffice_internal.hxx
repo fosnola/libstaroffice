@@ -157,6 +157,8 @@ namespace libstoff
 uint8_t readU8(librevenge::RVNGInputStream *input);
 //! adds an unicode character to a string
 void appendUnicode(uint32_t val, librevenge::RVNGString &buffer);
+//! transform a unicode string in a RNVGString
+librevenge::RVNGString getString(std::vector<uint32_t> const &unicode);
 }
 
 /* ---------- small enum/class ------------- */
@@ -1117,9 +1119,9 @@ typedef STOFFBox2<float> STOFFBox2f;
 /*! \brief STOFFBox2 of long */
 typedef STOFFBox2<long> STOFFBox2l;
 
-// some geometrical function
 namespace libstoff
 {
+// some geometrical function
 //! factor to convert from one unit to other
 float getScaleFactor(librevenge::RVNGUnit orig, librevenge::RVNGUnit dest);
 //! rotate a point around center, angle is given in degree

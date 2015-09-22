@@ -985,22 +985,22 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << "ePitch=" << input->readULong(1) << ",";
     int encoding=(int) input->readULong(1);
     f << "eTextEncoding=" << encoding << ",";
-    librevenge::RVNGString fName, string;
+    std::vector<uint32_t> fName, string;
     if (!zone.readString(fName)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the name\n"));
       f << "###aName,";
       break;
     }
     if (!fName.empty())
-      f << "aName=" << fName.cstr() << ",";
+      f << "aName=" << libstoff::getString(fName).cstr() << ",";
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the style\n"));
       f << "###aStyle,";
       break;
     }
     if (!string.empty())
-      f << "aStyle=" << string.cstr() << ",";
-    if (encoding!=10 && fName=="StarBats" && input->tell()<lastPos) {
+      f << "aStyle=" << libstoff::getString(string).cstr() << ",";
+    if (encoding!=10 && libstoff::getString(fName)=="StarBats" && input->tell()<lastPos) {
       if (input->readULong(4)==0xFE331188) {
         // reread data in unicode
         if (!zone.readString(fName)) {
@@ -1009,14 +1009,14 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
           break;
         }
         if (!fName.empty())
-          f << "aNameUni=" << fName.cstr() << ",";
+          f << "aNameUni=" << libstoff::getString(fName).cstr() << ",";
         if (!zone.readString(string)) {
           STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the style\n"));
           f << "###aStyle,";
           break;
         }
         if (!string.empty())
-          f << "aStyleUni=" << string.cstr() << ",";
+          f << "aStyleUni=" << libstoff::getString(string).cstr() << ",";
       }
       else input->seek(-3, librevenge::RVNG_SEEK_CUR);
     }
@@ -1066,21 +1066,21 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   case StarAttribute::ATTR_TXT_INETFMT: {
     f << "textAtrInetFmt,";
     // SwFmtINetFmt::Create
-    librevenge::RVNGString string;
+    std::vector<uint32_t> string;
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find string\n"));
       f << "###url,";
       break;
     }
     if (!string.empty())
-      f << "url=" << string.cstr() << ",";
+      f << "url=" << libstoff::getString(string).cstr() << ",";
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find string\n"));
       f << "###targert,";
       break;
     }
     if (!string.empty())
-      f << "target=" << string.cstr() << ",";
+      f << "target=" << libstoff::getString(string).cstr() << ",";
     f << "nId1=" << input->readULong(2) << ",";
     f << "nId2=" << input->readULong(2) << ",";
     int nCnt=(int) input->readULong(2);
@@ -1100,7 +1100,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
         break;
       }
       else if (!string.empty())
-        f << string.cstr() << ":";
+        f << libstoff::getString(string).cstr() << ":";
       if (!zone.readString(string)) {
         f << "###string,";
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
@@ -1108,7 +1108,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
         break;
       }
       else if (!string.empty())
-        f << string.cstr();
+        f << libstoff::getString(string).cstr();
       f << ",";
     }
     f << "],";
@@ -1120,7 +1120,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
         break;
       }
       if (!string.empty())
-        f << "aName1=" << string.cstr() << ",";
+        f << "aName1=" << libstoff::getString(string).cstr() << ",";
     }
     if (nVers>=2) {
       nCnt=(int) input->readULong(2);
@@ -1138,14 +1138,14 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
           break;
         }
         else if (!string.empty())
-          f << string.cstr() << ":";
+          f << libstoff::getString(string).cstr() << ":";
         if (!zone.readString(string)) {
           f << "###string,";
           STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
           break;
         }
         else if (!string.empty())
-          f << string.cstr();
+          f << libstoff::getString(string).cstr();
         f << "nScriptType=" << input->readULong(2) << ",";
       }
       f << "],";
@@ -1154,14 +1154,14 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   }
   case StarAttribute::ATTR_TXT_REFMARK: {
     f << "textAtrRefMark,";
-    librevenge::RVNGString string;
+    std::vector<uint32_t> string;
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find aName\n"));
       f << "###aName,";
       break;
     }
     if (!string.empty())
-      f << "aName=" << string.cstr() << ",";
+      f << "aName=" << libstoff::getString(string).cstr() << ",";
     break;
   }
   case StarAttribute::ATTR_TXT_TOXMARK: {
@@ -1169,7 +1169,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     int cType=(int) input->readULong(1);
     f << "cType=" << cType << ",";
     f << "nLevel=" << input->readULong(2) << ",";
-    librevenge::RVNGString string;
+    std::vector<uint32_t> string;
     int nStringId=0xFFFF;
     if (nVers<1) {
       if (!zone.readString(string)) {
@@ -1178,7 +1178,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
         break;
       }
       if (!string.empty())
-        f << "aTypeName=" << string.cstr() << ",";
+        f << "aTypeName=" << libstoff::getString(string).cstr() << ",";
     }
     else {
       nStringId=(int) input->readULong(2);
@@ -1191,21 +1191,21 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       break;
     }
     if (!string.empty())
-      f << "aAltText=" << string.cstr() << ",";
+      f << "aAltText=" << libstoff::getString(string).cstr() << ",";
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find aPrimKey\n"));
       f << "###aPrimKey,";
       break;
     }
     if (!string.empty())
-      f << "aPrimKey=" << string.cstr() << ",";
+      f << "aPrimKey=" << libstoff::getString(string).cstr() << ",";
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find aSecKey\n"));
       f << "###aSecKey,";
       break;
     }
     if (!string.empty())
-      f << "aSecKey=" << string.cstr() << ",";
+      f << "aSecKey=" << libstoff::getString(string).cstr() << ",";
     if (nVers>=2) {
       cType=(int) input->readULong(1);
       f << "cType=" << cType << ",";
@@ -1215,12 +1215,13 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       f << "cFlags=" << input->readULong(1) << ",";
     }
     if (nVers>=1 && nStringId!=0xFFFF) {
-      if (!zone.getPoolName(nStringId, string)) {
+      librevenge::RVNGString poolName;
+      if (!zone.getPoolName(nStringId, poolName)) {
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find a nId name\n"));
         f << "###nId=" << nStringId << ",";
       }
       else
-        f << string.cstr() << ",";
+        f << poolName.cstr() << ",";
     }
     break;
   }
@@ -1251,14 +1252,14 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << "textAtrFtn,";
     // sw_sw3npool.cxx SwFmtFtn::Create
     f << "number1=" << input->readULong(2) << ",";
-    librevenge::RVNGString string;
+    std::vector<uint32_t> string;
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the aNumber\n"));
       f << "###aNumber,";
       break;
     }
     if (!string.empty())
-      f << "aNumber=" << string.cstr() << ",";
+      f << "aNumber=" << libstoff::getString(string).cstr() << ",";
     // no sure, find this attribute once with a content here, so ...
     StarObjectText text(object, false); // checkme
     if (!text.readSWContent(zone)) {
@@ -1335,14 +1336,14 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     break;
   case StarAttribute::ATTR_PARA_NUMRULE: {
     f << "parAtrNumRule,";
-    librevenge::RVNGString string;
+    std::vector<uint32_t> string;
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the sTmp\n"));
       f << "###sTmp,";
       break;
     }
     if (!string.empty())
-      f << "sTmp=" << string.cstr() << ",";
+      f << "sTmp=" << libstoff::getString(string).cstr() << ",";
     if (nVers>0)
       f << "nPoolId=" << input->readULong(2) << ",";
     break;
@@ -1554,7 +1555,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       *input>>nCurKey;
       if (nCurKey) f << "nCurKey=" << nCurKey << ",";
       for (int j=0; j<2; ++j) {
-        librevenge::RVNGString text;
+        std::vector<uint32_t> text;
         if (!zone.readString(text)) {
           STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find a macro string\n"));
           f << "###string" << j << ",";
@@ -1562,7 +1563,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
           break;
         }
         else if (!text.empty())
-          f << (j==0 ? "lib" : "mac") << "=" << text.cstr() << ",";
+          f << (j==0 ? "lib" : "mac") << "=" << libstoff::getString(text).cstr() << ",";
       }
       if (!ok) break;
       if (nVers>=1) {
@@ -1614,14 +1615,14 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     if (!StarObjectText::readSWImageMap(zone))
       break;
     if (nVers>=1) {
-      librevenge::RVNGString text;
+      std::vector<uint32_t> text;
       if (!zone.readString(text)) {
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the setName\n"));
         f << "###name1,";
         break;
       }
       else if (!text.empty())
-        f << "name1=" << text.cstr() << ",";
+        f << "name1=" << libstoff::getString(text).cstr() << ",";
     }
     break;
   case StarAttribute::ATTR_FRM_CHAIN:
@@ -1645,21 +1646,21 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     if (nVers>0) {
       f << "offset=" << input->readULong(2) << ",";
       f << "fmtType=" << input->readULong(2) << ",";
-      librevenge::RVNGString text;
+      std::vector<uint32_t> text;
       if (!zone.readString(text)) {
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the prefix\n"));
         f << "###prefix,";
         break;
       }
       else if (!text.empty())
-        f << "prefix=" << text.cstr() << ",";
+        f << "prefix=" << libstoff::getString(text).cstr() << ",";
       if (!zone.readString(text)) {
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the suffix\n"));
         f << "###suffix,";
         break;
       }
       else if (!text.empty())
-        f << "suffix=" << text.cstr() << ",";
+        f << "suffix=" << libstoff::getString(text).cstr() << ",";
     }
     break;
   // graphic attribute
@@ -1681,27 +1682,27 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     break;
   case StarAttribute::ATTR_BOX_FORMULA: {
     f << "boxFormula,";
-    librevenge::RVNGString text;
+    std::vector<uint32_t> text;
     if (!zone.readString(text)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the formula\n"));
       f << "###formula,";
       break;
     }
     else if (!text.empty())
-      f << "formula=" << text.cstr() << ",";
+      f << "formula=" << libstoff::getString(text).cstr() << ",";
     break;
   }
   case StarAttribute::ATTR_BOX_VALUE:
     f << "boxAtrValue,";
     if (nVers==0) {
-      librevenge::RVNGString text;
+      std::vector<uint32_t> text;
       if (!zone.readString(text)) {
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the dValue\n"));
         f << "###dValue,";
         break;
       }
       else if (!text.empty())
-        f << "dValue=" << text.cstr() << ",";
+        f << "dValue=" << libstoff::getString(text).cstr() << ",";
     }
     else {
       double res;
@@ -1772,14 +1773,14 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     *input>>hasStyle;
     if (hasStyle) {
       f << "hasStyle,";
-      librevenge::RVNGString text;
+      std::vector<uint32_t> text;
       if (!zone.readString(text)) {
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a name\n"));
         f << "###name,";
         break;
       }
       else if (!text.empty())
-        f << "name=" << text.cstr() << ",";
+        f << "name=" << libstoff::getString(text).cstr() << ",";
       input->seek(2, librevenge::RVNG_SEEK_CUR);
     }
 
@@ -1795,14 +1796,14 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   case StarAttribute::ATTR_SC_PAGE: {
     // svx_pageitem.cxx SvxPageItem::Create
     f << "page,";
-    librevenge::RVNGString text;
+    std::vector<uint32_t> text;
     if (!zone.readString(text)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a name\n"));
       f << "###name,";
       break;
     }
     else if (!text.empty())
-      f << "name=" << text.cstr() << ",";
+      f << "name=" << libstoff::getString(text).cstr() << ",";
     f << "type=" << input->readULong(1) << ",";
     f << "bLand="<< input->readULong(1) << ",";
     f << "nUse=" << input->readULong(2) << ",";
@@ -1941,13 +1942,13 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       if (underline) f << "underline=" << underline << ",";
       if (strikeOut) f << "strikeOut=" << strikeOut << ",";
       if (italic) f << "italic=" << italic << ",";
-      librevenge::RVNGString text;
+      std::vector<uint32_t> text;
       if (!zone.readString(text)) {
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a name\n"));
         f << "###text,";
         break;
       }
-      f << text.cstr() << ",";
+      f << libstoff::getString(text).cstr() << ",";
       // if (nVers==1) f << "size=" << input->readLong(4) << "x" << input->readLong(4) << ",";
       bool outline, shadow, transparent;
       *input >> outline >>  shadow >>  transparent;
@@ -1961,14 +1962,14 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << "symbol=" << input->readULong(1) << ",";
     f << "scale=" << input->readULong(2) << ",";
     for (int i=0; i<2; ++i) {
-      librevenge::RVNGString text;
+      std::vector<uint32_t> text;
       if (!zone.readString(text)) {
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a name\n"));
         f << "###text,";
         break;
       }
       else if (!text.empty())
-        f << (i==0 ? "prev" : "next") << "=" << text.cstr() << ",";
+        f << (i==0 ? "prev" : "next") << "=" << libstoff::getString(text).cstr() << ",";
     }
     break;
   }
@@ -1995,13 +1996,13 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   case StarAttribute::XATTR_FILLFLOATTRANSPARENCE:
 
   case StarAttribute::XATTR_FORMTXTSHDWCOLOR: {
-    librevenge::RVNGString text;
+    std::vector<uint32_t> text;
     if (!zone.readString(text)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
       f << "###string";
       break;
     }
-    if (!text.empty()) f << "name=" << text.cstr() << ",";
+    if (!text.empty()) f << "name=" << libstoff::getString(text).cstr() << ",";
     int32_t id;
     *input >> id;
     if (id>=0) f << "id=" << id << ",";
@@ -2147,13 +2148,13 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
 
   // name or index
   case StarAttribute::SDRATTR_SHADOWCOLOR: {
-    librevenge::RVNGString text;
+    std::vector<uint32_t> text;
     if (!zone.readString(text)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
       f << "###string";
       break;
     }
-    if (!text.empty()) f << "name=" << text.cstr() << ",";
+    if (!text.empty()) f << "name=" << libstoff::getString(text).cstr() << ",";
     int32_t id;
     *input >> id;
     if (id>=0) f << "id=" << id << ",";
@@ -2192,26 +2193,26 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     break;
   case StarAttribute::SDRATTR_MEASUREFORMATSTRING: { // string
     f << "measure[formatString]=";
-    librevenge::RVNGString format;
+    std::vector<uint32_t> format;
     if (!zone.readString(format)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
       f << "###string";
       break;
     }
-    f << format.cstr() << ",";
+    f << libstoff::getString(format).cstr() << ",";
     break;
   }
 
   case StarAttribute::SDRATTR_LAYERNAME:
   case StarAttribute::SDRATTR_OBJECTNAME: {
     f << (nWhich==StarAttribute::SDRATTR_LAYERNAME ? "sdrLayerName" : "sdrObjectName") << ",";
-    librevenge::RVNGString name;
+    std::vector<uint32_t> name;
     if (!zone.readString(name)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
       f << "###string";
       break;
     }
-    f << name.cstr() << ",";
+    f << libstoff::getString(name).cstr() << ",";
     break;
   }
   case StarAttribute::SDRATTR_RESIZEXONE: // sdrFraction
@@ -2290,24 +2291,24 @@ bool StarAttributeManager::readBrushItem(StarZone &zone, int nVers, long /*endPo
     return false;
   }
   if (doLoad & 2) {
-    librevenge::RVNGString link;
+    std::vector<uint32_t> link;
     if (!zone.readString(link)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readBrushItem: can not find the link\n"));
       f << "###link,";
       return false;
     }
     if (!link.empty())
-      f << "link=" << link.cstr() << ",";
+      f << "link=" << libstoff::getString(link).cstr() << ",";
   }
   if (doLoad & 4) {
-    librevenge::RVNGString filter;
+    std::vector<uint32_t> filter;
     if (!zone.readString(filter)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readBrushItem: can not find the filter\n"));
       f << "###filter,";
       return false;
     }
     if (!filter.empty())
-      f << "filter=" << filter.cstr() << ",";
+      f << "filter=" << libstoff::getString(filter).cstr() << ",";
   }
   f << "nPos=" << input->readULong(1) << ",";
   return true;

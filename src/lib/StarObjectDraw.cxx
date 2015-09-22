@@ -225,7 +225,7 @@ bool StarObjectDraw::readSdrLayer(StarZone &zone)
   uint8_t layerId;
   *input>>layerId;
   if (layerId) f << "layerId=" << int(layerId) << ",";
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   if (!zone.readString(string)) {
     STOFF_DEBUG_MSG(("StarObjectDraw::readSdrLayer: can not read a string\n"));
     f << "###string";
@@ -234,7 +234,7 @@ bool StarObjectDraw::readSdrLayer(StarZone &zone)
     zone.closeSDRHeader("SdrLayerDef");
     return true;
   }
-  f << string.cstr() << ",";
+  f << libstoff::getString(string).cstr() << ",";
   if (version>=1) {
     uint16_t nType;
     *input>>nType;
@@ -289,7 +289,7 @@ bool StarObjectDraw::readSdrLayerSet(StarZone &zone)
     }
     f << "],";
   }
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   if (!zone.readString(string)) {
     STOFF_DEBUG_MSG(("StarObjectDraw::readSdrLayerSet: can not read a string\n"));
     f << "###string";
@@ -298,7 +298,7 @@ bool StarObjectDraw::readSdrLayerSet(StarZone &zone)
     zone.closeSDRHeader("SdrLayerSet");
     return true;
   }
-  f << string.cstr() << ",";
+  f << libstoff::getString(string).cstr() << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   zone.closeSDRHeader("SdrLayerSet");
@@ -461,7 +461,7 @@ bool StarObjectDraw::readSdrModel(StarZone &zone, StarObject &doc)
     }
     else {
       if (version<11) f << "nCharSet=" << input->readLong(2) << ",";
-      librevenge::RVNGString string;
+      std::vector<uint32_t> string;
       for (int i=0; i<6; ++i) {
         if (!zone.readString(string)) {
           STOFF_DEBUG_MSG(("StarObjectDraw::readSdrModel: can not read a string\n"));
@@ -471,7 +471,7 @@ bool StarObjectDraw::readSdrModel(StarZone &zone, StarObject &doc)
         }
         if (string.empty()) continue;
         static char const *(wh[])= {"cTableName", "dashName", "lineEndName", "hashName", "gradientName", "bitmapName"};
-        f << wh[i] << "=" << string.cstr() << ",";
+        f << wh[i] << "=" << libstoff::getString(string).cstr() << ",";
       }
     }
   }
@@ -820,13 +820,13 @@ bool StarObjectDraw::readSdrPage(StarZone &zone, StarObject &doc)
       f.str("");
       f << "SdrPageDefB" << ++n << "[" << zone.getRecordLevel() << "]:";
       if (n==1) {
-        librevenge::RVNGString string;
+        std::vector<uint32_t> string;
         if (!zone.readString(string)) {
           STOFF_DEBUG_MSG(("StarObjectDraw::readSdrPage: can not find read a string\n"));
           f << "###string";
         }
         else // Controls
-          f << string.cstr() << ",";
+          f << libstoff::getString(string).cstr() << ",";
         // then if vers>={13|14|15|16}  671905111105671901000800000000000000
       }
       else {

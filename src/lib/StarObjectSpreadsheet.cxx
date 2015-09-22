@@ -48,7 +48,7 @@
 #include "StarItemPool.hxx"
 #include "StarObjectDraw.hxx"
 #include "StarZone.hxx"
-#include "SWFieldManager.hxx"
+#include "STOFFCell.hxx"
 #include "SWFormatManager.hxx"
 
 #include "StarObjectSpreadsheet.hxx"
@@ -425,7 +425,7 @@ try
         }
         // sc_rangenam.cxx ScRangeData::ScRangeData
         long endDataPos=scRecord.getContentLastPosition();
-        librevenge::RVNGString string;
+        std::vector<uint32_t> string;
         if (!zone.readString(string)) {
           STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
           f << "###string";
@@ -433,7 +433,7 @@ try
           ascFile.addNote(f.str().c_str());
           continue;
         }
-        f << string.cstr() << ",";
+        f << libstoff::getString(string).cstr() << ",";
         if (version >= 3) {
           uint32_t nPos;
           uint16_t rangeType, index;
@@ -502,7 +502,7 @@ try
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       bool isOk=true;
-      librevenge::RVNGString string;
+      std::vector<uint32_t> string;
       for (int i=0; i<int(count); ++i)  {
         pos=input->tell();
         f.str("");
@@ -534,7 +534,7 @@ try
             f << "###string";
           }
           else {
-            if (!string.empty()) f << string.cstr() << ",";
+            if (!string.empty()) f << libstoff::getString(string).cstr() << ",";
             bool bColHeaders, bRowHeaders;
             *input >> bColHeaders >> bRowHeaders;
             if (bColHeaders) f << "col[headers],";
@@ -552,7 +552,7 @@ try
               break;
             }
             if (string.empty()) continue;
-            f << (j==0 ? "appl" : j==1 ? "topic" : "item") << "=" << string.cstr() << ",";
+            f << (j==0 ? "appl" : j==1 ? "topic" : "item") << "=" << libstoff::getString(string).cstr() << ",";
           }
           if (!parsed)
             break;
@@ -577,7 +577,7 @@ try
               break;
             }
             if (string.empty()) continue;
-            f << (j==0 ? "file" : j==1 ? "filter" : "source") << "=" << string.cstr() << ",";
+            f << (j==0 ? "file" : j==1 ? "filter" : "source") << "=" << libstoff::getString(string).cstr() << ",";
           }
           if (!parsed)
             break;
@@ -590,7 +590,7 @@ try
               break;
             }
             else if (!string.empty())
-              f << "options=" << string.cstr() << ",";
+              f << "options=" << libstoff::getString(string).cstr() << ",";
           }
           break;
         }
@@ -642,7 +642,7 @@ try
               break;
             }
             if (string.empty()) continue;
-            f << (j==0 ? "title" : "message") << "=" << string.cstr() << ",";
+            f << (j==0 ? "title" : "message") << "=" << libstoff::getString(string).cstr() << ",";
           }
           if (!parsed) break;
           bool showError;
@@ -656,7 +656,7 @@ try
               break;
             }
             if (string.empty()) continue;
-            f << (j==0 ? "error[title]" : "error[message]") << "=" << string.cstr() << ",";
+            f << (j==0 ? "error[title]" : "error[message]") << "=" << libstoff::getString(string).cstr() << ",";
           }
           if (!parsed) break;
           f << "style[error]=" << input->readULong(2) << ",";
@@ -688,7 +688,7 @@ try
                 break;
               }
               if (string.empty()) continue;
-              f << (j==0 ? "name" : "object") << "=" << string.cstr() << ",";
+              f << (j==0 ? "name" : "object") << "=" << libstoff::getString(string).cstr() << ",";
             }
             if (!parsed) break;
             f << "type=" << input->readULong(2) << ",";
@@ -704,7 +704,7 @@ try
               }
               if (string.empty()) continue;
               static char const*(wh[])= {"serviceName","source","name","user","pass"};
-              f << wh[j] << "=" << string.cstr() << ",";
+              f << wh[j] << "=" << libstoff::getString(string).cstr() << ",";
             }
             break;
           default:
@@ -726,7 +726,7 @@ try
               f << "###string";
               break;
             }
-            if (!string.empty()) f << string.cstr() << ",";
+            if (!string.empty()) f << libstoff::getString(string).cstr() << ",";
             bool isDataLayout, dupFlag, subTotalDef;
             uint16_t orientation, function, showEmptyMode, subTotalCount, extra;
             int32_t hierarchy;
@@ -760,7 +760,7 @@ try
                 f << "###string";
                 break;
               }
-              if (!string.empty()) f << string.cstr() << ",";
+              if (!string.empty()) f << libstoff::getString(string).cstr() << ",";
               uint16_t visibleMode, showDetailMode;
               *input >> visibleMode >> showDetailMode >> extra;
               if (visibleMode) f << "visibleMode=" << visibleMode << ",";
@@ -788,7 +788,7 @@ try
                 break;
               }
               if (string.empty()) continue;
-              f << (j==0 ? "tableName" : "tableTab") << "=" << string.cstr() << ",";
+              f << (j==0 ? "tableName" : "tableTab") << "=" << libstoff::getString(string).cstr() << ",";
             }
           }
           break;
@@ -843,7 +843,7 @@ try
     }
     long endPos=zone.getRecordLastPosition();
     uint16_t vers;
-    librevenge::RVNGString string;
+    std::vector<uint32_t> string;
     switch (subId) {
     case 0x4221: {
       f << "docFlags,";
@@ -856,7 +856,7 @@ try
         break;
       }
       else if (!string.empty())
-        f << "pageStyle=" << string.cstr() << ",";
+        f << "pageStyle=" << libstoff::getString(string).cstr() << ",";
       f << "protected=" << input->readULong(1) << ",";
       if (!zone.readString(string)) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
@@ -864,7 +864,7 @@ try
         break;
       }
       else if (!string.empty())
-        f << "passwd=" << string.cstr() << ","; // the uncrypted table password, safe to ignore
+        f << "passwd=" << libstoff::getString(string).cstr() << ","; // the uncrypted table password, safe to ignore
       if (input->tell()<endPos) f << "language=" << input->readULong(2) << ",";
       if (input->tell()<endPos) f << "autoCalc=" << input->readULong(1) << ",";
       if (input->tell()<endPos) f << "visibleTab=" << input->readULong(2) << ",";
@@ -1000,7 +1000,7 @@ try
         break;
       }
       else if (!string.empty())
-        f << "name=" << string.cstr() << ",";
+        f << "name=" << libstoff::getString(string).cstr() << ",";
       if (input->tell()<endPos)
         f << "opt[helplines]=" << input->readULong(1) << ",";
       if (input->tell()<endPos) {
@@ -1133,7 +1133,7 @@ try
         break;
       }
       else if (!string.empty())
-        f << "author=" << string.cstr() << ",";
+        f << "author=" << libstoff::getString(string).cstr() << ",";
       *input >> bIsRange;
       if (bIsRange) f << "isRange,";
       if (!zone.openSCRecord()) {
@@ -1297,7 +1297,7 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   while (input->tell()<lastPos) {
     pos=input->tell();
     uint16_t id;
@@ -1438,7 +1438,7 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
         }
         if (!string.empty()) {
           static char const *(wh[])= {"name", "comment", "pass"};
-          f << wh[i] << "=" << string.cstr() << ",";
+          f << wh[i] << "=" << libstoff::getString(string).cstr() << ",";
         }
         if (i==2) break;
         *input>>bVal;
@@ -1475,7 +1475,7 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
           break;
         }
         if (!string.empty())
-          f << "pageStyle=" << string.cstr() << ",";
+          f << "pageStyle=" << libstoff::getString(string).cstr() << ",";
       }
       if (input->tell()<endDataPos) {
         *input >> bVal;
@@ -1524,7 +1524,7 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
         }
         if (string.empty()) continue;
         static char const *(wh[])= {"doc", "flt", "tab"};
-        f << "link[" << wh[i] << "]=" << string.cstr() << ",";
+        f << "link[" << wh[i] << "]=" << libstoff::getString(string).cstr() << ",";
       }
       if (!ok) break;
       if (input->tell()<endDataPos)
@@ -1536,7 +1536,7 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
           break;
         }
         if (string.empty()) continue;
-        f << "link[opt]=" << string.cstr() << ",";
+        f << "link[opt]=" << libstoff::getString(string).cstr() << ",";
       }
       break;
     }
@@ -1565,7 +1565,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
   f << "Entries(SCColumn)-C" << column << "[" << zone.getRecordLevel() << "]:";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   while (input->tell()<lastPos) {
     pos=input->tell();
     uint16_t id;
@@ -1607,7 +1607,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
           }
           if (string.empty()) continue;
           static char const *(wh[])= {"note","date","author"};
-          f << wh[j] << "=" << string.cstr() << ",";
+          f << wh[j] << "=" << libstoff::getString(string).cstr() << ",";
         }
         if (!ok) break;
         f << "],";
@@ -1693,7 +1693,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
         *input>>unkn;
         if (unkn&0xf) input->seek((unkn&0xf), librevenge::RVNG_SEEK_CUR);
       }
-      double value; // checkme
+      double value;
       *input >> value;
       f << "val=" << value << ",";
       break;
@@ -1707,14 +1707,14 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
         *input>>unkn;
         if (unkn&0xf) input->seek((unkn&0xf), librevenge::RVNG_SEEK_CUR);
       }
-      librevenge::RVNGString text;
+      std::vector<uint32_t> text;
       if (!zone.readString(text)) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCData: can not open some text \n"));
         f << "###text";
         ok=false;
         break;
       }
-      f << "val=" << text.cstr() << ",";
+      f << "val=" << libstoff::getString(text).cstr() << ",";
       break;
     }
     case 3: {
@@ -1743,7 +1743,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
           f << "ergValue=" << ergValue << ",";
         }
         if (cFlags&0x10) {
-          librevenge::RVNGString text;
+          std::vector<uint32_t> text;
           if (!zone.readString(text)) {
             STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCData: can not open some text\n"));
             f << "###text";
@@ -1753,7 +1753,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
             break;
           }
           else if (!text.empty())
-            f << "val=" << text.cstr() << ",";
+            f << "val=" << libstoff::getString(text).cstr() << ",";
         }
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -1857,7 +1857,7 @@ bool StarObjectSpreadsheet::readSCChangeTrack(StarZone &zone, int /*version*/, l
   if (limit) f << "limit=" << limit << ",";
   if (delta) f << "delta=" << delta << ",";
   long endData=zone.getRecordLastPosition();
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   for (int16_t i=0; i<count; ++i) {
     if (!zone.readString(string) || input->tell() > endData) {
       STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack: can not open some string\n"));
@@ -1867,7 +1867,7 @@ bool StarObjectSpreadsheet::readSCChangeTrack(StarZone &zone, int /*version*/, l
       break;
     }
     else if (!string.empty())
-      f << "string" << i << "=" << string.cstr() << ",";
+      f << "string" << i << "=" << libstoff::getString(string).cstr() << ",";
   }
   zone.closeSCRecord("SCChangeTrack");
 
@@ -1926,7 +1926,7 @@ bool StarObjectSpreadsheet::readSCChangeTrack(StarZone &zone, int /*version*/, l
         continue;
       }
       if (!string.empty())
-        f << "comment" << i << "=" << string.cstr() << ",";
+        f << "comment" << i << "=" << libstoff::getString(string).cstr() << ",";
       if (s==0 && type!=8) {
         f << "###type";
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack:the type seems bad\n"));
@@ -1965,7 +1965,7 @@ bool StarObjectSpreadsheet::readSCChangeTrack(StarZone &zone, int /*version*/, l
             break;
           }
           if (string.empty()) continue;
-          f << (j==0 ? "oldValue" : "newValue") << "=" << string.cstr() << ",";
+          f << (j==0 ? "oldValue" : "newValue") << "=" << libstoff::getString(string).cstr() << ",";
         }
         if (!ok) break;
         uint32_t oldContent, newContent;
@@ -2046,7 +2046,7 @@ bool StarObjectSpreadsheet::readSCDBData(StarZone &zone, int /*version*/, long l
   libstoff::DebugStream f;
   f << "Entries(SCDBData)[" << zone.getRecordLevel() << "]:";
   // sc_dbcolect.cxx ScDBData::Load
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   if (!zone.readString(string)) {
     STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCDBData: can not read some text\n"));
     f << "###name";
@@ -2055,7 +2055,7 @@ bool StarObjectSpreadsheet::readSCDBData(StarZone &zone, int /*version*/, long l
     ascFile.addNote(f.str().c_str());
     return false;
   }
-  f << "name=" << string.cstr() << ",";
+  f << "name=" << libstoff::getString(string).cstr() << ",";
   uint16_t nTable, nStartCol, nStartRow, nEndCol, nEndRow;
   *input >> nTable >> nStartCol >> nStartRow >> nEndCol >> nEndRow;
   if (nTable) f << "table=" << nTable << ",";
@@ -2104,7 +2104,7 @@ bool StarObjectSpreadsheet::readSCDBData(StarZone &zone, int /*version*/, long l
       return false;
     }
     if (!string.empty())
-      f << (i==0 ? "dbName" : "dbStatement") << "=" << string.cstr() << ",";
+      f << (i==0 ? "dbName" : "dbStatement") << "=" << libstoff::getString(string).cstr() << ",";
   }
   *input >> bDBNative;
   if (bDBNative) f << "dbNative,";
@@ -2143,11 +2143,11 @@ bool StarObjectSpreadsheet::readSCDBData(StarZone &zone, int /*version*/, long l
     *input>>val >> queryConnect;
     if (!doQuery) continue;
     f << "query" << i << "=[";
-    f << string.cstr() << ",";
+    f << libstoff::getString(string).cstr() << ",";
     f << "field=" << queryField << ",";
     f << "op=" << (int)queryOp << ",";
     if (queryByString) f << "byString,";
-    if (!string.empty()) f << string.cstr() << ",";
+    if (!string.empty()) f << libstoff::getString(string).cstr() << ",";
     if (val<0 || val>0) f << "val=" << val << ",";
     f << "connect=" << (int)queryConnect << ",";
     f << "],";
@@ -2274,7 +2274,7 @@ bool StarObjectSpreadsheet::readSCDBPivot(StarZone &zone, int version, long last
     if (makeTotalRow) f << "make[totalRow],";
   }
   if (input->tell()<lastPos) {
-    librevenge::RVNGString string;
+    std::vector<uint32_t> string;
     for (int i=0; i<2; ++i) {
       if (!zone.readString(string)||input->tell()>lastPos) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCDBData: can not read some text\n"));
@@ -2284,7 +2284,7 @@ bool StarObjectSpreadsheet::readSCDBPivot(StarZone &zone, int version, long last
         return false;
       }
       if (!string.empty())
-        f << (i==0 ? "name": "tag") << "=" << string.cstr() << ",";
+        f << (i==0 ? "name": "tag") << "=" << libstoff::getString(string).cstr() << ",";
     }
     uint16_t count;
     *input >> count;
@@ -2297,7 +2297,7 @@ bool StarObjectSpreadsheet::readSCDBPivot(StarZone &zone, int version, long last
         return false;
       }
       if (!string.empty())
-        f << "colName" << i << "=" << string.cstr() << ",";
+        f << "colName" << i << "=" << libstoff::getString(string).cstr() << ",";
     }
   }
   if (input->tell()!=lastPos) {
@@ -2401,14 +2401,14 @@ bool StarObjectSpreadsheet::readSCMatrix(StarZone &zone, int /*version*/, long l
       break;
     }
     case 2: {
-      librevenge::RVNGString string;
+      std::vector<uint32_t> string;
       if (!zone.readString(string)) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCMatrix: can not read a string\n"));
         f << "###string";
         ok=false;
         break;
       }
-      f << string.cstr() << ",";
+      f << libstoff::getString(string).cstr() << ",";
       break;
     }
     default:
@@ -2453,7 +2453,7 @@ bool StarObjectSpreadsheet::readSCQueryParam(StarZone &zone, int /*version*/, lo
   if (bRegExp) f << "regExp,";
   if (bDuplicate) f << "duplicate,";
   if (bByRow) f << "byRow,";
-  librevenge::RVNGString string;
+  std::vector<uint32_t> string;
   for (int i=0; i<8; ++i) {
     bool doQuery, queryByString;
     uint8_t op, connect;
@@ -2475,7 +2475,7 @@ bool StarObjectSpreadsheet::readSCQueryParam(StarZone &zone, int /*version*/, lo
     f << "connect=" << int(connect) << ",";
     f << "field=" << nField << ",";
     f << "val=" << val << ",";
-    if (!string.empty()) f << string.cstr() << ",";
+    if (!string.empty()) f << libstoff::getString(string).cstr() << ",";
     f << "],";
   }
   zone.closeSCRecord("SCQueryParam");
@@ -2615,14 +2615,14 @@ bool StarObjectSpreadsheet::readSCTokenInFormula3(StarZone &zone, STOFFVec2i con
       break;
     }
     case 2: {
-      librevenge::RVNGString text;
+      std::vector<uint32_t> text;
       if (!zone.readString(text)) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTokenInFormula3: can not read text zone\n"));
         f << "###text";
         ok=false;
         break;
       }
-      f << "\"" << text.cstr() << "\"";
+      f << "\"" << libstoff::getString(text).cstr() << "\"";
       break;
     }
     case 3: {
@@ -2659,14 +2659,14 @@ bool StarObjectSpreadsheet::readSCTokenInFormula3(StarZone &zone, STOFFVec2i con
     endData=true;
     break;
   case 3: { // external
-    librevenge::RVNGString text;
+    std::vector<uint32_t> text;
     if (!zone.readString(text)) {
       STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTokenInFormula3: can not read external zone\n"));
       f << "###external";
       ok=false;
       break;
     }
-    f << "\"" << text.cstr() << "\"";
+    f << "\"" << libstoff::getString(text).cstr() << "\"";
     break;
   }
   case 4: { // name
