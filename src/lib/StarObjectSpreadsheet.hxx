@@ -66,7 +66,8 @@ public:
   virtual ~StarObjectSpreadsheet();
   //! try to parse the current object
   bool parse();
-
+  //! try to send the spreadsheet
+  bool send(STOFFSpreadsheetListenerPtr listener);
 protected:
   //
   // data

@@ -47,7 +47,7 @@
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
 StarZone::StarZone(STOFFInputStreamPtr inputStream, std::string const &ascName, std::string const &zoneName, char const *password) :
-  m_input(inputStream), m_ascii(inputStream), m_version(0), m_documentVersion(0), m_headerVersionStack(), m_encoding(0), m_encryption(), m_asciiName(ascName), m_zoneName(zoneName),
+  m_input(inputStream), m_ascii(inputStream), m_version(0), m_documentVersion(0), m_headerVersionStack(), m_encoding(StarEncoding::E_DONTKNOW), m_encryption(), m_asciiName(ascName), m_zoneName(zoneName),
   m_typeStack(), m_positionStack(), m_beginToEndMap(), m_flagEndZone(), m_poolList()
 {
   if (password)
@@ -65,17 +65,25 @@ void StarZone::setInput(STOFFInputStreamPtr ip)
   m_ascii.setStream(ip);
 }
 
-bool StarZone::readString(std::vector<uint32_t> &string, int /*encoding*/) const
+bool StarZone::readString(std::vector<uint32_t> &string, int encoding) const
 {
   int sSz=(int) m_input->readULong(2);
   string.clear();
-  if (!m_input->checkPosition(m_input->tell()+sSz)) {
+  if (!sSz) return true;
+  unsigned long numRead;
+  uint8_t const *data=m_input->read(size_t(sSz), numRead);
+  if (!data || numRead!=(unsigned long) sSz) {
     STOFF_DEBUG_MSG(("StarZone::readString: the sSz seems bad\n"));
     return false;
   }
-  // fixme use encoding
-  for (int c=0; c<sSz; ++c) string.push_back((uint32_t) m_input->readULong(1));
-  return true;
+  std::vector<uint8_t> buffer;
+  buffer.resize(size_t(sSz));
+  std::memcpy(&buffer[0], data, size_t(sSz));
+
+  StarEncoding::Encoding encod=m_encoding;
+  if (encoding>=1) encod=StarEncoding::getEncodingForId(encoding);
+  // fixme check encryption
+  return StarEncoding::convert(buffer, encod, string);
 }
 
 bool StarZone::readStringsPool()
@@ -278,8 +286,9 @@ bool StarZone::readSWHeader()
   if (val) f << "compVers=" << val << ",";
   std::vector<uint8_t> passwd;
   for (int i=0; i<16; ++i) passwd.push_back((uint8_t) m_input->readULong(1));
-  m_encoding=(int) m_input->readULong(1);
-  if (val) f << "charSet[encoding]=" << m_encoding << ",";
+  val=(int) m_input->readULong(1);
+  if (val) f << "charSet[encoding]=" << val << ",";
+  m_encoding=StarEncoding::getEncodingForId(val);
   val=(int) m_input->readULong(1);
   if (val) f << "f0=" << val << ",";
   uint32_t date, time;

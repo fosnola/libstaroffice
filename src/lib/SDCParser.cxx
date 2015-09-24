@@ -41,9 +41,9 @@
 
 #include "STOFFOLEParser.hxx"
 
-#include "StarAttribute.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
+#include "StarAttribute.hxx"
 #include "StarObject.hxx"
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
@@ -52,6 +52,7 @@
 #include "StarObjectSpreadsheet.hxx"
 #include "StarObjectText.hxx"
 #include "StarZone.hxx"
+#include "STOFFSpreadsheetListener.hxx"
 
 #include "SDCParser.hxx"
 
@@ -62,11 +63,12 @@ namespace SDCParserInternal
 //! Internal: the state of a SDCParser
 struct State {
   //! constructor
-  State() : m_actPage(0), m_numPages(0)
+  State() : m_actPage(0), m_numPages(0), m_mainSpreadsheet()
   {
   }
 
   int m_actPage /** the actual page */, m_numPages /** the number of page of the final document */;
+  shared_ptr<StarObjectSpreadsheet> m_mainSpreadsheet;
 };
 
 }
@@ -75,20 +77,12 @@ struct State {
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
 SDCParser::SDCParser(STOFFInputStreamPtr input, STOFFHeader *header) :
-  STOFFSpreadsheetParser(input, header), m_password(0), m_oleParser(), m_state()
+  STOFFSpreadsheetParser(input, header), m_password(0), m_oleParser(), m_state(new SDCParserInternal::State)
 {
-  init();
 }
 
 SDCParser::~SDCParser()
 {
-}
-
-void SDCParser::init()
-{
-  setAsciiName("main-1");
-
-  m_state.reset(new SDCParserInternal::State);
 }
 
 ////////////////////////////////////////////////////////////
@@ -104,6 +98,7 @@ void SDCParser::parse(librevenge::RVNGSpreadsheetInterface *docInterface)
     ok = createZones();
     if (ok) {
       createDocument(docInterface);
+      sendSpreadsheet();
     }
     ascii().reset();
   }
@@ -112,6 +107,7 @@ void SDCParser::parse(librevenge::RVNGSpreadsheetInterface *docInterface)
     ok = false;
   }
 
+  resetSpreadsheetListener();
   if (!ok) throw(libstoff::ParseException());
 }
 
@@ -137,8 +133,10 @@ bool SDCParser::createZones()
       continue;
     }
     if (object.getDocumentKind()==STOFFDocument::STOFF_K_SPREADSHEET) {
-      StarObjectSpreadsheet spreadsheet(object, false);
-      spreadsheet.parse();
+      shared_ptr<StarObjectSpreadsheet> spreadsheet(new StarObjectSpreadsheet(object, false));
+      spreadsheet->parse();
+      if (listDir[d]->m_dir.empty())
+        m_state->m_mainSpreadsheet=spreadsheet;
       continue;
     }
     if (object.getDocumentKind()==STOFFDocument::STOFF_K_TEXT) {
@@ -212,19 +210,34 @@ bool SDCParser::createZones()
       asciiFile.reset();
     }
   }
-  return false;
+  return m_state->m_mainSpreadsheet;
 }
 
 ////////////////////////////////////////////////////////////
-// create the document
+// create the document and send data
 ////////////////////////////////////////////////////////////
 void SDCParser::createDocument(librevenge::RVNGSpreadsheetInterface *documentInterface)
 {
   if (!documentInterface) return;
-  STOFF_DEBUG_MSG(("SDCParser::createDocument: not implemented exist\n"));
-  return;
+  m_state->m_numPages = 1;
+  STOFFPageSpan ps(getPageSpan());
+  ps.setPageSpan(1);
+  std::vector<STOFFPageSpan> pageList(1,ps);
+  //
+  STOFFSpreadsheetListenerPtr listen(new STOFFSpreadsheetListener(*getParserState(), pageList, documentInterface));
+  setSpreadsheetListener(listen);
+  listen->startDocument();
 }
 
+bool SDCParser::sendSpreadsheet()
+{
+  STOFFSpreadsheetListenerPtr listener=getSpreadsheetListener();
+  if (!listener || !m_state->m_mainSpreadsheet) {
+    STOFF_DEBUG_MSG(("SDCParser::sendSpreadsheet: can not find the main spreadsheet\n"));
+    return false;
+  }
+  return m_state->m_mainSpreadsheet->send(listener);
+}
 
 ////////////////////////////////////////////////////////////
 //

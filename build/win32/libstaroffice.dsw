@@ -31,6 +31,21 @@ Package=<4>
 
 ###############################################################################
 
+Project: "sdc2csv"=".\sdc2csv.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libstaroffice
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "sd2raw"=".\sd2raw.dsp" - Package Owner=<4>
 
 Package=<5>

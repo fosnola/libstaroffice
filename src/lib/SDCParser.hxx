@@ -80,14 +80,14 @@ public:
   void parse(librevenge::RVNGSpreadsheetInterface *documentInterface);
 
 protected:
-  //! inits all internal variables
-  void init();
-
   //! creates the listener which will be associated to the document
   void createDocument(librevenge::RVNGSpreadsheetInterface *documentInterface);
 
   //! parses the different OLE, ...
   bool createZones();
+
+  //! try to send the spreadsheet
+  bool sendSpreadsheet();
 
   //
   // low level

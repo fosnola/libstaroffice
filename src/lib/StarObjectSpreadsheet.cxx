@@ -49,6 +49,8 @@
 #include "StarObjectDraw.hxx"
 #include "StarZone.hxx"
 #include "STOFFCell.hxx"
+#include "STOFFSpreadsheetListener.hxx"
+#include "STOFFTable.hxx"
 #include "SWFormatManager.hxx"
 
 #include "StarObjectSpreadsheet.hxx"
@@ -234,13 +236,25 @@ private:
   ScMultiRecord &operator=(ScMultiRecord const &orig);
 };
 
+//! Internal: the cell of a StarObjectSpreadsheet
+struct Cell : public STOFFCell {
+public:
+  //! constructor
+  Cell(STOFFVec2i pos=STOFFVec2i(0,0)) : STOFFCell(), m_content()
+  {
+    setPosition(pos);
+  }
+  //! the cell content
+  STOFFCellContent m_content;
+};
+
 ////////////////////////////////////////
 //! Internal: a table of a StarObjectSpreadsheet
-class Table
+class Table : public STOFFTable
 {
 public:
   //! constructor
-  Table(int loadingVers, int maxRow) : m_loadingVersion(loadingVers), m_maxRow(maxRow)
+  Table(int loadingVers, int maxRow) : m_loadingVersion(loadingVers), m_name(""), m_maxRow(maxRow), m_colWidthList(), m_rowHeightList(), m_rowToColToCellMap()
   {
   }
   //! returns the load version
@@ -258,20 +272,57 @@ public:
   {
     return m_maxRow;
   }
+  //! returns the column width in twip
+  std::vector<float> getColWidths() const
+  {
+    std::vector<float> res;
+    res.resize(m_colWidthList.size());
+    for (size_t i=0; i<m_colWidthList.size(); ++i)
+      res[i]=(float) m_colWidthList[i]/1440.f;
+    return res;
+  }
+  //! returns a cell corresponding to a position
+  Cell &getCell(STOFFVec2i const &pos)
+  {
+    if (pos[1]<0 || pos[1]>getMaxRows() || pos[0]<0 || pos[0]>getMaxCols()) {
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::Table::getCell: the position is bad (%d,%d)\n", pos[0], pos[1]));
+      static Cell badCell;
+      return badCell;
+    }
+    if (m_rowToColToCellMap.find(pos[1])==m_rowToColToCellMap.end())
+      m_rowToColToCellMap[pos[1]]=std::map<int, shared_ptr<Cell> >();
+    std::map<int, shared_ptr<Cell> > &row=m_rowToColToCellMap.find(pos[1])->second;
+    if (row.find(pos[0]) == row.end() || !row.find(pos[0])->second) {
+      shared_ptr<Cell> newCell(new Cell(pos));
+      row.insert(std::map<int, shared_ptr<Cell> >::value_type(pos[0],newCell));
+      return *newCell;
+    }
+    return *(row.find(pos[0])->second);
+  }
 
   //! the loading version
   int m_loadingVersion;
+  //! the table name
+  librevenge::RVNGString m_name;
   //! the maximum number of row
   int m_maxRow;
+  //! the columns width
+  std::vector<int> m_colWidthList;
+  //! the rows heights
+  std::vector<int> m_rowHeightList;
+  //! map row -> col -> cell
+  std::map<int, std::map<int, shared_ptr<Cell> > > m_rowToColToCellMap;
 };
 
 ////////////////////////////////////////
 //! Internal: the state of a StarObjectSpreadsheet
 struct State {
   //! constructor
-  State()
+  State() : m_tableList()
   {
   }
+  //! the actual table
+  std::vector<shared_ptr<Table> > m_tableList;
 };
 
 }
@@ -289,9 +340,49 @@ StarObjectSpreadsheet::~StarObjectSpreadsheet()
 
 ////////////////////////////////////////////////////////////
 //
-// Intermediate level
+// send data
 //
 ////////////////////////////////////////////////////////////
+bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
+{
+  if (m_state->m_tableList.empty() || !listener) {
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheet::send: can not find the table\n"));
+    return false;
+  }
+  for (size_t t=0; t<m_state->m_tableList.size(); ++t) {
+    if (!m_state->m_tableList[t]) continue;
+    StarObjectSpreadsheetInternal::Table const &sheet=*m_state->m_tableList[t];
+    listener->openSheet(sheet.getColWidths(), librevenge::RVNG_INCH, sheet.m_name);
+
+    int prevRow = -1;
+    std::map<int, std::map<int, shared_ptr<StarObjectSpreadsheetInternal::Cell> > >::const_iterator rIt;
+    std::map<int, shared_ptr<StarObjectSpreadsheetInternal::Cell> >::const_iterator cellIt;
+    for (rIt=sheet.m_rowToColToCellMap.begin(); rIt!=sheet.m_rowToColToCellMap.end(); ++rIt) {
+      int row=rIt->first;
+      while (row > prevRow) {
+        if (prevRow != -1)
+          listener->closeSheetRow();
+        ++prevRow;
+        if (prevRow>=0 && prevRow<(int)sheet.m_rowHeightList.size())
+          listener->openSheetRow(float(sheet.m_rowHeightList[size_t(prevRow)])/1440.f, librevenge::RVNG_INCH);
+        else
+          listener->openSheetRow(12, librevenge::RVNG_POINT);
+      }
+      for (cellIt=rIt->second.begin(); cellIt!=rIt->second.end(); ++cellIt) {
+        if (!cellIt->second) continue;
+        StarObjectSpreadsheetInternal::Cell const &cell=*cellIt->second;
+        listener->openSheetCell(cell, cell.m_content);
+        if (cell.m_content.m_contentType==STOFFCellContent::C_TEXT_BASIC)
+          listener->insertUnicodeList(cell.m_content.m_text);
+        listener->closeSheetCell();
+      }
+    }
+    if (prevRow!=-1) listener->closeSheetRow();
+    listener->closeSheet();
+  }
+
+  return true;
+}
 
 ////////////////////////////////////////////////////////////
 // main zone
@@ -394,8 +485,10 @@ try
     switch (subId) {
     case 0x4222: {
       f << "table,";
-      StarObjectSpreadsheetInternal::Table table(version, maxRow);
-      ok=readSCTable(zone, table);
+      shared_ptr<StarObjectSpreadsheetInternal::Table> table;
+      table.reset(new StarObjectSpreadsheetInternal::Table(version, maxRow));
+      m_state->m_tableList.push_back(table);
+      ok=readSCTable(zone, *table);
       break;
     }
     case 0x4224: {
@@ -525,6 +618,7 @@ try
           parsed=readSCDBPivot(zone, version, endData);
           break;
         case 0x4227: {
+          f << "chart,";
           parsed=addDebugFile=true;
           uint16_t nTab, nCol1, nRow1, nCol2, nRow2;
           *input >> nTab >> nCol1 >> nRow1 >> nCol2 >> nRow2;
@@ -1037,11 +1131,17 @@ try
       if (!fileManager.readJobSetUp(zone)) break;
       break;
     }
-    case 0x422c:
+    case 0x422c: {
       f << "charset,";
       input->seek(1, librevenge::RVNG_SEEK_CUR); // GUI, dummy
-      f << "set=" << input->readULong(1) << ",";
+      int charSet=(int) input->readULong(1);
+      f << "set=" << charSet << ",";
+      if (StarEncoding::getEncodingForId(charSet)!=StarEncoding::E_DONTKNOW)
+        zone.setEncoding(StarEncoding::getEncodingForId(charSet));
+      else
+        f << "###,";
       break;
+    }
     case 0x4232:
     case 0x4233: {
       f << (subId==4232 ? "colNameRange" : "rowNameRange") << ",";
@@ -1373,6 +1473,11 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
           f << val << "x" << rep << ",";
         else if (rep==1)
           f << val << ",";
+        for (int j=0; j<int(rep); ++j) {
+          if (i+j>int(rep)+table.getMaxCols())
+            break;
+          table.m_colWidthList.push_back(int(val));
+        }
         i+=int(rep);
       }
       f << "],col[flag]=[";
@@ -1401,6 +1506,11 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
           f << val << "x" << (rep+1) << ",";
         else if (rep==1)
           f << val << ",";
+        for (int j=0; j<int(rep); ++j) {
+          if (i+j>int(rep)+table.getMaxRows())
+            break;
+          table.m_rowHeightList.push_back(int(val));
+        }
         i+=int(rep);
       }
       f << "],row[flag]=[";
@@ -1439,6 +1549,8 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
         if (!string.empty()) {
           static char const *(wh[])= {"name", "comment", "pass"};
           f << wh[i] << "=" << libstoff::getString(string).cstr() << ",";
+          if (i==0 && !m_state->m_tableList.empty() && m_state->m_tableList.back())
+            m_state->m_tableList.back()->m_name=libstoff::getString(string);
         }
         if (i==2) break;
         *input>>bVal;
@@ -1684,6 +1796,8 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
     uint8_t what;
     *input>>what;
     bool ok=true;
+    StarObjectSpreadsheetInternal::Cell &cell=table.getCell(STOFFVec2i(column, row));
+    STOFFCell::Format format=cell.getFormat();
     switch (what) {
     case 1: { // value
       // sc_cell2.cxx
@@ -1695,6 +1809,9 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
       }
       double value;
       *input >> value;
+      format.m_format=STOFFCell::F_NUMBER;
+      cell.m_content.m_contentType=STOFFCellContent::C_NUMBER;
+      cell.m_content.setValue(value);
       f << "val=" << value << ",";
       break;
     }
@@ -1714,10 +1831,14 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
         ok=false;
         break;
       }
+      // checkme: never seems what==6, so unsure...
+      format.m_format=STOFFCell::F_TEXT;
+      cell.m_content.m_contentType=STOFFCellContent::C_TEXT_BASIC;
+      cell.m_content.m_text=text;
       f << "val=" << libstoff::getString(text).cstr() << ",";
       break;
     }
-    case 3: {
+    case 3: { // TODO
       // sc_cell.cxx
       f << "formula,";
       if (!scRecord.openContent("SCData")) {
@@ -1798,7 +1919,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
       }
       break;
     }
-    case 5: {
+    case 5: { // TODO
       // sc_cell2.cxx
       f << "edit";
       if (version>=7) {
@@ -1821,6 +1942,8 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
       ok=false;
       break;
     }
+    cell.setFormat(format);
+
     if (!ok || pos!=input->tell()) {
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());

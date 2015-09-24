@@ -42,7 +42,9 @@
 #include <stack>
 
 #include "libstaroffice_internal.hxx"
+
 #include "STOFFDebug.hxx"
+#include "StarEncoding.hxx"
 
 class StarEncryption;
 
@@ -115,7 +117,16 @@ public:
     return (m_documentVersion>=vers1 && m_documentVersion<vers2) ||
            (m_documentVersion>=vers3 && m_documentVersion<vers4);
   }
-
+  //! returns the zone encoding
+  StarEncoding::Encoding getEncoding() const
+  {
+    return m_encoding;
+  }
+  //! sets the zone encoding
+  void setEncoding(StarEncoding::Encoding encod)
+  {
+    m_encoding=encod;
+  }
   //
   // basic
   //
@@ -253,7 +264,7 @@ protected:
   //! the header version (for SDR zone)
   std::stack<int> m_headerVersionStack;
   //! the zone encoding
-  int m_encoding;
+  StarEncoding::Encoding m_encoding;
   //! the encryption
   shared_ptr<StarEncryption> m_encryption;
   //! the file ascii name

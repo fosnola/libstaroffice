@@ -63,8 +63,11 @@ librevenge::RVNGString getString(std::vector<uint32_t> const &unicode)
 {
   librevenge::RVNGString res("");
   for (size_t i=0; i<unicode.size(); ++i) {
-    if (unicode[i]<0x20 && unicode[i]!=0x9 && unicode[i]!=0xd) {
-      STOFF_DEBUG_MSG(("libstoff::getString: find odd char %x\n", (unsigned int)unicode[i]));
+    if (unicode[i]<0x20 && unicode[i]!=0x9 && unicode[i]!=0xa && unicode[i]!=0xd) {
+      static int numErrors=0;
+      if (++numErrors<10) {
+        STOFF_DEBUG_MSG(("libstoff::getString: find odd char %x\n", (unsigned int)unicode[i]));
+      }
     }
     else if (unicode[i]<0x80)
       res.append((char) unicode[i]);

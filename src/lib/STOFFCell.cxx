@@ -732,10 +732,13 @@ std::ostream &operator<<(std::ostream &o, STOFFCellContent const &content)
   case STOFFCellContent::C_TEXT:
     o << ",text=\"" << content.m_textEntry << "\"";
     break;
+  case STOFFCellContent::C_TEXT_BASIC:
+    o << ",text=\"" << libstoff::getString(content.m_text).cstr() << "\"";
+    break;
   case STOFFCellContent::C_NUMBER: {
     o << ",val=";
     bool textAndVal = false;
-    if (content.hasText()) {
+    if (content.m_textEntry.valid()) {
       o << "entry=" << content.m_textEntry;
       textAndVal = content.isValueSet();
     }

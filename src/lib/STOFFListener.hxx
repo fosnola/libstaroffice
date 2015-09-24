@@ -93,6 +93,17 @@ public:
   /** adds an unicode character.
    *  By convention if \a character=0xfffd(undef), no character is added */
   virtual void insertUnicode(uint32_t character)=0;
+  /** try to insert a list of unicode character */
+  virtual void insertUnicodeList(std::vector<uint32_t> const &list)
+  {
+    if (list.empty() || !canWriteText())
+      return;
+    for (size_t i=0; i<list.size(); ++i) {
+      if (list[i]==0x9) insertTab();
+      else if (list[i]==0xa || list[i]==0xc) insertEOL(); // checkme: use softBreak ?
+      else insertUnicode(list[i]);
+    }
+  }
   //! adds a unicode string
   virtual void insertUnicodeString(librevenge::RVNGString const &str)=0;
 

@@ -388,9 +388,9 @@ public:
   };
 
   /** the different types of cell's field */
-  enum Type { C_NONE, C_TEXT, C_NUMBER, C_FORMULA, C_UNKNOWN };
+  enum Type { C_NONE, C_TEXT, C_TEXT_BASIC, C_NUMBER, C_FORMULA, C_UNKNOWN };
   /// constructor
-  STOFFCellContent() : m_contentType(C_UNKNOWN), m_value(0.0), m_valueSet(false), m_textEntry(), m_formula() { }
+  STOFFCellContent() : m_contentType(C_UNKNOWN), m_value(0.0), m_valueSet(false), m_text(), m_textEntry(), m_formula() { }
   /// destructor
   ~STOFFCellContent() {}
   //! operator<<
@@ -401,6 +401,7 @@ public:
   {
     if (m_contentType == C_NUMBER) return false;
     if (m_contentType == C_TEXT && m_textEntry.valid()) return false;
+    if (m_contentType == C_TEXT_BASIC && !m_text.empty()) return false;
     if (m_contentType == C_FORMULA && (m_formula.size() || isValueSet())) return false;
     return true;
   }
@@ -418,7 +419,7 @@ public:
   //! returns true if the text is set
   bool hasText() const
   {
-    return m_textEntry.valid();
+    return m_textEntry.valid() || !m_text.empty();
   }
   /** conversion beetween double days since 1900 and a date, ie val=0
       corresponds to 1/1/1900, val=365 to 1/1/1901, ... */
@@ -435,7 +436,9 @@ public:
   double m_value;
   //! true if the value has been set
   bool m_valueSet;
-  //! the cell string
+  //! the text value (for C_TEXT_BASIC)
+  std::vector<uint32_t> m_text;
+  //! the cell string position
   STOFFEntry m_textEntry;
   //! the formula list of instruction
   std::vector<FormulaInstruction> m_formula;

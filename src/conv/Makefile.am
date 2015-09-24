@@ -1,5 +1,5 @@
 if BUILD_TOOLS
 
-SUBDIRS = sd2raw sd2text sdw2html
+SUBDIRS = sd2raw sd2text sdc2csv sdw2html
 
 endif

@@ -69,6 +69,105 @@ bool StarEncoding::convert(std::vector<uint8_t> const &src, StarEncoding::Encodi
   return !dest.empty() || src.empty();
 }
 
+StarEncoding::Encoding StarEncoding::getEncodingForId(int id)
+{
+  Encoding res=E_DONTKNOW;
+  switch (id) {
+  case E_DONTKNOW:
+  case E_MS_1252:
+  case E_APPLE_ROMAN:
+  case E_IBM_437:
+  case E_IBM_850:
+  case E_IBM_860:
+  case E_IBM_861:
+  case E_IBM_863:
+  case E_IBM_865:
+  case E_SYMBOL:
+  case E_ASCII_US:
+  case E_ISO_8859_1:
+  case E_ISO_8859_2:
+  case E_ISO_8859_3:
+  case E_ISO_8859_4:
+  case E_ISO_8859_5:
+  case E_ISO_8859_6:
+  case E_ISO_8859_7:
+  case E_ISO_8859_8:
+  case E_ISO_8859_9:
+  case E_ISO_8859_14:
+  case E_ISO_8859_15:
+  case E_IBM_737:
+  case E_IBM_775:
+  case E_IBM_852:
+  case E_IBM_855:
+  case E_IBM_857:
+  case E_IBM_862:
+  case E_IBM_864:
+  case E_IBM_866:
+  case E_IBM_869:
+  case E_MS_874:
+  case E_MS_1250:
+  case E_MS_1251:
+  case E_MS_1253:
+  case E_MS_1254:
+  case E_MS_1255:
+  case E_MS_1256:
+  case E_MS_1257:
+  case E_MS_1258:
+  case E_APPLE_CENTEURO:
+  case E_APPLE_CROATIAN:
+  case E_APPLE_CYRILLIC:
+  case E_APPLE_GREEK:
+  case E_APPLE_ICELAND:
+  case E_APPLE_ROMANIAN:
+  case E_APPLE_TURKISH:
+  case E_APPLE_UKRAINIAN:
+  case E_APPLE_CHINSIMP:
+  case E_APPLE_CHINTRAD:
+  case E_APPLE_JAPANESE:
+  case E_APPLE_KOREAN:
+  case E_MS_932:
+  case E_MS_936:
+  case E_MS_949:
+  case E_MS_950:
+  case E_SHIFT_JIS:
+  case E_GB_2312:
+  case E_GBT_12345:
+  case E_GBK:
+  case E_BIG5:
+  case E_EUC_JP:
+  case E_EUC_CN:
+  case E_KOI8_R:
+  case E_UTF7:
+  case E_UTF8:
+  case E_ISO_8859_10:
+  case E_ISO_8859_13:
+  case E_EUC_KR:
+  case E_JIS_X_0201:
+  case E_JIS_X_0208:
+  case E_JIS_X_0212:
+  case E_MS_1361:
+  case E_BIG5_HKSCS:
+  case E_TIS_620:
+  case E_KOI8_U:
+  case E_ISCII_DEVANAGARI:
+  case E_UCS4:
+  case E_UCS2:
+    res=Encoding(id);
+    break;
+  default:
+    STOFF_DEBUG_MSG(("StarEncoding::getEncodingForId: can not find encoding for id=%d\n", id));
+    break;
+  }
+  if (res==E_DONTKNOW) res=E_MS_1252; // seems to be the default
+  // tenccvt.cxx GetExtendedTextEncoding GetExtendedCompatibilityTextEncoding
+  if (res==E_ISO_8859_1 || res==E_ISO_8859_15) res=E_MS_1252;
+  if (res==E_ISO_8859_2) res=E_MS_1250;
+  if (res==E_ISO_8859_5) res=E_MS_1251;
+  if (res==E_ISO_8859_7) res=E_MS_1253;
+  if (res==E_ISO_8859_9) res=E_MS_1254;
+  return res;
+}
+
 bool StarEncoding::read
 (std::vector<uint8_t> const &src, size_t &pos, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest)
 {
@@ -95,6 +194,7 @@ bool StarEncoding::read
   int c=(int) src[pos++];
   uint32_t unicode=uint32_t(c);
   switch (encoding) {
+  case E_DONTKNOW: // MS1252 seems to be the default encoding
   case E_ASCII_US: // use the same as MS1252
   case E_MS_1252: {
     if (c<0x80) break;
@@ -1333,13 +1433,15 @@ bool StarEncoding::read
   case E_EUC_KR: // already done
   case E_BIG5_HKSCS: // already done
   case E_MS_1361: // already done
-  case E_DONTKNOW:
   default:
     STOFF_DEBUG_MSG(("StarEncoding::read: unimplemented encoding %d\n", int(encoding)));
     break;
   }
   if (!unicode) {
-    STOFF_DEBUG_MSG(("StarEncoding::read: unknown caracter %x\n", (unsigned int)c));
+    static int numError=0;
+    if (++numError<10) {
+      STOFF_DEBUG_MSG(("StarEncoding::read: unknown caracter %x\n", (unsigned int)c));
+    }
   }
   dest.push_back(unicode);
   return true;

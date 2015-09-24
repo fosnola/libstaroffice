@@ -2,6 +2,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libstaroffice", "libstaroffice.vcxproj", "{C24D5976-7DA0-4B1E-838F-6ADCC835B5E1}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdc2csv", "sdc2csv.vcxproj", "{D6B45938-C154-436B-AA28-29C35A8A691F}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdw2html", "sdw2html.vcxproj", "{D6B45938-C154-436B-AA28-29C35A8A691F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sd2raw", "sd2raw.vcxproj", "{0E6CBB23-DFDC-4194-A2CC-F030F6B7D730}"

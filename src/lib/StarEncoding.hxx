@@ -77,6 +77,8 @@ public:
   //! destructor
   virtual ~StarEncoding();
 
+  //! return an encoding corresponding to an id
+  static Encoding getEncodingForId(int id);
   //! try to convert a list of character and transforms it a unicode's list
   static bool convert(std::vector<uint8_t> const &src, Encoding encoding, std::vector<uint32_t> &dest);
 

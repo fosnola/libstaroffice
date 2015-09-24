@@ -59,6 +59,7 @@ AS_CASE([$host],
 		native_win32=yes
 		LIBSTAROFFICE_WIN32_RESOURCE=libstaroffice-win32res.lo
 		LIBSTAROFFICE_STREAM_WIN32_RESOURCE=libstaroffice-stream-win32res.lo
+		SDC2CSV_WIN32_RESOURCE=sdc2csv-win32res.lo
 		SDW2HTML_WIN32_RESOURCE=sdw2html-win32res.lo
 		SD2RAW_WIN32_RESOURCE=sd2raw-win32res.lo
 		SD2TEXT_WIN32_RESOURCE=sd2text-win32res.lo
@@ -66,6 +67,7 @@ AS_CASE([$host],
 		native_win32=no
 		LIBSTAROFFICE_WIN32_RESOURCE=
 		LIBSTAROFFICE_STREAM_WIN32_RESOURCE=
+		SDC2CSV_WIN32_RESOURCE=
 		SDW2HTML_WIN32_RESOURCE=
 		SD2RAW_WIN32_RESOURCE=
 		SD2TEXT_WIN32_RESOURCE=
@@ -74,6 +76,7 @@ AS_CASE([$host],
 AM_CONDITIONAL(OS_WIN32, [test "x$native_win32" = "xyes"])
 AC_SUBST(LIBSTAROFFICE_WIN32_RESOURCE)
 AC_SUBST(LIBSTAROFFICE_STREAM_WIN32_RESOURCE)
+AC_SUBST(SDC2CSV_WIN32_RESOURCE)
 AC_SUBST(SDW2HTML_WIN32_RESOURCE)
 AC_SUBST(SD2RAW_WIN32_RESOURCE)
 AC_SUBST(SD2TEXT_WIN32_RESOURCE)
@@ -371,6 +374,8 @@ inc/Makefile
 inc/libstaroffice/Makefile
 src/Makefile
 src/conv/Makefile
+src/conv/sdc2csv/Makefile
+src/conv/sdc2csv/sdc2csv.rc
 src/conv/sdw2html/Makefile
 src/conv/sdw2html/sdw2html.rc
 src/conv/sd2raw/Makefile

@@ -1,0 +1,11 @@
+.deps
+.libs
+*.lo
+*.la
+*.o
+*.rc
+Makefile
+Makefile.in
+sdc2csv
+sdc2csv.exe
+*.rc

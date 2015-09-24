@@ -221,7 +221,7 @@ bool SDWParser::createZones()
 void SDWParser::createDocument(librevenge::RVNGTextInterface *documentInterface)
 {
   if (!documentInterface) return;
-  STOFF_DEBUG_MSG(("SDWParser::createDocument: not implemented exist\n"));
+  STOFF_DEBUG_MSG(("SDWParser::createDocument: not implemented, exit\n"));
   return;
 }
 
