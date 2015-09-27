@@ -90,18 +90,10 @@ protected:
   bool readSCDBData(StarZone &zone, int version, long lastPos);
   //! try to read a dbPivot
   bool readSCDBPivot(StarZone &zone, int version, long lastPos);
-  //! try to read a formula
-  bool readSCFormula(StarZone &zone, STOFFVec2i const &pos, int version, long lastPos);
-  //! try to read a formula(v3)
-  bool readSCFormula3(StarZone &zone, STOFFVec2i const &pos, int version, long lastPos);
   //! try to read a matrix
   bool readSCMatrix(StarZone &zone, int version, long lastPos);
   //! try to read a query param
   bool readSCQueryParam(StarZone &zone, int version, long lastPos);
-  //! try to read a token in a formula
-  bool readSCTokenInFormula(StarZone &zone, STOFFVec2i const &pos, int version, long lastPos, libstoff::DebugStream &f);
-  //! try to read a token in a formula (v3)
-  bool readSCTokenInFormula3(StarZone &zone, STOFFVec2i const &pos, bool &endData, long lastPos, libstoff::DebugStream &f);
   //! try to read a SCOutlineArray
   bool readSCOutlineArray(StarZone &zone);
 

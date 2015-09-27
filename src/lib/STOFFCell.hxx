@@ -360,7 +360,8 @@ public:
   struct FormulaInstruction {
     enum Type { F_Operator, F_Function, F_Cell, F_CellList, F_Long, F_Double, F_Text };
     //! constructor
-    FormulaInstruction() : m_type(F_Text), m_content(""), m_longValue(0), m_doubleValue(0), m_sheet("")
+    FormulaInstruction() : m_type(F_Text), m_content(""), m_longValue(0), m_doubleValue(0), m_sheet(""),
+      m_sheetId(-1), m_sheetIdRelative(false), m_extra("")
     {
       for (int i=0; i<2; ++i) {
         m_position[i]=STOFFVec2i(0,0);
@@ -385,6 +386,12 @@ public:
     STOFFVec2b m_positionRelative[2];
     //! the sheet name (if not empty)
     librevenge::RVNGString m_sheet;
+    //! the sheet id (if set)
+    int m_sheetId;
+    //! the sheet id relative flag
+    bool m_sheetIdRelative;
+    //! extra data
+    std::string m_extra;
   };
 
   /** the different types of cell's field */

@@ -762,7 +762,7 @@ std::ostream &operator<<(std::ostream &o, STOFFCellContent const &content)
   return o;
 }
 
-// ---------- WKSContentListener::FormulaInstruction ------------------
+// ---------- MWAWContentListener::FormulaInstruction ------------------
 librevenge::RVNGPropertyList STOFFCellContent::FormulaInstruction::getPropertyList() const
 {
   librevenge::RVNGPropertyList pList;
@@ -794,7 +794,7 @@ librevenge::RVNGPropertyList STOFFCellContent::FormulaInstruction::getPropertyLi
     pList.insert("librevenge:column-absolute",!m_positionRelative[0][0]);
     pList.insert("librevenge:row-absolute",!m_positionRelative[0][1]);
     if (!m_sheet.empty())
-      pList.insert("librevenge:sheet-name",m_sheet);
+      pList.insert("librevenge:sheet",m_sheet);
     break;
   case F_CellList:
     pList.insert("librevenge:type","librevenge-cells");
@@ -823,6 +823,11 @@ std::ostream &operator<<(std::ostream &o, STOFFCellContent::FormulaInstruction c
     o << inst.m_longValue;
   else if (inst.m_type==STOFFCellContent::FormulaInstruction::F_Cell) {
     if (!inst.m_sheet.empty()) o << inst.m_sheet.cstr();
+    else if (inst.m_sheetId>=0) {
+      o << "sheet[id]=" << inst.m_sheetId;
+      if (inst.m_sheetIdRelative) o << "[rel]";
+      o << ",";
+    }
     if (!inst.m_positionRelative[0][0]) o << "$";
     if (inst.m_position[0][0]<0) o << "C" << inst.m_position[0][0];
     else {
@@ -834,7 +839,12 @@ std::ostream &operator<<(std::ostream &o, STOFFCellContent::FormulaInstruction c
     else o << inst.m_position[0][1];
   }
   else if (inst.m_type==STOFFCellContent::FormulaInstruction::F_CellList) {
-    if (!inst.m_sheet.empty()) o << inst.m_sheet.cstr();
+    if (!inst.m_sheet.empty()) o << inst.m_sheet.cstr() << ":";
+    else if (inst.m_sheetId>=0) {
+      o << "sheet[id]=" << inst.m_sheetId;
+      if (inst.m_sheetIdRelative) o << "[rel]";
+      o << ",";
+    }
     for (int l=0; l<2; ++l) {
       if (!inst.m_positionRelative[l][0]) o << "$";
       if (inst.m_position[l][0]<0) o << "C" << inst.m_position[l][0];
@@ -852,6 +862,8 @@ std::ostream &operator<<(std::ostream &o, STOFFCellContent::FormulaInstruction c
     o << "\"" << inst.m_content.cstr() << "\"";
   else
     o << inst.m_content.cstr();
+  if (!inst.m_extra.empty())
+    o << "[" << inst.m_extra << "]";
   return o;
 }
 

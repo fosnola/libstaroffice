@@ -42,6 +42,7 @@
 #include "STOFFOLEParser.hxx"
 
 #include "StarAttribute.hxx"
+#include "StarCellFormula.hxx"
 #include "StarEncryption.hxx"
 #include "StarObject.hxx"
 #include "StarFileManager.hxx"
@@ -240,12 +241,14 @@ private:
 struct Cell : public STOFFCell {
 public:
   //! constructor
-  Cell(STOFFVec2i pos=STOFFVec2i(0,0)) : STOFFCell(), m_content()
+  Cell(STOFFVec2i pos=STOFFVec2i(0,0)) : STOFFCell(), m_content(), m_hasNote(false)
   {
     setPosition(pos);
   }
   //! the cell content
   STOFFCellContent m_content;
+  //! flag to know if the cell has some note
+  bool m_hasNote;
 };
 
 ////////////////////////////////////////
@@ -349,14 +352,23 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
     STOFF_DEBUG_MSG(("StarObjectSpreadsheet::send: can not find the table\n"));
     return false;
   }
+  // first creates the list of sheet names
+  std::vector<librevenge::RVNGString> sheetNames;
+  for (size_t t=0; t<m_state->m_tableList.size(); ++t) {
+    if (!m_state->m_tableList[t])
+      sheetNames.push_back("");
+    else
+      sheetNames.push_back(m_state->m_tableList[t]->m_name);
+  }
+
   for (size_t t=0; t<m_state->m_tableList.size(); ++t) {
     if (!m_state->m_tableList[t]) continue;
-    StarObjectSpreadsheetInternal::Table const &sheet=*m_state->m_tableList[t];
+    StarObjectSpreadsheetInternal::Table &sheet=*m_state->m_tableList[t];
     listener->openSheet(sheet.getColWidths(), librevenge::RVNG_INCH, sheet.m_name);
 
     int prevRow = -1;
-    std::map<int, std::map<int, shared_ptr<StarObjectSpreadsheetInternal::Cell> > >::const_iterator rIt;
-    std::map<int, shared_ptr<StarObjectSpreadsheetInternal::Cell> >::const_iterator cellIt;
+    std::map<int, std::map<int, shared_ptr<StarObjectSpreadsheetInternal::Cell> > >::iterator rIt;
+    std::map<int, shared_ptr<StarObjectSpreadsheetInternal::Cell> >::iterator cellIt;
     for (rIt=sheet.m_rowToColToCellMap.begin(); rIt!=sheet.m_rowToColToCellMap.end(); ++rIt) {
       int row=rIt->first;
       while (row > prevRow) {
@@ -370,7 +382,9 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
       }
       for (cellIt=rIt->second.begin(); cellIt!=rIt->second.end(); ++cellIt) {
         if (!cellIt->second) continue;
-        StarObjectSpreadsheetInternal::Cell const &cell=*cellIt->second;
+        StarObjectSpreadsheetInternal::Cell &cell=*cellIt->second;
+        if (!cell.m_content.m_formula.empty())
+          StarCellFormula::updateFormula(cell.m_content, sheetNames, int(t));
         listener->openSheetCell(cell, cell.m_content);
         if (cell.m_content.m_contentType==STOFFCellContent::C_TEXT_BASIC)
           listener->insertUnicodeList(cell.m_content.m_text);
@@ -527,6 +541,7 @@ try
           continue;
         }
         f << libstoff::getString(string).cstr() << ",";
+        StarObjectSpreadsheetInternal::Cell cell;
         if (version >= 3) {
           uint32_t nPos;
           uint16_t rangeType, index;
@@ -541,7 +556,7 @@ try
           f << "range[type]=" << rangeType << ",";
           f << "index=" << index << ",";
           if (nData&0xf) input->seek((nData&0xf), librevenge::RVNG_SEEK_CUR);
-          if (!readSCFormula(zone, STOFFVec2i(row,col), version, endDataPos) || input->tell()>endDataPos)
+          if (!StarCellFormula::readSCFormula(zone, cell, version, endDataPos) || input->tell()>endDataPos)
             f << "###";
         }
         else {
@@ -552,7 +567,8 @@ try
           f << ",";
           f << "range[type]=" << rangeType << ",";
           f << "index=" << index << ",";
-          if (tokLen && (!readSCFormula3(zone, STOFFVec2i(row,col), version, endDataPos) || input->tell()>endDataPos))
+          if (tokLen &&
+              (!StarCellFormula::readSCFormula3(zone, cell, cell.m_content, version, endDataPos) || input->tell()>endDataPos))
             f << "###";
         }
         ascFile.addPos(pos);
@@ -1882,7 +1898,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
         f.str("");
         f << "SCData[formula]:";
 
-        if (!readSCFormula(zone, STOFFVec2i(row,column), version, endDataPos) || input->tell()>endDataPos) {
+        if (!StarCellFormula::readSCFormula(zone, cell, version, endDataPos) || input->tell()>endDataPos) {
           f << "###";
           scRecord.closeContent("SCData");
           ascFile.addDelimiter(input->tell(),'|');
@@ -1898,7 +1914,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
         f << "matrix[flags]=" << input->readULong(1) << ",";
         uint16_t codeLen;
         *input>>codeLen;
-        if (codeLen && (!readSCFormula3(zone, STOFFVec2i(row,column), version, endDataPos) || input->tell()>endDataPos))
+        if (codeLen && (!StarCellFormula::readSCFormula3(zone, cell, cell.m_content, version, endDataPos) || input->tell()>endDataPos))
           f << "###";
       }
       if (input->tell()!=endDataPos) {
@@ -1912,6 +1928,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
     case 4: {
       // sc_cell2.cxx
       f << "note";
+      cell.m_hasNote=true;
       if (version>=7) {
         uint8_t unkn;
         *input>>unkn;
@@ -2434,67 +2451,6 @@ bool StarObjectSpreadsheet::readSCDBPivot(StarZone &zone, int version, long last
   return true;
 }
 
-bool StarObjectSpreadsheet::readSCFormula(StarZone &zone, STOFFVec2i const &cell, int version, long lastPos)
-{
-  STOFFInputStreamPtr input=zone.input();
-  long pos=input->tell();
-
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-  f << "Entries(SCFormula)[" << zone.getRecordLevel() << "]:";
-  uint8_t fFlags;
-  *input>>fFlags;
-  if (fFlags&0xf) input->seek((fFlags&0xf), librevenge::RVNG_SEEK_CUR);
-  f << "cMode=" << input->readULong(1) << ","; // if (version<0x201) old mode
-  if (fFlags&0x10) f << "nRefs=" << input->readLong(2) << ",";
-  if (fFlags&0x20) f << "nErrors=" << input->readULong(2) << ",";
-  if (fFlags&0x40) { // token
-    uint16_t nLen;
-    *input>>nLen;
-    f << "formula=[";
-    for (int tok=0; tok<nLen; ++tok) {
-      if (!readSCTokenInFormula(zone, cell, version, lastPos, f) || input->tell()>lastPos) {
-        f << "###";
-        ascFile.addPos(pos);
-        ascFile.addNote(f.str().c_str());
-        return false;
-      }
-    }
-    f << "],";
-  }
-  if (fFlags&0x80) {
-    uint16_t nRPN;
-    *input >> nRPN;
-    f << "rpn=[";
-    for (int rpn=0; rpn<int(nRPN); ++rpn) {
-      uint8_t b1;
-      *input >> b1;
-      if (b1==0xff) {
-        if (!readSCTokenInFormula(zone, cell, version, lastPos, f)) {
-          f << "###";
-          ascFile.addPos(pos);
-          ascFile.addNote(f.str().c_str());
-          return false;
-        }
-      }
-      else if (b1&0x40)
-        f << "[Index" << ((b1&0x3f) & (input->readULong(1)<<6)) << "]";
-      else
-        f << "[Index" << int(b1) << "]";
-      if (input->tell()>lastPos) {
-        f << "###";
-        ascFile.addPos(pos);
-        ascFile.addNote(f.str().c_str());
-        return false;
-      }
-    }
-    f << "],";
-  }
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  return true;
-}
-
 bool StarObjectSpreadsheet::readSCMatrix(StarZone &zone, int /*version*/, long lastPos)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -2605,210 +2561,6 @@ bool StarObjectSpreadsheet::readSCQueryParam(StarZone &zone, int /*version*/, lo
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return true;
-}
-
-bool StarObjectSpreadsheet::readSCFormula3(StarZone &zone, STOFFVec2i const &cell, int /*version*/, long lastPos)
-{
-  STOFFInputStreamPtr input=zone.input();
-  long pos=input->tell();
-
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-  f << "Entries(SCFormula)[" << zone.getRecordLevel() << "]:";
-  for (int tok=0; tok<512; ++tok) {
-    bool endData;
-    if (!readSCTokenInFormula3(zone, cell, endData, lastPos, f) || input->tell()>lastPos) {
-      f << "###";
-      break;
-    }
-    if (endData) break;
-  }
-
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  return true;
-}
-
-bool StarObjectSpreadsheet::readSCTokenInFormula(StarZone &zone, STOFFVec2i const &/*cell*/, int /*vers*/, long lastPos, libstoff::DebugStream &f)
-{
-  STOFFInputStreamPtr input=zone.input();
-  // sc_token.cxx ScRawToken::Load
-  uint16_t nOp;
-  uint8_t type;
-  *input >> nOp >> type;
-  bool ok=true;
-  switch (type) {
-  case 0: {
-    bool val;
-    *input>>val;
-    f << "[" << val << "]";
-    break;
-  }
-  case 1: {
-    double val;
-    *input>>val;
-    f << "[" << val << "]";
-    break;
-  }
-  case 2: // string
-  case 8: // external
-  default: { // ?
-    if (type==8) f << "[cByte=" << input->readULong(1) << "]";
-    uint8_t nBytes;
-    *input >> nBytes;
-    if (input->tell()+int(nBytes)>lastPos) {
-      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTokenInFormula: can not read text zone\n"));
-      f << "###text";
-      ok=false;
-      break;
-    }
-    librevenge::RVNGString text;
-    for (int i=0; i<int(nBytes); ++i) text.append((char) input->readULong(1));
-    f << "[" << text.cstr() << "]";
-    break;
-  }
-  case 3:
-  case 4: {
-    int16_t nCol, nRow, nTab;
-    uint8_t nByte;
-    f << "[";
-    *input >> nCol >> nRow >> nTab >> nByte;
-    f << nRow << "x" << nCol;
-    if (nTab) f << "x" << nTab;
-    if (nByte) f << ":" << int(nByte); // vers<10 diff
-    if (type==4) {
-      *input >> nCol >> nRow >> nTab >> nByte;
-      f << "<->" << nRow << "x" << nCol;
-      if (nTab) f << "x" << nTab;
-      if (nByte) f << ":" << int(nByte); // vers<10 diff
-    }
-    f << "]";
-    break;
-  }
-  case 6:
-    f << "[index" << input->readULong(2) << "]";
-    break;
-  case 7: {
-    uint8_t nByte;
-    *input >> nByte;
-    if (input->tell()+2*int(nByte)>lastPos) {
-      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTokenInFormula: can not read the jump\n"));
-      f << "###jump";
-      ok=false;
-      break;
-    }
-    f << "[J" << (int) nByte << ",";
-    for (int i=0; i<(int) nByte; ++i) f << input->readLong(2) << ",";
-    f << "]";
-    break;
-  }
-  case 0x70:
-    f << "[missing]";
-    break;
-  case 0x71:
-    f << "[error]";
-    break;
-  }
-  return ok && input->tell()<=lastPos;
-}
-
-bool StarObjectSpreadsheet::readSCTokenInFormula3(StarZone &zone, STOFFVec2i const &/*cell*/, bool &endData, long lastPos, libstoff::DebugStream &f)
-{
-  endData=false;
-  STOFFInputStreamPtr input=zone.input();
-  // sc_token.cxx ScRawToken::Load30
-  uint16_t nOp;
-  *input >> nOp;
-  bool ok=true;
-  switch (nOp) {
-  case 0: {
-    uint8_t type;
-    *input >> type;
-    switch (type) {
-    case 0: {
-      bool val;
-      *input>>val;
-      f << val;
-      break;
-    }
-    case 1: {
-      double val;
-      *input>>val;
-      f << val << ",";
-      break;
-    }
-    case 2: {
-      std::vector<uint32_t> text;
-      if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTokenInFormula3: can not read text zone\n"));
-        f << "###text";
-        ok=false;
-        break;
-      }
-      f << "\"" << libstoff::getString(text).cstr() << "\"";
-      break;
-    }
-    case 3: {
-      int16_t nCol, nRow, nTab;
-      uint8_t relCol, relRow, relTab, oldFlag;
-      *input >> nCol >> nRow >> nTab >> relCol >> relRow >> relTab >> oldFlag;
-      f << nRow << "x" << nCol;
-      if (nTab) f << "x" << nTab;
-      f << "[" << int(relCol) << "," << int(relRow) << "," << int(relTab) << "," << int(oldFlag) << "]";
-      break;
-    }
-    case 4: {
-      int16_t nCol1, nRow1, nTab1, nCol2, nRow2, nTab2;
-      uint8_t relCol1, relRow1, relTab1, oldFlag1, relCol2, relRow2, relTab2, oldFlag2;
-      *input >> nCol1 >> nRow1 >> nTab1 >> nCol2 >> nRow2 >> nTab2
-             >> relCol1 >> relRow1 >> relTab1 >> relCol2 >> relRow2 >> relTab2
-             >> oldFlag1 >> oldFlag2;
-      f << nRow1 << "x" << nCol1;
-      if (nTab1) f << "x" << nTab1;
-      f << "[" << int(relCol1) << "," << int(relRow1) << "," << int(relTab1) << "," << int(oldFlag1) << "]";
-      f << ":" << nRow2 << "x" << nCol2;
-      if (nTab2) f << "x" << nTab2;
-      f << "[" << int(relCol2) << "," << int(relRow2) << "," << int(relTab2) << "," << int(oldFlag2) << "]";
-      break;
-    }
-    default:
-      f << "##type=" << int(type) << ",";
-      ok=false;
-      break;
-    }
-    break;
-  }
-  case 2: // stop
-    endData=true;
-    break;
-  case 3: { // external
-    std::vector<uint32_t> text;
-    if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCTokenInFormula3: can not read external zone\n"));
-      f << "###external";
-      ok=false;
-      break;
-    }
-    f << "\"" << libstoff::getString(text).cstr() << "\"";
-    break;
-  }
-  case 4: { // name
-    uint16_t index;
-    *input >> index;
-    f << "I[" << index << "]";
-    break;
-  }
-  case 5: // jump 3
-    f << "if(";
-    break;
-  case 6: // jump=maxjumpcount
-    f << "choose(";
-    break;
-  default:
-    f << "f" << nOp << ",";
-    break;
-  }
-  return ok && input->tell()<=lastPos;
 }
 
 bool StarObjectSpreadsheet::readSCOutlineArray(StarZone &zone)
