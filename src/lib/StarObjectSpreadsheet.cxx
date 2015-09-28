@@ -556,7 +556,7 @@ try
           f << "range[type]=" << rangeType << ",";
           f << "index=" << index << ",";
           if (nData&0xf) input->seek((nData&0xf), librevenge::RVNG_SEEK_CUR);
-          if (!StarCellFormula::readSCFormula(zone, cell, version, endDataPos) || input->tell()>endDataPos)
+          if (!StarCellFormula::readSCFormula(zone, cell, cell.m_content, version, endDataPos) || input->tell()>endDataPos)
             f << "###";
         }
         else {
@@ -1877,6 +1877,9 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
         if (cFlags&8) {
           double ergValue;
           *input >> ergValue;
+          format.m_format=STOFFCell::F_NUMBER;
+          cell.m_content.m_contentType=STOFFCellContent::C_NUMBER;
+          cell.m_content.setValue(ergValue);
           f << "ergValue=" << ergValue << ",";
         }
         if (cFlags&0x10) {
@@ -1889,8 +1892,12 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
             scRecord.closeContent("SCData");
             break;
           }
-          else if (!text.empty())
+          else if (!text.empty()) {
+            format.m_format=STOFFCell::F_TEXT;
+            cell.m_content.m_contentType=STOFFCellContent::C_TEXT_BASIC;
+            cell.m_content.m_text=text;
             f << "val=" << libstoff::getString(text).cstr() << ",";
+          }
         }
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -1898,7 +1905,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
         f.str("");
         f << "SCData[formula]:";
 
-        if (!StarCellFormula::readSCFormula(zone, cell, version, endDataPos) || input->tell()>endDataPos) {
+        if (!StarCellFormula::readSCFormula(zone, cell, cell.m_content, version, endDataPos) || input->tell()>endDataPos) {
           f << "###";
           scRecord.closeContent("SCData");
           ascFile.addDelimiter(input->tell(),'|');

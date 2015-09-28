@@ -41,7 +41,7 @@
 
 #include "STOFFOLEParser.hxx"
 
-#include "StarEncryption.hxx"
+#include "StarEncoding.hxx"
 #include "StarZone.hxx"
 
 #include "StarCellFormula.hxx"
@@ -69,7 +69,7 @@ void StarCellFormula::updateFormula(STOFFCellContent &content, std::vector<libre
   }
 }
 
-bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCell &cell, int version, long lastPos)
+bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCell &cell, STOFFCellContent &content, int version, long lastPos)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -77,42 +77,60 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCell &cell, int version
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(SCFormula)[" << zone.getRecordLevel() << "]:";
+  // sc_token.cxx ScTokenArray::Load
   uint8_t fFlags;
   *input>>fFlags;
   if (fFlags&0xf) input->seek((fFlags&0xf), librevenge::RVNG_SEEK_CUR);
   f << "cMode=" << input->readULong(1) << ","; // if (version<0x201) old mode
   if (fFlags&0x10) f << "nRefs=" << input->readLong(2) << ",";
   if (fFlags&0x20) f << "nErrors=" << input->readULong(2) << ",";
+  bool ok=true;
   if (fFlags&0x40) { // token
     uint16_t nLen;
     *input>>nLen;
-    f << "formula=[";
     for (int tok=0; tok<nLen; ++tok) {
-      STOFFCellContent::FormulaInstruction instr;
-      if (!readSCToken(zone, cell.position(), version, lastPos, instr, f) || input->tell()>lastPos) {
+      if (!readSCToken(zone, cell, content, version, lastPos) || input->tell()>lastPos) {
         f << "###";
-        ascFile.addPos(pos);
-        ascFile.addNote(f.str().c_str());
-        return false;
+        ok=false;
       }
     }
-    f << "],";
+    f << "formula=";
+    bool hasIndex=false;
+    for (size_t i=0; i<content.m_formula.size(); ++i) {
+      f << content.m_formula[i];
+      if (content.m_formula[i].m_type==STOFFCellContent::FormulaInstruction::F_Index)
+        hasIndex=true;
+    }
+    f << ",";
+
+    if (ok && hasIndex) {
+      STOFF_DEBUG_MSG(("StarCellFormula::readSCFormula: formula with index are not implemented\n"));
+      f << "##index,";
+    }
+    else if (ok)
+      content.m_contentType=STOFFCellContent::C_FORMULA;
+  }
+  if (!ok) {
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
   }
   if (fFlags&0x80) {
     uint16_t nRPN;
     *input >> nRPN;
     f << "rpn=[";
-    for (int rpn=0; rpn<int(nRPN); ++rpn) {
+    STOFFCellContent rContent;
+    for (int rpn=0; ok && rpn<int(nRPN); ++rpn) {
       uint8_t b1;
       *input >> b1;
       if (b1==0xff) {
-        STOFFCellContent::FormulaInstruction instr;
-        if (!readSCToken(zone, cell.position(), version, lastPos, instr, f)) {
+        rContent.m_formula.clear();
+        if (!readSCToken(zone, cell, rContent, version, lastPos)) {
+          ok=false;
           f << "###";
-          ascFile.addPos(pos);
-          ascFile.addNote(f.str().c_str());
-          return false;
         }
+        for (size_t i=0; i<rContent.m_formula.size(); ++i)
+          f << rContent.m_formula[i] << ",";
       }
       else if (b1&0x40)
         f << "[Index" << ((b1&0x3f) & (input->readULong(1)<<6)) << "]";
@@ -120,16 +138,14 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCell &cell, int version
         f << "[Index" << int(b1) << "]";
       if (input->tell()>lastPos) {
         f << "###";
-        ascFile.addPos(pos);
-        ascFile.addNote(f.str().c_str());
-        return false;
+        ok=false;
       }
     }
     f << "],";
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  return true;
+  return ok;
 }
 
 bool StarCellFormula::readSCFormula3(StarZone &zone, STOFFCell const &cell, STOFFCellContent &content,
@@ -151,42 +167,58 @@ bool StarCellFormula::readSCFormula3(StarZone &zone, STOFFCell const &cell, STOF
     }
     if (endData) break;
   }
-  for (size_t i=0; i<content.m_formula.size(); ++i)
+  bool hasIndex=false;
+  for (size_t i=0; i<content.m_formula.size(); ++i) {
     f << content.m_formula[i];
+    if (content.m_formula[i].m_type==STOFFCellContent::FormulaInstruction::F_Index)
+      hasIndex=true;
+  }
 
-  if (ok)
+  if (ok && hasIndex) {
+    STOFF_DEBUG_MSG(("StarCellFormula::readSCFormula3: formula with index are not implemented\n"));
+    f << "##index,";
+  }
+  else if (ok)
     content.m_contentType=STOFFCellContent::C_FORMULA;
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return true;
 }
 
-bool StarCellFormula::readSCToken(StarZone &zone, STOFFVec2i const &/*cell*/, int /*vers*/, long lastPos,
-                                  STOFFCellContent::FormulaInstruction &/*instr*/, libstoff::DebugStream &f)
+bool StarCellFormula::readSCToken(StarZone &zone, STOFFCell const &/*cell*/, STOFFCellContent &content, int version, long lastPos)
 {
   STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugStream f;
   // sc_token.cxx ScRawToken::Load
   uint16_t nOp;
   uint8_t type;
   *input >> nOp >> type;
   bool ok=true;
+  STOFFCellContent::FormulaInstruction instr;
+  // first read the data
   switch (type) {
   case 0: {
-    bool val;
+    int8_t val;
     *input>>val;
-    f << "[" << val << "]";
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Long;
+    instr.m_longValue=val;
     break;
   }
   case 1: {
     double val;
     *input>>val;
-    f << "[" << val << "]";
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Double;
+    instr.m_doubleValue=val;
     break;
   }
   case 2: // string
   case 8: // external
   default: { // ?
-    if (type==8) f << "[cByte=" << input->readULong(1) << "]";
+    if (type==8) {
+      int cByte=(int) input->readULong(1);
+      if (cByte)
+        f << "cByte=" << cByte << ",";
+    }
     uint8_t nBytes;
     *input >> nBytes;
     if (input->tell()+int(nBytes)>lastPos) {
@@ -195,31 +227,65 @@ bool StarCellFormula::readSCToken(StarZone &zone, STOFFVec2i const &/*cell*/, in
       ok=false;
       break;
     }
-    librevenge::RVNGString text;
-    for (int i=0; i<int(nBytes); ++i) text.append((char) input->readULong(1));
-    f << "[" << text.cstr() << "]";
+    std::vector<uint8_t> text;
+    for (int i=0; i<int(nBytes); ++i) text.push_back((uint8_t) input->readULong(1));
+    std::vector<uint32_t> string;
+    StarEncoding::convert(text, zone.getEncoding(), string);
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Text;
+    instr.m_content=libstoff::getString(string);
+    if (type==8)
+      f << "external,";
+    else if (type!=2)
+      f << "f" << type << ",";
     break;
   }
   case 3:
   case 4: {
     int16_t nCol, nRow, nTab;
     uint8_t nByte;
-    f << "[";
     *input >> nCol >> nRow >> nTab >> nByte;
-    f << nRow << "x" << nCol;
-    if (nTab) f << "x" << nTab;
-    if (nByte) f << ":" << int(nByte); // vers<10 diff
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Cell;
+    instr.m_sheetId=nTab;
+    instr.m_position[0][0]=nCol;
+    instr.m_position[0][1]=nRow;
+    if (version<0x10) {
+      instr.m_positionRelative[0][0]=(nByte&3)!=0;
+      instr.m_positionRelative[0][1]=((nByte>>2)&3)!=0;
+      instr.m_sheetIdRelative=((nByte>>4)&3)!=0;
+      if (nByte>>6) f << "fl=" << int(nByte>>6) << ",";
+    }
+    else {
+      instr.m_positionRelative[0][0]=(nByte&1)!=0;
+      instr.m_positionRelative[0][1]=((nByte>>2)&1)!=0;
+      instr.m_sheetIdRelative=((nByte>>4)&1)!=0;
+      if (nByte&0xEA) f << "fl=" << std::hex << int(nByte&0xEF) << std::dec << ",";
+    }
     if (type==4) {
       *input >> nCol >> nRow >> nTab >> nByte;
-      f << "<->" << nRow << "x" << nCol;
-      if (nTab) f << "x" << nTab;
-      if (nByte) f << ":" << int(nByte); // vers<10 diff
+      instr.m_type=STOFFCellContent::FormulaInstruction::F_CellList;
+      instr.m_position[1][0]=nCol;
+      instr.m_position[1][1]=nRow;
+      if (nTab!=instr.m_sheetId) {
+        STOFF_DEBUG_MSG(("StarCellFormula::readSCToken: referencing different sheet is not implemented\n"));
+        f << "#sheet2=" << nTab << ",";
+      }
+      if (version<0x10) {
+        instr.m_positionRelative[1][0]=(nByte&3)!=0;
+        instr.m_positionRelative[1][1]=((nByte>>2)&3)!=0;
+        if (nByte>>6) f << "fl2=" << int(nByte>>6) << ",";
+      }
+      else {
+        instr.m_positionRelative[0][0]=(nByte&1)!=0;
+        instr.m_positionRelative[0][1]=((nByte>>2)&1)!=0;
+        instr.m_sheetIdRelative=((nByte>>4)&1)!=0;
+        if (nByte&0xEA) f << "fl=" << std::hex << int(nByte&0xEA) << std::dec << ",";
+      }
     }
-    f << "]";
     break;
   }
   case 6:
-    f << "[index" << input->readULong(2) << "]";
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Index;
+    instr.m_longValue=input->readULong(2);
     break;
   case 7: {
     uint8_t nByte;
@@ -230,18 +296,99 @@ bool StarCellFormula::readSCToken(StarZone &zone, STOFFVec2i const &/*cell*/, in
       ok=false;
       break;
     }
-    f << "[J" << (int) nByte << ",";
+    if (nOp==5 || nOp==6) { // safe to ignore
+      input->seek(2*int(nByte), librevenge::RVNG_SEEK_CUR);
+      break;
+    }
+    f << "J=[";
     for (int i=0; i<(int) nByte; ++i) f << input->readLong(2) << ",";
-    f << "]";
+    f << "],";
     break;
   }
   case 0x70:
-    f << "[missing]";
+    f << "#missing";
     break;
   case 0x71:
-    f << "[error]";
+    f << "#error";
     break;
   }
+  bool ignoreInstr=false;
+  switch (nOp) {
+  case 0:
+    break;
+  case 2: // endData
+    ignoreInstr=true;
+    break;
+  case 3:
+    if (type!=8) f << "##type=" << type << ",";
+    break;
+  case 4: // index
+    if (type!=6) f << "##type=" << type << ",";
+    break;
+  case 5:
+    if (type!=7) f << "##type=" << type << ",";
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Function;
+    instr.m_content="If";
+    break;
+  case 7:
+    if (type) f << "##type=" << type << ",";
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Operator;
+    instr.m_content="(";
+    break;
+  case 8:
+    if (type) f << "##type=" << type << ",";
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Operator;
+    instr.m_content=")";
+    break;
+  case 9:
+    if (type) f << "##type=" << type << ",";
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Operator;
+    instr.m_content=";";
+    break;
+  case 12:
+    // extra space
+    if (type) f << "##type=" << type << ",";
+    ignoreInstr=true;
+    break;
+  case 17:
+    if (type) f << "##type=" << type << ",";
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Operator;
+    instr.m_content="%";
+    break;
+  default:
+    if (type!=0) {
+      STOFF_DEBUG_MSG(("StarCellFormula::readSCToken: can not read a formule\n"));
+      f << "##f" << nOp << "[" << type << "],";
+      ok=false;
+    }
+    else if (nOp==33 || nOp==34) { // change, ie reconstructor a&&b in AND(a,b), ...
+      instr.m_type=STOFFCellContent::FormulaInstruction::F_Function;
+      instr.m_content=nOp==33 ? "and" : "or";
+    }
+    else if (nOp>=21 && nOp<=37) {
+      static char const *(wh[])=
+      {"+", "-", "*", "/", "&", "^", "=", "<>", "<", ">", "<=", ">=", "OR", "AND", "!", "~", ":"};
+      instr.m_type=STOFFCellContent::FormulaInstruction::F_Operator;
+      instr.m_content=wh[nOp-21];
+    }
+    else if (nOp==41) { // changeme ie reconstruct ~a in NOT(a)
+      instr.m_type=STOFFCellContent::FormulaInstruction::F_Function;
+      instr.m_content="Not";
+    }
+    else if (nOp==42 || nOp==43) {
+      instr.m_type=STOFFCellContent::FormulaInstruction::F_Operator;
+      instr.m_content="-";
+    }
+    else if (!setFunction(nOp, instr)) {
+      STOFF_DEBUG_MSG(("StarCellFormula::readSCToken: can not read a formule\n"));
+      f << "##f" << nOp << ",";
+      ok=false;
+    }
+    break;
+  }
+  instr.m_extra=f.str();
+  if (!ignoreInstr)
+    content.m_formula.push_back(instr);
   return ok && input->tell()<=lastPos;
 }
 
@@ -350,8 +497,7 @@ bool StarCellFormula::readSCToken3(StarZone &zone, STOFFCell const &/*cell*/, ST
   case 4: { // name
     uint16_t index;
     *input >> index;
-    f << "#index,";
-    instr.m_type=STOFFCellContent::FormulaInstruction::F_Long;
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Index;
     instr.m_longValue=index;
     break;
   }
@@ -398,61 +544,10 @@ bool StarCellFormula::readSCToken3(StarZone &zone, STOFFCell const &/*cell*/, ST
       instr.m_type=STOFFCellContent::FormulaInstruction::F_Operator;
       instr.m_content="-";
     }
-    else if (nOp>=46 && nOp<=53) {  // 60 endNoPar
-      static char const *(wh[])= {
-        "Pi", "Random", "True", "False", "GetActDate", "Today", "Now"/*getActTime*/,
-        "NA", "Current"
-      };
-      instr.m_type=STOFFCellContent::FormulaInstruction::F_Function;
-      instr.m_content=wh[nOp-46];
+    else if (!setFunction(nOp, instr)) {
+      ok=false;
+      f << "###f" << nOp << ",";
     }
-    else if (nOp==89) {
-      instr.m_type=STOFFCellContent::FormulaInstruction::F_Text;
-      libstoff::appendUnicode(0xb1, instr.m_content);
-    }
-    else if (nOp>=61 && nOp<=131) { // 200 endOnePar
-      static char const *(wh[])= {
-        "Degrees", "Radians", "Sin", "Cos", "Tan", "Cot", "Asin", "Acos", "Atan", "ACot", // 70
-        "SinH", "CosH", "TanH", "CotH", "AsinH", "ACosH", "ATanH", "ACosH", // 78
-        "Exp", "Ln", "Sqrt", "Fact", // 82
-        "Year", "Month", "Day", "Hour", "Minute", "Second", "PlusMinus" /* checkme*/, // 89
-        "Abs", "Int", "Phi", "Gauss", "IsBlank", "IsText", "IsNonText", "IsLogical", // 97
-        "Type", "IsRef", "IsNumber",  "IsFormula", "IsNA", "IsErr", "IsError", "IsEven", // 105
-        "IsOdd", "N", // 107
-        "DateValue", "TimeValue", "Code", "Trim", "Upper", "Proper", "Lower", "Len", "T", // 116
-        "Value", "Clean", "Char", "Log10", "Even", "Odd", "NormDist", "Fisher", "FisherInv", // 125
-        "NormSInv", "GammaLn", "ErrorType", "IsErr" /* errCell*/, "Formula", "Arabic"
-      };
-      instr.m_type=STOFFCellContent::FormulaInstruction::F_Function;
-      instr.m_content=wh[nOp-61];
-    }
-    else if (nOp>=201 && nOp<=386) {
-      static char const *(wh[])= {
-        "Atan2", "Ceil", "Floor", "Round", "RoundUp", "RoundDown", "Trunc", "Log", // 208
-        "Power", "GCD", "LCM", "Mod", "SumProduct", "SumSQ", "SumX2MY2", "SumX2PY2", "SumXMY2", // 217
-        "Date", "Time", "Days", "Days360", "Min", "Max", "Sum", "Product", "Average", "Count", // 227
-        "CountA", "NPV", "IRR", "Var", "VarP", "StDev", "StDevP", "B", "NormDist", "ExpDist", // 237
-        "BinomDist", "Poisson", "Combin", "CombinA", "Permut",  "PermutationA", "PV", "SYD", "DDB", "DB",
-        "VDB", "Duration", "SLN", "PMT", "Columns", "Rows", "Column", "Row", "RRI", "FV", // 257
-        "NPER", "Rate", "IPMT", "PPMT", "CUMIPMT", "CUMPRINC", "Effective", "Nominal", "SubTotal", "DSum", // 267
-        "DCount", "DCountA", "DAverage", "DGet", "DMax", "DMin", "DProduct", "DStDev", "DStDevP", "DVar",
-        "DVarP", "Indirect", "Address", "Match", "CountBlank", "CountIf", "SumIf", "LookUp", "VLookUp", "HLookUp", // 287
-        "MultiRange", "Offset", "Index", "Areas", "Dollar", "Replace", "Fixed", "Find", "Exact", "Left", // 297
-        "Right", "Search", "Mid", "Text", "Substitute", "Rept", "Concatenate", "MValue", "MDeterm", "MInverse",
-        "MMult", "Transpose", "MUnit", "GoalSeek", "HypGeomDist", "HYPGEOM.DIST", "LogNormDist", "TDist", "FDist", "ChiDist", "WeiBull",
-        "NegBinomDist", "CritBinom", "Kurt", "HarMean", "GeoMean", "Standardize", "AveDev", "Skew", "DevSQ", "Median", // 327
-        "Mode", "ZTest", "TTest", "Rank", "Percentile", "PercentRank", "Large", "Small", "Frequency", "Quartile",
-        "NormInv", "Confidence", "FTest", "TrimMean", "Prob", "CorRel", "CoVar", "Pearson", "RSQ", "STEYX", // 347
-        "Slope", "Intercept", "Trend", "Growth", "Linest", "Logest", "Forecast", "ChiInv", "GammaDist", "GammaInv", // 357
-        "TInv", "FInv", "ChiTest", "LogInv", "Multiple.Operations", "BetaDist", "BetaInv", "WeekNum", "WeekDay", "#Name!", // 367
-        "Style", "DDE", "Base", "Sheet", "Sheets", "MinA", "MaxA", "AverageA", "StDevA", "StDevPA", // 377
-        "VarA", "VarPA", "EasterSunday", "Decimal", "Convert", "Roman", "MIRR", "Cell", "IsPMT"
-      };
-      instr.m_type=STOFFCellContent::FormulaInstruction::F_Function;
-      instr.m_content=wh[nOp-201];
-    }
-    else
-      f << "#f" << nOp << ",";
     break;
   }
   if (!endData) {
@@ -462,4 +557,63 @@ bool StarCellFormula::readSCToken3(StarZone &zone, STOFFCell const &/*cell*/, ST
   return ok && input->tell()<=lastPos;
 }
 
+bool StarCellFormula::setFunction(int nOp, STOFFCellContent::FormulaInstruction &instr)
+{
+  if (nOp>=46 && nOp<=53) {  // 60 endNoPar
+    static char const *(wh[])= {
+      "Pi", "Random", "True", "False", "GetActDate", "Today", "Now"/*getActTime*/,
+      "NA", "Current"
+    };
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Function;
+    instr.m_content=wh[nOp-46];
+  }
+  else if (nOp==89) {
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Text;
+    libstoff::appendUnicode(0xb1, instr.m_content);
+  }
+  else if (nOp>=61 && nOp<=131) { // 200 endOnePar
+    static char const *(wh[])= {
+      "Degrees", "Radians", "Sin", "Cos", "Tan", "Cot", "Asin", "Acos", "Atan", "ACot", // 70
+      "SinH", "CosH", "TanH", "CotH", "AsinH", "ACosH", "ATanH", "ACosH", // 78
+      "Exp", "Ln", "Sqrt", "Fact", // 82
+      "Year", "Month", "Day", "Hour", "Minute", "Second", "PlusMinus" /* checkme*/, // 89
+      "Abs", "Int", "Phi", "Gauss", "IsBlank", "IsText", "IsNonText", "IsLogical", // 97
+      "Type", "IsRef", "IsNumber",  "IsFormula", "IsNA", "IsErr", "IsError", "IsEven", // 105
+      "IsOdd", "N", // 107
+      "DateValue", "TimeValue", "Code", "Trim", "Upper", "Proper", "Lower", "Len", "T", // 116
+      "Value", "Clean", "Char", "Log10", "Even", "Odd", "NormDist", "Fisher", "FisherInv", // 125
+      "NormSInv", "GammaLn", "ErrorType", "IsErr" /* errCell*/, "Formula", "Arabic"
+    };
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Function;
+    instr.m_content=wh[nOp-61];
+  }
+  else if (nOp>=201 && nOp<=386) {
+    static char const *(wh[])= {
+      "Atan2", "Ceil", "Floor", "Round", "RoundUp", "RoundDown", "Trunc", "Log", // 208
+      "Power", "GCD", "LCM", "Mod", "SumProduct", "SumSQ", "SumX2MY2", "SumX2PY2", "SumXMY2", // 217
+      "Date", "Time", "Days", "Days360", "Min", "Max", "Sum", "Product", "Average", "Count", // 227
+      "CountA", "NPV", "IRR", "Var", "VarP", "StDev", "StDevP", "B", "NormDist", "ExpDist", // 237
+      "BinomDist", "Poisson", "Combin", "CombinA", "Permut",  "PermutationA", "PV", "SYD", "DDB", "DB",
+      "VDB", "Duration", "SLN", "PMT", "Columns", "Rows", "Column", "Row", "RRI", "FV", // 257
+      "NPER", "Rate", "IPMT", "PPMT", "CUMIPMT", "CUMPRINC", "Effective", "Nominal", "SubTotal", "DSum", // 267
+      "DCount", "DCountA", "DAverage", "DGet", "DMax", "DMin", "DProduct", "DStDev", "DStDevP", "DVar",
+      "DVarP", "Indirect", "Address", "Match", "CountBlank", "CountIf", "SumIf", "LookUp", "VLookUp", "HLookUp", // 287
+      "MultiRange", "Offset", "Index", "Areas", "Dollar", "Replace", "Fixed", "Find", "Exact", "Left", // 297
+      "Right", "Search", "Mid", "Text", "Substitute", "Rept", "Concatenate", "MValue", "MDeterm", "MInverse",
+      "MMult", "Transpose", "MUnit", "GoalSeek", "HypGeomDist", "HYPGEOM.DIST", "LogNormDist", "TDist", "FDist", "ChiDist", "WeiBull",
+      "NegBinomDist", "CritBinom", "Kurt", "HarMean", "GeoMean", "Standardize", "AveDev", "Skew", "DevSQ", "Median", // 327
+      "Mode", "ZTest", "TTest", "Rank", "Percentile", "PercentRank", "Large", "Small", "Frequency", "Quartile",
+      "NormInv", "Confidence", "FTest", "TrimMean", "Prob", "CorRel", "CoVar", "Pearson", "RSQ", "STEYX", // 347
+      "Slope", "Intercept", "Trend", "Growth", "Linest", "Logest", "Forecast", "ChiInv", "GammaDist", "GammaInv", // 357
+      "TInv", "FInv", "ChiTest", "LogInv", "Multiple.Operations", "BetaDist", "BetaInv", "WeekNum", "WeekDay", "#Name!", // 367
+      "Style", "DDE", "Base", "Sheet", "Sheets", "MinA", "MaxA", "AverageA", "StDevA", "StDevPA", // 377
+      "VarA", "VarPA", "EasterSunday", "Decimal", "Convert", "Roman", "MIRR", "Cell", "IsPMT"
+    };
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_Function;
+    instr.m_content=wh[nOp-201];
+  }
+  else
+    return false;
+  return true;
+}
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

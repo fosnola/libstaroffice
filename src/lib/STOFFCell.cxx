@@ -730,23 +730,14 @@ std::ostream &operator<<(std::ostream &o, STOFFCellContent const &content)
   case STOFFCellContent::C_NONE:
     break;
   case STOFFCellContent::C_TEXT:
-    o << ",text=\"" << content.m_textEntry << "\"";
+    o << ",text";
     break;
   case STOFFCellContent::C_TEXT_BASIC:
     o << ",text=\"" << libstoff::getString(content.m_text).cstr() << "\"";
     break;
-  case STOFFCellContent::C_NUMBER: {
-    o << ",val=";
-    bool textAndVal = false;
-    if (content.m_textEntry.valid()) {
-      o << "entry=" << content.m_textEntry;
-      textAndVal = content.isValueSet();
-    }
-    if (textAndVal) o << "[";
-    if (content.isValueSet()) o << content.m_value;
-    if (textAndVal) o << "]";
-  }
-  break;
+  case STOFFCellContent::C_NUMBER:
+    o << ",val="<< content.m_value;
+    break;
   case STOFFCellContent::C_FORMULA:
     o << ",formula=";
     for (size_t l=0; l < content.m_formula.size(); ++l)
@@ -809,6 +800,7 @@ librevenge::RVNGPropertyList STOFFCellContent::FormulaInstruction::getPropertyLi
     if (!m_sheet.empty())
       pList.insert("librevenge:sheet-name",m_sheet.cstr());
     break;
+  case F_Index:
   default:
     STOFF_DEBUG_MSG(("STOFFCellContent::FormulaInstruction::getPropertyList: unexpected type\n"));
   }
@@ -821,12 +813,14 @@ std::ostream &operator<<(std::ostream &o, STOFFCellContent::FormulaInstruction c
     o << inst.m_doubleValue;
   else if (inst.m_type==STOFFCellContent::FormulaInstruction::F_Long)
     o << inst.m_longValue;
+  else if (inst.m_type==STOFFCellContent::FormulaInstruction::F_Index)
+    o << "[Idx" << inst.m_longValue << "]";
   else if (inst.m_type==STOFFCellContent::FormulaInstruction::F_Cell) {
     if (!inst.m_sheet.empty()) o << inst.m_sheet.cstr();
     else if (inst.m_sheetId>=0) {
-      o << "sheet[id]=" << inst.m_sheetId;
-      if (inst.m_sheetIdRelative) o << "[rel]";
-      o << ",";
+      if (!inst.m_sheetIdRelative) o << "$";
+      o << "S" << inst.m_sheetId;
+      o << ":";
     }
     if (!inst.m_positionRelative[0][0]) o << "$";
     if (inst.m_position[0][0]<0) o << "C" << inst.m_position[0][0];
@@ -841,9 +835,9 @@ std::ostream &operator<<(std::ostream &o, STOFFCellContent::FormulaInstruction c
   else if (inst.m_type==STOFFCellContent::FormulaInstruction::F_CellList) {
     if (!inst.m_sheet.empty()) o << inst.m_sheet.cstr() << ":";
     else if (inst.m_sheetId>=0) {
-      o << "sheet[id]=" << inst.m_sheetId;
-      if (inst.m_sheetIdRelative) o << "[rel]";
-      o << ",";
+      if (inst.m_sheetIdRelative) o << "$";
+      o << "S" << inst.m_sheetId;
+      o << ":";
     }
     for (int l=0; l<2; ++l) {
       if (!inst.m_positionRelative[l][0]) o << "$";

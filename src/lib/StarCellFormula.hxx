@@ -58,7 +58,7 @@ public:
   //! destructor
   ~StarCellFormula() {}
   //! try to read a formula
-  static bool readSCFormula(StarZone &zone, STOFFCell &cell, int version, long lastPos);
+  static bool readSCFormula(StarZone &zone, STOFFCell &cell, STOFFCellContent &content, int version, long lastPos);
   //! try to read a formula(v3)
   static bool readSCFormula3(StarZone &zone, STOFFCell const &cell, STOFFCellContent &content, int version, long lastPos);
   //! update the different formula(knowing the list of sheet names and the cell's sheetId)
@@ -68,10 +68,11 @@ protected:
   // data
   //
   //! try to read a token in a formula
-  static bool readSCToken(StarZone &zone, STOFFVec2i const &pos, int version, long lastPos,
-                          STOFFCellContent::FormulaInstruction &instr, libstoff::DebugStream &f);
+  static bool readSCToken(StarZone &zone, STOFFCell const &cell, STOFFCellContent &content, int version, long lastPos);
   //! try to read a token in a formula (v3)
   static bool readSCToken3(StarZone &zone, STOFFCell const &cell, STOFFCellContent &content, bool &endData, long lastPos);
+  //! try to update a function
+  static bool setFunction(int nOp, STOFFCellContent::FormulaInstruction &instr);
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
