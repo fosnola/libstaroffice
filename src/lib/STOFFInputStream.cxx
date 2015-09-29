@@ -286,6 +286,7 @@ bool STOFFInputStream::readCompressedULong(unsigned long &res)
   }
   if ((p[0]&0xC0)==0x80) {
     res=(p[0]&0x3f);
+    p = m_stream->read(sizeof(uint8_t), numBytesRead);
     if (!p || numBytesRead != sizeof(uint8_t))
       return false;
     res=(res<<8)|p[0];

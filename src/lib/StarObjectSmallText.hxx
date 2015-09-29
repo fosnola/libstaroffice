@@ -32,71 +32,56 @@
 */
 
 /*
- * StarFileManager to read/parse some basic StarOffice OLEs
+ * Parser to convert a small text zone/OLE in a StarOffice document
  *
  */
-#ifndef STAR_FILE_MANAGER
-#  define STAR_FILE_MANAGER
+#ifndef STAR_OBJECT_SMALL_TEXT
+#  define STAR_OBJECT_SMALL_TEXT
 
 #include <vector>
 
-#include "STOFFDebug.hxx"
-#include "STOFFEntry.hxx"
-#include "STOFFInputStream.hxx"
+#include "libstaroffice_internal.hxx"
+#include "StarObject.hxx"
 
-namespace StarFileManagerInternal
+namespace StarObjectSmallTextInternal
 {
 struct State;
 }
 
-class StarObject;
 class StarZone;
 
-/** \brief the main class to read/.. some basic StarOffice OLEs
+/** \brief the main class to read a small StarOffice text zone
  *
  *
  *
  */
-class StarFileManager
+class StarObjectSmallText : public StarObject
 {
 public:
   //! constructor
-  StarFileManager();
+  StarObjectSmallText(StarObject const &orig, bool duplicateState);
   //! destructor
-  virtual ~StarFileManager();
+  virtual ~StarObjectSmallText();
 
-  //! low level
+  //! try to read a small text object
+  bool read(StarZone &zone, long lastPos);
 
-  //! try to read a image zone: "StarImageDocument" or "StarImageDocument 4.0
-  static bool readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName);
-  //! try to read a math zone: "StarMathDocument" (v 3 or v4) .sdf
-  static bool readMathDocument(STOFFInputStreamPtr input, std::string const &fileName, StarObject &doc);
-
-  //! try to read a embedded picture file: Embedded/PicXXXXXX
-  static bool readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string &dataType, std::string const &fileName, StarObject &doc);
-
-  // other
-
-  //! try to read a "Ole-Object" zone
-  static bool readOleObject(STOFFInputStreamPtr input, std::string const &fileName);
-  //! try to read the "OutPlace Object"
-  static bool readOutPlaceObject(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
-
-  //! try to read a printer zone
-  static bool readJobSetUp(StarZone &zone);
-  //! try to read a font
-  static bool readFont(StarZone &zone);
-  //! try to read a SVGDI object
-  static bool readSVGDI(StarZone &zone);
+  //! try to send a small text zone
+  bool send(shared_ptr<STOFFListener> listener);
+protected:
+  //
+  // low level
+  //
 
 protected:
-
   //
   // data
   //
-private:
+
   //! the state
-  shared_ptr<StarFileManagerInternal::State> m_state;
+  shared_ptr<StarObjectSmallTextInternal::State> m_state;
+private:
+  StarObjectSmallText &operator=(StarObjectSmallText const &orig);
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

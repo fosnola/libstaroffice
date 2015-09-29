@@ -1,5 +1,12 @@
 CHANGES:
 
+09/29/2015: begin to reconstruct the "basic" content of sdc files, ie.
+   - the sheets' names
+   - the value, text or formula(if they do not contain any Index) which appear in sheet's cells
+   - the column and row widths
+   
+09/20/2015: begin to parsing the different files
+
 07/20/2015: creation
-- libstaroffice created from on version of libwps.
+   - libstaroffice created taking inspiration from libwps and libmwaw.
 

@@ -102,7 +102,7 @@ public:
      \param documentInterface A RVNGTextInterface implementation
      \param password The file password
 
-   \note password is currently ignored */
+   \note Reserved for future use. Actually, it only returns false */
   static STOFFLIB Result parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *documentInterface, char const *password=0);
 
   /** Parses the input stream content. It will make callbacks to the functions provided by a
@@ -132,7 +132,7 @@ public:
      \param documentInterface A RVNGSpreadsheetInterface implementation
      \param password The file password
 
-   \note Reserved for future use. Actually, it only returns false. */
+   \note Can only convert some basic documents: retrieving more cells' contents but no formating. */
   static STOFFLIB Result parse(librevenge::RVNGInputStream *input, librevenge::RVNGSpreadsheetInterface *documentInterface, char const *password=0);
 
   // ------------------------------------------------------------

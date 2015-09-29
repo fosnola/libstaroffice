@@ -33,11 +33,11 @@
 #define STOFF_MATH_VERSION 0
 /** Defines the presentation possible conversion (actually none) */
 #define STOFF_PRESENTATION_VERSION 0
-/** Defines the spreadsheet possible conversion (actually none) */
-#define STOFF_SPREADSHEET_VERSION 0
-/** Defines the word processing possible conversion:
-    - 1: can create some text document(from libstoff-0.0) */
-#define STOFF_TEXT_VERSION 1
+/** Defines the spreadsheet processing possible conversion:
+    - 1: can convert some basic document(from libstoff-0.0) */
+#define STOFF_SPREADSHEET_VERSION 1
+/** Defines the word processing possible conversion (actually none) */
+#define STOFF_TEXT_VERSION 0
 
 #include "STOFFDocument.hxx"
 

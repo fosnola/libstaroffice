@@ -1,1 +1,9 @@
-0.0.0: works in process
+0.0.0:
+- 09/29/2015: begin to reconstruct the "basic" content of sdc files, ie.
+   - the sheets' names
+   - the value, text or formula(if they do not contain any Index) which appear in sheet's cells
+   - the column and row widths
+   but not:
+   - numbers' formating
+   - cells' formating
+   - notes, fields, embedding objects, ...

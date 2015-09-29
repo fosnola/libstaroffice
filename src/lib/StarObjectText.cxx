@@ -1329,11 +1329,10 @@ bool StarObjectText::readSWNumRule(StarZone &zone, char cKind)
   // sw_sw3num.cxx::Sw3IoImp::InNumRule
   libstoff::DebugStream f;
   f << "Entries(SWNumRuleDef)[" << cKind << "-" << zone.getRecordLevel() << "]:";
-  int cFlags=0x20, nPoolId=-1, nStringId=0xFFFF;
   int val;
   if (zone.isCompatibleWith(0x201)) {
-    cFlags=(int) zone.openFlagZone();
-    nStringId=(int) input->readULong(2);
+    int cFlags=(int) zone.openFlagZone();
+    int nStringId=(int) input->readULong(2);
     librevenge::RVNGString poolName;
     if (nStringId==0xFFFF)
       ;
@@ -1342,7 +1341,7 @@ bool StarObjectText::readSWNumRule(StarZone &zone, char cKind)
     else if (!poolName.empty())
       f << poolName.cstr() << ",";
     if (cFlags&0x10) {
-      nPoolId=(int) input->readULong(2);
+      int nPoolId=(int) input->readULong(2);
       f << "PoolId=" << nPoolId << ",";
       val=(int) input->readULong(2);
       if (val) f << "poolHelpId=" << val << ",";
@@ -1694,9 +1693,8 @@ bool StarObjectText::readSWTextZone(StarZone &zone)
   f << "Entries(SWText)[" << zone.getRecordLevel() << "]:";
   int fl=zone.openFlagZone();
   f << "nColl=" << input->readULong(2) << ",";
-  int val;
   if (fl&0x10 && !zone.isCompatibleWith(0x201)) {
-    val=(int) input->readULong(1);
+    int val=(int) input->readULong(1);
     if (val==200 && zone.isCompatibleWith(0xf,0x101) && input->tell() < zone.getFlagLastPosition())
       val=(int) input->readULong(1);
     if (val)

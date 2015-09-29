@@ -4757,7 +4757,7 @@ bool StarEncodingJapanese::readJapanese212
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   default:
-    if ((c>=0x10 && c<=0x21) || (c>=0x23&&c<=25) || c==0x28 || (c>=0x2c && c<=0x2f) || (c>=0x6e && c<=0x7e))
+    if ((c>=0x10 && c<=0x21) || (c>=0x23&&c<=0x25) || c==0x28 || (c>=0x2c && c<=0x2f) || (c>=0x6e && c<=0x7e))
       unicode=(unicode<<8)+(uint32_t)c2;
     else
       unicode=0;

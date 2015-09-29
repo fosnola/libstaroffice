@@ -776,7 +776,7 @@ librevenge::RVNGPropertyList STOFFCellContent::FormulaInstruction::getPropertyLi
     break;
   case F_Long:
     pList.insert("librevenge:type","librevenge-number");
-    pList.insert("librevenge:number",m_longValue, librevenge::RVNG_GENERIC);
+    pList.insert("librevenge:number",double(m_longValue), librevenge::RVNG_GENERIC);
     break;
   case F_Cell:
     pList.insert("librevenge:type","librevenge-cell");
@@ -800,7 +800,14 @@ librevenge::RVNGPropertyList STOFFCellContent::FormulaInstruction::getPropertyLi
     if (!m_sheet.empty())
       pList.insert("librevenge:sheet-name",m_sheet.cstr());
     break;
-  case F_Index:
+  case F_Index: {
+    static bool first=true;
+    if (first) {
+      STOFF_DEBUG_MSG(("STOFFCellContent::FormulaInstruction::getPropertyList: impossible to send index data\n"));
+      first=false;
+    }
+    break;
+  }
   default:
     STOFF_DEBUG_MSG(("STOFFCellContent::FormulaInstruction::getPropertyList: unexpected type\n"));
   }

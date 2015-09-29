@@ -59,10 +59,12 @@ void StarCellFormula::updateFormula(STOFFCellContent &content, std::vector<libre
          form.m_type!=STOFFCellContent::FormulaInstruction::F_CellList) ||
         form.m_sheetId<0 || form.m_sheetId==sheetId)
       continue;
-    static bool first=true;
     if (form.m_sheetId>=numNames) {
-      STOFF_DEBUG_MSG(("StarCellFormula::updateFormula: some sheetId are bad\n"));
-      first=false;
+      static bool first=true;
+      if (first) {
+        STOFF_DEBUG_MSG(("StarCellFormula::updateFormula: some sheetId are bad\n"));
+        first=false;
+      }
       continue;
     }
     form.m_sheet=sheetNames[size_t(form.m_sheetId)];
@@ -104,7 +106,11 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCell &cell, STOFFCellCo
     f << ",";
 
     if (ok && hasIndex) {
-      STOFF_DEBUG_MSG(("StarCellFormula::readSCFormula: formula with index are not implemented\n"));
+      static bool first=true;
+      if (first) {
+        STOFF_DEBUG_MSG(("StarCellFormula::readSCFormula: formula with index are not implemented\n"));
+        first=false;
+      }
       f << "##index,";
     }
     else if (ok)
@@ -285,7 +291,7 @@ bool StarCellFormula::readSCToken(StarZone &zone, STOFFCell const &/*cell*/, STO
   }
   case 6:
     instr.m_type=STOFFCellContent::FormulaInstruction::F_Index;
-    instr.m_longValue=input->readULong(2);
+    instr.m_longValue=(long)input->readULong(2);
     break;
   case 7: {
     uint8_t nByte;

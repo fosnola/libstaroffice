@@ -92,6 +92,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarObjectChart.hxx			\
 	StarObjectDraw.cxx			\
 	StarObjectDraw.hxx			\
+	StarObjectSmallText.cxx			\
+	StarObjectSmallText.hxx			\
 	StarObjectSpreadsheet.cxx		\
 	StarObjectSpreadsheet.hxx		\
 	StarObjectText.cxx			\

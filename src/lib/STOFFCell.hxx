@@ -377,7 +377,7 @@ public:
     //! the content ( if type == F_Operator or type = F_Function or type==F_Text)
     librevenge::RVNGString m_content;
     //! value ( if type==F_Long )
-    double m_longValue;
+    long m_longValue;
     //! value ( if type==F_Double )
     double m_doubleValue;
     //! cell position ( if type==F_Cell or F_CellList )

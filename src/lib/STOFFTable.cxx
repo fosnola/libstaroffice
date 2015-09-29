@@ -312,7 +312,7 @@ bool STOFFTable::buildDims()
     return false;
   }
 
-  if (m_numRows<=0 || m_numCols<=0) {
+  if (m_numRows==0 || m_numCols==0) {
     STOFF_DEBUG_MSG(("STOFFTable::buildDims: can not compute the number of columns/row\n"));
     return false;
   }

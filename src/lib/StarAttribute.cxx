@@ -43,8 +43,8 @@
 #include "SWFormatManager.hxx"
 #include "StarBitmap.hxx"
 #include "StarObject.hxx"
+#include "StarObjectSmallText.hxx"
 #include "StarObjectText.hxx"
-#include "StarFileManager.hxx"
 #include "StarZone.hxx"
 
 #include "StarAttribute.hxx"
@@ -1866,8 +1866,8 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
           nWhich==StarAttribute::ATTR_SC_PAGE_HEADERRIGHT ? "header[right]" : "footer[right]") << ",";
     for (int i=0; i<3; ++i) {
       long actPos=input->tell();
-      StarFileManager fileManager;
-      if (!fileManager.readEditTextObject(zone, lastPos, object) || input->tell()>lastPos) {
+      StarObjectSmallText smallText(object, false); // checkme
+      if (!smallText.read(zone, lastPos) || input->tell()>lastPos) {
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a text object\n"));
         ascFile.addPos(actPos);
         ascFile.addNote("StarAttribute:###editTextObject");

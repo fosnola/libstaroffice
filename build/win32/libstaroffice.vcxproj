@@ -250,6 +250,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\..\src\lib\StarObjectSmallText.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\src\lib\StarObjectSpreadsheet.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -315,6 +319,7 @@
     <ClInclude Include="..\..\src\lib\StarObject.hxx" />
     <ClInclude Include="..\..\src\lib\StarObjectChart.hxx" />
     <ClInclude Include="..\..\src\lib\StarObjectDraw.hxx" />
+    <ClInclude Include="..\..\src\lib\StarObjectSmallText.hxx" />
     <ClInclude Include="..\..\src\lib\StarObjectSpreadsheet.hxx" />
     <ClInclude Include="..\..\src\lib\StarObjectText.hxx" />
     <ClInclude Include="..\..\src\lib\StarZone.hxx" />

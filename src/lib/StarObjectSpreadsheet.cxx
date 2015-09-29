@@ -44,10 +44,10 @@
 #include "StarAttribute.hxx"
 #include "StarCellFormula.hxx"
 #include "StarEncryption.hxx"
-#include "StarObject.hxx"
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarObjectDraw.hxx"
+#include "StarObjectSmallText.hxx"
 #include "StarZone.hxx"
 #include "STOFFCell.hxx"
 #include "STOFFSpreadsheetListener.hxx"
@@ -241,12 +241,14 @@ private:
 struct Cell : public STOFFCell {
 public:
   //! constructor
-  Cell(STOFFVec2i pos=STOFFVec2i(0,0)) : STOFFCell(), m_content(), m_hasNote(false)
+  Cell(STOFFVec2i pos=STOFFVec2i(0,0)) : STOFFCell(), m_content(), m_textZone(), m_hasNote(false)
   {
     setPosition(pos);
   }
   //! the cell content
   STOFFCellContent m_content;
+  //! the text zone(if set)
+  shared_ptr<StarObjectSmallText> m_textZone;
   //! flag to know if the cell has some note
   bool m_hasNote;
 };
@@ -388,6 +390,8 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
         listener->openSheetCell(cell, cell.m_content);
         if (cell.m_content.m_contentType==STOFFCellContent::C_TEXT_BASIC)
           listener->insertUnicodeList(cell.m_content.m_text);
+        else if (cell.m_content.m_contentType==STOFFCellContent::C_TEXT && cell.m_textZone)
+          cell.m_textZone->send(listener);
         listener->closeSheetCell();
       }
     }
@@ -1951,13 +1955,16 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
         *input>>unkn;
         if (unkn&0xf) input->seek((unkn&0xf), librevenge::RVNG_SEEK_CUR);
       }
-      StarFileManager fileManager;
-      if (!fileManager.readEditTextObject(zone, lastPos, *this) || input->tell()>lastPos) {
+      shared_ptr<StarObjectSmallText> textZone(new StarObjectSmallText(*this, true));
+      if (!textZone->read(zone, lastPos) || input->tell()>lastPos) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCData: can not open some edit text \n"));
         f << "###edit";
         ok=false;
         break;
       }
+      format.m_format=STOFFCell::F_TEXT;
+      cell.m_content.m_contentType=STOFFCellContent::C_TEXT;
+      cell.m_textZone=textZone;
       break;
     }
     default:
