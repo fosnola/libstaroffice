@@ -584,7 +584,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
     size_t wPos=0;
     for (uint32_t y=0; y<bitmap.m_height; ++y) {
       actPos=input->tell();
-      unsigned char val;
+      unsigned char val=0;
       for (uint32_t x=0; x<bitmap.m_width; ++x) {
         if ((x%2)==0)
           val=(unsigned char) input->readULong(1);

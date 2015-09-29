@@ -190,7 +190,7 @@ public:
                 };
   /** constructor
    *
-   * \param newId system id font
+   * \param name the font name
    * \param sz the font size
    * \param f the font attributes bold, ... */
   STOFFFont(librevenge::RVNGString const &name="", float sz=12, uint32_t f = 0) : m_name(name), m_size(sz), m_deltaSpacing(0), m_deltaSpacingUnit(librevenge::RVNG_POINT), m_widthStreching(1), m_scriptPosition(),

@@ -1,9 +1,15 @@
 The purpose of libstaroffice is to build a filter for old StarOffice's
-documents(.sdw, ...) based on librevenge(see
+documents(.sdc, .sdw, ...) based on librevenge(see
 https://sourceforge.net/p/libwpd/wiki/librevenge/ and
 http://www.documentliberation.org/projects/ ).
 
-Actually, it only tries to parse the main SDW's OLEs and prints
-"ERROR: Parse Exception!"(ie. it does not convert any files) excepted
-if it is configured with --enable-full-debug(if so, it creates some
-"*.ascii" files in the current repository to show what is parsed)...
+Currently:
+- it only tries to convert the main content of a .sdc files, ie. the
+  cells' value/text/formula,
+- and it refuses to convert any other files: .sdw, ...
+
+Notes:
+- when configured with --enable-full-debug, it also tries to parse
+  other StarOffice's files and it creates some "*.ascii" files in the
+  current repository(to show what is parsed) ; but of course, it still
+  does not generate any output...

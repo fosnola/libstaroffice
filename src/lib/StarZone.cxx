@@ -575,10 +575,12 @@ bool StarZone::closeRecord(char type, std::string const &debugName)
       return true;
     long actPos=m_input->tell();
     if (actPos!=pos) {
-      if (actPos>pos)
+      if (actPos>pos) {
         STOFF_DEBUG_MSG(("StarZone::closeRecord: oops, we read to much data\n"));
-      else if (actPos<pos)
+      }
+      else if (actPos<pos) {
         STOFF_DEBUG_MSG(("StarZone::closeRecord: oops, some data have been ignored\n"));
+      }
       libstoff::DebugStream f;
       f << debugName << ":###extra";
       m_ascii.addPos(actPos);
