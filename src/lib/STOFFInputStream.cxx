@@ -262,7 +262,7 @@ bool STOFFInputStream::readColor(STOFFColor &color)
     0xffffff,                          // COL_FIELD
     0                           // COL_FIELDTEXT
   };
-  if (colId>=int(sizeof(listColors)/sizeof(uint32_t))) {
+  if (colId<0 || colId>=int(sizeof(listColors)/sizeof(uint32_t))) {
     STOFF_DEBUG_MSG(("STOFFInputStream::readColor: can not find color %d\n", colId));
     return false;
   }

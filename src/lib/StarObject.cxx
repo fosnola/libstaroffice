@@ -225,7 +225,7 @@ bool StarObject::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*li
   ascFile.addNote(f.str().c_str());
   for (int i=0; i<int(n); ++i) {
     pos=input->tell();
-    if (pool->readItem(zone, isDirect, lastPos)) continue;
+    if (pool->readItem(zone, isDirect, lastPos) || input->tell()>lastPos) continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     ascFile.addPos(pos);
     ascFile.addNote("StarItem:pool,###extra");

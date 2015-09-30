@@ -139,7 +139,7 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCell &cell, STOFFCellCo
           f << rContent.m_formula[i] << ",";
       }
       else if (b1&0x40)
-        f << "[Index" << ((b1&0x3f) & (input->readULong(1)<<6)) << "]";
+        f << "[Index" << ((b1&0x3f) | (input->readULong(1)<<6)) << "]";
       else
         f << "[Index" << int(b1) << "]";
       if (input->tell()>lastPos) {

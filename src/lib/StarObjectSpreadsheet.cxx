@@ -1148,7 +1148,9 @@ try
     case 0x422b: {
       f << "printer,";
       StarFileManager fileManager;
-      if (!fileManager.readJobSetUp(zone)) break;
+      if (!fileManager.readJobSetUp(zone))
+        break;
+      // TODO store the page size
       break;
     }
     case 0x422c: {
@@ -1346,7 +1348,7 @@ bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::s
     switch (nId) {
     case 0x4211:
     case 0x4214: {
-      f << (nId==0x411 ? "pool" : "pool[edit]") << ",";
+      f << (nId==0x4211 ? "pool" : "pool[edit]") << ",";
       shared_ptr<StarItemPool> pool=getNewItemPool(nId==0x4211 ? StarItemPool::T_SpreadsheetPool : StarItemPool::T_EditEnginePool);
       if (pool && pool->read(zone)) {
         if (nId==0x4214 || !mainPool) mainPool=pool;

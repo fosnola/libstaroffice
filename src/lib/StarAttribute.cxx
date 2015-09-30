@@ -1041,6 +1041,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << (nWhich==StarAttribute::ATTR_CHR_BACKGROUND ? "chrAtrBackground" :
           nWhich==StarAttribute::ATTR_FRM_BACKGROUND ? "background" : "symbol[brush]") << "=" << input->readULong(1) << ",";
     if (!readBrushItem(zone, nVers, lastPos, object, f)) break;
+    // TODO store the brush
     break;
   case StarAttribute::ATTR_CHR_ROTATE:
     f << "chrAtrRotate,";
@@ -2135,6 +2136,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       librevenge::RVNGBinaryData data;
       std::string dType;
       if (!bitmap.readBitmap(zone, true, lastPos, data, dType)) break;
+      // TODO store the bitmap
       break;
     }
 

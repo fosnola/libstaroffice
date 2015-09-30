@@ -1524,10 +1524,6 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
   libstoff::DebugStream f;
   int poolVersion=input->peek()==3 ? 2 : 1;
   f << "Entries(SfxStylePool)[" << zone.getRecordLevel() << "]:pool[vers]=" << poolVersion << ",";
-  if (poolVersion!=1 && poolVersion!=2) {
-    STOFF_DEBUG_MSG(("StarItemPool::readStyle: reading version 1 is not implemented\n"));
-    return false;
-  }
   char type;
   uint16_t charSet, nCount;
 

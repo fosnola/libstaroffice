@@ -778,8 +778,6 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
         return true;
       }
     }
-
-    pos=input->tell();
   }
 
   if (version>=12) {
@@ -851,7 +849,7 @@ bool StarObjectChart::readSCHMemChart(StarZone &zone)
   uint16_t nCol, nRow;
   *input >> nCol >> nRow;
   f << "nCol=" << nCol << ",nRow=" << nRow << ",";
-  if (input->tell()+8*long(nCol)*long(nRow)>lastPos) {
+  if ((unsigned long)input->tell()+8*(unsigned long)nCol*(unsigned long)nRow>(unsigned long)lastPos) {
     STOFF_DEBUG_MSG(("StarObjectChart::readSCHMemChart: dim seems bad\n"));
     f << "###";
     ascFile.addPos(pos);

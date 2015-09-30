@@ -720,7 +720,7 @@ bool StarFileManager::readJobSetUp(StarZone &zone)
     }
     ok=true;
   }
-  if (ok && nSystem<0xffffe) {
+  if (ok && nSystem<0xfffe) {
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
 
@@ -775,9 +775,10 @@ bool StarFileManager::readJobSetUp(StarZone &zone)
       }
     }
   }
-
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
+  if (pos!=lastPos) {
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+  }
   return true;
 }
 
@@ -1030,6 +1031,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       std::string dataType;
       if (!bitmap.readBitmap(zone, false, endDataPos, data, dataType))
         f << "###bitmap,";
+      break;
     }
     case 19:
       f << "pen,";

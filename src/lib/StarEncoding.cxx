@@ -184,7 +184,7 @@ bool StarEncoding::read
   if (encoding==E_GBK || encoding==E_GB_2312  || encoding==E_EUC_CN ||
       encoding==E_GBT_12345 || encoding==E_MS_936 || encoding==E_APPLE_CHINSIMP)
     return StarEncodingChinese::readChinese1(src, pos, encoding, dest);
-  if (encoding==E_MS_949 && encoding==E_EUC_KR && encoding==E_APPLE_KOREAN)
+  if (encoding==E_MS_949 || encoding==E_EUC_KR || encoding==E_APPLE_KOREAN)
     return StarEncodingKorean::readKorean1(src, pos, encoding, dest);
   if (encoding==E_BIG5_HKSCS)
     return StarEncodingOtherKorean::readKoreanBig5(src, pos, encoding, dest);
@@ -841,7 +841,7 @@ bool StarEncoding::read
   }
   case E_TIS_620: // checkme
   case E_MS_874: {
-    if (c<0x80 || c>0xfb) break;
+    if (c<0xa0 || c>0xfb) break;
     static int const(val[])= {
       0x00A0, 0x0E01, 0x0E02, 0x0E03, 0x0E04, 0x0E05, 0x0E06, 0x0E07, /* 0xA0 */
       0x0E08, 0x0E09, 0x0E0A, 0x0E0B, 0x0E0C, 0x0E0D, 0x0E0E, 0x0E0F, /* 0xA0 */
@@ -1362,7 +1362,7 @@ bool StarEncoding::read
     if (c==0x9) {
       if (pos>=src.size()) return false;
       c=(int) src[pos++];
-      if (c<1 || c>0x6f) {
+      if (c<1 || c>0x6b) {
         STOFF_DEBUG_MSG(("StarEncoding::read: find unexpected char 0x09%x\n", (unsigned int)(c)));
         break;
       }
@@ -1398,7 +1398,7 @@ bool StarEncoding::read
       0, 0x0966, 0x0967, 0x0968, 0x0969, 0x096A, 0x096B, 0x096C, /* F0 */
       0x096D, 0x096E, 0x096F
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=(uint32_t) val[c-0xa1];
     break;
   }
   case E_JIS_X_0201: // ok

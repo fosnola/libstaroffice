@@ -248,13 +248,13 @@ bool SDWParser::checkHeader(STOFFHeader *header, bool /*strict*/)
   STOFFInputStreamPtr input = getInput();
   if (!input || !input->hasDataFork() || !input->isStructured())
     return false;
-#ifndef DEBUG
-  return false;
-#endif
   if (header)
     header->reset(1);
-
+#ifndef DEBUG
+  return false;
+#else
   return true;
+#endif
 }
 
 

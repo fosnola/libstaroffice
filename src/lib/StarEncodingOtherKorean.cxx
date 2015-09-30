@@ -147,7 +147,7 @@ bool StarEncodingOtherKorean::readKoreanBig5
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8b:
-    if (c2>=0x40 && c2<=0xfe) {
+    if (c2>=0x40 && c2<=0xfd) {
       static int const(val[])= {
         0xF4DA,0xF4DB,0xF4DC,0xF4DD,0xF4DE,0xF4DF,
         0xF4E0,0x3A18,0xF4E2,0xF4E3,0xF4E4,0xF4E5,0xF4E6,0xF4E7,0xF4E8,0xF4E9,
@@ -176,7 +176,7 @@ bool StarEncodingOtherKorean::readKoreanBig5
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8c:
-    if (c2>=0x40 && c2<=0xfe) {
+    if (c2>=0x40 && c2<=0xe6) {
       static int const(val[])= {
         0x503B,0x6DFE,0xF579,0xF57A,0x3DC9,0x888F,
         0xF57D,0x7077,0x5CF5,0x4B20,0xF581,0x3559,0xF583,0x6122,0xF585,0x8FA7,
@@ -1072,7 +1072,7 @@ bool StarEncodingOtherKorean::readKoreanMS1361
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x85:
-    if (c2>=0x41 && c2<=0xe2) {
+    if (c2>=0x41 && c2<=0xe1) {
       static int const(val[])= {
         0x3154, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, /* 0x40 */
         0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, /* 0x40 */
@@ -1102,7 +1102,7 @@ bool StarEncodingOtherKorean::readKoreanMS1361
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x86:
-    if (c2>=0x41 && c2<=0xe2) {
+    if (c2>=0x41 && c2<=0xe1) {
       static int const(val[])= {
         0x315A, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, /* 0x40 */
         0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, /* 0x40 */
@@ -1132,7 +1132,7 @@ bool StarEncodingOtherKorean::readKoreanMS1361
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x87:
-    if (c2>=0x41 && c2<=0xa2) {
+    if (c2>=0x41 && c2<=0xa1) {
       static int const(val[])= {
         0x3160, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, /* 0x40 */
         0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, /* 0x40 */
@@ -1311,7 +1311,7 @@ bool StarEncodingOtherKorean::readKoreanMS1361
       unicode=uint32_t((unicode<<8)+(uint32_t) c2);
     break;
   case 0x8d:
-    if (c2>=0x41 && c2<=0xfe) {
+    if (c2>=0x41 && c2<=0xfd) {
       static int const(val[])= {
         0xAED8, 0xAED9, 0xAEDA, 0xAEDB, 0xAEDC, 0xAEDD, 0xAEDE, /* 0x40 */
         0xAEDF, 0xAEE0, 0xAEE1, 0xAEE2, 0xAEE3, 0xAEE4, 0xAEE5, 0xAEE6, /* 0x40 */

@@ -404,7 +404,7 @@ bool StarBitmap::readBitmapInformation(StarZone &zone, StarBitmapInternal::Bitma
     uint16_t width, height, planes, bitCount;
     *input >> width >> height >> planes >> bitCount;
     info.m_width=width;
-    info.m_width=height;
+    info.m_height=height;
     info.m_planes=planes;
     info.m_bitCount=bitCount;
   }
