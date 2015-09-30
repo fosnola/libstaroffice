@@ -311,6 +311,7 @@ try
       f << "N=" << N << ",";
       zone.closeFlagZone();
       for (int i=0; i<N; ++i) {
+        // readSWPageDef will check that we can read the data, ....
         if (!readSWPageDef(zone))
           break;
       }

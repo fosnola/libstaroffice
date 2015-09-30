@@ -2042,7 +2042,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       if (id>=0) break;
       uint32_t nPoints;
       *input >> nPoints;
-      if (input->tell()+6*long(nPoints)>lastPos) {
+      if (input->tell()+12*long(nPoints)>lastPos) {
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: bad num point\n"));
         f << "###nPoints=" << nPoints << ",";
         break;

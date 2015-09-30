@@ -226,6 +226,8 @@ void SDCParser::createDocument(librevenge::RVNGSpreadsheetInterface *documentInt
   //
   STOFFSpreadsheetListenerPtr listen(new STOFFSpreadsheetListener(*getParserState(), pageList, documentInterface));
   setSpreadsheetListener(listen);
+  if (m_state->m_mainSpreadsheet)
+    listen->setDocumentMetaData(m_state->m_mainSpreadsheet->getMetaData());
   listen->startDocument();
 }
 

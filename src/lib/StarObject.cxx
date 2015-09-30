@@ -72,11 +72,11 @@ private:
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
 StarObject::StarObject(char const *passwd, shared_ptr<STOFFOLEParser::OleDirectory> directory) :
-  m_password(passwd), m_directory(directory), m_state(new StarObjectInternal::State())
+  m_password(passwd), m_directory(directory), m_state(new StarObjectInternal::State()), m_metaData()
 {
 }
 
-StarObject::StarObject(StarObject const &orig, bool duplicateState) : m_password(orig.m_password), m_directory(orig.m_directory), m_state()
+StarObject::StarObject(StarObject const &orig, bool duplicateState) : m_password(orig.m_password), m_directory(orig.m_directory), m_state(), m_metaData(orig.m_metaData)
 {
   if (duplicateState)
     m_state.reset(new StarObjectInternal::State(*orig.m_state));
@@ -128,11 +128,11 @@ shared_ptr<StarItemPool> StarObject::findItemPool(StarItemPool::Type type, bool 
 bool StarObject::parse()
 {
   if (!m_directory) {
-    STOFF_DEBUG_MSG(("StarObject::readPersistElements: can not find directory\n"));
+    STOFF_DEBUG_MSG(("StarObject::parse: can not find directory\n"));
     return false;
   }
   if (!m_directory->m_hasCompObj) {
-    STOFF_DEBUG_MSG(("StarObject::readPersistElements: called with unknown document\n"));
+    STOFF_DEBUG_MSG(("StarObject::parse: called with unknown document\n"));
   }
   for (size_t i = 0; i < m_directory->m_contentList.size(); ++i) {
     STOFFOLEParser::OleContent &content=m_directory->m_contentList[i];
@@ -166,13 +166,16 @@ bool StarObject::parse()
       readSfxPreview(ole, name);
       continue;
     }
+    if (base=="SfxDocumentInfo") {
+      content.setParsed(true);
+      readSfxDocumentInformation(ole, name);
+      continue;
+    }
     libstoff::DebugFile asciiFile(ole);
     asciiFile.open(name);
 
     bool ok=false;
-    if (base=="SfxDocumentInfo")
-      ok=readSfxDocumentInformation(ole, asciiFile);
-    else if (base=="SfxWindows")
+    if (base=="SfxWindows")
       ok=readSfxWindows(ole, asciiFile);
     else if (base=="Star Framework Config File")
       ok=readStarFrameworkConfigFile(ole, asciiFile);
@@ -433,8 +436,11 @@ bool StarObject::readPersistData(StarZone &zone, long lastPos)
   return true;
 }
 
-bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, libstoff::DebugFile &ascii)
+bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::string const &name)
 {
+  StarZone zone(input, name, "SfxDocInfo", 0); // no password
+  libstoff::DebugFile &ascii=zone.ascii();
+  ascii.open(name);
   input->seek(0, librevenge::RVNG_SEEK_SET);
 
   libstoff::DebugStream f;
@@ -467,6 +473,7 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, libstoff:
   if (bPasswd) f << "passwd,"; // the password does not seems to be kept/used in this block
   if (bPGraphic) f << "portableGraphic,";
   if (bQTemplate) f << "queryTemplate,";
+  StarEncoding::Encoding encoding=StarEncoding::getEncodingForId(nUS);
   ascii.addPos(0);
   ascii.addNote(f.str().c_str());
 
@@ -495,14 +502,35 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, libstoff:
       ascii.addNote(f.str().c_str());
       return true;
     }
-    text="";
-    for (int c=0; c<dSz; ++c) text+=(char) input->readULong(1);
-    f << text << ",";
+    std::vector<uint8_t> string;
+    for (int c=0; c<dSz; ++c) string.push_back((uint8_t) input->readULong(1));
+    std::vector<uint32_t> finalString;
+    if (StarEncoding::convert(string, encoding, finalString)) {
+      librevenge::RVNGString attrib=libstoff::getString(finalString);
+      f << attrib.cstr() << ",";
+      static char const *(attribNames[]) = {
+        "meta:initial-creator", "dc:creator", "", "dc:title", "dc:subject", "dc:description"/*comment*/, "meta:keywords",
+        "", "librevenge:Info0", "", "librevenge:Info1", "", "librevenge:Info2", "", "librevenge:Info3",
+        "librevenge:template-name", "librevenge:template-filename"
+      };
+      if (!attrib.empty() && !std::string(attribNames[i]).empty())
+        m_metaData.insert(attribNames[i], attrib);
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarObject::readSfxDocumentInformation: can not convert a string\n"));
+      f << "###string,";
+    }
     input->seek(pos+expectedSz, librevenge::RVNG_SEEK_SET);
     if (i<3) {
       uint32_t date, time;
       *input >> date >> time;
       f << "date=" << date << ", time=" << time << ",";
+      if (date) {
+        std::stringstream s;
+        s << date;
+        static char const *(attribNames[])= { "meta:creation-date", "dc:date", "meta:print-date" };
+        m_metaData.insert(attribNames[i], s.str().c_str());
+      }
     }
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());

@@ -856,7 +856,7 @@ bool StarEncoding::read
       0x0E50, 0x0E51, 0x0E52, 0x0E53, 0x0E54, 0x0E55, 0x0E56, 0x0E57, /* 0xF0 */
       0x0E58, 0x0E59, 0x0E5A, 0x0E5B                                  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=(uint32_t) val[c-0xa0];
     break;
   }
   case E_MS_1250: {
@@ -1362,7 +1362,7 @@ bool StarEncoding::read
     if (c==0x9) {
       if (pos>=src.size()) return false;
       c=(int) src[pos++];
-      if (c<1 || c>0x6b) {
+      if (c<1 || c>0x5a) {
         STOFF_DEBUG_MSG(("StarEncoding::read: find unexpected char 0x09%x\n", (unsigned int)(c)));
         break;
       }

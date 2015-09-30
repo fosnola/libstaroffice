@@ -469,6 +469,13 @@ void STOFFSpreadsheetListener::setDocumentLanguage(std::string locale)
   m_ds->m_metaData.insert("librevenge:language", locale.c_str());
 }
 
+void STOFFSpreadsheetListener::setDocumentMetaData(const librevenge::RVNGPropertyList &list)
+{
+  librevenge::RVNGPropertyList::Iter i(list);
+  for (i.rewind(); i.next();)
+    m_ds->m_metaData.insert(i.key(), i()->getStr());
+}
+
 bool STOFFSpreadsheetListener::isDocumentStarted() const
 {
   return m_ds->m_isDocumentStarted;

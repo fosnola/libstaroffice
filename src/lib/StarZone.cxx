@@ -142,7 +142,7 @@ bool StarZone::readStringsPool()
       f << "SWPoolList-" << i << ":";
       int nId=(int) m_input->readULong(2);
       f << "nId=" << nId << ",";
-      if (!readString(string, encoding)) {
+      if (!readString(string, encoding) || m_input->tell()>lastPos) {
         STOFF_DEBUG_MSG(("StarZone::readStringsPool: can not read a string\n"));
         m_input->seek(pos, librevenge::RVNG_SEEK_SET);
         break;

@@ -471,7 +471,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
       int N=(int) input->readULong(2);
       if (input->tell()+4*N>endFieldPos) break;
       for (int c=0; c<N; ++c) {
-        if (!zone.readString(text)) {
+        if (!zone.readString(text) || input->tell()>endFieldPos) {
           STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not read the format string\n"));
           f << "###SvNumFor" << c;
           ok=false;
@@ -492,7 +492,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
       if (val) f << "nCntPost=" << val << ",";
       val=(int) input->readULong(2);
       if (val) f << "nCntExp=" << val << ",";
-      if (!zone.readString(text)) {
+      if (!zone.readString(text) || input->tell()>endFieldPos) {
         STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not read the color name\n"));
         f << "###colorname";
         ok=false;
@@ -501,11 +501,6 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
       if (!text.empty())
         f << libstoff::getString(text).cstr() << ",";
       f << "],";
-    }
-    if (input->tell()>endFieldPos) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: we read too much\n"));
-      f << "###pos";
-      ok=false;
     }
     if (ok && input->tell()!=endFieldPos && !zone.readString(text)) {
       STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not read the comment\n"));

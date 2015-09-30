@@ -1265,7 +1265,7 @@ try
       }
       uint32_t nRange;
       *input >> nRange;
-      if (input->tell()+8*long(nRange)<=zone.getRecordLastPosition()) {
+      if ((unsigned long)input->tell()+8*(unsigned long)(nRange)<=(unsigned long)zone.getRecordLastPosition()) {
         f << "ranges=[";
         for (uint32_t j=0; j<nRange; ++j)
           f << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
@@ -2497,7 +2497,7 @@ bool StarObjectSpreadsheet::readSCMatrix(StarZone &zone, int /*version*/, long l
     }
     case 2: {
       std::vector<uint32_t> string;
-      if (!zone.readString(string)) {
+      if (!zone.readString(string) || input->tell()>lastPos) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCMatrix: can not read a string\n"));
         f << "###string";
         ok=false;
