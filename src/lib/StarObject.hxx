@@ -87,6 +87,11 @@ public:
   }
   //! return the attribute manager
   shared_ptr<StarAttributeManager> getAttributeManager();
+  //! returns the meta data (filled by readSfxDocumentInformation)
+  librevenge::RVNGPropertyList const &getMetaData() const
+  {
+    return m_metaData;
+  }
 
   // the document pool
   //! returns a new item pool for this document
@@ -108,7 +113,7 @@ protected:
   //!  the "persist elements" small ole: the list of object
   bool readPersistElements(STOFFInputStreamPtr input, std::string const &name);
   //! try to read the document information : "SfxDocumentInformation"
-  bool readSfxDocumentInformation(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
+  bool readSfxDocumentInformation(STOFFInputStreamPtr input, std::string const &name);
   //! try to read the preview : "SfxPreview"
   bool readSfxPreview(STOFFInputStreamPtr input, std::string const &name);
   //! try to read the windows information : "SfxWindows"
@@ -129,6 +134,8 @@ protected:
 
   //! the state
   shared_ptr<StarObjectInternal::State> m_state;
+  //! the meta data
+  librevenge::RVNGPropertyList m_metaData;
 
 private:
   StarObject(StarObject const &orig);

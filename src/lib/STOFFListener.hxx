@@ -64,6 +64,8 @@ public:
   // ------ main document -------
   /** sets the documents language */
   virtual void setDocumentLanguage(std::string locale) = 0;
+  /** sets the document meta data */
+  virtual void setDocumentMetaData(const librevenge::RVNGPropertyList &list) = 0;
   /** starts the document */
   virtual void startDocument() = 0;
   /** returns true if a document is opened */

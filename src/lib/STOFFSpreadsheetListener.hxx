@@ -78,8 +78,10 @@ public:
     return Spreadsheet;
   }
 
-  /** sets the documents language */
+  /** sets the document language */
   void setDocumentLanguage(std::string locale);
+  /** sets the document meta data */
+  void setDocumentMetaData(const librevenge::RVNGPropertyList &list);
 
   /** starts the document */
   void startDocument();
