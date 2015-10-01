@@ -1690,7 +1690,7 @@ bool StarEncodingJapanese::readJapanese208
     STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese208: unknown encoding\n"));
     return false;
   }
-  int const trailOff=StarEncoding::E_EUC_JP ? 0x80 : 0;
+  int const trailOff=encoding==StarEncoding::E_EUC_JP ? 0x80 : 0;
   if (pos+1>=src.size()) return false;
   int c=(int) src[pos++], c2=src[pos++];
   if (c<trailOff || c2<trailOff) {
@@ -3334,7 +3334,7 @@ bool StarEncodingJapanese::readJapanese212
     STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese212: unknown encoding\n"));
     return false;
   }
-  int const trailOff=StarEncoding::E_EUC_JP ? 0x80 : 0;
+  int const trailOff=encoding==StarEncoding::E_EUC_JP ? 0x80 : 0;
   if (pos+1>=src.size()) return false;
   int c=(int) src[pos++], c2=src[pos++];
   if (c<trailOff || c2<trailOff) {

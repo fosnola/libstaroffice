@@ -1360,7 +1360,6 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
 
   // now read the table
   input->seek(tablePos, librevenge::RVNG_SEEK_SET);
-  pos=input->tell();
   f.str("");
   f << "PoolDef[table]:";
   std::vector<uint32_t> sizeAttr;
@@ -1524,7 +1523,7 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
   libstoff::DebugStream f;
   int poolVersion=input->peek()==3 ? 2 : 1;
   f << "Entries(SfxStylePool)[" << zone.getRecordLevel() << "]:pool[vers]=" << poolVersion << ",";
-  char type;
+  char type=3; // to make clang analyzer happy
   uint16_t charSet, nCount;
 
   bool helpIdSize32=true, ok=true;

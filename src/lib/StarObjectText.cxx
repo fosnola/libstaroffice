@@ -1598,7 +1598,6 @@ bool StarObjectText::readSWTable(StarZone &zone)
     pos=input->tell();
     if (readSWTableLine(zone))
       continue;
-    pos=input->tell();
     STOFF_DEBUG_MSG(("StarObjectText::readSWTable: can not read a table line\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;

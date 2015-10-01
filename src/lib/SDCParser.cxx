@@ -210,7 +210,7 @@ bool SDCParser::createZones()
       asciiFile.reset();
     }
   }
-  return m_state->m_mainSpreadsheet;
+  return m_state->m_mainSpreadsheet ? true : false;
 }
 
 ////////////////////////////////////////////////////////////
