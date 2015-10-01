@@ -1,5 +1,7 @@
 CHANGES:
 
+09/30/2015: begin to reconstruct the document meta-data
+
 09/29/2015: begin to reconstruct the "basic" content of sdc files, ie.
    - the sheets' names
    - the value, text or formula(if they do not contain any Index) which appear in sheet's cells

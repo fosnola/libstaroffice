@@ -1557,7 +1557,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       if (nCurKey) f << "nCurKey=" << nCurKey << ",";
       for (int j=0; j<2; ++j) {
         std::vector<uint32_t> text;
-        if (!zone.readString(text)) {
+        if (!zone.readString(text) || input->tell()>lastPos) {
           STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find a macro string\n"));
           f << "###string" << j << ",";
           ok=false;
