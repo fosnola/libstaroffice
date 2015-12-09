@@ -52,11 +52,13 @@ struct State;
 class StarZone;
 class StarObject;
 
+//! virtual class used to store the different attribute
 class StarAttribute
 {
 public:
   //! the attribute list
   enum Type {
+    ATTR_SPECIAL=-1,                                  // special
     ATTR_CHR_CASEMAP = 1,					        	    		// 1
     ATTR_CHR_CHARSETCOLOR,					        	    	// 2
     ATTR_CHR_COLOR,								        	    		// 3
@@ -194,7 +196,7 @@ public:
     ATTR_BOX_VALUE,                         	      // 129
 
     // other
-    ATTR_SC_USERDEF,
+    ATTR_SC_USERDEF,                         	      // 130
     ATTR_SC_HYPHENATE,
     ATTR_SC_HORJUSTIFY,
     ATTR_SC_INDENT,
@@ -204,7 +206,7 @@ public:
     ATTR_SC_ROTATE_MODE,
     ATTR_SC_VERTICAL_ASIAN,
     ATTR_SC_WRITINGDIR,
-    ATTR_SC_LINEBREAK,
+    ATTR_SC_LINEBREAK,                         	     // 140
     ATTR_SC_MARGIN,
     ATTR_SC_MERGE,
     ATTR_SC_MERGE_FLAG,
@@ -214,8 +216,8 @@ public:
     ATTR_SC_BORDER,
     ATTR_SC_BORDER_INNER,
     ATTR_SC_VALIDDATA,
-    ATTR_SC_CONDITIONAL,
-    ATTR_SC_PATTERN, // TODO
+    ATTR_SC_CONDITIONAL,                         	    // 150
+    ATTR_SC_PATTERN,
     ATTR_SC_PAGE,
     ATTR_SC_PAGE_PAPERTRAY,
     ATTR_SC_PAGE_SIZE,
@@ -734,10 +736,19 @@ public:
   virtual shared_ptr<StarAttribute> create() const=0;
   //! read an attribute zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &document)=0;
+  //! add to a font
+  virtual void addTo(STOFFFont &/*font*/) const
+  {
+  }
   //! returns the debug name
   std::string const &getDebugName() const
   {
     return m_debugName;
+  }
+  //! debug function to print the data
+  virtual void print(std::ostream &o) const
+  {
+    o << m_debugName << ",";
   }
 protected:
   //! constructor
@@ -761,6 +772,7 @@ protected:
 private:
   StarAttribute &operator=(StarAttribute const &orig);
 };
+
 /** \brief the main class to read/.. a StarOffice attribute
  *
  *
@@ -775,8 +787,12 @@ public:
   virtual ~StarAttributeManager();
 
 
-  //! try to read an attribute
-  bool readAttribute(StarZone &zone, int which, int vers, long endPos, StarObject &document);
+  //! try to read an attribute and return it
+  shared_ptr<StarAttribute> readAttribute(StarZone &zone, int which, int vers, long endPos, StarObject &document);
+  //! try to return the default attribute
+  shared_ptr<StarAttribute> getDefaultAttribute(int which);
+  //! return a dummy attribute
+  static shared_ptr<StarAttribute> getDummyAttribute(int type=-1);
   //! try to read a brush
   static bool readBrushItem(StarZone &zone, int nVers, long endPos, StarObject &document, libstoff::DebugStream &f);
 

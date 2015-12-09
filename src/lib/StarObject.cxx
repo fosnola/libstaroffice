@@ -105,11 +105,12 @@ shared_ptr<StarItemPool> StarObject::getNewItemPool(StarItemPool::Type type)
   return pool;
 }
 
-shared_ptr<StarItemPool> StarObject::getCurrentPool()
+shared_ptr<StarItemPool> StarObject::getCurrentPool(bool onlyInside)
 {
   for (size_t i=m_state->m_poolList.size(); i>0;) {
     shared_ptr<StarItemPool> pool=m_state->m_poolList[--i];
-    if (pool && pool->isInside()) return pool;
+    if (pool && !pool->isSecondaryPool() && (!onlyInside || pool->isInside()))
+      return pool;
   }
   return shared_ptr<StarItemPool>();
 }
@@ -185,13 +186,15 @@ bool StarObject::parse()
   return true;
 }
 
-bool StarObject::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*limits*/, long lastPos, StarItemPool *pool, bool isDirect)
+bool StarObject::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*limits*/, long lastPos,
+                             std::vector<shared_ptr<StarItem> > &listItems, StarItemPool *pool, bool isDirect)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
 
+  listItems.clear();
   f << "Entries(StarItem):pool,";
   // itemset.cxx: SfxItemSet::Load (ncount)
   uint16_t n;
@@ -214,7 +217,7 @@ bool StarObject::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*li
           STOFF_DEBUG_MSG(("StarObject::readItemSet: reading a SfxItem is not implemented without pool\n"));
           first=false;
         }
-        f << "##noPool";
+        f << "##noPool,";
       }
       else
         f << "#";
@@ -228,7 +231,11 @@ bool StarObject::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*li
   ascFile.addNote(f.str().c_str());
   for (int i=0; i<int(n); ++i) {
     pos=input->tell();
-    if (pool->readItem(zone, isDirect, lastPos) || input->tell()>lastPos) continue;
+    shared_ptr<StarItem> item=pool->readItem(zone, isDirect, lastPos);
+    if (item && input->tell()<=lastPos) {
+      listItems.push_back(item);
+      continue;
+    }
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     ascFile.addPos(pos);
     ascFile.addNote("StarItem:pool,###extra");

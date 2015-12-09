@@ -283,12 +283,26 @@ struct Version {
   std::map<int,int> m_invertListMap;
 };
 
+//! internal: list of attribute corresponding to a slot id
+struct Values {
+  //! constructor
+  Values() : m_default(), m_values()
+  {
+  }
+  //! the default values
+  shared_ptr<StarAttribute> m_default;
+  //! the list of attribute
+  std::vector<shared_ptr<StarAttribute> > m_values;
+};
+
 ////////////////////////////////////////
 //! Internal: the state of a StarItemPool
 struct State {
   //! constructor
-  State(StarObject &document, StarItemPool::Type type) : m_document(document), m_type(StarItemPool::T_Unknown), m_majorVersion(0), m_minorVersion(0), m_loadingVersion(0),
-    m_name(""), m_secondaryPool(), m_currentVersion(0), m_verStart(0), m_verEnd(0), m_versionList(), m_idToAttributeList()
+  State(StarObject &document, StarItemPool::Type type) :
+    m_document(document), m_type(StarItemPool::T_Unknown), m_majorVersion(0), m_minorVersion(0), m_loadingVersion(-1),
+    m_name(""), m_isSecondaryPool(false), m_secondaryPool(), m_currentVersion(0), m_verStart(0), m_verEnd(0), m_versionList(),
+    m_idToAttributeList(), m_slotIdToValuesMap(), m_delayedItemList()
   {
     init(type);
   }
@@ -345,7 +359,7 @@ struct State {
     if (nFileWhich<m_verStart||nFileWhich>m_verEnd) {
       if (m_secondaryPool)
         return m_secondaryPool->m_state->getWhich(nFileWhich);
-      STOFF_DEBUG_MSG(("StarItemPoolInternal::State::GetWhich: can not find a conversion for which=%d\n", nFileWhich));
+      STOFF_DEBUG_MSG(("StarItemPoolInternal::State::getWhich: can not find a conversion for which=%d\n", nFileWhich));
       return 0;
     }
     if (m_loadingVersion>m_currentVersion) {
@@ -364,7 +378,7 @@ struct State {
         if (vers.m_version<=m_loadingVersion)
           continue;
         if (nFileWhich<vers.m_start || nFileWhich>=vers.m_start+(int) vers.m_list.size()) {
-          STOFF_DEBUG_MSG(("StarItemPoolInternal::State::GetWhich: argh nFileWhich is not in good range\n"));
+          STOFF_DEBUG_MSG(("StarItemPoolInternal::State::getWhich: argh nFileWhich=%d is not in good range\n", nFileWhich));
           break;
         }
         else
@@ -373,14 +387,34 @@ struct State {
     }
     return nFileWhich;
   }
-  // returns the state corresponding to which
+  //! returns the state corresponding to which
   State *getPoolStateFor(int which)
   {
     if (which>=m_verStart&&which<=m_verEnd) return this;
     if (m_secondaryPool) return m_secondaryPool->m_state->getPoolStateFor(which);
     return 0;
   }
-
+  //! returns a pointer to the values data
+  Values *getValues(int id, bool create=false)
+  {
+    if (m_slotIdToValuesMap.find(id)!=m_slotIdToValuesMap.end())
+      return &m_slotIdToValuesMap.find(id)->second;
+    if (!create)
+      return 0;
+    m_slotIdToValuesMap[id]=Values();
+    return &m_slotIdToValuesMap.find(id)->second;
+  }
+  //! try to return a default attribute corresponding to which
+  shared_ptr<StarAttribute> getDefaultAttribute(int which)
+  {
+    StarItemPoolInternal::State *state=getPoolStateFor(which);
+    if (!state || which<state->m_verStart || which>=state->m_verStart+int(state->m_idToAttributeList.size()) ||
+        !state->m_document.getAttributeManager()) {
+      STOFF_DEBUG_MSG(("StarItemPoolInternal::State::getDefaultAttribute: find unknown attribute\n"));
+      return StarAttributeManager::getDummyAttribute();
+    }
+    return m_document.getAttributeManager()->getDefaultAttribute(state->m_idToAttributeList[size_t(which-state->m_verStart)]);
+  }
   //! the document
   StarObject &m_document;
   //! the document type
@@ -393,6 +427,8 @@ struct State {
   int m_loadingVersion;
   //! the name
   librevenge::RVNGString m_name;
+  //! a flag to know if a pool is a secondary pool
+  bool m_isSecondaryPool;
   //! the secondary pool
   shared_ptr<StarItemPool> m_secondaryPool;
   //! the current version
@@ -405,6 +441,10 @@ struct State {
   std::vector<Version> m_versionList;
   //! list whichId to attribute list
   std::vector<int> m_idToAttributeList;
+  //! a map slot to the attribute list
+  std::map<int, Values> m_slotIdToValuesMap;
+  //! list of item which need to be read
+  std::vector<shared_ptr<StarItem> > m_delayedItemList;
 private:
   State(State const &orig);
   State operator=(State const &orig);
@@ -471,7 +511,7 @@ void State::init(StarItemPool::Type type)
     // svx_editdoc.cxx
     std::vector<int> list;
     for (int i = 0; i <= 14; ++i) list.push_back(3999+i);
-    for (int i = 15; i <= 17; ++i) list.push_back(3999+i+4);
+    for (int i = 15; i <= 17; ++i) list.push_back(3999+i+3);
     addVersionMap(1, 3999, list);
 
     list.clear();
@@ -776,12 +816,18 @@ StarItemPool::~StarItemPool()
 {
 }
 
+bool StarItemPool::isSecondaryPool() const
+{
+  return m_state->m_isSecondaryPool;
+}
+
 void StarItemPool::addSecondaryPool(shared_ptr<StarItemPool> secondary)
 {
   if (!secondary) {
     STOFF_DEBUG_MSG(("StarItemPool::addSecondaryPool: called without pool\n"));
     return;
   }
+  secondary->m_state->m_isSecondaryPool=true;
   if (m_state->m_secondaryPool)
     m_state->m_secondaryPool->addSecondaryPool(secondary);
   else
@@ -798,7 +844,18 @@ StarItemPool::Type StarItemPool::getType() const
   return m_state->m_type;
 }
 
-bool StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPos)
+shared_ptr<StarItem> StarItemPool::createItem(int which, int surrogateId, bool localId)
+{
+  shared_ptr<StarItem> res(new StarItem);
+  res->m_pool=this;
+  res->m_which=which;
+  res->m_surrogateId=surrogateId;
+  res->m_localId=localId;
+  m_state->m_delayedItemList.push_back(res);
+  return res;
+}
+
+shared_ptr<StarAttribute> StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPos)
 {
   if (m_state->m_currentVersion!=m_state->m_loadingVersion)
     which=m_state->getWhich(which);
@@ -815,13 +872,13 @@ bool StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPo
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());
     input->seek(endPos, librevenge::RVNG_SEEK_SET);
-    return true;
+    return StarAttributeManager::getDummyAttribute();
   }
   zone.openDummyRecord();
-  bool ok=state->m_document.getAttributeManager()->readAttribute
-          (zone, state->m_idToAttributeList[size_t(which-state->m_verStart)], vers, endPos, state->m_document);
+  shared_ptr<StarAttribute> attribute=state->m_document.getAttributeManager()->readAttribute
+                                      (zone, state->m_idToAttributeList[size_t(which-state->m_verStart)], vers, endPos, state->m_document);
   zone.closeDummyRecord();
-  return ok;
+  return attribute;
 }
 
 bool StarItemPool::read(StarZone &zone)
@@ -838,9 +895,15 @@ bool StarItemPool::read(StarZone &zone)
   input->seek(pos, librevenge::RVNG_SEEK_SET);
   if ((tag!=0x1111 && tag!=0xbbbb) || nMajorVers<1 || nMajorVers>2)
     return false;
-  m_isInside=true;
   StarItemPool *master=0, *pool=this;
+  // update the inside flag to true
+  while (pool) {
+    pool->m_isInside=true;
+    pool=pool->m_state->m_secondaryPool.get();
+  }
   bool ok=false;
+  // read the pools
+  pool=this;
   while (input->tell()<endPos) {
     if ((nMajorVers==2 && !pool->readV2(zone, master)) ||
         (nMajorVers==1 && !pool->readV1(zone, master)))
@@ -850,11 +913,24 @@ bool StarItemPool::read(StarZone &zone)
     pool=pool->m_state->m_secondaryPool.get();
     if (!pool) break;
   }
-  m_isInside=false;
+  // reset the inside flag to false
+  pool=this;
+  while (pool) {
+    pool->m_isInside=false;
+    pool=pool->m_state->m_secondaryPool.get();
+  }
+  // update the delayed item
+  pool=this;
+  while (pool) {
+    for (size_t i=0; i<pool->m_state->m_delayedItemList.size(); ++i)
+      loadSurrogate(*(pool->m_state->m_delayedItemList[i]));
+    pool->m_state->m_delayedItemList.clear();
+    pool=pool->m_state->m_secondaryPool.get();
+  }
   return ok;
 }
 
-bool StarItemPool::readItem(StarZone &zone, bool isDirect, long endPos)
+shared_ptr<StarItem> StarItemPool::readItem(StarZone &zone, bool isDirect, long endPos)
 {
   // polio.cxx SfxItemPool::LoadItem
   STOFFInputStreamPtr input=zone.input();
@@ -864,12 +940,13 @@ bool StarItemPool::readItem(StarZone &zone, bool isDirect, long endPos)
   long pos=input->tell();
   if (pos+4>endPos) {
     STOFF_DEBUG_MSG(("StarItemPool::readItem: the zone seems too short\n"));
-    return false;
+    return shared_ptr<StarItem>();
   }
   uint16_t nWhich, nSlot;
   *input>>nWhich >> nSlot;
   f << "which=" << nWhich << ",";
   if (nSlot) f << "slot=" << nSlot << ",";
+  shared_ptr<StarItem> pItem;
   if (!m_state->isInRange(nWhich)) {
     uint16_t nSurro, nVersion, nLength;
     *input >> nSurro;
@@ -893,33 +970,36 @@ bool StarItemPool::readItem(StarZone &zone, bool isDirect, long endPos)
     if (ok && input->tell()>endPos) {
       f << "###,";
       STOFF_DEBUG_MSG(("StarItemPool::readItem: find bad position\n"));
-      ok=false;
     }
+    else if (ok)
+      pItem.reset(new StarItem(StarAttributeManager::getDummyAttribute()));
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());
-    return ok;
+    return pItem;
   }
-  bool pItem=false;
+
   if (!isDirect) {
     if (nWhich)
-      pItem=loadSurrogate(zone, nWhich, f);
-    else
+      pItem=loadSurrogate(zone, nWhich, true, f);
+    else {
       input->seek(2, librevenge::RVNG_SEEK_CUR);
+      pItem.reset(new StarItem(StarAttributeManager::getDummyAttribute()));
+    }
   }
   if (isDirect || (nWhich && !pItem)) {
     uint16_t nVersion;
     uint32_t nLength;
     *input >> nVersion >> nLength;
     if (nVersion) f << "vers=" << nVersion << ",";
-    bool ok=true;
     if (input->tell()+long(nLength)>endPos) {
       f << "###length=" << nLength << ",";
       STOFF_DEBUG_MSG(("StarItemPool::readItem: find bad item\n"));
-      ok=false;
     }
     else if (nLength) {
       long endAttrPos=input->tell()+long(nLength);
-      if (!readAttribute(zone, int(nWhich), (int) nVersion, endAttrPos)) {
+      shared_ptr<StarAttribute> attribute=readAttribute(zone, int(nWhich), (int) nVersion, endAttrPos);
+      pItem.reset(new StarItem(attribute));
+      if (!attribute) {
         STOFF_DEBUG_MSG(("StarItemPool::readItem: can not read an attribute\n"));
         f << "###";
       }
@@ -928,37 +1008,95 @@ bool StarItemPool::readItem(StarZone &zone, bool isDirect, long endPos)
         input->seek(endAttrPos, librevenge::RVNG_SEEK_SET);
       }
     }
-    if (ok && input->tell()>endPos) {
+    if (pItem && input->tell()>endPos) {
       f << "###,";
       STOFF_DEBUG_MSG(("StarItemPool::readItem: find bad position\n"));
-      ok=false;
+      pItem.reset();
     }
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());
-    return ok;
+    return pItem;
   }
   ascii.addPos(pos);
   ascii.addNote(f.str().c_str());
+  return pItem;
+}
+
+bool StarItemPool::loadSurrogate(StarItem &item)
+{
+  if (item.m_attribute || !item.m_pool || !item.m_which)
+    return false;
+
+  if ((item.m_which<m_state->m_verStart||item.m_which>m_state->m_verEnd)&&m_state->m_secondaryPool)
+    return m_state->m_secondaryPool->loadSurrogate(item);
+  int aWhich=(item.m_localId && m_state->m_currentVersion!=m_state->m_loadingVersion) ?
+             m_state->getWhich(item.m_which) : item.m_which;
+  StarItemPoolInternal::Values *values=m_state->getValues(aWhich);
+  if (item.m_surrogateId==0xfffe) {
+    // default
+    if (!values || !values->m_default)
+      item.m_attribute=m_state->getDefaultAttribute(aWhich);
+    else
+      item.m_attribute=values->m_default;
+    return true;
+  }
+  if (!values || item.m_surrogateId<0 || item.m_surrogateId>=(int) values->m_values.size()) {
+    STOFF_DEBUG_MSG(("StarItemPool::loadSurrogate: can not find the attribute array for %d[%d]\n", aWhich, item.m_surrogateId));
+    item.m_attribute=m_state->getDefaultAttribute(aWhich);
+    return true;
+  }
+  item.m_attribute=values->m_values[size_t(item.m_surrogateId)];
+
   return true;
 }
 
-bool StarItemPool::loadSurrogate(StarZone &zone, uint16_t &nWhich, libstoff::DebugStream &f)
+shared_ptr<StarItem> StarItemPool::loadSurrogate(StarZone &zone, uint16_t &nWhich, bool localId, libstoff::DebugStream &f)
 {
+  if ((nWhich<m_state->m_verStart||nWhich>m_state->m_verEnd)&&m_state->m_secondaryPool)
+    return m_state->m_secondaryPool->loadSurrogate(zone, nWhich, localId, f);
   // polio.cxx SfxItemPool::LoadSurrogate
   uint16_t nSurrog;
   *zone.input()>>nSurrog;
   if (nSurrog==0xffff) {
     f << "direct,";
-    return false;
+    return shared_ptr<StarItem>();
   }
   if (nSurrog==0xfff0) {
     f << "null,";
     nWhich=0;
-    return false;
+    return shared_ptr<StarItem>();
   }
-
+  if (m_state->m_loadingVersion<0) // the pool is not read, so we wait
+    return createItem(int(nWhich), (int) nSurrog, localId);
+  shared_ptr<StarItem> res(new StarItem);
+  int aWhich=(localId && m_state->m_currentVersion!=m_state->m_loadingVersion) ?
+             m_state->getWhich(nWhich) : nWhich;
+  StarItemPoolInternal::Values *values=m_state->getValues(aWhich);
+  if (nSurrog==0xfffe) {
+    f << "default,";
+    if (!values || !values->m_default) {
+      if (!isInside() && m_state->m_document.getAttributeManager())
+        res->m_attribute=m_state->getDefaultAttribute(aWhich);
+      else // we must wait that the pool is read
+        return createItem(int(nWhich), (int) nSurrog, localId);
+    }
+    else
+      res->m_attribute=values->m_default;
+    return res;
+  }
   f << "surrog=" << nSurrog << ",";
-  return true;
+  if (!values || nSurrog>=(int) values->m_values.size()) {
+    if (isInside()) {
+      // ok, we must wait that the pool is read
+      return createItem(int(nWhich), (int) nSurrog, localId);
+    }
+    STOFF_DEBUG_MSG(("StarItemPool::loadSurrogate: can not find the attribute array for %d\n", aWhich));
+    f << "###notFind,";
+    res->m_attribute=m_state->getDefaultAttribute(aWhich);
+    return res;
+  }
+  res->m_attribute=values->m_values[size_t(nSurrog)];
+  return res;
 }
 
 bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
@@ -1035,10 +1173,9 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
   }
   int16_t val;
   *input >> val;
-  if (val) {
+  if (val)
     f << "loadingVersion=" << val << ",";
-    m_state->m_loadingVersion=val;
-  }
+  m_state->m_loadingVersion=val;
   std::vector<uint32_t> string;
   if (!zone.readString(string)) {
     STOFF_DEBUG_MSG(("StarItemPool::readV2: can not readV2 the name\n"));
@@ -1139,16 +1276,18 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
         STOFF_DEBUG_MSG(("StarItemPool::readV2: the which value seems bad\n"));
         f << "###";
       }
-      f << "wh=" << which << ", vers=" << nVersion << ", count=" << nCount << ",";
-      static bool first=true;
-      if (first) {
-        STOFF_DEBUG_MSG(("StarItemPool::readV2: reading attribute is not implemented\n"));
-        first=false;
-      }
+      f << "wh=" << which << ",vers=" << nVersion << ",";
+      if (step==0) f << "count=" << nCount << ",";
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
       pos=input->tell();
+      shared_ptr<StarAttribute> attribute;
+      int aWhich=m_state->m_currentVersion!=m_state->m_loadingVersion ? m_state->getWhich(which) : which;
+      StarItemPoolInternal::Values *values=m_state->getValues(aWhich, true);
       if (step==0) {
+        if (!values->m_values.empty()) {
+          STOFF_DEBUG_MSG(("StarItemPool::readV2: oops, there is already some attributes in values\n"));
+        }
         StarItemPoolInternal::SfxMultiRecord mRecord1;
         f.str("");
         f << "Entries(StarAttribute):inPool,";
@@ -1162,37 +1301,53 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
           f << mRecord1;
           ascii.addPos(pos);
           ascii.addNote(f.str().c_str());
+          int id=0;
           while (mRecord1.getNewContent("StarAttribute")) {
             pos=input->tell();
             f.str("");
-            f << "StarAttribute:inPool,wh=" <<  which << ",";
+            f << "StarAttribute:inPool,wh=" <<  which << "[" << id++ << "],";
             uint16_t nRef;
             *input>>nRef;
             f << "ref=" << nRef << ",";
-            if (!readAttribute(zone, which, (int) nVersion, mRecord1.getLastContentPosition()))
+            attribute=readAttribute(zone, which, (int) nVersion, mRecord1.getLastContentPosition());
+            if (!attribute)
               f << "###";
             else if (input->tell()!=mRecord1.getLastContentPosition()) {
               STOFF_DEBUG_MSG(("StarItemPool::readV2: find extra attrib data\n"));
               f << "###extra";
             }
+            values->m_values.push_back(attribute);
             input->seek(mRecord1.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
             ascii.addPos(pos);
             ascii.addNote(f.str().c_str());
           }
           mRecord1.close("StarAttribute");
+          if (values->m_values.size() != size_t(nCount) && m_state->m_document.getAttributeManager()) {
+            // poolio.cxx increase the list with (SfxPoolItem *)0
+            attribute=m_state->m_document.getAttributeManager()->getDefaultAttribute(aWhich);
+            while (values->m_values.size() < size_t(nCount))
+              values->m_values.push_back(attribute);
+          }
         }
       }
       else {
-        if (!readAttribute(zone, which, (int) nVersion, mRecord.getLastContentPosition())) {
+        if (values->m_default) {
+          STOFF_DEBUG_MSG(("StarItemPool::readV2: the default slot %d is already created\n", aWhich));
+        }
+        attribute=readAttribute(zone, which, (int) nVersion, mRecord.getLastContentPosition());
+        if (!attribute) {
           f.str("");
           f << "Entries(StarAttribute)[" <<  which << "]:";
           ascii.addPos(pos);
           ascii.addNote(f.str().c_str());
         }
-        else if (input->tell()!=mRecord.getLastContentPosition()) {
-          STOFF_DEBUG_MSG(("StarItemPool::readV2: find extra attrib data\n"));
-          ascii.addPos(pos);
-          ascii.addNote("extra###");
+        else {
+          values->m_default=attribute;
+          if (input->tell()!=mRecord.getLastContentPosition()) {
+            STOFF_DEBUG_MSG(("StarItemPool::readV2: find extra attrib data\n"));
+            ascii.addPos(pos);
+            ascii.addNote("extra###");
+          }
         }
       }
       input->seek(mRecord.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
@@ -1448,7 +1603,18 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
       f << "wh=" << which << "[" << std::hex << nSlot << std::dec << "], vers=" << nVersion << ", count=" << nCount << ",";
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
-
+      int aWhich=m_state->m_currentVersion!=m_state->m_loadingVersion ? m_state->getWhich(which) : which;
+      StarItemPoolInternal::Values *values=m_state->getValues(aWhich, true);
+      if (step==0 && nCount) {
+        if (!values->m_values.empty()) {
+          STOFF_DEBUG_MSG(("StarItemPool::readV1: the slot %d is already created\n", aWhich));
+        }
+      }
+      else if (step==1) {
+        if (values->m_default) {
+          STOFF_DEBUG_MSG(("StarItemPool::readV1: the default slot %d is already created\n", aWhich));
+        }
+      }
       for (int i=0; i<nCount; ++i) {
         long debAttPos=(step==0 ? input->tell() : pos);
         pos=input->tell();
@@ -1465,9 +1631,12 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
           break;
         }
         long endAttPos=debAttPos+(long)sizeAttr[n];
+        shared_ptr<StarAttribute> attribute;
         if (input->tell()==endAttPos) {
           ascii.addPos(pos);
           ascii.addNote(f.str().c_str());
+          if (step==0)
+            values->m_values.push_back(attribute);
           continue;
         }
 
@@ -1477,9 +1646,14 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
           f << "ref=" << nRef << ",";
         }
         if (nRef) {
-          if (!readAttribute(zone, which, (int) nVersion, debAttPos+(long) sizeAttr[n]))
+          attribute=readAttribute(zone, which, (int) nVersion, debAttPos+(long) sizeAttr[n]);
+          if (!attribute)
             f << "###";
         }
+        if (step==0)
+          values->m_values.push_back(attribute);
+        else
+          values->m_default=attribute;
         if (input->tell()!=debAttPos+(long)sizeAttr[n]) {
           STOFF_DEBUG_MSG(("StarItemPool::readV1: find extra attrib data\n"));
           f << "###extra,";
@@ -1662,7 +1836,8 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
     }
     if (nHelpId) f << "help[id]=" << nHelpId << ",";
     std::vector<STOFFVec2i> limits; // unknown
-    if (!doc.readItemSet(zone, limits, lastPos, pool.get(), false)) {
+    std::vector<shared_ptr<StarItem> > itemList;
+    if (!doc.readItemSet(zone, limits, lastPos, itemList, pool.get(), false)) {
       f << "###itemList";
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());

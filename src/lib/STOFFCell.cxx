@@ -341,8 +341,7 @@ void STOFFCell::addTo(librevenge::RVNGPropertyList &propList) const
   propList.insert("table:number-columns-spanned", numSpannedCells()[0]);
   propList.insert("table:number-rows-spanned", numSpannedCells()[1]);
 
-  if (m_fontSet)
-    m_font.addTo(propList);
+  m_font.addTo(propList);
   for (size_t c = 0; c < m_bordersList.size(); c++) {
     switch (c) {
     case libstoff::Left:
@@ -464,7 +463,6 @@ std::ostream &operator<<(std::ostream &o, STOFFCell const &cell)
   if (cell.m_bdSize[0]>0 || cell.m_bdSize[1]>0)
     o << "bdSize=" << cell.m_bdSize << ",";
   o << cell.m_format;
-  if (cell.m_fontSet) o << "hasFont,";
   switch (cell.m_hAlign) {
   case STOFFCell::HALIGN_LEFT:
     o << "left,";

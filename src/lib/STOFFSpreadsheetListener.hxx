@@ -128,11 +128,11 @@ public:
   /** closes this sheet */
   void closeSheet();
   /** open a row with given height ( if h < 0.0, set min-row-height = -h )*/
-  void openSheetRow(float h, librevenge::RVNGUnit unit);
+  void openSheetRow(float h, librevenge::RVNGUnit unit, int numRepeated=1);
   /** closes this row */
   void closeSheetRow();
   /** open a cell */
-  void openSheetCell(STOFFCell const &cell, STOFFCellContent const &content);
+  void openSheetCell(STOFFCell const &cell, STOFFCellContent const &content, int numRepeated=1);
   /** close a cell */
   void closeSheetCell();
 

@@ -175,7 +175,8 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
     if (styleFamily) f << "styleFam=" << styleFamily << ",";
     std::vector<STOFFVec2i> limits;
     limits.push_back(STOFFVec2i(3989, 4033)); // EE_PARA_START 4033: EE_CHAR_END
-    if (!readItemSet(zone, limits, lastPos, pool.get(), false) || input->tell()>lastPos) {
+    std::vector<shared_ptr<StarItem> > itemList;
+    if (!readItemSet(zone, limits, lastPos, itemList, pool.get(), false) || input->tell()>lastPos) {
       STOFF_DEBUG_MSG(("StarObjectSmallText::read: can not read item list\n"));
       f << "###item list,";
       ascFile.addPos(pos);

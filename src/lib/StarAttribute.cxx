@@ -39,9 +39,12 @@
 
 #include <librevenge/librevenge.h>
 
+#include "STOFFFont.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
+
 #include "StarBitmap.hxx"
+#include "StarItemPool.hxx"
 #include "StarObject.hxx"
 #include "StarObjectSmallText.hxx"
 #include "StarObjectText.hxx"
@@ -120,6 +123,13 @@ public:
     ascFile.addNote(f.str().c_str());
     return pos+1<=endPos;
   }
+  //! debug function to print the data
+  virtual void print(std::ostream &o) const
+  {
+    o << m_debugName;
+    if (m_value) o << "=true";
+    o << ",";
+  }
 protected:
   //! copy constructor
   StarAttributeBool(StarAttributeBool const &orig) : StarAttribute(orig), m_value(orig.m_value)
@@ -159,6 +169,14 @@ public:
     ascFile.addNote(f.str().c_str());
     return input->tell()<=endPos;
   }
+  //! debug function to print the data
+  virtual void print(std::ostream &o) const
+  {
+    o << m_debugName;
+    if (m_value) o << "=" << m_value;
+    o << ",";
+  }
+
 protected:
   //! copy constructor
   StarAttributeInt(StarAttributeInt const &orig) : StarAttribute(orig), m_value(orig.m_value), m_intSize(orig.m_intSize)
@@ -199,6 +217,44 @@ public:
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
     return input->tell()<=endPos;
+  }
+  //! add to a font
+  virtual void addTo(STOFFFont &font) const
+  {
+    if (m_type==StarAttribute::ATTR_CHR_CROSSEDOUT) {
+      switch (m_value) {
+      case 0: // break
+        break;
+      case 1: // single
+      case 2: // double
+        font.m_propertyList.insert("style:text-line-through", m_value==1 ? "single" : "double");
+        font.m_propertyList.insert("style:text-line-through-style", "solid");
+        break;
+      case 3: // dontknow
+        break;
+      case 4: // bold
+        font.m_propertyList.insert("style:text-line-through", "single");
+        font.m_propertyList.insert("style:text-line-through-style", "solid");
+        font.m_propertyList.insert("style:text-line-through-width", "thick");
+        break;
+      case 5: // slash
+      case 6: // X
+        font.m_propertyList.insert("style:text-line-through", "single");
+        font.m_propertyList.insert("style:text-line-through-style", "solid");
+        font.m_propertyList.insert("style:text-line-through-text", m_value==5 ? "/" : "X");
+        break;
+      default:
+        STOFF_DEBUG_MSG(("StarAttributeUInternal::StarAttributeUInt: find unknown crossedout enum=%d\n", m_value));
+        break;
+      }
+    }
+  }
+  //! debug function to print the data
+  virtual void print(std::ostream &o) const
+  {
+    o << m_debugName;
+    if (m_value) o << "=" << m_value;
+    o << ",";
   }
 protected:
   //! copy constructor
@@ -241,6 +297,13 @@ public:
     ascFile.addNote(f.str().c_str());
     return input->tell()<=endPos;
   }
+  //! debug function to print the data
+  virtual void print(std::ostream &o) const
+  {
+    o << m_debugName;
+    if (m_value<0 || m_value>0) o << "=" << m_value;
+    o << ",";
+  }
 protected:
   //! copy constructor
   StarAttributeDouble(StarAttributeDouble const &orig) : StarAttribute(orig), m_value(orig.m_value)
@@ -273,7 +336,7 @@ public:
     f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName;
     bool ok=input->readColor(m_value);
     if (!ok) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a color\n"));
+      STOFF_DEBUG_MSG(("StarAttributeInternal::StarAttributeColor::read: can not read a color\n"));
       f << ",###color,";
     }
     else if (m_value!=m_defValue)
@@ -283,6 +346,17 @@ public:
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
     return ok && input->tell()<=endPos;
+  }
+  //! add to a font
+  virtual void addTo(STOFFFont &font) const
+  {
+    if (m_type==StarAttribute::ATTR_CHR_COLOR)
+      font.m_propertyList.insert("fo:color", m_value.str().c_str());
+  }
+  //! debug function to print the data
+  virtual void print(std::ostream &o) const
+  {
+    o << m_debugName << "[col=" << m_value << "],";
   }
 protected:
   //! copy constructor
@@ -301,13 +375,80 @@ class StarAttributeItemSet : public StarAttribute
 public:
   //! constructor
   StarAttributeItemSet(Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits) :
-    StarAttribute(type, debugName), m_limits(limits)
+    StarAttribute(type, debugName), m_limits(limits), m_itemList()
   {
   }
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
     return shared_ptr<StarAttribute>(new StarAttributeItemSet(*this));
+  }
+  //! add to a font
+  virtual void addTo(STOFFFont &font) const
+  {
+    for (size_t i=0; i<m_itemList.size(); ++i) {
+      if (m_itemList[i] && m_itemList[i]->m_attribute)
+        m_itemList[i]->m_attribute->addTo(font);
+    }
+  }
+
+  //! read a zone
+  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &object)
+  {
+    STOFFInputStreamPtr input=zone.input();
+    long pos=input->tell();
+    libstoff::DebugFile &ascFile=zone.ascii();
+    libstoff::DebugStream f;
+    f << "StarAttribute[" << zone.getRecordLevel() << "]:" << m_debugName << ",";
+    bool ok=object.readItemSet(zone, m_limits, endPos, m_itemList, object.getCurrentPool(false).get());
+    if (!ok) f << "###";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return ok && input->tell()<=endPos;
+  }
+  //! debug function to print the data
+  virtual void print(std::ostream &o) const
+  {
+    o << m_debugName;
+    if (!m_itemList.empty()) {
+      o << "[";
+      for (size_t i=0; i<m_itemList.size(); ++i) {
+        if (m_itemList[i] && m_itemList[i]->m_attribute)
+          m_itemList[i]->m_attribute->print(o);
+        else
+          o << "_";
+        o << ",";
+      }
+      o << "]";
+    }
+    o << ",";
+  }
+
+protected:
+  //! copy constructor
+  StarAttributeItemSet(StarAttributeItemSet const &orig) : StarAttribute(orig), m_limits(orig.m_limits), m_itemList()
+  {
+  }
+  //! the pool limits id
+  std::vector<STOFFVec2i> m_limits;
+  //! the list of items
+  std::vector<shared_ptr<StarItem> > m_itemList;
+};
+
+//! SCPattern attribute of StarAttributeInternal
+class StarAttributeSCPattern : public StarAttributeItemSet
+{
+public:
+  //! constructor
+  StarAttributeSCPattern() :
+    StarAttributeItemSet(StarAttribute::ATTR_SC_PATTERN, "ScPattern", std::vector<STOFFVec2i>()), m_style("")
+  {
+    m_limits.push_back(STOFFVec2i(100,148));
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarAttributeSCPattern(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &object)
@@ -317,20 +458,44 @@ public:
     libstoff::DebugFile &ascFile=zone.ascii();
     libstoff::DebugStream f;
     f << "StarAttribute[" << zone.getRecordLevel() << "]:" << m_debugName << ",";
-    bool ok=object.readItemSet(zone, m_limits, endPos, object.getCurrentPool().get());
+    // sc_patattr.cxx ScPatternAttr::Create
+    bool hasStyle;
+    *input>>hasStyle;
+    if (hasStyle) {
+      f << "hasStyle,";
+      std::vector<uint32_t> text;
+      if (!zone.readString(text)) {
+        STOFF_DEBUG_MSG(("StarAttributeManagerInternal::StarAttributeSCPattern::read: can not read a name\n"));
+        f << "###name,";
+        return false;
+      }
+      else if (!text.empty()) {
+        m_style=libstoff::getString(text);
+        f << "name=" << m_style.cstr() << ",";
+      }
+      input->seek(2, librevenge::RVNG_SEEK_CUR);
+    }
+    bool ok=object.readItemSet(zone, m_limits, endPos, m_itemList, object.getCurrentPool(false).get());
     if (!ok) f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
     return ok && input->tell()<=endPos;
   }
-
+  //! debug function to print the data
+  virtual void print(std::ostream &o) const
+  {
+    StarAttributeItemSet::print(o);
+    if (m_style.empty())
+      return;
+    o << "style=" << m_style.cstr() << ",";
+  }
 protected:
   //! copy constructor
-  StarAttributeItemSet(StarAttributeItemSet const &orig) : StarAttribute(orig), m_limits(orig.m_limits)
+  StarAttributeSCPattern(StarAttributeSCPattern const &orig) : StarAttributeItemSet(orig), m_style(orig.m_style)
   {
   }
-  //! the pool limits id
-  std::vector<STOFFVec2i> m_limits;
+  //! the style
+  librevenge::RVNGString m_style;
 };
 
 ////////////////////////////////////////
@@ -471,7 +636,6 @@ void State::initAttributeMap()
     addAttributeBool(StarAttribute::Type(type), s.str(), false);
   }
   // --- sc --- sc_docpool.cxx
-
   addAttributeVoid(StarAttribute::ATTR_SC_USERDEF, "sc[userDef]");
   addAttributeBool(StarAttribute::ATTR_SC_HYPHENATE,"hyphenate", false);
   addAttributeUInt(StarAttribute::ATTR_SC_HORJUSTIFY,"justify[horz]",2,0); // standart
@@ -488,6 +652,7 @@ void State::initAttributeMap()
   addAttributeUInt(StarAttribute::ATTR_SC_LANGUAGE_FORMAT,"char[language]",2,0x3ff); // in fact, global language
   addAttributeUInt(StarAttribute::ATTR_SC_VALIDDATA,"data[valid]",4,0);
   addAttributeUInt(StarAttribute::ATTR_SC_CONDITIONAL,"conditional",4,0);
+  m_whichToAttributeMap[StarAttribute::ATTR_SC_PATTERN]=shared_ptr<StarAttribute>(new StarAttributeSCPattern());
 
   addAttributeUInt(StarAttribute::ATTR_SC_PAGE_PAPERTRAY,"page[papertray]",2,0);
   addAttributeBool(StarAttribute::ATTR_SC_PAGE_HORCENTER,"page[horizontal,center]", false);
@@ -933,7 +1098,24 @@ StarAttributeManager::~StarAttributeManager()
 {
 }
 
-bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, long lastPos, StarObject &object)
+shared_ptr<StarAttribute> StarAttributeManager::getDummyAttribute(int id)
+{
+  if (id<=0)
+    return shared_ptr<StarAttribute>(new StarAttributeInternal::StarAttributeVoid(StarAttribute::ATTR_CHR_DUMMY1, "unknownAttribute"));
+  std::stringstream s;
+  s << "attrib" << id;
+  return shared_ptr<StarAttribute>(new StarAttributeInternal::StarAttributeVoid(StarAttribute::ATTR_CHR_DUMMY1, s.str()));
+}
+
+shared_ptr<StarAttribute> StarAttributeManager::getDefaultAttribute(int nWhich)
+{
+  if (m_state->m_whichToAttributeMap.find(nWhich)!=m_state->m_whichToAttributeMap.end() &&
+      m_state->m_whichToAttributeMap.find(nWhich)->second)
+    return m_state->m_whichToAttributeMap.find(nWhich)->second->create();
+  return getDummyAttribute();
+}
+
+shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, long lastPos, StarObject &object)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -949,9 +1131,9 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       f << "###bad";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      return false;
+      return shared_ptr<StarAttribute>();
     }
-    return true;
+    return attrib;
   }
 
   int val;
@@ -1767,33 +1949,6 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     }
     break;
   }
-  case StarAttribute::ATTR_SC_PATTERN: {
-    f << "pattern,";
-    // sc_patattr.cxx ScPatternAttr::Create
-    bool hasStyle;
-    *input>>hasStyle;
-    if (hasStyle) {
-      f << "hasStyle,";
-      std::vector<uint32_t> text;
-      if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a name\n"));
-        f << "###name,";
-        break;
-      }
-      else if (!text.empty())
-        f << "name=" << libstoff::getString(text).cstr() << ",";
-      input->seek(2, librevenge::RVNG_SEEK_CUR);
-    }
-
-    std::vector<STOFFVec2i> limits;
-    limits.push_back(STOFFVec2i(100, 148)); // ATTR_PATTERN_START, ATTR_PATTERN_END
-    if (!object.readItemSet(zone, limits, lastPos, object.getCurrentPool().get())) {
-      f << "###itemSet";
-      input->seek(lastPos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    break;
-  }
   case StarAttribute::ATTR_SC_PAGE: {
     // svx_pageitem.cxx SvxPageItem::Create
     f << "page,";
@@ -1867,7 +2022,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
           nWhich==StarAttribute::ATTR_SC_PAGE_HEADERRIGHT ? "header[right]" : "footer[right]") << ",";
     for (int i=0; i<3; ++i) {
       long actPos=input->tell();
-      StarObjectSmallText smallText(object, false); // checkme
+      StarObjectSmallText smallText(object, true);
       if (!smallText.read(zone, lastPos) || input->tell()>lastPos) {
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a text object\n"));
         ascFile.addPos(actPos);
@@ -1978,7 +2133,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
     f << "eeFeatureField,vers=" << nVers << ",";
     // svx_flditem.cxx SvxFieldItem::Create
     if (!object.readPersistData(zone, lastPos)) break;
-    return true;
+    return getDummyAttribute(nWhich);
   }
 
   case StarAttribute::ATTR_SCH_SYMBOL_SIZE:
@@ -2252,6 +2407,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
       f << coord << (i==2 ? "," : "x");
     }
     break;
+  case StarAttribute::ATTR_SPECIAL:
   default:
     STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: reading not format attribute is not implemented\n"));
     f << "#unimplemented[wh=" << std::hex << nWhich << std::dec << ",";
@@ -2263,7 +2419,7 @@ bool StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, 
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  return true;
+  return getDummyAttribute(nWhich); // fixme
 }
 
 bool StarAttributeManager::readBrushItem(StarZone &zone, int nVers, long /*endPos*/, StarObject &/*object*/, libstoff::DebugStream &f)

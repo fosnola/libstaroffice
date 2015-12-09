@@ -100,15 +100,16 @@ public:
       \note if isInside is set only look for inside pool
    */
   shared_ptr<StarItemPool> findItemPool(StarItemPool::Type type, bool isInside);
-  //! returns the current inside pool
-  shared_ptr<StarItemPool> getCurrentPool();
+  //! returns the current all/inside pool
+  shared_ptr<StarItemPool> getCurrentPool(bool onlyInside=true);
 
   //! try to read persist data
   bool readPersistData(StarZone &zone, long endPos);
   //! try to read a spreadshet style zone: SfxStyleSheets
   bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name);
   //! try to read a list of item
-  bool readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &limits, long endPos, StarItemPool *pool=0, bool isDirect=false);
+  bool readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &limits, long endPos,
+                   std::vector<shared_ptr<StarItem> > &listItems, StarItemPool *pool=0, bool isDirect=false);
 protected:
   //!  the "persist elements" small ole: the list of object
   bool readPersistElements(STOFFInputStreamPtr input, std::string const &name);

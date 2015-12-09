@@ -45,11 +45,13 @@
 
 namespace StarObjectSpreadsheetInternal
 {
+class Cell;
 class Table;
 
 struct State;
 }
 
+class StarAttribute;
 class StarZone;
 
 /** \brief the main class to read a StarOffice sdc file
@@ -68,6 +70,12 @@ public:
   bool parse();
   //! try to send the spreadsheet
   bool send(STOFFSpreadsheetListenerPtr listener);
+  /** try to send a spreadsheet row.
+
+   \note this function does not call openSheetRow,closeSheetRow */
+  bool sendRow(int table, int row, STOFFSpreadsheetListenerPtr listener);
+  /** try to send a cell */
+  bool sendCell(StarObjectSpreadsheetInternal::Cell &cell, StarAttribute *attrib, int table, int numRepeated, STOFFSpreadsheetListenerPtr listener);
 protected:
   //
   // data

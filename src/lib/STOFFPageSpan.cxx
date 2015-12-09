@@ -100,7 +100,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType ty
 STOFFHeaderFooter::STOFFHeaderFooter(STOFFHeaderFooter::Type const type, STOFFHeaderFooter::Occurrence const occurrence) :
   m_type(type), m_occurrence(occurrence), m_height(0),
   m_pageNumberPosition(STOFFHeaderFooter::None), m_pageNumberType(libstoff::ARABIC),
-  m_pageNumberFont("Geneva",12), m_subDocument()
+  m_pageNumberFont(), m_subDocument()
 {
 }
 

@@ -128,7 +128,7 @@ public:
 
   //! constructor
   STOFFCell() : m_position(0,0), m_numberCellSpanned(1,1), m_bdBox(),  m_bdSize(),
-    m_format(), m_font("Geneva",12), m_fontSet(false), m_hAlign(HALIGN_DEFAULT), m_vAlign(VALIGN_DEFAULT),
+    m_format(), m_font(), m_hAlign(HALIGN_DEFAULT), m_vAlign(VALIGN_DEFAULT),
     m_backgroundColor(STOFFColor::white()), m_protected(false),
     m_bordersList(), m_extraLine(E_None), m_extraLineType() { }
 
@@ -219,21 +219,15 @@ public:
     m_format=format;
   }
 
-  //! returns true if the font has been set
-  bool isFontSet() const
-  {
-    return m_fontSet;
-  }
   //! returns the font
   STOFFFont getFont() const
   {
     return m_font;
   }
   //! sets the fonts
-  void setFont(STOFFFont const &font, bool isDefault=false)
+  void setFont(STOFFFont const &font)
   {
     m_font=font;
-    m_fontSet=!isDefault;
   }
 
   //! returns true if the cell is protected
@@ -333,8 +327,6 @@ protected:
   Format m_format;
   //! the cell font
   STOFFFont m_font;
-  //! a flag to know if the font has been set
-  bool m_fontSet;
   //! the cell alignment : by default nothing
   HorizontalAlignment m_hAlign;
   //! the vertical cell alignment : by default nothing

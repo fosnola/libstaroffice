@@ -35,6 +35,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <set>
 #include <sstream>
 
 #include <librevenge/librevenge.h>
@@ -238,7 +239,8 @@ private:
 };
 
 //! Internal: the cell of a StarObjectSpreadsheet
-struct Cell : public STOFFCell {
+class Cell : public STOFFCell
+{
 public:
   //! constructor
   Cell(STOFFVec2i pos=STOFFVec2i(0,0)) : STOFFCell(), m_content(), m_textZone(), m_hasNote(false)
@@ -254,12 +256,51 @@ public:
 };
 
 ////////////////////////////////////////
+//! Internal: structure used to store a row of a StarObjectSpreadsheet
+class RowContent
+{
+public:
+  //! constructor
+  RowContent() : m_colToCellMap(), m_colToAttributeMap()
+  {
+  }
+  //! try to compress the item list and create a attribute list
+  void compressItemList()
+  {
+    std::map<STOFFVec2i,shared_ptr<StarAttribute> > oldMap=m_colToAttributeMap;
+    std::map<STOFFVec2i,shared_ptr<StarAttribute> >::const_iterator it=oldMap.begin();
+    m_colToAttributeMap.clear();
+
+    shared_ptr<StarAttribute> actAttribute;
+    STOFFVec2i actPos(0,-1);
+    while (it!=oldMap.end()) {
+      // first check for not filled row
+      shared_ptr<StarAttribute> newAttrib=it->second;
+      if (it->first[0]!=actPos[1]+1 || newAttrib.get()!=actAttribute.get()) {
+        if (actAttribute)
+          m_colToAttributeMap[actPos]=actAttribute;
+        actAttribute=newAttrib;
+        actPos=STOFFVec2i(it->first[0], it->first[0]-1);
+      }
+      actPos[1]=it->first[1];
+      ++it;
+    }
+    if (actAttribute)
+      m_colToAttributeMap[actPos]=actAttribute;
+  }
+  //! map col -> cell
+  std::map<int, shared_ptr<Cell> > m_colToCellMap;
+  //! map col -> attribute
+  std::map<STOFFVec2i, shared_ptr<StarAttribute> > m_colToAttributeMap;
+};
+
+////////////////////////////////////////
 //! Internal: a table of a StarObjectSpreadsheet
 class Table : public STOFFTable
 {
 public:
   //! constructor
-  Table(int loadingVers, int maxRow) : m_loadingVersion(loadingVers), m_name(""), m_maxRow(maxRow), m_colWidthList(), m_rowHeightList(), m_rowToColToCellMap()
+  Table(int loadingVers, int maxRow) : m_loadingVersion(loadingVers), m_name(""), m_maxRow(maxRow), m_colWidthList(), m_rowHeightMap(), m_rowToRowContentMap()
   {
   }
   //! returns the load version
@@ -286,6 +327,66 @@ public:
       res[i]=(float) m_colWidthList[i]/1440.f;
     return res;
   }
+  //! returns the row size in point
+  float getRowHeight(int row) const
+  {
+    std::map<STOFFVec2i,int>::const_iterator rIt=m_rowHeightMap.lower_bound(STOFFVec2i(-1,row));
+    if (rIt!=m_rowHeightMap.end() && rIt->first[0]<=row && rIt->first[1]>=row)
+      return float(rIt->second)/20.f;
+    return (float) 12;
+  }
+  //! returns a row content
+  RowContent *getRow(int row)
+  {
+    std::map<STOFFVec2i, RowContent>::iterator it=m_rowToRowContentMap.lower_bound(STOFFVec2i(-1,row));
+    if (it!=m_rowToRowContentMap.end() && it->first[0]<=row && row<=it->first[1])
+      return &it->second;
+    return 0;
+  }
+  //! create a block of rows(if not created)
+  void updateRowsBlocks(STOFFVec2i const &rows)
+  {
+    std::map<STOFFVec2i, RowContent>::iterator it=m_rowToRowContentMap.lower_bound(STOFFVec2i(-1,rows[0]));
+    if (it==m_rowToRowContentMap.end()) {
+      m_rowToRowContentMap[rows]=RowContent();
+      return;
+    }
+    if (it->first[0]<rows[0]) { // we must split this set of rows
+      STOFFVec2i oldRows=it->first;
+      RowContent const &content=it->second;
+      m_rowToRowContentMap[STOFFVec2i(oldRows[0],rows[0]-1)]=content;
+      m_rowToRowContentMap[STOFFVec2i(rows[0],oldRows[1])]=content;
+      m_rowToRowContentMap.erase(oldRows);
+    }
+    int actRow=rows[0];
+    while (actRow<=rows[1]) {
+      it=m_rowToRowContentMap.lower_bound(STOFFVec2i(-1,actRow));
+      if (it==m_rowToRowContentMap.end()) {
+        m_rowToRowContentMap[STOFFVec2i(actRow,rows[1])]=RowContent();
+        break;
+      }
+      if (it->first[0]!=actRow) {
+        if (it->first[0]-1<=rows[1]) {
+          m_rowToRowContentMap[STOFFVec2i(actRow,it->first[0]-1)]=RowContent();
+          actRow=it->first[0];
+          continue;
+        }
+        m_rowToRowContentMap[STOFFVec2i(actRow,rows[1])]=RowContent();
+        break;
+      }
+      if (it->first[1]<=rows[1]) {
+        actRow=it->first[1]+1;
+        continue;
+      }
+      // we must split the last row
+      STOFFVec2i oldRows=it->first;
+      RowContent const &content=it->second;
+      m_rowToRowContentMap[STOFFVec2i(oldRows[0],rows[1])]=content;
+      m_rowToRowContentMap[STOFFVec2i(rows[1]+1,oldRows[1])]=content;
+      m_rowToRowContentMap.erase(oldRows);
+      break;
+    }
+  }
   //! returns a cell corresponding to a position
   Cell &getCell(STOFFVec2i const &pos)
   {
@@ -294,15 +395,14 @@ public:
       static Cell badCell;
       return badCell;
     }
-    if (m_rowToColToCellMap.find(pos[1])==m_rowToColToCellMap.end())
-      m_rowToColToCellMap[pos[1]]=std::map<int, shared_ptr<Cell> >();
-    std::map<int, shared_ptr<Cell> > &row=m_rowToColToCellMap.find(pos[1])->second;
-    if (row.find(pos[0]) == row.end() || !row.find(pos[0])->second) {
+    updateRowsBlocks(STOFFVec2i(pos[1],pos[1]));
+    RowContent *row=getRow(pos[1]);
+    if (row->m_colToCellMap.find(pos[0]) == row->m_colToCellMap.end() || !row->m_colToCellMap.find(pos[0])->second) {
       shared_ptr<Cell> newCell(new Cell(pos));
-      row.insert(std::map<int, shared_ptr<Cell> >::value_type(pos[0],newCell));
+      row->m_colToCellMap.insert(std::map<int, shared_ptr<Cell> >::value_type(pos[0],newCell));
       return *newCell;
     }
-    return *(row.find(pos[0])->second);
+    return *(row->m_colToCellMap.find(pos[0])->second);
   }
 
   //! the loading version
@@ -313,21 +413,23 @@ public:
   int m_maxRow;
   //! the columns width
   std::vector<int> m_colWidthList;
-  //! the rows heights
-  std::vector<int> m_rowHeightList;
-  //! map row -> col -> cell
-  std::map<int, std::map<int, shared_ptr<Cell> > > m_rowToColToCellMap;
+  //! the rows heights in TWIP
+  std::map<STOFFVec2i, int> m_rowHeightMap;
+  //! map (min row, max row) -> rowContent
+  std::map<STOFFVec2i, RowContent> m_rowToRowContentMap;
 };
 
 ////////////////////////////////////////
 //! Internal: the state of a StarObjectSpreadsheet
 struct State {
   //! constructor
-  State() : m_tableList()
+  State() : m_tableList(), m_sheetNames()
   {
   }
   //! the actual table
   std::vector<shared_ptr<Table> > m_tableList;
+  //! the sheet names
+  std::vector<librevenge::RVNGString> m_sheetNames;
 };
 
 }
@@ -355,12 +457,12 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
     return false;
   }
   // first creates the list of sheet names
-  std::vector<librevenge::RVNGString> sheetNames;
+  m_state->m_sheetNames.clear();
   for (size_t t=0; t<m_state->m_tableList.size(); ++t) {
     if (!m_state->m_tableList[t])
-      sheetNames.push_back("");
+      m_state->m_sheetNames.push_back("");
     else
-      sheetNames.push_back(m_state->m_tableList[t]->m_name);
+      m_state->m_sheetNames.push_back(m_state->m_tableList[t]->m_name);
   }
 
   for (size_t t=0; t<m_state->m_tableList.size(); ++t) {
@@ -368,37 +470,118 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
     StarObjectSpreadsheetInternal::Table &sheet=*m_state->m_tableList[t];
     listener->openSheet(sheet.getColWidths(), librevenge::RVNG_INCH, sheet.m_name);
 
-    int prevRow = -1;
-    std::map<int, std::map<int, shared_ptr<StarObjectSpreadsheetInternal::Cell> > >::iterator rIt;
-    std::map<int, shared_ptr<StarObjectSpreadsheetInternal::Cell> >::iterator cellIt;
-    for (rIt=sheet.m_rowToColToCellMap.begin(); rIt!=sheet.m_rowToColToCellMap.end(); ++rIt) {
-      int row=rIt->first;
-      while (row > prevRow) {
-        if (prevRow != -1)
-          listener->closeSheetRow();
-        ++prevRow;
-        if (prevRow>=0 && prevRow<(int)sheet.m_rowHeightList.size())
-          listener->openSheetRow(float(sheet.m_rowHeightList[size_t(prevRow)])/1440.f, librevenge::RVNG_INCH);
-        else
-          listener->openSheetRow(12, librevenge::RVNG_POINT);
-      }
-      for (cellIt=rIt->second.begin(); cellIt!=rIt->second.end(); ++cellIt) {
-        if (!cellIt->second) continue;
-        StarObjectSpreadsheetInternal::Cell &cell=*cellIt->second;
-        if (!cell.m_content.m_formula.empty())
-          StarCellFormula::updateFormula(cell.m_content, sheetNames, int(t));
-        listener->openSheetCell(cell, cell.m_content);
-        if (cell.m_content.m_contentType==STOFFCellContent::C_TEXT_BASIC)
-          listener->insertUnicodeList(cell.m_content.m_text);
-        else if (cell.m_content.m_contentType==STOFFCellContent::C_TEXT && cell.m_textZone)
-          cell.m_textZone->send(listener);
-        listener->closeSheetCell();
-      }
+    /* create a set to know which row needed to be send, each value of
+       the set corresponding to a position where the rows change
+       excepted the last position */
+    std::set<int> newRowSet;
+    for (std::map<STOFFVec2i, StarObjectSpreadsheetInternal::RowContent>::iterator it=sheet.m_rowToRowContentMap.begin();
+         it!=sheet.m_rowToRowContentMap.end(); ++it) {
+      STOFFVec2i rows=it->first;
+      newRowSet.insert(rows[0]);
+      newRowSet.insert(rows[1]+1);
     }
-    if (prevRow!=-1) listener->closeSheetRow();
+    for (std::map<STOFFVec2i,int>::const_iterator it=sheet.m_rowHeightMap.begin();
+         it!=sheet.m_rowHeightMap.end(); ++it) {
+      STOFFVec2i rows=it->first;
+      newRowSet.insert(rows[0]);
+      newRowSet.insert(rows[1]+1);
+    }
+
+    std::map<int, shared_ptr<StarObjectSpreadsheetInternal::Cell> >::iterator cellIt;
+    for (std::set<int>::const_iterator it=newRowSet.begin(); it!=newRowSet.end();) {
+      int row=*(it++);
+      if (row<0) {
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::sendSpreadsheet: find a negative row %d\n", row));
+        continue;
+      }
+      if (it==newRowSet.end())
+        break;
+      listener->openSheetRow(sheet.getRowHeight(row), librevenge::RVNG_POINT, *it-row);
+      sendRow(int(t), row, listener);
+      listener->closeSheetRow();
+    }
     listener->closeSheet();
   }
 
+  return true;
+}
+
+bool StarObjectSpreadsheet::sendRow(int table, int row, STOFFSpreadsheetListenerPtr listener)
+{
+  if (!listener || table<0 || table>=(int) m_state->m_tableList.size() || !m_state->m_tableList[size_t(table)]) {
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheet::send: can not find the table %d\n", table));
+    return false;
+  }
+  StarObjectSpreadsheetInternal::Table &sheet=*m_state->m_tableList[size_t(table)];
+  StarObjectSpreadsheetInternal::RowContent *rowC=sheet.getRow(row);
+  if (!rowC) return true;
+  rowC->compressItemList();
+
+  // we need to go through the row style list and the cell list in parallel
+  bool checkStyle=false;
+  int actStyleCol=0;
+  std::map<STOFFVec2i, shared_ptr<StarAttribute> >::const_iterator sIt;
+  if (!rowC->m_colToAttributeMap.empty()) {
+    checkStyle=true;
+    sIt=rowC->m_colToAttributeMap.begin();
+    actStyleCol=sIt->first[0];
+  }
+  bool checkCell=false;
+  std::map<int, shared_ptr<StarObjectSpreadsheetInternal::Cell> >::iterator cIt;
+  if (!rowC->m_colToCellMap.empty()) {
+    checkCell=true;
+    cIt=rowC->m_colToCellMap.begin();
+  }
+
+  StarObjectSpreadsheetInternal::Cell emptyCell;
+  while (checkStyle || checkCell) {
+    int newCol=checkCell ? cIt->first : -1;
+    if (checkStyle && sIt->first[1] < actStyleCol) {
+      ++sIt;
+      checkStyle=sIt!=rowC->m_colToAttributeMap.end();
+      actStyleCol=checkStyle ? sIt->first[0] : -1;
+    }
+    if (checkStyle && (!checkCell || actStyleCol<newCol)) {
+      emptyCell.setPosition(STOFFVec2i(actStyleCol, row));
+      int numRepeated=(checkCell && newCol<=sIt->first[1]) ? newCol-actStyleCol : sIt->first[1]-actStyleCol+1;
+      sendCell(emptyCell, sIt->second ? sIt->second.get() : 0, table, numRepeated, listener);
+      actStyleCol += numRepeated;
+      continue;
+    }
+    if (!checkCell)
+      break;
+    if (checkStyle && newCol==actStyleCol) {
+      sendCell(cIt->second ? *cIt->second : emptyCell, sIt->second ? sIt->second.get() : 0, table, 1, listener);
+      ++actStyleCol;
+    }
+    else
+      sendCell(cIt->second ? *cIt->second : emptyCell, 0, table, 1, listener);
+    ++cIt;
+    checkCell=cIt!=rowC->m_colToCellMap.end();
+  }
+  return true;
+}
+
+bool StarObjectSpreadsheet::sendCell(StarObjectSpreadsheetInternal::Cell &cell, StarAttribute *attrib, int table, int numRepeated, STOFFSpreadsheetListenerPtr listener)
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheet::send: can not find the listener\n"));
+    return false;
+  }
+  if (attrib) {
+    STOFFFont font;
+    attrib->addTo(font);
+    cell.setFont(font);
+  }
+  if (!cell.m_content.m_formula.empty())
+    StarCellFormula::updateFormula(cell.m_content, m_state->m_sheetNames, table);
+
+  listener->openSheetCell(cell, cell.m_content, numRepeated);
+  if (cell.m_content.m_contentType==STOFFCellContent::C_TEXT_BASIC)
+    listener->insertUnicodeList(cell.m_content.m_text);
+  else if (cell.m_content.m_contentType==STOFFCellContent::C_TEXT && cell.m_textZone)
+    cell.m_textZone->send(listener);
+  listener->closeSheetCell();
   return true;
 }
 
@@ -1528,12 +1711,10 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
           f << val << "x" << (rep+1) << ",";
         else if (rep==1)
           f << val << ",";
-        for (int j=0; j<int(rep); ++j) {
-          if (i+j>int(rep)+table.getMaxRows())
-            break;
-          table.m_rowHeightList.push_back(int(val));
+        if (rep>0) {
+          table.m_rowHeightMap[STOFFVec2i(i,i+rep-1)]=int(val);
+          i+=int(rep);
         }
-        i+=int(rep);
       }
       f << "],row[flag]=[";
       for (int i=0; i<=table.getMaxRows();) {
@@ -1754,15 +1935,43 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
       uint16_t nCount;
       *input >> nCount;
       f << "n=" << nCount << ",";
-      shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_SpreadsheetPool); // FIXME
+      shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_SpreadsheetPool, false);
+      if (!pool) {
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCColumn:can not read the spreadsheet pool, create a new one\n"));
+        pool=getNewItemPool(StarItemPool::T_SpreadsheetPool);
+      }
       f << "attrib=[";
-      for (int i=0; i<nCount; ++i) {
-        f << input->readULong(2) << ":";
-        uint16_t nWhich=149; // ATTR_PATTERN
-        if (!pool->loadSurrogate(zone, nWhich, f) || input->tell()>endDataPos) {
+#if 0
+      std::cerr << "Attrib\n";
+#endif
+      for (int i=0,row=0; i<nCount; ++i) {
+        int newRow=(int) input->readULong(2);
+        f << newRow << ":";
+        uint16_t nWhich=149; // StarAttribute::ATTR_SC_PATTERN;
+        shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
+        if (!item || input->tell()>endDataPos) {
           STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCColumn:can not read a attrib\n"));
           f << "###attrib";
           break;
+        }
+        if (!item->m_attribute) {
+          row=newRow+1;
+          continue;
+        }
+#if 0
+        std::cerr << "\t" << STOFFVec2i(row, newRow) << ":" ;
+        item->m_attribute->print(std::cerr);
+        std::cerr << "\n";
+#endif
+        if (newRow>=row) {
+          table.updateRowsBlocks(STOFFVec2i(row, newRow));
+          std::map<STOFFVec2i, StarObjectSpreadsheetInternal::RowContent>::iterator it=
+            table.m_rowToRowContentMap.lower_bound(STOFFVec2i(-1,row));
+          while (it!=table.m_rowToRowContentMap.end() && it->first[1]<=newRow) {
+            it->second.m_colToAttributeMap[STOFFVec2i(column, column)]=item->m_attribute;
+            ++it;
+          }
+          row=newRow+1;
         }
       }
       f << "],";

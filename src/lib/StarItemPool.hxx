@@ -46,11 +46,42 @@
 #include "STOFFEntry.hxx"
 #include "STOFFInputStream.hxx"
 
+class StarAttribute;
+class StarItemPool;
+
+/** \brief class to store an item: ie. an attribute whose reading is
+    potentially retarded
+ */
+struct StarItem {
+  //! constructor
+  StarItem() : m_attribute(), m_pool(0), m_which(0), m_surrogateId(0), m_localId(false)
+  {
+  }
+  //! constructor from attribute
+  explicit StarItem(shared_ptr<StarAttribute> attribute) : m_attribute(attribute), m_pool(0), m_which(0), m_surrogateId(0), m_localId(false)
+  {
+  }
+  /** the attribute if loaded */
+  shared_ptr<StarAttribute> m_attribute;
+  //! the item pool
+  StarItemPool *m_pool;
+  //! the which id
+  int m_which;
+  //! the surrogate id
+  int m_surrogateId;
+  //! true if which is local
+  bool m_localId;
+private:
+  StarItem(StarItem const &);
+  StarItem &operator=(StarItem const &);
+};
+
 namespace StarItemPoolInternal
 {
 struct State;
 }
 
+class StarAttribute;
 class StarObject;
 class StarZone;
 
@@ -72,6 +103,8 @@ public:
 
   //! add a secondary pool
   void addSecondaryPool(shared_ptr<StarItemPool> secondary);
+  //! returns true if a pool is a secondary pool
+  bool isSecondaryPool() const;
   //! try to read a "ItemPool" zone
   bool read(StarZone &zone);
   //! returns the pool version
@@ -87,17 +120,22 @@ public:
   static bool readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, StarObject &doc);
 
   //! try to read an attribute
-  bool readAttribute(StarZone &zone, int which, int vers, long endPos);
+  shared_ptr<StarAttribute> readAttribute(StarZone &zone, int which, int vers, long endPos);
   //! read a item
-  bool readItem(StarZone &zone, bool isDirect, long endPos);
+  shared_ptr<StarItem> readItem(StarZone &zone, bool isDirect, long endPos);
   //! try to load a surrogate
-  bool loadSurrogate(StarZone &zone, uint16_t &nWhich, libstoff::DebugStream &f);
+  shared_ptr<StarItem> loadSurrogate(StarZone &zone, uint16_t &nWhich, bool localId, libstoff::DebugStream &f);
+  //! try to load a surrogate
+  bool loadSurrogate(StarItem &item);
 
 protected:
   //! try to read a "ItemPool" zone (version 1)
   bool readV1(StarZone &zone, StarItemPool *master);
   //! try to read a "ItemPool" zone (version 2)
   bool readV2(StarZone &zone, StarItemPool *master);
+
+  //! create an item for futher reading
+  shared_ptr<StarItem> createItem(int which, int surrogateId, bool localId);
 
   //
   // data

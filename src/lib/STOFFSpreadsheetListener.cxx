@@ -173,7 +173,7 @@ private:
 State::State() :
   m_textBuffer(""), m_numDeferredTabs(0),
 
-  m_font("Times New Roman",12), // default time 12
+  m_font(),
 
   m_paragraph(),
 
@@ -294,9 +294,6 @@ void STOFFSpreadsheetListener::insertEOL(bool soft)
   }
   else if (m_ps->m_isParagraphOpened)
     _closeParagraph();
-
-  // sub/superscript must not survive a new line
-  m_ps->m_font.set(STOFFFont::Script());
 }
 
 void STOFFSpreadsheetListener::insertTab()
@@ -327,17 +324,8 @@ void STOFFSpreadsheetListener::insertBreak(STOFFSpreadsheetListener::BreakType)
 void STOFFSpreadsheetListener::setFont(STOFFFont const &font)
 {
   if (font == m_ps->m_font) return;
-
-  // check if id and size are defined, if not used the previous fields
-  STOFFFont finalFont(font);
-  if (!font.getFontName().empty())
-    finalFont.setFontName(m_ps->m_font.getFontName());
-  if (font.size() <= 0)
-    finalFont.setSize(m_ps->m_font.size());
-  if (finalFont == m_ps->m_font) return;
-
   _closeSpan();
-  m_ps->m_font = finalFont;
+  m_ps->m_font = font;
 }
 
 STOFFFont const &STOFFSpreadsheetListener::getFont() const
@@ -849,20 +837,10 @@ void STOFFSpreadsheetListener::_flushDeferredTabs()
 {
   if (m_ps->m_numDeferredTabs == 0 || !m_ps->canWriteText())
     return;
-  if (!m_ps->m_font.hasDecorationLines()) {
-    if (!m_ps->m_isSpanOpened) _openSpan();
-    for (; m_ps->m_numDeferredTabs > 0; m_ps->m_numDeferredTabs--)
-      m_documentInterface->insertTab();
-    return;
-  }
-
-  STOFFFont oldFont(m_ps->m_font);
-  m_ps->m_font.resetDecorationLines();
-  _closeSpan();
-  _openSpan();
+  if (!m_ps->m_isSpanOpened) _openSpan();
   for (; m_ps->m_numDeferredTabs > 0; m_ps->m_numDeferredTabs--)
     m_documentInterface->insertTab();
-  setFont(oldFont);
+  return;
 }
 
 void STOFFSpreadsheetListener::_flushText()
@@ -1426,7 +1404,7 @@ void STOFFSpreadsheetListener::closeSheet()
   _popParsingState();
 }
 
-void STOFFSpreadsheetListener::openSheetRow(float h, librevenge::RVNGUnit unit)
+void STOFFSpreadsheetListener::openSheetRow(float h, librevenge::RVNGUnit unit, int numRepeated)
 {
   if (m_ds->m_isSheetRowOpened) {
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openSheetRow: called with m_isSheetRowOpened=true\n"));
@@ -1441,6 +1419,8 @@ void STOFFSpreadsheetListener::openSheetRow(float h, librevenge::RVNGUnit unit)
     propList.insert("style:row-height", h, unit);
   else if (h < 0)
     propList.insert("style:min-row-height", -h, unit);
+  if (numRepeated>1)
+    propList.insert("table:number-rows-repeated", numRepeated);
   m_documentInterface->openSheetRow(propList);
   m_ds->m_isSheetRowOpened = true;
 }
@@ -1455,7 +1435,7 @@ void STOFFSpreadsheetListener::closeSheetRow()
   m_documentInterface->closeSheetRow();
 }
 
-void STOFFSpreadsheetListener::openSheetCell(STOFFCell const &cell, STOFFCellContent const &content)
+void STOFFSpreadsheetListener::openSheetCell(STOFFCell const &cell, STOFFCellContent const &content, int numRepeated)
 {
   if (!m_ds->m_isSheetRowOpened) {
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openSheetCell: called with m_isSheetRowOpened=false\n"));
@@ -1468,6 +1448,8 @@ void STOFFSpreadsheetListener::openSheetCell(STOFFCell const &cell, STOFFCellCon
 
   librevenge::RVNGPropertyList propList;
   cell.addTo(propList);
+  if (numRepeated>1)
+    propList.insert("table:number-columns-repeated", numRepeated);
   STOFFCell::Format const &format=cell.getFormat();
   if (!format.hasBasicFormat()) {
     int numberingId=-1;
