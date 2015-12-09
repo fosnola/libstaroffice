@@ -55,32 +55,6 @@
 /** Internal: the structures of a StarAttribute */
 namespace StarAttributeInternal
 {
-//! void attribute of StarAttributeInternal
-class StarAttributeVoid : public StarAttribute
-{
-public:
-  //! constructor
-  StarAttributeVoid(Type type, std::string const &debugName) : StarAttribute(type, debugName)
-  {
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarAttributeVoid(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long /*endPos*/, StarObject &/*object*/)
-  {
-    STOFFInputStreamPtr input=zone.input();
-    libstoff::DebugFile &ascFile=zone.ascii();
-    libstoff::DebugStream f;
-    f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << ",";
-    ascFile.addPos(input->tell());
-    ascFile.addNote(f.str().c_str());
-    return true;
-  }
-};
-
 //! xml attribute of StarAttributeInternal
 class StarAttributeXML : public StarAttributeVoid
 {
@@ -97,343 +71,6 @@ public:
   }
 };
 
-//! bool attribute of StarAttributeInternal
-class StarAttributeBool : public StarAttribute
-{
-public:
-  //! constructor
-  StarAttributeBool(Type type, std::string const &debugName, bool value) : StarAttribute(type, debugName), m_value(value)
-  {
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarAttributeBool(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
-  {
-    STOFFInputStreamPtr input=zone.input();
-    long pos=input->tell();
-    libstoff::DebugFile &ascFile=zone.ascii();
-    libstoff::DebugStream f;
-    *input>>m_value;
-    f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << (m_value ? "true" : "false") << ",";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    return pos+1<=endPos;
-  }
-  //! debug function to print the data
-  virtual void print(std::ostream &o) const
-  {
-    o << m_debugName;
-    if (m_value) o << "=true";
-    o << ",";
-  }
-protected:
-  //! copy constructor
-  StarAttributeBool(StarAttributeBool const &orig) : StarAttribute(orig), m_value(orig.m_value)
-  {
-  }
-  // the bool value
-  bool m_value;
-};
-
-//! int attribute of StarAttributeInternal
-class StarAttributeInt : public StarAttribute
-{
-public:
-  //! constructor
-  StarAttributeInt(Type type, std::string const &debugName, int intSize, int value) : StarAttribute(type, debugName), m_value(value), m_intSize(intSize)
-  {
-    if (intSize!=1 && intSize!=2 && intSize!=4) {
-      STOFF_DEBUG_MSG(("StarAttributeInternal::StarAttributeInt: bad num size\n"));
-      m_intSize=0;
-    }
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarAttributeInt(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
-  {
-    STOFFInputStreamPtr input=zone.input();
-    long pos=input->tell();
-    libstoff::DebugFile &ascFile=zone.ascii();
-    libstoff::DebugStream f;
-    if (m_intSize) m_value=(int) input->readLong(m_intSize);
-    f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    return input->tell()<=endPos;
-  }
-  //! debug function to print the data
-  virtual void print(std::ostream &o) const
-  {
-    o << m_debugName;
-    if (m_value) o << "=" << m_value;
-    o << ",";
-  }
-
-protected:
-  //! copy constructor
-  StarAttributeInt(StarAttributeInt const &orig) : StarAttribute(orig), m_value(orig.m_value), m_intSize(orig.m_intSize)
-  {
-  }
-  // the int value
-  int m_value;
-  // number of byte 1,2,4
-  int m_intSize;
-};
-
-//! uint attribute of StarAttributeInternal
-class StarAttributeUInt : public StarAttribute
-{
-public:
-  //! constructor
-  StarAttributeUInt(Type type, std::string const &debugName, int intSize, unsigned int value) : StarAttribute(type, debugName), m_value(value), m_intSize(intSize)
-  {
-    if (intSize!=1 && intSize!=2 && intSize!=4) {
-      STOFF_DEBUG_MSG(("StarAttributeUInternal::StarAttributeUInt: bad num size\n"));
-      m_intSize=0;
-    }
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarAttributeUInt(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
-  {
-    STOFFInputStreamPtr input=zone.input();
-    long pos=input->tell();
-    libstoff::DebugFile &ascFile=zone.ascii();
-    libstoff::DebugStream f;
-    if (m_intSize) m_value=(unsigned int) input->readULong(m_intSize);
-    f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    return input->tell()<=endPos;
-  }
-  //! add to a font
-  virtual void addTo(STOFFFont &font) const
-  {
-    if (m_type==StarAttribute::ATTR_CHR_CROSSEDOUT) {
-      switch (m_value) {
-      case 0: // break
-        break;
-      case 1: // single
-      case 2: // double
-        font.m_propertyList.insert("style:text-line-through", m_value==1 ? "single" : "double");
-        font.m_propertyList.insert("style:text-line-through-style", "solid");
-        break;
-      case 3: // dontknow
-        break;
-      case 4: // bold
-        font.m_propertyList.insert("style:text-line-through", "single");
-        font.m_propertyList.insert("style:text-line-through-style", "solid");
-        font.m_propertyList.insert("style:text-line-through-width", "thick");
-        break;
-      case 5: // slash
-      case 6: // X
-        font.m_propertyList.insert("style:text-line-through", "single");
-        font.m_propertyList.insert("style:text-line-through-style", "solid");
-        font.m_propertyList.insert("style:text-line-through-text", m_value==5 ? "/" : "X");
-        break;
-      default:
-        STOFF_DEBUG_MSG(("StarAttributeUInternal::StarAttributeUInt: find unknown crossedout enum=%d\n", m_value));
-        break;
-      }
-    }
-  }
-  //! debug function to print the data
-  virtual void print(std::ostream &o) const
-  {
-    o << m_debugName;
-    if (m_value) o << "=" << m_value;
-    o << ",";
-  }
-protected:
-  //! copy constructor
-  StarAttributeUInt(StarAttributeUInt const &orig) : StarAttribute(orig), m_value(orig.m_value), m_intSize(orig.m_intSize)
-  {
-  }
-  // the int value
-  unsigned int m_value;
-  // number of byte 1,2,4
-  int m_intSize;
-};
-
-//! double attribute of StarAttributeInternal
-class StarAttributeDouble : public StarAttribute
-{
-public:
-  //! constructor
-  StarAttributeDouble(Type type, std::string const &debugName, double value) : StarAttribute(type, debugName), m_value(value)
-  {
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarAttributeDouble(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
-  {
-    STOFFInputStreamPtr input=zone.input();
-    long pos=input->tell();
-    libstoff::DebugFile &ascFile=zone.ascii();
-    libstoff::DebugStream f;
-    *input>>m_value;
-    f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName;
-    if (m_value<0 || m_value>0)
-      f << "=" << m_value << ",";
-    else
-      f << ",";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    return input->tell()<=endPos;
-  }
-  //! debug function to print the data
-  virtual void print(std::ostream &o) const
-  {
-    o << m_debugName;
-    if (m_value<0 || m_value>0) o << "=" << m_value;
-    o << ",";
-  }
-protected:
-  //! copy constructor
-  StarAttributeDouble(StarAttributeDouble const &orig) : StarAttribute(orig), m_value(orig.m_value)
-  {
-  }
-  // the double value
-  double m_value;
-};
-
-//! color attribute of StarAttributeInternal
-class StarAttributeColor : public StarAttribute
-{
-public:
-  //! constructor
-  StarAttributeColor(Type type, std::string const &debugName, STOFFColor const &value) : StarAttribute(type, debugName), m_value(value), m_defValue(value)
-  {
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarAttributeColor(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
-  {
-    STOFFInputStreamPtr input=zone.input();
-    long pos=input->tell();
-    libstoff::DebugFile &ascFile=zone.ascii();
-    libstoff::DebugStream f;
-    f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName;
-    bool ok=input->readColor(m_value);
-    if (!ok) {
-      STOFF_DEBUG_MSG(("StarAttributeInternal::StarAttributeColor::read: can not read a color\n"));
-      f << ",###color,";
-    }
-    else if (m_value!=m_defValue)
-      f << "=" << m_value << ",";
-    else
-      f << ",";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    return ok && input->tell()<=endPos;
-  }
-  //! add to a font
-  virtual void addTo(STOFFFont &font) const
-  {
-    if (m_type==StarAttribute::ATTR_CHR_COLOR)
-      font.m_propertyList.insert("fo:color", m_value.str().c_str());
-  }
-  //! debug function to print the data
-  virtual void print(std::ostream &o) const
-  {
-    o << m_debugName << "[col=" << m_value << "],";
-  }
-protected:
-  //! copy constructor
-  StarAttributeColor(StarAttributeColor const &orig) : StarAttribute(orig), m_value(orig.m_value), m_defValue(orig.m_defValue)
-  {
-  }
-  //! the color value
-  STOFFColor m_value;
-  //! the default value
-  STOFFColor m_defValue;
-};
-
-//! itemSet attribute of StarAttributeInternal
-class StarAttributeItemSet : public StarAttribute
-{
-public:
-  //! constructor
-  StarAttributeItemSet(Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits) :
-    StarAttribute(type, debugName), m_limits(limits), m_itemList()
-  {
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarAttributeItemSet(*this));
-  }
-  //! add to a font
-  virtual void addTo(STOFFFont &font) const
-  {
-    for (size_t i=0; i<m_itemList.size(); ++i) {
-      if (m_itemList[i] && m_itemList[i]->m_attribute)
-        m_itemList[i]->m_attribute->addTo(font);
-    }
-  }
-
-  //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &object)
-  {
-    STOFFInputStreamPtr input=zone.input();
-    long pos=input->tell();
-    libstoff::DebugFile &ascFile=zone.ascii();
-    libstoff::DebugStream f;
-    f << "StarAttribute[" << zone.getRecordLevel() << "]:" << m_debugName << ",";
-    bool ok=object.readItemSet(zone, m_limits, endPos, m_itemList, object.getCurrentPool(false).get());
-    if (!ok) f << "###";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    return ok && input->tell()<=endPos;
-  }
-  //! debug function to print the data
-  virtual void print(std::ostream &o) const
-  {
-    o << m_debugName;
-    if (!m_itemList.empty()) {
-      o << "[";
-      for (size_t i=0; i<m_itemList.size(); ++i) {
-        if (m_itemList[i] && m_itemList[i]->m_attribute)
-          m_itemList[i]->m_attribute->print(o);
-        else
-          o << "_";
-        o << ",";
-      }
-      o << "]";
-    }
-    o << ",";
-  }
-
-protected:
-  //! copy constructor
-  StarAttributeItemSet(StarAttributeItemSet const &orig) : StarAttribute(orig), m_limits(orig.m_limits), m_itemList()
-  {
-  }
-  //! the pool limits id
-  std::vector<STOFFVec2i> m_limits;
-  //! the list of items
-  std::vector<shared_ptr<StarItem> > m_itemList;
-};
 
 //! SCPattern attribute of StarAttributeInternal
 class StarAttributeSCPattern : public StarAttributeItemSet
@@ -1088,8 +725,175 @@ void State::initAttributeMap()
 }
 
 ////////////////////////////////////////////////////////////
+// basic attribute function
+////////////////////////////////////////////////////////////
+void StarAttributeItemSet::addTo(STOFFFont &font) const
+{
+  for (size_t i=0; i<m_itemList.size(); ++i) {
+    if (m_itemList[i] && m_itemList[i]->m_attribute)
+      m_itemList[i]->m_attribute->addTo(font);
+  }
+}
+
+void StarAttributeItemSet::print(std::ostream &o) const
+{
+  o << m_debugName;
+  if (!m_itemList.empty()) {
+    o << "[";
+    for (size_t i=0; i<m_itemList.size(); ++i) {
+      if (m_itemList[i] && m_itemList[i]->m_attribute)
+        m_itemList[i]->m_attribute->print(o);
+      else
+        o << "_";
+      o << ",";
+    }
+    o << "]";
+  }
+  o << ",";
+}
+
+bool StarAttributeBool::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  *input>>m_value;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << (m_value ? "true" : "false") << ",";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return pos+1<=endPos;
+}
+
+bool StarAttributeColor::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName;
+  bool ok=input->readColor(m_value);
+  if (!ok) {
+    STOFF_DEBUG_MSG(("StarAttributeColor::read: can not read a color\n"));
+    f << ",###color,";
+  }
+  else if (m_value!=m_defValue)
+    f << "=" << m_value << ",";
+  else
+    f << ",";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok && input->tell()<=endPos;
+}
+
+bool StarAttributeDouble::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  *input>>m_value;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName;
+  if (m_value<0 || m_value>0)
+    f << "=" << m_value << ",";
+  else
+    f << ",";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
+bool StarAttributeInt::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  if (m_intSize) m_value=(int) input->readLong(m_intSize);
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
+bool StarAttributeItemSet::read(StarZone &zone, int /*vers*/, long endPos, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "StarAttribute[" << zone.getRecordLevel() << "]:" << m_debugName << ",";
+  bool ok=object.readItemSet(zone, m_limits, endPos, m_itemList, object.getCurrentPool(false).get());
+  if (!ok) f << "###";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok && input->tell()<=endPos;
+}
+
+bool StarAttributeUInt::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  if (m_intSize) m_value=(unsigned int) input->readULong(m_intSize);
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
+bool StarAttributeVoid::read(StarZone &zone, int /*vers*/, long /*endPos*/, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << ",";
+  ascFile.addPos(input->tell());
+  ascFile.addNote(f.str().c_str());
+  return true;
+}
+
+void StarAttributeColor::addTo(STOFFFont &font) const
+{
+  if (m_type==ATTR_CHR_COLOR)
+    font.m_propertyList.insert("fo:color", m_value.str().c_str());
+}
+
+void StarAttributeUInt::addTo(STOFFFont &font) const
+{
+  if (m_type==ATTR_CHR_CROSSEDOUT) {
+    switch (m_value) {
+    case 0: // break
+      break;
+    case 1: // single
+    case 2: // double
+      font.m_propertyList.insert("style:text-line-through", m_value==1 ? "single" : "double");
+      font.m_propertyList.insert("style:text-line-through-style", "solid");
+      break;
+    case 3: // dontknow
+      break;
+    case 4: // bold
+      font.m_propertyList.insert("style:text-line-through", "single");
+      font.m_propertyList.insert("style:text-line-through-style", "solid");
+      font.m_propertyList.insert("style:text-line-through-width", "thick");
+      break;
+    case 5: // slash
+    case 6: // X
+      font.m_propertyList.insert("style:text-line-through", "single");
+      font.m_propertyList.insert("style:text-line-through-style", "solid");
+      font.m_propertyList.insert("style:text-line-through-text", m_value==5 ? "/" : "X");
+      break;
+    default:
+      STOFF_DEBUG_MSG(("StarAttributeUInternal::StarAttributeUInt: find unknown crossedout enum=%d\n", m_value));
+      break;
+    }
+  }
+}
+////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
+
 StarAttributeManager::StarAttributeManager() : m_state(new StarAttributeInternal::State)
 {
 }
@@ -1101,10 +905,10 @@ StarAttributeManager::~StarAttributeManager()
 shared_ptr<StarAttribute> StarAttributeManager::getDummyAttribute(int id)
 {
   if (id<=0)
-    return shared_ptr<StarAttribute>(new StarAttributeInternal::StarAttributeVoid(StarAttribute::ATTR_CHR_DUMMY1, "unknownAttribute"));
+    return shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::ATTR_CHR_DUMMY1, "unknownAttribute"));
   std::stringstream s;
   s << "attrib" << id;
-  return shared_ptr<StarAttribute>(new StarAttributeInternal::StarAttributeVoid(StarAttribute::ATTR_CHR_DUMMY1, s.str()));
+  return shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::ATTR_CHR_DUMMY1, s.str()));
 }
 
 shared_ptr<StarAttribute> StarAttributeManager::getDefaultAttribute(int nWhich)
