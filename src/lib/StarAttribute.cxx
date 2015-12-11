@@ -44,6 +44,7 @@
 #include "SWFormatManager.hxx"
 
 #include "StarBitmap.hxx"
+#include "StarCharAttribute.hxx"
 #include "StarItemPool.hxx"
 #include "StarObject.hxx"
 #include "StarObjectSmallText.hxx"
@@ -192,33 +193,10 @@ protected:
 
 void State::initAttributeMap()
 {
+  StarCharAttribute::addInitTo(m_whichToAttributeMap);
+
   std::stringstream s;
   // --- sw --- sw_init.cxx
-  addAttributeUInt(StarAttribute::ATTR_CHR_CASEMAP,"char[casemap]",1,0); // no mapped
-  addAttributeColor(StarAttribute::ATTR_CHR_COLOR,"char[color]",STOFFColor::black());
-  addAttributeUInt(StarAttribute::ATTR_CHR_CROSSEDOUT,"char[crossedout]",1,0); // none
-  addAttributeBool(StarAttribute::ATTR_CHR_CONTOUR,"char[contour]",false);
-  addAttributeBool(StarAttribute::ATTR_CHR_SHADOWED,"char[shadowed]",false);
-  addAttributeBool(StarAttribute::ATTR_CHR_WORDLINEMODE,"char[word,linemode]",false);
-  addAttributeBool(StarAttribute::ATTR_CHR_AUTOKERN,"char[autoKern]",false);
-  addAttributeBool(StarAttribute::ATTR_CHR_BLINK,"char[blink]",false);
-  addAttributeBool(StarAttribute::ATTR_CHR_NOHYPHEN,"char[noHyphen]",true);
-  addAttributeBool(StarAttribute::ATTR_CHR_NOLINEBREAK,"char[nolineBreak]",true);
-  addAttributeUInt(StarAttribute::ATTR_CHR_KERNING,"char[kerning]",2,0);
-  addAttributeUInt(StarAttribute::ATTR_CHR_LANGUAGE,"char[language]",2,0x3ff); // unknown
-  addAttributeUInt(StarAttribute::ATTR_CHR_POSTURE,"char[posture]",1,0); // none
-  addAttributeUInt(StarAttribute::ATTR_CHR_PROPORTIONALFONTSIZE,"char[proportionalfontsize]",2,100); // 100%
-  addAttributeUInt(StarAttribute::ATTR_CHR_UNDERLINE,"char[underline]",1,0); // none
-  addAttributeUInt(StarAttribute::ATTR_CHR_WEIGHT,"char[weight]",1,5); // normal
-  addAttributeUInt(StarAttribute::ATTR_CHR_CJK_LANGUAGE,"char[cjk,language]",2,0x3ff); // unknown
-  addAttributeUInt(StarAttribute::ATTR_CHR_CJK_POSTURE,"char[cjk,posture]",1,0); // none
-  addAttributeUInt(StarAttribute::ATTR_CHR_CJK_WEIGHT,"char[cjk,weight]",1,5); // normal
-  addAttributeUInt(StarAttribute::ATTR_CHR_CTL_LANGUAGE,"char[ctl,language]",2,0x3ff); // unknown
-  addAttributeUInt(StarAttribute::ATTR_CHR_CTL_POSTURE,"char[ctl,posture]",1,0); // none
-  addAttributeUInt(StarAttribute::ATTR_CHR_CTL_WEIGHT,"char[ctl,weight]",1,5); // normal
-  addAttributeUInt(StarAttribute::ATTR_CHR_EMPHASIS_MARK,"char[emphasisMark]",2,0); // none
-  addAttributeUInt(StarAttribute::ATTR_CHR_RELIEF,"char[relief]",2,0); // none
-  addAttributeBool(StarAttribute::ATTR_CHR_DUMMY1,"char[dummy1]",false);
 
   addAttributeVoid(StarAttribute::ATTR_TXT_SOFTHYPH,"text[softHyphen]");
   addAttributeXML(StarAttribute::ATTR_TXT_UNKNOWN_CONTAINER, "text[unknContainer]");
@@ -854,42 +832,6 @@ bool StarAttributeVoid::read(StarZone &zone, int /*vers*/, long /*endPos*/, Star
   return true;
 }
 
-void StarAttributeColor::addTo(STOFFFont &font) const
-{
-  if (m_type==ATTR_CHR_COLOR)
-    font.m_propertyList.insert("fo:color", m_value.str().c_str());
-}
-
-void StarAttributeUInt::addTo(STOFFFont &font) const
-{
-  if (m_type==ATTR_CHR_CROSSEDOUT) {
-    switch (m_value) {
-    case 0: // break
-      break;
-    case 1: // single
-    case 2: // double
-      font.m_propertyList.insert("style:text-line-through", m_value==1 ? "single" : "double");
-      font.m_propertyList.insert("style:text-line-through-style", "solid");
-      break;
-    case 3: // dontknow
-      break;
-    case 4: // bold
-      font.m_propertyList.insert("style:text-line-through", "single");
-      font.m_propertyList.insert("style:text-line-through-style", "solid");
-      font.m_propertyList.insert("style:text-line-through-width", "thick");
-      break;
-    case 5: // slash
-    case 6: // X
-      font.m_propertyList.insert("style:text-line-through", "single");
-      font.m_propertyList.insert("style:text-line-through-style", "solid");
-      font.m_propertyList.insert("style:text-line-through-text", m_value==5 ? "/" : "X");
-      break;
-    default:
-      STOFF_DEBUG_MSG(("StarAttributeUInternal::StarAttributeUInt: find unknown crossedout enum=%d\n", m_value));
-      break;
-    }
-  }
-}
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
@@ -957,69 +899,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
   case StarAttribute::ATTR_CHR_ESCAPEMENT:
     f << "chrAtrEscapement=" << input->readULong(1) << ",";
     f << "nEsc=" << input->readLong(2) << ",";
-    break;
-  case StarAttribute::ATTR_CHR_FONT:
-  case StarAttribute::ATTR_CHR_CJK_FONT:
-  case StarAttribute::ATTR_CHR_CTL_FONT: {
-    if (nWhich==StarAttribute::ATTR_CHR_FONT)
-      f << "chrAtrFont,";
-    else if (nWhich==StarAttribute::ATTR_CHR_CJK_FONT)
-      f << "chrAtrCJKFont,";
-    else
-      f << "chrAtrCTLFont,";
-    f << "family=" << input->readULong(1) << ",";
-    f << "ePitch=" << input->readULong(1) << ",";
-    int encoding=(int) input->readULong(1);
-    f << "eTextEncoding=" << encoding << ",";
-    std::vector<uint32_t> fName, string;
-    if (!zone.readString(fName)) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the name\n"));
-      f << "###aName,";
-      break;
-    }
-    if (!fName.empty())
-      f << "aName=" << libstoff::getString(fName).cstr() << ",";
-    if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the style\n"));
-      f << "###aStyle,";
-      break;
-    }
-    if (!string.empty())
-      f << "aStyle=" << libstoff::getString(string).cstr() << ",";
-    if (encoding!=10 && libstoff::getString(fName)=="StarBats" && input->tell()<lastPos) {
-      if (input->readULong(4)==0xFE331188) {
-        // reread data in unicode
-        if (!zone.readString(fName)) {
-          STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the name\n"));
-          f << "###aName,";
-          break;
-        }
-        if (!fName.empty())
-          f << "aNameUni=" << libstoff::getString(fName).cstr() << ",";
-        if (!zone.readString(string)) {
-          STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the style\n"));
-          f << "###aStyle,";
-          break;
-        }
-        if (!string.empty())
-          f << "aStyleUni=" << libstoff::getString(string).cstr() << ",";
-      }
-      else input->seek(-3, librevenge::RVNG_SEEK_CUR);
-    }
-    break;
-  }
-  case StarAttribute::ATTR_CHR_FONTSIZE:
-  case StarAttribute::ATTR_CHR_CJK_FONTSIZE:
-  case StarAttribute::ATTR_CHR_CTL_FONTSIZE:
-    if (nWhich==StarAttribute::ATTR_CHR_FONTSIZE)
-      f << "chrAtrFontSize,";
-    else if (nWhich==StarAttribute::ATTR_CHR_CJK_FONTSIZE)
-      f << "chrAtrCJKFontSize,";
-    else
-      f << "chrAtrCTLFontSize,";
-    f << "size=" << input->readULong(2) << ",";
-    f << "nProp=" << input->readULong((nVers>=1) ? 2 : 1) << ",";
-    if (nVers>=2) f << "nPropUnit=" << input->readULong(2) << ",";
     break;
   case StarAttribute::ATTR_CHR_BACKGROUND:
   case StarAttribute::ATTR_FRM_BACKGROUND:

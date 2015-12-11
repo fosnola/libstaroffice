@@ -821,8 +821,6 @@ public:
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  //! add to a font(REMOVE)
-  virtual void addTo(STOFFFont &font) const;
   //! debug function to print the data
   virtual void print(std::ostream &o) const
   {
@@ -928,8 +926,6 @@ public:
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  //! add to a font(REMOVEME)
-  virtual void addTo(STOFFFont &font) const;
   //! debug function to print the data
   virtual void print(std::ostream &o) const
   {

@@ -187,6 +187,10 @@ SOURCE=..\..\src\lib\StarCellFormula.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarCharAttribute.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarEncodingChinese.cxx
 # End Source File
 # Begin Source File
@@ -380,6 +384,10 @@ SOURCE=..\..\src\lib\StarBitmap.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarCellFormula.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarCharAttribute.hxx
 # End Source File
 # Begin Source File
 

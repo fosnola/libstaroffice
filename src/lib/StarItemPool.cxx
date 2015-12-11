@@ -168,14 +168,14 @@ struct SfxMultiRecord {
     m_zone=0;
   }
   //! try to go to the new content positon
-  bool getNewContent(std::string const &wh)
+  bool getNewContent(std::string const &wh, int &id)
   {
     if (!m_zone) return false;
     // SfxMultiRecordReader::GetContent
     long newPos=getLastContentPosition();
     if (newPos>=m_endPos) return false;
     STOFFInputStreamPtr input=m_zone->input();
-    ++m_actualRecord;
+    id=m_actualRecord++;
     if (input->tell()<newPos && input->tell()+4>=newPos) { // small diff is possible
       m_zone->ascii().addDelimiter(input->tell(),'|');
       input->seek(newPos, librevenge::RVNG_SEEK_SET);
@@ -188,10 +188,10 @@ struct SfxMultiRecord {
       m_zone->ascii().addNote(f.str().c_str());
       input->seek(newPos, librevenge::RVNG_SEEK_SET);
     }
-    if (m_headerType==7 || m_headerType==8) {
-      // TODO: readtag
+    if (m_headerType==7) // mixtags?
       input->seek(2, librevenge::RVNG_SEEK_CUR);
-    }
+    else if (m_headerType==8) // relocate
+      id=(int) input->readULong(2);
     return true;
   }
   //! returns the last content position
@@ -286,13 +286,13 @@ struct Version {
 //! internal: list of attribute corresponding to a slot id
 struct Values {
   //! constructor
-  Values() : m_default(), m_values()
+  Values() : m_default(), m_idValueMap()
   {
   }
   //! the default values
   shared_ptr<StarAttribute> m_default;
   //! the list of attribute
-  std::vector<shared_ptr<StarAttribute> > m_values;
+  std::map<int,shared_ptr<StarAttribute> > m_idValueMap;
 };
 
 ////////////////////////////////////////
@@ -1040,12 +1040,12 @@ bool StarItemPool::loadSurrogate(StarItem &item)
       item.m_attribute=values->m_default;
     return true;
   }
-  if (!values || item.m_surrogateId<0 || item.m_surrogateId>=(int) values->m_values.size()) {
+  if (!values || values->m_idValueMap.find(item.m_surrogateId)==values->m_idValueMap.end()) {
     STOFF_DEBUG_MSG(("StarItemPool::loadSurrogate: can not find the attribute array for %d[%d]\n", aWhich, item.m_surrogateId));
     item.m_attribute=m_state->getDefaultAttribute(aWhich);
     return true;
   }
-  item.m_attribute=values->m_values[size_t(item.m_surrogateId)];
+  item.m_attribute=values->m_idValueMap.find(item.m_surrogateId)->second;
 
   return true;
 }
@@ -1085,7 +1085,7 @@ shared_ptr<StarItem> StarItemPool::loadSurrogate(StarZone &zone, uint16_t &nWhic
     return res;
   }
   f << "surrog=" << nSurrog << ",";
-  if (!values || nSurrog>=(int) values->m_values.size()) {
+  if (!values || values->m_idValueMap.find(int(nSurrog))==values->m_idValueMap.end()) {
     if (isInside()) {
       // ok, we must wait that the pool is read
       return createItem(int(nWhich), (int) nSurrog, localId);
@@ -1095,7 +1095,7 @@ shared_ptr<StarItem> StarItemPool::loadSurrogate(StarZone &zone, uint16_t &nWhic
     res->m_attribute=m_state->getDefaultAttribute(aWhich);
     return res;
   }
-  res->m_attribute=values->m_values[size_t(nSurrog)];
+  res->m_attribute=values->m_idValueMap.find(int(nSurrog))->second;
   return res;
 }
 
@@ -1206,11 +1206,11 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
   f << mRecord;
   ascii.addPos(pos);
   ascii.addNote(f.str().c_str());
-  int n=0;
-  while (mRecord.getNewContent("PoolDef")) {
+  int id;
+  while (mRecord.getNewContent("PoolDef", id)) {
     pos=input->tell();
     f.str("");
-    f << "PoolDef[versMap-" << n++ << "]:";
+    f << "PoolDef[versMap-" << id << "]:";
     uint16_t nVers, nStart, nEnd;
     *input >> nVers >> nStart >> nEnd;
     f << "vers=" << nVers << "," << nStart << "<->" << nEnd << ",";
@@ -1263,11 +1263,10 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());
 
-    n=0;
-    while (mRecord.getNewContent("PoolDef")) {
+    while (mRecord.getNewContent("PoolDef", id)) {
       pos=input->tell();
       f.str("");
-      f << "PoolDef[" << wh << "-" << n++ << "]:";
+      f << "PoolDef[" << wh << "-" << id << "]:";
       uint16_t nWhich, nVersion, nCount=1;
       *input >> nWhich >> nVersion;
       if (step==0) *input >> nCount;
@@ -1285,7 +1284,7 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
       int aWhich=m_state->m_currentVersion!=m_state->m_loadingVersion ? m_state->getWhich(which) : which;
       StarItemPoolInternal::Values *values=m_state->getValues(aWhich, true);
       if (step==0) {
-        if (!values->m_values.empty()) {
+        if (!values->m_idValueMap.empty()) {
           STOFF_DEBUG_MSG(("StarItemPool::readV2: oops, there is already some attributes in values\n"));
         }
         StarItemPoolInternal::SfxMultiRecord mRecord1;
@@ -1301,11 +1300,10 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
           f << mRecord1;
           ascii.addPos(pos);
           ascii.addNote(f.str().c_str());
-          int id=0;
-          while (mRecord1.getNewContent("StarAttribute")) {
+          while (mRecord1.getNewContent("StarAttribute", id)) {
             pos=input->tell();
             f.str("");
-            f << "StarAttribute:inPool,wh=" <<  which << "[" << id++ << "],";
+            f << "StarAttribute:inPool,wh=" <<  which << "[" << id << "],";
             uint16_t nRef;
             *input>>nRef;
             f << "ref=" << nRef << ",";
@@ -1316,18 +1314,17 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
               STOFF_DEBUG_MSG(("StarItemPool::readV2: find extra attrib data\n"));
               f << "###extra";
             }
-            values->m_values.push_back(attribute);
+            if (values->m_idValueMap.find(id)!=values->m_idValueMap.end()) {
+              STOFF_DEBUG_MSG(("StarItemPool::readV2: find dupplicated attrib data in %d\n", id));
+              f << "###id";
+            }
+            else
+              values->m_idValueMap[id]=attribute;
             input->seek(mRecord1.getLastContentPosition(), librevenge::RVNG_SEEK_SET);
             ascii.addPos(pos);
             ascii.addNote(f.str().c_str());
           }
           mRecord1.close("StarAttribute");
-          if (values->m_values.size() != size_t(nCount) && m_state->m_document.getAttributeManager()) {
-            // poolio.cxx increase the list with (SfxPoolItem *)0
-            attribute=m_state->m_document.getAttributeManager()->getDefaultAttribute(aWhich);
-            while (values->m_values.size() < size_t(nCount))
-              values->m_values.push_back(attribute);
-          }
         }
       }
       else {
@@ -1606,7 +1603,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
       int aWhich=m_state->m_currentVersion!=m_state->m_loadingVersion ? m_state->getWhich(which) : which;
       StarItemPoolInternal::Values *values=m_state->getValues(aWhich, true);
       if (step==0 && nCount) {
-        if (!values->m_values.empty()) {
+        if (!values->m_idValueMap.empty()) {
           STOFF_DEBUG_MSG(("StarItemPool::readV1: the slot %d is already created\n", aWhich));
         }
       }
@@ -1636,7 +1633,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
           ascii.addPos(pos);
           ascii.addNote(f.str().c_str());
           if (step==0)
-            values->m_values.push_back(attribute);
+            values->m_idValueMap[i]=attribute;
           continue;
         }
 
@@ -1651,7 +1648,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
             f << "###";
         }
         if (step==0)
-          values->m_values.push_back(attribute);
+          values->m_idValueMap[i]=attribute;
         else
           values->m_default=attribute;
         if (input->tell()!=debAttPos+(long)sizeAttr[n]) {
@@ -1787,8 +1784,9 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
     pool=doc.getNewItemPool(T_Unknown); // CHANGE
   for (int i=0; ok && i<int(nCount); ++i) {
     pos=input->tell();
+    int id=0;
     if (poolVersion==2) {
-      if (!mRecord.getNewContent("SfxStylePool"))
+      if (!mRecord.getNewContent("SfxStylePool", id))
         break;
       lastPos=mRecord.getLastContentPosition();
     }
