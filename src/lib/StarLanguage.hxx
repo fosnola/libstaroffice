@@ -31,44 +31,27 @@
 * instead of those above.
 */
 
-#ifndef STOFF_FONT
-#  define STOFF_FONT
+/*
+ * StarLanguage to read/parse some basic language in StarOffice documents
+ *
+ */
+#ifndef STAR_LANGUAGE
+#  define STAR_LANGUAGE
 
-#include <string>
 #include <vector>
 
 #include "libstaroffice_internal.hxx"
+#include "STOFFDebug.hxx"
 
-//! Class to store font
-class STOFFFont
+/** \brief namespace convert language id in international iso
+ *
+ *
+ *
+ */
+namespace StarLanguage
 {
-public:
-  /** constructor */
-  STOFFFont() : m_propertyList(), m_hyphen(false), m_softHyphen(false), m_lineBreak(false)
-  {
-  };
-  //! add to the propList
-  void addTo(librevenge::RVNGPropertyList &propList) const;
-
-  //! operator<<
-  friend std::ostream &operator<<(std::ostream &o, STOFFFont const &font);
-  //! operator==
-  bool operator==(STOFFFont const &font) const;
-  //! operator!=
-  bool operator!=(STOFFFont const &font) const
-  {
-    return !operator==(font);
-  }
-  /** the property list */
-  librevenge::RVNGPropertyList m_propertyList;
-  /** hyphen */
-  bool m_hyphen;
-  /** soft hyphen */
-  bool m_softHyphen;
-  /** line break */
-  bool m_lineBreak;
-};
-
-
+//! returns the iso639-1 and iso3166 language code
+bool getLanguageId(int id, std::string &lang, std::string &country);
+}
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

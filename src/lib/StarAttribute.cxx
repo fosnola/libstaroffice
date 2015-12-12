@@ -198,15 +198,6 @@ void State::initAttributeMap()
   std::stringstream s;
   // --- sw --- sw_init.cxx
 
-  addAttributeVoid(StarAttribute::ATTR_TXT_SOFTHYPH,"text[softHyphen]");
-  addAttributeXML(StarAttribute::ATTR_TXT_UNKNOWN_CONTAINER, "text[unknContainer]");
-  addAttributeBool(StarAttribute::ATTR_TXT_DUMMY1,"text[dummy1]",false);
-  addAttributeBool(StarAttribute::ATTR_TXT_DUMMY2,"text[dummy2]",false);
-  addAttributeBool(StarAttribute::ATTR_TXT_DUMMY4,"text[dummy4]",false);
-  addAttributeBool(StarAttribute::ATTR_TXT_DUMMY5,"text[dummy5]",false);
-  addAttributeBool(StarAttribute::ATTR_TXT_DUMMY6,"text[dummy6]",false);
-  addAttributeBool(StarAttribute::ATTR_TXT_DUMMY7,"text[dummy7]",false);
-
   addAttributeBool(StarAttribute::ATTR_PARA_SPLIT,"para[split]",true);
   addAttributeUInt(StarAttribute::ATTR_PARA_WIDOWS,"para[widows]",1,0); // numlines
   addAttributeUInt(StarAttribute::ATTR_PARA_ORPHANS,"para[orphans]",1,0); // numlines
@@ -896,10 +887,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
       f << color << ",";
     break;
   }
-  case StarAttribute::ATTR_CHR_ESCAPEMENT:
-    f << "chrAtrEscapement=" << input->readULong(1) << ",";
-    f << "nEsc=" << input->readLong(2) << ",";
-    break;
   case StarAttribute::ATTR_CHR_BACKGROUND:
   case StarAttribute::ATTR_FRM_BACKGROUND:
   case StarAttribute::ATTR_SCH_SYMBOL_BRUSH:

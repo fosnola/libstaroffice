@@ -44,22 +44,28 @@
 std::ostream &operator<<(std::ostream &o, STOFFFont const &font)
 {
   o << font.m_propertyList.getPropString().cstr() << ",";
+  if (font.m_hyphen) o << "hyphen,";
+  if (font.m_softHyphen) o << "hyphen[soft],";
+  if (font.m_lineBreak) o << "line[break],";
   return o;
 }
 
 bool STOFFFont::operator==(STOFFFont const &font) const
 {
-  return m_propertyList.getPropString() == font.m_propertyList.getPropString();
+  return m_propertyList.getPropString() == font.m_propertyList.getPropString() &&
+         m_hyphen==font.m_hyphen && m_softHyphen==font.m_softHyphen && m_lineBreak==font.m_lineBreak;
 }
 
 void STOFFFont::addTo(librevenge::RVNGPropertyList &pList) const
 {
   librevenge::RVNGPropertyList::Iter i(m_propertyList);
   for (i.rewind(); i.next();) {
-    if (i.child())
+    if (i.child()) {
+      STOFF_DEBUG_MSG(("STOFFFont::addTo: find unexpected property child\n"));
       pList.insert(i.key(), *i.child());
-    else
-      pList.insert(i.key(), i()->clone());
+      continue;
+    }
+    pList.insert(i.key(), i()->clone());
   }
 }
 

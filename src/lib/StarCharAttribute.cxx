@@ -35,6 +35,7 @@
 
 #include "StarAttribute.hxx"
 #include "StarItemPool.hxx"
+#include "StarLanguage.hxx"
 #include "StarObject.hxx"
 #include "StarZone.hxx"
 
@@ -56,6 +57,9 @@ public:
   {
     return shared_ptr<StarAttribute>(new StarCAttributeBool(*this));
   }
+  //! add to a font
+  virtual void addTo(STOFFFont &font) const;
+
 protected:
   //! copy constructor
   StarCAttributeBool(StarCAttributeBool const &orig) : StarAttributeBool(orig)
@@ -94,6 +98,8 @@ public:
     StarAttributeInt(type, debugName, intSize, value)
   {
   }
+  //! add to a font
+  virtual void addTo(STOFFFont &font) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -129,6 +135,27 @@ protected:
   }
 };
 
+//! a void attribute
+class StarCAttributeVoid : public StarAttributeVoid
+{
+public:
+  //! constructor
+  StarCAttributeVoid(Type type, std::string const &debugName) : StarAttributeVoid(type, debugName)
+  {
+  }
+  //! add to a font
+  virtual void addTo(STOFFFont &font) const;
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarCAttributeVoid(*this));
+  }
+protected:
+  //! copy constructor
+  StarCAttributeVoid(StarCAttributeVoid const &orig) : StarAttributeVoid(orig)
+  {
+  }
+};
 
 //! add a bool attribute
 void addAttributeBool(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
@@ -150,11 +177,45 @@ void addAttributeUInt(std::map<int, shared_ptr<StarAttribute> > &map, StarAttrib
 {
   map[type]=shared_ptr<StarAttribute>(new StarCAttributeUInt(type,debugName, numBytes, defValue));
 }
+//! add a void attribute
+void addAttributeVoid(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
+{
+  map[type]=shared_ptr<StarAttribute>(new StarCAttributeVoid(type,debugName));
+}
+
+void StarCAttributeBool::addTo(STOFFFont &font) const
+{
+  if (!m_value) {
+    if (m_type==ATTR_CHR_NOHYPHEN)
+      font.m_hyphen=true;
+    else if (m_type==ATTR_CHR_NOLINEBREAK)
+      font.m_lineBreak=true;
+    return;
+  }
+  if (m_type==ATTR_CHR_CONTOUR)
+    font.m_propertyList.insert("style:text-outline", "true");
+  else if (m_type==ATTR_CHR_SHADOWED)
+    font.m_propertyList.insert("fo:text-shadow", "1pt 1pt");
+  else if (m_type==ATTR_CHR_BLINK)
+    font.m_propertyList.insert("style:text-blinking", "true");
+  else if (m_type==ATTR_CHR_WORDLINEMODE)  {
+    font.m_propertyList.insert("style:text-line-through-mode", "skip-white-space");
+    font.m_propertyList.insert("style:text-underline-mode", "skip-white-space");
+  }
+  else if (m_type==ATTR_CHR_AUTOKERN)
+    font.m_propertyList.insert("style:letter-kerning", "true");
+}
 
 void StarCAttributeColor::addTo(STOFFFont &font) const
 {
   if (m_type==ATTR_CHR_COLOR)
     font.m_propertyList.insert("fo:color", m_value.str().c_str());
+}
+
+void StarCAttributeInt::addTo(STOFFFont &font) const
+{
+  if (m_type==ATTR_CHR_KERNING && m_value)
+    font.m_propertyList.insert("fo:letter-spacing", m_value, librevenge::RVNG_TWIP);
 }
 
 void StarCAttributeUInt::addTo(STOFFFont &font) const
@@ -232,14 +293,24 @@ void StarCAttributeUInt::addTo(STOFFFont &font) const
     }
   }
   else if (m_type==ATTR_CHR_POSTURE || m_type==ATTR_CHR_CJK_POSTURE || m_type==ATTR_CHR_CTL_POSTURE) {
-    std::string wh(m_type==ATTR_CHR_POSTURE ? "fo:font-style" :  m_type==ATTR_CHR_CJK_POSTURE ? "style:font-style-asian" : "style:font-style-compllex");
+    std::string wh(m_type==ATTR_CHR_POSTURE ? "fo:font-style" :  m_type==ATTR_CHR_CJK_POSTURE ? "style:font-style-asian" : "style:font-style-complex");
     if (m_value==1)
       font.m_propertyList.insert(wh.c_str(), "oblique");
     else if (m_value==2)
       font.m_propertyList.insert(wh.c_str(), "italic");
+    else if (m_value)
+      STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown posture enum=%d\n", m_value));
+  }
+  if (m_type==ATTR_CHR_RELIEF) {
+    if (m_value==1)
+      font.m_propertyList.insert("style:font-relief", "embossed");
+    else if (m_value==2)
+      font.m_propertyList.insert("style:font-relief", "engraved");
+    else if (m_value)
+      STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown relief enum=%d\n", m_value));
   }
   else if (m_type==ATTR_CHR_WEIGHT || m_type==ATTR_CHR_CJK_WEIGHT || m_type==ATTR_CHR_CTL_WEIGHT) {
-    std::string wh(m_type==ATTR_CHR_WEIGHT ? "fo:font-weight" :  m_type==ATTR_CHR_CJK_WEIGHT ? "style:font-weight-asian" : "style:font-weight-compllex");
+    std::string wh(m_type==ATTR_CHR_WEIGHT ? "fo:font-weight" :  m_type==ATTR_CHR_CJK_WEIGHT ? "style:font-weight-asian" : "style:font-weight-complex");
     if (m_value==5)
       font.m_propertyList.insert(wh.c_str(), "normal");
     else if (m_value==8)
@@ -248,12 +319,92 @@ void StarCAttributeUInt::addTo(STOFFFont &font) const
       font.m_propertyList.insert(wh.c_str(), m_value*100, librevenge::RVNG_GENERIC);
     // 10: WEIGHT_BLACK
   }
+  else if (m_type==ATTR_CHR_CASEMAP) {
+    if (m_value==1)
+      font.m_propertyList.insert("fo:text-transform", "uppercase");
+    else if (m_value==2)
+      font.m_propertyList.insert("fo:text-transform", "lowercase");
+    else if (m_value==3)
+      font.m_propertyList.insert("fo:text-transform", "capitalize");
+    else if (m_value==4)
+      font.m_propertyList.insert("fo:font-variant", "small-caps");
+    else if (m_value)
+      STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown casemap enum=%d\n", m_value));
+  }
+  else if (m_type==ATTR_CHR_LANGUAGE || m_type==ATTR_CHR_CJK_LANGUAGE || m_type==ATTR_CHR_CTL_LANGUAGE) {
+    std::string prefix(m_type==ATTR_CHR_LANGUAGE ? "fo:" : "style:");
+    std::string extension(m_type==ATTR_CHR_LANGUAGE ? "" :  m_type==ATTR_CHR_CJK_LANGUAGE ? "-asian" : "-complex");
+    std::string lang, country;
+    if (StarLanguage::getLanguageId((int) m_value, lang, country)) {
+      if (!lang.empty())
+        font.m_propertyList.insert((prefix + "language" + extension).c_str(), lang.c_str());
+      if (!country.empty())
+        font.m_propertyList.insert((prefix + "country" + extension).c_str(), country.c_str());
+    }
+  }
+  else if (m_type==ATTR_CHR_PROPORTIONALFONTSIZE && m_value!=100) { // checkme: maybe font-size with %
+    std::stringstream s;
+    s << 0 << "% " << m_value << "%";
+    font.m_propertyList.insert("style:text-position", s.str().c_str());
+  }
+  else if (m_type==ATTR_CHR_EMPHASIS_MARK) {
+    if (m_value && ((m_value&0xC000)==0 || (m_value&0x3000)==0x3000 || (m_value&0xFFF)>4 || (m_value&0xFFF)==0)) {
+      STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown emphasis mark=%x\n", (unsigned)m_value));
+    }
+    else if (m_value) {
+      std::string what((m_value&7)== 1 ? "dot" : (m_value&7)== 2 ? "circle" : (m_value&7)== 3 ? "disc" : "accent");
+      font.m_propertyList.insert("style:text-emphasize", (what+((m_value&0x1000) ? " above" : " below")).c_str());
+    }
+  }
 }
+
+void StarCAttributeVoid::addTo(STOFFFont &font) const
+{
+  if (m_type==ATTR_TXT_SOFTHYPH)
+    font.m_softHyphen=true;
+}
+
 }
 
 namespace StarCharAttribute
 {
 // ------------------------------------------------------------
+
+//! a escapement attribute
+class StarCAttributeEscapement : public StarAttribute
+{
+public:
+  //! constructor
+  StarCAttributeEscapement(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_delta(0), m_scale(100)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarCAttributeEscapement(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a font
+  virtual void addTo(STOFFFont &font) const;
+  //! debug function to print the data
+  virtual void print(std::ostream &o) const
+  {
+    o << m_debugName << "=[";
+    if (m_delta) o << "decal=" << m_delta << "%,";
+    if (m_scale!=100) o << "scale=" << m_scale << "%,";
+    o << "],";
+  }
+protected:
+  //! copy constructor
+  StarCAttributeEscapement(StarCAttributeEscapement const &orig) : StarAttribute(orig), m_delta(orig.m_delta), m_scale(orig.m_scale)
+  {
+  }
+  //! the sub/super decal in %
+  int m_delta;
+  //! the scaling
+  int m_scale;
+};
 
 //! a font attribute
 class StarCAttributeFont : public StarAttribute
@@ -340,6 +491,15 @@ protected:
   int m_pitch;
 };
 
+void StarCAttributeEscapement::addTo(STOFFFont &font) const
+{
+  if (m_delta==0 && m_scale==100)
+    return;
+  std::stringstream s;
+  s << m_delta << "% " << m_scale << "%";
+  font.m_propertyList.insert("style:text-position", s.str().c_str());
+}
+
 void StarCAttributeFont::addTo(STOFFFont &font) const
 {
   if (!m_name.empty()) {
@@ -359,6 +519,21 @@ void StarCAttributeFont::addTo(STOFFFont &font) const
       font.m_propertyList.insert("style:font-pitch-complex", m_pitch==1 ? "fixed" : "variable");
   }
   // TODO m_style, m_family
+}
+
+bool StarCAttributeEscapement::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  m_scale=(int) input->readULong(1);
+  m_delta=(int)  input->readLong(2);
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
 }
 
 bool StarCAttributeFont::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
@@ -559,25 +734,38 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeUInt(map,StarAttribute::ATTR_CHR_POSTURE,"char[posture]",1,0); // none
   addAttributeUInt(map,StarAttribute::ATTR_CHR_CJK_POSTURE,"char[cjk,posture]",1,0); // none
   addAttributeUInt(map,StarAttribute::ATTR_CHR_CTL_POSTURE,"char[ctl,posture]",1,0); // none
-  addAttributeUInt(map, StarAttribute::ATTR_CHR_CROSSEDOUT,"char[crossedout]",1,0); // none
-  addAttributeUInt(map,StarAttribute::ATTR_CHR_UNDERLINE,"char[underline]",1,0); // none
 
   addAttributeUInt(map,StarAttribute::ATTR_CHR_CASEMAP,"char[casemap]",1,0); // no mapped
+  addAttributeUInt(map,StarAttribute::ATTR_CHR_CROSSEDOUT,"char[crossedout]",1,0); // none
+  addAttributeUInt(map,StarAttribute::ATTR_CHR_UNDERLINE,"char[underline]",1,0); // none
   addAttributeBool(map,StarAttribute::ATTR_CHR_CONTOUR,"char[contour]",false);
   addAttributeBool(map,StarAttribute::ATTR_CHR_SHADOWED,"char[shadowed]",false);
+  addAttributeUInt(map,StarAttribute::ATTR_CHR_RELIEF,"char[relief]",2,0); // none
+  addAttributeBool(map,StarAttribute::ATTR_CHR_BLINK,"char[blink]",false);
+  addAttributeUInt(map,StarAttribute::ATTR_CHR_EMPHASIS_MARK,"char[emphasisMark]",2,0); // none
+
   addAttributeBool(map,StarAttribute::ATTR_CHR_WORDLINEMODE,"char[word,linemode]",false);
   addAttributeBool(map,StarAttribute::ATTR_CHR_AUTOKERN,"char[autoKern]",false);
-  addAttributeBool(map,StarAttribute::ATTR_CHR_BLINK,"char[blink]",false);
-  addAttributeBool(map,StarAttribute::ATTR_CHR_NOHYPHEN,"char[noHyphen]",true);
-  addAttributeBool(map,StarAttribute::ATTR_CHR_NOLINEBREAK,"char[nolineBreak]",true);
-  addAttributeUInt(map,StarAttribute::ATTR_CHR_KERNING,"char[kerning]",2,0);
-  addAttributeUInt(map,StarAttribute::ATTR_CHR_LANGUAGE,"char[language]",2,0x3ff); // unknown
+  addAttributeInt(map,StarAttribute::ATTR_CHR_KERNING,"char[kerning]",2,0);
+  map[StarAttribute::ATTR_CHR_ESCAPEMENT]=shared_ptr<StarAttribute>(new StarCAttributeEscapement(StarAttribute::ATTR_CHR_ESCAPEMENT,"chrAtrEscapement"));
   addAttributeUInt(map,StarAttribute::ATTR_CHR_PROPORTIONALFONTSIZE,"char[proportionalfontsize]",2,100); // 100%
+
+  addAttributeUInt(map,StarAttribute::ATTR_CHR_LANGUAGE,"char[language]",2,0x3ff); // unknown
   addAttributeUInt(map,StarAttribute::ATTR_CHR_CJK_LANGUAGE,"char[cjk,language]",2,0x3ff); // unknown
   addAttributeUInt(map,StarAttribute::ATTR_CHR_CTL_LANGUAGE,"char[ctl,language]",2,0x3ff); // unknown
-  addAttributeUInt(map,StarAttribute::ATTR_CHR_EMPHASIS_MARK,"char[emphasisMark]",2,0); // none
-  addAttributeUInt(map,StarAttribute::ATTR_CHR_RELIEF,"char[relief]",2,0); // none
+
+  addAttributeBool(map,StarAttribute::ATTR_CHR_NOHYPHEN,"char[noHyphen]",true);
+  addAttributeVoid(map,StarAttribute::ATTR_TXT_SOFTHYPH,"text[softHyphen]");
+  addAttributeBool(map,StarAttribute::ATTR_CHR_NOLINEBREAK,"char[nolineBreak]",true);
+
   addAttributeBool(map,StarAttribute::ATTR_CHR_DUMMY1,"char[dummy1]",false);
+  addAttributeBool(map,StarAttribute::ATTR_TXT_DUMMY1,"text[dummy1]",false);
+  addAttributeBool(map,StarAttribute::ATTR_TXT_DUMMY2,"text[dummy2]",false);
+  addAttributeBool(map,StarAttribute::ATTR_TXT_DUMMY4,"text[dummy4]",false);
+  addAttributeBool(map,StarAttribute::ATTR_TXT_DUMMY5,"text[dummy5]",false);
+  addAttributeBool(map,StarAttribute::ATTR_TXT_DUMMY6,"text[dummy6]",false);
+  addAttributeBool(map,StarAttribute::ATTR_TXT_DUMMY7,"text[dummy7]",false);
+  addAttributeVoid(map,StarAttribute::ATTR_TXT_UNKNOWN_CONTAINER, "text[unknContainer]"); // XML attrib
 }
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

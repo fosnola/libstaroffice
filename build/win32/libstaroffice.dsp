@@ -227,6 +227,10 @@ SOURCE=..\..\src\lib\StarItemPool.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarLanguage.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarObject.cxx
 # End Source File
 # Begin Source File
@@ -424,6 +428,10 @@ SOURCE=..\..\src\lib\StarFileManager.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarItemPool.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarLanguage.hxx
 # End Source File
 # Begin Source File
 

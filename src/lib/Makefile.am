@@ -88,6 +88,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarFileManager.hxx			\
 	StarItemPool.cxx			\
 	StarItemPool.hxx			\
+	StarLanguage.cxx			\
+	StarLanguage.hxx			\
 	StarObject.cxx				\
 	StarObject.hxx				\
 	StarObjectChart.cxx			\
