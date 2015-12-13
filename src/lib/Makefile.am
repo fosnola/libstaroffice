@@ -22,6 +22,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	SDWParser.hxx				\
 	STOFFCell.cxx				\
 	STOFFCell.hxx				\
+	STOFFCellStyle.cxx			\
+	STOFFCellStyle.hxx			\
 	STOFFChart.cxx				\
 	STOFFChart.hxx				\
 	STOFFDebug.cxx				\

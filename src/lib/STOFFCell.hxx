@@ -45,7 +45,7 @@
 
 #include "STOFFEntry.hxx"
 #include "STOFFFont.hxx"
-#include "STOFFGraphicStyle.hxx"
+#include "STOFFCellStyle.hxx"
 
 class STOFFTable;
 
@@ -126,7 +126,7 @@ public:
 
   //! constructor
   STOFFCell() : m_position(0,0), m_numberCellSpanned(1,1), m_bdBox(),  m_bdSize(),
-    m_format(), m_font(), m_graphicStyle(), m_hAlign(HALIGN_DEFAULT), m_vAlign(VALIGN_DEFAULT), m_protected(false) { }
+    m_format(), m_font(), m_cellStyle(), m_hAlign(HALIGN_DEFAULT), m_vAlign(VALIGN_DEFAULT), m_protected(false) { }
 
   //! destructor
   virtual ~STOFFCell() {}
@@ -226,15 +226,15 @@ public:
     m_font=font;
   }
 
-  //! returns the graphic style
-  STOFFGraphicStyle const &getGraphicStyle() const
+  //! returns the cell style
+  STOFFCellStyle const &getCellStyle() const
   {
-    return m_graphicStyle;
+    return m_cellStyle;
   }
-  //! set the graphic style
-  void setGraphicStyle(STOFFGraphicStyle const &graphicStyle)
+  //! set the cell style
+  void setCellStyle(STOFFCellStyle const &cellStyle)
   {
-    m_graphicStyle=graphicStyle;
+    m_cellStyle=cellStyle;
   }
 
   //! returns true if the cell is protected
@@ -284,8 +284,8 @@ protected:
   Format m_format;
   //! the cell font
   STOFFFont m_font;
-  //! the cell graphic style
-  STOFFGraphicStyle m_graphicStyle;
+  //! the cell cell style
+  STOFFCellStyle m_cellStyle;
   //! the cell alignment : by default nothing
   HorizontalAlignment m_hAlign;
   //! the vertical cell alignment : by default nothing

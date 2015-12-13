@@ -54,6 +54,7 @@ struct StarItem;
 class StarObject;
 class StarZone;
 
+class STOFFCellStyle;
 class STOFFFont;
 class STOFFGraphicStyle;
 
@@ -220,8 +221,9 @@ public:
     ATTR_SC_PROTECTION,
     ATTR_SC_BORDER,
     ATTR_SC_BORDER_INNER,
-    ATTR_SC_VALIDDATA,
-    ATTR_SC_CONDITIONAL,                         	    // 150
+    ATTR_SC_SHADOW,
+    ATTR_SC_VALIDDATA,                         	    // 150
+    ATTR_SC_CONDITIONAL,
     ATTR_SC_PATTERN,
     ATTR_SC_PAGE,
     ATTR_SC_PAGE_PAPERTRAY,
@@ -741,6 +743,10 @@ public:
   virtual shared_ptr<StarAttribute> create() const=0;
   //! read an attribute zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &document)=0;
+  //! add to a cell style
+  virtual void addTo(STOFFCellStyle &/*cell*/) const
+  {
+  }
   //! add to a font
   virtual void addTo(STOFFFont &/*font*/) const
   {
@@ -965,6 +971,8 @@ public:
   {
     return shared_ptr<StarAttribute>(new StarAttributeItemSet(*this));
   }
+  //! add to a cell style
+  virtual void addTo(STOFFCellStyle &graphic) const;
   //! add all child to a font
   virtual void addTo(STOFFFont &font) const;
   //! add to a graphic style

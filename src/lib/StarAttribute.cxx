@@ -39,7 +39,6 @@
 
 #include <librevenge/librevenge.h>
 
-#include "STOFFFont.hxx"
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
 
@@ -698,6 +697,14 @@ void State::initAttributeMap()
 ////////////////////////////////////////////////////////////
 // basic attribute function
 ////////////////////////////////////////////////////////////
+void StarAttributeItemSet::addTo(STOFFCellStyle &cell) const
+{
+  for (size_t i=0; i<m_itemList.size(); ++i) {
+    if (m_itemList[i] && m_itemList[i]->m_attribute)
+      m_itemList[i]->m_attribute->addTo(cell);
+  }
+}
+
 void StarAttributeItemSet::addTo(STOFFFont &font) const
 {
   for (size_t i=0; i<m_itemList.size(); ++i) {
@@ -1346,30 +1353,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
         f << "nId=" << nId << ",";
     }
     break;
-  // ATTR_FRM_BACKGROUND see case StarAttribute::ATTR_CHR_BACKGROUND
-  case StarAttribute::ATTR_FRM_SHADOW: {
-    f << "shadow,";
-    f << "cLoc=" << input->readULong(1) << ",";
-    f << "nWidth=" << input->readULong(2) << ",";
-    f << "bTrans=" << input->readULong(1) << ",";
-    STOFFColor color;
-    if (!input->readColor(color)) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read color\n"));
-      f << "###color,";
-      break;
-    }
-    else if (!color.isWhite())
-      f << "color=" << color << ",";
-    if (!input->readColor(color)) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read fill color\n"));
-      f << "###fillcolor,";
-      break;
-    }
-    else if (!color.isWhite())
-      f << "fillcolor=" << color << ",";
-    f << "style=" << input->readULong(1) << ",";
-    break;
-  }
   case StarAttribute::ATTR_FRM_FRMMACRO: { // macitem.cxx SvxMacroTableDtor::Read
     f << "frmMacro,";
     if (nVers>=1) {

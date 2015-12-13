@@ -50,6 +50,7 @@
 #include "StarZone.hxx"
 
 #include "STOFFCell.hxx"
+#include "STOFFCellStyle.hxx"
 #include "STOFFFont.hxx"
 #include "STOFFGraphicStyle.hxx"
 #include "STOFFOLEParser.hxx"
@@ -575,9 +576,9 @@ bool StarObjectSpreadsheet::sendCell(StarObjectSpreadsheetInternal::Cell &cell, 
     STOFFFont font;
     attrib->addTo(font);
     cell.setFont(font);
-    STOFFGraphicStyle style;
+    STOFFCellStyle style;
     attrib->addTo(style);
-    cell.setGraphicStyle(style);
+    cell.setCellStyle(style);
   }
   if (!cell.m_content.m_formula.empty())
     StarCellFormula::updateFormula(cell.m_content, m_state->m_sheetNames, table);
@@ -1947,13 +1948,13 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
         pool=getNewItemPool(StarItemPool::T_SpreadsheetPool);
       }
       f << "attrib=[";
-#if 0
+#if 1
       std::cerr << "Attrib\n";
 #endif
       for (int i=0,row=0; i<nCount; ++i) {
         int newRow=(int) input->readULong(2);
         f << newRow << ":";
-        uint16_t nWhich=149; // StarAttribute::ATTR_SC_PATTERN;
+        uint16_t nWhich=149;//StarAttribute::ATTR_SC_PATTERN-3;
         shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
         if (!item || input->tell()>endDataPos) {
           STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCColumn:can not read a attrib\n"));
@@ -1964,10 +1965,10 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
           row=newRow+1;
           continue;
         }
-#if 0
-        std::cerr << "\t" << STOFFVec2i(row, newRow) << ":" ;
-        item->m_attribute->print(std::cerr);
-        std::cerr << "\n";
+#if 1
+        libstoff::DebugStream f2;
+        item->m_attribute->print(f2);
+        std::cerr << "\t" << STOFFVec2i(row, newRow) << ":" << f2.str().c_str() << "\n";
 #endif
         if (newRow>=row) {
           table.updateRowsBlocks(STOFFVec2i(row, newRow));

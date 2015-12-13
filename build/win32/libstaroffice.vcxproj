@@ -114,6 +114,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\..\src\lib\STOFFCellStyle.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\src\lib\STOFFChart.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -299,6 +303,7 @@
     <ClInclude Include="..\..\src\lib\SDCParser.hxx" />
     <ClInclude Include="..\..\src\lib\SDWParser.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFCell.hxx" />
+    <ClInclude Include="..\..\src\lib\STOFFCellStyle.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFChart.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFDebug.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFEntry.hxx" />

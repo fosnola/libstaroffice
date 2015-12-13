@@ -342,7 +342,7 @@ void STOFFCell::addTo(librevenge::RVNGPropertyList &propList) const
   propList.insert("table:number-rows-spanned", numSpannedCells()[1]);
 
   m_font.addTo(propList);
-  m_graphicStyle.addTo(propList);
+  m_cellStyle.addTo(propList);
   if (isProtected())
     propList.insert("style:cell-protect","protected");
   // alignment

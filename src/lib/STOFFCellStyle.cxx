@@ -31,25 +31,38 @@
 * instead of those above.
 */
 
-/*
- * file to read/parse StarOffice graphic attributes
- *
- */
-#ifndef STAR_GRAPHIC_ATTRIBUTE
-#  define STAR_GRAPHIC_ATTRIBUTE
+#include <sstream>
 
-#include <map>
+#include <librevenge/librevenge.h>
 
 #include "libstaroffice_internal.hxx"
 
-class StarAttribute;
+#include "STOFFCellStyle.hxx"
 
-//! namespace used to contain graphic attributes (and some cell attributes which are similar)
-namespace StarGraphicAttribute
+// cell style function
+
+std::ostream &operator<<(std::ostream &o, STOFFCellStyle const &cellStyle)
 {
-//! adds graphic attribute to the general it to attribute map
-void addInitTo(std::map<int, shared_ptr<StarAttribute> > &whichToAttributeMap);
+  o << cellStyle.m_propertyList.getPropString().cstr() << ",";;
+  return o;
 }
 
-#endif
+bool STOFFCellStyle::operator==(STOFFCellStyle const &cellStyle) const
+{
+  return m_propertyList.getPropString() == cellStyle.m_propertyList.getPropString();
+}
+
+void STOFFCellStyle::addTo(librevenge::RVNGPropertyList &pList) const
+{
+  librevenge::RVNGPropertyList::Iter i(m_propertyList);
+  for (i.rewind(); i.next();) {
+    if (i.child()) {
+      STOFF_DEBUG_MSG(("STOFFCellStyle::addTo: find unexpected property child\n"));
+      pList.insert(i.key(), *i.child());
+      continue;
+    }
+    pList.insert(i.key(), i()->clone());
+  }
+}
+
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

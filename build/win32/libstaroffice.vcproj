@@ -193,6 +193,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\STOFFCellStyle.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\STOFFChart.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -560,6 +568,8 @@
 			<File RelativePath="..\..\src\lib\SDWParser.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFCell.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\STOFFCellStyle.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFChart.hxx">
 			</File>

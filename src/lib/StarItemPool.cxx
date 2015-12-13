@@ -613,7 +613,7 @@ void State::init(StarItemPool::Type type)
       StarAttribute::ATTR_SC_LINEBREAK, StarAttribute::ATTR_SC_MARGIN, StarAttribute::ATTR_SC_MERGE, StarAttribute::ATTR_SC_MERGE_FLAG,
 
       StarAttribute::ATTR_SC_VALUE_FORMAT, StarAttribute::ATTR_SC_LANGUAGE_FORMAT, StarAttribute::ATTR_FRM_BACKGROUND, StarAttribute::ATTR_SC_PROTECTION,
-      StarAttribute::ATTR_SC_BORDER, StarAttribute::ATTR_SC_BORDER_INNER, StarAttribute::ATTR_FRM_SHADOW, StarAttribute::ATTR_SC_VALIDDATA,
+      StarAttribute::ATTR_SC_BORDER, StarAttribute::ATTR_SC_BORDER_INNER, StarAttribute::ATTR_SC_SHADOW, StarAttribute::ATTR_SC_VALIDDATA,
       StarAttribute::ATTR_SC_CONDITIONAL, StarAttribute::ATTR_SC_PATTERN, StarAttribute::ATTR_FRM_LR_SPACE, StarAttribute::ATTR_FRM_UL_SPACE,
       StarAttribute::ATTR_SC_PAGE, StarAttribute::ATTR_SC_PAGE_PAPERTRAY, StarAttribute::ATTR_FRM_PAPER_BIN, StarAttribute::ATTR_SC_PAGE_SIZE,
       StarAttribute::ATTR_SC_PAGE_MAXSIZE, StarAttribute::ATTR_SC_PAGE_HORCENTER, StarAttribute::ATTR_SC_PAGE_VERCENTER, StarAttribute::ATTR_SC_PAGE_ON,

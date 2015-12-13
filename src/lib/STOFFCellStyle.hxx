@@ -31,25 +31,38 @@
 * instead of those above.
 */
 
-/*
- * file to read/parse StarOffice graphic attributes
- *
- */
-#ifndef STAR_GRAPHIC_ATTRIBUTE
-#  define STAR_GRAPHIC_ATTRIBUTE
+#ifndef STOFF_CELL_STYLE
+#  define STOFF_CELL_STYLE
 
-#include <map>
+#include <string>
+#include <vector>
 
 #include "libstaroffice_internal.hxx"
 
-class StarAttribute;
-
-//! namespace used to contain graphic attributes (and some cell attributes which are similar)
-namespace StarGraphicAttribute
+//! Class to store a cell style
+class STOFFCellStyle
 {
-//! adds graphic attribute to the general it to attribute map
-void addInitTo(std::map<int, shared_ptr<StarAttribute> > &whichToAttributeMap);
-}
+public:
+  /** constructor */
+  STOFFCellStyle() : m_propertyList()
+  {
+  };
+  //! add to the propList
+  void addTo(librevenge::RVNGPropertyList &propList) const;
+
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, STOFFCellStyle const &cellStyle);
+  //! operator==
+  bool operator==(STOFFCellStyle const &cellStyle) const;
+  //! operator!=
+  bool operator!=(STOFFCellStyle const &cellStyle) const
+  {
+    return !operator==(cellStyle);
+  }
+  /** the property list */
+  librevenge::RVNGPropertyList m_propertyList;
+};
+
 
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

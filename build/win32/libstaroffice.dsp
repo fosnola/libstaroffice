@@ -99,6 +99,10 @@ SOURCE=..\..\src\lib\STOFFCell.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFCellStyle.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFChart.cxx
 # End Source File
 # Begin Source File
@@ -300,6 +304,10 @@ SOURCE=..\..\src\lib\SDWParser.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFCell.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFCellStyle.hxx
 # End Source File
 # Begin Source File
 

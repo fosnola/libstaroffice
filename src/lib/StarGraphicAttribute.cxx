@@ -31,6 +31,7 @@
 * instead of those above.
 */
 
+#include "STOFFCellStyle.hxx"
 #include "STOFFGraphicStyle.hxx"
 
 #include "StarAttribute.hxx"
@@ -205,6 +206,8 @@ public:
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a cell style
+  virtual void addTo(STOFFCellStyle &cell) const;
   //! add to a graphic style
   virtual void addTo(STOFFGraphicStyle &graphic) const;
   //! debug function to print the data
@@ -249,23 +252,137 @@ protected:
   int m_distances[4];
 };
 
+//! a shadow attribute
+class StarGAttributeShadow : public StarAttribute
+{
+public:
+  //! constructor
+  StarGAttributeShadow(Type type, std::string const &debugName) :
+    StarAttribute(type, debugName), m_location(0), m_width(0), m_transparency(0), m_color(STOFFColor::white()),
+    m_fillColor(STOFFColor::white()), m_style(0)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarGAttributeShadow(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a cell style
+  virtual void addTo(STOFFCellStyle &cell) const;
+  //! add to a graphic style
+  virtual void addTo(STOFFGraphicStyle &graphic) const;
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    if (m_location) o << "loc=" << m_location << ",";
+    if (m_width) o << "width=" << m_width << ",";
+    if (m_transparency) o << "transparency=" << m_transparency << ",";
+    if (!m_color.isWhite()) o << "col=" << m_color << ",";
+    if (!m_fillColor.isWhite()) o << "col[fill]=" << m_fillColor << ",";
+    if (m_style) o << "style=" << m_style << ",";
+    o << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarGAttributeShadow(StarGAttributeShadow const &orig) :
+    StarAttribute(orig), m_location(orig.m_location), m_width(orig.m_width), m_transparency(orig.m_transparency), m_color(orig.m_color),
+    m_fillColor(orig.m_fillColor), m_style(orig.m_style)
+  {
+  }
+  //! the location 0-4
+  int m_location;
+  //! the width in twip
+  int m_width;
+  //! the trans?
+  int m_transparency;
+  //! the color
+  STOFFColor m_color;
+  //! the fill color
+  STOFFColor m_fillColor;
+  //! the style
+  int m_style;
+};
+
+void StarGAttributeBorder::addTo(STOFFCellStyle &cell) const
+{
+  if (m_type==ATTR_SC_BORDER) {
+    // checkme what is m_distance?
+    char const * (wh[])= {"top", "left", "right", "bottom"};
+    for (int i=0; i<4; ++i) {
+      if (!m_borders[i].isEmpty())
+        m_borders[i].addTo(cell.m_propertyList, wh[i]);
+    }
+  }
+}
+
 void StarGAttributeBorder::addTo(STOFFGraphicStyle &graphic) const
 {
-  if (m_type==StarAttribute::ATTR_FRM_BOX || m_type==ATTR_SC_BORDER) {
+  if (m_type==ATTR_FRM_BOX) {
     // checkme what is m_distance?
     char const * (wh[])= {"top", "left", "right", "bottom"};
     for (int i=0; i<4; ++i) {
       if (!m_borders[i].isEmpty())
         m_borders[i].addTo(graphic.m_propertyList, wh[i]);
     }
-    if (StarAttribute::ATTR_FRM_BOX) {
-      for (int i=0; i<4; ++i) {
-        if (m_distances[i]==0)
-          continue;
-        graphic.m_propertyList.insert((std::string("padding-")+wh[i]).c_str(), float(m_distances[i])/20.f, librevenge::RVNG_POINT);
-      }
+    for (int i=0; i<4; ++i) {
+      if (m_distances[i]==0)
+        continue;
+      graphic.m_propertyList.insert((std::string("padding-")+wh[i]).c_str(), float(m_distances[i])/20.f, librevenge::RVNG_POINT);
     }
   }
+}
+
+void StarGAttributeShadow::addTo(STOFFCellStyle &cell) const
+{
+  if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=100) return;
+  std::stringstream s;
+  s << m_color.str().c_str() << " "
+    << ((m_location%2)?-1:1)*double(m_width)/20. << "pt "
+    << (m_location<=2?-1:1)*double(m_width)/20. << "pt";
+  cell.m_propertyList.insert("style:shadow", s.str().c_str());
+}
+
+void StarGAttributeShadow::addTo(STOFFGraphicStyle &graphic) const
+{
+  if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=100) return;
+  graphic.m_propertyList.insert("draw:shadow", "visible");
+  graphic.m_propertyList.insert("draw:shadow-color", m_color.str().c_str());
+  graphic.m_propertyList.insert("draw:shadow-opacity", 1.f-float(m_transparency)/100.f, librevenge::RVNG_PERCENT);
+  graphic.m_propertyList.insert("draw:shadow-offset-x", ((m_location%2)?-1:1)*double(m_width)/20., librevenge::RVNG_POINT);
+  graphic.m_propertyList.insert("draw:shadow-offset-y", (m_location<=2?-1:1)*double(m_width)/20., librevenge::RVNG_POINT);
+}
+
+bool StarGAttributeShadow::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  bool ok=true;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  m_location=(int) input->readULong(1);
+  m_width=(int) input->readULong(2);
+  m_transparency=(int) input->readULong(1);
+  if (!input->readColor(m_color)) {
+    STOFF_DEBUG_MSG(("StarGraphicAttribute::StarGAttributeShadow::read: can not find a fill color\n"));
+    f << "###color,";
+    ok=false;
+  }
+  if (ok && !input->readColor(m_fillColor)) {
+    STOFF_DEBUG_MSG(("StarGraphicAttribute::StarGAttributeShadow::read: can not find a fill color\n"));
+    f << "###fillcolor,";
+    ok=false;
+  }
+  if (ok) m_style=(int) input->readULong(1);
+
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok && input->tell()<=endPos;
 }
 
 bool StarGAttributeBorder::read(StarZone &zone, int nVers, long endPos, StarObject &/*object*/)
@@ -317,6 +434,8 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
 {
   map[StarAttribute::ATTR_FRM_BOX]=shared_ptr<StarAttribute>(new StarGAttributeBorder(StarAttribute::ATTR_FRM_BOX,"box"));
   map[StarAttribute::ATTR_SC_BORDER]=shared_ptr<StarAttribute>(new StarGAttributeBorder(StarAttribute::ATTR_SC_BORDER,"scBorder"));
+  map[StarAttribute::ATTR_FRM_SHADOW]=shared_ptr<StarAttribute>(new StarGAttributeShadow(StarAttribute::ATTR_FRM_SHADOW,"shadow"));
+  map[StarAttribute::ATTR_SC_SHADOW]=shared_ptr<StarAttribute>(new StarGAttributeShadow(StarAttribute::ATTR_SC_SHADOW,"shadow"));
 }
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
