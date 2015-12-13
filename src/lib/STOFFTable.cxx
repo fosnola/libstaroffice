@@ -274,9 +274,6 @@ bool STOFFTable::buildPosToCellId()
   m_posToCellId.resize(m_numCols*m_numRows, -1);
   for (size_t c = 0; c < nCells; ++c) {
     if (!m_cellsList[c]) continue;
-    if (m_cellsList[c]->hasExtraLine()) {
-      STOFF_DEBUG_MSG(("STOFFTable::buildPosToCellId: extra line code is not implemented!!!\n"));
-    }
     STOFFVec2i const &pos=m_cellsList[c]->position();
     STOFFVec2i lastPos=pos+m_cellsList[c]->numSpannedCells();
     for (int x = pos[0]; x < lastPos[0]; x++) {

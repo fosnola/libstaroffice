@@ -40,8 +40,6 @@
 
 #include <librevenge/librevenge.h>
 
-#include "STOFFOLEParser.hxx"
-
 #include "StarAttribute.hxx"
 #include "StarCellFormula.hxx"
 #include "StarEncryption.hxx"
@@ -50,9 +48,14 @@
 #include "StarObjectDraw.hxx"
 #include "StarObjectSmallText.hxx"
 #include "StarZone.hxx"
+
 #include "STOFFCell.hxx"
+#include "STOFFFont.hxx"
+#include "STOFFGraphicStyle.hxx"
+#include "STOFFOLEParser.hxx"
 #include "STOFFSpreadsheetListener.hxx"
 #include "STOFFTable.hxx"
+
 #include "SWFormatManager.hxx"
 
 #include "StarObjectSpreadsheet.hxx"
@@ -572,6 +575,9 @@ bool StarObjectSpreadsheet::sendCell(StarObjectSpreadsheetInternal::Cell &cell, 
     STOFFFont font;
     attrib->addTo(font);
     cell.setFont(font);
+    STOFFGraphicStyle style;
+    attrib->addTo(style);
+    cell.setGraphicStyle(style);
   }
   if (!cell.m_content.m_formula.empty())
     StarCellFormula::updateFormula(cell.m_content, m_state->m_sheetNames, table);

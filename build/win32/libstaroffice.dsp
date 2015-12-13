@@ -119,6 +119,10 @@ SOURCE=..\..\src\lib\STOFFGraphicDecoder.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFGraphicStyle.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFHeader.cxx
 # End Source File
 # Begin Source File
@@ -223,6 +227,10 @@ SOURCE=..\..\src\lib\StarFileManager.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarGraphicAttribute.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarItemPool.cxx
 # End Source File
 # Begin Source File
@@ -312,6 +320,10 @@ SOURCE=..\..\src\lib\STOFFFont.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFGraphicDecoder.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFGraphicStyle.hxx
 # End Source File
 # Begin Source File
 
@@ -424,6 +436,10 @@ SOURCE=..\..\src\lib\StarEncryption.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarFileManager.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarGraphicAttribute.hxx
 # End Source File
 # Begin Source File
 

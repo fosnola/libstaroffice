@@ -342,11 +342,8 @@ void StarCAttributeUInt::addTo(STOFFFont &font) const
         font.m_propertyList.insert((prefix + "country" + extension).c_str(), country.c_str());
     }
   }
-  else if (m_type==ATTR_CHR_PROPORTIONALFONTSIZE && m_value!=100) { // checkme: maybe font-size with %
-    std::stringstream s;
-    s << 0 << "% " << m_value << "%";
-    font.m_propertyList.insert("style:text-position", s.str().c_str());
-  }
+  else if (m_type==ATTR_CHR_PROPORTIONALFONTSIZE && m_value!=100) // checkme: maybe font-size with %
+    font.m_propertyList.insert("style:text-scale", float(m_value)/100.f, librevenge::RVNG_PERCENT);
   else if (m_type==ATTR_CHR_EMPHASIS_MARK) {
     if (m_value && ((m_value&0xC000)==0 || (m_value&0x3000)==0x3000 || (m_value&0xFFF)>4 || (m_value&0xFFF)==0)) {
       STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown emphasis mark=%x\n", (unsigned)m_value));
@@ -388,7 +385,7 @@ public:
   //! add to a font
   virtual void addTo(STOFFFont &font) const;
   //! debug function to print the data
-  virtual void print(std::ostream &o) const
+  virtual void print(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     if (m_delta) o << "decal=" << m_delta << "%,";
@@ -425,7 +422,7 @@ public:
   //! add to a font
   virtual void addTo(STOFFFont &font) const;
   //! debug function to print the data
-  virtual void print(std::ostream &o) const
+  virtual void print(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     if (!m_name.empty()) o << "name=" << m_name.cstr() << ",";
@@ -618,7 +615,7 @@ public:
   //! add to a font
   virtual void addTo(STOFFFont &font) const;
   //! debug function to print the data
-  virtual void print(std::ostream &o) const
+  virtual void print(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     if (m_size!=240) o << "sz=" << m_size << ",";

@@ -93,9 +93,6 @@ std::ostream &operator<<(std::ostream &o, STOFFSection const &sec)
     o << "text[balance],";
   for (size_t c=0; c < sec.m_columns.size(); c++)
     o << "col" << c << "=[" << sec.m_columns[c] << "],";
-  if (sec.m_columnSeparator.m_style != STOFFBorder::None &&
-      sec.m_columnSeparator.m_width > 0)
-    o << "colSep=[" << sec.m_columnSeparator << "],";
   return o;
 }
 
@@ -128,13 +125,6 @@ void STOFFSection::addTo(librevenge::RVNGPropertyList &propList) const
     propList.insert("text:dont-balance-text-columns", !m_balanceText);
   if (!m_backgroundColor.isWhite())
     propList.insert("fo:background-color", m_backgroundColor.str().c_str());
-  if (m_columnSeparator.m_style != STOFFBorder::None &&
-      m_columnSeparator.m_width > 0) {
-    propList.insert("librevenge:colsep-width", m_columnSeparator.m_width, librevenge::RVNG_POINT);
-    propList.insert("librevenge:colsep-color", m_columnSeparator.m_color.str().c_str());
-    propList.insert("librevenge:colsep-height", "100%");
-    propList.insert("librevenge:colsep-vertical-align", "middle");
-  }
 }
 
 void STOFFSection::addColumnsTo(librevenge::RVNGPropertyListVector &propVec) const

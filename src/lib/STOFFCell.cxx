@@ -342,27 +342,7 @@ void STOFFCell::addTo(librevenge::RVNGPropertyList &propList) const
   propList.insert("table:number-rows-spanned", numSpannedCells()[1]);
 
   m_font.addTo(propList);
-  for (size_t c = 0; c < m_bordersList.size(); c++) {
-    switch (c) {
-    case libstoff::Left:
-      m_bordersList[c].addTo(propList, "left");
-      break;
-    case libstoff::Right:
-      m_bordersList[c].addTo(propList, "right");
-      break;
-    case libstoff::Top:
-      m_bordersList[c].addTo(propList, "top");
-      break;
-    case libstoff::Bottom:
-      m_bordersList[c].addTo(propList, "bottom");
-      break;
-    default:
-      STOFF_DEBUG_MSG(("STOFFCell::addTo: can not send %d border\n",int(c)));
-      break;
-    }
-  }
-  if (!backgroundColor().isWhite())
-    propList.insert("fo:background-color", backgroundColor().str().c_str());
+  m_graphicStyle.addTo(propList);
   if (isProtected())
     propList.insert("style:cell-protect","protected");
   // alignment
@@ -428,29 +408,6 @@ std::string STOFFCell::getCellName(STOFFVec2i const &pos, STOFFVec2b const &abso
   return f.str();
 }
 
-void STOFFCell::setBorders(int wh, STOFFBorder const &border)
-{
-  int const allBits = libstoff::LeftBit|libstoff::RightBit|libstoff::TopBit|libstoff::BottomBit|libstoff::HMiddleBit|libstoff::VMiddleBit;
-  if (wh & (~allBits)) {
-    STOFF_DEBUG_MSG(("STOFFCell::setBorders: unknown borders\n"));
-    return;
-  }
-  size_t numData = 4;
-  if (wh & (libstoff::HMiddleBit|libstoff::VMiddleBit))
-    numData=6;
-  if (m_bordersList.size() < numData) {
-    STOFFBorder emptyBorder;
-    emptyBorder.m_style = STOFFBorder::None;
-    m_bordersList.resize(numData, emptyBorder);
-  }
-  if (wh & libstoff::LeftBit) m_bordersList[libstoff::Left] = border;
-  if (wh & libstoff::RightBit) m_bordersList[libstoff::Right] = border;
-  if (wh & libstoff::TopBit) m_bordersList[libstoff::Top] = border;
-  if (wh & libstoff::BottomBit) m_bordersList[libstoff::Bottom] = border;
-  if (wh & libstoff::HMiddleBit) m_bordersList[libstoff::HMiddle] = border;
-  if (wh & libstoff::VMiddleBit) m_bordersList[libstoff::VMiddle] = border;
-}
-
 std::ostream &operator<<(std::ostream &o, STOFFCell const &cell)
 {
   o << STOFFCell::getCellName(cell.m_position, STOFFVec2b(false,false)) << ":";
@@ -495,36 +452,6 @@ std::ostream &operator<<(std::ostream &o, STOFFCell const &cell)
     break; // default
   }
 
-  if (!cell.m_backgroundColor.isWhite())
-    o << "backColor=" << cell.m_backgroundColor << ",";
-  for (size_t i = 0; i < cell.m_bordersList.size(); i++) {
-    if (cell.m_bordersList[i].m_style == STOFFBorder::None)
-      continue;
-    o << "bord";
-    if (i < 6) {
-      static char const *wh[] = { "L", "R", "T", "B", "MiddleH", "MiddleV" };
-      o << wh[i];
-    }
-    else o << "[#wh=" << i << "]";
-    o << "=" << cell.m_bordersList[i] << ",";
-  }
-  switch (cell.m_extraLine) {
-  case STOFFCell::E_None:
-    break;
-  case STOFFCell::E_Line1:
-    o << "line[TL->RB],";
-    break;
-  case STOFFCell::E_Line2:
-    o << "line[BL->RT],";
-    break;
-  case STOFFCell::E_Cross:
-    o << "line[cross],";
-    break;
-  default:
-    break;
-  }
-  if (cell.m_extraLine!=STOFFCell::E_None)
-    o << cell.m_extraLineType << ",";
   return o;
 }
 

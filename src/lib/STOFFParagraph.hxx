@@ -115,8 +115,7 @@ public:
   //! a function used to resize the borders list ( adding empty borders if needed )
   void resizeBorders(size_t newSize)
   {
-    STOFFBorder empty;
-    empty.m_style=STOFFBorder::None;
+    STOFFBorderLine empty;
     m_borders.resize(newSize, empty);
   }
   //! set the interline
@@ -174,8 +173,8 @@ public:
   //! the background color
   STOFFVariable<STOFFColor> m_backgroundColor;
 
-  //! list of border ( order STOFFBorder::Pos)
-  std::vector<STOFFVariable<STOFFBorder> > m_borders;
+  //! list of border ( order STOFFBorderLine::Pos)
+  std::vector<STOFFVariable<STOFFBorderLine> > m_borders;
 
   //! the style name
   std::string m_styleName;

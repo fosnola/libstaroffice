@@ -32,6 +32,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFFont.hxx				\
 	STOFFGraphicDecoder.cxx			\
 	STOFFGraphicDecoder.hxx			\
+	STOFFGraphicStyle.cxx			\
+	STOFFGraphicStyle.hxx			\
 	STOFFHeader.cxx				\
 	STOFFHeader.hxx				\
 	STOFFInputStream.cxx			\
@@ -86,6 +88,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarEncryption.hxx			\
 	StarFileManager.cxx			\
 	StarFileManager.hxx			\
+	StarGraphicAttribute.cxx		\
+	StarGraphicAttribute.hxx		\
 	StarItemPool.cxx			\
 	StarItemPool.hxx			\
 	StarLanguage.cxx			\

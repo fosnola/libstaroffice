@@ -239,140 +239,37 @@ bool STOFFLink::addTo(librevenge::RVNGPropertyList &propList) const
 }
 
 // border function
-int STOFFBorder::compare(STOFFBorder const &orig) const
+bool STOFFBorderLine::addTo(librevenge::RVNGPropertyList &propList, std::string const which) const
 {
-  int diff = int(m_style)-int(orig.m_style);
-  if (diff) return diff;
-  diff = int(m_type)-int(orig.m_type);
-  if (diff) return diff;
-  if (m_width < orig.m_width) return -1;
-  if (m_width > orig.m_width) return 1;
-  if (m_color < orig.m_color) return -1;
-  if (m_color > orig.m_color) return 1;
-  return 0;
-}
-bool STOFFBorder::addTo(librevenge::RVNGPropertyList &propList, std::string const which) const
-{
+  if (isEmpty())
+    return true;
   std::stringstream stream, field;
-  stream << m_width << "pt ";
-  if (m_type==STOFFBorder::Double || m_type==STOFFBorder::Triple) {
-    static bool first = true;
-    if (first && m_style!=Simple) {
-      STOFF_DEBUG_MSG(("STOFFBorder::addTo: find double or tripe border with complex style\n"));
-      first = false;
-    }
-    stream << "double";
-  }
-  else {
-    switch (m_style) {
-    case Dot:
-    case LargeDot:
-      stream << "dotted";
-      break;
-    case Dash:
-      stream << "dashed";
-      break;
-    case Simple:
-      stream << "solid";
-      break;
-    case None:
-    default:
-      stream << "none";
-      break;
-    }
-  }
-  stream << " " << m_color;
   field << "fo:border";
   if (which.length())
     field << "-" << which;
+  stream << float(m_inWidth+m_distance+m_outWidth)/20.f << "pt ";
+  stream << ((m_inWidth && m_outWidth) ? "double" : "solid") << " " << m_color;
   propList.insert(field.str().c_str(), stream.str().c_str());
-  size_t numRelWidth=m_widthsList.size();
-  if (!numRelWidth)
-    return true;
-  if (m_type!=STOFFBorder::Double || numRelWidth!=3) {
-    static bool first = true;
-    if (first) {
-      STOFF_DEBUG_MSG(("STOFFBorder::addTo: relative width is only implemented with double style\n"));
-      first = false;
-    }
-    return true;
+
+  if (m_inWidth && m_outWidth) {
+    field.str("");
+    field << "style:border-line-width";
+    if (which.length())
+      field << "-" << which;
+    stream.str("");
+    stream << float(m_inWidth)/20.f << "pt " << float(m_distance)/20.f << "pt " << float(m_outWidth)/20.f << "pt";
+    propList.insert(field.str().c_str(), stream.str().c_str());
   }
-  double totalWidth=0;
-  for (size_t w=0; w < numRelWidth; w++)
-    totalWidth+=m_widthsList[w];
-  if (totalWidth <= 0) {
-    STOFF_DEBUG_MSG(("STOFFBorder::addTo: can not compute total width\n"));
-    return true;
-  }
-  double factor=m_width/totalWidth;
-  stream.str("");
-  for (size_t w=0; w < numRelWidth; w++) {
-    stream << factor *m_widthsList[w]<< "pt";
-    if (w+1!=numRelWidth)
-      stream << " ";
-  }
-  field.str("");
-  field << "style:border-line-width";
-  if (which.length())
-    field << "-" << which;
-  propList.insert(field.str().c_str(), stream.str().c_str());
   return true;
 }
 
-std::ostream &operator<< (std::ostream &o, STOFFBorder::Style const &style)
+std::ostream &operator<< (std::ostream &o, STOFFBorderLine const &border)
 {
-  switch (style) {
-  case STOFFBorder::None:
-    o << "none";
-    break;
-  case STOFFBorder::Simple:
-    break;
-  case STOFFBorder::Dot:
-    o << "dot";
-    break;
-  case STOFFBorder::LargeDot:
-    o << "large dot";
-    break;
-  case STOFFBorder::Dash:
-    o << "dash";
-    break;
-  default:
-    STOFF_DEBUG_MSG(("STOFFBorder::operator<<: find unknown style\n"));
-    o << "#style=" << int(style);
-    break;
-  }
-  return o;
-}
-
-std::ostream &operator<< (std::ostream &o, STOFFBorder const &border)
-{
-  o << border.m_style << ":";
-  switch (border.m_type) {
-  case STOFFBorder::Single:
-    break;
-  case STOFFBorder::Double:
-    o << "double:";
-    break;
-  case STOFFBorder::Triple:
-    o << "triple:";
-    break;
-  default:
-    STOFF_DEBUG_MSG(("STOFFBorder::operator<<: find unknown type\n"));
-    o << "#type=" << int(border.m_type) << ":";
-    break;
-  }
-  if (border.m_width > 1 || border.m_width < 1) o << "w=" << border.m_width << ":";
-  if (!border.m_color.isBlack())
-    o << "col=" << border.m_color << ":";
+  if (border.m_outWidth) o << "width[out]=" << border.m_outWidth << ":";
+  if (border.m_inWidth) o << "width[in]=" << border.m_inWidth << ":";
+  if (border.m_distance) o << "distance=" << border.m_distance << ":";
+  if (!border.m_color.isBlack()) o << "col=" << border.m_color << ":";
   o << ",";
-  size_t numRelWidth=border.m_widthsList.size();
-  if (numRelWidth) {
-    o << "bordW[rel]=[";
-    for (size_t i=0; i < numRelWidth; i++)
-      o << border.m_widthsList[i] << ",";
-    o << "]:";
-  }
-  o << border.m_extra;
   return o;
 }
 

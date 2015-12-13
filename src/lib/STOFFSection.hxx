@@ -47,9 +47,8 @@ class STOFFSection
 public:
   struct Column;
   //! constructor
-  STOFFSection() : m_columns(), m_width(0), m_columnSeparator(), m_balanceText(false), m_backgroundColor(STOFFColor::white())
+  STOFFSection() : m_columns(), m_width(0), m_balanceText(false), m_backgroundColor(STOFFColor::white())
   {
-    m_columnSeparator.m_style=STOFFBorder::None;
   }
   //! destructor
   virtual ~STOFFSection()
@@ -85,8 +84,6 @@ public:
       if (m_columns[c] != sec.m_columns[c])
         return true;
     }
-    if (m_columnSeparator != sec.m_columnSeparator)
-      return true;
     if (m_balanceText!=sec.m_balanceText || m_backgroundColor!=sec.m_backgroundColor)
       return true;
     return false;
@@ -101,8 +98,6 @@ public:
   std::vector<Column> m_columns;
   //! the total section width ( if set )
   double m_width;
-  /** the vertical separator between columns */
-  STOFFBorder m_columnSeparator;
   //! true if the text is balanced between different columns
   bool m_balanceText;
   //! the background color

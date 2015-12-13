@@ -45,6 +45,7 @@
 
 #include "STOFFEntry.hxx"
 #include "STOFFFont.hxx"
+#include "STOFFGraphicStyle.hxx"
 
 class STOFFTable;
 
@@ -123,14 +124,9 @@ public:
   \note actually mainly used for table/spreadsheet cell,  not yet implemented */
   enum VerticalAlignment { VALIGN_TOP, VALIGN_CENTER, VALIGN_BOTTOM, VALIGN_DEFAULT };
 
-  //! an enum to defined potential internal line: E_Line1=TL to RB, E_Line2=BL to RT
-  enum ExtraLine { E_None, E_Line1, E_Line2, E_Cross };
-
   //! constructor
   STOFFCell() : m_position(0,0), m_numberCellSpanned(1,1), m_bdBox(),  m_bdSize(),
-    m_format(), m_font(), m_hAlign(HALIGN_DEFAULT), m_vAlign(VALIGN_DEFAULT),
-    m_backgroundColor(STOFFColor::white()), m_protected(false),
-    m_bordersList(), m_extraLine(E_None), m_extraLineType() { }
+    m_format(), m_font(), m_graphicStyle(), m_hAlign(HALIGN_DEFAULT), m_vAlign(VALIGN_DEFAULT), m_protected(false) { }
 
   //! destructor
   virtual ~STOFFCell() {}
@@ -220,14 +216,25 @@ public:
   }
 
   //! returns the font
-  STOFFFont getFont() const
+  STOFFFont const &getFont() const
   {
     return m_font;
   }
-  //! sets the fonts
+  //! set the font
   void setFont(STOFFFont const &font)
   {
     m_font=font;
+  }
+
+  //! returns the graphic style
+  STOFFGraphicStyle const &getGraphicStyle() const
+  {
+    return m_graphicStyle;
+  }
+  //! set the graphic style
+  void setGraphicStyle(STOFFGraphicStyle const &graphicStyle)
+  {
+    m_graphicStyle=graphicStyle;
   }
 
   //! returns true if the cell is protected
@@ -263,56 +270,6 @@ public:
     m_vAlign = align;
   }
 
-  //! return true if the cell has some border
-  bool hasBorders() const
-  {
-    return m_bordersList.size() != 0;
-  }
-  //! return the cell border: libstoff::Left | ...
-  std::vector<STOFFBorder> const &borders() const
-  {
-    return m_bordersList;
-  }
-
-  //! reset the border
-  void resetBorders()
-  {
-    m_bordersList.resize(0);
-  }
-  //! sets the cell border: wh=libstoff::LeftBit|...
-  void setBorders(int wh, STOFFBorder const &border);
-
-  //! returns the background color
-  STOFFColor backgroundColor() const
-  {
-    return m_backgroundColor;
-  }
-  //! sets the background color
-  void setBackgroundColor(STOFFColor color)
-  {
-    m_backgroundColor = color;
-  }
-  //! returns true if we have some extra lines
-  bool hasExtraLine() const
-  {
-    return m_extraLine!=E_None && !m_extraLineType.isEmpty();
-  }
-  //! returns the extra lines
-  ExtraLine extraLine() const
-  {
-    return m_extraLine;
-  }
-  //! returns the extra line border
-  STOFFBorder const &extraLineType() const
-  {
-    return m_extraLineType;
-  }
-  //! sets the extraline
-  void setExtraLine(ExtraLine extrLine, STOFFBorder const &type=STOFFBorder())
-  {
-    m_extraLine = extrLine;
-    m_extraLineType=type;
-  }
 protected:
   //! the cell row and column : 0,0 -> A1, 0,1 -> A2
   STOFFVec2i m_position;
@@ -327,21 +284,14 @@ protected:
   Format m_format;
   //! the cell font
   STOFFFont m_font;
+  //! the cell graphic style
+  STOFFGraphicStyle m_graphicStyle;
   //! the cell alignment : by default nothing
   HorizontalAlignment m_hAlign;
   //! the vertical cell alignment : by default nothing
   VerticalAlignment m_vAlign;
-  //! the backgroung color
-  STOFFColor m_backgroundColor;
   //! cell protected
   bool m_protected;
-
-  //! the cell border STOFFBorder::Pos
-  std::vector<STOFFBorder> m_bordersList;
-  /** extra line */
-  ExtraLine m_extraLine;
-  /** extra line type */
-  STOFFBorder m_extraLineType;
 };
 
 //! small class use to define a sheet cell content

@@ -54,6 +54,9 @@ struct StarItem;
 class StarObject;
 class StarZone;
 
+class STOFFFont;
+class STOFFGraphicStyle;
+
 //! virtual class used to store the different attribute
 class StarAttribute
 {
@@ -742,13 +745,17 @@ public:
   virtual void addTo(STOFFFont &/*font*/) const
   {
   }
+  //! add to a graphic style
+  virtual void addTo(STOFFGraphicStyle &/*graphic*/) const
+  {
+  }
   //! returns the debug name
   std::string const &getDebugName() const
   {
     return m_debugName;
   }
   //! debug function to print the data
-  virtual void print(std::ostream &o) const
+  virtual void print(libstoff::DebugStream &o) const
   {
     o << m_debugName << ",";
   }
@@ -791,7 +798,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int ver, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(std::ostream &o) const
+  virtual void print(libstoff::DebugStream &o) const
   {
     o << m_debugName;
     if (m_value) o << "=true";
@@ -822,7 +829,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(std::ostream &o) const
+  virtual void print(libstoff::DebugStream &o) const
   {
     o << m_debugName << "[col=" << m_value << "],";
   }
@@ -854,7 +861,7 @@ public:
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
 
   //! debug function to print the data
-  virtual void print(std::ostream &o) const
+  virtual void print(libstoff::DebugStream &o) const
   {
     o << m_debugName;
     if (m_value<0 || m_value>0) o << "=" << m_value;
@@ -889,7 +896,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(std::ostream &o) const
+  virtual void print(libstoff::DebugStream &o) const
   {
     o << m_debugName;
     if (m_value) o << "=" << m_value;
@@ -927,7 +934,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(std::ostream &o) const
+  virtual void print(libstoff::DebugStream &o) const
   {
     o << m_debugName;
     if (m_value) o << "=" << m_value;
@@ -960,11 +967,13 @@ public:
   }
   //! add all child to a font
   virtual void addTo(STOFFFont &font) const;
+  //! add to a graphic style
+  virtual void addTo(STOFFGraphicStyle &graphic) const;
 
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(std::ostream &o) const;
+  virtual void print(libstoff::DebugStream &o) const;
 
 protected:
   //! copy constructor

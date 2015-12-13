@@ -233,6 +233,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\STOFFGraphicStyle.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\STOFFHeader.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -441,6 +449,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\StarGraphicAttribute.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\StarItemPool.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -555,6 +571,8 @@
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFGraphicDecoder.hxx">
 			</File>
+			<File RelativePath="..\..\src\lib\STOFFGraphicStyle.hxx">
+			</File>
 			<File RelativePath="..\..\src\lib\STOFFHeader.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFInputStream.hxx">
@@ -610,6 +628,8 @@
 			<File RelativePath="..\..\src\lib\StarEncryption.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarFileManager.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\StarGraphicAttribute.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarItemPool.hxx">
 			</File>

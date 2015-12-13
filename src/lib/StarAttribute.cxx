@@ -45,6 +45,7 @@
 
 #include "StarBitmap.hxx"
 #include "StarCharAttribute.hxx"
+#include "StarGraphicAttribute.hxx"
 #include "StarItemPool.hxx"
 #include "StarObject.hxx"
 #include "StarObjectSmallText.hxx"
@@ -120,7 +121,7 @@ public:
     return ok && input->tell()<=endPos;
   }
   //! debug function to print the data
-  virtual void print(std::ostream &o) const
+  virtual void print(libstoff::DebugStream &o) const
   {
     StarAttributeItemSet::print(o);
     if (m_style.empty())
@@ -194,10 +195,11 @@ protected:
 void State::initAttributeMap()
 {
   StarCharAttribute::addInitTo(m_whichToAttributeMap);
+  StarGraphicAttribute::addInitTo(m_whichToAttributeMap);
 
   std::stringstream s;
-  // --- sw --- sw_init.cxx
 
+  // --- sw --- sw_init.cxx
   addAttributeBool(StarAttribute::ATTR_PARA_SPLIT,"para[split]",true);
   addAttributeUInt(StarAttribute::ATTR_PARA_WIDOWS,"para[widows]",1,0); // numlines
   addAttributeUInt(StarAttribute::ATTR_PARA_ORPHANS,"para[orphans]",1,0); // numlines
@@ -704,7 +706,15 @@ void StarAttributeItemSet::addTo(STOFFFont &font) const
   }
 }
 
-void StarAttributeItemSet::print(std::ostream &o) const
+void StarAttributeItemSet::addTo(STOFFGraphicStyle &graphic) const
+{
+  for (size_t i=0; i<m_itemList.size(); ++i) {
+    if (m_itemList[i] && m_itemList[i]->m_attribute)
+      m_itemList[i]->m_attribute->addTo(graphic);
+  }
+}
+
+void StarAttributeItemSet::print(libstoff::DebugStream &o) const
 {
   o << m_debugName;
   if (!m_itemList.empty()) {
@@ -1337,38 +1347,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     }
     break;
   // ATTR_FRM_BACKGROUND see case StarAttribute::ATTR_CHR_BACKGROUND
-  case StarAttribute::ATTR_FRM_BOX:
-  case StarAttribute::ATTR_SC_BORDER: {
-    f << (nWhich==StarAttribute::ATTR_FRM_BOX ? "box" : "scBorder") << ",";
-    f << "nDist=" << input->readULong(2) << ",";
-    int cLine=0;
-    bool ok=true;
-    while (input->tell()<lastPos) {
-      cLine=(int) input->readULong(1);
-      if (cLine>3) break;
-      f << "[";
-      STOFFColor color;
-      if (!input->readColor(color)) {
-        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find a box's color\n"));
-        f << "###color,";
-        ok=false;
-        break;
-      }
-      else if (!color.isBlack())
-        f << "col=" << color << ",";
-      f << "outline=" << input->readULong(2) << ",";
-      f << "inline=" << input->readULong(2) << ",";
-      f << "nDist=" << input->readULong(2) << ",";
-      f << "],";
-    }
-    if (!ok) break;
-    if (nVers>=1 && cLine&0x10) {
-      f << "dist=[";
-      for (int i=0; i<4; ++i) f << input->readULong(2) << ",";
-      f << "],";
-    }
-    break;
-  }
   case StarAttribute::ATTR_FRM_SHADOW: {
     f << "shadow,";
     f << "cLoc=" << input->readULong(1) << ",";

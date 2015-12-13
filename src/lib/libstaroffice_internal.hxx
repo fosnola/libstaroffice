@@ -307,15 +307,10 @@ protected:
   uint32_t m_value;
 };
 
-//! a border
-struct STOFFBorder {
-  /** the line style */
-  enum Style { None, Simple, Dot, LargeDot, Dash };
-  /** the line repetition */
-  enum Type { Single, Double, Triple };
-
+//! a border line
+struct STOFFBorderLine {
   //! constructor
-  STOFFBorder() : m_style(Simple), m_type(Single), m_width(1), m_widthsList(), m_color(STOFFColor::black()), m_extra("") { }
+  STOFFBorderLine() : m_outWidth(0), m_inWidth(0), m_color(STOFFColor::black()), m_distance(0) { }
   /** add the border property to proplist (if needed )
 
   \note if set which must be equal to "left", "top", ... */
@@ -323,40 +318,30 @@ struct STOFFBorder {
   //! returns true if the border is empty
   bool isEmpty() const
   {
-    return m_style==None || m_width <= 0;
+    return m_outWidth==0 && m_inWidth==0;
   }
   //! operator==
-  bool operator==(STOFFBorder const &orig) const
+  bool operator==(STOFFBorderLine const &orig) const
   {
     return !operator!=(orig);
   }
   //! operator!=
-  bool operator!=(STOFFBorder const &orig) const
+  bool operator!=(STOFFBorderLine const &orig) const
   {
-    return m_style != orig.m_style || m_type != orig.m_type ||
-           m_width < orig.m_width || m_width > orig.m_width || m_color != orig.m_color;
+    return m_outWidth != orig.m_outWidth || m_inWidth != orig.m_inWidth ||
+           m_distance != orig.m_distance || m_color != orig.m_color;
   }
-  //! compare two borders
-  int compare(STOFFBorder const &orig) const;
 
   //! operator<<
-  friend std::ostream &operator<< (std::ostream &o, STOFFBorder const &border);
-  //! operator<<: prints data in form "none|dot|..."
-  friend std::ostream &operator<< (std::ostream &o, STOFFBorder::Style const &style);
-  //! the border style
-  Style m_style;
-  //! the border repetition
-  Type m_type;
-  //! the border total width in point
-  double m_width;
-  /** the different length used for each line/sep (if defined)
-
-  \note when defined, the size of this list must be equal to 2*Type-1*/
-  std::vector<double> m_widthsList;
+  friend std::ostream &operator<< (std::ostream &o, STOFFBorderLine const &border);
+  //! the outline width in TWIP
+  int m_outWidth;
+  //! the inline width in TWIP
+  int m_inWidth;
   //! the border color
   STOFFColor m_color;
-  //! extra data ( if needed)
-  std::string m_extra;
+  //! the border distance
+  int m_distance;
 };
 
 //! a field

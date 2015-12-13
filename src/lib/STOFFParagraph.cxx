@@ -198,8 +198,6 @@ int STOFFParagraph::cmp(STOFFParagraph const &para) const
   for (size_t i=0; i < m_borders.size(); i++) {
     if (m_borders[i].isSet() != para.m_borders[i].isSet())
       return m_borders[i].isSet() ? 1 : -1;
-    diff = m_borders[i]->compare(*(para.m_borders[i]));
-    if (diff) return diff;
   }
   if (m_styleName<para.m_styleName) return -1;
   if (m_styleName>para.m_styleName) return 1;
@@ -313,7 +311,7 @@ void STOFFParagraph::addTo(librevenge::RVNGPropertyList &propList, bool inTable)
           break;
         if (!m_borders[w].isSet())
           continue;
-        STOFFBorder const &border = *(m_borders[w]);
+        STOFFBorderLine const &border = *(m_borders[w]);
         if (border.isEmpty())
           continue;
         if (setAll) {
@@ -459,7 +457,7 @@ std::ostream &operator<<(std::ostream &o, STOFFParagraph const &pp)
   for (size_t i = 0; i < pp.m_borders.size(); i++) {
     if (!pp.m_borders[i].isSet())
       continue;
-    STOFFBorder const &border = pp.m_borders[i].get();
+    STOFFBorderLine const &border = pp.m_borders[i].get();
     if (border.isEmpty())
       continue;
     o << "bord";

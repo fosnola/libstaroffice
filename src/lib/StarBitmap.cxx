@@ -575,7 +575,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
         if (decal--==0)
           decal=7;
       }
-      input->seek(actPos+alignWidth, librevenge::RVNG_SEEK_SET);
+      input->seek(actPos+long(alignWidth), librevenge::RVNG_SEEK_SET);
     }
     break;
   }
@@ -590,7 +590,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
           val=(unsigned char) input->readULong(1);
         bitmap.m_indexDataList[wPos++]=int(((x%2) ? val : (val>>4))&0xf);
       }
-      input->seek(actPos+alignWidth, librevenge::RVNG_SEEK_SET);
+      input->seek(actPos+long(alignWidth), librevenge::RVNG_SEEK_SET);
     }
     break;
   }
@@ -601,7 +601,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
       actPos=input->tell();
       for (uint32_t x=0; x<bitmap.m_width; ++x)
         bitmap.m_indexDataList[wPos++]=(int) input->readULong(1);
-      input->seek(actPos+alignWidth, librevenge::RVNG_SEEK_SET);
+      input->seek(actPos+long(alignWidth), librevenge::RVNG_SEEK_SET);
     }
     break;
   }
@@ -616,7 +616,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
           STOFFColor((unsigned char)((val&RGBMask[0])>>RGBShift[0]), (unsigned char)((val&RGBMask[1])>>RGBShift[1]),
                      (unsigned char)((val&RGBMask[2])>>RGBShift[2]));
       }
-      input->seek(actPos+alignWidth, librevenge::RVNG_SEEK_SET);
+      input->seek(actPos+long(alignWidth), librevenge::RVNG_SEEK_SET);
     }
     break;
   }
@@ -632,13 +632,13 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
         for (int c=0; c<numComponent; ++c) col[c]=(unsigned char) input->readULong(1);
         bitmap.m_colorDataList[wPos++]=STOFFColor(col[0],col[1],col[2],col[3]);
       }
-      input->seek(actPos+alignWidth, librevenge::RVNG_SEEK_SET);
+      input->seek(actPos+long(alignWidth), librevenge::RVNG_SEEK_SET);
     }
     break;
   }
   default:
     STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: find unexpected bit count %d\n", int(bitmap.m_bitCount)));
-    input->seek(actPos+bitmap.m_height*alignWidth, librevenge::RVNG_SEEK_SET);
+    input->seek(actPos+long(bitmap.m_height*alignWidth), librevenge::RVNG_SEEK_SET);
     break;
   }
   return true;
