@@ -243,6 +243,11 @@ struct STOFFColor {
   {
     return (unsigned char)((m_value>>24)&0xFF);
   }
+  //! reset the alpha value
+  void setAlpha(unsigned char alpha)
+  {
+    m_value=(m_value&0xFFFFFF)|uint32_t(alpha<<24);
+  }
   //! returns the green value
   unsigned char getBlue() const
   {

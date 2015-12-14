@@ -39,8 +39,10 @@
 
 #include <librevenge/librevenge.h>
 
-#include "StarAttribute.hxx"
+#include "STOFFGraphicStyle.hxx"
+
 #include "StarFileManager.hxx"
+#include "StarGraphicStruct.hxx"
 #include "StarObject.hxx"
 #include "StarObjectText.hxx"
 #include "StarZone.hxx"
@@ -295,13 +297,15 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarObject 
   uint16_t tmp;
   *input >> tmp;
   if (tmp) {
-    if (!StarAttributeManager::readBrushItem(zone, 1, lastPos, doc, f)) {
+    StarGraphicStruct::StarBrush brush;
+    if (!brush.read(zone, 1, lastPos, doc)) {
       STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: can not read a brush\n"));
-      f << "###brush";
+      f << brush << "###brush";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       return false;
     }
+    f << brush;
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
 

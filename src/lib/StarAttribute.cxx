@@ -39,6 +39,8 @@
 
 #include <librevenge/librevenge.h>
 
+#include "STOFFGraphicStyle.hxx"
+
 #include "SWFieldManager.hxx"
 #include "SWFormatManager.hxx"
 
@@ -904,14 +906,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
       f << color << ",";
     break;
   }
-  case StarAttribute::ATTR_CHR_BACKGROUND:
-  case StarAttribute::ATTR_FRM_BACKGROUND:
-  case StarAttribute::ATTR_SCH_SYMBOL_BRUSH:
-    f << (nWhich==StarAttribute::ATTR_CHR_BACKGROUND ? "chrAtrBackground" :
-          nWhich==StarAttribute::ATTR_FRM_BACKGROUND ? "background" : "symbol[brush]") << "=" << input->readULong(1) << ",";
-    if (!readBrushItem(zone, nVers, lastPos, object, f)) break;
-    // TODO store the brush
-    break;
   case StarAttribute::ATTR_CHR_ROTATE:
     f << "chrAtrRotate,";
     f << "nVal=" << input->readULong(2) << ",";
@@ -2051,56 +2045,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return getDummyAttribute(nWhich); // fixme
-}
-
-bool StarAttributeManager::readBrushItem(StarZone &zone, int nVers, long /*endPos*/, StarObject &/*object*/, libstoff::DebugStream &f)
-{
-  STOFFInputStreamPtr input=zone.input();
-  STOFFColor color;
-  if (!input->readColor(color)) {
-    STOFF_DEBUG_MSG(("StarAttributeManager::readBrushItem: can not read color\n"));
-    f << "###color,";
-    return false;
-  }
-  else if (!color.isWhite())
-    f << "color=" << color << ",";
-  if (!input->readColor(color)) {
-    STOFF_DEBUG_MSG(("StarAttributeManager::readBrushItem: can not read fill color\n"));
-    f << "###fillcolor,";
-    return false;
-  }
-  else if (!color.isWhite())
-    f << "fillcolor=" << color << ",";
-  f << "nStyle=" << input->readULong(1) << ",";
-  if (nVers<1) return true;
-  int doLoad=(int) input->readULong(2);
-  if (doLoad & 1) { // TODO: svx_frmitems.cxx:1948
-    STOFF_DEBUG_MSG(("StarAttributeManager::readBrushItem: do not know how to load graphic\n"));
-    f << "###graphic,";
-    return false;
-  }
-  if (doLoad & 2) {
-    std::vector<uint32_t> link;
-    if (!zone.readString(link)) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readBrushItem: can not find the link\n"));
-      f << "###link,";
-      return false;
-    }
-    if (!link.empty())
-      f << "link=" << libstoff::getString(link).cstr() << ",";
-  }
-  if (doLoad & 4) {
-    std::vector<uint32_t> filter;
-    if (!zone.readString(filter)) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readBrushItem: can not find the filter\n"));
-      f << "###filter,";
-      return false;
-    }
-    if (!filter.empty())
-      f << "filter=" << libstoff::getString(filter).cstr() << ",";
-  }
-  f << "nPos=" << input->readULong(1) << ",";
-  return true;
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

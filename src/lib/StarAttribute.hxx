@@ -218,11 +218,12 @@ public:
     ATTR_SC_MERGE_FLAG,
     ATTR_SC_VALUE_FORMAT,
     ATTR_SC_LANGUAGE_FORMAT,
+    ATTR_SC_BACKGROUND,
     ATTR_SC_PROTECTION,
     ATTR_SC_BORDER,
     ATTR_SC_BORDER_INNER,
-    ATTR_SC_SHADOW,
-    ATTR_SC_VALIDDATA,                         	    // 150
+    ATTR_SC_SHADOW,																	// 150
+    ATTR_SC_VALIDDATA,
     ATTR_SC_CONDITIONAL,
     ATTR_SC_PATTERN,
     ATTR_SC_PAGE,
@@ -1031,8 +1032,6 @@ public:
   shared_ptr<StarAttribute> getDefaultAttribute(int which);
   //! return a dummy attribute
   static shared_ptr<StarAttribute> getDummyAttribute(int type=-1);
-  //! try to read a brush
-  static bool readBrushItem(StarZone &zone, int nVers, long endPos, StarObject &document, libstoff::DebugStream &f);
 
 protected:
   //

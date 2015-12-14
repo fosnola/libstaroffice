@@ -34,6 +34,7 @@
 #ifndef STOFF_GRAPHIC_STYLE
 #  define STOFF_GRAPHIC_STYLE
 
+#include <ostream>
 #include <string>
 #include <vector>
 

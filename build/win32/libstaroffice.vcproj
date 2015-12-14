@@ -465,6 +465,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\StarGraphicStruct.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\StarItemPool.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -640,6 +648,8 @@
 			<File RelativePath="..\..\src\lib\StarFileManager.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarGraphicAttribute.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\StarGraphicStruct.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarItemPool.hxx">
 			</File>

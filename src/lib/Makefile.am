@@ -92,6 +92,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarFileManager.hxx			\
 	StarGraphicAttribute.cxx		\
 	StarGraphicAttribute.hxx		\
+	StarGraphicStruct.cxx			\
+	StarGraphicStruct.hxx			\
 	StarItemPool.cxx			\
 	StarItemPool.hxx			\
 	StarLanguage.cxx			\

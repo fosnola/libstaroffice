@@ -32,9 +32,11 @@
 */
 
 #include "STOFFCellStyle.hxx"
+#include "STOFFFont.hxx"
 #include "STOFFGraphicStyle.hxx"
 
 #include "StarAttribute.hxx"
+#include "StarGraphicStruct.hxx"
 #include "StarItemPool.hxx"
 #include "StarLanguage.hxx"
 #include "StarObject.hxx"
@@ -252,6 +254,42 @@ protected:
   int m_distances[4];
 };
 
+//! a brush attribute
+class StarGAttributeBrush : public StarAttribute
+{
+public:
+  //! constructor
+  StarGAttributeBrush(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_brush()
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarGAttributeBrush(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a font
+  virtual void addTo(STOFFFont &font) const;
+  //! add to a cell style
+  virtual void addTo(STOFFCellStyle &cell) const;
+  //! add to a graphic style
+  virtual void addTo(STOFFGraphicStyle &graphic) const;
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[" << m_brush << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarGAttributeBrush(StarGAttributeBrush const &orig) : StarAttribute(orig), m_brush(orig.m_brush)
+  {
+  }
+  //! the brush
+  StarGraphicStruct::StarBrush m_brush;
+};
+
 //! a shadow attribute
 class StarGAttributeShadow : public StarAttribute
 {
@@ -336,6 +374,58 @@ void StarGAttributeBorder::addTo(STOFFGraphicStyle &graphic) const
   }
 }
 
+void StarGAttributeBrush::addTo(STOFFFont &font) const
+{
+  if (m_type != ATTR_SC_BACKGROUND || m_brush.isEmpty())
+    return;
+  STOFFColor color;
+  if (m_brush.getColor(color)) {
+    font.m_propertyList.insert("fo:background-color", color.str().c_str());
+    return;
+  }
+  else {
+    STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a font background\n"));
+  }
+}
+
+void StarGAttributeBrush::addTo(STOFFCellStyle &cell) const
+{
+  if (m_type != ATTR_SC_BACKGROUND || m_brush.isEmpty())
+    return;
+  STOFFColor color;
+  if (m_brush.getColor(color)) {
+    cell.m_propertyList.insert("fo:background-color", color.str().c_str());
+    return;
+  }
+  else {
+    STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a cell background\n"));
+  }
+}
+
+void StarGAttributeBrush::addTo(STOFFGraphicStyle &graphic) const
+{
+  if (m_type!=ATTR_FRM_BACKGROUND || m_brush.isEmpty())
+    return;
+  if (m_brush.m_transparency>0 && m_brush.m_transparency<=255)
+    graphic.m_propertyList.insert("draw:opacity", 1.-double(m_brush.m_transparency)/255., librevenge::RVNG_PERCENT);
+  STOFFColor color;
+  if (m_brush.hasUniqueColor() && m_brush.getColor(color)) {
+    graphic.m_propertyList.insert("draw:fill", "solid");
+    graphic.m_propertyList.insert("draw:fill-color", color.str().c_str());
+    return;
+  }
+  STOFFEmbeddedObject object;
+  STOFFVec2i size;
+  if (m_brush.getPattern(object, size) && object.m_dataList.size()) {
+    graphic.m_propertyList.insert("draw:fill", "bitmap");
+    graphic.m_propertyList.insert("draw:fill-image", object.m_dataList[0].getBase64Data());
+    graphic.m_propertyList.insert("draw:fill-image-width", size[0], librevenge::RVNG_POINT);
+    graphic.m_propertyList.insert("draw:fill-image-height", size[1], librevenge::RVNG_POINT);
+    graphic.m_propertyList.insert("draw:fill-image-ref-point-x",0, librevenge::RVNG_POINT);
+    graphic.m_propertyList.insert("draw:fill-image-ref-point-y",0, librevenge::RVNG_POINT);
+    graphic.m_propertyList.insert("librevenge:mime-type", object.m_typeList.empty() ? "image/pict" : object.m_typeList[0].c_str());
+  }
+}
 void StarGAttributeShadow::addTo(STOFFCellStyle &cell) const
 {
   if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=100) return;
@@ -348,42 +438,14 @@ void StarGAttributeShadow::addTo(STOFFCellStyle &cell) const
 
 void StarGAttributeShadow::addTo(STOFFGraphicStyle &graphic) const
 {
-  if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=100) return;
+  if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=255) return;
   graphic.m_propertyList.insert("draw:shadow", "visible");
   graphic.m_propertyList.insert("draw:shadow-color", m_color.str().c_str());
-  graphic.m_propertyList.insert("draw:shadow-opacity", 1.f-float(m_transparency)/100.f, librevenge::RVNG_PERCENT);
+  graphic.m_propertyList.insert("draw:shadow-opacity", 1.f-float(m_transparency)/255.f, librevenge::RVNG_PERCENT);
   graphic.m_propertyList.insert("draw:shadow-offset-x", ((m_location%2)?-1:1)*double(m_width)/20., librevenge::RVNG_POINT);
   graphic.m_propertyList.insert("draw:shadow-offset-y", (m_location<=2?-1:1)*double(m_width)/20., librevenge::RVNG_POINT);
 }
 
-bool StarGAttributeShadow::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
-{
-  STOFFInputStreamPtr input=zone.input();
-  long pos=input->tell();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-  bool ok=true;
-  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  m_location=(int) input->readULong(1);
-  m_width=(int) input->readULong(2);
-  m_transparency=(int) input->readULong(1);
-  if (!input->readColor(m_color)) {
-    STOFF_DEBUG_MSG(("StarGraphicAttribute::StarGAttributeShadow::read: can not find a fill color\n"));
-    f << "###color,";
-    ok=false;
-  }
-  if (ok && !input->readColor(m_fillColor)) {
-    STOFF_DEBUG_MSG(("StarGraphicAttribute::StarGAttributeShadow::read: can not find a fill color\n"));
-    f << "###fillcolor,";
-    ok=false;
-  }
-  if (ok) m_style=(int) input->readULong(1);
-
-  print(f);
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  return ok && input->tell()<=endPos;
-}
 
 bool StarGAttributeBorder::read(StarZone &zone, int nVers, long endPos, StarObject &/*object*/)
 {
@@ -425,6 +487,54 @@ bool StarGAttributeBorder::read(StarZone &zone, int nVers, long endPos, StarObje
   return ok && input->tell()<=endPos;
 }
 
+bool StarGAttributeBrush::read(StarZone &zone, int nVers, long endPos, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  bool transparent=false;
+  *input>>transparent;
+  bool ok=m_brush.read(zone, nVers, endPos, object);
+  if (!ok)
+    f << "###brush,";
+  if (transparent)
+    m_brush.m_transparency=255;
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok && input->tell()<=endPos;
+}
+
+bool StarGAttributeShadow::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  bool ok=true;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  m_location=(int) input->readULong(1);
+  m_width=(int) input->readULong(2);
+  m_transparency=(int) input->readULong(1);
+  if (!input->readColor(m_color)) {
+    STOFF_DEBUG_MSG(("StarGraphicAttribute::StarGAttributeShadow::read: can not find a fill color\n"));
+    f << "###color,";
+    ok=false;
+  }
+  if (ok && !input->readColor(m_fillColor)) {
+    STOFF_DEBUG_MSG(("StarGraphicAttribute::StarGAttributeShadow::read: can not find a fill color\n"));
+    f << "###fillcolor,";
+    ok=false;
+  }
+  if (ok) m_style=(int) input->readULong(1);
+
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok && input->tell()<=endPos;
+}
 
 }
 
@@ -434,6 +544,10 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
 {
   map[StarAttribute::ATTR_FRM_BOX]=shared_ptr<StarAttribute>(new StarGAttributeBorder(StarAttribute::ATTR_FRM_BOX,"box"));
   map[StarAttribute::ATTR_SC_BORDER]=shared_ptr<StarAttribute>(new StarGAttributeBorder(StarAttribute::ATTR_SC_BORDER,"scBorder"));
+  map[StarAttribute::ATTR_CHR_BACKGROUND]=shared_ptr<StarAttribute>(new StarGAttributeBrush(StarAttribute::ATTR_CHR_BACKGROUND,"chrBackground"));
+  map[StarAttribute::ATTR_FRM_BACKGROUND]=shared_ptr<StarAttribute>(new StarGAttributeBrush(StarAttribute::ATTR_FRM_BACKGROUND,"frmBackground"));
+  map[StarAttribute::ATTR_SC_BACKGROUND]=shared_ptr<StarAttribute>(new StarGAttributeBrush(StarAttribute::ATTR_SC_BACKGROUND,"scBackground"));
+  map[StarAttribute::ATTR_SCH_SYMBOL_BRUSH]=shared_ptr<StarAttribute>(new StarGAttributeBrush(StarAttribute::ATTR_SCH_SYMBOL_BRUSH,"symbold[brush]"));
   map[StarAttribute::ATTR_FRM_SHADOW]=shared_ptr<StarAttribute>(new StarGAttributeShadow(StarAttribute::ATTR_FRM_SHADOW,"shadow"));
   map[StarAttribute::ATTR_SC_SHADOW]=shared_ptr<StarAttribute>(new StarGAttributeShadow(StarAttribute::ATTR_SC_SHADOW,"shadow"));
 }

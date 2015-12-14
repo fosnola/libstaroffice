@@ -1948,7 +1948,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
         pool=getNewItemPool(StarItemPool::T_SpreadsheetPool);
       }
       f << "attrib=[";
-#if 1
+#if 0
       std::cerr << "Attrib\n";
 #endif
       for (int i=0,row=0; i<nCount; ++i) {
@@ -1965,7 +1965,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
           row=newRow+1;
           continue;
         }
-#if 1
+#if 0
         libstoff::DebugStream f2;
         item->m_attribute->print(f2);
         std::cerr << "\t" << STOFFVec2i(row, newRow) << ":" << f2.str().c_str() << "\n";
