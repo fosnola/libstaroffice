@@ -183,34 +183,6 @@ void State::initAttributeMap()
     addAttributeBool(StarAttribute::Type(type), s.str(), false);
   }
   // --- sc --- sc_docpool.cxx
-  addAttributeBool(StarAttribute::ATTR_SC_HYPHENATE,"hyphenate", false);
-  addAttributeUInt(StarAttribute::ATTR_SC_INDENT,"indent",2,0);
-  addAttributeInt(StarAttribute::ATTR_SC_ROTATE_VALUE,"rotate[value]",4,0);
-  addAttributeUInt(StarAttribute::ATTR_SC_ROTATE_MODE,"rotate[mode]",2,0); // normal
-  addAttributeBool(StarAttribute::ATTR_SC_VERTICAL_ASIAN,"vertical[asian]", false);
-  addAttributeUInt(StarAttribute::ATTR_SC_WRITINGDIR,"writing[dir]",2,4); // frame environment
-  addAttributeBool(StarAttribute::ATTR_SC_LINEBREAK,"lineBreak", false);
-  addAttributeInt(StarAttribute::ATTR_SC_MERGE_FLAG,"merge[flag]",2,0);
-  addAttributeUInt(StarAttribute::ATTR_SC_LANGUAGE_FORMAT,"char[language]",2,0x3ff); // in fact, global language
-  addAttributeUInt(StarAttribute::ATTR_SC_VALIDDATA,"data[valid]",4,0);
-  addAttributeUInt(StarAttribute::ATTR_SC_CONDITIONAL,"conditional",4,0);
-
-  addAttributeUInt(StarAttribute::ATTR_SC_PAGE_PAPERTRAY,"page[papertray]",2,0);
-  addAttributeBool(StarAttribute::ATTR_SC_PAGE_HORCENTER,"page[horizontal,center]", false);
-  addAttributeBool(StarAttribute::ATTR_SC_PAGE_VERCENTER,"page[vertical,center]", false);
-  addAttributeBool(StarAttribute::ATTR_SC_PAGE_ON,"page[on]", true);
-  addAttributeBool(StarAttribute::ATTR_SC_PAGE_DYNAMIC,"page[dynamic]", true);
-  addAttributeBool(StarAttribute::ATTR_SC_PAGE_SHARED,"page[shared]", true);
-  addAttributeBool(StarAttribute::ATTR_SC_PAGE_NOTES,"page[notes]", false);
-  addAttributeBool(StarAttribute::ATTR_SC_PAGE_GRID,"page[grid]", false);
-  addAttributeBool(StarAttribute::ATTR_SC_PAGE_HEADERS,"page[headers]", false);
-  addAttributeBool(StarAttribute::ATTR_SC_PAGE_TOPDOWN,"page[topdown]", true);
-  addAttributeUInt(StarAttribute::ATTR_SC_PAGE_SCALE,"page[scale]",2,100);
-  addAttributeUInt(StarAttribute::ATTR_SC_PAGE_SCALETOPAGES,"page[scaleToPage]",2,1);
-  addAttributeUInt(StarAttribute::ATTR_SC_PAGE_FIRSTPAGENO,"page[first,pageNo]",2,1);
-  addAttributeBool(StarAttribute::ATTR_SC_PAGE_FORMULAS,"page[formulas]", false);
-  addAttributeBool(StarAttribute::ATTR_SC_PAGE_NULLVALS,"page[nullvals]", true);
-
   std::vector<STOFFVec2i> limits;
   limits.push_back(STOFFVec2i(142,142)); // BACKGROUND
   limits.push_back(STOFFVec2i(144,146)); // BORDER->SHADOW
@@ -1504,13 +1476,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
   case StarAttribute::ATTR_SC_PAGE_MAXSIZE:
     f << (nWhich==StarAttribute::ATTR_SC_PAGE_SIZE ? "page[sz]" : "maxPage[sz]") << "=" << input->readLong(4) << "x" << input->readLong(4) << ",";
     break;
-  case StarAttribute::ATTR_SC_PAGE_CHARTS:
-  case StarAttribute::ATTR_SC_PAGE_OBJECTS:
-  case StarAttribute::ATTR_SC_PAGE_DRAWINGS:
-    f << (nWhich==StarAttribute::ATTR_SC_PAGE_CHARTS ? "page[charts]" : nWhich==StarAttribute::ATTR_SC_PAGE_OBJECTS ? "page[object]" : "page[drawings]");
-    if (nVers==0) f << ",";
-    else f << input->readULong(2) << ",";
-    break;
   case StarAttribute::ATTR_SC_PAGE_PRINTAREA:
   case StarAttribute::ATTR_SC_PAGE_REPEATROW:
   case StarAttribute::ATTR_SC_PAGE_REPEATCOL:
@@ -1520,6 +1485,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
       uint16_t n, nColS, nRowS, nColE, nRowE;
       *input >> n >> nColS >> nRowS >> nColE >> nRowE;
       if (n>255) f << "allTabs,";
+      else f << "table=" << n << ",";
       f << "range=" << nColS << "x" << nRowS << "<->" << nColE << "x" << nRowE << ",";
     }
     else {

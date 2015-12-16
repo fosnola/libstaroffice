@@ -58,7 +58,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeBool(*this));
   }
   //! add to a cell style
-  //virtual void addTo(STOFFCellStyle &cell) const;
+  virtual void addTo(STOFFCellStyle &cell) const;
 
 protected:
   //! copy constructor
@@ -99,7 +99,7 @@ public:
   {
   }
   //! add to a cell style
-  // virtual void addTo(STOFFCellStyle &cell) const;
+  virtual void addTo(STOFFCellStyle &cell) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -157,6 +157,21 @@ protected:
   }
 };
 
+void StarCAttributeBool::addTo(STOFFCellStyle &cell) const
+{
+  if (!m_value) return;
+  if (m_type==ATTR_SC_LINEBREAK)
+    cell.m_propertyList.insert("fo:wrap-option","wrap");
+}
+
+void StarCAttributeInt::addTo(STOFFCellStyle &cell) const
+{
+  if (m_type==ATTR_SC_ROTATE_VALUE) {
+    int prevRot=cell.m_propertyList["style:rotation-angle"] ? cell.m_propertyList["style:rotation-angle"]->getInt() : 0;
+    cell.m_propertyList.insert("style:rotation-angle",prevRot+m_value);
+  }
+}
+
 void StarCAttributeUInt::addTo(STOFFCellStyle &cell) const
 {
   if (m_type==ATTR_SC_VALUE_FORMAT)
@@ -175,26 +190,28 @@ void StarCAttributeUInt::addTo(STOFFCellStyle &cell) const
       cell.m_propertyList.insert("style:text-align-source", "fix");
       cell.m_propertyList.insert("fo:text-align", "justify");
       break;
-    case 5: // repeat (imposible)
+    case 5: // repeat
+      cell.m_propertyList.insert("style:repeat-content", true);
       break;
     default:
       STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeUInt::addTo: find unknown horizontal enum=%d\n", int(m_value)));
       break;
     }
   }
-  else if (m_type==ATTR_SC_VERJUSTIFY) {
+  else if (m_type==ATTR_SC_VERJUSTIFY || m_type==ATTR_SC_ROTATE_MODE) {
     switch (m_value) {
     case 0: // standard
       break;
     case 1: // top
     case 2: // center
     case 3: // bottom
-      cell.m_propertyList.insert("style:vertical-align", m_value==1 ? "top" : m_value==2 ? "middle" : "bottom");
-      break;
-    case 4: // block ?
+      cell.m_propertyList.insert(m_type==ATTR_SC_VERJUSTIFY ? "style:vertical-align" : "style:rotation-align",
+                                 m_value==1 ? "top" : m_value==2 ? "middle" : "bottom");
       break;
     default:
-      STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeUInt::addTo: find unknown vertical enum=%d\n", int(m_value)));
+      if (m_type==ATTR_SC_VERJUSTIFY && m_value==4) // block ?
+        break;
+      STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeUInt::addTo: find unknown vertical/rotateMode enum=%d\n", int(m_value)));
       break;
     }
   }
@@ -203,9 +220,11 @@ void StarCAttributeUInt::addTo(STOFFCellStyle &cell) const
     case 0: // standard
       break;
     case 1: // topbottom
-    case 2: // bottomtop
-      cell.m_propertyList.insert("style:rotation-angle",m_value==1 ? "270" : "90");
+    case 2: { // bottomtop
+      int prevRot=cell.m_propertyList["style:rotation-angle"] ? cell.m_propertyList["style:rotation-angle"]->getInt() : 0;
+      cell.m_propertyList.insert("style:rotation-angle",prevRot+(m_value==1 ? 270 : 90));
       break;
+    }
     case 3: // stacked
       cell.m_propertyList.insert("style:direction","ttb");
       break;
@@ -213,6 +232,14 @@ void StarCAttributeUInt::addTo(STOFFCellStyle &cell) const
       STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeUInt::addTo: find unknown orientation enum=%d\n", int(m_value)));
       break;
     }
+  }
+  else if (m_type==ATTR_SC_WRITINGDIR) {
+    if (m_value<=4) {
+      char const *(wh[])= {"lr-tb", "rl-tb", "tb-rl", "tb-lr", "page"};
+      cell.m_propertyList.insert("style:writing-mode", wh[m_value]);
+    }
+    else
+      STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeUInt::addTo: find unknown writing dir enum=%d\n", int(m_value)));
   }
 }
 
@@ -427,6 +454,54 @@ protected:
   bool m_doNotPrint;
 };
 
+//! a character unsigned integer attribute
+class StarCAttributeViewMode : public StarAttributeUInt
+{
+public:
+  //! constructor
+  StarCAttributeViewMode(Type type, std::string const &debugName) :
+    StarAttributeUInt(type, debugName, 2, 0)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarCAttributeViewMode(*this));
+  }
+  //! try to read a field
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object)
+  {
+    if (vers==0) {
+      m_value=0; // show
+      return true;
+    }
+    return StarAttributeUInt::read(zone, vers, endPos, object);
+  }
+  //! print data
+  void print(libstoff::DebugStream &o) const
+  {
+    o << m_debugName;
+    switch (m_value) {
+    case 0: // show
+      break;
+    case 1:
+      o << "=hide";
+      break;
+    default:
+      STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeViewMode::print: find unknown enum=%d\n", int(m_value)));
+      o << "=###" << m_value;
+      break;
+    }
+    o << ",";
+  }
+
+protected:
+  //! copy constructor
+  StarCAttributeViewMode(StarCAttributeUInt const &orig) : StarAttributeUInt(orig)
+  {
+  }
+};
+
 void StarCAttributeMargins::addTo(STOFFCellStyle &cell) const
 {
   if (m_type!=ATTR_SC_MARGIN)
@@ -441,7 +516,13 @@ void StarCAttributeMerge::addTo(STOFFCellStyle &cell) const
 {
   if (m_type!=ATTR_SC_MERGE)
     return;
-  cell.m_numberCellSpanned=m_span;
+  if (m_span==STOFFVec2i(0,0)) // checkme
+    return;
+  if (m_span[0]<=0 || m_span[1]<=0) {
+    STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeMerge::addTo: the span value %dx%d seems bad\n", m_span[0], m_span[1]));
+  }
+  else
+    cell.m_numberCellSpanned=m_span;
 }
 
 void StarCAttributeProtection::addTo(STOFFCellStyle &cell) const
@@ -518,14 +599,44 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeUInt(map, StarAttribute::ATTR_SC_VALUE_FORMAT,"format[value]",4,0);
   addAttributeUInt(map, StarAttribute::ATTR_SC_HORJUSTIFY,"justify[horz]",2,0); // standart
   addAttributeUInt(map, StarAttribute::ATTR_SC_VERJUSTIFY,"justify[vert]",2,0); // standart
+  addAttributeBool(map, StarAttribute::ATTR_SC_LINEBREAK,"lineBreak", false);
   addAttributeUInt(map, StarAttribute::ATTR_SC_ORIENTATION,"orientation",2,0); // standard
+  addAttributeInt(map, StarAttribute::ATTR_SC_ROTATE_VALUE,"rotate[value]",4,0);
+  addAttributeUInt(map, StarAttribute::ATTR_SC_ROTATE_MODE,"rotate[mode]",2,0); // normal
+  addAttributeUInt(map, StarAttribute::ATTR_SC_WRITINGDIR,"writing[dir]",2,4); // frame environment
 
   map[StarAttribute::ATTR_SC_PATTERN]=shared_ptr<StarAttribute>(new StarCAttributeSCPattern());
   map[StarAttribute::ATTR_SC_MARGIN]=shared_ptr<StarAttribute>(new StarCAttributeMargins(StarAttribute::ATTR_SC_MARGIN,"scMargins"));
   map[StarAttribute::ATTR_SC_MERGE]=shared_ptr<StarAttribute>(new StarCAttributeMerge(StarAttribute::ATTR_SC_MERGE,"scMerge"));
   map[StarAttribute::ATTR_SC_PROTECTION]=shared_ptr<StarAttribute>(new StarCAttributeProtection(StarAttribute::ATTR_SC_PROTECTION,"scProtection"));
 
-  // TODO
+  // TOUSE
+  addAttributeUInt(map, StarAttribute::ATTR_SC_INDENT,"indent",2,0);
+  addAttributeBool(map, StarAttribute::ATTR_SC_VERTICAL_ASIAN,"vertical[asian]", false);
+  addAttributeInt(map, StarAttribute::ATTR_SC_MERGE_FLAG,"merge[flag]",2,0);
+  addAttributeUInt(map, StarAttribute::ATTR_SC_VALIDDATA,"data[valid]",4,0);
+  addAttributeUInt(map, StarAttribute::ATTR_SC_CONDITIONAL,"conditional",4,0);
+
+  addAttributeUInt(map, StarAttribute::ATTR_SC_PAGE_PAPERTRAY,"page[papertray]",2,0);
+  addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_HORCENTER,"page[horizontal,center]", false);
+  addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_VERCENTER,"page[vertical,center]", false);
+  addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_ON,"page[on]", true);
+  addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_DYNAMIC,"page[dynamic]", true);
+  addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_SHARED,"page[shared]", true);
+  addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_NOTES,"page[notes]", false);
+  addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_GRID,"page[grid]", false);
+  addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_HEADERS,"page[headers]", false);
+  addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_TOPDOWN,"page[topdown]", true);
+  addAttributeUInt(map, StarAttribute::ATTR_SC_PAGE_SCALE,"page[scale]",2,100);
+  addAttributeUInt(map, StarAttribute::ATTR_SC_PAGE_SCALETOPAGES,"page[scaleToPage]",2,1);
+  addAttributeUInt(map, StarAttribute::ATTR_SC_PAGE_FIRSTPAGENO,"page[first,pageNo]",2,1);
+  addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_FORMULAS,"page[formulas]", false);
+  addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_NULLVALS,"page[nullvals]", true);
+
+  map[StarAttribute::ATTR_SC_PAGE_CHARTS]=shared_ptr<StarAttribute>(new StarCAttributeViewMode(StarAttribute::ATTR_SC_PAGE_CHARTS, "page[charts]"));
+  map[StarAttribute::ATTR_SC_PAGE_OBJECTS]=shared_ptr<StarAttribute>(new StarCAttributeViewMode(StarAttribute::ATTR_SC_PAGE_OBJECTS, "page[objects]"));
+  map[StarAttribute::ATTR_SC_PAGE_DRAWINGS]=shared_ptr<StarAttribute>(new StarCAttributeViewMode(StarAttribute::ATTR_SC_PAGE_DRAWINGS, "page[drawings]"));
+
 }
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

@@ -204,6 +204,8 @@ void StarCAttributeBool::addTo(STOFFFont &font) const
   }
   else if (m_type==ATTR_CHR_AUTOKERN)
     font.m_propertyList.insert("style:letter-kerning", "true");
+  else if (m_type==ATTR_SC_HYPHENATE)
+    font.m_propertyList.insert("fo:hyphenate", "true");
 }
 
 void StarCAttributeColor::addTo(STOFFFont &font) const
@@ -301,7 +303,7 @@ void StarCAttributeUInt::addTo(STOFFFont &font) const
     else if (m_value)
       STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown posture enum=%d\n", m_value));
   }
-  if (m_type==ATTR_CHR_RELIEF) {
+  else if (m_type==ATTR_CHR_RELIEF) {
     if (m_value==1)
       font.m_propertyList.insert("style:font-relief", "embossed");
     else if (m_value==2)
@@ -331,9 +333,10 @@ void StarCAttributeUInt::addTo(STOFFFont &font) const
     else if (m_value)
       STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown casemap enum=%d\n", m_value));
   }
-  else if (m_type==ATTR_CHR_LANGUAGE || m_type==ATTR_CHR_CJK_LANGUAGE || m_type==ATTR_CHR_CTL_LANGUAGE) {
-    std::string prefix(m_type==ATTR_CHR_LANGUAGE ? "fo:" : "style:");
-    std::string extension(m_type==ATTR_CHR_LANGUAGE ? "" :  m_type==ATTR_CHR_CJK_LANGUAGE ? "-asian" : "-complex");
+  else if (m_type==ATTR_CHR_LANGUAGE || m_type==ATTR_CHR_CJK_LANGUAGE || m_type==ATTR_CHR_CTL_LANGUAGE || m_type==ATTR_SC_LANGUAGE_FORMAT) {
+    bool const basic=m_type==ATTR_CHR_LANGUAGE||m_type==ATTR_SC_LANGUAGE_FORMAT;
+    std::string prefix(basic ? "fo:" : "style:");
+    std::string extension(basic ? "" :  m_type==ATTR_CHR_CJK_LANGUAGE ? "-asian" : "-complex");
     std::string lang, country;
     if (StarLanguage::getLanguageId((int) m_value, lang, country)) {
       if (!lang.empty())
@@ -750,10 +753,12 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeUInt(map,StarAttribute::ATTR_CHR_LANGUAGE,"char[language]",2,0x3ff); // unknown
   addAttributeUInt(map,StarAttribute::ATTR_CHR_CJK_LANGUAGE,"char[cjk,language]",2,0x3ff); // unknown
   addAttributeUInt(map,StarAttribute::ATTR_CHR_CTL_LANGUAGE,"char[ctl,language]",2,0x3ff); // unknown
+  addAttributeUInt(map,StarAttribute::ATTR_SC_LANGUAGE_FORMAT,"cell[language]",2,0x3ff); // unknown
 
   addAttributeBool(map,StarAttribute::ATTR_CHR_NOHYPHEN,"char[noHyphen]",true);
   addAttributeVoid(map,StarAttribute::ATTR_TXT_SOFTHYPH,"text[softHyphen]");
   addAttributeBool(map,StarAttribute::ATTR_CHR_NOLINEBREAK,"char[nolineBreak]",true);
+  addAttributeBool(map,StarAttribute::ATTR_SC_HYPHENATE,"hyphenate", false);
 
   addAttributeBool(map,StarAttribute::ATTR_CHR_DUMMY1,"char[dummy1]",false);
   addAttributeBool(map,StarAttribute::ATTR_TXT_DUMMY1,"text[dummy1]",false);
