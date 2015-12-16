@@ -206,6 +206,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\..\src\lib\StarCellAttribute.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\src\lib\StarCellFormula.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -332,6 +336,7 @@
     <ClInclude Include="..\..\src\lib\STOFFTable.hxx" />
     <ClInclude Include="..\..\src\lib\StarAttribute.hxx" />
     <ClInclude Include="..\..\src\lib\StarBitmap.hxx" />
+    <ClInclude Include="..\..\src\lib\StarCellAttribute.hxx" />
     <ClInclude Include="..\..\src\lib\StarCellFormula.hxx" />
     <ClInclude Include="..\..\src\lib\StarCharAttribute.hxx" />
     <ClInclude Include="..\..\src\lib\StarEncodingChinese.hxx" />

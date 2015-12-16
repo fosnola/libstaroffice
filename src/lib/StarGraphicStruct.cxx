@@ -149,7 +149,7 @@ bool getBMPData(std::vector<std::vector<STOFFColor> > const &orig, librevenge::R
 //! Internal: helper function to create a BMP for a color bitmap from a 8*8 patterns, defined with 4 uint16_t
 static bool getBMPData(uint16_t const *pattern, STOFFColor const &col0,  STOFFColor const &col1, librevenge::RVNGBinaryData &data)
 {
-  if (pattern) return false;
+  if (!pattern) return false;
   STOFFVec2i sz(8,8);
   unsigned tmpBufferPosition, tmpDIBFileSize;
   unsigned char *tmpDIBBuffer=createAndInitBMPData(sz, tmpDIBFileSize, tmpBufferPosition);

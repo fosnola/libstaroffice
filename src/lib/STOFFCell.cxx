@@ -338,51 +338,8 @@ void STOFFCell::addTo(librevenge::RVNGPropertyList &propList) const
   propList.insert("librevenge:column", position()[0]);
   propList.insert("librevenge:row", position()[1]);
 
-  propList.insert("table:number-columns-spanned", numSpannedCells()[0]);
-  propList.insert("table:number-rows-spanned", numSpannedCells()[1]);
-
   m_font.addTo(propList);
   m_cellStyle.addTo(propList);
-  if (isProtected())
-    propList.insert("style:cell-protect","protected");
-  // alignment
-  switch (hAlignment()) {
-  case HALIGN_LEFT:
-    propList.insert("fo:text-align", "first");
-    propList.insert("style:text-align-source", "fix");
-    break;
-  case HALIGN_CENTER:
-    propList.insert("fo:text-align", "center");
-    propList.insert("style:text-align-source", "fix");
-    break;
-  case HALIGN_RIGHT:
-    propList.insert("fo:text-align", "end");
-    propList.insert("style:text-align-source", "fix");
-    break;
-  case HALIGN_DEFAULT:
-    break; // default
-  case HALIGN_FULL:
-  default:
-    STOFF_DEBUG_MSG(("STOFFCell::addTo: called with unknown halign=%d\n", hAlignment()));
-  }
-  // no padding
-  propList.insert("fo:padding", 0, librevenge::RVNG_POINT);
-  // alignment
-  switch (vAlignment()) {
-  case VALIGN_TOP:
-    propList.insert("style:vertical-align", "top");
-    break;
-  case VALIGN_CENTER:
-    propList.insert("style:vertical-align", "middle");
-    break;
-  case VALIGN_BOTTOM:
-    propList.insert("style:vertical-align", "bottom");
-    break;
-  case VALIGN_DEFAULT:
-    break; // default
-  default:
-    STOFF_DEBUG_MSG(("STOFFCell::addTo: called with unknown valign=%d\n", vAlignment()));
-  }
 }
 
 std::string STOFFCell::getColumnName(int col)
@@ -411,47 +368,11 @@ std::string STOFFCell::getCellName(STOFFVec2i const &pos, STOFFVec2b const &abso
 std::ostream &operator<<(std::ostream &o, STOFFCell const &cell)
 {
   o << STOFFCell::getCellName(cell.m_position, STOFFVec2b(false,false)) << ":";
-  if (cell.numSpannedCells()[0] != 1 || cell.numSpannedCells()[1] != 1)
-    o << "span=[" << cell.numSpannedCells()[0] << "," << cell.numSpannedCells()[1] << "],";
-
-  if (cell.m_protected) o << "protected,";
   if (cell.m_bdBox.size()[0]>0 || cell.m_bdBox.size()[1]>0)
     o << "bdBox=" << cell.m_bdBox << ",";
   if (cell.m_bdSize[0]>0 || cell.m_bdSize[1]>0)
     o << "bdSize=" << cell.m_bdSize << ",";
   o << cell.m_format;
-  switch (cell.m_hAlign) {
-  case STOFFCell::HALIGN_LEFT:
-    o << "left,";
-    break;
-  case STOFFCell::HALIGN_CENTER:
-    o << "centered,";
-    break;
-  case STOFFCell::HALIGN_RIGHT:
-    o << "right,";
-    break;
-  case STOFFCell::HALIGN_FULL:
-    o << "full,";
-    break;
-  case STOFFCell::HALIGN_DEFAULT:
-  default:
-    break; // default
-  }
-  switch (cell.m_vAlign) {
-  case STOFFCell::VALIGN_TOP:
-    o << "top,";
-    break;
-  case STOFFCell::VALIGN_CENTER:
-    o << "centered[y],";
-    break;
-  case STOFFCell::VALIGN_BOTTOM:
-    o << "bottom,";
-    break;
-  case STOFFCell::VALIGN_DEFAULT:
-  default:
-    break; // default
-  }
-
   return o;
 }
 

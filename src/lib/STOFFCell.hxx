@@ -113,20 +113,9 @@ public:
       return c1.compare(c2) < 0;
     }
   };
-  /** the default horizontal alignment.
-
-  \note actually mainly used for table/spreadsheet cell, FULL is not yet implemented */
-  enum HorizontalAlignment { HALIGN_LEFT, HALIGN_RIGHT, HALIGN_CENTER,
-                             HALIGN_FULL, HALIGN_DEFAULT
-                           };
-
-  /** the default vertical alignment.
-  \note actually mainly used for table/spreadsheet cell,  not yet implemented */
-  enum VerticalAlignment { VALIGN_TOP, VALIGN_CENTER, VALIGN_BOTTOM, VALIGN_DEFAULT };
-
   //! constructor
-  STOFFCell() : m_position(0,0), m_numberCellSpanned(1,1), m_bdBox(),  m_bdSize(),
-    m_format(), m_font(), m_cellStyle(), m_hAlign(HALIGN_DEFAULT), m_vAlign(VALIGN_DEFAULT), m_protected(false) { }
+  STOFFCell() : m_position(0,0),m_bdBox(),  m_bdSize(),
+    m_format(), m_font(), m_cellStyle() { }
 
   //! destructor
   virtual ~STOFFCell() {}
@@ -161,17 +150,6 @@ public:
   void setPosition(STOFFVec2i posi)
   {
     m_position = posi;
-  }
-
-  //! returns the number of spanned cells
-  STOFFVec2i const &numSpannedCells() const
-  {
-    return m_numberCellSpanned;
-  }
-  //! sets the number of spanned cells : STOFFVec2i(1,1) means 1 cellule
-  void setNumSpannedCells(STOFFVec2i numSpanned)
-  {
-    m_numberCellSpanned=numSpanned;
   }
 
   //! bdbox  accessor
@@ -231,50 +209,20 @@ public:
   {
     return m_cellStyle;
   }
+  //! returns the cell style
+  STOFFCellStyle &getCellStyle()
+  {
+    return m_cellStyle;
+  }
   //! set the cell style
   void setCellStyle(STOFFCellStyle const &cellStyle)
   {
     m_cellStyle=cellStyle;
   }
 
-  //! returns true if the cell is protected
-  bool isProtected() const
-  {
-    return m_protected;
-  }
-  //! sets the cell's protected flag
-  void setProtected(bool fl)
-  {
-    m_protected = fl;
-  }
-
-  //! returns the horizontal alignment
-  HorizontalAlignment hAlignment() const
-  {
-    return m_hAlign;
-  }
-  //! sets the horizontal alignment
-  void setHAlignment(HorizontalAlignment align)
-  {
-    m_hAlign = align;
-  }
-
-  //! returns the vertical alignment
-  VerticalAlignment vAlignment() const
-  {
-    return m_vAlign;
-  }
-  //! sets the vertical alignment
-  void setVAlignment(VerticalAlignment align)
-  {
-    m_vAlign = align;
-  }
-
 protected:
   //! the cell row and column : 0,0 -> A1, 0,1 -> A2
   STOFFVec2i m_position;
-  //! the cell spanned : by default (1,1)
-  STOFFVec2i m_numberCellSpanned;
   /** the cell bounding box (unit in point)*/
   STOFFBox2f m_bdBox;
   /** the cell bounding size : unit point */
@@ -286,12 +234,6 @@ protected:
   STOFFFont m_font;
   //! the cell cell style
   STOFFCellStyle m_cellStyle;
-  //! the cell alignment : by default nothing
-  HorizontalAlignment m_hAlign;
-  //! the vertical cell alignment : by default nothing
-  VerticalAlignment m_vAlign;
-  //! cell protected
-  bool m_protected;
 };
 
 //! small class use to define a sheet cell content

@@ -191,6 +191,10 @@ SOURCE=..\..\src\lib\StarBitmap.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarCellAttribute.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarCellFormula.cxx
 # End Source File
 # Begin Source File
@@ -408,6 +412,10 @@ SOURCE=..\..\src\lib\StarAttribute.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarBitmap.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarCellAttribute.hxx
 # End Source File
 # Begin Source File
 

@@ -70,6 +70,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarAttribute.hxx			\
 	StarBitmap.cxx				\
 	StarBitmap.hxx				\
+	StarCellAttribute.cxx			\
+	StarCellAttribute.hxx			\
 	StarCellFormula.cxx			\
 	StarCellFormula.hxx			\
 	StarCharAttribute.cxx			\

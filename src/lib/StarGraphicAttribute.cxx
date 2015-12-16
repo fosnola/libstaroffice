@@ -376,7 +376,7 @@ void StarGAttributeBorder::addTo(STOFFGraphicStyle &graphic) const
 
 void StarGAttributeBrush::addTo(STOFFFont &font) const
 {
-  if (m_type != ATTR_SC_BACKGROUND || m_brush.isEmpty())
+  if (m_type != ATTR_CHR_BACKGROUND || m_brush.isEmpty())
     return;
   STOFFColor color;
   if (m_brush.getColor(color)) {
@@ -393,13 +393,45 @@ void StarGAttributeBrush::addTo(STOFFCellStyle &cell) const
   if (m_type != ATTR_SC_BACKGROUND || m_brush.isEmpty())
     return;
   STOFFColor color;
+#if 1
   if (m_brush.getColor(color)) {
     cell.m_propertyList.insert("fo:background-color", color.str().c_str());
     return;
   }
+  STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a cell background\n"));
+#else
+  /* checkme, is it possible to use style:background-image here ?
+     Can not create any working ods file with bitmap cell's background...
+   */
+  if (m_brush.hasUniqueColor() && m_brush.getColor(color)) {
+    cell.m_propertyList.insert("fo:background-color", color.str().c_str());
+    return;
+  }
+  STOFFEmbeddedObject object;
+  STOFFVec2i size;
+  if (m_brush.getPattern(object, size) && object.m_dataList.size()) {
+    librevenge::RVNGPropertyList backgroundList;
+    backgroundList.insert("librevenge:bitmap", object.m_dataList[0].getBase64Data());
+    backgroundList.insert("xlink:type", "simple");
+    backgroundList.insert("xlink:show", "embed");
+    backgroundList.insert("xlink:actuate", "onLoad");
+    backgroundList.insert("style:filter-name", object.m_typeList.empty() ? "image/pict" : object.m_typeList[0].c_str());
+    if (m_brush.m_transparency>0 && m_brush.m_transparency<=255)
+      backgroundList.insert("draw:opacity", 1.-double(m_brush.m_transparency)/255., librevenge::RVNG_PERCENT);
+    if (m_brush.m_position>=1 && m_brush.m_position<=9) {
+      int xPos=(m_brush.m_position-1)%3, yPos=(m_brush.m_position-1)%3;
+      backgroundList.insert("style:position",
+                            (std::string(xPos==0 ? "left " : xPos==1 ? "center " : "right ")+
+                             std::string(yPos==0 ? "top" : yPos==1 ? "center" : "bottom")).c_str());
+    }
+    librevenge::RVNGPropertyListVector backgroundVector;
+    backgroundVector.append(backgroundList);
+    cell.m_propertyList.insert("librevenge:background-image", backgroundVector);
+  }
   else {
     STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a cell background\n"));
   }
+#endif
 }
 
 void StarGAttributeBrush::addTo(STOFFGraphicStyle &graphic) const

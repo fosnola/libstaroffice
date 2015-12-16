@@ -45,6 +45,7 @@
 #include "SWFormatManager.hxx"
 
 #include "StarBitmap.hxx"
+#include "StarCellAttribute.hxx"
 #include "StarCharAttribute.hxx"
 #include "StarGraphicAttribute.hxx"
 #include "StarItemPool.hxx"
@@ -72,70 +73,6 @@ public:
   {
     return shared_ptr<StarAttribute>(new StarAttributeXML(*this));
   }
-};
-
-
-//! SCPattern attribute of StarAttributeInternal
-class StarAttributeSCPattern : public StarAttributeItemSet
-{
-public:
-  //! constructor
-  StarAttributeSCPattern() :
-    StarAttributeItemSet(StarAttribute::ATTR_SC_PATTERN, "ScPattern", std::vector<STOFFVec2i>()), m_style("")
-  {
-    m_limits.push_back(STOFFVec2i(100,148));
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarAttributeSCPattern(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &object)
-  {
-    STOFFInputStreamPtr input=zone.input();
-    long pos=input->tell();
-    libstoff::DebugFile &ascFile=zone.ascii();
-    libstoff::DebugStream f;
-    f << "StarAttribute[" << zone.getRecordLevel() << "]:" << m_debugName << ",";
-    // sc_patattr.cxx ScPatternAttr::Create
-    bool hasStyle;
-    *input>>hasStyle;
-    if (hasStyle) {
-      f << "hasStyle,";
-      std::vector<uint32_t> text;
-      if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarAttributeManagerInternal::StarAttributeSCPattern::read: can not read a name\n"));
-        f << "###name,";
-        return false;
-      }
-      else if (!text.empty()) {
-        m_style=libstoff::getString(text);
-        f << "name=" << m_style.cstr() << ",";
-      }
-      input->seek(2, librevenge::RVNG_SEEK_CUR);
-    }
-    bool ok=object.readItemSet(zone, m_limits, endPos, m_itemList, object.getCurrentPool(false).get());
-    if (!ok) f << "###";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    return ok && input->tell()<=endPos;
-  }
-  //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
-  {
-    StarAttributeItemSet::print(o);
-    if (m_style.empty())
-      return;
-    o << "style=" << m_style.cstr() << ",";
-  }
-protected:
-  //! copy constructor
-  StarAttributeSCPattern(StarAttributeSCPattern const &orig) : StarAttributeItemSet(orig), m_style(orig.m_style)
-  {
-  }
-  //! the style
-  librevenge::RVNGString m_style;
 };
 
 ////////////////////////////////////////
@@ -195,6 +132,7 @@ protected:
 
 void State::initAttributeMap()
 {
+  StarCellAttribute::addInitTo(m_whichToAttributeMap);
   StarCharAttribute::addInitTo(m_whichToAttributeMap);
   StarGraphicAttribute::addInitTo(m_whichToAttributeMap);
 
@@ -245,23 +183,17 @@ void State::initAttributeMap()
     addAttributeBool(StarAttribute::Type(type), s.str(), false);
   }
   // --- sc --- sc_docpool.cxx
-  addAttributeVoid(StarAttribute::ATTR_SC_USERDEF, "sc[userDef]");
   addAttributeBool(StarAttribute::ATTR_SC_HYPHENATE,"hyphenate", false);
-  addAttributeUInt(StarAttribute::ATTR_SC_HORJUSTIFY,"justify[horz]",2,0); // standart
   addAttributeUInt(StarAttribute::ATTR_SC_INDENT,"indent",2,0);
-  addAttributeUInt(StarAttribute::ATTR_SC_VERJUSTIFY,"justify[vert]",2,0); // standart
-  addAttributeUInt(StarAttribute::ATTR_SC_ORIENTATION,"orientation",2,0); // standard
   addAttributeInt(StarAttribute::ATTR_SC_ROTATE_VALUE,"rotate[value]",4,0);
   addAttributeUInt(StarAttribute::ATTR_SC_ROTATE_MODE,"rotate[mode]",2,0); // normal
   addAttributeBool(StarAttribute::ATTR_SC_VERTICAL_ASIAN,"vertical[asian]", false);
   addAttributeUInt(StarAttribute::ATTR_SC_WRITINGDIR,"writing[dir]",2,4); // frame environment
   addAttributeBool(StarAttribute::ATTR_SC_LINEBREAK,"lineBreak", false);
   addAttributeInt(StarAttribute::ATTR_SC_MERGE_FLAG,"merge[flag]",2,0);
-  addAttributeUInt(StarAttribute::ATTR_SC_VALUE_FORMAT,"format[value]",4,0);
   addAttributeUInt(StarAttribute::ATTR_SC_LANGUAGE_FORMAT,"char[language]",2,0x3ff); // in fact, global language
   addAttributeUInt(StarAttribute::ATTR_SC_VALIDDATA,"data[valid]",4,0);
   addAttributeUInt(StarAttribute::ATTR_SC_CONDITIONAL,"conditional",4,0);
-  m_whichToAttributeMap[StarAttribute::ATTR_SC_PATTERN]=shared_ptr<StarAttribute>(new StarAttributeSCPattern());
 
   addAttributeUInt(StarAttribute::ATTR_SC_PAGE_PAPERTRAY,"page[papertray]",2,0);
   addAttributeBool(StarAttribute::ATTR_SC_PAGE_HORCENTER,"page[horizontal,center]", false);
@@ -1524,28 +1456,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     }
     break;
 
-  case StarAttribute::ATTR_SC_MARGIN:
-    // algItem SvxMarginItem::Create
-    f << "scMargin,";
-    f << "top=" << input->readLong(2) << ",";
-    f << "left=" << input->readLong(2) << ",";
-    f << "right=" << input->readLong(2) << ",";
-    f << "bottom=" << input->readLong(2) << ",";
-    break;
-  case StarAttribute::ATTR_SC_MERGE:
-    // sc_attrib.cxx ScMergeAttr::Create
-    f << "scMerge,";
-    f << "nCol=" << input->readLong(2) << ",";
-    f << "nRow=" << input->readLong(2) << ",";
-    break;
-  case StarAttribute::ATTR_SC_PROTECTION:
-    // sc_attrib.cxx ScProtectionAttr::Create
-    f << "scProtection,";
-    f << "bProtect=" << input->readLong(1) << ",";
-    f << "bHFormula=" << input->readLong(1) << ",";
-    f << "bHCell=" << input->readLong(1) << ",";
-    f << "bHPrint=" << input->readLong(1) << ",";
-    break;
   case StarAttribute::ATTR_SC_BORDER_INNER: {
     // frmitem.cxx SvxBoxInfoItem::Create
     f << "scBorderInner,";

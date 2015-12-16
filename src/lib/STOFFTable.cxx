@@ -226,7 +226,7 @@ bool STOFFTable::buildStructures()
       }
     }
     m_cellsList[c]->setPosition(STOFFVec2i(cellPos[0], cellPos[1]));
-    m_cellsList[c]->setNumSpannedCells(STOFFVec2i(spanCell[0], spanCell[1]));
+    m_cellsList[c]->getCellStyle().m_numberCellSpanned=STOFFVec2i(spanCell[0], spanCell[1]);
   }
   m_setData |= CellPositionBit;
   // finally update the row/col size
@@ -264,7 +264,7 @@ bool STOFFTable::buildPosToCellId()
     for (size_t c = 0; c < nCells; ++c) {
       if (!m_cellsList[c]) continue;
       STOFFVec2i const &lastPos=m_cellsList[c]->position() +
-                                m_cellsList[c]->numSpannedCells();
+                                m_cellsList[c]->getCellStyle().m_numberCellSpanned;
       if (lastPos[0]>int(m_numCols)) m_numCols=size_t(lastPos[0]);
       if (lastPos[1]>int(m_numRows)) m_numRows=size_t(lastPos[1]);
     }
@@ -275,7 +275,7 @@ bool STOFFTable::buildPosToCellId()
   for (size_t c = 0; c < nCells; ++c) {
     if (!m_cellsList[c]) continue;
     STOFFVec2i const &pos=m_cellsList[c]->position();
-    STOFFVec2i lastPos=pos+m_cellsList[c]->numSpannedCells();
+    STOFFVec2i lastPos=pos+m_cellsList[c]->getCellStyle().m_numberCellSpanned;
     for (int x = pos[0]; x < lastPos[0]; x++) {
       for (int y = pos[1]; y < lastPos[1]; y++) {
         int tablePos = getCellIdPos(x,y);
@@ -323,7 +323,7 @@ bool STOFFTable::buildDims()
       shared_ptr<STOFFCell> cell=m_cellsList[size_t(m_posToCellId[size_t(cPos)])];
       if (!cell) continue;
       STOFFVec2i const &pos=cell->position();
-      STOFFVec2i lastPos=pos+cell->numSpannedCells();
+      STOFFVec2i lastPos=pos+cell->getCellStyle().m_numberCellSpanned;
       if (m_setData&BoxBit) {
         colLimit[size_t(pos[0])] = cell->bdBox()[0][0];
         colLimit[size_t(lastPos[0])] = cell->bdBox()[1][0];
@@ -358,7 +358,7 @@ bool STOFFTable::buildDims()
       shared_ptr<STOFFCell> cell=m_cellsList[size_t(m_posToCellId[size_t(cPos)])];
       if (!cell) continue;
       STOFFVec2i const &pos=cell->position();
-      STOFFVec2i lastPos=pos+cell->numSpannedCells();
+      STOFFVec2i lastPos=pos+cell->getCellStyle().m_numberCellSpanned;
       if (m_setData&BoxBit) {
         rowLimit[size_t(pos[1])] = cell->bdBox()[0][1];
         rowLimit[size_t(lastPos[1])] = cell->bdBox()[1][1];

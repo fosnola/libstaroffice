@@ -31,42 +31,25 @@
 * instead of those above.
 */
 
-#ifndef STOFF_CELL_STYLE
-#  define STOFF_CELL_STYLE
+/*
+ * file to read/parse StarOffice cell attributes
+ *
+ */
+#ifndef STAR_CELL_ATTRIBUTE
+#  define STAR_CELL_ATTRIBUTE
 
-#include <string>
-#include <vector>
+#include <map>
 
 #include "libstaroffice_internal.hxx"
 
-//! Class to store a cell style
-class STOFFCellStyle
+class StarAttribute;
+
+//! namespace used to contain cell attributes (and some cell attributes which are similar)
+namespace StarCellAttribute
 {
-public:
-  /** constructor */
-  STOFFCellStyle() : m_propertyList(), m_numberCellSpanned(1,1), m_format(0)
-  {
-  };
-  //! add to the propList
-  void addTo(librevenge::RVNGPropertyList &propList) const;
-
-  //! operator<<
-  friend std::ostream &operator<<(std::ostream &o, STOFFCellStyle const &cellStyle);
-  //! operator==
-  bool operator==(STOFFCellStyle const &cellStyle) const;
-  //! operator!=
-  bool operator!=(STOFFCellStyle const &cellStyle) const
-  {
-    return !operator==(cellStyle);
-  }
-  /** the property list */
-  librevenge::RVNGPropertyList m_propertyList;
-  //! the cell spanned : by default (1,1)
-  STOFFVec2i m_numberCellSpanned;
-  //! the cell format : 0 by default
-  unsigned m_format;
-};
-
+//! adds cell attribute to the general it to attribute map
+void addInitTo(std::map<int, shared_ptr<StarAttribute> > &whichToAttributeMap);
+}
 
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
