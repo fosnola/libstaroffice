@@ -958,6 +958,44 @@ protected:
   int m_intSize;
 };
 
+//! an Vec2i attribute
+class StarAttributeVec2i : public StarAttribute
+{
+public:
+  //! constructor
+  StarAttributeVec2i(Type type, std::string const &debugName, int intSize, STOFFVec2i value=STOFFVec2i(0,0)) : StarAttribute(type, debugName), m_value(value), m_intSize(intSize)
+  {
+    if (intSize!=1 && intSize!=2 && intSize!=4) {
+      STOFF_DEBUG_MSG(("StarAttributeVec2i: bad num size\n"));
+      m_intSize=0;
+    }
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarAttributeVec2i(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    o << m_debugName;
+    if (m_value!=STOFFVec2i(0,0)) o << "=" << m_value;
+    o << ",";
+  }
+
+protected:
+  //! copy constructor
+  StarAttributeVec2i(StarAttributeVec2i const &orig) : StarAttribute(orig), m_value(orig.m_value), m_intSize(orig.m_intSize)
+  {
+  }
+  // the int value
+  STOFFVec2i m_value;
+  // number of byte 1,2,4
+  int m_intSize;
+};
+
 //! a list of item attribute of StarAttributeInternal
 class StarAttributeItemSet : public StarAttribute
 {

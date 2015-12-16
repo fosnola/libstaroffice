@@ -254,6 +254,50 @@ protected:
   int m_distances[4];
 };
 
+//! a box info attribute
+class StarGAttributeBoxInfo : public StarAttribute
+{
+public:
+  //! constructor
+  StarGAttributeBoxInfo(Type type, std::string const &debugName) :
+    StarAttribute(type, debugName), m_distance(0), m_borderList(), m_flags(0)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarGAttributeBoxInfo(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    if (m_distance) o << "dist=" << m_distance << ",";
+    for (size_t i=0; i<m_borderList.size(); ++i) {
+      if (!m_borderList[i].isEmpty())
+        o << "border" << i << "=[" << m_borderList[i] << "],";
+    }
+    if (m_flags&1) o << "set[table],";
+    if (m_flags&2) o << "set[dist],";
+    if (m_flags&4) o << "set[minDist],";
+    o << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarGAttributeBoxInfo(StarGAttributeBoxInfo const &orig) : StarAttribute(orig), m_borderList(orig.m_borderList), m_flags(orig.m_flags)
+  {
+  }
+  //! the distance
+  int m_distance;
+  //! the boxInfo list: top, left, right, bottom
+  std::vector<STOFFBorderLine> m_borderList;
+  //! some flags: setTable, setDist, setMinDist
+  int m_flags;
+};
+
 //! a brush attribute
 class StarGAttributeBrush : public StarAttribute
 {
@@ -519,6 +563,39 @@ bool StarGAttributeBorder::read(StarZone &zone, int nVers, long endPos, StarObje
   return ok && input->tell()<=endPos;
 }
 
+bool StarGAttributeBoxInfo::read(StarZone &zone, int /*nVers*/, long endPos, StarObject &/*object*/)
+{
+  // frmitem.cxx SvxBoxInfoItem::Create
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  m_flags=(int) input->readULong(1);
+  m_distance=(int) input->readULong(2);
+  int cLine=0;
+  bool ok=true;
+  while (input->tell()<endPos) {
+    cLine=(int) input->readULong(1);
+    if (cLine>1) break;
+    STOFFBorderLine border;
+    if (!input->readColor(border.m_color)) {
+      STOFF_DEBUG_MSG(("StarGraphicAttribute::StarGAttributeBoxInfo::read: can not find a box's color\n"));
+      f << "###color,";
+      ok=false;
+      break;
+    }
+    border.m_outWidth=(int) input->readULong(2);
+    border.m_inWidth=(int) input->readULong(2);
+    border.m_distance=(int) input->readULong(2);
+    m_borderList.push_back(border);
+  }
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok && input->tell()<=endPos;
+}
+
 bool StarGAttributeBrush::read(StarZone &zone, int nVers, long endPos, StarObject &object)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -582,6 +659,10 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   map[StarAttribute::ATTR_SCH_SYMBOL_BRUSH]=shared_ptr<StarAttribute>(new StarGAttributeBrush(StarAttribute::ATTR_SCH_SYMBOL_BRUSH,"symbold[brush]"));
   map[StarAttribute::ATTR_FRM_SHADOW]=shared_ptr<StarAttribute>(new StarGAttributeShadow(StarAttribute::ATTR_FRM_SHADOW,"shadow"));
   map[StarAttribute::ATTR_SC_SHADOW]=shared_ptr<StarAttribute>(new StarGAttributeShadow(StarAttribute::ATTR_SC_SHADOW,"shadow"));
+
+  // TOUSE
+  map[StarAttribute::ATTR_SC_BORDER_INNER]=shared_ptr<StarAttribute>(new StarGAttributeBoxInfo(StarAttribute::ATTR_SC_BORDER_INNER,"scBorder[inner]"));
+
 }
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

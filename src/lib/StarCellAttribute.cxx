@@ -37,6 +37,7 @@
 #include "StarItemPool.hxx"
 #include "StarLanguage.hxx"
 #include "StarObject.hxx"
+#include "StarObjectSmallText.hxx"
 #include "StarZone.hxx"
 
 #include "StarCellAttribute.hxx"
@@ -346,13 +347,43 @@ protected:
   STOFFVec2i m_span;
 };
 
-
-//! SCPattern attribute of StarAttributeInternal
-class StarCAttributeSCPattern : public StarAttributeItemSet
+//! a page header/footer attribute
+class StarCAttributePageHF : public StarAttribute
 {
 public:
   //! constructor
-  StarCAttributeSCPattern() :
+  StarCAttributePageHF(Type type, std::string const &debugName) : StarAttribute(type, debugName)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarCAttributePageHF(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << ",";
+  }
+
+protected:
+  //! copy constructor
+  StarCAttributePageHF(StarCAttributePageHF const &orig) : StarAttribute(orig)
+  {
+    for (int i=0; i<3; ++i) m_zones[i]=orig.m_zones[i];
+  }
+  //! the left/middle/right zones
+  shared_ptr<StarObjectSmallText> m_zones[3];
+};
+
+//! Pattern attribute of StarAttributeInternal
+class StarCAttributePattern : public StarAttributeItemSet
+{
+public:
+  //! constructor
+  StarCAttributePattern() :
     StarAttributeItemSet(StarAttribute::ATTR_SC_PATTERN, "ScPattern", std::vector<STOFFVec2i>()), m_style("")
   {
     m_limits.push_back(STOFFVec2i(100,148));
@@ -360,7 +391,7 @@ public:
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeSCPattern(*this));
+    return shared_ptr<StarAttribute>(new StarCAttributePattern(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &object)
@@ -377,7 +408,7 @@ public:
       f << "hasStyle,";
       std::vector<uint32_t> text;
       if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeSCPattern::read: can not read a name\n"));
+        STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributePattern::read: can not read a name\n"));
         f << "###name,";
         return false;
       }
@@ -403,11 +434,85 @@ public:
   }
 protected:
   //! copy constructor
-  StarCAttributeSCPattern(StarCAttributeSCPattern const &orig) : StarAttributeItemSet(orig), m_style(orig.m_style)
+  StarCAttributePattern(StarCAttributePattern const &orig) : StarAttributeItemSet(orig), m_style(orig.m_style)
   {
   }
   //! the style
   librevenge::RVNGString m_style;
+};
+
+//! a page attribute
+class StarCAttributePage : public StarAttribute
+{
+public:
+  //! constructor
+  StarCAttributePage(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_name(""), m_pageType(0), m_landscape(false), m_used(0)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarCAttributePage(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    if (!m_name.empty()) o << m_name.cstr();
+    if (m_pageType) o << "type=" << m_pageType << ",";
+    if (m_landscape) o << "landscape,";
+    if (m_used) o << "used=" << m_used << ",";
+    o << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarCAttributePage(StarCAttributePage const &orig) : StarAttribute(orig), m_name(orig.m_name), m_pageType(orig.m_pageType), m_landscape(orig.m_landscape), m_used(orig.m_used)
+  {
+  }
+  //! the name
+  librevenge::RVNGString m_name;
+  //! the type
+  int m_pageType;
+  //! true if landscape
+  bool m_landscape;
+  //! the number of use
+  int m_used;
+};
+
+//! a print attribute
+class StarCAttributePrint : public StarAttribute
+{
+public:
+  //! constructor
+  StarCAttributePrint(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_tableList()
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarCAttributePrint(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    for (size_t i=0; i<m_tableList.size(); ++i)
+      o << m_tableList[i];
+    o << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarCAttributePrint(StarCAttributePrint const &orig) : StarAttribute(orig), m_tableList(orig.m_tableList)
+  {
+  }
+  //! the list of table to print
+  std::vector<int> m_tableList;
 };
 
 //! a protection attribute
@@ -452,6 +557,49 @@ protected:
   bool m_hiddenCell;
   //! do not print the formula
   bool m_doNotPrint;
+};
+
+//! a rangeItem attribute
+class StarCAttributeRangeItem : public StarAttribute
+{
+public:
+  //! constructor
+  StarCAttributeRangeItem(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_table(-1), m_range()
+  {
+    for (int i=0; i<2; ++i) m_flags[i]=false;
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarCAttributeRangeItem(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    o << "range=" << m_range << ",";
+    if (m_table>255) o << "all[table],";
+    else if (m_table>=0) o << "table=" << m_table << ",";
+    for (int i=0; i<2; ++i) {
+      if (m_flags[i]) o << "flag" << i << ",";
+    }
+    o << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarCAttributeRangeItem(StarCAttributeRangeItem const &orig) : StarAttribute(orig), m_table(orig.m_table), m_range(orig.m_range)
+  {
+    for (int i=0; i<2; ++i) m_flags[i]=orig.m_flags[i];
+  }
+  //! the table(v0)
+  int m_table;
+  //! the range
+  STOFFBox2i m_range;
+  //! two flags
+  bool m_flags[2];
 };
 
 //! a character unsigned integer attribute
@@ -572,6 +720,30 @@ bool StarCAttributeMerge::read(StarZone &zone, int /*vers*/, long endPos, StarOb
   return input->tell()<=endPos;
 }
 
+bool StarCAttributePageHF::read(StarZone &zone, int /*vers*/, long endPos, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  bool ok=true;
+  for (int i=0; i<3; ++i) {
+    long actPos=input->tell();
+    shared_ptr<StarObjectSmallText> smallText(new StarObjectSmallText(object, true));
+    if (!smallText->read(zone, endPos) || input->tell()>endPos) {
+      f << "###editTextObject";
+      input->seek(actPos, librevenge::RVNG_SEEK_SET);
+      ok=false;
+    }
+    m_zones[i]=smallText;
+  }
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok && input->tell()<=endPos;
+}
+
 bool StarCAttributeProtection::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -589,12 +761,90 @@ bool StarCAttributeProtection::read(StarZone &zone, int /*vers*/, long endPos, S
   return input->tell()<=endPos;
 }
 
+bool StarCAttributePage::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  // svx_pageitem.cxx SvxPageItem::Create
+  std::vector<uint32_t> text;
+  if (!zone.readString(text)) {
+    STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a name\n"));
+    f << "###name,";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  if (!text.empty())
+    m_name=libstoff::getString(text);
+  m_pageType=(int) input->readULong(1);
+  *input >> m_landscape;
+  m_used=(int) input->readULong(2);
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
+bool StarCAttributePrint::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  bool ok=true;
+  uint16_t n;
+  *input >> n;
+  if (!n||input->tell()+2*int(n)>endPos) {
+    STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributePrint::addTo: the number seems bad\n"));
+    f << "###n=" << n << ",";
+    ok=false;
+  }
+  for (int i=0; i<int(n); ++i)
+    m_tableList.push_back((int) input->readULong(2));
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok && input->tell()<=endPos;
+}
+
+bool StarCAttributeRangeItem::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
+{
+  // algItem ScRangeItem::Create
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  int dim[4];
+  if (vers==0) {
+    m_table=(int) input->readULong(2);
+    for (int i=0; i<4; ++i) dim[i]=(int) input->readULong(2);
+  }
+  else {
+    for (int i=0; i<4; ++i) dim[i]=(int) input->readULong(2);
+    if (vers>=2) {
+      *input>>m_flags[0];
+      if (input->tell()+1==endPos) // checkme
+        *input>>m_flags[1];
+    }
+  }
+  m_range=STOFFBox2i(STOFFVec2i(dim[0],dim[1]),STOFFVec2i(dim[2],dim[3]));
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
 }
 
 namespace StarCellAttribute
 {
 void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
 {
+  // --- sc --- sc_docpool.cxx
   addAttributeVoid(map, StarAttribute::ATTR_SC_USERDEF, "sc[userDef]");
   addAttributeUInt(map, StarAttribute::ATTR_SC_VALUE_FORMAT,"format[value]",4,0);
   addAttributeUInt(map, StarAttribute::ATTR_SC_HORJUSTIFY,"justify[horz]",2,0); // standart
@@ -605,7 +855,7 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeUInt(map, StarAttribute::ATTR_SC_ROTATE_MODE,"rotate[mode]",2,0); // normal
   addAttributeUInt(map, StarAttribute::ATTR_SC_WRITINGDIR,"writing[dir]",2,4); // frame environment
 
-  map[StarAttribute::ATTR_SC_PATTERN]=shared_ptr<StarAttribute>(new StarCAttributeSCPattern());
+  map[StarAttribute::ATTR_SC_PATTERN]=shared_ptr<StarAttribute>(new StarCAttributePattern());
   map[StarAttribute::ATTR_SC_MARGIN]=shared_ptr<StarAttribute>(new StarCAttributeMargins(StarAttribute::ATTR_SC_MARGIN,"scMargins"));
   map[StarAttribute::ATTR_SC_MERGE]=shared_ptr<StarAttribute>(new StarCAttributeMerge(StarAttribute::ATTR_SC_MERGE,"scMerge"));
   map[StarAttribute::ATTR_SC_PROTECTION]=shared_ptr<StarAttribute>(new StarCAttributeProtection(StarAttribute::ATTR_SC_PROTECTION,"scProtection"));
@@ -633,10 +883,28 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_FORMULAS,"page[formulas]", false);
   addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_NULLVALS,"page[nullvals]", true);
 
+  map[StarAttribute::ATTR_SC_PAGE]=shared_ptr<StarAttribute>(new StarCAttributePage(StarAttribute::ATTR_SC_PAGE, "page"));
   map[StarAttribute::ATTR_SC_PAGE_CHARTS]=shared_ptr<StarAttribute>(new StarCAttributeViewMode(StarAttribute::ATTR_SC_PAGE_CHARTS, "page[charts]"));
   map[StarAttribute::ATTR_SC_PAGE_OBJECTS]=shared_ptr<StarAttribute>(new StarCAttributeViewMode(StarAttribute::ATTR_SC_PAGE_OBJECTS, "page[objects]"));
   map[StarAttribute::ATTR_SC_PAGE_DRAWINGS]=shared_ptr<StarAttribute>(new StarCAttributeViewMode(StarAttribute::ATTR_SC_PAGE_DRAWINGS, "page[drawings]"));
-
+  map[StarAttribute::ATTR_SC_PAGE_PRINTTABLES]=shared_ptr<StarAttribute>(new StarCAttributePrint(StarAttribute::ATTR_SC_PAGE_PRINTTABLES, "page[printtables]"));
+  map[StarAttribute::ATTR_SC_PAGE_HEADERLEFT]=shared_ptr<StarAttribute>(new StarCAttributePageHF(StarAttribute::ATTR_SC_PAGE_HEADERLEFT, "header[left]"));
+  map[StarAttribute::ATTR_SC_PAGE_HEADERRIGHT]=shared_ptr<StarAttribute>(new StarCAttributePageHF(StarAttribute::ATTR_SC_PAGE_HEADERRIGHT, "header[right]"));
+  map[StarAttribute::ATTR_SC_PAGE_FOOTERLEFT]=shared_ptr<StarAttribute>(new StarCAttributePageHF(StarAttribute::ATTR_SC_PAGE_FOOTERLEFT, "footer[left]"));
+  map[StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT]=shared_ptr<StarAttribute>(new StarCAttributePageHF(StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT, "footer[right]"));
+  map[StarAttribute::ATTR_SC_PAGE_SIZE]=shared_ptr<StarAttribute>(new StarAttributeVec2i(StarAttribute::ATTR_SC_PAGE_SIZE, "page[size]", 4));
+  map[StarAttribute::ATTR_SC_PAGE_MAXSIZE]=shared_ptr<StarAttribute>(new StarAttributeVec2i(StarAttribute::ATTR_SC_PAGE_MAXSIZE, "page[maxsize]", 4));
+  map[StarAttribute::ATTR_SC_PAGE_PRINTAREA]=shared_ptr<StarAttribute>(new StarCAttributeRangeItem(StarAttribute::ATTR_SC_PAGE_PRINTAREA, "page[printArea]"));
+  map[StarAttribute::ATTR_SC_PAGE_REPEATCOL]=shared_ptr<StarAttribute>(new StarCAttributeRangeItem(StarAttribute::ATTR_SC_PAGE_REPEATCOL, "page[repeatCol]"));
+  map[StarAttribute::ATTR_SC_PAGE_REPEATROW]=shared_ptr<StarAttribute>(new StarCAttributeRangeItem(StarAttribute::ATTR_SC_PAGE_REPEATROW, "page[repeatRow]"));
+  std::vector<STOFFVec2i> limits;
+  limits.push_back(STOFFVec2i(142,142)); // BACKGROUND
+  limits.push_back(STOFFVec2i(144,146)); // BORDER->SHADOW
+  limits.push_back(STOFFVec2i(150,151)); // LRSPACE->ULSPACE
+  limits.push_back(STOFFVec2i(155,155)); // PAGESIZE
+  limits.push_back(STOFFVec2i(159,161)); // ON -> SHARED
+  map[StarAttribute::ATTR_SC_PAGE_HEADERSET]=shared_ptr<StarAttribute>(new StarAttributeItemSet(StarAttribute::ATTR_SC_PAGE_HEADERSET, "setPageHeader", limits));
+  map[StarAttribute::ATTR_SC_PAGE_FOOTERSET]=shared_ptr<StarAttribute>(new StarAttributeItemSet(StarAttribute::ATTR_SC_PAGE_FOOTERSET, "setPageFooter", limits));
 }
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

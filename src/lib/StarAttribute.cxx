@@ -182,15 +182,6 @@ void State::initAttributeMap()
     s << "grafDummy" << type-StarAttribute::ATTR_GRF_DUMMY1+1;
     addAttributeBool(StarAttribute::Type(type), s.str(), false);
   }
-  // --- sc --- sc_docpool.cxx
-  std::vector<STOFFVec2i> limits;
-  limits.push_back(STOFFVec2i(142,142)); // BACKGROUND
-  limits.push_back(STOFFVec2i(144,146)); // BORDER->SHADOW
-  limits.push_back(STOFFVec2i(150,151)); // LRSPACE->ULSPACE
-  limits.push_back(STOFFVec2i(155,155)); // PAGESIZE
-  limits.push_back(STOFFVec2i(159,161)); // ON -> SHARED
-  addAttributeItemSet(StarAttribute::ATTR_SC_PAGE_HEADERSET,"setPageHeader",limits);
-  addAttributeItemSet(StarAttribute::ATTR_SC_PAGE_FOOTERSET,"setPageFooter",limits);
   // --- ee --- svx_editdoc.cxx and svx_eerdll.cxx
   addAttributeVoid(StarAttribute::ATTR_EE_CHR_RUBI_DUMMY, "chr[rubi,dummy]");
   addAttributeXML(StarAttribute::ATTR_EE_CHR_XMLATTRIBS, "chr[xmlAttrib]");
@@ -358,6 +349,7 @@ void State::initAttributeMap()
     s << "form[reserved" << type-StarAttribute::XATTR_FTRESERVED2+2 << "]";
     addAttributeVoid(StarAttribute::Type(type), s.str());
   }
+  std::vector<STOFFVec2i> limits;
   limits.resize(1);
   limits[0]=STOFFVec2i(1000,1016);
   addAttributeItemSet(StarAttribute::XATTR_SET_LINE,"setLine",limits);
@@ -702,6 +694,23 @@ bool StarAttributeInt::read(StarZone &zone, int /*vers*/, long endPos, StarObjec
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   if (m_intSize) m_value=(int) input->readLong(m_intSize);
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
+bool StarAttributeVec2i::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  if (m_intSize) {
+    int dim[2];
+    for (int i=0; i<2; ++i) dim[i]=(int) input->readLong(m_intSize);
+    m_value=STOFFVec2i(dim[0],dim[1]);
+  }
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -1428,112 +1437,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     }
     break;
 
-  case StarAttribute::ATTR_SC_BORDER_INNER: {
-    // frmitem.cxx SvxBoxInfoItem::Create
-    f << "scBorderInner,";
-    int cFlags=(int) input->readULong(1);
-    if (cFlags&1) f << "setTable,";
-    if (cFlags&2) f << "setDist,";
-    if (cFlags&4) f << "setMinDist,";
-    f << "defDist=" << input->readULong(2) << ",";
-    int n=0;
-    while (input->tell()<lastPos) {
-      int cLine=(int) input->readLong(1);
-      if (cLine>1) break;
-      f << "line" << n++ <<"=[";
-      STOFFColor col;
-      if (!input->readColor(col)) {
-        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a color\n"));
-        f << "###color,";
-        break;
-      }
-      else if (!col.isBlack())
-        f << "col=" << col << ",";
-      f << "out=" << input->readLong(2) << ",";
-      f << "in=" << input->readLong(2) << ",";
-      f << "dist=" << input->readLong(2) << ",";
-      f << "],";
-    }
-    break;
-  }
-  case StarAttribute::ATTR_SC_PAGE: {
-    // svx_pageitem.cxx SvxPageItem::Create
-    f << "page,";
-    std::vector<uint32_t> text;
-    if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a name\n"));
-      f << "###name,";
-      break;
-    }
-    else if (!text.empty())
-      f << "name=" << libstoff::getString(text).cstr() << ",";
-    f << "type=" << input->readULong(1) << ",";
-    f << "bLand="<< input->readULong(1) << ",";
-    f << "nUse=" << input->readULong(2) << ",";
-    break;
-  }
-  case StarAttribute::ATTR_SC_PAGE_SIZE:
-  case StarAttribute::ATTR_SC_PAGE_MAXSIZE:
-    f << (nWhich==StarAttribute::ATTR_SC_PAGE_SIZE ? "page[sz]" : "maxPage[sz]") << "=" << input->readLong(4) << "x" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::ATTR_SC_PAGE_PRINTAREA:
-  case StarAttribute::ATTR_SC_PAGE_REPEATROW:
-  case StarAttribute::ATTR_SC_PAGE_REPEATCOL:
-    f << (nWhich==StarAttribute::ATTR_SC_PAGE_PRINTAREA ? "print[area]" : nWhich==StarAttribute::ATTR_SC_PAGE_REPEATROW ? "repeat[row]" : "repeat[col]") << ",";
-    // sc_attrib.cxx ScRangeItem::Create
-    if (nVers==0) {
-      uint16_t n, nColS, nRowS, nColE, nRowE;
-      *input >> n >> nColS >> nRowS >> nColE >> nRowE;
-      if (n>255) f << "allTabs,";
-      else f << "table=" << n << ",";
-      f << "range=" << nColS << "x" << nRowS << "<->" << nColE << "x" << nRowE << ",";
-    }
-    else {
-      uint16_t nColS, nRowS, nColE, nRowE;
-      *input >> nColS >> nRowS >> nColE >> nRowE;
-      f << "range=" << nColS << "x" << nRowS << "<->" << nColE << "x" << nRowE << ",";
-      if (nVers>=2) {
-        bool newFlag;
-        *input>>newFlag;
-        if (newFlag) f << "newFlag,";
-        if (input->tell()+1==lastPos) { // checkme
-          *input>>newFlag;
-          if (newFlag) f << "newFlag1,";
-        }
-      }
-    }
-    break;
-  case StarAttribute::ATTR_SC_PAGE_PRINTTABLES: {
-    f << "print[tables],";
-    uint16_t n;
-    *input >> n;
-    if (!n||input->tell()+2*int(n)>lastPos) break;
-    f << "list=[";
-    for (int i=0; i<int(n); ++i)
-      f << input->readULong(2) << ",";
-    f << "],";
-    break;
-  }
-  case StarAttribute::ATTR_SC_PAGE_HEADERLEFT:
-  case StarAttribute::ATTR_SC_PAGE_FOOTERLEFT:
-  case StarAttribute::ATTR_SC_PAGE_HEADERRIGHT:
-  case StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT: {
-    f << (nWhich==StarAttribute::ATTR_SC_PAGE_HEADERLEFT ? "header[left]" :
-          nWhich==StarAttribute::ATTR_SC_PAGE_FOOTERLEFT ? "footer[left]" :
-          nWhich==StarAttribute::ATTR_SC_PAGE_HEADERRIGHT ? "header[right]" : "footer[right]") << ",";
-    for (int i=0; i<3; ++i) {
-      long actPos=input->tell();
-      StarObjectSmallText smallText(object, true);
-      if (!smallText.read(zone, lastPos) || input->tell()>lastPos) {
-        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a text object\n"));
-        ascFile.addPos(actPos);
-        ascFile.addNote("StarAttribute:###editTextObject");
-        input->seek(lastPos, librevenge::RVNG_SEEK_SET);
-        break;
-      }
-    }
-    break;
-  }
   case StarAttribute::ATTR_EE_PARA_NUMBULLET: {
     // svx_numitem.cxx SvxNumRule::SvxNumRule
     f << "eeParaNumBullet,";
