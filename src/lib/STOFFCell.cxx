@@ -73,87 +73,6 @@ std::string STOFFCell::Format::getValueType() const
   return "float";
 }
 
-bool STOFFCell::Format::getNumberingProperties(librevenge::RVNGPropertyList &propList) const
-{
-  librevenge::RVNGPropertyListVector pVect;
-  switch (m_format) {
-  case F_BOOLEAN:
-    propList.insert("librevenge:value-type", "boolean");
-    break;
-  case F_NUMBER:
-    if (m_digits>0)
-      propList.insert("number:decimal-places", m_digits);
-    if (m_thousandHasSeparator)
-      propList.insert("number:grouping", true);
-    switch (m_numberFormat) {
-    case F_NUMBER_GENERIC:
-      propList.insert("librevenge:value-type", "number");
-      propList.remove("number:decimal-places");
-      break;
-    case F_NUMBER_SCIENTIFIC:
-      propList.insert("librevenge:value-type", "scientific");
-      break;
-    case F_NUMBER_PERCENT:
-      propList.insert("librevenge:value-type", "percentage");
-      break;
-    case F_NUMBER_DECIMAL:
-      propList.insert("librevenge:value-type", "number");
-      if (m_integerDigits>=0) {
-        propList.insert("number:min-integer-digits", m_integerDigits+1);
-        propList.insert("number:decimal-places", 0);
-      }
-      break;
-    case F_NUMBER_FRACTION:
-      propList.insert("librevenge:value-type", "fraction");
-      propList.insert("number:min-integer-digits", 0);
-      propList.insert("number:min-numerator-digits", m_numeratorDigits>0 ? m_numeratorDigits : 1);
-      propList.insert("number:min-denominator-digits", m_denominatorDigits>0 ? m_denominatorDigits : 1);
-      propList.remove("number:decimal-places");
-      break;
-    case F_NUMBER_CURRENCY: {
-      propList.clear();
-      propList.insert("librevenge:value-type", "currency");
-      librevenge::RVNGPropertyList list;
-      list.insert("librevenge:value-type", "currency-symbol");
-      list.insert("number:language","en");
-      list.insert("number:country","US");
-      list.insert("librevenge:currency",m_currencySymbol.c_str());
-      pVect.append(list);
-
-      list.clear();
-      list.insert("librevenge:value-type", "number");
-      if (m_digits>-1000)
-        list.insert("number:decimal-places", m_digits);
-      pVect.append(list);
-      break;
-    }
-    case F_NUMBER_UNKNOWN:
-    default:
-      return false;
-    }
-    break;
-  case F_DATE:
-    propList.insert("librevenge:value-type", "date");
-    propList.insert("number:automatic-order", "true");
-    if (!convertDTFormat(m_DTFormat.empty() ? "%m/%d/%Y" : m_DTFormat, pVect))
-      return false;
-    break;
-  case F_TIME:
-    propList.insert("librevenge:value-type", "time");
-    propList.insert("number:automatic-order", "true");
-    if (!convertDTFormat(m_DTFormat.empty() ? "%H:%M:%S" : m_DTFormat, pVect))
-      return false;
-    break;
-  case F_TEXT:
-  case F_UNKNOWN:
-  default:
-    return false;
-  }
-  if (pVect.count())
-    propList.insert("librevenge:format", pVect);
-  return true;
-}
-
 bool STOFFCell::Format::convertDTFormat(std::string const &dtFormat, librevenge::RVNGPropertyListVector &propVect)
 {
   propVect.clear();
@@ -273,7 +192,7 @@ std::ostream &operator<<(std::ostream &o, STOFFCell::Format const &format)
       o << "[percent]";
       break;
     case STOFFCell::F_NUMBER_CURRENCY:
-      o << "[money=" << format.m_currencySymbol << "]";
+      o << "[money]";
       break;
     case STOFFCell::F_NUMBER_FRACTION:
       o << "[fraction]";
@@ -284,10 +203,6 @@ std::ostream &operator<<(std::ostream &o, STOFFCell::Format const &format)
       o << "###format,";
       break;
     }
-    if (format.m_thousandHasSeparator)
-      o << "[thousandSep]";
-    if (format.m_parenthesesForNegative)
-      o << "[parenthesis<0]";
     break;
   case STOFFCell::F_DATE:
     o << "date[" << format.m_DTFormat << "]";
@@ -301,35 +216,9 @@ std::ostream &operator<<(std::ostream &o, STOFFCell::Format const &format)
   }
   o << ",";
 
-  if (format.m_digits != -1) o << "digits=" << format.m_digits << ",";
-  if (format.m_integerDigits != -1) o << "digits[min]=" << format.m_integerDigits << ",";
-  if (format.m_numeratorDigits != -1) o << "digits[num]=" << format.m_numeratorDigits << ",";
-  if (format.m_denominatorDigits != -1) o << "digits[den]=" << format.m_denominatorDigits << ",";
   return o;
 }
 
-int STOFFCell::Format::compare(STOFFCell::Format const &cell) const
-{
-  if (m_format<cell.m_format) return 1;
-  if (m_format>cell.m_format) return -1;
-  if (m_numberFormat<cell.m_numberFormat) return 1;
-  if (m_numberFormat>cell.m_numberFormat) return -1;
-  if (m_digits<cell.m_digits) return 1;
-  if (m_digits>cell.m_digits) return -1;
-  if (m_integerDigits<cell.m_integerDigits) return 1;
-  if (m_integerDigits>cell.m_integerDigits) return -1;
-  if (m_numeratorDigits<cell.m_numeratorDigits) return 1;
-  if (m_numeratorDigits>cell.m_numeratorDigits) return -1;
-  if (m_denominatorDigits<cell.m_denominatorDigits) return 1;
-  if (m_denominatorDigits>cell.m_denominatorDigits) return -1;
-  if (m_thousandHasSeparator!=cell.m_thousandHasSeparator) return m_thousandHasSeparator ? -1:1;
-  if (m_parenthesesForNegative!=cell.m_parenthesesForNegative) return m_parenthesesForNegative ? -1:1;
-  if (m_DTFormat<cell.m_DTFormat) return 1;
-  if (m_DTFormat>cell.m_DTFormat) return -1;
-  if (m_currencySymbol<cell.m_currencySymbol) return 1;
-  if (m_currencySymbol>cell.m_currencySymbol) return -1;
-  return 0;
-}
 ////////////////////////////////////////////////////////////
 // STOFFCell
 ////////////////////////////////////////////////////////////
@@ -484,89 +373,6 @@ bool STOFFCellContent::double2Time(double val, int &H, int &M, int &S)
   M=int(time/60.);
   time -= M*60.;
   S=int(time);
-  return true;
-}
-
-bool STOFFCellContent::double2String(double val, STOFFCell::Format const &format, std::string &str)
-{
-  std::stringstream s;
-  switch (format.m_format) {
-  case STOFFCell::F_BOOLEAN:
-    if (val<0 || val >0) s << "true";
-    else s << "false";
-    break;
-  case STOFFCell::F_NUMBER:
-    if (format.m_digits>=0 && format.m_numberFormat!=STOFFCell::F_NUMBER_GENERIC)
-      s << std::setprecision(format.m_digits);
-    switch (format.m_numberFormat) {
-    case STOFFCell::F_NUMBER_CURRENCY:
-      s << std::fixed << val << "$";
-      break;
-    case STOFFCell::F_NUMBER_DECIMAL:
-      s << val;
-      break;
-    case STOFFCell::F_NUMBER_SCIENTIFIC:
-      s << std::scientific << val;
-      break;
-    case STOFFCell::F_NUMBER_PERCENT:
-      s << std::fixed << 100*val << "%";
-      break;
-    case STOFFCell::F_NUMBER_FRACTION:
-    case STOFFCell::F_NUMBER_GENERIC:
-    case STOFFCell::F_NUMBER_UNKNOWN:
-    default:
-      s << val;
-      break;
-    }
-    break;
-  case STOFFCell::F_DATE: {
-    int Y, M, D;
-    if (!double2Date(val, Y, M, D)) return false;
-    struct tm time;
-    time.tm_sec=time.tm_min=time.tm_hour=0;
-    time.tm_mday=D;
-    time.tm_mon=M;
-    time.tm_year=Y;
-    time.tm_wday=time.tm_yday=time.tm_isdst=-1;
-#if HAVE_STRUCT_TM_TM_ZONE
-    time.tm_zone=0;
-#endif
-    char buf[256];
-    if (mktime(&time)==-1 ||
-        !strftime(buf, 256, format.m_DTFormat.empty() ? "%m/%d/%y" : format.m_DTFormat.c_str(), &time))
-      return false;
-    s << buf;
-    break;
-  }
-  case STOFFCell::F_TIME: {
-    if (val<0 || val>=1)
-      val=std::fmod(val,1.);
-    int H, M, S;
-    if (!double2Time(val, H, M, S)) return false;
-    struct tm time;
-    time.tm_sec=S;
-    time.tm_min=M;
-    time.tm_hour=H;
-    time.tm_mday=time.tm_mon=1;
-    time.tm_year=100;
-    time.tm_wday=time.tm_yday=time.tm_isdst=-1;
-#if HAVE_STRUCT_TM_TM_ZONE
-    time.tm_zone=0;
-#endif
-    char buf[256];
-    if (mktime(&time)==-1 ||
-        !strftime(buf, 256, format.m_DTFormat.empty() ? "%H:%M:%S" : format.m_DTFormat.c_str(), &time))
-      return false;
-    s << buf;
-    break;
-  }
-  case STOFFCell::F_TEXT:
-  case STOFFCell::F_UNKNOWN:
-  default:
-    STOFF_DEBUG_MSG(("STOFFCellContent::double2String: called with bad format\n"));
-    return false;
-  }
-  str=s.str();
   return true;
 }
 

@@ -39,7 +39,8 @@
 
 #include <librevenge/librevenge.h>
 
-#include "STOFFGraphicStyle.hxx"
+#include "STOFFCell.hxx"
+#include "STOFFCellStyle.hxx"
 
 #include "StarFileManager.hxx"
 #include "StarGraphicStruct.hxx"
@@ -671,5 +672,57 @@ bool StarFormatManager::readSWPatternLCL(StarZone &zone)
   }
   zone.closeSWRecord('P', "SWPatternLCL");
   return true;
+}
+
+void StarFormatManager::updateNumberingProperties(STOFFCell &cell) const
+{
+  bool cellUpdated=true;
+  STOFFCellStyle const &style=cell.getCellStyle();
+  librevenge::RVNGPropertyList &propList=cell.getNumberingStyle();
+  STOFFCell::Format format=cell.getFormat();
+  switch (style.m_format) {
+  case 0:
+    cellUpdated=false;
+    break;
+  default:
+    cellUpdated=false;
+    break;
+  }
+
+  if (cellUpdated)
+    return;
+
+  librevenge::RVNGPropertyListVector pVect;
+  switch (format.m_format) {
+  case STOFFCell::F_BOOLEAN:
+    propList.insert("librevenge:value-type", "boolean");
+    break;
+  case STOFFCell::F_NUMBER:
+    propList.insert("librevenge:value-type", "number");
+    format.m_numberFormat=STOFFCell::F_NUMBER_GENERIC;
+    cell.setFormat(format);
+    break;
+  case STOFFCell::F_DATE:
+    propList.insert("librevenge:value-type", "date");
+    propList.insert("number:automatic-order", "true");
+    break;
+    propList.insert("librevenge:value-type", "date");
+    propList.insert("number:automatic-order", "true");
+    if (!format.convertDTFormat(format.m_DTFormat.empty() ? "%m/%d/%Y" : format.m_DTFormat, pVect))
+      return;
+    break;
+  case STOFFCell::F_TIME:
+    propList.insert("librevenge:value-type", "time");
+    propList.insert("number:automatic-order", "true");
+    if (!format.convertDTFormat(format.m_DTFormat.empty() ? "%H:%M:%S" : format.m_DTFormat, pVect))
+      return;
+    break;
+  case STOFFCell::F_TEXT:
+  case STOFFCell::F_UNKNOWN:
+  default:
+    return;
+  }
+  if (pVect.count())
+    propList.insert("librevenge:format", pVect);
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

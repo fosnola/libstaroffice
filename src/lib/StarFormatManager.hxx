@@ -52,6 +52,8 @@ struct State;
 class StarZone;
 class StarObject;
 
+class STOFFCell;
+
 /** \brief the main class to read/.. a StarOffice sdw format
  *
  *
@@ -80,6 +82,9 @@ public:
   bool readNumberFormat(StarZone &zone, long endPos, StarObject &doc);
   //! try to read number formatter type
   bool readNumberFormatter(StarZone &zone);
+
+  //! try to update the cell's data
+  void updateNumberingProperties(STOFFCell &cell) const;
 
   //
   // data

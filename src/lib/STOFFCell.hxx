@@ -60,8 +60,7 @@ public:
   /** a structure uses to define the format of a cell content */
   struct Format {
     //! constructor
-    Format() : m_format(F_UNKNOWN), m_numberFormat(F_NUMBER_UNKNOWN), m_digits(-1), m_integerDigits(-1), m_numeratorDigits(-1), m_denominatorDigits(-1),
-      m_thousandHasSeparator(false), m_parenthesesForNegative(false), m_currencySymbol("$"), m_DTFormat("")
+    Format() : m_format(F_UNKNOWN), m_numberFormat(F_NUMBER_UNKNOWN), m_DTFormat("")
     {
     }
     //! destructor
@@ -73,45 +72,17 @@ public:
     }
     //! returns a value type
     std::string getValueType() const;
-    //! get the numbering style
-    bool getNumberingProperties(librevenge::RVNGPropertyList &propList) const;
     //! convert a DTFormat in a propertyList
     static bool convertDTFormat(std::string const &dtFormat, librevenge::RVNGPropertyListVector &propListVector);
     //! operator<<
     friend std::ostream &operator<<(std::ostream &o, Format const &format);
-    //! a comparison  function
-    int compare(Format const &format) const;
 
     //! the cell format : by default unknown
     FormatType m_format;
     //! the numeric format
     NumberType m_numberFormat;
-    //! the number of digits
-    int m_digits;
-    //! the number of main digits
-    int m_integerDigits;
-    //! the number of numerator digits
-    int m_numeratorDigits;
-    //! the number of denominator digits
-    int m_denominatorDigits;
-    //! true if we must separate the thousand
-    bool m_thousandHasSeparator;
-    //! true if we use parenthese to print negative number
-    bool m_parenthesesForNegative;
-    //! the currency symbol ( default '$')
-    std::string m_currencySymbol;
     //! a date/time format ( using a subset of strftime format )
     std::string m_DTFormat;
-  };
-  //! a comparaison structure used to store data
-  struct CompareFormat {
-    //! constructor
-    CompareFormat() {}
-    //! comparaison function
-    bool operator()(Format const &c1, Format const &c2) const
-    {
-      return c1.compare(c2) < 0;
-    }
   };
   //! constructor
   STOFFCell() : m_position(0,0),m_bdBox(),  m_bdSize(),
@@ -220,6 +191,21 @@ public:
     m_cellStyle=cellStyle;
   }
 
+  //! returns the numbering style
+  librevenge::RVNGPropertyList const &getNumberingStyle() const
+  {
+    return m_numberingStyle;
+  }
+  //! returns the numbering style
+  librevenge::RVNGPropertyList &getNumberingStyle()
+  {
+    return m_numberingStyle;
+  }
+  //! set the numbering style
+  void setNumberingStyle(librevenge::RVNGPropertyList const &numberStyle)
+  {
+    m_numberingStyle=numberStyle;
+  }
 protected:
   //! the cell row and column : 0,0 -> A1, 0,1 -> A2
   STOFFVec2i m_position;
@@ -234,6 +220,8 @@ protected:
   STOFFFont m_font;
   //! the cell cell style
   STOFFCellStyle m_cellStyle;
+  //! the numbering style
+  librevenge::RVNGPropertyList m_numberingStyle;
 };
 
 //! small class use to define a sheet cell content
@@ -316,8 +304,6 @@ public:
   static bool double2Date(double val, int &Y, int &M, int &D);
   /** conversion beetween double: second since 0:00 and time */
   static bool double2Time(double val, int &H, int &M, int &S);
-  /** conversion of the value in string knowing the cell format */
-  static bool double2String(double val, STOFFCell::Format const &format, std::string &str);
   /** conversion beetween date and double days since 1900 date */
   static bool date2Double(int Y, int M, int D, double &val);
   //! the content type ( by default unknown )

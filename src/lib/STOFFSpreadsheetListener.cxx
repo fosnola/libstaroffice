@@ -99,7 +99,7 @@ struct DocumentState {
   /// the list of marker corresponding to sent list
   std::vector<int> m_sentListMarkers;
   /** a map cell's format to id */
-  std::map<STOFFCell::Format,int,STOFFCell::CompareFormat> m_numberingIdMap;
+  std::map<librevenge::RVNGString,int> m_numberingIdMap;
   std::vector<STOFFSubDocumentPtr> m_subDocuments; /** list of document actually open */
 
 private:
@@ -1453,23 +1453,24 @@ void STOFFSpreadsheetListener::openSheetCell(STOFFCell const &cell, STOFFCellCon
   STOFFCell::Format const &format=cell.getFormat();
   if (!format.hasBasicFormat()) {
     int numberingId=-1;
+    librevenge::RVNGPropertyList const &numberingStyle=cell.getNumberingStyle();
+    librevenge::RVNGString hashKey = numberingStyle.getPropString();
+
     std::stringstream name;
-    if (m_ds->m_numberingIdMap.find(format)!=m_ds->m_numberingIdMap.end()) {
-      numberingId=m_ds->m_numberingIdMap.find(format)->second;
+    if (m_ds->m_numberingIdMap.find(hashKey)!=m_ds->m_numberingIdMap.end()) {
+      numberingId=m_ds->m_numberingIdMap.find(hashKey)->second;
       name << "Numbering" << numberingId;
     }
+    else if (numberingStyle.empty())
+      numberingId=-1;
     else {
       numberingId=(int) m_ds->m_numberingIdMap.size();
       name << "Numbering" << numberingId;
 
-      librevenge::RVNGPropertyList numList;
-      if (format.getNumberingProperties(numList)) {
-        numList.insert("librevenge:name", name.str().c_str());
-        m_documentInterface->defineSheetNumberingStyle(numList);
-        m_ds->m_numberingIdMap[format]=numberingId;
-      }
-      else
-        numberingId=-1;
+      librevenge::RVNGPropertyList numList(numberingStyle);
+      numList.insert("librevenge:name", name.str().c_str());
+      m_documentInterface->defineSheetNumberingStyle(numList);
+      m_ds->m_numberingIdMap[hashKey]=numberingId;
     }
     if (numberingId>=0)
       propList.insert("librevenge:numbering-name", name.str().c_str());

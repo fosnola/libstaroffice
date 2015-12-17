@@ -579,6 +579,7 @@ bool StarObjectSpreadsheet::sendCell(StarObjectSpreadsheetInternal::Cell &cell, 
     STOFFCellStyle style;
     attrib->addTo(style);
     cell.setCellStyle(style);
+    getFormatManager()->updateNumberingProperties(cell);
   }
   if (!cell.m_content.m_formula.empty())
     StarCellFormula::updateFormula(cell.m_content, m_state->m_sheetNames, table);
