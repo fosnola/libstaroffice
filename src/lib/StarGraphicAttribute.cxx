@@ -287,7 +287,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeBoxInfo(StarGAttributeBoxInfo const &orig) : StarAttribute(orig), m_borderList(orig.m_borderList), m_flags(orig.m_flags)
+  StarGAttributeBoxInfo(StarGAttributeBoxInfo const &orig) : StarAttribute(orig), m_distance(orig.m_distance), m_borderList(orig.m_borderList), m_flags(orig.m_flags)
   {
   }
   //! the distance

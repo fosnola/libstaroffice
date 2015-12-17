@@ -158,7 +158,7 @@ static bool getBMPData(uint16_t const *pattern, STOFFColor const &col0,  STOFFCo
   uint32_t cols[2]= {col0.value(), col1.value()};
   // Write DIB Image data
   for (int i = 7; i>=0 && tmpBufferPosition < tmpDIBFileSize; i--) {
-    uint16_t row=(i%2) ? (pattern[i/2]&0xff) : (pattern[i/2]>>4);
+    uint16_t row=(i%2) ? uint16_t(pattern[i/2]&0xff) : uint16_t(pattern[i/2]>>4);
     for (int j = 0, depl=0x80; j < 8 && tmpBufferPosition < tmpDIBFileSize; j++, depl>>=1) {
       uint32_t const &col = cols[(row&depl) ? 1 : 0];
 

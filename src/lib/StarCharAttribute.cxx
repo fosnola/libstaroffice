@@ -300,16 +300,18 @@ void StarCAttributeUInt::addTo(STOFFFont &font) const
       font.m_propertyList.insert(wh.c_str(), "oblique");
     else if (m_value==2)
       font.m_propertyList.insert(wh.c_str(), "italic");
-    else if (m_value)
+    else if (m_value) {
       STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown posture enum=%d\n", m_value));
+    }
   }
   else if (m_type==ATTR_CHR_RELIEF) {
     if (m_value==1)
       font.m_propertyList.insert("style:font-relief", "embossed");
     else if (m_value==2)
       font.m_propertyList.insert("style:font-relief", "engraved");
-    else if (m_value)
+    else if (m_value) {
       STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown relief enum=%d\n", m_value));
+    }
   }
   else if (m_type==ATTR_CHR_WEIGHT || m_type==ATTR_CHR_CJK_WEIGHT || m_type==ATTR_CHR_CTL_WEIGHT) {
     std::string wh(m_type==ATTR_CHR_WEIGHT ? "fo:font-weight" :  m_type==ATTR_CHR_CJK_WEIGHT ? "style:font-weight-asian" : "style:font-weight-complex");
@@ -330,8 +332,9 @@ void StarCAttributeUInt::addTo(STOFFFont &font) const
       font.m_propertyList.insert("fo:text-transform", "capitalize");
     else if (m_value==4)
       font.m_propertyList.insert("fo:font-variant", "small-caps");
-    else if (m_value)
+    else if (m_value) {
       STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown casemap enum=%d\n", m_value));
+    }
   }
   else if (m_type==ATTR_CHR_LANGUAGE || m_type==ATTR_CHR_CJK_LANGUAGE || m_type==ATTR_CHR_CTL_LANGUAGE || m_type==ATTR_SC_LANGUAGE_FORMAT) {
     bool const basic=m_type==ATTR_CHR_LANGUAGE||m_type==ATTR_SC_LANGUAGE_FORMAT;

@@ -239,8 +239,9 @@ void StarCAttributeUInt::addTo(STOFFCellStyle &cell) const
       char const *(wh[])= {"lr-tb", "rl-tb", "tb-rl", "tb-lr", "page"};
       cell.m_propertyList.insert("style:writing-mode", wh[m_value]);
     }
-    else
+    else {
       STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeUInt::addTo: find unknown writing dir enum=%d\n", int(m_value)));
+    }
   }
 }
 
