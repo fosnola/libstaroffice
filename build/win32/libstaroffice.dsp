@@ -235,6 +235,10 @@ SOURCE=..\..\src\lib\StarFileManager.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarFormatManager.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarGraphicAttribute.cxx
 # End Source File
 # Begin Source File
@@ -280,10 +284,6 @@ SOURCE=..\..\src\lib\StarZone.cxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\SWFieldManager.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\SWFormatManager.cxx
 # End Source File
 # Begin Source File
 
@@ -459,6 +459,10 @@ SOURCE=..\..\src\lib\StarFileManager.hxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarFormatManager.hxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarGraphicAttribute.hxx
 # End Source File
 # Begin Source File
@@ -504,10 +508,6 @@ SOURCE=..\..\src\lib\StarZone.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\SWFieldManager.hxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\lib\SWFormatManager.hxx
 # End Source File
 # Begin Source File
 

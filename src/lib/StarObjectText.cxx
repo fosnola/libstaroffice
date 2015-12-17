@@ -43,7 +43,7 @@
 
 #include "StarAttribute.hxx"
 #include "SWFieldManager.hxx"
-#include "SWFormatManager.hxx"
+#include "StarFormatManager.hxx"
 #include "StarObject.hxx"
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
@@ -289,9 +289,7 @@ try
     ;
   readSWBookmarkList(zone);
   readSWRedlineList(zone);
-  SWFormatManager formatManager;
-  formatManager.readSWNumberFormatterList(zone);
-
+  getFormatManager()->readSWNumberFormatterList(zone);
   // sw_sw3page.cxx Sw3IoImp::InPageDesc
   libstoff::DebugFile &ascFile=zone.ascii();
   while (!input->isEnd()) {
@@ -615,7 +613,6 @@ bool StarObjectText::readSWContent(StarZone &zone)
   ascFile.addNote(f.str().c_str());
 
   long lastPos=zone.getRecordLastPosition();
-  SWFormatManager formatManager;
   for (int i=0; i<nNodes; ++i) {
     if (input->tell()>=lastPos) break;
     pos=input->tell();
@@ -639,7 +636,7 @@ bool StarObjectText::readSWContent(StarZone &zone)
       break;
     case 'l': // related to link
     case 'o': // format: safe to ignore
-      done=formatManager.readSWFormatDef(zone,char(cType),*this);
+      done=getFormatManager()->readSWFormatDef(zone,char(cType),*this);
       break;
     case 'v':
       done=readSWNodeRedline(zone);
@@ -1372,10 +1369,9 @@ bool StarObjectText::readSWNumRule(StarZone &zone, char cKind)
   ascFile.addNote(f.str().c_str());
 
   int nKnownFormat=nFormat>10 ? 10 : nFormat;
-  SWFormatManager formatManager;
   for (int i=0; i<nKnownFormat; ++i) {
     pos=input->tell();
-    if (formatManager.readSWNumberFormat(zone)) continue;
+    if (getFormatManager()->readSWNumberFormat(zone)) continue;
     STOFF_DEBUG_MSG(("StarObjectText::readSwNumRule: can not read a format\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
@@ -1577,8 +1573,7 @@ bool StarObjectText::readSWTable(StarZone &zone)
   ascFile.addNote(f.str().c_str());
 
   long lastPos=zone.getRecordLastPosition();
-  SWFormatManager formatManager;
-  if (input->peek()=='f') formatManager.readSWFormatDef(zone, 'f', *this);
+  if (input->peek()=='f') getFormatManager()->readSWFormatDef(zone, 'f', *this);
   if (input->peek()=='Y') {
     SWFieldManager fieldManager;
     fieldManager.readField(zone,'Y');
@@ -1628,8 +1623,8 @@ bool StarObjectText::readSWTableBox(StarZone &zone)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  SWFormatManager formatManager;
-  if (input->peek()=='f') formatManager.readSWFormatDef(zone,'f',*this);
+  if (input->peek()=='f')
+    getFormatManager()->readSWFormatDef(zone,'f',*this);
   if (input->peek()=='N') readSWContent(zone);
   long lastPos=zone.getRecordLastPosition();
   while (input->tell()<lastPos) {
@@ -1662,9 +1657,8 @@ bool StarObjectText::readSWTableLine(StarZone &zone)
   zone.closeFlagZone();
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  SWFormatManager formatManager;
   if (input->peek()=='f')
-    formatManager.readSWFormatDef(zone,'f',*this);
+    getFormatManager()->readSWFormatDef(zone,'f',*this);
 
   long lastPos=zone.getRecordLastPosition();
   while (input->tell()<lastPos) {
@@ -1720,7 +1714,6 @@ bool StarObjectText::readSWTextZone(StarZone &zone)
   ascFile.addNote(f.str().c_str());
 
   long lastPos=zone.getRecordLastPosition();
-  SWFormatManager formatManager;
   while (input->tell()<lastPos) {
     pos=input->tell();
 
@@ -1739,7 +1732,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone)
       break;
     case 'l': // related to link
     case 'o': // format: safe to ignore
-      done=formatManager.readSWFormatDef(zone,char(rType), *this);
+      done=getFormatManager()->readSWFormatDef(zone,char(rType), *this);
       break;
     case 'v':
       done=readSWNodeRedline(zone);
@@ -1890,9 +1883,8 @@ bool StarObjectText::readSWTOXList(StarZone &zone)
     int N=(int) input->readULong(1);
     f << "nPatterns=" << N << ",";
     bool ok=true;
-    SWFormatManager formatManager;
     for (int i=0; i<N; ++i) {
-      if (formatManager.readSWPatternLCL(zone))
+      if (getFormatManager()->readSWPatternLCL(zone))
         continue;
       ok=false;
       f << "###pat";
@@ -1948,7 +1940,7 @@ bool StarObjectText::readSWTOXList(StarZone &zone)
 
     if ((fl&0x10)) {
       while (input->tell()<zone.getRecordLastPosition() && input->peek()=='s') {
-        if (!formatManager.readSWFormatDef(zone,'s', *this)) {
+        if (!getFormatManager()->readSWFormatDef(zone,'s', *this)) {
           STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read some format\n"));
           f << "###format,";
           break;
@@ -2157,7 +2149,6 @@ try
   // sw_sw3doc.cxx Sw3IoImp::LoadDocContents
   SWFieldManager fieldManager;
   StarFileManager fileManager;
-  SWFormatManager formatManager;
   while (!input->isEnd()) {
     long pos=input->tell();
     int rType=input->peek();
@@ -2180,7 +2171,7 @@ try
       done=readSWDBName(zone);
       break;
     case 'F':
-      done=formatManager.readSWFlyFrameList(zone, *this);
+      done=getFormatManager()->readSWFlyFrameList(zone, *this);
       break;
     case 'J':
       done=readSWJobSetUp(zone);
@@ -2208,7 +2199,7 @@ try
       done=readSWDictionary(zone);
       break;
     case 'q':
-      done=formatManager.readSWNumberFormatterList(zone);
+      done=getFormatManager()->readSWNumberFormatterList(zone);
       break;
     case 'u':
       done=readSWTOXList(zone);

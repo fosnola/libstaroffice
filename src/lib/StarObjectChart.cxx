@@ -49,7 +49,7 @@
 #include "StarObjectDraw.hxx"
 #include "StarZone.hxx"
 #include "SWFieldManager.hxx"
-#include "SWFormatManager.hxx"
+#include "StarFormatManager.hxx"
 
 #include "StarObjectChart.hxx"
 
@@ -733,11 +733,10 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
       pos=input->tell();
     }
 
-    if (moreData>=16 && input->tell()<lastPos) {
-      SWFormatManager formatManager;
+    if (moreData>=16 && input->tell()<lastPos && getFormatManager()) {
       for (int i=0; i<3; ++i) {
         pos=input->tell();
-        if (!formatManager.readNumberFormatter(zone)) {
+        if (!getFormatManager()->readNumberFormatter(zone)) {
           ascFile.addPos(pos);
           ascFile.addNote("SCHAttributes[format]:####");
           STOFF_DEBUG_MSG(("StarObjectChart::readSCHAttributes: can not read a format zone\n"));

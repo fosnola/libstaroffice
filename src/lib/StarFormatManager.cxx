@@ -47,13 +47,13 @@
 #include "StarObjectText.hxx"
 #include "StarZone.hxx"
 
-#include "SWFormatManager.hxx"
+#include "StarFormatManager.hxx"
 
-/** Internal: the structures of a SWFormatManager */
-namespace SWFormatManagerInternal
+/** Internal: the structures of a StarFormatManager */
+namespace StarFormatManagerInternal
 {
 ////////////////////////////////////////
-//! Internal: the state of a SWFormatManager
+//! Internal: the state of a StarFormatManager
 struct State {
   //! constructor
   State()
@@ -66,15 +66,15 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SWFormatManager::SWFormatManager() : m_state(new SWFormatManagerInternal::State)
+StarFormatManager::StarFormatManager() : m_state(new StarFormatManagerInternal::State)
 {
 }
 
-SWFormatManager::~SWFormatManager()
+StarFormatManager::~StarFormatManager()
 {
 }
 
-bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &doc)
+bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -113,7 +113,7 @@ bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &doc
   std::vector<uint32_t> string;
   if (readName) {
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readSWFormatDef: can not read the name\n"));
+      STOFF_DEBUG_MSG(("StarFormatManager::readSWFormatDef: can not read the name\n"));
       f << "###name";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -146,7 +146,7 @@ bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &doc
       break;
     f.str("");
     f << "SWFormatDef[" << type << "-" << zone.getRecordLevel() << "]:";
-    STOFF_DEBUG_MSG(("SWFormatManager::readSwFormatDef: find unexpected type\n"));
+    STOFF_DEBUG_MSG(("StarFormatManager::readSwFormatDef: find unexpected type\n"));
     f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -157,7 +157,7 @@ bool SWFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &doc
   return true;
 }
 
-bool SWFormatManager::readSWNumberFormat(StarZone &zone)
+bool StarFormatManager::readSWNumberFormat(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -173,7 +173,7 @@ bool SWFormatManager::readSWNumberFormat(StarZone &zone)
   std::vector<uint32_t> string;
   for (int i=0; i<4; ++i) {
     if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readSWNumberFormat: can not read a string\n"));
+      STOFF_DEBUG_MSG(("StarFormatManager::readSWNumberFormat: can not read a string\n"));
       f << "###string";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -221,7 +221,7 @@ bool SWFormatManager::readSWNumberFormat(StarZone &zone)
   return true;
 }
 
-bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
+bool StarFormatManager::readSWNumberFormatterList(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -245,7 +245,7 @@ bool SWFormatManager::readSWNumberFormatterList(StarZone &zone)
   return true;
 }
 
-bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarObject &doc)
+bool StarFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarObject &doc)
 {
   // svx_numitem.cxx SvxNumberFormat::SvxNumberFormat
   STOFFInputStreamPtr input=zone.input();
@@ -254,7 +254,7 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarObject 
   libstoff::DebugStream f;
   f << "Entries(StarNumberFormat)[" << zone.getRecordLevel() << "]:";
   if (pos+26>lastPos) {
-    STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: the zone seems too short\n"));
+    STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormat: the zone seems too short\n"));
     f << "###size";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -279,7 +279,7 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarObject 
   for (int i=0; i<3; ++i) {
     std::vector<uint32_t> text;
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: can not read the format string\n"));
+      STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormat: can not read the format string\n"));
       f << "###string";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -299,7 +299,7 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarObject 
   if (tmp) {
     StarGraphicStruct::StarBrush brush;
     if (!brush.read(zone, 1, lastPos, doc)) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: can not read a brush\n"));
+      STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormat: can not read a brush\n"));
       f << brush << "###brush";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -319,7 +319,7 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarObject 
   if (tmp) {
     StarFileManager fileManager;
     if (!fileManager.readFont(zone) || input->tell()>lastPos) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: can not read a font\n"));
+      STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormat: can not read a font\n"));
       f << "###font";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -335,7 +335,7 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarObject 
   f << "size=" << input->readLong(4) << "x" << input->readLong(4) << ",";
   STOFFColor col;
   if (!input->readColor(col)) {
-    STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormat: can not read a color\n"));
+    STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormat: can not read a color\n"));
     f << "###color";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -351,7 +351,7 @@ bool SWFormatManager::readNumberFormat(StarZone &zone, long lastPos, StarObject 
   return true;
 }
 
-bool SWFormatManager::readNumberFormatter(StarZone &zone)
+bool StarFormatManager::readNumberFormatter(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -361,7 +361,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
   long dataSz=(int) input->readULong(4);
   long lastPos=zone.getRecordLastPosition();
   if (input->tell()+dataSz+6>lastPos) {
-    STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: data size seems bad\n"));
+    STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: data size seems bad\n"));
     f << "###dataSz";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -383,7 +383,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
   long lastZonePos=input->tell()+nSizeTableLen;
   std::vector<long> fieldSize;
   if (lastZonePos>lastPos) {
-    STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: the table length seems bad\n"));
+    STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: the table length seems bad\n"));
     f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -418,7 +418,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
     pos=input->tell();
     if (pos==endDataPos) break;
     if (pos>endDataPos) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: data size seems bad\n"));
+      STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: data size seems bad\n"));
       break;
     }
 
@@ -430,7 +430,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
     if (val) f << "eLge=" << val << ",";
 
     if (n>=fieldSize.size()||input->tell()+fieldSize[n]>endDataPos) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not find end of field\n"));
+      STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: can not find end of field\n"));
       f << "###unknownN";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -440,7 +440,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
 
     std::vector<uint32_t> text;
     if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not read the format string\n"));
+      STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: can not read the format string\n"));
       f << "###string";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -453,7 +453,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
       double res;
       bool isNan;
       if (!input->readDoubleReverted8(res, isNan)) {
-        STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not read a double\n"));
+        STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: can not read a double\n"));
         f << "##limit" << i << ",";
       }
       else if (res<0||res>0)
@@ -476,7 +476,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
       if (input->tell()+4*N>endFieldPos) break;
       for (int c=0; c<N; ++c) {
         if (!zone.readString(text) || input->tell()>endFieldPos) {
-          STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not read the format string\n"));
+          STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: can not read the format string\n"));
           f << "###SvNumFor" << c;
           ok=false;
           break;
@@ -497,7 +497,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
       val=(int) input->readULong(2);
       if (val) f << "nCntExp=" << val << ",";
       if (!zone.readString(text) || input->tell()>endFieldPos) {
-        STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not read the color name\n"));
+        STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: can not read the color name\n"));
         f << "###colorname";
         ok=false;
         break;
@@ -507,7 +507,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
       f << "],";
     }
     if (ok && input->tell()!=endFieldPos && !zone.readString(text)) {
-      STOFF_DEBUG_MSG(("SWFormatManager::readNumberFormatter: can not read the comment\n"));
+      STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: can not read the comment\n"));
       f << "###comment";
       ok=false;
     }
@@ -525,7 +525,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
       // now there can still be a list of currency version....
       static bool first=true;
       if (first) {
-        STOFF_DEBUG_MSG(("SWFormatManager::readSWNumberFormat: find extra data\n"));
+        STOFF_DEBUG_MSG(("StarFormatManager::readSWNumberFormat: find extra data\n"));
         first=false;
       }
       ascFile.addDelimiter(input->tell(),'|');
@@ -546,7 +546,7 @@ bool SWFormatManager::readNumberFormatter(StarZone &zone)
   return true;
 }
 
-bool SWFormatManager::readSWFlyFrameList(StarZone &zone, StarObject &doc)
+bool StarFormatManager::readSWFlyFrameList(StarZone &zone, StarObject &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -575,7 +575,7 @@ bool SWFormatManager::readSWFlyFrameList(StarZone &zone, StarObject &doc)
   return true;
 }
 
-bool SWFormatManager::readSWPatternLCL(StarZone &zone)
+bool StarFormatManager::readSWPatternLCL(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -634,7 +634,7 @@ bool SWFormatManager::readSWPatternLCL(StarZone &zone)
     case 4: {
       f << "tknText,";
       if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("SWFormatManager::readSWPatternLCL: can not read a string\n"));
+        STOFF_DEBUG_MSG(("StarFormatManager::readSWPatternLCL: can not read a string\n"));
         f << "###type,";
         break;
       }
@@ -661,7 +661,7 @@ bool SWFormatManager::readSWPatternLCL(StarZone &zone)
     case 10: // end of token
       break;
     default:
-      STOFF_DEBUG_MSG(("SWFormatManager::readSWPatternLCL: find unknown token\n"));
+      STOFF_DEBUG_MSG(("StarFormatManager::readSWPatternLCL: find unknown token\n"));
       f << "###type,";
       break;
     }

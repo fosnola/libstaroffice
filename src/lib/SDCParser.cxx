@@ -42,7 +42,6 @@
 #include "STOFFOLEParser.hxx"
 
 #include "SWFieldManager.hxx"
-#include "SWFormatManager.hxx"
 #include "StarAttribute.hxx"
 #include "StarObject.hxx"
 #include "StarFileManager.hxx"

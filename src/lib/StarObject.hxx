@@ -53,6 +53,7 @@ struct State;
 }
 
 class StarAttributeManager;
+class StarFormatManager;
 
 /** \brief an object corresponding to an OLE directory
  *
@@ -85,8 +86,10 @@ public:
   {
     return m_directory;
   }
-  //! return the attribute manager
+  //! returns the attribute manager
   shared_ptr<StarAttributeManager> getAttributeManager();
+  //! returns the format manager
+  shared_ptr<StarFormatManager> getFormatManager();
   //! returns the meta data (filled by readSfxDocumentInformation)
   librevenge::RVNGPropertyList const &getMetaData() const
   {

@@ -92,6 +92,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarEncryption.hxx			\
 	StarFileManager.cxx			\
 	StarFileManager.hxx			\
+	StarFormatManager.cxx			\
+	StarFormatManager.hxx			\
 	StarGraphicAttribute.cxx		\
 	StarGraphicAttribute.hxx		\
 	StarGraphicStruct.cxx			\
@@ -116,8 +118,6 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarZone.hxx				\
 	SWFieldManager.cxx			\
 	SWFieldManager.hxx			\
-	SWFormatManager.cxx			\
-	SWFormatManager.hxx			\
 	libstaroffice_internal.cxx		\
 	libstaroffice_internal.hxx
 

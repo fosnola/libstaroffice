@@ -43,6 +43,7 @@
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarZone.hxx"
+#include "StarFormatManager.hxx"
 
 #include "StarObject.hxx"
 
@@ -52,17 +53,19 @@ namespace StarObjectInternal
 //! the state of a StarObject
 struct State {
   //! constructor
-  State() : m_poolList(), m_attributeManager(new StarAttributeManager)
+  State() : m_poolList(), m_attributeManager(new StarAttributeManager), m_formatManager(new StarFormatManager)
   {
   }
   //! copy constructor
-  State(State const &orig) : m_poolList(orig.m_poolList), m_attributeManager(orig.m_attributeManager)
+  State(State const &orig) : m_poolList(orig.m_poolList), m_attributeManager(orig.m_attributeManager), m_formatManager(orig.m_formatManager)
   {
   }
   //! the list of pool
   std::vector<shared_ptr<StarItemPool> > m_poolList;
   //! the attribute manager
   shared_ptr<StarAttributeManager> m_attributeManager;
+  //! the format manager
+  shared_ptr<StarFormatManager> m_formatManager;
 private:
   State operator=(State const &orig);
 };
@@ -96,6 +99,11 @@ STOFFDocument::Kind StarObject::getDocumentKind() const
 shared_ptr<StarAttributeManager> StarObject::getAttributeManager()
 {
   return m_state->m_attributeManager;
+}
+
+shared_ptr<StarFormatManager> StarObject::getFormatManager()
+{
+  return m_state->m_formatManager;
 }
 
 shared_ptr<StarItemPool> StarObject::getNewItemPool(StarItemPool::Type type)

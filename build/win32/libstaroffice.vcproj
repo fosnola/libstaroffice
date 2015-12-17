@@ -465,6 +465,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\StarFormatManager.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\StarGraphicAttribute.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -561,14 +569,6 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
-			<File RelativePath="..\..\src\lib\SWFormatManager.cxx">
-				<FileConfiguration Name="Release|Win32">
-					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
-				</FileConfiguration>
-				<FileConfiguration Name="Debug|Win32">
-					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
 			<File RelativePath="..\..\src\lib\libstaroffice_internal.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -657,6 +657,8 @@
 			</File>
 			<File RelativePath="..\..\src\lib\StarFileManager.hxx">
 			</File>
+			<File RelativePath="..\..\src\lib\StarFormatManager.hxx">
+			</File>
 			<File RelativePath="..\..\src\lib\StarGraphicAttribute.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarGraphicStruct.hxx">
@@ -680,8 +682,6 @@
 			<File RelativePath="..\..\src\lib\StarZone.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\SWFieldManager.hxx">
-			</File>
-			<File RelativePath="..\..\src\lib\SWFormatManager.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\libstaroffice_internal.hxx">
 			</File>

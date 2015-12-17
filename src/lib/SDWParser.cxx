@@ -43,7 +43,6 @@
 
 #include "StarAttribute.hxx"
 #include "SWFieldManager.hxx"
-#include "SWFormatManager.hxx"
 #include "StarObject.hxx"
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"

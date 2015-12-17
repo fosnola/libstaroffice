@@ -55,7 +55,7 @@ class StarAttributeManager;
 class StarObject;
 class StarZone;
 class STOFFOLEParser;
-class SWFormatManager;
+class StarFormatManager;
 /** \brief the main class to read a StarOffice sdc file
  *
  *

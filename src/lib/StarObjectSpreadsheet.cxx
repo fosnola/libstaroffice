@@ -57,7 +57,7 @@
 #include "STOFFSpreadsheetListener.hxx"
 #include "STOFFTable.hxx"
 
-#include "SWFormatManager.hxx"
+#include "StarFormatManager.hxx"
 
 #include "StarObjectSpreadsheet.hxx"
 
@@ -1227,8 +1227,7 @@ try
     }
     case 0x4228: {
       f << "numFormats,";
-      SWFormatManager formatManager;
-      if (!formatManager.readNumberFormatter(zone))
+      if (!getFormatManager()->readNumberFormatter(zone))
         f << "###";
       break;
     }

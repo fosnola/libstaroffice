@@ -47,8 +47,6 @@
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarZone.hxx"
-#include "SWFieldManager.hxx"
-#include "SWFormatManager.hxx"
 
 #include "StarObjectDraw.hxx"
 

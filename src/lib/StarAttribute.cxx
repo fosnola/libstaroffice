@@ -42,7 +42,7 @@
 #include "STOFFGraphicStyle.hxx"
 
 #include "SWFieldManager.hxx"
-#include "SWFormatManager.hxx"
+#include "StarFormatManager.hxx"
 
 #include "StarBitmap.hxx"
 #include "StarCellAttribute.hxx"
@@ -1018,11 +1018,10 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
   }
   case StarAttribute::ATTR_TXT_FLYCNT: {
     f << "textAtrFlycnt,";
-    SWFormatManager formatManager;
     if (input->peek()=='o')
-      formatManager.readSWFormatDef(zone,'o', object);
+      object.getFormatManager()->readSWFormatDef(zone,'o', object);
     else
-      formatManager.readSWFormatDef(zone,'l', object);
+      object.getFormatManager()->readSWFormatDef(zone,'l', object);
     break;
   }
   case StarAttribute::ATTR_TXT_FTN: {
@@ -1219,8 +1218,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     long actPos=input->tell();
     if (actPos==lastPos)
       break;
-    SWFormatManager formatManager;
-    formatManager.readSWFormatDef(zone,'r',object);
+    object.getFormatManager()->readSWFormatDef(zone,'r',object);
     break;
   }
   case StarAttribute::ATTR_FRM_PROTECT:
@@ -1453,8 +1451,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
       *input>>nSet;
       if (nSet) {
         f << nSet << ",";
-        SWFormatManager formatManager;
-        if (!formatManager.readNumberFormat(zone, lastPos, object) || input->tell()>lastPos) {
+        if (!object.getFormatManager()->readNumberFormat(zone, lastPos, object) || input->tell()>lastPos) {
           f << "###";
           break;
         }

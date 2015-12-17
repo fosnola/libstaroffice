@@ -32,11 +32,11 @@
 */
 
 /*
- * FormatManager to read/parse SW StarOffice format
+ * FormatManager to read/parse StarOffice format
  *
  */
-#ifndef SW_FORMATMANAGER
-#  define SW_FORMATMANAGER
+#ifndef STAR_FORMATMANAGER
+#  define STAR_FORMATMANAGER
 
 #include <vector>
 
@@ -44,7 +44,7 @@
 #include "STOFFEntry.hxx"
 #include "STOFFInputStream.hxx"
 
-namespace SWFormatManagerInternal
+namespace StarFormatManagerInternal
 {
 struct State;
 }
@@ -57,13 +57,13 @@ class StarObject;
  *
  *
  */
-class SWFormatManager
+class StarFormatManager
 {
 public:
   //! constructor
-  SWFormatManager();
+  StarFormatManager();
   //! destructor
-  virtual ~SWFormatManager();
+  virtual ~StarFormatManager();
 
   //! try to read a format zone : 'f' or 'l' or 'o' or 'r' or 's'(in TOCX)
   bool readSWFormatDef(StarZone &zone, char kind, StarObject &doc);
@@ -86,7 +86,7 @@ public:
   //
 private:
   //! the state
-  shared_ptr<SWFormatManagerInternal::State> m_state;
+  shared_ptr<StarFormatManagerInternal::State> m_state;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
