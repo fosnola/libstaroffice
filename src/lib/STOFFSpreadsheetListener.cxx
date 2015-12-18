@@ -1455,15 +1455,12 @@ void STOFFSpreadsheetListener::openSheetCell(STOFFCell const &cell, STOFFCellCon
     int numberingId=-1;
     librevenge::RVNGPropertyList const &numberingStyle=cell.getNumberingStyle();
     librevenge::RVNGString hashKey = numberingStyle.getPropString();
-
     std::stringstream name;
     if (m_ds->m_numberingIdMap.find(hashKey)!=m_ds->m_numberingIdMap.end()) {
       numberingId=m_ds->m_numberingIdMap.find(hashKey)->second;
       name << "Numbering" << numberingId;
     }
-    else if (numberingStyle.empty())
-      numberingId=-1;
-    else {
+    else if (!numberingStyle.empty()) {
       numberingId=(int) m_ds->m_numberingIdMap.size();
       name << "Numbering" << numberingId;
 

@@ -676,23 +676,83 @@ bool StarFormatManager::readSWPatternLCL(StarZone &zone)
 
 void StarFormatManager::updateNumberingProperties(STOFFCell &cell) const
 {
-  bool cellUpdated=true;
   STOFFCellStyle const &style=cell.getCellStyle();
   librevenge::RVNGPropertyList &propList=cell.getNumberingStyle();
   STOFFCell::Format format=cell.getFormat();
+  librevenge::RVNGPropertyListVector pVect;
   switch (style.m_format) {
-  case 0:
-    cellUpdated=false;
+  case 0: // standart
     break;
+  case 1: // decimal
+  case 2:
+  case 3:
+  case 4:
+    format.m_format=STOFFCell::F_NUMBER;
+    format.m_numberFormat=STOFFCell::F_NUMBER_DECIMAL;
+    cell.setFormat(format);
+    propList.insert("librevenge:value-type", "number");
+    propList.insert("number:decimal-places", (style.m_format&1) ? 0 : 2);
+    if (style.m_format>=3) propList.insert("number:grouping", true);
+    return;
+  case 10:
+  case 11:
+    format.m_format=STOFFCell::F_NUMBER;
+    format.m_numberFormat=STOFFCell::F_NUMBER_PERCENT;
+    cell.setFormat(format);
+    propList.insert("librevenge:value-type", "percentage");
+    propList.insert("number:decimal-places", (style.m_format&1) ? 2 : 0);
+    return;
+  case 20:
+  case 21:
+  case 22: // red negative
+  case 23: { // red negative
+    // fixme implement red negative + non us currency
+    format.m_format=STOFFCell::F_NUMBER;
+    format.m_numberFormat=STOFFCell::F_NUMBER_CURRENCY;
+    cell.setFormat(format);
+    propList.insert("librevenge:value-type", "currency");
+    librevenge::RVNGPropertyList list;
+    list.insert("librevenge:value-type", "currency-symbol");
+    list.insert("number:language","en");
+    list.insert("number:country","US");
+    list.insert("librevenge:currency","$");
+    pVect.append(list);
+    list.clear();
+    list.insert("librevenge:value-type", "number");
+    list.insert("number:decimal-places", (style.m_format&1) ? 2 : 0);
+    list.insert("number:grouping", true);
+    pVect.append(list);
+    propList.insert("librevenge:format", pVect);
+    return;
+  }
+  case 60:
+  case 61:
+    format.m_format=STOFFCell::F_NUMBER;
+    format.m_numberFormat=STOFFCell::F_NUMBER_SCIENTIFIC;
+    cell.setFormat(format);
+    propList.insert("librevenge:value-type", "scientific");
+    propList.insert("number:decimal-places", 2);
+    propList.insert("number:min-exponent-digits", style.m_format==60 ? 3 : 2);
+    return;
+  case 70:
+  case 71:
+    format.m_format=STOFFCell::F_NUMBER;
+    format.m_numberFormat=STOFFCell::F_NUMBER_FRACTION;
+    cell.setFormat(format);
+    propList.insert("librevenge:value-type", "fraction");
+    propList.insert("number:min-numerator-digits", style.m_format==70 ? 1 : 2);
+    propList.insert("number:min-denominator-digits", style.m_format==70 ? 1 : 2);
+    return;
+  case 99:
+    format.m_format=STOFFCell::F_BOOLEAN;
+    cell.setFormat(format);
+    propList.insert("librevenge:value-type", "boolean");
+    return;
+  case 100: // text
   default:
-    cellUpdated=false;
     break;
   }
 
-  if (cellUpdated)
-    return;
-
-  librevenge::RVNGPropertyListVector pVect;
   switch (format.m_format) {
   case STOFFCell::F_BOOLEAN:
     propList.insert("librevenge:value-type", "boolean");
