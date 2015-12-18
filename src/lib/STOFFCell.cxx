@@ -62,6 +62,7 @@ std::string STOFFCell::Format::getValueType() const
   case F_BOOLEAN:
     return "boolean";
   case F_DATE:
+  case F_DATETIME:
     return "date";
   case F_TIME:
     return "time";
@@ -147,12 +148,22 @@ bool STOFFCell::Format::convertDTFormat(std::string const &dtFormat, librevenge:
       list.insert("number:style", "long");
       propVect.append(list);
       break;
+    case 's': // extension for second + milli second...
+      list.insert("librevenge:value-type", "seconds");
+      list.insert("number:decimal-places", 2);
+      list.insert("number:style", "long");
+      propVect.append(list);
+      break;
     case 'p':
       list.insert("librevenge:value-type", "text");
       list.insert("librevenge:text", " ");
       propVect.append(list);
       list.clear();
       list.insert("librevenge:value-type", "am-pm");
+      propVect.append(list);
+      break;
+    case 'Q': // extension for quarter
+      list.insert("librevenge:value-type", "quarter");
       propVect.append(list);
       break;
     default:
@@ -205,10 +216,13 @@ std::ostream &operator<<(std::ostream &o, STOFFCell::Format const &format)
     }
     break;
   case STOFFCell::F_DATE:
-    o << "date[" << format.m_DTFormat << "]";
+    o << "date";
+    break;
+  case STOFFCell::F_DATETIME:
+    o << "date+time";
     break;
   case STOFFCell::F_TIME:
-    o << "time[" << format.m_DTFormat << "]";
+    o << "time";
     break;
   case STOFFCell::F_UNKNOWN:
   default:

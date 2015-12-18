@@ -725,6 +725,45 @@ void StarFormatManager::updateNumberingProperties(STOFFCell &cell) const
     propList.insert("librevenge:format", pVect);
     return;
   }
+  case 30:
+  case 31:
+  case 32:
+  case 33:
+  case 34:
+  case 35:
+  case 36: {
+    format.m_format=STOFFCell::F_DATE;
+    cell.setFormat(format);
+    propList.insert("librevenge:value-type", "date");
+    propList.insert("number:automatic-order", "true");
+    char const *(wh[])= {"%m/%d/%y", "%a %d/%b %y", "%m/%y", "%b %d", "%B",
+                         "%Q Quarter %y", "%m/%d/%Y"
+                        };
+    if (format.convertDTFormat(wh[style.m_format-30], pVect))
+      propList.insert("librevenge:format", pVect);
+    return;
+  }
+  case 40:
+  case 41:
+  case 42:
+  case 43:
+  case 44:
+  case 45: {
+    format.m_format=STOFFCell::F_TIME;
+    cell.setFormat(format);
+    propList.insert("librevenge:value-type", "time");
+    propList.insert("number:automatic-order", "true");
+    char const *(wh[])= {"%H:%M", "%H:%M:%S", "%I:%M %p","%I:%M:%S %p", "%H:%M:%S", "%M:%s" };
+    if (format.convertDTFormat(wh[style.m_format-40], pVect))
+      propList.insert("librevenge:format", pVect);
+    return;
+  }
+  case 50:
+    format.m_format=STOFFCell::F_DATETIME;
+    cell.setFormat(format);
+    if (format.convertDTFormat("%m/%d/%Y %H:%M", pVect))
+      propList.insert("librevenge:format", pVect);
+    return;
   case 60:
   case 61:
     format.m_format=STOFFCell::F_NUMBER;
@@ -765,16 +804,19 @@ void StarFormatManager::updateNumberingProperties(STOFFCell &cell) const
   case STOFFCell::F_DATE:
     propList.insert("librevenge:value-type", "date");
     propList.insert("number:automatic-order", "true");
+    if (!format.convertDTFormat("%m/%d/%Y", pVect))
+      return;
     break;
+  case STOFFCell::F_DATETIME:
     propList.insert("librevenge:value-type", "date");
     propList.insert("number:automatic-order", "true");
-    if (!format.convertDTFormat(format.m_DTFormat.empty() ? "%m/%d/%Y" : format.m_DTFormat, pVect))
+    if (!format.convertDTFormat("%m/%d/%Y %H:%M", pVect))
       return;
     break;
   case STOFFCell::F_TIME:
     propList.insert("librevenge:value-type", "time");
     propList.insert("number:automatic-order", "true");
-    if (!format.convertDTFormat(format.m_DTFormat.empty() ? "%H:%M:%S" : format.m_DTFormat, pVect))
+    if (!format.convertDTFormat("%H:%M:%S", pVect))
       return;
     break;
   case STOFFCell::F_TEXT:

@@ -1500,7 +1500,8 @@ void STOFFSpreadsheetListener::openSheetCell(STOFFCell const &cell, STOFFCellCon
       if (!hasValue) break;
       propList.insert("librevenge:value", content.m_value, librevenge::RVNG_GENERIC);
       break;
-    case STOFFCell::F_DATE: {
+    case STOFFCell::F_DATE:
+    case STOFFCell::F_DATETIME: {
       propList.insert("librevenge:value-type", "date");
       if (!hasValue) break;
       int Y=0, M=0, D=0;
@@ -1508,10 +1509,13 @@ void STOFFSpreadsheetListener::openSheetCell(STOFFCell const &cell, STOFFCellCon
       propList.insert("librevenge:year", Y);
       propList.insert("librevenge:month", M);
       propList.insert("librevenge:day", D);
-      break;
+      if (format.m_format==STOFFCell::F_DATE)
+        break;
     }
+    // fall throught intended
     case STOFFCell::F_TIME: {
-      propList.insert("librevenge:value-type", "time");
+      if (format.m_format==STOFFCell::F_TIME)
+        propList.insert("librevenge:value-type", "time");
       if (!hasValue) break;
       int H=0, M=0, S=0;
       if (!STOFFCellContent::double2Time(std::fmod(content.m_value,1.),H,M,S))

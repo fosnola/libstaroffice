@@ -567,7 +567,7 @@ bool StarCellFormula::setFunction(int nOp, STOFFCellContent::FormulaInstruction 
 {
   if (nOp>=46 && nOp<=53) {  // 60 endNoPar
     static char const *(wh[])= {
-      "Pi", "Random", "True", "False", "GetActDate", "Today", "Now"/*getActTime*/,
+      "Pi", "Random", "True", "False", "Today"/*getActDate*/, "Now"/*getActTime*/,
       "NA", "Current"
     };
     instr.m_type=STOFFCellContent::FormulaInstruction::F_Function;

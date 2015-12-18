@@ -54,13 +54,13 @@ class STOFFCell
 {
 public:
   /** the different format of a cell's content */
-  enum FormatType { F_TEXT, F_BOOLEAN, F_NUMBER, F_DATE, F_TIME, F_UNKNOWN };
+  enum FormatType { F_TEXT, F_BOOLEAN, F_NUMBER, F_DATE, F_TIME, F_DATETIME, F_UNKNOWN };
   /** the different number format of a cell's content */
   enum NumberType { F_NUMBER_CURRENCY, F_NUMBER_DECIMAL, F_NUMBER_FRACTION, F_NUMBER_GENERIC, F_NUMBER_SCIENTIFIC, F_NUMBER_PERCENT, F_NUMBER_UNKNOWN };
   /** a structure uses to define the format of a cell content */
   struct Format {
     //! constructor
-    Format() : m_format(F_UNKNOWN), m_numberFormat(F_NUMBER_UNKNOWN), m_DTFormat("")
+    Format() : m_format(F_UNKNOWN), m_numberFormat(F_NUMBER_UNKNOWN)
     {
     }
     //! destructor
@@ -81,8 +81,6 @@ public:
     FormatType m_format;
     //! the numeric format
     NumberType m_numberFormat;
-    //! a date/time format ( using a subset of strftime format )
-    std::string m_DTFormat;
   };
   //! constructor
   STOFFCell() : m_position(0,0),m_bdBox(),  m_bdSize(),
