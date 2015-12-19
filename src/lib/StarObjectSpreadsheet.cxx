@@ -54,6 +54,7 @@
 #include "STOFFFont.hxx"
 #include "STOFFGraphicStyle.hxx"
 #include "STOFFOLEParser.hxx"
+#include "STOFFSubDocument.hxx"
 #include "STOFFSpreadsheetListener.hxx"
 #include "STOFFTable.hxx"
 
@@ -257,6 +258,8 @@ public:
   shared_ptr<StarObjectSmallText> m_textZone;
   //! flag to know if the cell has some note
   bool m_hasNote;
+  //! the notes text, date, author
+  librevenge::RVNGString m_notes[3];
 };
 
 ////////////////////////////////////////
@@ -436,6 +439,53 @@ struct State {
   std::vector<librevenge::RVNGString> m_sheetNames;
 };
 
+////////////////////////////////////////
+//! Internal: the subdocument of a StarObjectSpreadsheet
+class SubDocument : public STOFFSubDocument
+{
+public:
+  SubDocument(librevenge::RVNGString const &text) :
+    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_text(text) {}
+
+  //! destructor
+  virtual ~SubDocument() {}
+
+  //! operator!=
+  virtual bool operator!=(STOFFSubDocument const &doc) const
+  {
+    if (STOFFSubDocument::operator!=(doc)) return true;
+    SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
+    if (!sDoc) return true;
+    if (m_text != sDoc->m_text) return true;
+    return false;
+  }
+
+  //! operator!==
+  virtual bool operator==(STOFFSubDocument const &doc) const
+  {
+    return !operator!=(doc);
+  }
+
+  //! the parser function
+  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type);
+
+protected:
+  //! the note text
+  librevenge::RVNGString m_text;
+};
+
+void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*type*/)
+{
+  if (!listener.get()) {
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::SubDocument::parse: no listener\n"));
+    return;
+  }
+  if (!m_text.empty())
+    listener->insertUnicodeString(m_text);
+  else
+    listener->insertChar(' ');
+}
+
 }
 
 ////////////////////////////////////////////////////////////
@@ -589,6 +639,10 @@ bool StarObjectSpreadsheet::sendCell(StarObjectSpreadsheetInternal::Cell &cell, 
     listener->insertUnicodeList(cell.m_content.m_text);
   else if (cell.m_content.m_contentType==STOFFCellContent::C_TEXT && cell.m_textZone)
     cell.m_textZone->send(listener);
+  if (cell.m_hasNote) {
+    shared_ptr<STOFFSubDocument> subDoc(new StarObjectSpreadsheetInternal::SubDocument(cell.m_notes[0]));
+    listener->insertComment(subDoc, cell.m_notes[2], cell.m_notes[1]);
+  }
   listener->closeSheetCell();
   return true;
 }
@@ -1918,7 +1972,9 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
       *input >> nCount;
       f << "n=" << nCount << ",";
       for (int i=0; i<nCount; ++i) {
-        f << "note" << i << "[pos=" << input->readULong(2) << ",";
+        int row=(int) input->readULong(2);
+        f << "note" << i << "[R" << row << ",";
+        StarObjectSpreadsheetInternal::Cell &cell=table.getCell(STOFFVec2i(column, row));
         // sc_cell.cxx ScBaseCell::LoadNotes, ScPostIt operator>>
         for (int j=0; j<3; ++j) {
           if (!zone.readString(string)||input->tell()>endDataPos) {
@@ -1929,9 +1985,11 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
           }
           if (string.empty()) continue;
           static char const *(wh[])= {"note","date","author"};
-          f << wh[j] << "=" << libstoff::getString(string).cstr() << ",";
+          cell.m_notes[j]=libstoff::getString(string);
+          f << wh[j] << "=" << cell.m_notes[j].cstr()  << ",";
         }
         if (!ok) break;
+        cell.m_hasNote=true;
         f << "],";
       }
       break;
@@ -2157,7 +2215,6 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
     case 4: {
       // sc_cell2.cxx
       f << "note";
-      cell.m_hasNote=true;
       if (version>=7) {
         uint8_t unkn;
         *input>>unkn;

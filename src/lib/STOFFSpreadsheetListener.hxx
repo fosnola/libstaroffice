@@ -184,7 +184,7 @@ public:
   void insertNote(STOFFNote const &note, STOFFSubDocumentPtr &subDocument);
 
   /** adds comment */
-  void insertComment(STOFFSubDocumentPtr &subDocument);
+  void insertComment(STOFFSubDocumentPtr &subDocument, librevenge::RVNGString const &creator="", librevenge::RVNGString const &date="");
 #if 0
   /** adds a picture with potential various representationin given position */
   void insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture,

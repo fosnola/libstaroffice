@@ -44,6 +44,7 @@
 
 #include "StarFileManager.hxx"
 #include "StarGraphicStruct.hxx"
+#include "StarLanguage.hxx"
 #include "StarObject.hxx"
 #include "StarObjectText.hxx"
 #include "StarZone.hxx"
@@ -53,13 +54,438 @@
 /** Internal: the structures of a StarFormatManager */
 namespace StarFormatManagerInternal
 {
+//! a struct use to store number formatter of a StarFormatManager
+struct NumberFormatter {
+  //! struct use to store small format item
+  struct FormatItem {
+    //! constructor
+    FormatItem() : m_text(""), m_type(0)
+    {
+    }
+    //! try to update the cell's formating
+    bool updateNumberingProperties(librevenge::RVNGPropertyListVector &vect) const;
+
+    //! operator<<
+    friend std::ostream &operator<<(std::ostream &o, FormatItem const &item)
+    {
+      if (!item.m_text.empty()) o << item.m_text.cstr();
+      o << ":";
+      if (item.m_type<0 && item.m_type>=-21) {
+        char const *(wh[])= {"", "string", "del", "blank", "star", "digit",
+                             "decimSep", "thSep", "exp", "frac", "empty",
+                             "fracBlank", "currency", "currDel", "currext",
+                             "calendar", "caldel", "dateSep", "timeSep",
+                             "time100secSep", "percent", "frac_fdiv"
+                            };
+        o << wh[-item.m_type];
+      }
+      else if (item.m_type>0 && item.m_type<=50) {
+        char const *(wh[])= {
+          "", "E", "AMPM", "AP", "MI", "MMI", "M", "MM", // exp, 2a/p, 2min, 2month
+          "MMM", "MMMM", "H", "HH", "S", "SS", "Q", "QQ", // 2month, 2hours, 2sec, 2quarter
+          "D", "DD", "DDD", "DDDD", "YY", "YYYY", "NN", "NNNN", //4 day, 2 year, 2 day of week
+          "CCC", "GENERAL", "NNN", "WW", "MMMMM", "UNUSED4", "QUARTER", "TRUE", // currency, blank, day of week, week, month[first letter], ...,  quarter, true
+          "FALSE", "BOOLEAN", "COLOR", "BLACK", "BLUE", "GREEN", "YELLOW", "WHITE", // false, bool, + colors
+          "AAA", "AAAA", "EC", "EEC", "G", "GG", "GGG", "R", // 2 jap DDD, 2 gregorian year, 3 gentoo era, EE
+          "RR", "THAI_T"
+        };
+        o << wh[item.m_type];
+      }
+      else if (item.m_type) o << ":" << item.m_type;
+      return o;
+    }
+    //! the string
+    librevenge::RVNGString m_text;
+    //! the type
+    int m_type;
+  };
+  //! struct use to store different local format
+  struct Format {
+    //! constructor
+    Format() : m_itemList(), m_type(0), m_hasThousandSep(false), m_prefix(0), m_postfix(0), m_exponential(0), m_thousand(0), m_colorName("")
+    {
+    }
+    //! operator<<
+    friend std::ostream &operator<<(std::ostream &o, Format const &form)
+    {
+      if (!form.m_type) return o;
+      o << getTypeString(form.m_type) << ",";
+      if (form.m_prefix) o << "prefix[digits]=" << form.m_prefix << ",";
+      if (form.m_postfix) o << "postfix[digits]=" << form.m_postfix << ",";
+      if (form.m_exponential) o << "exponential[digits]=" << form.m_exponential << ",";
+      if (form.m_hasThousandSep) o << "thousand[digits]=" << form.m_thousand << ",";
+      if (!form.m_itemList.empty()) {
+        o << "item=[";
+        for (size_t i=0; i<form.m_itemList.size(); ++i)
+          o << form.m_itemList[i] << ",";
+        o << "],";
+      }
+      if (!form.m_colorName.empty()) o << "color[name]=" << form.m_colorName.cstr() << ",";
+      return o;
+    }
+    //! try to update the cell's formating
+    bool updateNumberingProperties(STOFFCell &cell, std::string const &language, std::string const &country) const;
+    //! the item list
+    std::vector<FormatItem> m_itemList;
+    //! the format type
+    int m_type;
+    //! a flag to know if we need to add a thousand separator
+    bool m_hasThousandSep;
+    //! the prefix digits
+    int m_prefix;
+    //! the postfix digits
+    int m_postfix;
+    //! the exponential digits
+    int m_exponential;
+    //! the number of thousand digits
+    int m_thousand;
+    //! the color name
+    librevenge::RVNGString m_colorName;
+  };
+  //! constructor
+  NumberFormatter() : m_format(""), m_language(0), m_type(0), m_isStandart(false), m_isUsed(false), m_extra("")
+  {
+    for (int i=0; i<2; ++i) {
+      m_limits[i]=0;
+      m_limitsOp[i]=0;
+    }
+  }
+  //! returns a string corresponding to a format type
+  static std::string getTypeString(int typeId)
+  {
+    std::stringstream s;
+    if (typeId&1) s << "user,";
+    if (typeId&2) s << "date";
+    if (typeId&4) s << "time";
+    if (typeId&8) s << "currency";
+    if (typeId&0x10) s << "number";
+    if (typeId&0x20) s << "scientific";
+    if (typeId&0x40) s << "fraction";
+    if (typeId&0x80) s << "percent";
+    if (typeId&0x100) s << "text";
+    if (typeId&0x400) s << "logical";
+    if (typeId&0x800) s << "unused";
+    if (typeId&0xF200) s << "#form=" << std::hex << (typeId&0xFa00) << std::dec;
+    return s.str();
+  }
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, NumberFormatter const &form)
+  {
+    if (!form.m_format.empty()) o << form.m_format.cstr() << ",";
+    if (form.m_language) {
+      std::string lang, country;
+      if (StarLanguage::getLanguageId(form.m_language, lang, country))
+        o << lang << "_" << country << ",";
+      else
+        o << "#langId=" << form.m_language << ",";
+    }
+    o << getTypeString(form.m_type) << ",";
+    if (form.m_isStandart) o << "standart,";
+    if (!form.m_isUsed) o << "unused,";
+    for (int i=0; i<2; ++i) {
+      if (!form.m_limitsOp[i]) continue;
+      char const *(wh[])= {"none", "=", "<>", "<", "<=", ">", ">="};
+      if (form.m_limitsOp[i]>0 && form.m_limitsOp[i]<=6)
+        o << "lim" << i << "=[" << wh[form.m_limitsOp[i]] << form.m_limits[i] << "],";
+      else {
+        STOFF_DEBUG_MSG(("StarFormatManagerInternal::NumberFormatter::operator<< unknown limit op\n"));
+        o << "lim" << i << "=###" << form.m_limitsOp[i] << ":" << form.m_limits[i] << ",";
+      }
+    }
+    for (int i=0; i<4; ++i) {
+      if ((form.m_subFormats[i].m_type&0xF7FF)==0) continue;
+      o << "format" << i << "=[" << form.m_subFormats[i] << "],";
+    }
+    o << form.m_extra;
+    return o;
+  }
+  //! try to update the cell's formating
+  bool updateNumberingProperties(STOFFCell &cell) const
+  {
+    std::string lang(""), country("");
+    if (m_language) StarLanguage::getLanguageId(m_language, lang, country);
+    return m_subFormats[0].updateNumberingProperties(cell, lang, country);
+  }
+  //! the format
+  librevenge::RVNGString m_format;
+  //! the format language
+  int m_language;
+  //! the format type
+  uint16_t m_type;
+  //! a flag to know if the format is standart
+  bool m_isStandart;
+  //! a flag to know if this format is used
+  bool m_isUsed;
+  //! the limits
+  double m_limits[2];
+  //! the limits operator
+  int m_limitsOp[2];
+  //! the list of sub format
+  Format m_subFormats[4];
+  //! extra data
+  std::string m_extra;
+};
+
+bool NumberFormatter::FormatItem::updateNumberingProperties(librevenge::RVNGPropertyListVector &vect) const
+{
+  librevenge::RVNGPropertyList list;
+  switch (m_type) {
+  case -3: {
+    if (m_text.empty()) break;
+    int fChar=(int) m_text.cstr()[0];
+    if (fChar>=32) {
+      static int cCharWidths[ 128-32 ] = {
+        1,1,1,2,2,3,2,1,1,1,1,2,1,1,1,1,
+        2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,
+        3,2,2,2,2,2,2,3,2,1,2,2,2,3,3,3,
+        2,3,2,2,2,2,2,3,2,2,2,1,1,1,2,2,
+        1,2,2,2,2,2,1,2,2,1,1,2,1,3,2,2,
+        2,2,1,2,1,2,2,2,2,2,2,1,1,1,2,1
+      };
+      int n=fChar<128 ? cCharWidths[fChar-32] : 2;
+      std::string s("");
+      for (int i=0; i<n; ++i) s+=' ';
+      list.insert("librevenge:value-type", "text");
+      list.insert("librevenge:text", s.c_str());
+    }
+    break;
+  }
+  case -4: { // star
+    librevenge::RVNGString s("*");
+    s.append(m_text);
+    list.insert("librevenge:value-type", "text");
+    list.insert("librevenge:text", s);
+    break;
+  }
+  case -5: // digits todo
+  case -15: // calendar
+    break;
+  case -1: // string
+  case -12: // currency
+  case -17: // dateSep
+  case -18: // timeSep
+  case -19: // time100Sep
+    if (m_text.empty()) break;
+    list.insert("librevenge:value-type", "text");
+    list.insert("librevenge:text", m_text);
+    break;
+  case 2: // ampm
+  case 3: // ap
+    list.insert("librevenge:value-type", "am-pm");
+    break;
+  case 4: // mi
+  case 5: // mmi
+    if (m_type==5)
+      list.insert("number:style", "long");
+    list.insert("librevenge:value-type", "minutes");
+    break;
+  case 6: // m
+  case 7: // mm
+    if (m_type==7)
+      list.insert("number:style", "long");
+    list.insert("librevenge:value-type", "month");
+    break;
+  case 8: // mmm
+  case 9: // mmmm
+  case 28: // mmmmm fixme only one letter
+    if (m_type==9)
+      list.insert("number:style", "long");
+    list.insert("librevenge:value-type", "month");
+    list.insert("number:textual", true);
+    break;
+  case 10: // h
+  case 11: // hh
+    if (m_type==11)
+      list.insert("number:style", "long");
+    list.insert("librevenge:value-type", "hours");
+    break;
+  case 12: // s
+  case 13: // ss
+    if (m_type==13)
+      list.insert("number:style", "long");
+    list.insert("librevenge:value-type", "seconds");
+    break;
+  case 14: // q
+  case 15: // qq
+    if (m_type==15)
+      list.insert("number:style", "long");
+    list.insert("librevenge:value-type", "quarter");
+    break;
+  case 16: // d
+  case 17: // dd
+    if (m_type==17)
+      list.insert("number:style", "long");
+    list.insert("librevenge:value-type", "day");
+    break;
+  case 18: // ddd
+  case 26: // nnn
+  case 41: // aaa
+    list.insert("number:style", "long");
+  // fall through expected
+  case 19: // dddd
+  case 22: // nn
+  case 40: // aa
+    list.insert("librevenge:value-type", "day-of-week");
+    break;
+  case 23: // nnnn
+    list.insert("number:style", "long");
+    list.insert("librevenge:value-type", "day-of-week");
+    vect.append(list);
+    list.clear();
+    list.insert("librevenge:value-type", "text");
+    list.insert("librevenge:text", " ");
+    break;
+  case 20: // yy
+  case 42: // ec
+    list.insert("librevenge:value-type", "year");
+    break;
+  case 21: // yyyy
+  case 43: // eec
+  case 47: // r
+    list.insert("number:style", "long");
+    list.insert("librevenge:value-type", "year");
+    break;
+  case 27: // ww
+    list.insert("librevenge:value-type", "week-of-year");
+    break;
+  case 44: // g
+  case 45: // gg
+  case 46: // ggg
+    if (m_type==46) list.insert("number:style", "long");
+    list.insert("librevenge:value-type", "era");
+    break;
+  case 48: // rr
+    list.insert("number:style", "long");
+    list.insert("librevenge:value-type", "year");
+    vect.append(list);
+    list.clear();
+    list.insert("librevenge:value-type", "text");
+    list.insert("librevenge:text", " ");
+    vect.append(list);
+    list.clear();
+    list.insert("number:style", "long");
+    list.insert("librevenge:value-type", "era");
+    break;
+  default:
+    STOFF_DEBUG_MSG(("StarFormatManagerInternal::NumberFormatter::Format::updateNumberingProperties: find unexpected type %d\n", m_type));
+    return false;
+  }
+  if (!list.empty())
+    vect.append(list);
+  return true;
+}
+
+bool NumberFormatter::Format::updateNumberingProperties(STOFFCell &cell, std::string const &language, std::string const &country) const
+{
+  if (m_type==0 || m_type==0x800) return false;
+  librevenge::RVNGPropertyList &propList=cell.getNumberingStyle();
+  librevenge::RVNGPropertyListVector pVect;
+  STOFFCell::Format format=cell.getFormat();
+  if (m_type&6) {
+    format.m_format=(m_type&6)==6 ? STOFFCell::F_DATETIME : (m_type&6)==2 ? STOFFCell::F_DATE : STOFFCell::F_TIME;
+    for (size_t i=0; i<m_itemList.size(); ++i) {
+      if (!m_itemList[i].updateNumberingProperties(pVect))
+        return false;
+    }
+    propList.insert("librevenge:value-type", (m_type&6)==4 ? "time" : "date");
+    propList.insert("librevenge:format", pVect);
+    cell.setFormat(format);
+    return true;
+  }
+  else if (m_type&8) {
+    format.m_format=STOFFCell::F_NUMBER;
+    format.m_numberFormat=STOFFCell::F_NUMBER_CURRENCY;
+    librevenge::RVNGString currency("");
+    // look for currency
+    int nString=0;
+    for (size_t i=0; i<m_itemList.size(); ++i) {
+      if (m_itemList[i].m_type!=-1) continue;
+      currency=m_itemList[i].m_text;
+      ++nString;
+    }
+    if (nString!=1 || currency.empty()) currency="$";
+    propList.insert("librevenge:value-type", "currency");
+    librevenge::RVNGPropertyList list;
+    list.insert("librevenge:value-type", "currency-symbol");
+    list.insert("number:language",language.empty() ? "en" : language.c_str());
+    list.insert("number:country",country.empty() ? "US" : country.c_str());
+    list.insert("librevenge:currency",currency);
+    pVect.append(list);
+    list.clear();
+    list.insert("librevenge:value-type", "number");
+    list.insert("number:decimal-places", m_postfix);
+    if (m_prefix) list.insert("number:min-integer-digits", m_prefix);
+    if (m_hasThousandSep) list.insert("number:grouping", true);
+    pVect.append(list);
+    propList.insert("librevenge:format", pVect);
+    cell.setFormat(format);
+    return true;
+  }
+  else if (m_type&0x10) {
+    format.m_format=STOFFCell::F_NUMBER;
+    format.m_numberFormat=STOFFCell::F_NUMBER_DECIMAL;
+    propList.insert("librevenge:value-type", "number");
+    propList.insert("number:decimal-places", m_postfix);
+    if (m_prefix) propList.insert("number:min-integer-digits", m_prefix);
+    if (m_hasThousandSep) propList.insert("number:grouping", true);
+    cell.setFormat(format);
+    return true;
+  }
+  else if (m_type&0x20) {
+    format.m_format=STOFFCell::F_NUMBER;
+    format.m_numberFormat=STOFFCell::F_NUMBER_SCIENTIFIC;
+    propList.insert("librevenge:value-type", "scientific");
+    propList.insert("number:decimal-places", m_postfix);
+    if (m_prefix) propList.insert("number:min-integer-digits", m_prefix);
+    if (m_exponential) propList.insert("number:min-exponent-digits", m_exponential);
+    if (m_hasThousandSep) propList.insert("number:grouping", true);
+    cell.setFormat(format);
+    return true;
+  }
+  else if (m_type&0x40) {
+    format.m_format=STOFFCell::F_NUMBER;
+    format.m_numberFormat=STOFFCell::F_NUMBER_FRACTION;
+    propList.insert("librevenge:value-type", "fraction");
+    propList.insert("number:min-numerator-digits", m_postfix ? m_postfix : 1);
+    propList.insert("number:min-denominator-digits", m_exponential ? m_exponential : 1);
+    if (m_prefix) propList.insert("number:min-integer-digits", m_prefix);
+    if (m_hasThousandSep) propList.insert("number:grouping", true);
+    cell.setFormat(format);
+    return true;
+  }
+  else if (m_type&0x80) {
+    format.m_format=STOFFCell::F_NUMBER;
+    format.m_numberFormat=STOFFCell::F_NUMBER_PERCENT;
+    propList.insert("librevenge:value-type", "percent");
+    propList.insert("number:decimal-places", m_postfix);
+    if (m_prefix) propList.insert("number:min-integer-digits", m_prefix);
+    if (m_hasThousandSep) propList.insert("number:grouping", true);
+    cell.setFormat(format);
+    return true;
+  }
+  else if (m_type&0x100)
+    format.m_format=STOFFCell::F_TEXT;
+  else if (m_type&0x400) {
+    format.m_format=STOFFCell::F_BOOLEAN;
+    propList.insert("librevenge:value-type", "boolean");
+    cell.setFormat(format);
+    return true;
+  }
+  else
+    return false;
+  cell.setFormat(format);
+  return false;
+}
+
 ////////////////////////////////////////
 //! Internal: the state of a StarFormatManager
 struct State {
   //! constructor
-  State()
+  State() : m_idNumberFormatMap()
   {
   }
+  //! a map id to number format
+  std::map<unsigned, NumberFormatter> m_idNumberFormatMap;
 };
 
 }
@@ -413,9 +839,9 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
   ascFile.addPos(actPos);
   ascFile.addNote(f.str().c_str());
 
-  unsigned long nPos=(unsigned long) input->readULong(4);
+  unsigned long id=(unsigned long) input->readULong(4);
   size_t n=0;
-  while (nPos!=0xffffffff) {
+  while (id!=0xffffffff) {
     pos=input->tell();
     if (pos==endDataPos) break;
     if (pos>endDataPos) {
@@ -424,15 +850,15 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
     }
 
     f.str("");
-    f << "NumberFormatter-A" << n << ":nPos=" << nPos << ",";
-
+    StarFormatManagerInternal::NumberFormatter form;
     input->seek(2, librevenge::RVNG_SEEK_CUR);
-    val=(int) input->readULong(2);
-    if (val) f << "eLge=" << val << ",";
+    form.m_language=(int) input->readULong(2);
 
     if (n>=fieldSize.size()||input->tell()+fieldSize[n]>endDataPos) {
       STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: can not find end of field\n"));
-      f << "###unknownN";
+      form.m_extra="###unknownN";
+      f.str("");
+      f << "NumberFormatter-A" << id << ":" << form;
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       break;
@@ -442,71 +868,80 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
     std::vector<uint32_t> text;
     if (!zone.readString(text)) {
       STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: can not read the format string\n"));
-      f << "###string";
+      form.m_extra="###format";
+      f.str("");
+      f << "NumberFormatter-A" << id << ":" << form;
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       break;
     }
-    f << libstoff::getString(text).cstr() << ",";
-    val=(int) input->readULong(2);
-    if (val) f << "eType=" << val << ",";
-    for (int i=0; i<2; ++i) { // checkme
-      double res;
+    form.m_format=libstoff::getString(text).cstr();
+    *input>>form.m_type;
+    for (int i=0; i<2; ++i) {
       bool isNan;
-      if (!input->readDoubleReverted8(res, isNan)) {
+      if (!input->readDoubleReverted8(form.m_limits[i], isNan)) {
         STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: can not read a double\n"));
         f << "##limit" << i << ",";
       }
-      else if (res<0||res>0)
-        f << "limit" << i << "=" << res << ",";
     }
-    for (int i=0; i<2; ++i) {
-      val=(int) input->readULong(2);
-      if (val) f << "nOp" << i << "=" << val << ",";
-    }
-    val=(int) input->readULong(1);
-    if (val) f << "bStandart=" << val << ",";
-    val=(int) input->readULong(1);
-    if (val) f << "bIsUsed=" << val << ",";
+    for (int i=0; i<2; ++i)
+      form.m_limitsOp[i]=(int) input->readULong(2);
+    *input >> form.m_isStandart;
+    *input >> form.m_isUsed;
 
     bool ok=true;
     for (int i=0; i<4; ++i) {
       // ImpSvNumFor::Load
-      f << "numFor" << i << "=[";
+      StarFormatManagerInternal::NumberFormatter::Format subForm;
       int N=(int) input->readULong(2);
       if (input->tell()+4*N>endFieldPos) break;
       for (int c=0; c<N; ++c) {
+        StarFormatManagerInternal::NumberFormatter::FormatItem item;
         if (!zone.readString(text) || input->tell()>endFieldPos) {
           STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: can not read the format string\n"));
-          f << "###SvNumFor" << c;
+          f << "###SvNumFor" << c << "[" << subForm << "]";
           ok=false;
           break;
         }
-        f << libstoff::getString(text).cstr() << ":" << input->readULong(2) << ",";
+        item.m_text=libstoff::getString(text).cstr();
+        item.m_type=(int) input->readLong(2);
+        subForm.m_itemList.push_back(item);
       }
       if (!ok) break;
-      val=(int) input->readLong(2);
-      if (val) f << "eScannedType=" << val << ",";
-      val=(int) input->readULong(1);
-      if (val) f << "bThousand=" << val << ",";
-      val=(int) input->readULong(2);
-      if (val) f << "nThousand=" << val << ",";
-      val=(int) input->readULong(2);
-      if (val) f << "nCntPre=" << val << ",";
-      val=(int) input->readULong(2);
-      if (val) f << "nCntPost=" << val << ",";
-      val=(int) input->readULong(2);
-      if (val) f << "nCntExp=" << val << ",";
+      subForm.m_type=(int) input->readULong(2);
+      *input>>subForm.m_hasThousandSep;
+      subForm.m_thousand=(int) input->readULong(2);
+      subForm.m_prefix=(int) input->readULong(2);
+      subForm.m_postfix=(int) input->readULong(2);
+      subForm.m_exponential=(int) input->readULong(2);
       if (!zone.readString(text) || input->tell()>endFieldPos) {
         STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: can not read the color name\n"));
         f << "###colorname";
         ok=false;
+      }
+      else
+        subForm.m_colorName=libstoff::getString(text).cstr();
+
+      if (!ok) {
+        f << "###[" << subForm << "],";
         break;
       }
-      if (!text.empty())
-        f << libstoff::getString(text).cstr() << ",";
-      f << "],";
+      form.m_subFormats[i]=subForm;
     }
+    form.m_extra=f.str();
+    if (ok && m_state->m_idNumberFormatMap.find(unsigned(id))==m_state->m_idNumberFormatMap.end())
+      m_state->m_idNumberFormatMap[unsigned(id)]=form;
+    else if (ok) {
+      // FIXME: can happen in StarChartDocument which can have multible number formatter zones
+      static bool first=true;
+      if (first) {
+        STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: format %d already exist...\n", int(id)));
+        first=false;
+      }
+    }
+
+    f.str("");
+    f << "NumberFormatter-A" << id << ":" << form;
     if (ok && input->tell()!=endFieldPos && !zone.readString(text)) {
       STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: can not read the comment\n"));
       f << "###comment";
@@ -539,7 +974,7 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
       break;
     }
     input->seek(endFieldPos, librevenge::RVNG_SEEK_SET);
-    nPos=(unsigned long) input->readULong(4);
+    id=(unsigned long) input->readULong(4);
   }
 
   if (input->tell()+4>=endDataPos)
@@ -680,7 +1115,12 @@ void StarFormatManager::updateNumberingProperties(STOFFCell &cell) const
   librevenge::RVNGPropertyList &propList=cell.getNumberingStyle();
   STOFFCell::Format format=cell.getFormat();
   librevenge::RVNGPropertyListVector pVect;
-  switch (style.m_format) {
+  if (style.m_format &&
+      m_state->m_idNumberFormatMap.find(unsigned(style.m_format))!=m_state->m_idNumberFormatMap.end() &&
+      m_state->m_idNumberFormatMap.find(unsigned(style.m_format))->second.updateNumberingProperties(cell))
+    return;
+  // CHECKME: style.m_format/1000 is the language format,
+  switch (style.m_format%1000) {
   case 0: // standart
     break;
   case 1: // decimal

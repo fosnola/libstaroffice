@@ -927,7 +927,7 @@ void STOFFSpreadsheetListener::insertNote(STOFFNote const &note, STOFFSubDocumen
   m_ps->m_isNote = false;
 }
 
-void STOFFSpreadsheetListener::insertComment(STOFFSubDocumentPtr &subDocument)
+void STOFFSpreadsheetListener::insertComment(STOFFSubDocumentPtr &subDocument, librevenge::RVNGString const &creator, librevenge::RVNGString const &date)
 {
   if (m_ps->m_isNote) {
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertComment try to insert a comment in a note (ignored)\n"));
@@ -950,6 +950,8 @@ void STOFFSpreadsheetListener::insertComment(STOFFSubDocumentPtr &subDocument)
     _closeParagraph();
 
   librevenge::RVNGPropertyList propList;
+  if (!creator.empty())  propList.insert("dc:creator", creator);
+  if (!date.empty())  propList.insert("meta:date-string", date);
   m_documentInterface->openComment(propList);
 
   m_ps->m_isNote = true;

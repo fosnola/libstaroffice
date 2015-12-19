@@ -173,7 +173,7 @@ public:
   /** insert a note */
   virtual void insertNote(STOFFNote const &note, STOFFSubDocumentPtr &subDocument)=0;
   /** adds comment */
-  virtual void insertComment(STOFFSubDocumentPtr &subDocument) = 0;
+  virtual void insertComment(STOFFSubDocumentPtr &subDocument, librevenge::RVNGString const &creator="", librevenge::RVNGString const &date="") = 0;
 #if 0
   /** adds a picture with various representationin given position.
    \note by default only send the first picture*/
