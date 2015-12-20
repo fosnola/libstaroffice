@@ -1111,6 +1111,11 @@ typedef STOFFBox2<long> STOFFBox2l;
 
 namespace libstoff
 {
+// some date function
+
+//! convert a date/time in a date time format
+bool convertToDateTime(uint32_t date, uint32_t time, std::string &dateTime);
+
 // some geometrical function
 //! factor to convert from one unit to other
 float getScaleFactor(librevenge::RVNGUnit orig, librevenge::RVNGUnit dest);

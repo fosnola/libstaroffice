@@ -84,7 +84,7 @@ public:
   };
   //! constructor
   STOFFCell() : m_position(0,0),m_bdBox(),  m_bdSize(),
-    m_format(), m_font(), m_cellStyle() { }
+    m_format(), m_font(), m_cellStyle(), m_numberingStyle() { }
 
   //! destructor
   virtual ~STOFFCell() {}

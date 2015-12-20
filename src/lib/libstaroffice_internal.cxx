@@ -340,9 +340,35 @@ std::ostream &operator<<(std::ostream &o, STOFFEmbeddedObject const &pict)
   return o;
 }
 
-// a little geometry
 namespace libstoff
 {
+// some date conversion
+bool convertToDateTime(uint32_t date, uint32_t time, std::string &dateTime)
+{
+  std::stringstream s;
+  s << std::setfill('0') << std::setw(8) << date;
+  dateTime=s.str();
+  if (dateTime.length()!=8) {
+    STOFF_DEBUG_MSG(("libstoff:convertToDateTime: can not convert the date"));
+    return false;
+  }
+  s.str("");
+  s << std::setfill('0') << std::setw(8) << time;
+  if (s.str().length()!=8) {
+    STOFF_DEBUG_MSG(("libstoff:convertToDateTime: can not convert the time"));
+    return false;
+  }
+  dateTime+=s.str();
+  dateTime.insert(14,1,'.');
+  dateTime.insert(12,1,':');
+  dateTime.insert(10,1,':');
+  dateTime.insert(8,1,'T');
+  dateTime.insert(6,1,'-');
+  dateTime.insert(4,1,'-');
+  return true;
+}
+
+// a little geometry
 STOFFVec2f rotatePointAroundCenter(STOFFVec2f const &point, STOFFVec2f const &center, float angle)
 {
   float angl=float(M_PI/180.)*angle;

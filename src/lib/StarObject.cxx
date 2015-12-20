@@ -540,11 +540,10 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
       uint32_t date, time;
       *input >> date >> time;
       f << "date=" << date << ", time=" << time << ",";
-      if (date) {
-        std::stringstream s;
-        s << date;
+      std::string dateTime;
+      if (date && libstoff::convertToDateTime(date,time, dateTime)) {
         static char const *(attribNames[])= { "meta:creation-date", "dc:date", "meta:print-date" };
-        m_metaData.insert(attribNames[i], s.str().c_str());
+        m_metaData.insert(attribNames[i], dateTime.c_str());
       }
     }
     ascii.addPos(pos);
