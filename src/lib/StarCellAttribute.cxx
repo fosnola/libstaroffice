@@ -385,7 +385,7 @@ class StarCAttributePattern : public StarAttributeItemSet
 public:
   //! constructor
   StarCAttributePattern() :
-    StarAttributeItemSet(StarAttribute::ATTR_SC_PATTERN, "ScPattern", std::vector<STOFFVec2i>()), m_style("")
+    StarAttributeItemSet(StarAttribute::ATTR_SC_PATTERN, "ScPattern", std::vector<STOFFVec2i>())
   {
     m_limits.push_back(STOFFVec2i(100,148));
   }
@@ -414,12 +414,12 @@ public:
         return false;
       }
       else if (!text.empty()) {
-        m_style=libstoff::getString(text);
-        f << "name=" << m_style.cstr() << ",";
+        m_itemSet.m_style=libstoff::getString(text);
+        f << "name=" << m_itemSet.m_style.cstr() << ",";
       }
       input->seek(2, librevenge::RVNG_SEEK_CUR);
     }
-    bool ok=object.readItemSet(zone, m_limits, endPos, m_itemList, object.getCurrentPool(false).get());
+    bool ok=object.readItemSet(zone, m_limits, endPos, m_itemSet, object.getCurrentPool(false).get());
     if (!ok) f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());

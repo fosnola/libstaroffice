@@ -247,6 +247,10 @@ SOURCE=..\..\src\lib\StarGraphicStruct.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarItem.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarItemPool.cxx
 # End Source File
 # Begin Source File
@@ -468,6 +472,10 @@ SOURCE=..\..\src\lib\StarGraphicAttribute.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarGraphicStruct.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarItem.hxx
 # End Source File
 # Begin Source File
 

@@ -98,6 +98,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarGraphicAttribute.hxx		\
 	StarGraphicStruct.cxx			\
 	StarGraphicStruct.hxx			\
+	StarItem.cxx				\
+	StarItem.hxx				\
 	StarItemPool.cxx			\
 	StarItemPool.hxx			\
 	StarLanguage.cxx			\

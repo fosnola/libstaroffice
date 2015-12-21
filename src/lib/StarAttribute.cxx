@@ -597,36 +597,40 @@ void State::initAttributeMap()
 ////////////////////////////////////////////////////////////
 void StarAttributeItemSet::addTo(STOFFCellStyle &cell) const
 {
-  for (size_t i=0; i<m_itemList.size(); ++i) {
-    if (m_itemList[i] && m_itemList[i]->m_attribute)
-      m_itemList[i]->m_attribute->addTo(cell);
+  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
+       it!=m_itemSet.m_whichToItemMap.end(); ++it) {
+    if (it->second && it->second->m_attribute)
+      it->second->m_attribute->addTo(cell);
   }
 }
 
 void StarAttributeItemSet::addTo(STOFFFont &font) const
 {
-  for (size_t i=0; i<m_itemList.size(); ++i) {
-    if (m_itemList[i] && m_itemList[i]->m_attribute)
-      m_itemList[i]->m_attribute->addTo(font);
+  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
+       it!=m_itemSet.m_whichToItemMap.end(); ++it) {
+    if (it->second && it->second->m_attribute)
+      it->second->m_attribute->addTo(font);
   }
 }
 
 void StarAttributeItemSet::addTo(STOFFGraphicStyle &graphic) const
 {
-  for (size_t i=0; i<m_itemList.size(); ++i) {
-    if (m_itemList[i] && m_itemList[i]->m_attribute)
-      m_itemList[i]->m_attribute->addTo(graphic);
+  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
+       it!=m_itemSet.m_whichToItemMap.end(); ++it) {
+    if (it->second && it->second->m_attribute)
+      it->second->m_attribute->addTo(graphic);
   }
 }
 
 void StarAttributeItemSet::print(libstoff::DebugStream &o) const
 {
   o << m_debugName;
-  if (!m_itemList.empty()) {
+  if (!m_itemSet.empty()) {
     o << "[";
-    for (size_t i=0; i<m_itemList.size(); ++i) {
-      if (m_itemList[i] && m_itemList[i]->m_attribute)
-        m_itemList[i]->m_attribute->print(o);
+    for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
+         it!=m_itemSet.m_whichToItemMap.end(); ++it) {
+      if (it->second && it->second->m_attribute)
+        it->second->m_attribute->print(o);
       else
         o << "_";
       o << ",";
@@ -724,7 +728,7 @@ bool StarAttributeItemSet::read(StarZone &zone, int /*vers*/, long endPos, StarO
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "StarAttribute[" << zone.getRecordLevel() << "]:" << m_debugName << ",";
-  bool ok=object.readItemSet(zone, m_limits, endPos, m_itemList, object.getCurrentPool(false).get());
+  bool ok=object.readItemSet(zone, m_limits, endPos, m_itemSet, object.getCurrentPool(false).get());
   if (!ok) f << "###";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());

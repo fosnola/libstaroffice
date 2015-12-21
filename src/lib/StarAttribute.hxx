@@ -45,12 +45,14 @@
 #include "STOFFEntry.hxx"
 #include "STOFFInputStream.hxx"
 
+#include "StarItem.hxx"
+
 namespace StarAttributeInternal
 {
 struct State;
 }
 
-struct StarItem;
+class StarItem;
 class StarObject;
 class StarZone;
 
@@ -1002,7 +1004,7 @@ class StarAttributeItemSet : public StarAttribute
 public:
   //! constructor
   StarAttributeItemSet(Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits) :
-    StarAttribute(type, debugName), m_limits(limits), m_itemList()
+    StarAttribute(type, debugName), m_limits(limits), m_itemSet()
   {
   }
   //! create a new attribute
@@ -1024,13 +1026,13 @@ public:
 
 protected:
   //! copy constructor
-  StarAttributeItemSet(StarAttributeItemSet const &orig) : StarAttribute(orig), m_limits(orig.m_limits), m_itemList()
+  StarAttributeItemSet(StarAttributeItemSet const &orig) : StarAttribute(orig), m_limits(orig.m_limits), m_itemSet()
   {
   }
   //! the pool limits id
   std::vector<STOFFVec2i> m_limits;
   //! the list of items
-  std::vector<shared_ptr<StarItem> > m_itemList;
+  StarItemSet m_itemSet;
 };
 
 //! void attribute of StarAttribute

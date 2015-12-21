@@ -296,6 +296,79 @@ struct Values {
 };
 
 ////////////////////////////////////////
+//! Internal: a style of a StarItemPool
+struct Style {
+  //! constructor
+  Style() : m_family(0), m_mask(0), m_itemSet(), m_helpId(0)
+  {
+  }
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, Style const &style)
+  {
+    for (int i=0; i<4; ++i) {
+      static char const *(wh[])= {"name","parent","follow","help"};
+      if (!style.m_names[i].empty())
+        o << wh[i] << "=" << style.m_names[i].cstr() << ",";
+    }
+    switch (style.m_family&0xff) {
+    case 0:
+      break;
+    case 1:
+      o << "char[family],";
+      break;
+    case 2:
+      o << "para[family],";
+      break;
+    case 4:
+      o << "frame[family],";
+      break;
+    case 8:
+      o << "page[family],";
+      break;
+    case 0x10:
+      o << "pseudo[family],";
+      break;
+    case 0xFE:
+      o << "*[family],";
+      break;
+    default:
+      STOFF_DEBUG_MSG(("StarItemPoolInternal::Style::operator<< unexpected family\n"));
+      o << "###family=" << std::hex << (style.m_family&0xff) << std::dec << ",";
+      break;
+    }
+    if (style.m_family&0xFF00) // find 0xaf
+      o << "#family[high]=" << std::hex << (style.m_family>>8) << std::dec << ",";
+    if (style.m_mask) o << "mask=" << std::hex << style.m_mask << std::dec << ",";
+    if (style.m_helpId) o << "help[id]=" << style.m_helpId << ",";
+#if 1
+    o << "Attrib=[";
+    for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style.m_itemSet.m_whichToItemMap.begin();
+         it!=style.m_itemSet.m_whichToItemMap.end(); ++it) {
+      if (!it->second || !it->second->m_attribute) {
+        o << "_,";
+        continue;
+      }
+      libstoff::DebugStream f2;
+      it->second->m_attribute->print(f2);
+      o << f2.str() << ",";
+    }
+    o << "],";
+#endif
+    return o;
+  }
+  //! the name, the parent name, the follow name, the help names
+  librevenge::RVNGString m_names[4];
+  //! the family
+  int m_family;
+  //! the mask
+  int m_mask;
+  //! the item list
+  StarItemSet m_itemSet;
+  //! the help id
+  unsigned m_helpId;
+};
+
+////////////////////////////////////////
 //! Internal: the state of a StarItemPool
 struct State {
   //! constructor
@@ -846,9 +919,7 @@ StarItemPool::Type StarItemPool::getType() const
 
 shared_ptr<StarItem> StarItemPool::createItem(int which, int surrogateId, bool localId)
 {
-  shared_ptr<StarItem> res(new StarItem);
-  res->m_pool=this;
-  res->m_which=which;
+  shared_ptr<StarItem> res(new StarItem(which));
   res->m_surrogateId=surrogateId;
   res->m_localId=localId;
   m_state->m_delayedItemList.push_back(res);
@@ -972,7 +1043,7 @@ shared_ptr<StarItem> StarItemPool::readItem(StarZone &zone, bool isDirect, long 
       STOFF_DEBUG_MSG(("StarItemPool::readItem: find bad position\n"));
     }
     else if (ok)
-      pItem.reset(new StarItem(StarAttributeManager::getDummyAttribute()));
+      pItem.reset(new StarItem(StarAttributeManager::getDummyAttribute(), nWhich));
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());
     return pItem;
@@ -983,7 +1054,7 @@ shared_ptr<StarItem> StarItemPool::readItem(StarZone &zone, bool isDirect, long 
       pItem=loadSurrogate(zone, nWhich, true, f);
     else {
       input->seek(2, librevenge::RVNG_SEEK_CUR);
-      pItem.reset(new StarItem(StarAttributeManager::getDummyAttribute()));
+      pItem.reset(new StarItem(StarAttributeManager::getDummyAttribute(), nWhich));
     }
   }
   if (isDirect || (nWhich && !pItem)) {
@@ -998,7 +1069,7 @@ shared_ptr<StarItem> StarItemPool::readItem(StarZone &zone, bool isDirect, long 
     else if (nLength) {
       long endAttrPos=input->tell()+long(nLength);
       shared_ptr<StarAttribute> attribute=readAttribute(zone, int(nWhich), (int) nVersion, endAttrPos);
-      pItem.reset(new StarItem(attribute));
+      pItem.reset(new StarItem(attribute, nWhich));
       if (!attribute) {
         STOFF_DEBUG_MSG(("StarItemPool::readItem: can not read an attribute\n"));
         f << "###";
@@ -1024,7 +1095,7 @@ shared_ptr<StarItem> StarItemPool::readItem(StarZone &zone, bool isDirect, long 
 
 bool StarItemPool::loadSurrogate(StarItem &item)
 {
-  if (item.m_attribute || !item.m_pool || !item.m_which)
+  if (item.m_attribute || !item.m_which)
     return false;
 
   if ((item.m_which<m_state->m_verStart||item.m_which>m_state->m_verEnd)&&m_state->m_secondaryPool)
@@ -1068,7 +1139,7 @@ shared_ptr<StarItem> StarItemPool::loadSurrogate(StarZone &zone, uint16_t &nWhic
   }
   if (m_state->m_loadingVersion<0) // the pool is not read, so we wait
     return createItem(int(nWhich), (int) nSurrog, localId);
-  shared_ptr<StarItem> res(new StarItem);
+  shared_ptr<StarItem> res(new StarItem(int(nWhich)));
   int aWhich=(localId && m_state->m_currentVersion!=m_state->m_loadingVersion) ?
              m_state->getWhich(nWhich) : nWhich;
   StarItemPoolInternal::Values *values=m_state->getValues(aWhich);
@@ -1794,16 +1865,15 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
     f << "SfxStylePool[data" << i << "]:";
     bool readOk=true;
     std::vector<uint32_t> text;
+    StarItemPoolInternal::Style style;
     for (int j=0; j<3; ++j) {
       if (!zone.readString(text) || input->tell()>=lastPos) {
         STOFF_DEBUG_MSG(("StarItemPool::readStyle: can not find a string\n"));
-        f << "###string";
+        f << style << "###string" << j;
         readOk=false;
         break;
       }
-      if (text.empty()) continue;
-      static char const *(wh[])= {"name","parent","follow"};
-      f << wh[j] << "=" << libstoff::getString(text).cstr() << ",";
+      style.m_names[j]=libstoff::getString(text);
     }
     if (!readOk) {
       ascii.addPos(pos);
@@ -1811,38 +1881,30 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
       if (poolVersion==1) return true;
       continue;
     }
-    uint16_t nFamily, nMask, nVer;
-    *input >> nFamily >> nMask;
-    if (nFamily) f << "family=" << nFamily << ",";
-    if (nMask) f << "mask=" << nMask << ",";
+    style.m_family=(int) input->readULong(2);
+    style.m_mask=(int) input->readULong(2);
     if (!zone.readString(text) || input->tell()>=lastPos) {
       STOFF_DEBUG_MSG(("StarItemPool::readStyle: can not find helpFile\n"));
-      f << "###helpFile";
+      f << style << "###helpFile";
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
       if (poolVersion==1) return true;
       continue;
     }
-    if (!text.empty()) f << "help[file]=" << libstoff::getString(text).cstr() << ",";
-    uint32_t nHelpId, nSize;
-    if (helpIdSize32)
-      *input>>nHelpId;
-    else {
-      uint16_t tmp;
-      *input >> tmp;
-      nHelpId=tmp;
-    }
-    if (nHelpId) f << "help[id]=" << nHelpId << ",";
+    style.m_names[3]=libstoff::getString(text);
+    style.m_helpId=(unsigned) input->readULong(helpIdSize32 ? 4 : 2);
     std::vector<STOFFVec2i> limits; // unknown
-    std::vector<shared_ptr<StarItem> > itemList;
-    if (!doc.readItemSet(zone, limits, lastPos, itemList, pool.get(), false)) {
-      f << "###itemList";
+    if (!doc.readItemSet(zone, limits, lastPos, style.m_itemSet, pool.get(), false)) {
+      f << style << "###itemList";
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
       if (poolVersion==1) return true;
       continue;
     }
+    f << style;
     ascii.addDelimiter(input->tell(),'|');
+    uint16_t nVer;
+    uint32_t nSize;
     *input>>nVer>>nSize;
     if (nVer) f << "version=" << nVer << ",";
     if (input->tell()+long(nSize)>lastPos) {

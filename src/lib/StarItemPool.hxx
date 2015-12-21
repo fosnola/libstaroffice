@@ -38,6 +38,7 @@
 #ifndef STAR_ITEM_POOL_HXX
 #  define STAR_ITEM_POOL_HXX
 
+#include <map>
 #include <vector>
 
 #include <libstaroffice/STOFFDocument.hxx>
@@ -47,34 +48,7 @@
 #include "STOFFInputStream.hxx"
 
 class StarAttribute;
-class StarItemPool;
-
-/** \brief class to store an item: ie. an attribute whose reading is
-    potentially retarded
- */
-struct StarItem {
-  //! constructor
-  StarItem() : m_attribute(), m_pool(0), m_which(0), m_surrogateId(0), m_localId(false)
-  {
-  }
-  //! constructor from attribute
-  explicit StarItem(shared_ptr<StarAttribute> attribute) : m_attribute(attribute), m_pool(0), m_which(0), m_surrogateId(0), m_localId(false)
-  {
-  }
-  /** the attribute if loaded */
-  shared_ptr<StarAttribute> m_attribute;
-  //! the item pool
-  StarItemPool *m_pool;
-  //! the which id
-  int m_which;
-  //! the surrogate id
-  int m_surrogateId;
-  //! true if which is local
-  bool m_localId;
-private:
-  StarItem(StarItem const &);
-  StarItem &operator=(StarItem const &);
-};
+class StarItem;
 
 namespace StarItemPoolInternal
 {

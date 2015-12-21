@@ -195,14 +195,14 @@ bool StarObject::parse()
 }
 
 bool StarObject::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*limits*/, long lastPos,
-                             std::vector<shared_ptr<StarItem> > &listItems, StarItemPool *pool, bool isDirect)
+                             StarItemSet &itemSet, StarItemPool *pool, bool isDirect)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
 
-  listItems.clear();
+  itemSet.m_whichToItemMap.clear();
   f << "Entries(StarItem):pool,";
   // itemset.cxx: SfxItemSet::Load (ncount)
   uint16_t n;
@@ -241,7 +241,7 @@ bool StarObject::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*li
     pos=input->tell();
     shared_ptr<StarItem> item=pool->readItem(zone, isDirect, lastPos);
     if (item && input->tell()<=lastPos) {
-      listItems.push_back(item);
+      itemSet.add(item);
       continue;
     }
     input->seek(pos, librevenge::RVNG_SEEK_SET);

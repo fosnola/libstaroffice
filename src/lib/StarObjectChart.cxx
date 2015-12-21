@@ -492,10 +492,10 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
   legendLimits.push_back(STOFFVec2i(3994,4037)); // EE_ITEMS_START, EE_ITEMS_END
 
   for (int i=0; i<10+11; ++i) {
-    std::vector<shared_ptr<StarItem> > itemList;
+    StarItemSet itemSet;
     if (!readItemSet(zone, i<6 ? titleLimits : i==6 ? allAxisLimits : i<10 ? compatAxisLimits :
                      i<17 ? gridLimits : i < 20 ? diagramAreaLimits : legendLimits, lastPos,
-                     itemList, pool.get(), false) ||
+                     itemSet, pool.get(), false) ||
         input->tell()>lastPos) {
       zone.closeSCHHeader("SCHAttributes");
       return true;
@@ -514,8 +514,8 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
     ascFile.addNote(f.str().c_str());
 
     for (int i=0; i<int(nInt16); ++i) {
-      std::vector<shared_ptr<StarItem> > itemList;
-      if (!readItemSet(zone,rowLimits,lastPos, itemList, pool.get(), false) || input->tell()>lastPos) {
+      StarItemSet itemSet;
+      if (!readItemSet(zone,rowLimits,lastPos, itemSet, pool.get(), false) || input->tell()>lastPos) {
         zone.closeSCHHeader("SCHAttributes");
         return true;
       }
@@ -624,8 +624,8 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
         ascFile.addNote(f.str().c_str());
 
         for (int i=0; i<int(nInt16); ++i) {
-          std::vector<shared_ptr<StarItem> > itemList;
-          if (!readItemSet(zone, gridLimits, lastPos, itemList, pool.get(), false) ||
+          StarItemSet itemSet;
+          if (!readItemSet(zone, gridLimits, lastPos, itemSet, pool.get(), false) ||
               input->tell()>lastPos) {
             zone.closeSCHHeader("SCHAttributes");
             return true;
@@ -776,8 +776,8 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
 
   if (version>=11 && input->tell()<lastPos) {
     for (int loop=0; loop<3; ++loop) { // the StockXXXAttr
-      std::vector<shared_ptr<StarItem> > itemList;
-      if (!readItemSet(zone,rowLimits,lastPos, itemList, pool.get(), false) || input->tell()>lastPos) {
+      StarItemSet itemSet;
+      if (!readItemSet(zone,rowLimits,lastPos, itemSet, pool.get(), false) || input->tell()>lastPos) {
         zone.closeSCHHeader("SCHAttributes");
         return true;
       }
@@ -803,8 +803,8 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       if (nAxisId==-1) break;
-      std::vector<shared_ptr<StarItem> > itemList;
-      if (!readItemSet(zone,axisLimits,lastPos, itemList, pool.get(), false) || input->tell()>lastPos) {
+      StarItemSet itemSet;
+      if (!readItemSet(zone,axisLimits,lastPos, itemSet, pool.get(), false) || input->tell()>lastPos) {
         zone.closeSCHHeader("SCHAttributes");
         return true;
       }

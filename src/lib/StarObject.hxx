@@ -54,6 +54,7 @@ struct State;
 
 class StarAttributeManager;
 class StarFormatManager;
+class StarItemSet;
 
 /** \brief an object corresponding to an OLE directory
  *
@@ -112,7 +113,7 @@ public:
   bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name);
   //! try to read a list of item
   bool readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &limits, long endPos,
-                   std::vector<shared_ptr<StarItem> > &listItems, StarItemPool *pool=0, bool isDirect=false);
+                   StarItemSet &itemSet, StarItemPool *pool=0, bool isDirect=false);
 protected:
   //!  the "persist elements" small ole: the list of object
   bool readPersistElements(STOFFInputStreamPtr input, std::string const &name);
