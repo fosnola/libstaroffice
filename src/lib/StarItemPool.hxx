@@ -49,6 +49,7 @@
 
 class StarAttribute;
 class StarItem;
+class StarItemSet;
 
 namespace StarItemPoolInternal
 {
@@ -90,8 +91,14 @@ public:
   {
     return m_isInside;
   }
-  //! try to read a "StyleItemPool" zone
-  static bool readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, StarObject &doc);
+  //! try to read the styles, ie a "StyleItemPool" zone
+  bool readStyles(StarZone &zone, StarObject &doc);
+  /** try to update the style
+
+   \note must be called after all styles have been updated */
+  void updateStyles();
+  /** update a itemset by adding attribute corresponding to its styles*/
+  void updateUsingStyles(StarItemSet &itemSet) const;
 
   //! try to read an attribute
   shared_ptr<StarAttribute> readAttribute(StarZone &zone, int which, int vers, long endPos);

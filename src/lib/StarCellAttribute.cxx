@@ -31,6 +31,8 @@
 * instead of those above.
 */
 
+#include <iostream>
+
 #include "STOFFCellStyle.hxx"
 
 #include "StarAttribute.hxx"
@@ -59,7 +61,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeBool(*this));
   }
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
 
 protected:
   //! copy constructor
@@ -82,7 +84,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeColor(*this));
   }
   //! add to a cell style
-  //virtual void addTo(STOFFCellStyle &cell) const;
+  //virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
 protected:
   //! copy constructor
   StarCAttributeColor(StarCAttributeColor const &orig) : StarAttributeColor(orig)
@@ -100,7 +102,7 @@ public:
   {
   }
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -128,7 +130,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeUInt(*this));
   }
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
 protected:
   //! copy constructor
   StarCAttributeUInt(StarCAttributeUInt const &orig) : StarAttributeUInt(orig)
@@ -150,7 +152,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeVoid(*this));
   }
   //! add to a cell style
-  //virtual void addTo(STOFFCellStyle &cell) const;
+  //virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
 protected:
   //! copy constructor
   StarCAttributeVoid(StarCAttributeVoid const &orig) : StarAttributeVoid(orig)
@@ -158,14 +160,14 @@ protected:
   }
 };
 
-void StarCAttributeBool::addTo(STOFFCellStyle &cell) const
+void StarCAttributeBool::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
 {
   if (!m_value) return;
   if (m_type==ATTR_SC_LINEBREAK)
     cell.m_propertyList.insert("fo:wrap-option","wrap");
 }
 
-void StarCAttributeInt::addTo(STOFFCellStyle &cell) const
+void StarCAttributeInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
 {
   if (m_type==ATTR_SC_ROTATE_VALUE) {
     int prevRot=cell.m_propertyList["style:rotation-angle"] ? cell.m_propertyList["style:rotation-angle"]->getInt() : 0;
@@ -173,7 +175,7 @@ void StarCAttributeInt::addTo(STOFFCellStyle &cell) const
   }
 }
 
-void StarCAttributeUInt::addTo(STOFFCellStyle &cell) const
+void StarCAttributeUInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
 {
   if (m_type==ATTR_SC_VALUE_FORMAT)
     cell.m_format=(unsigned) m_value;
@@ -292,7 +294,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
   //! debug function to print the data
   virtual void print(libstoff::DebugStream &o) const
   {
@@ -330,7 +332,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
   //! debug function to print the data
   virtual void print(libstoff::DebugStream &o) const
   {
@@ -408,16 +410,15 @@ public:
     if (hasStyle) {
       f << "hasStyle,";
       std::vector<uint32_t> text;
-      if (!zone.readString(text)) {
+      if (!zone.readString(text) || text.size()>1000 || input->tell()>endPos) {
         STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributePattern::read: can not read a name\n"));
         f << "###name,";
         return false;
       }
-      else if (!text.empty()) {
-        m_itemSet.m_style=libstoff::getString(text);
+      m_itemSet.m_style=libstoff::getString(text);
+      if (!text.empty())
         f << "name=" << m_itemSet.m_style.cstr() << ",";
-      }
-      input->seek(2, librevenge::RVNG_SEEK_CUR);
+      m_itemSet.m_family=(int) input->readULong(2);
     }
     bool ok=object.readItemSet(zone, m_limits, endPos, m_itemSet, object.getCurrentPool(false).get());
     if (!ok) f << "###";
@@ -533,7 +534,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
   //! debug function to print the data
   virtual void print(libstoff::DebugStream &o) const
   {
@@ -651,7 +652,7 @@ protected:
   }
 };
 
-void StarCAttributeMargins::addTo(STOFFCellStyle &cell) const
+void StarCAttributeMargins::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
 {
   if (m_type!=ATTR_SC_MARGIN)
     return;
@@ -661,7 +662,7 @@ void StarCAttributeMargins::addTo(STOFFCellStyle &cell) const
   }
 }
 
-void StarCAttributeMerge::addTo(STOFFCellStyle &cell) const
+void StarCAttributeMerge::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
 {
   if (m_type!=ATTR_SC_MERGE)
     return;
@@ -674,7 +675,7 @@ void StarCAttributeMerge::addTo(STOFFCellStyle &cell) const
     cell.m_numberCellSpanned=m_span;
 }
 
-void StarCAttributeProtection::addTo(STOFFCellStyle &cell) const
+void StarCAttributeProtection::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
 {
   if (m_type!=ATTR_SC_PROTECTION)
     return;

@@ -185,8 +185,10 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
   }
   if (input->isEnd()) return true;
   long pos=input->tell();
-  if (!StarItemPool::readStyle(zone, mainPool, *this))
+  if (!mainPool || !mainPool->readStyles(zone, *this)) {
+    STOFF_DEBUG_MSG(("StarObjectText::readSfxStyleSheets: can not read a style pool\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
+  }
   if (!input->isEnd()) {
     STOFF_DEBUG_MSG(("StarObjectText::readSfxStyleSheets: find extra data\n"));
     ascFile.addPos(input->tell());

@@ -58,7 +58,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeBool(*this));
   }
   //! add to a font
-  virtual void addTo(STOFFFont &font) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
 
 protected:
   //! copy constructor
@@ -81,7 +81,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeColor(*this));
   }
   //! add to a font
-  virtual void addTo(STOFFFont &font) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
 protected:
   //! copy constructor
   StarCAttributeColor(StarCAttributeColor const &orig) : StarAttributeColor(orig)
@@ -99,7 +99,7 @@ public:
   {
   }
   //! add to a font
-  virtual void addTo(STOFFFont &font) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -127,7 +127,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeUInt(*this));
   }
   //! add to a font
-  virtual void addTo(STOFFFont &font) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
 protected:
   //! copy constructor
   StarCAttributeUInt(StarCAttributeUInt const &orig) : StarAttributeUInt(orig)
@@ -144,7 +144,7 @@ public:
   {
   }
   //! add to a font
-  virtual void addTo(STOFFFont &font) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -183,68 +183,67 @@ void addAttributeVoid(std::map<int, shared_ptr<StarAttribute> > &map, StarAttrib
   map[type]=shared_ptr<StarAttribute>(new StarCAttributeVoid(type,debugName));
 }
 
-void StarCAttributeBool::addTo(STOFFFont &font) const
+void StarCAttributeBool::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
 {
-  if (!m_value) {
-    if (m_type==ATTR_CHR_NOHYPHEN)
-      font.m_hyphen=true;
-    else if (m_type==ATTR_CHR_NOLINEBREAK)
-      font.m_lineBreak=true;
-    return;
-  }
   if (m_type==ATTR_CHR_CONTOUR)
-    font.m_propertyList.insert("style:text-outline", "true");
+    font.m_propertyList.insert("style:text-outline", m_value);
   else if (m_type==ATTR_CHR_SHADOWED)
-    font.m_propertyList.insert("fo:text-shadow", "1pt 1pt");
+    font.m_propertyList.insert("fo:text-shadow", m_value ? "1pt 1pt" : "none");
   else if (m_type==ATTR_CHR_BLINK)
-    font.m_propertyList.insert("style:text-blinking", "true");
+    font.m_propertyList.insert("style:text-blinking", m_value);
   else if (m_type==ATTR_CHR_WORDLINEMODE)  {
-    font.m_propertyList.insert("style:text-line-through-mode", "skip-white-space");
-    font.m_propertyList.insert("style:text-underline-mode", "skip-white-space");
+    font.m_propertyList.insert("style:text-line-through-mode", m_value ? "skip-white-space" : "continuous");
+    font.m_propertyList.insert("style:text-underline-mode", m_value ? "skip-white-space" : "continuous");
   }
   else if (m_type==ATTR_CHR_AUTOKERN)
-    font.m_propertyList.insert("style:letter-kerning", "true");
+    font.m_propertyList.insert("style:letter-kerning", m_value);
   else if (m_type==ATTR_SC_HYPHENATE)
-    font.m_propertyList.insert("fo:hyphenate", "true");
+    font.m_propertyList.insert("fo:hyphenate", m_value);
+  else if (m_type==ATTR_CHR_NOHYPHEN)
+    font.m_hyphen=!m_value;
+  else if (m_type==ATTR_CHR_NOLINEBREAK)
+    font.m_lineBreak=!m_value;
 }
 
-void StarCAttributeColor::addTo(STOFFFont &font) const
+void StarCAttributeColor::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
 {
   if (m_type==ATTR_CHR_COLOR)
     font.m_propertyList.insert("fo:color", m_value.str().c_str());
 }
 
-void StarCAttributeInt::addTo(STOFFFont &font) const
+void StarCAttributeInt::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
 {
-  if (m_type==ATTR_CHR_KERNING && m_value)
+  if (m_type==ATTR_CHR_KERNING)
     font.m_propertyList.insert("fo:letter-spacing", m_value, librevenge::RVNG_TWIP);
 }
 
-void StarCAttributeUInt::addTo(STOFFFont &font) const
+void StarCAttributeUInt::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
 {
   if (m_type==ATTR_CHR_CROSSEDOUT) {
     switch (m_value) {
     case 0: // none
+      font.m_propertyList.insert("style:text-line-through-type", "none");
       break;
     case 1: // single
     case 2: // double
-      font.m_propertyList.insert("style:text-line-through", m_value==1 ? "single" : "double");
+      font.m_propertyList.insert("style:text-line-through-type", m_value==1 ? "single" : "double");
       font.m_propertyList.insert("style:text-line-through-style", "solid");
       break;
     case 3: // dontknow
       break;
     case 4: // bold
-      font.m_propertyList.insert("style:text-line-through", "single");
+      font.m_propertyList.insert("style:text-line-through-type", "single");
       font.m_propertyList.insert("style:text-line-through-style", "solid");
       font.m_propertyList.insert("style:text-line-through-width", "thick");
       break;
     case 5: // slash
     case 6: // X
-      font.m_propertyList.insert("style:text-line-through", "single");
+      font.m_propertyList.insert("style:text-line-through-type", "single");
       font.m_propertyList.insert("style:text-line-through-style", "solid");
       font.m_propertyList.insert("style:text-line-through-text", m_value==5 ? "/" : "X");
       break;
     default:
+      font.m_propertyList.insert("style:text-line-through-type", "none");
       STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown crossedout enum=%d\n", m_value));
       break;
     }
@@ -253,10 +252,11 @@ void StarCAttributeUInt::addTo(STOFFFont &font) const
     switch (m_value) {
     case 0: // none
     case 4: // unknown
+      font.m_propertyList.insert("style:text-underline-type", "none");
       break;
     case 1: // single
     case 2: // double
-      font.m_propertyList.insert("style:text-underline", m_value==1 ? "single" : "double");
+      font.m_propertyList.insert("style:text-underline-type", m_value==1 ? "single" : "double");
       font.m_propertyList.insert("style:text-underline-style", "solid");
       break;
     case 3: // dot
@@ -264,14 +264,14 @@ void StarCAttributeUInt::addTo(STOFFFont &font) const
     case 6: // long-dash
     case 7: // dash-dot
     case 8: // dash-dot-dot
-      font.m_propertyList.insert("style:text-underline", "single");
+      font.m_propertyList.insert("style:text-underline-type", "single");
       font.m_propertyList.insert("style:text-underline-style", m_value==3 ? "dotted" : m_value==5 ? "dash" :
                                  m_value==6 ? "long-dash" : m_value==7 ? "dot-dash" : "dot-dot-dash");
       break;
     case 9: // small wave
     case 10: // wave
     case 11: // double wave
-      font.m_propertyList.insert("style:text-underline", m_value==11 ? "single" : "double");
+      font.m_propertyList.insert("style:text-underline-type", m_value==11 ? "single" : "double");
       font.m_propertyList.insert("style:text-underline-style", "wave");
       if (m_value==9)
         font.m_propertyList.insert("style:text-underline-width", "thin");
@@ -284,12 +284,13 @@ void StarCAttributeUInt::addTo(STOFFFont &font) const
     case 17: // bold dash-dot-dot
     case 18: { // bold wave
       char const *(wh[])= {"solid", "dotted", "dash", "long-dash", "dot-dash", "dot-dot-dash", "wave"};
-      font.m_propertyList.insert("style:text-underline", "single");
+      font.m_propertyList.insert("style:text-underline-type", "single");
       font.m_propertyList.insert("style:text-underline-style", wh[m_value-12]);
       font.m_propertyList.insert("style:text-underline-width", "thick");
       break;
     }
     default:
+      font.m_propertyList.insert("style:text-underline-type", "none");
       STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown underline enum=%d\n", m_value));
       break;
     }
@@ -305,11 +306,14 @@ void StarCAttributeUInt::addTo(STOFFFont &font) const
     }
   }
   else if (m_type==ATTR_CHR_RELIEF) {
-    if (m_value==1)
+    if (m_value==0)
+      font.m_propertyList.insert("style:font-relief", "none");
+    else if (m_value==1)
       font.m_propertyList.insert("style:font-relief", "embossed");
     else if (m_value==2)
       font.m_propertyList.insert("style:font-relief", "engraved");
     else if (m_value) {
+      font.m_propertyList.insert("style:font-relief", "none");
       STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown relief enum=%d\n", m_value));
     }
   }
@@ -321,10 +325,13 @@ void StarCAttributeUInt::addTo(STOFFFont &font) const
       font.m_propertyList.insert(wh.c_str(), "bold");
     else if (m_value>=1 && m_value<=9)
       font.m_propertyList.insert(wh.c_str(), m_value*100, librevenge::RVNG_GENERIC);
-    // 10: WEIGHT_BLACK
+    else // 10: WEIGHT_BLACK
+      font.m_propertyList.insert(wh.c_str(), "normal");
   }
   else if (m_type==ATTR_CHR_CASEMAP) {
-    if (m_value==1)
+    if (m_value==0)
+      font.m_propertyList.insert("fo:text-transform", "none");
+    else if (m_value==1)
       font.m_propertyList.insert("fo:text-transform", "uppercase");
     else if (m_value==2)
       font.m_propertyList.insert("fo:text-transform", "lowercase");
@@ -333,6 +340,7 @@ void StarCAttributeUInt::addTo(STOFFFont &font) const
     else if (m_value==4)
       font.m_propertyList.insert("fo:font-variant", "small-caps");
     else if (m_value) {
+      font.m_propertyList.insert("fo:text-transform", "none");
       STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown casemap enum=%d\n", m_value));
     }
   }
@@ -352,16 +360,19 @@ void StarCAttributeUInt::addTo(STOFFFont &font) const
     font.m_propertyList.insert("style:text-scale", float(m_value)/100.f, librevenge::RVNG_PERCENT);
   else if (m_type==ATTR_CHR_EMPHASIS_MARK) {
     if (m_value && ((m_value&0xC000)==0 || (m_value&0x3000)==0x3000 || (m_value&0xFFF)>4 || (m_value&0xFFF)==0)) {
+      font.m_propertyList.insert("style:text-emphasize", "none");
       STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown emphasis mark=%x\n", (unsigned)m_value));
     }
     else if (m_value) {
       std::string what((m_value&7)== 1 ? "dot" : (m_value&7)== 2 ? "circle" : (m_value&7)== 3 ? "disc" : "accent");
       font.m_propertyList.insert("style:text-emphasize", (what+((m_value&0x1000) ? " above" : " below")).c_str());
     }
+    else
+      font.m_propertyList.insert("style:text-emphasize", "none");
   }
 }
 
-void StarCAttributeVoid::addTo(STOFFFont &font) const
+void StarCAttributeVoid::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
 {
   if (m_type==ATTR_TXT_SOFTHYPH)
     font.m_softHyphen=true;
@@ -389,7 +400,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a font
-  virtual void addTo(STOFFFont &font) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
   //! debug function to print the data
   virtual void print(libstoff::DebugStream &o) const
   {
@@ -426,7 +437,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a font
-  virtual void addTo(STOFFFont &font) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
   //! debug function to print the data
   virtual void print(libstoff::DebugStream &o) const
   {
@@ -494,16 +505,14 @@ protected:
   int m_pitch;
 };
 
-void StarCAttributeEscapement::addTo(STOFFFont &font) const
+void StarCAttributeEscapement::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
 {
-  if (m_delta==0 && m_scale==100)
-    return;
   std::stringstream s;
   s << m_delta << "% " << m_scale << "%";
   font.m_propertyList.insert("style:text-position", s.str().c_str());
 }
 
-void StarCAttributeFont::addTo(STOFFFont &font) const
+void StarCAttributeFont::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
 {
   if (!m_name.empty()) {
     if (m_type==ATTR_CHR_FONT)
@@ -619,7 +628,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a font
-  virtual void addTo(STOFFFont &font) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
   //! debug function to print the data
   virtual void print(libstoff::DebugStream &o) const
   {
@@ -668,7 +677,7 @@ bool StarCAttributeFontSize::read(StarZone &zone, int nVers, long endPos, StarOb
   return input->tell()<=endPos;
 }
 
-void StarCAttributeFontSize::addTo(STOFFFont &font) const
+void StarCAttributeFontSize::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
 {
   std::string wh(m_type==ATTR_CHR_FONTSIZE ? "fo:font-size" :
                  m_type==ATTR_CHR_CJK_FONTSIZE ? "style:font-size-asian" :

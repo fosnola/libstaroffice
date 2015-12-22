@@ -595,30 +595,54 @@ void State::initAttributeMap()
 ////////////////////////////////////////////////////////////
 // basic attribute function
 ////////////////////////////////////////////////////////////
-void StarAttributeItemSet::addTo(STOFFCellStyle &cell) const
+void StarAttributeItemSet::addTo(STOFFCellStyle &cell, StarItemPool const *pool) const
 {
-  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
-       it!=m_itemSet.m_whichToItemMap.end(); ++it) {
+  StarItemSet finalSet;
+  bool newSet=false;
+  if (pool && !m_itemSet.m_style.empty()) {
+    finalSet=m_itemSet;
+    pool->updateUsingStyles(finalSet);
+    newSet=true;
+  }
+  StarItemSet const &set=newSet ? finalSet : m_itemSet;
+  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
+       it!=set.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(cell);
+      it->second->m_attribute->addTo(cell, pool);
   }
 }
 
-void StarAttributeItemSet::addTo(STOFFFont &font) const
+void StarAttributeItemSet::addTo(STOFFFont &font, StarItemPool const *pool) const
 {
-  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
-       it!=m_itemSet.m_whichToItemMap.end(); ++it) {
+  StarItemSet finalSet;
+  bool newSet=false;
+  if (pool && !m_itemSet.m_style.empty()) {
+    finalSet=m_itemSet;
+    pool->updateUsingStyles(finalSet);
+    newSet=true;
+  }
+  StarItemSet const &set=newSet ? finalSet : m_itemSet;
+  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
+       it!=set.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(font);
+      it->second->m_attribute->addTo(font, pool);
   }
 }
 
-void StarAttributeItemSet::addTo(STOFFGraphicStyle &graphic) const
+void StarAttributeItemSet::addTo(STOFFGraphicStyle &graphic, StarItemPool const *pool) const
 {
-  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
-       it!=m_itemSet.m_whichToItemMap.end(); ++it) {
+  StarItemSet finalSet;
+  bool newSet=false;
+  if (pool && !m_itemSet.m_style.empty()) {
+    finalSet=m_itemSet;
+    pool->updateUsingStyles(finalSet);
+    newSet=true;
+  }
+  StarItemSet const &set=newSet ? finalSet : m_itemSet;
+  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
+       it!=set.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(graphic);
+      it->second->m_attribute->addTo(graphic, pool);
   }
 }
 

@@ -80,7 +80,7 @@ class StarItemSet
 {
 public:
   //! constructor
-  StarItemSet() : m_style(""), m_whichToItemMap()
+  StarItemSet() : m_style(""), m_family(0), m_whichToItemMap()
   {
   }
   //! return true if the set is empty
@@ -92,6 +92,8 @@ public:
   bool add(shared_ptr<StarItem> item);
   //! item set name
   librevenge::RVNGString m_style;
+  //! the family
+  int m_family;
   //! the list of item
   std::map<int, shared_ptr<StarItem> > m_whichToItemMap;
 };

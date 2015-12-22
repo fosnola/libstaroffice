@@ -35,6 +35,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <set>
 #include <sstream>
 
 #include <librevenge/librevenge.h>
@@ -297,6 +298,35 @@ struct Values {
 
 ////////////////////////////////////////
 //! Internal: a style of a StarItemPool
+struct StyleId {
+  //! constructor
+  StyleId(librevenge::RVNGString const &name, int family) : m_name(name), m_family(family)
+  {
+  }
+  //! operator==
+  bool operator==(StyleId const &other) const
+  {
+    return m_family==other.m_family && m_name==other.m_name;
+  }
+  //! operator!=
+  bool operator!=(StyleId const &other) const
+  {
+    return !operator==(other);
+  }
+  //! operator<
+  bool operator<(StyleId const &other) const
+  {
+    if (m_family<other.m_family) return true;
+    if (m_family>other.m_family) return false;
+    return m_name<other.m_name;
+  }
+  //! the name
+  librevenge::RVNGString m_name;
+  //! the family
+  int m_family;
+};
+
+//! small class used to stored the style
 struct Style {
   //! constructor
   Style() : m_family(0), m_mask(0), m_itemSet(), m_helpId(0)
@@ -340,7 +370,7 @@ struct Style {
       o << "#family[high]=" << std::hex << (style.m_family>>8) << std::dec << ",";
     if (style.m_mask) o << "mask=" << std::hex << style.m_mask << std::dec << ",";
     if (style.m_helpId) o << "help[id]=" << style.m_helpId << ",";
-#if 1
+#if 0
     o << "Attrib=[";
     for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style.m_itemSet.m_whichToItemMap.begin();
          it!=style.m_itemSet.m_whichToItemMap.end(); ++it) {
@@ -375,7 +405,7 @@ struct State {
   State(StarObject &document, StarItemPool::Type type) :
     m_document(document), m_type(StarItemPool::T_Unknown), m_majorVersion(0), m_minorVersion(0), m_loadingVersion(-1),
     m_name(""), m_isSecondaryPool(false), m_secondaryPool(), m_currentVersion(0), m_verStart(0), m_verEnd(0), m_versionList(),
-    m_idToAttributeList(), m_slotIdToValuesMap(), m_delayedItemList()
+    m_idToAttributeList(), m_slotIdToValuesMap(), m_styleIdToStyleMap(), m_delayedItemList()
   {
     init(type);
   }
@@ -516,6 +546,8 @@ struct State {
   std::vector<int> m_idToAttributeList;
   //! a map slot to the attribute list
   std::map<int, Values> m_slotIdToValuesMap;
+  //! the set of style
+  std::map<StyleId,Style> m_styleIdToStyleMap;
   //! list of item which need to be read
   std::vector<shared_ptr<StarItem> > m_delayedItemList;
 private:
@@ -1757,7 +1789,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
   return true;
 }
 
-bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, StarObject &doc)
+bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascii=zone.ascii();
@@ -1766,7 +1798,7 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
   int poolVersion=input->peek()==3 ? 2 : 1;
   f << "Entries(SfxStylePool)[" << zone.getRecordLevel() << "]:pool[vers]=" << poolVersion << ",";
   char type=3; // to make clang analyzer happy
-  uint16_t charSet, nCount;
+  uint16_t charSet=0, nCount;
 
   bool helpIdSize32=true, ok=true;
   StarItemPoolInternal::SfxMultiRecord mRecord;
@@ -1788,7 +1820,7 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
   else {
     // style.cxx SfxStyleSheetBasePool::Load(vers==2)
     if (input->peek()!=3 || !zone.openSfxRecord(type)) {
-      STOFF_DEBUG_MSG(("StarItemPool::readStyle: can not open the first zone\n"));
+      STOFF_DEBUG_MSG(("StarItemPool::readStyles: can not open the first zone\n"));
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       return false;
     }
@@ -1801,7 +1833,7 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
     f << "SfxStylePool[header]:";
     char type1;
     if (!zone.openSfxRecord(type1)) {
-      STOFF_DEBUG_MSG(("StarItemPool::readStyle: can not open the header zone\n"));
+      STOFF_DEBUG_MSG(("StarItemPool::readStyles: can not open the header zone\n"));
       f << "###";
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
@@ -1812,7 +1844,7 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
     uint16_t headerTag;
     *input >> headerType >> headerVersion >> headerTag;
     if (headerTag!=0x10) {
-      STOFF_DEBUG_MSG(("StarItemPool::readStyle: can not find header tag\n"));
+      STOFF_DEBUG_MSG(("StarItemPool::readStyles: can not find header tag\n"));
       f << "###";
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
@@ -1831,7 +1863,7 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
     f.str("");
     f << "SfxStylePool[styles]:";
     if (!mRecord.open(zone)) {
-      STOFF_DEBUG_MSG(("StarItemPool::readStyle: can not open the versionMap sfx record\n"));
+      STOFF_DEBUG_MSG(("StarItemPool::readStyles: can not open the versionMap sfx record\n"));
       f << "###openVersionMap";
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
@@ -1841,7 +1873,7 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
     f << mRecord;
 
     if (mRecord.getHeaderTag()!=0x20) {
-      STOFF_DEBUG_MSG(("StarItemPool::readStyle: can not find the version map tag\n"));
+      STOFF_DEBUG_MSG(("StarItemPool::readStyles: can not find the version map tag\n"));
       f << "###tag";
       ok=false;
     }
@@ -1851,8 +1883,6 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
     nCount=mRecord.getNumRecords();
   }
   long lastPos=zone.getRecordLevel() ? zone.getRecordLastPosition() : input->size();
-  if (!pool)
-    pool=doc.getNewItemPool(T_Unknown); // CHANGE
   for (int i=0; ok && i<int(nCount); ++i) {
     pos=input->tell();
     int id=0;
@@ -1867,8 +1897,8 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
     std::vector<uint32_t> text;
     StarItemPoolInternal::Style style;
     for (int j=0; j<3; ++j) {
-      if (!zone.readString(text) || input->tell()>=lastPos) {
-        STOFF_DEBUG_MSG(("StarItemPool::readStyle: can not find a string\n"));
+      if (!zone.readString(text, charSet) || input->tell()>=lastPos) {
+        STOFF_DEBUG_MSG(("StarItemPool::readStyles: can not find a string\n"));
         f << style << "###string" << j;
         readOk=false;
         break;
@@ -1883,8 +1913,8 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
     }
     style.m_family=(int) input->readULong(2);
     style.m_mask=(int) input->readULong(2);
-    if (!zone.readString(text) || input->tell()>=lastPos) {
-      STOFF_DEBUG_MSG(("StarItemPool::readStyle: can not find helpFile\n"));
+    if (!zone.readString(text, charSet) || input->tell()>=lastPos) {
+      STOFF_DEBUG_MSG(("StarItemPool::readStyles: can not find helpFile\n"));
       f << style << "###helpFile";
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
@@ -1894,13 +1924,19 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
     style.m_names[3]=libstoff::getString(text);
     style.m_helpId=(unsigned) input->readULong(helpIdSize32 ? 4 : 2);
     std::vector<STOFFVec2i> limits; // unknown
-    if (!doc.readItemSet(zone, limits, lastPos, style.m_itemSet, pool.get(), false)) {
+    if (!doc.readItemSet(zone, limits, lastPos, style.m_itemSet, this, false)) {
       f << style << "###itemList";
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
       if (poolVersion==1) return true;
       continue;
     }
+    StarItemPoolInternal::StyleId styleId(style.m_names[0], style.m_family);
+    if (m_state->m_styleIdToStyleMap.find(styleId)!=m_state->m_styleIdToStyleMap.end()) {
+      STOFF_DEBUG_MSG(("StarItemPool::readStyles: style %s-%d\n", style.m_names[0].cstr(), style.m_family));
+    }
+    else
+      m_state->m_styleIdToStyleMap[styleId]=style;
     f << style;
     ascii.addDelimiter(input->tell(),'|');
     uint16_t nVer;
@@ -1908,7 +1944,7 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
     *input>>nVer>>nSize;
     if (nVer) f << "version=" << nVer << ",";
     if (input->tell()+long(nSize)>lastPos) {
-      STOFF_DEBUG_MSG(("StarItemPool::readStyle: something is bad\n"));
+      STOFF_DEBUG_MSG(("StarItemPool::readStyles: something is bad\n"));
       f << "###nSize=" << nSize << ",";
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
@@ -1919,7 +1955,7 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
       f << "#size=" << nSize << ",";
       static bool first=true;
       if (first) {
-        STOFF_DEBUG_MSG(("StarItemPool::readStyle: loading a sheet is not implemented\n"));
+        STOFF_DEBUG_MSG(("StarItemPool::readStyles: loading the base sheet data is not implemented\n"));
         first=false;
       }
       // normally SfxStyleSheetBase::Load but no code
@@ -1939,6 +1975,80 @@ bool StarItemPool::readStyle(StarZone &zone, shared_ptr<StarItemPool> pool, Star
     zone.closeSfxRecord(type, "SfxStylePool");
   }
   return true;
+}
+
+void StarItemPool::updateStyles()
+{
+  std::set<StarItemPoolInternal::StyleId> done, toDo;
+  std::multimap<StarItemPoolInternal::StyleId, StarItemPoolInternal::StyleId> childMap;
+  std::map<StarItemPoolInternal::StyleId,StarItemPoolInternal::Style>::iterator it;
+  std::multimap<StarItemPoolInternal::StyleId, StarItemPoolInternal::StyleId>::iterator cIt;
+  std::map<int, shared_ptr<StarItem> >::const_iterator iIt;
+  for (it=m_state->m_styleIdToStyleMap.begin(); it!=m_state->m_styleIdToStyleMap.end(); ++it) {
+    if (it->second.m_names[1].empty())
+      toDo.insert(it->first);
+    else {
+      StarItemPoolInternal::StyleId parentId(it->second.m_names[1], it->first.m_family);
+      if (m_state->m_styleIdToStyleMap.find(parentId)==m_state->m_styleIdToStyleMap.end()) {
+        STOFF_DEBUG_MSG(("StarItemPool::updateStyles: can not find style %s-%d\n", parentId.m_name.cstr(), parentId.m_family));
+      }
+      else
+        childMap.insert(std::multimap<StarItemPoolInternal::StyleId, StarItemPoolInternal::StyleId>::value_type(parentId, it->first));
+    }
+  }
+  while (!toDo.empty()) {
+    StarItemPoolInternal::StyleId styleId=*toDo.begin();
+    toDo.erase(styleId);
+    if (done.find(styleId)!=done.end()) {
+      STOFF_DEBUG_MSG(("StarItemPool::updateStyles: find loop for style %s-%d\n", styleId.m_name.cstr(), styleId.m_family));
+      continue;
+    }
+    done.insert(styleId);
+    it=m_state->m_styleIdToStyleMap.find(styleId);
+    if (it==m_state->m_styleIdToStyleMap.end()) {
+      STOFF_DEBUG_MSG(("StarItemPool::updateStyles: can not find style %s-%d\n", styleId.m_name.cstr(), styleId.m_family));
+      continue;
+    }
+    StarItemSet const &parentItemSet=it->second.m_itemSet;
+    cIt=childMap.lower_bound(styleId);
+    while (cIt!=childMap.end() && cIt->first==styleId) {
+      StarItemPoolInternal::StyleId childId=cIt++->second;
+      it=m_state->m_styleIdToStyleMap.find(childId);
+      if (it==m_state->m_styleIdToStyleMap.end() || done.find(childId)!=done.end()) {
+        STOFF_DEBUG_MSG(("StarItemPool::updateStyles: pb with style %s-%d\n", childId.m_name.cstr(), childId.m_family));
+        continue;
+      }
+      toDo.insert(childId);
+      StarItemSet &childItemSet=it->second.m_itemSet;
+      for (iIt=parentItemSet.m_whichToItemMap.begin(); iIt!=parentItemSet.m_whichToItemMap.end(); ++iIt) {
+        if (!iIt->second || childItemSet.m_whichToItemMap.find(iIt->first)!=childItemSet.m_whichToItemMap.end())
+          continue;
+        childItemSet.m_whichToItemMap[iIt->first]=iIt->second;
+      }
+    }
+  }
+  if (done.size()!=m_state->m_styleIdToStyleMap.size()) {
+    STOFF_DEBUG_MSG(("StarItemPool::updateStyles: convert only %d of %d styles\n", int(done.size()), int(m_state->m_styleIdToStyleMap.size())));
+  }
+}
+
+void StarItemPool::updateUsingStyles(StarItemSet &itemSet) const
+{
+  if (itemSet.m_style.empty())
+    return;
+  StarItemPoolInternal::StyleId styleId(itemSet.m_style, itemSet.m_family);
+  std::map<StarItemPoolInternal::StyleId,StarItemPoolInternal::Style>::iterator it=m_state->m_styleIdToStyleMap.find(styleId);
+  if (it==m_state->m_styleIdToStyleMap.end()) {
+    STOFF_DEBUG_MSG(("StarItemPool::updateUsingStyles: can not find with style %s-%d\n", styleId.m_name.cstr(), styleId.m_family));
+    return;
+  }
+  StarItemSet const &parentItemSet=it->second.m_itemSet;
+  std::map<int, shared_ptr<StarItem> >::const_iterator iIt;
+  for (iIt=parentItemSet.m_whichToItemMap.begin(); iIt!=parentItemSet.m_whichToItemMap.end(); ++iIt) {
+    if (!iIt->second || itemSet.m_whichToItemMap.find(iIt->first)!=itemSet.m_whichToItemMap.end())
+      continue;
+    itemSet.m_whichToItemMap[iIt->first]=iIt->second;
+  }
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

@@ -623,12 +623,14 @@ bool StarObjectSpreadsheet::sendCell(StarObjectSpreadsheetInternal::Cell &cell, 
     return false;
   }
   if (attrib) {
+    shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_SpreadsheetPool, false);
     STOFFFont font;
-    attrib->addTo(font);
+    attrib->addTo(font, pool.get());
     cell.setFont(font);
     STOFFCellStyle style;
-    attrib->addTo(style);
+    attrib->addTo(style, pool.get());
     cell.setCellStyle(style);
+    // checkme: we need the pool here
     getFormatManager()->updateNumberingProperties(cell);
   }
   if (!cell.m_content.m_formula.empty())
@@ -1577,6 +1579,7 @@ bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::s
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   long lastPos=zone.getRecordLastPosition();
+  StarEncoding::Encoding oldEncoding=zone.getEncoding();
   while (input->tell()+6 < lastPos) {
     pos=input->tell();
     f.str("");
@@ -1605,19 +1608,26 @@ bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::s
       }
       break;
     }
-    case 0x4212:
+    case 0x4212: {
       f << "style[pool],";
-      if (!StarItemPool::readStyle(zone, mainPool, *this)) {
+      StarEncoding::Encoding prevEncoding=zone.getEncoding();
+      zone.setEncoding(StarEncoding::E_ASCII_US); // getSystemTextEncoding
+      if (!mainPool || !mainPool->readStyles(zone, *this)) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSfxStyleSheets: can not readStylePool\n"));
         f << "###";
         input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
-        break;
       }
+      zone.setEncoding(prevEncoding);
       break;
+    }
     case 0x422c: {
       uint8_t cSet, cGUI;
       *input >> cGUI >> cSet;
-      f << "charset=" << int(cSet) << ",";
+      if (cSet) {
+        f << "charset=" << int(cSet) << ",";
+        if (StarEncoding::getEncodingForId(cSet)!=StarEncoding::E_DONTKNOW)
+          zone.setEncoding(StarEncoding::getEncodingForId(cSet));
+      }
       if (cGUI) f << "gui=" << int(cGUI) << ",";
       break;
     }
@@ -1632,12 +1642,14 @@ bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::s
     zone.closeSCRecord("SfxStyleSheets");
   }
   zone.closeSCRecord("SfxStyleSheets");
+  zone.setEncoding(oldEncoding);
 
   if (!input->isEnd()) {
     STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSfxStyleSheets: find extra data\n"));
     ascFile.addPos(input->tell());
     ascFile.addNote("SfxStyleSheets:###extra");
   }
+  if (mainPool) mainPool->updateStyles();
   return true;
 }
 

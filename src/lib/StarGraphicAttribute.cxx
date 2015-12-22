@@ -61,7 +61,7 @@ public:
     return shared_ptr<StarAttribute>(new StarGAttributeBool(*this));
   }
   //! add to a graphic style
-  //virtual void addTo(STOFFGraphicStyle &graphic) const;
+  //virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
 
 protected:
   //! copy constructor
@@ -84,7 +84,7 @@ public:
     return shared_ptr<StarAttribute>(new StarGAttributeColor(*this));
   }
   //! add to a graphic style
-  //virtual void addTo(STOFFGraphicStyle &graphic) const;
+  //virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
 protected:
   //! copy constructor
   StarGAttributeColor(StarGAttributeColor const &orig) : StarAttributeColor(orig)
@@ -102,7 +102,7 @@ public:
   {
   }
   //! add to a graphic style
-  // virtual void addTo(STOFFGraphicStyle &graphic) const;
+  // virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -130,7 +130,7 @@ public:
     return shared_ptr<StarAttribute>(new StarGAttributeUInt(*this));
   }
   //! add to a graphic style
-  //virtual void addTo(STOFFGraphicStyle &graphic) const;
+  //virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
 protected:
   //! copy constructor
   StarGAttributeUInt(StarGAttributeUInt const &orig) : StarAttributeUInt(orig)
@@ -152,7 +152,7 @@ public:
     return shared_ptr<StarAttribute>(new StarGAttributeVoid(*this));
   }
   //! add to a graphic style
-  //virtual void addTo(STOFFGraphicStyle &graphic) const;
+  //virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
 protected:
   //! copy constructor
   StarGAttributeVoid(StarGAttributeVoid const &orig) : StarAttributeVoid(orig)
@@ -209,9 +209,9 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic) const;
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
   //! debug function to print the data
   virtual void print(libstoff::DebugStream &o) const
   {
@@ -314,11 +314,11 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a font
-  virtual void addTo(STOFFFont &font) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic) const;
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
   //! debug function to print the data
   virtual void print(libstoff::DebugStream &o) const
   {
@@ -352,9 +352,9 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic) const;
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
   //! debug function to print the data
   virtual void print(libstoff::DebugStream &o) const
   {
@@ -389,19 +389,17 @@ protected:
   int m_style;
 };
 
-void StarGAttributeBorder::addTo(STOFFCellStyle &cell) const
+void StarGAttributeBorder::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
 {
   if (m_type==ATTR_SC_BORDER) {
     // checkme what is m_distance?
     char const * (wh[])= {"top", "left", "right", "bottom"};
-    for (int i=0; i<4; ++i) {
-      if (!m_borders[i].isEmpty())
-        m_borders[i].addTo(cell.m_propertyList, wh[i]);
-    }
+    for (int i=0; i<4; ++i)
+      m_borders[i].addTo(cell.m_propertyList, wh[i]);
   }
 }
 
-void StarGAttributeBorder::addTo(STOFFGraphicStyle &graphic) const
+void StarGAttributeBorder::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
 {
   if (m_type==ATTR_FRM_BOX) {
     // checkme what is m_distance?
@@ -410,19 +408,21 @@ void StarGAttributeBorder::addTo(STOFFGraphicStyle &graphic) const
       if (!m_borders[i].isEmpty())
         m_borders[i].addTo(graphic.m_propertyList, wh[i]);
     }
-    for (int i=0; i<4; ++i) {
-      if (m_distances[i]==0)
-        continue;
+    for (int i=0; i<4; ++i)
       graphic.m_propertyList.insert((std::string("padding-")+wh[i]).c_str(), float(m_distances[i])/20.f, librevenge::RVNG_POINT);
-    }
   }
 }
 
-void StarGAttributeBrush::addTo(STOFFFont &font) const
+void StarGAttributeBrush::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
 {
-  if (m_type != ATTR_CHR_BACKGROUND || m_brush.isEmpty())
+  if (m_type != ATTR_CHR_BACKGROUND)
     return;
+  if (m_brush.isEmpty()) {
+    font.m_propertyList.insert("style:background-transparency", "100%");
+    return;
+  }
   STOFFColor color;
+  font.m_propertyList.insert("style:background-transparency", "0%");
   if (m_brush.getColor(color)) {
     font.m_propertyList.insert("fo:background-color", color.str().c_str());
     return;
@@ -432,7 +432,7 @@ void StarGAttributeBrush::addTo(STOFFFont &font) const
   }
 }
 
-void StarGAttributeBrush::addTo(STOFFCellStyle &cell) const
+void StarGAttributeBrush::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
 {
   if (m_type != ATTR_SC_BACKGROUND || m_brush.isEmpty())
     return;
@@ -478,7 +478,7 @@ void StarGAttributeBrush::addTo(STOFFCellStyle &cell) const
 #endif
 }
 
-void StarGAttributeBrush::addTo(STOFFGraphicStyle &graphic) const
+void StarGAttributeBrush::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
 {
   if (m_type!=ATTR_FRM_BACKGROUND || m_brush.isEmpty())
     return;
@@ -502,7 +502,7 @@ void StarGAttributeBrush::addTo(STOFFGraphicStyle &graphic) const
     graphic.m_propertyList.insert("librevenge:mime-type", object.m_typeList.empty() ? "image/pict" : object.m_typeList[0].c_str());
   }
 }
-void StarGAttributeShadow::addTo(STOFFCellStyle &cell) const
+void StarGAttributeShadow::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
 {
   if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=100) return;
   std::stringstream s;
@@ -512,7 +512,7 @@ void StarGAttributeShadow::addTo(STOFFCellStyle &cell) const
   cell.m_propertyList.insert("style:shadow", s.str().c_str());
 }
 
-void StarGAttributeShadow::addTo(STOFFGraphicStyle &graphic) const
+void StarGAttributeShadow::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
 {
   if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=255) return;
   graphic.m_propertyList.insert("draw:shadow", "visible");

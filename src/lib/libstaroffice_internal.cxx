@@ -241,12 +241,14 @@ bool STOFFLink::addTo(librevenge::RVNGPropertyList &propList) const
 // border function
 bool STOFFBorderLine::addTo(librevenge::RVNGPropertyList &propList, std::string const which) const
 {
-  if (isEmpty())
-    return true;
   std::stringstream stream, field;
   field << "fo:border";
   if (which.length())
     field << "-" << which;
+  if (isEmpty()) {
+    propList.insert(field.str().c_str(), "none");
+    return true;
+  }
   stream << float(m_inWidth+m_distance+m_outWidth)/20.f << "pt ";
   stream << ((m_inWidth && m_outWidth) ? "double" : "solid") << " " << m_color;
   propList.insert(field.str().c_str(), stream.str().c_str());

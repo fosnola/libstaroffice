@@ -52,7 +52,7 @@ namespace StarAttributeInternal
 struct State;
 }
 
-class StarItem;
+class StarItemPool;
 class StarObject;
 class StarZone;
 
@@ -747,15 +747,15 @@ public:
   //! read an attribute zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &document)=0;
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &/*cell*/) const
+  virtual void addTo(STOFFCellStyle &/*cell*/, StarItemPool const */*pool*/) const
   {
   }
   //! add to a font
-  virtual void addTo(STOFFFont &/*font*/) const
+  virtual void addTo(STOFFFont &/*font*/, StarItemPool const */*pool*/) const
   {
   }
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &/*graphic*/) const
+  virtual void addTo(STOFFGraphicStyle &/*graphic*/, StarItemPool const */*pool*/) const
   {
   }
   //! returns the debug name
@@ -1013,11 +1013,11 @@ public:
     return shared_ptr<StarAttribute>(new StarAttributeItemSet(*this));
   }
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &graphic) const;
+  virtual void addTo(STOFFCellStyle &graphic, StarItemPool const *pool) const;
   //! add all child to a font
-  virtual void addTo(STOFFFont &font) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const *pool) const;
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic) const;
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const *pool) const;
 
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
