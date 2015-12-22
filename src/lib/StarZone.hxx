@@ -127,6 +127,16 @@ public:
   {
     m_encoding=encod;
   }
+  //! returns the zone GUI type
+  int getGuiType() const
+  {
+    return m_guiType;
+  }
+  //! sets the zone GUI type
+  void setGuiType(int type)
+  {
+    m_guiType=type;
+  }
   //
   // basic
   //
@@ -265,6 +275,8 @@ protected:
   std::stack<int> m_headerVersionStack;
   //! the zone encoding
   StarEncoding::Encoding m_encoding;
+  //! the zone GUI type
+  int m_guiType;
   //! the encryption
   shared_ptr<StarEncryption> m_encryption;
   //! the file ascii name

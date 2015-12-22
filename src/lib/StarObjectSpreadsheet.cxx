@@ -1401,7 +1401,9 @@ try
     }
     case 0x422c: {
       f << "charset,";
-      input->seek(1, librevenge::RVNG_SEEK_CUR); // GUI, dummy
+      int guiType=(int) input->readULong(1);
+      f << "gui[type]=" << guiType << ",";
+      zone.setGuiType(guiType);
       int charSet=(int) input->readULong(1);
       f << "set=" << charSet << ",";
       if (StarEncoding::getEncodingForId(charSet)!=StarEncoding::E_DONTKNOW)
@@ -1610,14 +1612,11 @@ bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::s
     }
     case 0x4212: {
       f << "style[pool],";
-      StarEncoding::Encoding prevEncoding=zone.getEncoding();
-      zone.setEncoding(StarEncoding::E_ASCII_US); // getSystemTextEncoding
       if (!mainPool || !mainPool->readStyles(zone, *this)) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSfxStyleSheets: can not readStylePool\n"));
         f << "###";
         input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
       }
-      zone.setEncoding(prevEncoding);
       break;
     }
     case 0x422c: {
@@ -1628,7 +1627,10 @@ bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::s
         if (StarEncoding::getEncodingForId(cSet)!=StarEncoding::E_DONTKNOW)
           zone.setEncoding(StarEncoding::getEncodingForId(cSet));
       }
-      if (cGUI) f << "gui=" << int(cGUI) << ",";
+      if (cGUI) {
+        zone.setGuiType(cGUI);
+        f << "gui=" << int(cGUI) << ",";
+      }
       break;
     }
     default:

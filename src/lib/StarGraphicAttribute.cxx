@@ -418,24 +418,28 @@ void StarGAttributeBrush::addTo(STOFFFont &font, StarItemPool const */*pool*/) c
   if (m_type != ATTR_CHR_BACKGROUND)
     return;
   if (m_brush.isEmpty()) {
-    font.m_propertyList.insert("style:background-transparency", "100%");
+    font.m_propertyList.insert("fo:background-color", "transparent");
     return;
   }
   STOFFColor color;
-  font.m_propertyList.insert("style:background-transparency", "0%");
   if (m_brush.getColor(color)) {
     font.m_propertyList.insert("fo:background-color", color.str().c_str());
     return;
   }
   else {
+    font.m_propertyList.insert("fo:background-color", "transparent");
     STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a font background\n"));
   }
 }
 
 void StarGAttributeBrush::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
 {
-  if (m_type != ATTR_SC_BACKGROUND || m_brush.isEmpty())
+  if (m_type != ATTR_SC_BACKGROUND)
     return;
+  if (m_brush.isEmpty()) {
+    cell.m_propertyList.insert("fo:background-color", "transparent");
+    return;
+  }
   STOFFColor color;
 #if 1
   if (m_brush.getColor(color)) {
@@ -443,6 +447,7 @@ void StarGAttributeBrush::addTo(STOFFCellStyle &cell, StarItemPool const */*pool
     return;
   }
   STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a cell background\n"));
+  cell.m_propertyList.insert("fo:background-color", "transparent");
 #else
   /* checkme, is it possible to use style:background-image here ?
      Can not create any working ods file with bitmap cell's background...
@@ -480,10 +485,16 @@ void StarGAttributeBrush::addTo(STOFFCellStyle &cell, StarItemPool const */*pool
 
 void StarGAttributeBrush::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
 {
-  if (m_type!=ATTR_FRM_BACKGROUND || m_brush.isEmpty())
+  if (m_type!=ATTR_FRM_BACKGROUND)
     return;
   if (m_brush.m_transparency>0 && m_brush.m_transparency<=255)
     graphic.m_propertyList.insert("draw:opacity", 1.-double(m_brush.m_transparency)/255., librevenge::RVNG_PERCENT);
+  else
+    graphic.m_propertyList.insert("draw:opacity",1., librevenge::RVNG_PERCENT);
+  if (m_brush.isEmpty()) {
+    graphic.m_propertyList.insert("draw:fill", "none");
+    return;
+  }
   STOFFColor color;
   if (m_brush.hasUniqueColor() && m_brush.getColor(color)) {
     graphic.m_propertyList.insert("draw:fill", "solid");
@@ -501,10 +512,15 @@ void StarGAttributeBrush::addTo(STOFFGraphicStyle &graphic, StarItemPool const *
     graphic.m_propertyList.insert("draw:fill-image-ref-point-y",0, librevenge::RVNG_POINT);
     graphic.m_propertyList.insert("librevenge:mime-type", object.m_typeList.empty() ? "image/pict" : object.m_typeList[0].c_str());
   }
+  else
+    graphic.m_propertyList.insert("draw:fill", "none");
 }
 void StarGAttributeShadow::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
 {
-  if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=100) return;
+  if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=100) {
+    cell.m_propertyList.insert("style:shadow", "none");
+    return;
+  }
   std::stringstream s;
   s << m_color.str().c_str() << " "
     << ((m_location%2)?-1:1)*double(m_width)/20. << "pt "
@@ -514,7 +530,10 @@ void StarGAttributeShadow::addTo(STOFFCellStyle &cell, StarItemPool const */*poo
 
 void StarGAttributeShadow::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
 {
-  if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=255) return;
+  if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=255) {
+    graphic.m_propertyList.insert("draw:shadow", "hidden");
+    return;
+  }
   graphic.m_propertyList.insert("draw:shadow", "visible");
   graphic.m_propertyList.insert("draw:shadow-color", m_color.str().c_str());
   graphic.m_propertyList.insert("draw:shadow-opacity", 1.f-float(m_transparency)/255.f, librevenge::RVNG_PERCENT);

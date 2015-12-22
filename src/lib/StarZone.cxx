@@ -47,7 +47,8 @@
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
 StarZone::StarZone(STOFFInputStreamPtr inputStream, std::string const &ascName, std::string const &zoneName, char const *password) :
-  m_input(inputStream), m_ascii(inputStream), m_version(0), m_documentVersion(0), m_headerVersionStack(), m_encoding(StarEncoding::E_DONTKNOW), m_encryption(), m_asciiName(ascName), m_zoneName(zoneName),
+  m_input(inputStream), m_ascii(inputStream), m_version(0), m_documentVersion(0), m_headerVersionStack(),
+  m_encoding(StarEncoding::E_DONTKNOW), m_guiType(0), m_encryption(), m_asciiName(ascName), m_zoneName(zoneName),
   m_typeStack(), m_positionStack(), m_beginToEndMap(), m_flagEndZone(), m_poolList()
 {
   if (password)
@@ -309,7 +310,7 @@ bool StarZone::readSWHeader()
   }
   if (m_input->tell()!=8+hSz) {
     m_ascii.addDelimiter(m_input->tell(),'|');
-    STOFF_DEBUG_MSG(("StarZone::readZoneHeader: find extra data\n"));
+    STOFF_DEBUG_MSG(("StarZone::readSWHeader: find extra data\n"));
     f << "###extra";
   }
   m_ascii.addPos(0);

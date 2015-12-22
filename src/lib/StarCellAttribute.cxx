@@ -162,9 +162,8 @@ protected:
 
 void StarCAttributeBool::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
 {
-  if (!m_value) return;
   if (m_type==ATTR_SC_LINEBREAK)
-    cell.m_propertyList.insert("fo:wrap-option","wrap");
+    cell.m_propertyList.insert("fo:wrap-option",m_value ? "wrap" : "no-wrap");
 }
 
 void StarCAttributeInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
@@ -180,8 +179,11 @@ void StarCAttributeUInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*
   if (m_type==ATTR_SC_VALUE_FORMAT)
     cell.m_format=(unsigned) m_value;
   else if (m_type==ATTR_SC_HORJUSTIFY) {
+    cell.m_propertyList.insert("style:repeat-content", false);
     switch (m_value) {
     case 0: // standard
+      cell.m_propertyList.insert("style:text-align-source", "value-type");
+      if (cell.m_propertyList["fo:text-align"]) cell.m_propertyList.remove("fo:text-align");
       break;
     case 1: // left
     case 2: // center
@@ -197,6 +199,8 @@ void StarCAttributeUInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*
       cell.m_propertyList.insert("style:repeat-content", true);
       break;
     default:
+      cell.m_propertyList.insert("style:text-align-source", "value-type");
+      if (cell.m_propertyList["fo:text-align"]) cell.m_propertyList.remove("fo:text-align");
       STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeUInt::addTo: find unknown horizontal enum=%d\n", int(m_value)));
       break;
     }
@@ -204,6 +208,10 @@ void StarCAttributeUInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*
   else if (m_type==ATTR_SC_VERJUSTIFY || m_type==ATTR_SC_ROTATE_MODE) {
     switch (m_value) {
     case 0: // standard
+      if (m_type==ATTR_SC_VERJUSTIFY)
+        cell.m_propertyList.insert("style:vertical-align", "automatic");
+      else
+        cell.m_propertyList.insert("style:rotation-align", "none");
       break;
     case 1: // top
     case 2: // center
@@ -212,6 +220,10 @@ void StarCAttributeUInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*
                                  m_value==1 ? "top" : m_value==2 ? "middle" : "bottom");
       break;
     default:
+      if (m_type==ATTR_SC_VERJUSTIFY)
+        cell.m_propertyList.insert("style:vertical-align", "automatic");
+      else
+        cell.m_propertyList.insert("style:rotation-align", "none");
       if (m_type==ATTR_SC_VERJUSTIFY && m_value==4) // block ?
         break;
       STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeUInt::addTo: find unknown vertical/rotateMode enum=%d\n", int(m_value)));
@@ -219,6 +231,8 @@ void StarCAttributeUInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*
     }
   }
   else if (m_type==ATTR_SC_ORIENTATION) {
+    if (cell.m_propertyList["style:direction"]) cell.m_propertyList.remove("style:direction");
+    // fixme: we must also revert the rotation angle, but ...
     switch (m_value) {
     case 0: // standard
       break;
@@ -242,6 +256,7 @@ void StarCAttributeUInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*
       cell.m_propertyList.insert("style:writing-mode", wh[m_value]);
     }
     else {
+      cell.m_propertyList.insert("style:writing-mode", "page");
       STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeUInt::addTo: find unknown writing dir enum=%d\n", int(m_value)));
     }
   }
@@ -666,6 +681,7 @@ void StarCAttributeMerge::addTo(STOFFCellStyle &cell, StarItemPool const */*pool
 {
   if (m_type!=ATTR_SC_MERGE)
     return;
+  cell.m_numberCellSpanned=STOFFVec2i(1,1);
   if (m_span==STOFFVec2i(0,0)) // checkme
     return;
   if (m_span[0]<=0 || m_span[1]<=0) {
@@ -684,7 +700,9 @@ void StarCAttributeProtection::addTo(STOFFCellStyle &cell, StarItemPool const */
   else if (m_protected || m_hiddenFormula)
     cell.m_propertyList.insert
     ("style:cell-protect", m_protected ? (m_hiddenFormula ? "hidden-and-protected" : "protected") : "formula-hidden");
-  if (m_doNotPrint) cell.m_propertyList.insert("style:print-content", false);
+  else
+    cell.m_propertyList.insert("style:cell-protect","none");
+  cell.m_propertyList.insert("style:print-content", m_doNotPrint);
   // hiddenCell ?
 }
 
@@ -801,7 +819,7 @@ bool StarCAttributePrint::read(StarZone &zone, int /*vers*/, long endPos, StarOb
   uint16_t n;
   *input >> n;
   if (!n||input->tell()+2*int(n)>endPos) {
-    STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributePrint::addTo: the number seems bad\n"));
+    STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributePrint::read: the number seems bad\n"));
     f << "###n=" << n << ",";
     ok=false;
   }

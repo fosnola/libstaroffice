@@ -405,7 +405,7 @@ struct State {
   State(StarObject &document, StarItemPool::Type type) :
     m_document(document), m_type(StarItemPool::T_Unknown), m_majorVersion(0), m_minorVersion(0), m_loadingVersion(-1),
     m_name(""), m_isSecondaryPool(false), m_secondaryPool(), m_currentVersion(0), m_verStart(0), m_verEnd(0), m_versionList(),
-    m_idToAttributeList(), m_slotIdToValuesMap(), m_styleIdToStyleMap(), m_delayedItemList()
+    m_idToAttributeList(), m_slotIdToValuesMap(), m_styleIdToStyleMap(), m_simplifyNameToStyleNameMap(), m_delayedItemList()
   {
     init(type);
   }
@@ -518,6 +518,31 @@ struct State {
     }
     return m_document.getAttributeManager()->getDefaultAttribute(state->m_idToAttributeList[size_t(which-state->m_verStart)]);
   }
+  //! small function to simplify a string (bad hack)
+  static librevenge::RVNGString getBasicString(librevenge::RVNGString const &s)
+  {
+    librevenge::RVNGString res("");
+    char const *ptr=s.cstr();
+    if (!ptr) return res;
+    int numBad=0;
+    while (*ptr) {
+      char c=*(ptr++);
+      if (unsigned(c)<0x80) {
+        if (numBad) {
+          numBad=0;
+          res.append('@');
+        }
+        res.append(c);
+        continue;
+      }
+      if (numBad++>=4) {
+        res.append('@');
+        numBad=0;
+      }
+    }
+    if (numBad) res.append('@');
+    return res;
+  }
   //! the document
   StarObject &m_document;
   //! the document type
@@ -548,6 +573,8 @@ struct State {
   std::map<int, Values> m_slotIdToValuesMap;
   //! the set of style
   std::map<StyleId,Style> m_styleIdToStyleMap;
+  //! map simplify style name to style name
+  std::map<librevenge::RVNGString, librevenge::RVNGString> m_simplifyNameToStyleNameMap;
   //! list of item which need to be read
   std::vector<shared_ptr<StarItem> > m_delayedItemList;
 private:
@@ -2030,6 +2057,23 @@ void StarItemPool::updateStyles()
   if (done.size()!=m_state->m_styleIdToStyleMap.size()) {
     STOFF_DEBUG_MSG(("StarItemPool::updateStyles: convert only %d of %d styles\n", int(done.size()), int(m_state->m_styleIdToStyleMap.size())));
   }
+  /* Sometimes, the attribute encoding when reading style name seems
+     bad (even in the lastest versions of LibreOffice which read sdc
+     files), so create a map to try to retrieve the real style name
+     from a bad encoded style name...
+   */
+  std::set<librevenge::RVNGString> dupplicatedSimpName;
+  for (it=m_state->m_styleIdToStyleMap.begin(); it!=m_state->m_styleIdToStyleMap.end(); ++it) {
+    if (it->second.m_names[0].empty()) continue;
+    librevenge::RVNGString simpName=m_state->getBasicString(it->second.m_names[0]);
+    if (it->second.m_names[0]==simpName || dupplicatedSimpName.find(simpName)!=dupplicatedSimpName.end()) continue;
+    if (m_state->m_simplifyNameToStyleNameMap.find(simpName)==m_state->m_simplifyNameToStyleNameMap.end())
+      m_state->m_simplifyNameToStyleNameMap[simpName]=it->second.m_names[0];
+    else if (m_state->m_simplifyNameToStyleNameMap.find(simpName)->second!=it->second.m_names[0]) {
+      dupplicatedSimpName.insert(simpName);
+      m_state->m_simplifyNameToStyleNameMap.erase(simpName);
+    }
+  }
 }
 
 void StarItemPool::updateUsingStyles(StarItemSet &itemSet) const
@@ -2038,6 +2082,19 @@ void StarItemPool::updateUsingStyles(StarItemSet &itemSet) const
     return;
   StarItemPoolInternal::StyleId styleId(itemSet.m_style, itemSet.m_family);
   std::map<StarItemPoolInternal::StyleId,StarItemPoolInternal::Style>::iterator it=m_state->m_styleIdToStyleMap.find(styleId);
+  if (it==m_state->m_styleIdToStyleMap.end()) {
+    // hack: try to retrieve the original style, ...
+    librevenge::RVNGString simpName=m_state->getBasicString(itemSet.m_style);
+    if (m_state->m_simplifyNameToStyleNameMap.find(simpName)!=m_state->m_simplifyNameToStyleNameMap.end()) {
+      styleId.m_name=m_state->m_simplifyNameToStyleNameMap.find(simpName)->second;
+      it=m_state->m_styleIdToStyleMap.find(styleId);
+      static bool first=true;
+      if (first && it!=m_state->m_styleIdToStyleMap.end()) {
+        STOFF_DEBUG_MSG(("StarItemPool::updateUsingStyles: try to recover some style names\n"));
+        first=false;
+      }
+    }
+  }
   if (it==m_state->m_styleIdToStyleMap.end()) {
     STOFF_DEBUG_MSG(("StarItemPool::updateUsingStyles: can not find with style %s-%d\n", styleId.m_name.cstr(), styleId.m_family));
     return;
