@@ -48,6 +48,7 @@
 #include "StarCellAttribute.hxx"
 #include "StarCharAttribute.hxx"
 #include "StarGraphicAttribute.hxx"
+#include "StarPageAttribute.hxx"
 #include "StarParagraphAttribute.hxx"
 #include "StarItemPool.hxx"
 #include "StarObject.hxx"
@@ -137,26 +138,11 @@ void State::initAttributeMap()
   StarCharAttribute::addInitTo(m_whichToAttributeMap);
   StarGraphicAttribute::addInitTo(m_whichToAttributeMap);
   StarParagraphAttribute::addInitTo(m_whichToAttributeMap);
+  StarPageAttribute::addInitTo(m_whichToAttributeMap);
 
   std::stringstream s;
 
   // --- sw --- sw_init.cxx
-  addAttributeBool(StarAttribute::ATTR_PARA_SPLIT,"para[split]",true);
-  addAttributeUInt(StarAttribute::ATTR_PARA_WIDOWS,"para[widows]",1,0); // numlines
-  addAttributeUInt(StarAttribute::ATTR_PARA_ORPHANS,"para[orphans]",1,0); // numlines
-  addAttributeBool(StarAttribute::ATTR_PARA_REGISTER,"para[register]",false);
-  addAttributeBool(StarAttribute::ATTR_PARA_SCRIPTSPACE,"para[scriptSpace]",false);
-  addAttributeBool(StarAttribute::ATTR_PARA_HANGINGPUNCTUATION,"para[hangingPunctuation]",true);
-  addAttributeBool(StarAttribute::ATTR_PARA_FORBIDDEN_RULES,"para[forbiddenRules]",true);
-  addAttributeUInt(StarAttribute::ATTR_PARA_VERTALIGN,"para[vert,align]",2,0);
-  addAttributeBool(StarAttribute::ATTR_PARA_SNAPTOGRID,"para[snapToGrid]",true);
-  addAttributeBool(StarAttribute::ATTR_PARA_CONNECT_BORDER,"para[connectBorder]",true);
-  for (int type=StarAttribute::ATTR_PARA_DUMMY5; type<=StarAttribute::ATTR_PARA_DUMMY8; ++type) {
-    s.str("");
-    s << "paraDummy" << type-StarAttribute::ATTR_PARA_DUMMY5+5;
-    addAttributeBool(StarAttribute::Type(type), s.str(), false);
-  }
-
   addAttributeUInt(StarAttribute::ATTR_FRM_FILL_ORDER,"frm[fill,order]",1,0); // topDown
   addAttributeUInt(StarAttribute::ATTR_FRM_PAPER_BIN,"frm[paperBin]",1,0xFF); // settings
   addAttributeBool(StarAttribute::ATTR_FRM_PRINT,"print",true);
@@ -665,6 +651,23 @@ void StarAttributeItemSet::addTo(STOFFParagraph &para, StarItemPool const *pool)
   }
 }
 
+void StarAttributeItemSet::addTo(STOFFPageSpan &page, StarItemPool const *pool) const
+{
+  StarItemSet finalSet;
+  bool newSet=false;
+  if (pool && !m_itemSet.m_style.empty()) {
+    finalSet=m_itemSet;
+    pool->updateUsingStyles(finalSet);
+    newSet=true;
+  }
+  StarItemSet const &set=newSet ? finalSet : m_itemSet;
+  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
+       it!=set.m_whichToItemMap.end(); ++it) {
+    if (it->second && it->second->m_attribute)
+      it->second->m_attribute->addTo(page, pool);
+  }
+}
+
 void StarAttributeItemSet::print(libstoff::DebugStream &o) const
 {
   o << m_debugName;
@@ -1117,10 +1120,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     f << "nRule=" << input->readULong(1) << ",";
     f << "nInterRule=" << input->readULong(1) << ",";
     break;
-  case StarAttribute::ATTR_PARA_ADJUST:
-    f << "parAtrAdjust=" << input->readULong(1) << ",";
-    if (nVers>=1) f << "nFlags=" << input->readULong(1) << ",";
-    break;
   case StarAttribute::ATTR_PARA_TABSTOP: {
     f << "parAtrTabStop,";
     int N=(int) input->readULong(1);
@@ -1180,34 +1179,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     f << "height=" << input->readULong(4) << ",";
     if (nVers>1)
       f << "percent=" << input->readULong(1) << "x"  << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_FRM_LR_SPACE:
-  case StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE:
-    f << (nWhich==StarAttribute::ATTR_FRM_LR_SPACE ? "lrSpace" : "eeOutLrSpace") << ",";
-    f << "left=" << input->readULong(2);
-    val=(int) input->readULong(nVers>=1 ? 2 : 1);
-    if (val) f << ":" << val;
-    f << ",";
-    f << "right=" << input->readULong(2);
-    val=(int) input->readULong(nVers>=1 ? 2 : 1);
-    if (val) f << ":" << val;
-    f << ",";
-    f << "firstLine=" << input->readLong(2);
-    val=(int) input->readULong(nVers>=1 ? 2 : 1);
-    if (val) f << ":" << val;
-    f << ",";
-    if (nVers>=2)
-      f << "textLeft=" << input->readLong(2) << ",";
-    if (nVers>=3) {
-      int8_t autofirst;
-      *input >> autofirst;
-      if (autofirst) f << "autofirst=" << int(autofirst) << ",";
-      long marker=(long) input->readULong(4);
-      if (marker==0x599401FE)
-        f << "firstLine[bullet]=" << input->readULong(2);
-      else
-        input->seek(-4, librevenge::RVNG_SEEK_CUR);
-    }
     break;
   case StarAttribute::ATTR_FRM_UL_SPACE:
     f << "ulSpace,";
@@ -1855,7 +1826,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
       f << coord << (i==2 ? "," : "x");
     }
     break;
-  case StarAttribute::ATTR_SPECIAL:
   default:
     STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: reading not format attribute is not implemented\n"));
     f << "#unimplemented[wh=" << std::hex << nWhich << std::dec << ",";

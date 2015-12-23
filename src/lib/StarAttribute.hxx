@@ -59,6 +59,7 @@ class StarZone;
 class STOFFCellStyle;
 class STOFFFont;
 class STOFFGraphicStyle;
+class STOFFPageSpan;
 class STOFFParagraph;
 
 //! virtual class used to store the different attribute
@@ -759,6 +760,10 @@ public:
   virtual void addTo(STOFFGraphicStyle &/*graphic*/, StarItemPool const */*pool*/) const
   {
   }
+  //! add to a pageSpan
+  virtual void addTo(STOFFPageSpan &/*page*/, StarItemPool const */*pool*/) const
+  {
+  }
   //! add to a paragraph
   virtual void addTo(STOFFParagraph &/*para*/, StarItemPool const */*pool*/) const
   {
@@ -1019,11 +1024,13 @@ public:
   }
   //! add to a cell style
   virtual void addTo(STOFFCellStyle &graphic, StarItemPool const *pool) const;
-  //! add all child to a font
+  //! add to a font
   virtual void addTo(STOFFFont &font, StarItemPool const *pool) const;
   //! add to a graphic style
   virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const *pool) const;
-  //! add all child to a paragraph
+  //! add to a pageSpan
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool) const;
+  //! add to a paragraph
   virtual void addTo(STOFFParagraph &para, StarItemPool const *pool) const;
 
   //! read a zone

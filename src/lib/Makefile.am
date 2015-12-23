@@ -116,6 +116,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarObjectSpreadsheet.hxx		\
 	StarObjectText.cxx			\
 	StarObjectText.hxx			\
+	StarPageAttribute.cxx			\
+	StarPageAttribute.hxx			\
 	StarParagraphAttribute.cxx		\
 	StarParagraphAttribute.hxx		\
 	StarZone.cxx				\

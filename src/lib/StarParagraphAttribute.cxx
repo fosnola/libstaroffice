@@ -188,12 +188,186 @@ void addAttributeVoid(std::map<int, shared_ptr<StarAttribute> > &map, StarAttrib
 namespace StarParagraphAttribute
 {
 // ------------------------------------------------------------
+//! a adjust attribute
+class StarPAttributeAdjust : public StarAttribute
+{
+public:
+  //! constructor
+  StarPAttributeAdjust(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_adjust(0), m_flags(0)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarPAttributeAdjust(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a font
+  virtual void addTo(STOFFParagraph &para, StarItemPool const */*pool*/) const;
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    if (m_adjust) o << "adjust=" << m_adjust << ",";
+    if (m_flags) o << "flags=" << std::hex << m_flags << std::dec << ",";
+    o << "],";
+  }
+protected:
+  //! copy constructor
+  StarPAttributeAdjust(StarPAttributeAdjust const &orig) : StarAttribute(orig), m_adjust(orig.m_adjust), m_flags(orig.m_flags)
+  {
+  }
+  //! the adjust value
+  int m_adjust;
+  //! the flags
+  int m_flags;
+};
+
+//! a left, right, ... attribute
+class StarPAttributeLRSpace : public StarAttribute
+{
+public:
+  //! constructor
+  StarPAttributeLRSpace(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_textLeft(0), m_autoFirst(true), m_bullet(0)
+  {
+    for (int i=0; i<3; ++i) m_margins[i]=0;
+    for (int i=0; i<3; ++i) m_propMargins[i]=100;
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarPAttributeLRSpace(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a font
+  virtual void addTo(STOFFParagraph &para, StarItemPool const */*pool*/) const;
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    for (int i=0; i<3; ++i) {
+      if (m_margins[i]>=0&&m_margins[i]<=0)
+        continue;
+      char const *(wh[])= {"left", "right", "firstLine"};
+      o << wh[i] << "=" << m_margins[i];
+      if (m_propMargins[i]!=100) o << ":" << m_propMargins[i] << ",";
+      o << ",";
+    }
+    if (m_textLeft) o << "text[left]=" << m_textLeft << ",";
+    if (!m_autoFirst) o << "autoFirst=no,";
+    if (m_bullet) o << "bullet=" << m_bullet << ",";
+    o << "],";
+  }
+protected:
+  //! copy constructor
+  StarPAttributeLRSpace(StarPAttributeLRSpace const &orig) : StarAttribute(orig), m_textLeft(orig.m_textLeft), m_autoFirst(orig.m_autoFirst), m_bullet(orig.m_bullet)
+  {
+    for (int i=0; i<3; ++i) m_margins[i]=orig.m_margins[i];
+    for (int i=0; i<3; ++i) m_propMargins[i]=orig.m_propMargins[i];
+  }
+  //! the margins: left, right, firstline
+  int m_margins[3];
+  //! the prop margins: left, right, firstline
+  int m_propMargins[3];
+  //! the text left
+  int m_textLeft;
+  //! a bool
+  bool m_autoFirst;
+  //! the bullet
+  int m_bullet;
+};
+
+void StarPAttributeAdjust::addTo(STOFFParagraph &/*para*/, StarItemPool const */*pool*/) const
+{
+}
+
+void StarPAttributeLRSpace::addTo(STOFFParagraph &/*para*/, StarItemPool const */*pool*/) const
+{
+}
+
+bool StarPAttributeAdjust::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  print(f);
+  m_adjust=(int) input->readULong(1);
+  if (vers>=1) m_flags=(int) input->readULong(1);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
+bool StarPAttributeLRSpace::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  for (int i=0; i<3; ++i) {
+    if (i<2)
+      m_margins[i]=(int) input->readULong(2);
+    else
+      m_margins[i]=(int) input->readLong(2);
+    m_propMargins[i]=(int) input->readULong(vers>=1 ? 2 : 1);
+  }
+  if (vers>=2)
+    m_textLeft=(int) input->readLong(2);
+  uint8_t autofirst=0;
+  if (vers>=3) {
+    *input >> autofirst;
+    m_autoFirst=(autofirst&1);
+    long marker=(long) input->readULong(4);
+    if (marker==0x599401FE)
+      m_bullet=(int) input->readULong(2);
+    else
+      input->seek(-4, librevenge::RVNG_SEEK_CUR);
+  }
+  if (vers>=4 && (autofirst&0x80)) { // negative margin
+    int32_t nMargin;
+    *input >> nMargin;
+    m_margins[0]=nMargin;
+    m_textLeft=m_margins[2]>=0 ? nMargin : nMargin-m_margins[2];
+    *input >> nMargin;
+    m_margins[1]=nMargin;
+  }
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
 }
 
 namespace StarParagraphAttribute
 {
-void addInitTo(std::map<int, shared_ptr<StarAttribute> > &/*map*/)
+void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
 {
+  // TODO
+  addAttributeBool(map,StarAttribute::ATTR_PARA_SPLIT,"para[split]",true);
+  addAttributeUInt(map,StarAttribute::ATTR_PARA_WIDOWS,"para[widows]",1,0); // numlines
+  addAttributeUInt(map,StarAttribute::ATTR_PARA_ORPHANS,"para[orphans]",1,0); // numlines
+  addAttributeBool(map,StarAttribute::ATTR_PARA_REGISTER,"para[register]",false);
+  addAttributeBool(map,StarAttribute::ATTR_PARA_SCRIPTSPACE,"para[scriptSpace]",false);
+  addAttributeBool(map,StarAttribute::ATTR_PARA_HANGINGPUNCTUATION,"para[hangingPunctuation]",true);
+  addAttributeBool(map,StarAttribute::ATTR_PARA_FORBIDDEN_RULES,"para[forbiddenRules]",true);
+  addAttributeUInt(map,StarAttribute::ATTR_PARA_VERTALIGN,"para[vert,align]",2,0);
+  addAttributeBool(map,StarAttribute::ATTR_PARA_SNAPTOGRID,"para[snapToGrid]",true);
+  addAttributeBool(map,StarAttribute::ATTR_PARA_CONNECT_BORDER,"para[connectBorder]",true);
+  std::stringstream s;
+  for (int type=StarAttribute::ATTR_PARA_DUMMY5; type<=StarAttribute::ATTR_PARA_DUMMY8; ++type) {
+    s.str("");
+    s << "paraDummy" << type-StarAttribute::ATTR_PARA_DUMMY5+5;
+    addAttributeBool(map,StarAttribute::Type(type), s.str(), false);
+  }
+  map[StarAttribute::ATTR_PARA_ADJUST]=shared_ptr<StarAttribute>(new StarPAttributeAdjust(StarAttribute::ATTR_PARA_ADJUST,"parAtrAdjust"));
+  map[StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE]=shared_ptr<StarAttribute>(new StarPAttributeLRSpace(StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE,"eeOutLrSpace"));
+  map[StarAttribute::ATTR_FRM_LR_SPACE]=shared_ptr<StarAttribute>(new StarPAttributeLRSpace(StarAttribute::ATTR_FRM_LR_SPACE,"lrSpace"));
 }
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

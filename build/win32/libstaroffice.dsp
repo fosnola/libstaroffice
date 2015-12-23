@@ -283,6 +283,10 @@ SOURCE=..\..\src\lib\StarObjectText.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarPageAttribute.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarParagraphAttribute.cxx
 # End Source File
 # Begin Source File
@@ -512,6 +516,10 @@ SOURCE=..\..\src\lib\StarObjectSpreadsheet.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarObjectText.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarPageAttribute.hxx
 # End Source File
 # Begin Source File
 
