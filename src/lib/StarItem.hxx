@@ -98,5 +98,31 @@ public:
   std::map<int, shared_ptr<StarItem> > m_whichToItemMap;
 };
 
+//! brief class used to stored the style
+class StarItemStyle
+{
+public:
+  //! the different family style
+  enum FamilyStyle {
+    F_Char=1, F_Paragraph=2, F_Frame=4, F_PAGE=8, F_PSEUDO=0x10, F_ALL=0xFE
+  };
+  //! constructor
+  StarItemStyle() : m_family(0), m_mask(0), m_itemSet(), m_helpId(0)
+  {
+  }
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, StarItemStyle const &style);
+  //! the name, the parent name, the follow name, the help names
+  librevenge::RVNGString m_names[4];
+  //! the family
+  int m_family;
+  //! the mask
+  int m_mask;
+  //! the item list
+  StarItemSet m_itemSet;
+  //! the help id
+  unsigned m_helpId;
+};
+
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

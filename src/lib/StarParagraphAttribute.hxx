@@ -31,43 +31,25 @@
 * instead of those above.
 */
 
-#include <map>
+/*
+ * file to read/parse StarOffice paragraph attributes
+ *
+ */
+#ifndef STAR_PARAGRAPH_ATTRIBUTE
+#  define STAR_PARAGRAPH_ATTRIBUTE
 
-#include <librevenge/librevenge.h>
+#include <map>
 
 #include "libstaroffice_internal.hxx"
 
-#include "STOFFParagraph.hxx"
+class StarAttribute;
 
-////////////////////////////////////////////////////////////
-// paragraph
-////////////////////////////////////////////////////////////
-bool STOFFParagraph::operator==(STOFFParagraph const &pp) const
+//! namespace used to contain paragraph attributes
+namespace StarParagraphAttribute
 {
-  return m_propertyList.getPropString() == pp.m_propertyList.getPropString() &&
-         m_listLevelIndex==pp.m_listLevelIndex && m_listId==pp.m_listId && m_listStartValue==pp.m_listStartValue &&
-         m_listLevel==pp.m_listLevel;
+//! adds character attribute to the general it to attribute map
+void addInitTo(std::map<int, shared_ptr<StarAttribute> > &whichToAttributeMap);
 }
 
-void STOFFParagraph::addTo(librevenge::RVNGPropertyList &pList) const
-{
-  librevenge::RVNGPropertyList::Iter i(m_propertyList);
-  for (i.rewind(); i.next();) {
-    if (i.child()) {
-      STOFF_DEBUG_MSG(("STOFFParagraph::addTo: find unexpected property child\n"));
-      pList.insert(i.key(), *i.child());
-      continue;
-    }
-    pList.insert(i.key(), i()->clone());
-  }
-}
-std::ostream &operator<<(std::ostream &o, STOFFParagraph const &pp)
-{
-  o << pp.m_propertyList.getPropString().cstr() << ",";
-  if (pp.m_listId >= 0) o << "listId=" << pp.m_listId << ",";
-  if (pp.m_listLevelIndex >= 1)
-    o << pp.m_listLevel << ":" << pp.m_listLevelIndex <<",";
-  return o;
-}
-
+#endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

@@ -326,78 +326,6 @@ struct StyleId {
   int m_family;
 };
 
-//! small class used to stored the style
-struct Style {
-  //! constructor
-  Style() : m_family(0), m_mask(0), m_itemSet(), m_helpId(0)
-  {
-  }
-  //! operator<<
-  friend std::ostream &operator<<(std::ostream &o, Style const &style)
-  {
-    for (int i=0; i<4; ++i) {
-      static char const *(wh[])= {"name","parent","follow","help"};
-      if (!style.m_names[i].empty())
-        o << wh[i] << "=" << style.m_names[i].cstr() << ",";
-    }
-    switch (style.m_family&0xff) {
-    case 0:
-      break;
-    case 1:
-      o << "char[family],";
-      break;
-    case 2:
-      o << "para[family],";
-      break;
-    case 4:
-      o << "frame[family],";
-      break;
-    case 8:
-      o << "page[family],";
-      break;
-    case 0x10:
-      o << "pseudo[family],";
-      break;
-    case 0xFE:
-      o << "*[family],";
-      break;
-    default:
-      STOFF_DEBUG_MSG(("StarItemPoolInternal::Style::operator<< unexpected family\n"));
-      o << "###family=" << std::hex << (style.m_family&0xff) << std::dec << ",";
-      break;
-    }
-    if (style.m_family&0xFF00) // find 0xaf
-      o << "#family[high]=" << std::hex << (style.m_family>>8) << std::dec << ",";
-    if (style.m_mask) o << "mask=" << std::hex << style.m_mask << std::dec << ",";
-    if (style.m_helpId) o << "help[id]=" << style.m_helpId << ",";
-#if 0
-    o << "Attrib=[";
-    for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style.m_itemSet.m_whichToItemMap.begin();
-         it!=style.m_itemSet.m_whichToItemMap.end(); ++it) {
-      if (!it->second || !it->second->m_attribute) {
-        o << "_,";
-        continue;
-      }
-      libstoff::DebugStream f2;
-      it->second->m_attribute->print(f2);
-      o << f2.str() << ",";
-    }
-    o << "],";
-#endif
-    return o;
-  }
-  //! the name, the parent name, the follow name, the help names
-  librevenge::RVNGString m_names[4];
-  //! the family
-  int m_family;
-  //! the mask
-  int m_mask;
-  //! the item list
-  StarItemSet m_itemSet;
-  //! the help id
-  unsigned m_helpId;
-};
-
 ////////////////////////////////////////
 //! Internal: the state of a StarItemPool
 struct State {
@@ -572,7 +500,7 @@ struct State {
   //! a map slot to the attribute list
   std::map<int, Values> m_slotIdToValuesMap;
   //! the set of style
-  std::map<StyleId,Style> m_styleIdToStyleMap;
+  std::map<StyleId,StarItemStyle> m_styleIdToStyleMap;
   //! map simplify style name to style name
   std::map<librevenge::RVNGString, librevenge::RVNGString> m_simplifyNameToStyleNameMap;
   //! list of item which need to be read
@@ -1922,7 +1850,7 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
     f << "SfxStylePool[data" << i << "]:";
     bool readOk=true;
     std::vector<uint32_t> text;
-    StarItemPoolInternal::Style style;
+    StarItemStyle style;
     for (int j=0; j<3; ++j) {
       if (!zone.readString(text, charSet) || input->tell()>=lastPos) {
         STOFF_DEBUG_MSG(("StarItemPool::readStyles: can not find a string\n"));
@@ -2008,7 +1936,7 @@ void StarItemPool::updateStyles()
 {
   std::set<StarItemPoolInternal::StyleId> done, toDo;
   std::multimap<StarItemPoolInternal::StyleId, StarItemPoolInternal::StyleId> childMap;
-  std::map<StarItemPoolInternal::StyleId,StarItemPoolInternal::Style>::iterator it;
+  std::map<StarItemPoolInternal::StyleId,StarItemStyle>::iterator it;
   std::multimap<StarItemPoolInternal::StyleId, StarItemPoolInternal::StyleId>::iterator cIt;
   std::map<int, shared_ptr<StarItem> >::const_iterator iIt;
   for (it=m_state->m_styleIdToStyleMap.begin(); it!=m_state->m_styleIdToStyleMap.end(); ++it) {
@@ -2081,7 +2009,7 @@ void StarItemPool::updateUsingStyles(StarItemSet &itemSet) const
   if (itemSet.m_style.empty())
     return;
   StarItemPoolInternal::StyleId styleId(itemSet.m_style, itemSet.m_family);
-  std::map<StarItemPoolInternal::StyleId,StarItemPoolInternal::Style>::iterator it=m_state->m_styleIdToStyleMap.find(styleId);
+  std::map<StarItemPoolInternal::StyleId,StarItemStyle>::iterator it=m_state->m_styleIdToStyleMap.find(styleId);
   if (it==m_state->m_styleIdToStyleMap.end()) {
     // hack: try to retrieve the original style, ...
     librevenge::RVNGString simpName=m_state->getBasicString(itemSet.m_style);

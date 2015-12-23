@@ -383,7 +383,7 @@ public:
   //! debug function to print the data
   virtual void print(libstoff::DebugStream &o) const
   {
-    o << m_debugName << ",";
+    o << m_debugName << "=*,";
   }
 
 protected:
@@ -402,7 +402,7 @@ class StarCAttributePattern : public StarAttributeItemSet
 public:
   //! constructor
   StarCAttributePattern() :
-    StarAttributeItemSet(StarAttribute::ATTR_SC_PATTERN, "ScPattern", std::vector<STOFFVec2i>())
+    StarAttributeItemSet(StarAttribute::ATTR_SC_PATTERN, "ScPattern", std::vector<STOFFVec2i>()), m_style("")
   {
     m_limits.push_back(STOFFVec2i(100,148));
   }

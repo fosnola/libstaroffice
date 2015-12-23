@@ -172,15 +172,15 @@ void STOFFHeaderFooter::send(STOFFListener *listener) const
 void STOFFHeaderFooter::insertPageNumberParagraph(STOFFListener *listener) const
 {
   STOFFParagraph para;
-  para.m_justify = STOFFParagraph::JustificationCenter;
+  para.m_propertyList.insert("fo:text-align", "center");
   switch (m_pageNumberPosition) {
   case TopLeft:
   case BottomLeft:
-    para.m_justify = STOFFParagraph::JustificationLeft;
+    para.m_propertyList.insert("fo:text-align", "left");
     break;
   case TopRight:
   case BottomRight:
-    para.m_justify = STOFFParagraph::JustificationRight;
+    para.m_propertyList.insert("fo:text-align", "right");
     break;
   case TopCenter:
   case BottomCenter:

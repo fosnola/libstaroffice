@@ -393,8 +393,8 @@ bool StarCellFormula::readSCToken(StarZone &zone, STOFFCell const &/*cell*/, STO
     break;
   }
   instr.m_extra=f.str();
-  if (!ignoreInstr)
-    content.m_formula.push_back(instr);
+  if (ignoreInstr) instr.m_type=STOFFCellContent::FormulaInstruction::F_None;
+  content.m_formula.push_back(instr);
   return ok && input->tell()<=lastPos;
 }
 
@@ -485,6 +485,7 @@ bool StarCellFormula::readSCToken3(StarZone &zone, STOFFCell const &/*cell*/, ST
     break;
   }
   case 2: // stop
+    instr.m_type=STOFFCellContent::FormulaInstruction::F_None;
     endData=true;
     break;
   case 3: { // external
@@ -556,10 +557,8 @@ bool StarCellFormula::readSCToken3(StarZone &zone, STOFFCell const &/*cell*/, ST
     }
     break;
   }
-  if (!endData) {
-    instr.m_extra=f.str();
-    content.m_formula.push_back(instr);
-  }
+  instr.m_extra=f.str();
+  content.m_formula.push_back(instr);
   return ok && input->tell()<=lastPos;
 }
 

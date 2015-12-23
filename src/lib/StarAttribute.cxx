@@ -48,6 +48,7 @@
 #include "StarCellAttribute.hxx"
 #include "StarCharAttribute.hxx"
 #include "StarGraphicAttribute.hxx"
+#include "StarParagraphAttribute.hxx"
 #include "StarItemPool.hxx"
 #include "StarObject.hxx"
 #include "StarObjectSmallText.hxx"
@@ -135,6 +136,7 @@ void State::initAttributeMap()
   StarCellAttribute::addInitTo(m_whichToAttributeMap);
   StarCharAttribute::addInitTo(m_whichToAttributeMap);
   StarGraphicAttribute::addInitTo(m_whichToAttributeMap);
+  StarParagraphAttribute::addInitTo(m_whichToAttributeMap);
 
   std::stringstream s;
 
@@ -643,6 +645,23 @@ void StarAttributeItemSet::addTo(STOFFGraphicStyle &graphic, StarItemPool const 
        it!=set.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
       it->second->m_attribute->addTo(graphic, pool);
+  }
+}
+
+void StarAttributeItemSet::addTo(STOFFParagraph &para, StarItemPool const *pool) const
+{
+  StarItemSet finalSet;
+  bool newSet=false;
+  if (pool && !m_itemSet.m_style.empty()) {
+    finalSet=m_itemSet;
+    pool->updateUsingStyles(finalSet);
+    newSet=true;
+  }
+  StarItemSet const &set=newSet ? finalSet : m_itemSet;
+  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
+       it!=set.m_whichToItemMap.end(); ++it) {
+    if (it->second && it->second->m_attribute)
+      it->second->m_attribute->addTo(para, pool);
   }
 }
 

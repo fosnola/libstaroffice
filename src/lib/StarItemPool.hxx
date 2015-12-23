@@ -50,6 +50,7 @@
 class StarAttribute;
 class StarItem;
 class StarItemSet;
+class StarItemStyle;
 
 namespace StarItemPoolInternal
 {
@@ -99,7 +100,8 @@ public:
   void updateStyles();
   /** update a itemset by adding attribute corresponding to its styles*/
   void updateUsingStyles(StarItemSet &itemSet) const;
-
+  /** try to find a style with given family style */
+  StarItemStyle const *findStyleWithFamily(int family, bool last=true) const;
   //! try to read an attribute
   shared_ptr<StarAttribute> readAttribute(StarZone &zone, int which, int vers, long endPos);
   //! read a item

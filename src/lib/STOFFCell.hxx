@@ -228,9 +228,9 @@ class STOFFCellContent
 public:
   //! small class use to define a formula instruction
   struct FormulaInstruction {
-    enum Type { F_Operator, F_Function, F_Cell, F_CellList, F_Index, F_Long, F_Double, F_Text };
+    enum Type { F_None, F_Operator, F_Function, F_Cell, F_CellList, F_Index, F_Long, F_Double, F_Text };
     //! constructor
-    FormulaInstruction() : m_type(F_Text), m_content(""), m_longValue(0), m_doubleValue(0), m_sheet(""),
+    FormulaInstruction() : m_type(F_None), m_content(""), m_longValue(0), m_doubleValue(0), m_sheet(""),
       m_sheetId(-1), m_sheetIdRelative(false), m_extra("")
     {
       for (int i=0; i<2; ++i) {

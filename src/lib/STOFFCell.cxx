@@ -424,6 +424,8 @@ librevenge::RVNGPropertyList STOFFCellContent::FormulaInstruction::getPropertyLi
 {
   librevenge::RVNGPropertyList pList;
   switch (m_type) {
+  case F_None:
+    break;
   case F_Operator:
     pList.insert("librevenge:type","librevenge-operator");
     pList.insert("librevenge:operator",m_content);
@@ -527,7 +529,7 @@ std::ostream &operator<<(std::ostream &o, STOFFCellContent::FormulaInstruction c
   }
   else if (inst.m_type==STOFFCellContent::FormulaInstruction::F_Text)
     o << "\"" << inst.m_content.cstr() << "\"";
-  else
+  else if (inst.m_type!=STOFFCellContent::FormulaInstruction::F_None)
     o << inst.m_content.cstr();
   if (!inst.m_extra.empty())
     o << "[" << inst.m_extra << "]";

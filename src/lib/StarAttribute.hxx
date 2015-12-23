@@ -59,6 +59,7 @@ class StarZone;
 class STOFFCellStyle;
 class STOFFFont;
 class STOFFGraphicStyle;
+class STOFFParagraph;
 
 //! virtual class used to store the different attribute
 class StarAttribute
@@ -758,6 +759,10 @@ public:
   virtual void addTo(STOFFGraphicStyle &/*graphic*/, StarItemPool const */*pool*/) const
   {
   }
+  //! add to a paragraph
+  virtual void addTo(STOFFParagraph &/*para*/, StarItemPool const */*pool*/) const
+  {
+  }
   //! returns the debug name
   std::string const &getDebugName() const
   {
@@ -1018,6 +1023,8 @@ public:
   virtual void addTo(STOFFFont &font, StarItemPool const *pool) const;
   //! add to a graphic style
   virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const *pool) const;
+  //! add all child to a paragraph
+  virtual void addTo(STOFFParagraph &para, StarItemPool const *pool) const;
 
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);

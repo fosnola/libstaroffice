@@ -49,4 +49,58 @@ bool StarItemSet::add(shared_ptr<StarItem> item)
   return true;
 }
 
+std::ostream &operator<<(std::ostream &o, StarItemStyle const &style)
+{
+  for (int i=0; i<4; ++i) {
+    static char const *(wh[])= {"name","parent","follow","help"};
+    if (!style.m_names[i].empty())
+      o << wh[i] << "=" << style.m_names[i].cstr() << ",";
+  }
+  switch (style.m_family&0xff) {
+  case 0:
+    break;
+  case 1:
+    o << "char[family],";
+    break;
+  case 2:
+    o << "para[family],";
+    break;
+  case 4:
+    o << "frame[family],";
+    break;
+  case 8:
+    o << "page[family],";
+    break;
+  case 0x10:
+    o << "pseudo[family],";
+    break;
+  case 0xFE:
+    o << "*[family],";
+    break;
+  default:
+    STOFF_DEBUG_MSG(("StarItemPoolInternal::StarItemStyle::operator<< unexpected family\n"));
+    o << "###family=" << std::hex << (style.m_family&0xff) << std::dec << ",";
+    break;
+  }
+  if (style.m_family&0xFF00) // find 0xaf
+    o << "#family[high]=" << std::hex << (style.m_family>>8) << std::dec << ",";
+  if (style.m_mask) o << "mask=" << std::hex << style.m_mask << std::dec << ",";
+  if (style.m_helpId) o << "help[id]=" << style.m_helpId << ",";
+#if 1
+  o << "Attrib=[";
+  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style.m_itemSet.m_whichToItemMap.begin();
+       it!=style.m_itemSet.m_whichToItemMap.end(); ++it) {
+    if (!it->second || !it->second->m_attribute) {
+      o << "_,";
+      continue;
+    }
+    libstoff::DebugStream f2;
+    it->second->m_attribute->print(f2);
+    o << f2.str() << ",";
+  }
+  o << "],";
+#endif
+  return o;
+}
+
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

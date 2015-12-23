@@ -653,7 +653,7 @@ void STOFFSpreadsheetListener::_openParagraph()
   }
 
   librevenge::RVNGPropertyList propList;
-  m_ps->m_paragraph.addTo(propList, false);
+  m_ps->m_paragraph.addTo(propList);
   if (!m_ps->m_isParagraphOpened)
     m_documentInterface->openParagraph(propList);
 
@@ -701,9 +701,9 @@ void STOFFSpreadsheetListener::_openListElement()
     return;
 
   librevenge::RVNGPropertyList propList;
-  m_ps->m_paragraph.addTo(propList, false);
+  m_ps->m_paragraph.addTo(propList);
   // check if we must change the start value
-  int startValue=m_ps->m_paragraph.m_listStartValue.get();
+  int startValue=m_ps->m_paragraph.m_listStartValue;
   if (startValue > 0 && m_ps->m_list && m_ps->m_list->getStartValueForNextElement() != startValue) {
     propList.insert("text:start-value", startValue);
     m_ps->m_list->setStartValueForNextElement(startValue);
@@ -729,9 +729,9 @@ void STOFFSpreadsheetListener::_closeListElement()
 
 int STOFFSpreadsheetListener::_getListId() const
 {
-  size_t newLevel= (size_t) m_ps->m_paragraph.m_listLevelIndex.get();
+  size_t newLevel= (size_t) m_ps->m_paragraph.m_listLevelIndex;
   if (newLevel == 0) return -1;
-  int newListId = m_ps->m_paragraph.m_listId.get();
+  int newListId = m_ps->m_paragraph.m_listId;
   if (newListId > 0) return newListId;
   static bool first = true;
   if (first) {
@@ -739,7 +739,7 @@ int STOFFSpreadsheetListener::_getListId() const
     first = false;
   }
   shared_ptr<STOFFList> list=m_parserState.m_listManager->getNewList
-                             (m_ps->m_list, int(newLevel), *m_ps->m_paragraph.m_listLevel);
+                             (m_ps->m_list, int(newLevel), m_ps->m_paragraph.m_listLevel);
   if (!list) return -1;
   return list->getId();
 }
@@ -753,7 +753,7 @@ void STOFFSpreadsheetListener::_changeList()
     _closeParagraph();
 
   size_t actualLevel = m_ps->m_listOrderedLevels.size();
-  size_t newLevel= (size_t) m_ps->m_paragraph.m_listLevelIndex.get();
+  size_t newLevel= (size_t) m_ps->m_paragraph.m_listLevelIndex;
   int newListId = newLevel>0 ? _getListId() : -1;
   bool changeList = newLevel &&
                     (m_ps->m_list && m_ps->m_list->getId()!=newListId);
@@ -805,7 +805,7 @@ void STOFFSpreadsheetListener::_openSpan()
 
   if (!m_ps->m_isParagraphOpened && !m_ps->m_isListElementOpened) {
     _changeList();
-    if (*m_ps->m_paragraph.m_listLevelIndex == 0)
+    if (m_ps->m_paragraph.m_listLevelIndex == 0)
       _openParagraph();
     else
       _openListElement();
@@ -893,7 +893,7 @@ void STOFFSpreadsheetListener::insertNote(STOFFNote const &note, STOFFSubDocumen
     */
     if (m_ps->m_isParagraphOpened)
       _closeParagraph();
-    int prevListLevel = *m_ps->m_paragraph.m_listLevelIndex;
+    int prevListLevel = m_ps->m_paragraph.m_listLevelIndex;
     m_ps->m_paragraph.m_listLevelIndex = 0;
     _changeList(); // flush the list exterior
     handleSubDocument(subDocument, libstoff::DOC_NOTE);
@@ -1102,7 +1102,7 @@ void STOFFSpreadsheetListener::_handleFrameParameters
     propList.insert("text:anchor-type", what.c_str());
     propList.insert("style:vertical-rel", what.c_str());
     propList.insert("style:horizontal-rel", what.c_str());
-    double w = m_ds->m_pageSpan.getPageWidth() - m_ps->m_paragraph.getMarginsWidth();
+    double w = m_ds->m_pageSpan.getPageWidth(); // to do m_ps->m_paragraph.getMarginsWidth();
     w *= inchFactor;
     switch (pos.m_xPos) {
     case STOFFPosition::XRight:
@@ -1477,8 +1477,10 @@ void STOFFSpreadsheetListener::openSheetCell(STOFFCell const &cell, STOFFCellCon
   // formula
   if (content.m_formula.size()) {
     librevenge::RVNGPropertyListVector formulaVect;
-    for (size_t i=0; i < content.m_formula.size(); ++i)
-      formulaVect.append(content.m_formula[i].getPropertyList());
+    for (size_t i=0; i < content.m_formula.size(); ++i) {
+      if (content.m_formula[i].m_type!=STOFFCellContent::FormulaInstruction::F_None)
+        formulaVect.append(content.m_formula[i].getPropertyList());
+    }
     propList.insert("librevenge:formula", formulaVect);
   }
   bool hasFormula=!content.m_formula.empty();
@@ -1622,7 +1624,8 @@ void STOFFSpreadsheetListener::openTable(STOFFTable const &table)
   // default value: which can be redefined by table
   librevenge::RVNGPropertyList propList;
   propList.insert("table:align", "left");
-  propList.insert("fo:margin-left", *m_ps->m_paragraph.m_margins[1], *m_ps->m_paragraph.m_marginsUnit);
+  if (m_ps->m_paragraph.m_propertyList["fo:margin-left"])
+    propList.insert("fo:margin-left", m_ps->m_paragraph.m_propertyList["fo:margin-left"]->clone());
 
   _pushParsingState();
   _startSubDocument();

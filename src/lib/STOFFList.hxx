@@ -67,6 +67,16 @@ struct STOFFListLevel {
   {
     return m_type !=DEFAULT && m_type !=NONE && m_type != BULLET;
   }
+  //! operator==
+  bool operator==(STOFFListLevel const &levl) const
+  {
+    return cmp(levl)==0;
+  }
+  //! operator!=
+  bool operator!=(STOFFListLevel const &levl) const
+  {
+    return !operator==(levl);
+  }
   /** add the information of this level in the propList */
   void addTo(librevenge::RVNGPropertyList &propList) const;
 
