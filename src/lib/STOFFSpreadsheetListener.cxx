@@ -38,6 +38,8 @@
  * the librevenge::RVNGSpreadsheetInterface
  */
 
+#define SENDHFREGION 1
+
 #include <cmath>
 #include <cstring>
 #include <iomanip>
@@ -116,7 +118,7 @@ struct State {
   //! returns true if we are in a text zone
   bool canWriteText() const
   {
-    if (m_isSheetCellOpened || m_isHeaderFooterOpened) return true;
+    if (m_isSheetCellOpened || m_isHeaderFooterRegionOpened) return true;
     return m_isTextboxOpened || m_isTableCellOpened || m_isNote;
   }
 
@@ -134,6 +136,7 @@ struct State {
 
   bool m_isPageSpanOpened;
   bool m_isHeaderFooterOpened /** a flag to know if the header footer is started */;
+  bool m_isHeaderFooterRegionOpened /** a flag to know if the header footer region is started */;
   bool m_isFrameOpened;
   bool m_isTextboxOpened;
 
@@ -142,8 +145,6 @@ struct State {
   bool m_isSpanOpened;
   bool m_isParagraphOpened;
   bool m_isListElementOpened;
-
-  bool m_firstParagraphInPageSpan;
 
   bool m_isSheetColumnOpened;
   bool m_isSheetCellOpened;
@@ -179,13 +180,11 @@ State::State() :
 
   m_list(),
 
-  m_isPageSpanOpened(false), m_isHeaderFooterOpened(false),
+  m_isPageSpanOpened(false), m_isHeaderFooterOpened(false), m_isHeaderFooterRegionOpened(false),
   m_isFrameOpened(false), m_isTextboxOpened(false),
   m_isHeaderFooterWithoutParagraph(false),
 
   m_isSpanOpened(false), m_isParagraphOpened(false), m_isListElementOpened(false),
-
-  m_firstParagraphInPageSpan(true),
 
   m_isSheetColumnOpened(false),
   m_isSheetCellOpened(false),
@@ -209,18 +208,6 @@ STOFFSpreadsheetListener::STOFFSpreadsheetListener(STOFFParserState &parserState
   m_parserState(parserState), m_documentInterface(documentInterface)
 {
 }
-
-STOFFSpreadsheetListener::STOFFSpreadsheetListener(STOFFParserState &parserState, STOFFBox2f const &box, librevenge::RVNGSpreadsheetInterface *documentInterface) : STOFFListener(),
-  m_ds(), m_ps(new STOFFSpreadsheetListenerInternal::State), m_psStack(), m_parserState(parserState), m_documentInterface(documentInterface)
-{
-  STOFFPageSpan pageSpan;
-  pageSpan.setMargins(0);
-  pageSpan.setPageSpan(1);
-  pageSpan.setFormWidth(box.size().x()/72.);
-  pageSpan.setFormLength(box.size().y()/72.);
-  m_ds.reset(new STOFFSpreadsheetListenerInternal::DocumentState(std::vector<STOFFPageSpan>(1, pageSpan)));
-}
-
 
 STOFFSpreadsheetListener::~STOFFSpreadsheetListener()
 {
@@ -560,7 +547,7 @@ void STOFFSpreadsheetListener::_openPageSpan(bool sendHeaderFooters)
   std::vector<STOFFPageSpan>::iterator it = m_ds->m_pageList.begin();
   ++m_ps->m_currentPage;
   while (true) {
-    actPage+=(unsigned)it->getPageSpan();
+    actPage+=(unsigned)it->m_pageSpan;
     if (actPage >= m_ps->m_currentPage)
       break;
     if (++it == m_ds->m_pageList.end()) {
@@ -585,9 +572,7 @@ void STOFFSpreadsheetListener::_openPageSpan(bool sendHeaderFooters)
   if (sendHeaderFooters)
     currentPage.sendHeaderFooters(this);
 
-  // first paragraph in span (necessary for resetting page number)
-  m_ps->m_firstParagraphInPageSpan = true;
-  m_ps->m_numPagesRemainingInSpan = (currentPage.getPageSpan() - 1);
+  m_ps->m_numPagesRemainingInSpan = (currentPage.m_pageSpan - 1);
 }
 
 void STOFFSpreadsheetListener::_closePageSpan()
@@ -607,28 +592,84 @@ bool STOFFSpreadsheetListener::isHeaderFooterOpened() const
   return m_ps->m_isHeaderFooterOpened;
 }
 
-bool STOFFSpreadsheetListener::insertHeader(STOFFSubDocumentPtr subDocument, librevenge::RVNGPropertyList const &extras)
+bool STOFFSpreadsheetListener::openHeader(librevenge::RVNGPropertyList const &extras)
 {
   if (m_ps->m_isHeaderFooterOpened) {
-    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertHeader: Oops a header/footer is already opened\n"));
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openHeader: Oops a header/footer is already opened\n"));
     return false;
   }
-  librevenge::RVNGPropertyList propList(extras);
+  _pushParsingState();
+  m_ps->m_isHeaderFooterOpened=true;
+  m_documentInterface->openHeader(extras);
+  return true;
+}
+
+bool STOFFSpreadsheetListener::insertHeaderRegion(STOFFSubDocumentPtr subDocument, librevenge::RVNGString const &which)
+{
+  if (!m_ps->m_isHeaderFooterOpened || m_ps->m_isHeaderFooterRegionOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertHeaderRegion: Oops can not open a new region\n"));
+    return false;
+  }
+  librevenge::RVNGPropertyList propList;
+  propList.insert("librevenge::region", which);
+#ifdef SENDHFREGION
   m_documentInterface->openHeader(propList);
-  handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER);
+  handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER_REGION);
+  m_documentInterface->closeHeader();
+#else
+  handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER_REGION);
+#endif
+  return true;
+}
+
+bool STOFFSpreadsheetListener::closeHeader()
+{
+  if (!m_ps->m_isHeaderFooterOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::closeHeader: Oops no opened header/footer\n"));
+    return false;
+  }
+  _popParsingState();
   m_documentInterface->closeHeader();
   return true;
 }
 
-bool STOFFSpreadsheetListener::insertFooter(STOFFSubDocumentPtr subDocument, librevenge::RVNGPropertyList const &extras)
+bool STOFFSpreadsheetListener::openFooter(librevenge::RVNGPropertyList const &extras)
 {
   if (m_ps->m_isHeaderFooterOpened) {
-    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertFooter: Oops a header/footer is already opened\n"));
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFooter: Oops a header/footer is already opened\n"));
     return false;
   }
-  librevenge::RVNGPropertyList propList(extras);
+  _pushParsingState();
+  m_ps->m_isHeaderFooterOpened=true;
+  m_documentInterface->openFooter(extras);
+  return true;
+}
+
+bool STOFFSpreadsheetListener::insertFooterRegion(STOFFSubDocumentPtr subDocument, librevenge::RVNGString const &which)
+{
+  if (!m_ps->m_isHeaderFooterOpened || m_ps->m_isHeaderFooterRegionOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertFooterRegion: Oops can not open a new region\n"));
+    return false;
+  }
+  librevenge::RVNGPropertyList propList;
+  propList.insert("librevenge::region", which);
+#ifdef SENDHFREGION
   m_documentInterface->openFooter(propList);
-  handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER);
+  handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER_REGION);
+  m_documentInterface->closeFooter();
+#else
+  handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER_REGION);
+#endif
+  return true;
+}
+
+bool STOFFSpreadsheetListener::closeFooter()
+{
+  if (!m_ps->m_isHeaderFooterOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::closeFooter: Oops no opened header/footer\n"));
+    return false;
+  }
+  _popParsingState();
   m_documentInterface->closeFooter();
   return true;
 }
@@ -674,7 +715,6 @@ void STOFFSpreadsheetListener::_openParagraph()
     m_documentInterface->openParagraph(propList);
 
   _resetParagraphState();
-  m_ps->m_firstParagraphInPageSpan = false;
 }
 
 void STOFFSpreadsheetListener::_closeParagraph()
@@ -1025,7 +1065,7 @@ bool STOFFSpreadsheetListener::openFrame(STOFFPosition const &pos)
       STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame: can not determine the frame\n"));
       return false;
     }
-    if (m_ps->m_subDocumentType==libstoff::DOC_HEADER_FOOTER) {
+    if (m_ps->m_subDocumentType==libstoff::DOC_HEADER_FOOTER_REGION) {
       STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame: called with Frame position in header footer, switch to paragraph\n"));
       if (m_ps->m_isParagraphOpened)
         _flushText();
@@ -1061,225 +1101,9 @@ void STOFFSpreadsheetListener::closeFrame()
 }
 
 void STOFFSpreadsheetListener::_handleFrameParameters
-(librevenge::RVNGPropertyList &propList, STOFFPosition const &pos)
+(librevenge::RVNGPropertyList &/*propList*/, STOFFPosition const &/*pos*/)
 {
-  STOFFVec2f origin = pos.origin();
-  librevenge::RVNGUnit unit = pos.unit();
-  float inchFactor=pos.getInvUnitScale(librevenge::RVNG_INCH);
-  float pointFactor = pos.getInvUnitScale(librevenge::RVNG_POINT);
-
-  if (pos.size()[0]>0)
-    propList.insert("svg:width", double(pos.size()[0]), unit);
-  else if (pos.size()[0]<0)
-    propList.insert("fo:min-width", double(-pos.size()[0]), unit);
-  if (pos.size()[1]>0)
-    propList.insert("svg:height", double(pos.size()[1]), unit);
-  else if (pos.size()[1]<0)
-    propList.insert("fo:min-height", double(-pos.size()[1]), unit);
-  if (pos.order() > 0)
-    propList.insert("draw:z-index", pos.order());
-  if (pos.naturalSize().x() > 4*pointFactor && pos.naturalSize().y() > 4*pointFactor) {
-    propList.insert("librevenge:naturalWidth", pos.naturalSize().x(), pos.unit());
-    propList.insert("librevenge:naturalHeight", pos.naturalSize().y(), pos.unit());
-  }
-  STOFFVec2f TLClip = (1.f/pointFactor)*pos.leftTopClipping();
-  STOFFVec2f RBClip = (1.f/pointFactor)*pos.rightBottomClipping();
-  if (TLClip[0] > 0 || TLClip[1] > 0 || RBClip[0] > 0 || RBClip[1] > 0) {
-    // in ODF1.2 we need to separate the value with ,
-    std::stringstream s;
-    s << "rect(" << TLClip[1] << "pt " << RBClip[0] << "pt "
-      <<  RBClip[1] << "pt " << TLClip[0] << "pt)";
-    propList.insert("fo:clip", s.str().c_str());
-  }
-
-  if (pos.m_wrapping ==  STOFFPosition::WDynamic)
-    propList.insert("style:wrap", "dynamic");
-  else if (pos.m_wrapping ==  STOFFPosition::WBackground) {
-    propList.insert("style:wrap", "run-through");
-    propList.insert("style:run-through", "background");
-  }
-  else if (pos.m_wrapping ==  STOFFPosition::WForeground) {
-    propList.insert("style:wrap", "run-through");
-    propList.insert("style:run-through", "foreground");
-  }
-  else if (pos.m_wrapping ==  STOFFPosition::WParallel) {
-    propList.insert("style:wrap", "parallel");
-    propList.insert("style:run-through", "foreground");
-  }
-  else if (pos.m_wrapping ==  STOFFPosition::WRunThrough)
-    propList.insert("style:wrap", "run-through");
-  else
-    propList.insert("style:wrap", "none");
-
-  if (pos.m_anchorTo == STOFFPosition::Paragraph ||
-      pos.m_anchorTo == STOFFPosition::Frame) {
-    std::string what= pos.m_anchorTo == STOFFPosition::Paragraph ?
-                      "paragraph" : "frame";
-    propList.insert("text:anchor-type", what.c_str());
-    propList.insert("style:vertical-rel", what.c_str());
-    propList.insert("style:horizontal-rel", what.c_str());
-    double w = m_ds->m_pageSpan.getPageWidth(); // to do m_ps->m_paragraph.getMarginsWidth();
-    w *= inchFactor;
-    switch (pos.m_xPos) {
-    case STOFFPosition::XRight:
-      if (origin[0] < 0.0 || origin[0] > 0.0) {
-        propList.insert("style:horizontal-pos", "from-left");
-        propList.insert("svg:x", double(origin[0] - pos.size()[0] + w), unit);
-      }
-      else
-        propList.insert("style:horizontal-pos", "right");
-      break;
-    case STOFFPosition::XCenter:
-      if (origin[0] < 0.0 || origin[0] > 0.0) {
-        propList.insert("style:horizontal-pos", "from-left");
-        propList.insert("svg:x", double(origin[0] - pos.size()[0]/2.0 + w/2.0), unit);
-      }
-      else
-        propList.insert("style:horizontal-pos", "center");
-      break;
-    case STOFFPosition::XLeft:
-    case STOFFPosition::XFull:
-    default:
-      if (origin[0] < 0.0 || origin[0] > 0.0) {
-        propList.insert("style:horizontal-pos", "from-left");
-        propList.insert("svg:x", double(origin[0]), unit);
-      }
-      else
-        propList.insert("style:horizontal-pos", "left");
-      break;
-    }
-
-    if (origin[1] < 0.0 || origin[1] > 0.0) {
-      propList.insert("style:vertical-pos", "from-top");
-      propList.insert("svg:y", double(origin[1]), unit);
-    }
-    else
-      propList.insert("style:vertical-pos", "top");
-    return;
-  }
-
-  if (pos.m_anchorTo == STOFFPosition::Page) {
-    // Page position seems to do not use the page margin...
-    propList.insert("text:anchor-type", "page");
-    if (pos.page() > 0) propList.insert("text:anchor-page-number", pos.page());
-    double w = m_ds->m_pageSpan.getFormWidth();
-    double h = m_ds->m_pageSpan.getFormLength();
-    w *= inchFactor;
-    h *= inchFactor;
-
-    propList.insert("style:vertical-rel", "page");
-    propList.insert("style:horizontal-rel", "page");
-    double newPosition;
-    switch (pos.m_yPos) {
-    case STOFFPosition::YFull:
-      propList.insert("svg:height", double(h), unit);
-    // fallthrough intended
-    case STOFFPosition::YTop:
-      if (origin[1] < 0.0 || origin[1] > 0.0) {
-        propList.insert("style:vertical-pos", "from-top");
-        newPosition = origin[1];
-        if (newPosition > h -pos.size()[1])
-          newPosition = h - pos.size()[1];
-        propList.insert("svg:y", double(newPosition), unit);
-      }
-      else
-        propList.insert("style:vertical-pos", "top");
-      break;
-    case STOFFPosition::YCenter:
-      if (origin[1] < 0.0 || origin[1] > 0.0) {
-        propList.insert("style:vertical-pos", "from-top");
-        newPosition = (h - pos.size()[1])/2.0;
-        if (newPosition > h -pos.size()[1]) newPosition = h - pos.size()[1];
-        propList.insert("svg:y", double(newPosition), unit);
-      }
-      else
-        propList.insert("style:vertical-pos", "middle");
-      break;
-    case STOFFPosition::YBottom:
-      if (origin[1] < 0.0 || origin[1] > 0.0) {
-        propList.insert("style:vertical-pos", "from-top");
-        newPosition = h - pos.size()[1]-origin[1];
-        if (newPosition > h -pos.size()[1]) newPosition = h -pos.size()[1];
-        else if (newPosition < 0) newPosition = 0;
-        propList.insert("svg:y", double(newPosition), unit);
-      }
-      else
-        propList.insert("style:vertical-pos", "bottom");
-      break;
-    default:
-      break;
-    }
-
-    switch (pos.m_xPos) {
-    case STOFFPosition::XFull:
-      propList.insert("svg:width", double(w), unit);
-    // fallthrough intended
-    case STOFFPosition::XLeft:
-      if (origin[0] < 0.0 || origin[0] > 0.0) {
-        propList.insert("style:horizontal-pos", "from-left");
-        propList.insert("svg:x", double(origin[0]), unit);
-      }
-      else
-        propList.insert("style:horizontal-pos", "left");
-      break;
-    case STOFFPosition::XRight:
-      if (origin[0] < 0.0 || origin[0] > 0.0) {
-        propList.insert("style:horizontal-pos", "from-left");
-        propList.insert("svg:x",double(w - pos.size()[0] + origin[0]), unit);
-      }
-      else
-        propList.insert("style:horizontal-pos", "right");
-      break;
-    case STOFFPosition::XCenter:
-      if (origin[0] < 0.0 || origin[0] > 0.0) {
-        propList.insert("style:horizontal-pos", "from-left");
-        propList.insert("svg:x", double((w - pos.size()[0])/2. + origin[0]), unit);
-      }
-      else
-        propList.insert("style:horizontal-pos", "center");
-      break;
-    default:
-      break;
-    }
-    return;
-  }
-  if (pos.m_anchorTo != STOFFPosition::Char &&
-      pos.m_anchorTo != STOFFPosition::CharBaseLine &&
-      pos.m_anchorTo != STOFFPosition::Unknown) return;
-
-  propList.insert("text:anchor-type", "as-char");
-  if (pos.m_anchorTo == STOFFPosition::CharBaseLine)
-    propList.insert("style:vertical-rel", "baseline");
-  else
-    propList.insert("style:vertical-rel", "line");
-  switch (pos.m_yPos) {
-  case STOFFPosition::YFull:
-  case STOFFPosition::YTop:
-    if (origin[1] < 0.0 || origin[1] > 0.0) {
-      propList.insert("style:vertical-pos", "from-top");
-      propList.insert("svg:y", double(origin[1]), unit);
-    }
-    else
-      propList.insert("style:vertical-pos", "top");
-    break;
-  case STOFFPosition::YCenter:
-    if (origin[1] < 0.0 || origin[1] > 0.0) {
-      propList.insert("style:vertical-pos", "from-top");
-      propList.insert("svg:y", double(origin[1] - pos.size()[1]/2.0), unit);
-    }
-    else
-      propList.insert("style:vertical-pos", "middle");
-    break;
-  case STOFFPosition::YBottom:
-  default:
-    if (origin[1] < 0.0 || origin[1] > 0.0) {
-      propList.insert("style:vertical-pos", "from-top");
-      propList.insert("svg:y", double(origin[1] - pos.size()[1]), unit);
-    }
-    else
-      propList.insert("style:vertical-pos", "bottom");
-    break;
-  }
+  // todo
 }
 
 ///////////////////
@@ -1297,11 +1121,10 @@ void STOFFSpreadsheetListener::handleSubDocument(STOFFSubDocumentPtr subDocument
   switch (subDocumentType) {
   case libstoff::DOC_TEXT_BOX:
     m_ps->m_isTextboxOpened = true;
-    m_ds->m_pageSpan.setMargins(0.0);
     break;
-  case libstoff::DOC_HEADER_FOOTER:
+  case libstoff::DOC_HEADER_FOOTER_REGION:
+    m_ps->m_isHeaderFooterRegionOpened=true;
     m_ps->m_isHeaderFooterWithoutParagraph = true;
-    m_ps->m_isHeaderFooterOpened = true;
     break;
   case libstoff::DOC_CHART_ZONE:
     m_ps->m_isTextboxOpened = true;

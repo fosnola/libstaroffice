@@ -221,7 +221,7 @@ void SDCParser::createDocument(librevenge::RVNGSpreadsheetInterface *documentInt
   std::vector<STOFFPageSpan> pageList;
   if (!m_state->m_mainSpreadsheet || m_state->m_mainSpreadsheet->updatePageSpans(pageList, m_state->m_numPages)) {
     STOFFPageSpan ps(getPageSpan());
-    ps.setPageSpan(1);
+    ps.m_pageSpan=1;
     pageList.push_back(ps);
     m_state->m_numPages = 1;
   }

@@ -43,176 +43,47 @@
 
 class STOFFListener;
 
+/** a class which stores the header/footer */
+class STOFFHeaderFooter
+{
+public:
+  //! the different type
+  enum Type { R_Left=0, R_Center, R_Right, R_All };
+  //! constructor
+  STOFFHeaderFooter()
+  {
+  }
+  //! destructor
+  ~STOFFHeaderFooter()
+  {
+  }
+  //! operator==
+  bool operator==(STOFFHeaderFooter const &headerFooter) const;
+  //! operator!=
+  bool operator!=(STOFFHeaderFooter const &headerFooter) const
+  {
+    return !operator==(headerFooter);
+  }
+  /** send to header to the listener */
+  void send(STOFFListener *listener, bool header) const;
+  //! the document data: left, center, right, all
+  STOFFSubDocumentPtr m_subDocument[4];
+};
+
 /** A class which defines the page properties */
 class STOFFPageSpan
 {
 public:
-  /** the page orientation */
-  enum FormOrientation { PORTRAIT, LANDSCAPE };
+  /** the zone type */
+  enum ZoneType { Page=0, Header, Footer };
 public:
   //! constructor
   STOFFPageSpan();
   //! destructor
   virtual ~STOFFPageSpan();
 
-  //! returns the page length
-  double getFormLength() const
-  {
-    return m_formLength;
-  }
-  //! returns the page width
-  double getFormWidth() const
-  {
-    return m_formWidth;
-  }
-  //! returns the page orientation
-  FormOrientation getFormOrientation() const
-  {
-    return m_formOrientation;
-  }
-  //! returns the left margin
-  double getMarginLeft() const
-  {
-    return m_margins[libstoff::Left];
-  }
-  //! returns the right margin
-  double getMarginRight() const
-  {
-    return m_margins[libstoff::Right];
-  }
-  //! returns the top margin
-  double getMarginTop() const
-  {
-    return m_margins[libstoff::Top];
-  }
-  //! returns the bottom margin
-  double getMarginBottom() const
-  {
-    return m_margins[libstoff::Bottom];
-  }
-  //! returns the page length (form width without margin )
-  double getPageLength() const
-  {
-    return m_formLength-m_margins[libstoff::Top]-m_margins[libstoff::Bottom];
-  }
-  //! returns the page width (form width without margin )
-  double getPageWidth() const
-  {
-    return m_formWidth-m_margins[libstoff::Left]-m_margins[libstoff::Right];
-  }
-  //! returns the background color
-  STOFFColor backgroundColor() const
-  {
-    return m_backgroundColor;
-  }
-  int getPageNumber() const
-  {
-    return m_pageNumber;
-  }
-  int getPageSpan() const
-  {
-    return m_pageSpan;
-  }
-
-  //! add a header on some page
-  void addHeader(librevenge::RVNGString const &occurence, STOFFSubDocumentPtr document);
-  //! add a header on some page
-  void addFooter(librevenge::RVNGString const &occurence, STOFFSubDocumentPtr document);
-  //! set the total page length
-  void setFormLength(const double formLength)
-  {
-    m_formLength = formLength;
-  }
-  //! set the total page width
-  void setFormWidth(const double formWidth)
-  {
-    m_formWidth = formWidth;
-  }
-  //! set the form orientation
-  void setFormOrientation(const FormOrientation formOrientation)
-  {
-    m_formOrientation = formOrientation;
-  }
-  //! set the page left margin
-  void setMarginLeft(const double marginLeft)
-  {
-    m_margins[libstoff::Left] = (marginLeft >= 0) ? marginLeft : 0.01;
-  }
-  //! set the page right margin
-  void setMarginRight(const double marginRight)
-  {
-    m_margins[libstoff::Right] = (marginRight >= 0) ? marginRight : 0.01;
-  }
-  //! set the page top margin
-  void setMarginTop(const double marginTop)
-  {
-    m_margins[libstoff::Top] =(marginTop >= 0) ? marginTop : 0.01;
-  }
-  //! set the page bottom margin
-  void setMarginBottom(const double marginBottom)
-  {
-    m_margins[libstoff::Bottom] = (marginBottom >= 0) ? marginBottom : 0.01;
-  }
-  //! set all the margins
-  void setMargins(double margin, int wh=libstoff::LeftBit|libstoff::RightBit|libstoff::TopBit|libstoff::BottomBit)
-  {
-    if (margin < 0.0) margin = 0.01;
-    if (wh&libstoff::LeftBit)
-      m_margins[libstoff::Left]=margin;
-    if (wh&libstoff::RightBit)
-      m_margins[libstoff::Right]=margin;
-    if (wh&libstoff::TopBit)
-      m_margins[libstoff::Top]=margin;
-    if (wh&libstoff::BottomBit)
-      m_margins[libstoff::Bottom]=margin;
-  }
-  //! check if the page margins are consistent with the page dimension, if not update them
-  void checkMargins();
-  //! set the page name
-  void setPageName(librevenge::RVNGString const &name)
-  {
-    m_name=name;
-  }
-  //! return true if the page has a name
-  bool hasPageName() const
-  {
-    return !m_name.empty();
-  }
-  //! return the page name
-  librevenge::RVNGString const &getPageName() const
-  {
-    return m_name;
-  }
-  //! set the page master name
-  void setMasterPageName(librevenge::RVNGString const &name)
-  {
-    m_masterName=name;
-  }
-  //! return true if the masterPage has a name
-  bool hasMasterPageName() const
-  {
-    return !m_masterName.empty();
-  }
-  //! return the page master name
-  librevenge::RVNGString const &getMasterPageName() const
-  {
-    return m_masterName;
-  }
-  //! set the background color
-  void setBackgroundColor(STOFFColor color=STOFFColor::white())
-  {
-    m_backgroundColor=color;
-  }
-  //! set the page number
-  void setPageNumber(const int pageNumber)
-  {
-    m_pageNumber = pageNumber;
-  }
-  //! set the page span ( default 1)
-  void setPageSpan(const int pageSpan)
-  {
-    m_pageSpan = pageSpan;
-  }
+  //! add a header on some page: occurrence must be odd|right, even|left, first, last or all
+  void addHeaderFooter(bool header, std::string const &occurrence, STOFFHeaderFooter const &hf);
   //! operator==
   bool operator==(shared_ptr<STOFFPageSpan> const &pageSpan) const;
   //! operator!=
@@ -222,31 +93,20 @@ public:
   }
 
   // interface with STOFFListener
+
   //! add the page properties in pList
   void getPageProperty(librevenge::RVNGPropertyList &pList) const;
   //! send the page's headers/footers if some exists
   void sendHeaderFooters(STOFFListener *listener) const;
 
-private:
-  double m_formLength/** the form length*/, m_formWidth /** the form width */;
-  /** the form orientation */
-  FormOrientation m_formOrientation;
-  /** the margins: libstoff::Left, ... */
-  double m_margins[4];
-  //! the page name
-  librevenge::RVNGString m_name;
-  //! the page master name
-  librevenge::RVNGString m_masterName;
-  /** the page background color: default white */
-  STOFFColor m_backgroundColor;
-  //! the page number ( or -1)
-  int m_pageNumber;
-  //! the map occurence to header document
-  std::map<librevenge::RVNGString,STOFFSubDocumentPtr> m_occurenceHeaderMap;
-  //! the map occurence to footer document
-  std::map<librevenge::RVNGString,STOFFSubDocumentPtr> m_occurenceFooterMap;
   //! the number of page
   int m_pageSpan;
+  //! the document, header and footer property list
+  librevenge::RVNGPropertyList m_propertiesList[3];
+  //! the map occurrence to header/footer document
+  std::map<std::string, STOFFHeaderFooter> m_occurrenceHFMap[2];
+  //! the actual zone type
+  ZoneType m_actualZone;
 };
 
 #endif

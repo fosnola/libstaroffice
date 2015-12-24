@@ -523,9 +523,14 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
     }
     if (nPages) {
       STOFFPageSpan ps;
-      ps.setPageSpan(nPages);
+      ps.m_pageSpan=nPages;
       StarItemStyle const *style=(pool&&!styleName.empty()) ? pool->findStyleWithFamily(styleName, StarItemStyle::F_Page) : 0;
       if (style) {
+        for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
+             it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
+          if (it->second && it->second->m_attribute)
+            it->second->m_attribute->addTo(ps, pool.get());
+        }
 #if 1
         std::cerr << "Attrib\n";
         for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();

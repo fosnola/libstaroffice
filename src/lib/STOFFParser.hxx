@@ -120,26 +120,6 @@ public:
   {
     return m_parserState->m_pageSpan;
   }
-  //! returns the form length
-  double getFormLength() const
-  {
-    return m_parserState->m_pageSpan.getFormLength();
-  }
-  //! returns the form width
-  double getFormWidth() const
-  {
-    return m_parserState->m_pageSpan.getFormWidth();
-  }
-  //! returns the page length (form length without margin )
-  double getPageLength() const
-  {
-    return m_parserState->m_pageSpan.getPageLength();
-  }
-  //! returns the page width (form width without margin )
-  double getPageWidth() const
-  {
-    return m_parserState->m_pageSpan.getPageWidth();
-  }
   //! returns the spreadsheet listener
   STOFFSpreadsheetListenerPtr &getSpreadsheetListener()
   {

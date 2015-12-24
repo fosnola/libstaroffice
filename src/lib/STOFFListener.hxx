@@ -82,10 +82,18 @@ public:
   virtual STOFFPageSpan const &getPageSpan() = 0;
 
   // ------ header/footer --------
-  /** insert a header (interaction with STOFFPageSpan which fills the parameters for openHeader) */
-  virtual bool insertHeader(STOFFSubDocumentPtr subDocument, librevenge::RVNGPropertyList const &extras) = 0;
-  /** insert a footer (interaction with STOFFPageSpan which fills the parameters for openFooter) */
-  virtual bool insertFooter(STOFFSubDocumentPtr subDocument, librevenge::RVNGPropertyList const &extras) = 0;
+  /** open a header  (interaction with STOFFPageSpan which fills the parameters for openHeader) */
+  virtual bool openHeader(librevenge::RVNGPropertyList const &extras) = 0;
+  /** open a footer  (interaction with STOFFPageSpan which fills the parameters for openFooter) */
+  virtual bool openFooter(librevenge::RVNGPropertyList const &extras) = 0;
+  /** close a header */
+  virtual bool closeHeader() = 0;
+  /** close a footer */
+  virtual bool closeFooter() = 0;
+  /** insert a header */
+  virtual bool insertHeaderRegion(STOFFSubDocumentPtr subDocument, librevenge::RVNGString const &which) = 0;
+  /** insert a footer */
+  virtual bool insertFooterRegion(STOFFSubDocumentPtr subDocument, librevenge::RVNGString const &which) = 0;
   /** returns true if the header/footer is open */
   virtual bool isHeaderFooterOpened() const = 0;
 

@@ -65,10 +65,6 @@ class STOFFSpreadsheetListener : public STOFFListener
 public:
   /** constructor */
   STOFFSpreadsheetListener(STOFFParserState &parserState, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface);
-  /** simplified constructor (can be used for a embedded spreadsheet with one page).
-
-   \note the box coordinates must be given in point.*/
-  STOFFSpreadsheetListener(STOFFParserState &parserState, STOFFBox2f const &box, librevenge::RVNGSpreadsheetInterface *documentInterface);
   /** destructor */
   virtual ~STOFFSpreadsheetListener();
 
@@ -115,10 +111,18 @@ public:
   STOFFPageSpan const &getPageSpan();
 
   // ------ header/footer --------
+  /** open a header  (interaction with STOFFPageSpan which fills the parameters for openHeader) */
+  bool openHeader(librevenge::RVNGPropertyList const &extras);
+  /** open a footer  (interaction with STOFFPageSpan which fills the parameters for openFooter) */
+  bool openFooter(librevenge::RVNGPropertyList const &extras);
+  /** close a header */
+  bool closeHeader();
+  /** close a footer */
+  bool closeFooter();
   /** insert a header */
-  bool insertHeader(STOFFSubDocumentPtr subDocument, librevenge::RVNGPropertyList const &extras);
+  bool insertHeaderRegion(STOFFSubDocumentPtr subDocument, librevenge::RVNGString const &which);
   /** insert a footer */
-  bool insertFooter(STOFFSubDocumentPtr subDocument, librevenge::RVNGPropertyList const &extras);
+  bool insertFooterRegion(STOFFSubDocumentPtr subDocument, librevenge::RVNGString const &which);
   /** returns true if the header/footer is open */
   bool isHeaderFooterOpened() const;
 

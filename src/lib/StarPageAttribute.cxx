@@ -32,6 +32,7 @@
 */
 
 #include "STOFFPageSpan.hxx"
+#include "STOFFSubDocument.hxx"
 
 #include "StarAttribute.hxx"
 #include "StarItemPool.hxx"
@@ -58,8 +59,8 @@ public:
   {
     return shared_ptr<StarAttribute>(new StarPAttributeBool(*this));
   }
-  //! add to a para
-  // virtual void addTo(STOFFPageSpan &para, StarItemPool const */*pool*/) const;
+  //! add to a page
+  // virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
 
 protected:
   //! copy constructor
@@ -81,8 +82,8 @@ public:
   {
     return shared_ptr<StarAttribute>(new StarPAttributeColor(*this));
   }
-  //! add to a para
-  // virtual void addTo(STOFFPageSpan &para, StarItemPool const */*pool*/) const;
+  //! add to a page
+  // virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
 protected:
   //! copy constructor
   StarPAttributeColor(StarPAttributeColor const &orig) : StarAttributeColor(orig)
@@ -99,8 +100,8 @@ public:
     StarAttributeInt(type, debugName, intSize, value)
   {
   }
-  //! add to a para
-  // virtual void addTo(STOFFPageSpan &para, StarItemPool const */*pool*/) const;
+  //! add to a page
+  // virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -127,8 +128,8 @@ public:
   {
     return shared_ptr<StarAttribute>(new StarPAttributeUInt(*this));
   }
-  //! add to a para
-  // virtual void addTo(STOFFPageSpan &para, StarItemPool const */*pool*/) const;
+  //! add to a page
+  // virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
 protected:
   //! copy constructor
   StarPAttributeUInt(StarPAttributeUInt const &orig) : StarAttributeUInt(orig)
@@ -144,8 +145,8 @@ public:
   StarPAttributeVoid(Type type, std::string const &debugName) : StarAttributeVoid(type, debugName)
   {
   }
-  //! add to a para
-  // virtual void addTo(STOFFPageSpan &para, StarItemPool const */*pool*/) const;
+  //! add to a page
+  // virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -188,6 +189,51 @@ void addAttributeVoid(std::map<int, shared_ptr<StarAttribute> > &map, StarAttrib
 
 namespace StarPageAttribute
 {
+////////////////////////////////////////
+//! Internal: the subdocument of a StarObjectSpreadsheet
+class SubDocument : public STOFFSubDocument
+{
+public:
+  SubDocument(shared_ptr<StarObjectSmallText> text) :
+    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_smallText(text) {}
+
+  //! destructor
+  virtual ~SubDocument() {}
+
+  //! operator!=
+  virtual bool operator!=(STOFFSubDocument const &doc) const
+  {
+    if (STOFFSubDocument::operator!=(doc)) return true;
+    SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
+    if (!sDoc) return true;
+    if (m_smallText.get() != sDoc->m_smallText.get()) return true;
+    return false;
+  }
+
+  //! operator!==
+  virtual bool operator==(STOFFSubDocument const &doc) const
+  {
+    return !operator!=(doc);
+  }
+
+  //! the parser function
+  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type);
+
+protected:
+  //! the note text
+  shared_ptr<StarObjectSmallText> m_smallText;
+};
+
+void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*type*/)
+{
+  if (!listener.get()) {
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::SubDocument::parse: no listener\n"));
+    return;
+  }
+  if (m_smallText)
+    m_smallText->send(listener);
+}
+
 // ------------------------------------------------------------
 //! a page header/footer attribute
 class StarPAttributePageHF : public StarAttribute
@@ -202,6 +248,8 @@ public:
   {
     return shared_ptr<StarAttribute>(new StarPAttributePageHF(*this));
   }
+  //! add to a page
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
@@ -371,7 +419,7 @@ public:
       o << "=hide";
       break;
     default:
-      STOFF_DEBUG_MSG(("StarPellAttribute::StarPAttributeViewMode::print: find unknown enum=%d\n", int(m_value)));
+      STOFF_DEBUG_MSG(("StarPAttribute::StarPAttributeViewMode::print: find unknown enum=%d\n", int(m_value)));
       o << "=###" << m_value;
       break;
     }
@@ -385,6 +433,23 @@ protected:
   }
 };
 
+void StarPAttributePageHF::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const
+{
+  bool isHeader=m_type==ATTR_SC_PAGE_HEADERLEFT || m_type==ATTR_SC_PAGE_HEADERRIGHT;
+  if (!isHeader && m_type!=ATTR_SC_PAGE_FOOTERLEFT && m_type!=ATTR_SC_PAGE_FOOTERRIGHT)
+    return;
+  STOFFHeaderFooter hf;
+  bool hasData=false;
+  for (int i=0; i<3; ++i) {
+    if (!m_zones[i]) continue;
+    hasData=true;
+    hf.m_subDocument[i].reset(new SubDocument(m_zones[i]));
+  }
+  if (!hasData) return;
+  std::string wh(m_type==ATTR_SC_PAGE_HEADERLEFT || m_type==ATTR_SC_PAGE_FOOTERLEFT ? "left" : "right");
+  page.addHeaderFooter(isHeader,wh, hf);
+}
+
 bool StarPAttributePage::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -395,7 +460,7 @@ bool StarPAttributePage::read(StarZone &zone, int /*vers*/, long endPos, StarObj
   // svx_pageitem.cxx SvxPageItem::Create
   std::vector<uint32_t> text;
   if (!zone.readString(text)) {
-    STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a name\n"));
+    STOFF_DEBUG_MSG(("StarPAttributePage::read: can not read a name\n"));
     f << "###name,";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());

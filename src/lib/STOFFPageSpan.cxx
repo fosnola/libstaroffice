@@ -40,52 +40,52 @@
 
 #include "STOFFPageSpan.hxx"
 
-// ----------------- STOFFPageSpan ------------------------
-STOFFPageSpan::STOFFPageSpan() :
-  m_formLength(11.0), m_formWidth(8.5), m_formOrientation(STOFFPageSpan::PORTRAIT),
-  m_name(""), m_masterName(""),
-  m_backgroundColor(STOFFColor::white()),
-  m_pageNumber(-1),
-  m_occurenceHeaderMap(), m_occurenceFooterMap(),
-  m_pageSpan(1)
+// ----------------- STOFFHeaderFooter ------------------------
+bool STOFFHeaderFooter::operator==(STOFFHeaderFooter const &hF) const
 {
-  for (int i = 0; i < 4; i++) m_margins[i] = 1.0;
+  for (int step=0; step<4; ++step) {
+    if (m_subDocument[step]) {
+      if (!hF.m_subDocument[step] || *m_subDocument[step]!=hF.m_subDocument[step])
+        return false;
+    }
+    else if (hF.m_subDocument[step])
+      return false;
+  }
+  return true;
+}
+
+void STOFFHeaderFooter::send(STOFFListener *listener, bool isHeader) const
+{
+  librevenge::RVNGPropertyList propList;
+  if (!listener) {
+    STOFF_DEBUG_MSG(("STOFFHeaderFooter::send: called without listener\n"));
+    return;
+  }
+  for (int i=0; i<4; ++i) {
+    char const *(wh[])= {"region-left", "region-center", "region-right", ""};
+    if (!m_subDocument[i]) continue;
+    if (isHeader)
+      listener->insertHeaderRegion(m_subDocument[i], wh[i]);
+    else
+      listener->insertFooterRegion(m_subDocument[i], wh[i]);
+  }
+}
+
+// ----------------- STOFFPageSpan ------------------------
+STOFFPageSpan::STOFFPageSpan() : m_pageSpan(1), m_actualZone(STOFFPageSpan::Page)
+{
+  m_propertiesList[0].insert("fo:page-height", 11., librevenge::RVNG_INCH);
+  m_propertiesList[0].insert("fo:page-width", 8.5, librevenge::RVNG_INCH);
+  m_propertiesList[0].insert("style:print-orientation", "portrait");
 }
 
 STOFFPageSpan::~STOFFPageSpan()
 {
 }
 
-void STOFFPageSpan::addHeader(librevenge::RVNGString const &occurence, STOFFSubDocumentPtr document)
+void STOFFPageSpan::addHeaderFooter(bool header, std::string const &occurrence, STOFFHeaderFooter const &hf)
 {
-  if (!document) {
-    if (m_occurenceHeaderMap.find(occurence)!=m_occurenceHeaderMap.end())
-      m_occurenceHeaderMap.erase(occurence);
-    return;
-  }
-  m_occurenceHeaderMap[occurence]=document;
-}
-
-void STOFFPageSpan::addFooter(librevenge::RVNGString const &occurence, STOFFSubDocumentPtr document)
-{
-  if (!document) {
-    if (m_occurenceFooterMap.find(occurence)!=m_occurenceFooterMap.end())
-      m_occurenceFooterMap.erase(occurence);
-    return;
-  }
-  m_occurenceFooterMap[occurence]=document;
-}
-
-void STOFFPageSpan::checkMargins()
-{
-  if (m_margins[libstoff::Left]+m_margins[libstoff::Right] > 0.95*m_formWidth) {
-    STOFF_DEBUG_MSG(("STOFFPageSpan::checkMargins: left/right margins seems bad\n"));
-    m_margins[libstoff::Left] = m_margins[libstoff::Right] = 0.05*m_formWidth;
-  }
-  if (m_margins[libstoff::Top]+m_margins[libstoff::Bottom] > 0.95*m_formLength) {
-    STOFF_DEBUG_MSG(("STOFFPageSpan::checkMargins: top/bottom margins seems bad\n"));
-    m_margins[libstoff::Top] = m_margins[libstoff::Bottom] = 0.05*m_formLength;
-  }
+  m_occurrenceHFMap[header ? 0 : 1][occurrence]=hf;
 }
 
 void STOFFPageSpan::sendHeaderFooters(STOFFListener *listener) const
@@ -95,41 +95,30 @@ void STOFFPageSpan::sendHeaderFooters(STOFFListener *listener) const
     return;
   }
 
-  std::map<librevenge::RVNGString,STOFFSubDocumentPtr>::const_iterator it;
-  for (it=m_occurenceHeaderMap.begin(); it!=m_occurenceHeaderMap.end(); ++it) {
-    if (it->first.empty()) continue;
-    librevenge::RVNGPropertyList propList;
-    propList.insert("librevenge:occurrence", it->first);
-    listener->insertHeader(it->second,propList);
-  }
-  for (it=m_occurenceFooterMap.begin(); it!=m_occurenceFooterMap.end(); ++it) {
-    if (it->first.empty()) continue;
-    librevenge::RVNGPropertyList propList;
-    propList.insert("librevenge:occurrence", it->first);
-    listener->insertFooter(it->second,propList);
+  for (int i=0; i<2; ++i) {
+    std::map<std::string,STOFFHeaderFooter>::const_iterator it;
+    for (it=m_occurrenceHFMap[i].begin(); it!=m_occurrenceHFMap[i].end(); ++it) {
+      std::string occurrence=it->first;
+      if (occurrence.empty()) continue;
+      librevenge::RVNGPropertyList propList(m_propertiesList[i+1]);
+      propList.insert("librevenge:occurrence", occurrence.c_str());
+      if (i==0)
+        listener->openHeader(propList);
+      else
+        listener->openFooter(propList);
+      it->second.send(listener, true);
+      if (i==0)
+        listener->closeHeader();
+      else
+        listener->closeFooter();
+    }
   }
 }
 
 void STOFFPageSpan::getPageProperty(librevenge::RVNGPropertyList &propList) const
 {
-  propList.insert("librevenge:num-pages", getPageSpan());
-
-  if (hasPageName())
-    propList.insert("draw:name", getPageName());
-  if (hasMasterPageName())
-    propList.insert("librevenge:master-page-name", getMasterPageName());
-  propList.insert("fo:page-height", getFormLength(), librevenge::RVNG_INCH);
-  propList.insert("fo:page-width", getFormWidth(), librevenge::RVNG_INCH);
-  if (getFormOrientation() == LANDSCAPE)
-    propList.insert("style:print-orientation", "landscape");
-  else
-    propList.insert("style:print-orientation", "portrait");
-  propList.insert("fo:margin-left", getMarginLeft(), librevenge::RVNG_INCH);
-  propList.insert("fo:margin-right", getMarginRight(), librevenge::RVNG_INCH);
-  propList.insert("fo:margin-top", getMarginTop(), librevenge::RVNG_INCH);
-  propList.insert("fo:margin-bottom", getMarginBottom(), librevenge::RVNG_INCH);
-  if (!m_backgroundColor.isWhite())
-    propList.insert("fo:background-color", m_backgroundColor.str().c_str());
+  propList=m_propertiesList[0];
+  propList.insert("librevenge:num-pages", m_pageSpan);
 }
 
 
@@ -137,39 +126,18 @@ bool STOFFPageSpan::operator==(shared_ptr<STOFFPageSpan> const &page2) const
 {
   if (!page2) return false;
   if (page2.get() == this) return true;
-  if (m_formLength < page2->m_formLength || m_formLength > page2->m_formLength ||
-      m_formWidth < page2->m_formWidth || m_formWidth > page2->m_formWidth ||
-      m_formOrientation != page2->m_formOrientation)
-    return false;
-  if (getMarginLeft() < page2->getMarginLeft() || getMarginLeft() > page2->getMarginLeft() ||
-      getMarginRight() < page2->getMarginRight() || getMarginRight() > page2->getMarginRight() ||
-      getMarginTop() < page2->getMarginTop() || getMarginTop() > page2->getMarginTop() ||
-      getMarginBottom() < page2->getMarginBottom() || getMarginBottom() > page2->getMarginBottom())
-    return false;
-  if (getPageName() != page2->getPageName() || getMasterPageName() != page2->getMasterPageName() ||
-      backgroundColor() != page2->backgroundColor())
-    return false;
 
-  if (getPageNumber() != page2->getPageNumber())
-    return false;
-
-  for (int step=0; step<2; ++step) {
-    std::map<librevenge::RVNGString,STOFFSubDocumentPtr> const &map1=
-      step==0 ? m_occurenceHeaderMap : m_occurenceFooterMap;
-    std::map<librevenge::RVNGString,STOFFSubDocumentPtr> const &map2=
-      step==0 ? page2->m_occurenceHeaderMap : page2->m_occurenceFooterMap;
-    if (map1.size()!=map2.size())
+  for (int i=0; i<3; ++i) {
+    if (m_propertiesList[i].getPropString() != page2->m_propertiesList[i].getPropString())
       return false;
-    std::map<librevenge::RVNGString,STOFFSubDocumentPtr>::const_iterator it1, it2;
-    for (it1=map1.begin(); it1!=map1.end(); ++it1) {
-      it2=map2.find(it1->first);
-      if (it2==map2.end()) return false;
-      if (it1->second) {
-        if (!it2->second || *it1->second!=*it2->second)
-          return false;
-      }
-      else if (it2->second)
-        return false;
+  }
+  for (int i=0; i<2; ++i) {
+    if (m_occurrenceHFMap[i].size()!=page2->m_occurrenceHFMap[i].size())
+      return false;
+    std::map<std::string,STOFFHeaderFooter>::const_iterator it1, it2;
+    for (it1=m_occurrenceHFMap[i].begin(); it1!=m_occurrenceHFMap[i].end(); ++it1) {
+      it2=page2->m_occurrenceHFMap[i].find(it1->first);
+      if (it2==page2->m_occurrenceHFMap[i].end() || it1->second!=it2->second) return false;
     }
   }
   STOFF_DEBUG_MSG(("WordPerfect: STOFFPageSpan == comparison finished, found no differences\n"));
