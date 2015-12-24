@@ -86,7 +86,7 @@ std::ostream &operator<<(std::ostream &o, StarItemStyle const &style)
     o << "#family[high]=" << std::hex << (style.m_family>>8) << std::dec << ",";
   if (style.m_mask) o << "mask=" << std::hex << style.m_mask << std::dec << ",";
   if (style.m_helpId) o << "help[id]=" << style.m_helpId << ",";
-#if 1
+#if 0
   o << "Attrib=[";
   for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style.m_itemSet.m_whichToItemMap.begin();
        it!=style.m_itemSet.m_whichToItemMap.end(); ++it) {

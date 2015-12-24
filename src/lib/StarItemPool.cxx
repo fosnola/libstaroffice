@@ -2004,30 +2004,37 @@ void StarItemPool::updateStyles()
   }
 }
 
-void StarItemPool::updateUsingStyles(StarItemSet &itemSet) const
+StarItemStyle const *StarItemPool::findStyleWithFamily(librevenge::RVNGString const &style, int family) const
 {
-  if (itemSet.m_style.empty())
-    return;
-  StarItemPoolInternal::StyleId styleId(itemSet.m_style, itemSet.m_family);
-  std::map<StarItemPoolInternal::StyleId,StarItemStyle>::iterator it=m_state->m_styleIdToStyleMap.find(styleId);
+  if (style.empty())
+    return 0;
+  StarItemPoolInternal::StyleId styleId(style, family);
+  std::map<StarItemPoolInternal::StyleId,StarItemStyle>::const_iterator it=m_state->m_styleIdToStyleMap.find(styleId);
   if (it==m_state->m_styleIdToStyleMap.end()) {
     // hack: try to retrieve the original style, ...
-    librevenge::RVNGString simpName=m_state->getBasicString(itemSet.m_style);
+    librevenge::RVNGString simpName=m_state->getBasicString(style);
     if (m_state->m_simplifyNameToStyleNameMap.find(simpName)!=m_state->m_simplifyNameToStyleNameMap.end()) {
       styleId.m_name=m_state->m_simplifyNameToStyleNameMap.find(simpName)->second;
       it=m_state->m_styleIdToStyleMap.find(styleId);
       static bool first=true;
       if (first && it!=m_state->m_styleIdToStyleMap.end()) {
-        STOFF_DEBUG_MSG(("StarItemPool::updateUsingStyles: try to recover some style names\n"));
+        STOFF_DEBUG_MSG(("StarItemPool::findStyleWithFamily: try to recover some style names\n"));
         first=false;
       }
     }
   }
   if (it==m_state->m_styleIdToStyleMap.end()) {
-    STOFF_DEBUG_MSG(("StarItemPool::updateUsingStyles: can not find with style %s-%d\n", styleId.m_name.cstr(), styleId.m_family));
-    return;
+    STOFF_DEBUG_MSG(("StarItemPool::findStyleWithFamily: can not find with style %s-%d\n", style.cstr(), family));
+    return 0;
   }
-  StarItemSet const &parentItemSet=it->second.m_itemSet;
+  return &it->second;
+}
+
+void StarItemPool::updateUsingStyles(StarItemSet &itemSet) const
+{
+  StarItemStyle const *style=findStyleWithFamily(itemSet.m_style, itemSet.m_family);
+  if (!style) return;
+  StarItemSet const &parentItemSet=style->m_itemSet;
   std::map<int, shared_ptr<StarItem> >::const_iterator iIt;
   for (iIt=parentItemSet.m_whichToItemMap.begin(); iIt!=parentItemSet.m_whichToItemMap.end(); ++iIt) {
     if (!iIt->second || itemSet.m_whichToItemMap.find(iIt->first)!=itemSet.m_whichToItemMap.end())

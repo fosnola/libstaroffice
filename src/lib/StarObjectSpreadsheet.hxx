@@ -53,6 +53,7 @@ struct State;
 
 class StarAttribute;
 class StarZone;
+class STOFFPageSpan;
 
 /** \brief the main class to read a StarOffice sdc file
  *
@@ -76,6 +77,8 @@ public:
   bool sendRow(int table, int row, STOFFSpreadsheetListenerPtr listener);
   /** try to send a cell */
   bool sendCell(StarObjectSpreadsheetInternal::Cell &cell, StarAttribute *attrib, int table, int numRepeated, STOFFSpreadsheetListenerPtr listener);
+  /** try to update the page span */
+  bool updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const;
 protected:
   //
   // data

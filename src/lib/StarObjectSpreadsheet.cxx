@@ -54,6 +54,7 @@
 #include "STOFFFont.hxx"
 #include "STOFFGraphicStyle.hxx"
 #include "STOFFOLEParser.hxx"
+#include "STOFFPageSpan.hxx"
 #include "STOFFSubDocument.hxx"
 #include "STOFFSpreadsheetListener.hxx"
 #include "STOFFTable.hxx"
@@ -307,7 +308,7 @@ class Table : public STOFFTable
 {
 public:
   //! constructor
-  Table(int loadingVers, int maxRow) : m_loadingVersion(loadingVers), m_name(""), m_maxRow(maxRow), m_colWidthList(), m_rowHeightMap(), m_rowToRowContentMap()
+  Table(int loadingVers, int maxRow) : m_loadingVersion(loadingVers), m_name(""), m_pageStyle(""), m_maxRow(maxRow), m_colWidthList(), m_rowHeightMap(), m_rowToRowContentMap()
   {
   }
   //! returns the load version
@@ -416,6 +417,8 @@ public:
   int m_loadingVersion;
   //! the table name
   librevenge::RVNGString m_name;
+  //! the page style name
+  librevenge::RVNGString m_pageStyle;
   //! the maximum number of row
   int m_maxRow;
   //! the columns width
@@ -504,6 +507,49 @@ StarObjectSpreadsheet::~StarObjectSpreadsheet()
 // send data
 //
 ////////////////////////////////////////////////////////////
+bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const
+{
+  if (m_state->m_tableList.empty()) return false;
+  numPages=int(m_state->m_tableList.size());
+
+  librevenge::RVNGString styleName("");
+  int nPages=0;
+  shared_ptr<StarItemPool> pool=const_cast<StarObjectSpreadsheet *>(this)->findItemPool(StarItemPool::T_SpreadsheetPool, false);
+  for (size_t i=0; i<=m_state->m_tableList.size(); ++i) {
+    bool isEnd=(i==m_state->m_tableList.size());
+    if (!isEnd && m_state->m_tableList[i] && m_state->m_tableList[i]->m_pageStyle==styleName) {
+      ++nPages;
+      continue;
+    }
+    if (nPages) {
+      STOFFPageSpan ps;
+      ps.setPageSpan(nPages);
+      StarItemStyle const *style=(pool&&!styleName.empty()) ? pool->findStyleWithFamily(styleName, StarItemStyle::F_Page) : 0;
+      if (style) {
+#if 1
+        std::cerr << "Attrib\n";
+        for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
+             it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
+          if (!it->second || !it->second->m_attribute) {
+            std::cerr << "_,";
+            continue;
+          }
+          libstoff::DebugStream f2;
+          it->second->m_attribute->print(f2);
+          std::cerr << f2.str() << ",";
+        }
+        std::cerr << "\n";
+#endif
+      }
+      pageSpan.push_back(ps);
+    }
+    if (isEnd) break;
+    styleName=m_state->m_tableList[i] ? m_state->m_tableList[i]->m_pageStyle : "";
+    nPages=1;
+  }
+  return true;
+}
+
 bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
 {
   if (m_state->m_tableList.empty() || !listener) {
@@ -520,6 +566,7 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
   }
 
   for (size_t t=0; t<m_state->m_tableList.size(); ++t) {
+    if (t) listener->insertBreak(STOFFListener::PageBreak);
     if (!m_state->m_tableList[t]) continue;
     StarObjectSpreadsheetInternal::Table &sheet=*m_state->m_tableList[t];
     listener->openSheet(sheet.getColWidths(), librevenge::RVNG_INCH, sheet.m_name);
@@ -1864,8 +1911,9 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
           f << "###pageStyle";
           break;
         }
+        table.m_pageStyle=libstoff::getString(string);
         if (!string.empty())
-          f << "pageStyle=" << libstoff::getString(string).cstr() << ",";
+          f << "pageStyle=" << table.m_pageStyle.cstr() << ",";
       }
       if (input->tell()<endDataPos) {
         *input >> bVal;

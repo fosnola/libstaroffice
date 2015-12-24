@@ -40,173 +40,13 @@
 
 #include "STOFFPageSpan.hxx"
 
-/** Internal: the structures of a STOFFPageSpan */
-namespace STOFFPageSpanInternal
-{
-////////////////////////////////////////
-//! Internal: the subdocument of a STOFFParser
-class SubDocument : public STOFFSubDocument
-{
-public:
-  //! constructor
-  SubDocument(STOFFHeaderFooter const &headerFooter) :
-    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_headerFooter(headerFooter) {}
-
-  //! destructor
-  virtual ~SubDocument() {}
-
-  //! operator!=
-  virtual bool operator!=(STOFFSubDocument const &doc) const
-  {
-    if (STOFFSubDocument::operator!=(doc)) return true;
-    SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
-    if (!sDoc) return true;
-    if (m_headerFooter != sDoc->m_headerFooter) return true;
-    return false;
-  }
-
-  //! operator!==
-  virtual bool operator==(STOFFSubDocument const &doc) const
-  {
-    return !operator!=(doc);
-  }
-
-  //! the parser function
-  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type);
-
-protected:
-  //! the header footer
-  STOFFHeaderFooter const &m_headerFooter;
-};
-
-void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type)
-{
-  if (!listener.get()) {
-    STOFF_DEBUG_MSG(("STOFFPageSpanInternal::SubDocument::parse: no listener\n"));
-    return;
-  }
-  if (m_headerFooter.m_pageNumberPosition >= STOFFHeaderFooter::TopLeft &&
-      m_headerFooter.m_pageNumberPosition <= STOFFHeaderFooter::TopRight)
-    m_headerFooter.insertPageNumberParagraph(listener.get());
-  if (m_headerFooter.m_subDocument)
-    m_headerFooter.m_subDocument->parse(listener, type);
-  if (m_headerFooter.m_pageNumberPosition >= STOFFHeaderFooter::BottomLeft &&
-      m_headerFooter.m_pageNumberPosition <= STOFFHeaderFooter::BottomRight)
-    m_headerFooter.insertPageNumberParagraph(listener.get());
-}
-}
-
-// ----------------- STOFFHeaderFooter ------------------------
-STOFFHeaderFooter::STOFFHeaderFooter(STOFFHeaderFooter::Type const type, STOFFHeaderFooter::Occurrence const occurrence) :
-  m_type(type), m_occurrence(occurrence), m_height(0),
-  m_pageNumberPosition(STOFFHeaderFooter::None), m_pageNumberType(libstoff::ARABIC),
-  m_pageNumberFont(), m_subDocument()
-{
-}
-
-STOFFHeaderFooter::~STOFFHeaderFooter()
-{
-}
-
-bool STOFFHeaderFooter::operator==(STOFFHeaderFooter const &hf) const
-{
-  if (&hf==this) return true;
-  if (m_type != hf.m_type)
-    return false;
-  if (m_type == UNDEF)
-    return true;
-  if (m_occurrence != hf.m_occurrence)
-    return false;
-  if (m_height < hf.m_height || m_height > hf.m_height)
-    return false;
-  if (m_pageNumberPosition != hf.m_pageNumberPosition ||
-      m_pageNumberType != hf.m_pageNumberType ||
-      m_pageNumberFont != hf.m_pageNumberFont)
-    return false;
-  if (!m_subDocument)
-    return !hf.m_subDocument;
-  if (*m_subDocument.get() != hf.m_subDocument)
-    return false;
-  return true;
-}
-
-// send data to the listener
-void STOFFHeaderFooter::send(STOFFListener *listener) const
-{
-  if (m_type == UNDEF)
-    return;
-  if (!listener) {
-    STOFF_DEBUG_MSG(("STOFFHeaderFooter::send: called without listener\n"));
-    return;
-  }
-  librevenge::RVNGPropertyList propList;
-  switch (m_occurrence) {
-  case ODD:
-    propList.insert("librevenge:occurrence", "odd");
-    break;
-  case EVEN:
-    propList.insert("librevenge:occurrence", "even");
-    break;
-  case ALL:
-    propList.insert("librevenge:occurrence", "all");
-    break;
-  case NEVER:
-  default:
-    break;
-  }
-  if (m_pageNumberPosition!=None) {
-    shared_ptr<STOFFPageSpanInternal::SubDocument> doc
-    (new STOFFPageSpanInternal::SubDocument(*this));
-    if (m_type == HEADER)
-      listener->insertHeader(doc,propList);
-    else
-      listener->insertFooter(doc,propList);
-    return;
-  }
-  if (m_type == HEADER)
-    listener->insertHeader(m_subDocument,propList);
-  else
-    listener->insertFooter(m_subDocument,propList);
-}
-
-void STOFFHeaderFooter::insertPageNumberParagraph(STOFFListener *listener) const
-{
-  STOFFParagraph para;
-  para.m_propertyList.insert("fo:text-align", "center");
-  switch (m_pageNumberPosition) {
-  case TopLeft:
-  case BottomLeft:
-    para.m_propertyList.insert("fo:text-align", "left");
-    break;
-  case TopRight:
-  case BottomRight:
-    para.m_propertyList.insert("fo:text-align", "right");
-    break;
-  case TopCenter:
-  case BottomCenter:
-  case None:
-    break;
-  default:
-    STOFF_DEBUG_MSG(("STOFFHeaderFooter::insertPageNumberParagraph: unexpected value\n"));
-    break;
-  }
-  listener->setParagraph(para);
-  listener->setFont(m_pageNumberFont);
-  if (listener->isParagraphOpened())
-    listener->insertEOL();
-
-  STOFFField field(STOFFField::PageNumber);
-  field.m_numberingType=m_pageNumberType;
-  listener->insertField(field);
-}
-
 // ----------------- STOFFPageSpan ------------------------
 STOFFPageSpan::STOFFPageSpan() :
   m_formLength(11.0), m_formWidth(8.5), m_formOrientation(STOFFPageSpan::PORTRAIT),
   m_name(""), m_masterName(""),
   m_backgroundColor(STOFFColor::white()),
   m_pageNumber(-1),
-  m_headerFooterList(),
+  m_occurenceHeaderMap(), m_occurenceFooterMap(),
   m_pageSpan(1)
 {
   for (int i = 0; i < 4; i++) m_margins[i] = 1.0;
@@ -216,45 +56,24 @@ STOFFPageSpan::~STOFFPageSpan()
 {
 }
 
-void STOFFPageSpan::setHeaderFooter(STOFFHeaderFooter const &hF)
+void STOFFPageSpan::addHeader(librevenge::RVNGString const &occurence, STOFFSubDocumentPtr document)
 {
-  STOFFHeaderFooter::Type const type=hF.m_type;
-  switch (hF.m_occurrence) {
-  case STOFFHeaderFooter::NEVER:
-    removeHeaderFooter(type, STOFFHeaderFooter::ALL);
-  case STOFFHeaderFooter::ALL:
-    removeHeaderFooter(type, STOFFHeaderFooter::ODD);
-    removeHeaderFooter(type, STOFFHeaderFooter::EVEN);
-    break;
-  case STOFFHeaderFooter::ODD:
-    removeHeaderFooter(type, STOFFHeaderFooter::ALL);
-    break;
-  case STOFFHeaderFooter::EVEN:
-    removeHeaderFooter(type, STOFFHeaderFooter::ALL);
-    break;
-  default:
-    break;
+  if (!document) {
+    if (m_occurenceHeaderMap.find(occurence)!=m_occurenceHeaderMap.end())
+      m_occurenceHeaderMap.erase(occurence);
+    return;
   }
-  int pos = getHeaderFooterPosition(hF.m_type, hF.m_occurrence);
-  if (pos != -1)
-    m_headerFooterList[size_t(pos)]=hF;
+  m_occurenceHeaderMap[occurence]=document;
+}
 
-  bool containsHFLeft = containsHeaderFooter(type, STOFFHeaderFooter::ODD);
-  bool containsHFRight = containsHeaderFooter(type, STOFFHeaderFooter::EVEN);
-
-  if (containsHFLeft && !containsHFRight) {
-    STOFF_DEBUG_MSG(("Inserting dummy header right\n"));
-    STOFFHeaderFooter dummy(type, STOFFHeaderFooter::EVEN);
-    pos = getHeaderFooterPosition(type, STOFFHeaderFooter::EVEN);
-    if (pos != -1)
-      m_headerFooterList[size_t(pos)]=STOFFHeaderFooter(type, STOFFHeaderFooter::EVEN);
+void STOFFPageSpan::addFooter(librevenge::RVNGString const &occurence, STOFFSubDocumentPtr document)
+{
+  if (!document) {
+    if (m_occurenceFooterMap.find(occurence)!=m_occurenceFooterMap.end())
+      m_occurenceFooterMap.erase(occurence);
+    return;
   }
-  else if (!containsHFLeft && containsHFRight) {
-    STOFF_DEBUG_MSG(("Inserting dummy header left\n"));
-    pos = getHeaderFooterPosition(type, STOFFHeaderFooter::ODD);
-    if (pos != -1)
-      m_headerFooterList[size_t(pos)]=STOFFHeaderFooter(type, STOFFHeaderFooter::ODD);
-  }
+  m_occurenceFooterMap[occurence]=document;
 }
 
 void STOFFPageSpan::checkMargins()
@@ -276,25 +95,18 @@ void STOFFPageSpan::sendHeaderFooters(STOFFListener *listener) const
     return;
   }
 
-  for (size_t i = 0; i < m_headerFooterList.size(); i++) {
-    STOFFHeaderFooter const &hf = m_headerFooterList[i];
-    if (!hf.isDefined()) continue;
-    hf.send(listener);
+  std::map<librevenge::RVNGString,STOFFSubDocumentPtr>::const_iterator it;
+  for (it=m_occurenceHeaderMap.begin(); it!=m_occurenceHeaderMap.end(); ++it) {
+    if (it->first.empty()) continue;
+    librevenge::RVNGPropertyList propList;
+    propList.insert("librevenge:occurrence", it->first);
+    listener->insertHeader(it->second,propList);
   }
-}
-
-void STOFFPageSpan::sendHeaderFooters(STOFFListener *listener, STOFFHeaderFooter::Occurrence occurrence) const
-{
-  if (!listener) {
-    STOFF_DEBUG_MSG(("STOFFPageSpan::sendHeaderFooters: no listener\n"));
-    return;
-  }
-
-  for (size_t i = 0; i < m_headerFooterList.size(); i++) {
-    STOFFHeaderFooter const &hf = m_headerFooterList[i];
-    if (!hf.isDefined()) continue;
-    if (hf.m_occurrence==occurrence || hf.m_occurrence==STOFFHeaderFooter::ALL)
-      hf.send(listener);
+  for (it=m_occurenceFooterMap.begin(); it!=m_occurenceFooterMap.end(); ++it) {
+    if (it->first.empty()) continue;
+    librevenge::RVNGPropertyList propList;
+    propList.insert("librevenge:occurrence", it->first);
+    listener->insertFooter(it->second,propList);
   }
 }
 
@@ -341,74 +153,28 @@ bool STOFFPageSpan::operator==(shared_ptr<STOFFPageSpan> const &page2) const
   if (getPageNumber() != page2->getPageNumber())
     return false;
 
-  size_t numHF = m_headerFooterList.size();
-  size_t numHF2 = page2->m_headerFooterList.size();
-  for (size_t i = numHF; i < numHF2; i++) {
-    if (page2->m_headerFooterList[i].isDefined())
+  for (int step=0; step<2; ++step) {
+    std::map<librevenge::RVNGString,STOFFSubDocumentPtr> const &map1=
+      step==0 ? m_occurenceHeaderMap : m_occurenceFooterMap;
+    std::map<librevenge::RVNGString,STOFFSubDocumentPtr> const &map2=
+      step==0 ? page2->m_occurenceHeaderMap : page2->m_occurenceFooterMap;
+    if (map1.size()!=map2.size())
       return false;
-  }
-  for (size_t i = numHF2; i < numHF; i++) {
-    if (m_headerFooterList[i].isDefined())
-      return false;
-  }
-  if (numHF2 < numHF) numHF = numHF2;
-  for (size_t i = 0; i < numHF; i++) {
-    if (m_headerFooterList[i] != page2->m_headerFooterList[i])
-      return false;
+    std::map<librevenge::RVNGString,STOFFSubDocumentPtr>::const_iterator it1, it2;
+    for (it1=map1.begin(); it1!=map1.end(); ++it1) {
+      it2=map2.find(it1->first);
+      if (it2==map2.end()) return false;
+      if (it1->second) {
+        if (!it2->second || *it1->second!=*it2->second)
+          return false;
+      }
+      else if (it2->second)
+        return false;
+    }
   }
   STOFF_DEBUG_MSG(("WordPerfect: STOFFPageSpan == comparison finished, found no differences\n"));
 
   return true;
 }
 
-// -------------- manage header footer list ------------------
-void STOFFPageSpan::removeHeaderFooter(STOFFHeaderFooter::Type type, STOFFHeaderFooter::Occurrence occurrence)
-{
-  int pos = getHeaderFooterPosition(type, occurrence);
-  if (pos == -1) return;
-  m_headerFooterList[size_t(pos)]=STOFFHeaderFooter();
-}
-
-bool STOFFPageSpan::containsHeaderFooter(STOFFHeaderFooter::Type type, STOFFHeaderFooter::Occurrence occurrence)
-{
-  int pos = getHeaderFooterPosition(type, occurrence);
-  if (pos == -1 || !m_headerFooterList[size_t(pos)].isDefined()) return false;
-  return true;
-}
-
-int STOFFPageSpan::getHeaderFooterPosition(STOFFHeaderFooter::Type type, STOFFHeaderFooter::Occurrence occurrence)
-{
-  int typePos = 0, occurrencePos = 0;
-  switch (type) {
-  case STOFFHeaderFooter::HEADER:
-    typePos = 0;
-    break;
-  case STOFFHeaderFooter::FOOTER:
-    typePos = 1;
-    break;
-  case STOFFHeaderFooter::UNDEF:
-  default:
-    STOFF_DEBUG_MSG(("STOFFPageSpan::getVectorPosition: unknown type\n"));
-    return -1;
-  }
-  switch (occurrence) {
-  case STOFFHeaderFooter::ALL:
-    occurrencePos = 0;
-    break;
-  case STOFFHeaderFooter::ODD:
-    occurrencePos = 1;
-    break;
-  case STOFFHeaderFooter::EVEN:
-    occurrencePos = 2;
-    break;
-  case STOFFHeaderFooter::NEVER:
-  default:
-    STOFF_DEBUG_MSG(("STOFFPageSpan::getVectorPosition: unknown occurrence\n"));
-    return -1;
-  }
-  size_t res = size_t(typePos*3+occurrencePos);
-  if (res >= m_headerFooterList.size())
-    m_headerFooterList.resize(res+1);
-  return int(res);
-}
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

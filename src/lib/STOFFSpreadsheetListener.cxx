@@ -312,10 +312,26 @@ void STOFFSpreadsheetListener::insertTab()
   _flushDeferredTabs();
 }
 
-void STOFFSpreadsheetListener::insertBreak(STOFFSpreadsheetListener::BreakType)
+void STOFFSpreadsheetListener::insertBreak(STOFFSpreadsheetListener::BreakType type)
 {
-  STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertBreak: make not sense\n"));
-  return;
+  if (type!=PageBreak) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertBreak: make not sense\n"));
+    return;
+  }
+  if (!m_ps->m_isPageSpanOpened && !m_ps->m_inSubDocument)
+    _openSpan();
+  if (m_ps->m_isParagraphOpened)
+    _closeParagraph();
+  if (m_ps->m_numPagesRemainingInSpan > 0)
+    m_ps->m_numPagesRemainingInSpan--;
+  else {
+    if (!m_ds->m_isSheetOpened && !m_ps->m_isTableOpened && !m_ps->m_inSubDocument)
+      _closePageSpan();
+    else {
+      STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertBreak: oops, call inside a sheet, table, ...\n"));
+    }
+  }
+  m_ps->m_currentPageNumber++;
 }
 
 ///////////////////

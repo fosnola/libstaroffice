@@ -34,6 +34,7 @@
 #ifndef STOFFPAGESPAN_H
 #define STOFFPAGESPAN_H
 
+#include <map>
 #include <vector>
 
 #include "libstaroffice_internal.hxx"
@@ -42,67 +43,12 @@
 
 class STOFFListener;
 
-/** a class which stores the header/footer data */
-class STOFFHeaderFooter
-{
-public:
-  /** the header/footer type */
-  enum Type { HEADER, FOOTER, UNDEF };
-  /** the header/footer occurrence in the file */
-  enum Occurrence { ODD, EVEN, ALL, NEVER };
-  /** a fixed page number position */
-  enum PageNumberPosition { None = 0, TopLeft, TopCenter, TopRight, BottomLeft, BottomCenter, BottomRight };
-
-  //! constructor
-  STOFFHeaderFooter(Type const type=UNDEF, Occurrence const occurrence=NEVER);
-  //! destructor
-  ~STOFFHeaderFooter();
-  //! returns true if the header footer is defined
-  bool isDefined() const
-  {
-    return m_type != UNDEF;
-  }
-  /** send to header to the listener */
-  void send(STOFFListener *listener) const;
-  //! operator==
-  bool operator==(STOFFHeaderFooter const &headerFooter) const;
-  //! operator!=
-  bool operator!=(STOFFHeaderFooter const &headerFooter) const
-  {
-    return !operator==(headerFooter);
-  }
-  //! insert a page number
-  void insertPageNumberParagraph(STOFFListener *listener) const;
-
-public:
-  //! the type header/footer
-  Type m_type;
-  //! the actual occurrence
-  Occurrence m_occurrence;
-  //! the height ( if known )
-  double m_height;
-  //! the page number position ( or none)
-  PageNumberPosition m_pageNumberPosition;
-  //! the page numbering type
-  libstoff::NumberingType m_pageNumberType;
-  //! the page numbering font
-  STOFFFont m_pageNumberFont;
-  //! the document data
-  STOFFSubDocumentPtr m_subDocument;
-};
-
-typedef shared_ptr<STOFFHeaderFooter> STOFFHeaderFooterPtr;
-
 /** A class which defines the page properties */
 class STOFFPageSpan
 {
 public:
   /** the page orientation */
   enum FormOrientation { PORTRAIT, LANDSCAPE };
-  /** a fixed page number position */
-  enum PageNumberPosition { None = 0, TopLeft, TopCenter, TopRight,
-                            BottomLeft, BottomCenter, BottomRight
-                          };
 public:
   //! constructor
   STOFFPageSpan();
@@ -168,8 +114,10 @@ public:
     return m_pageSpan;
   }
 
-  //! add a header/footer on some page
-  void setHeaderFooter(STOFFHeaderFooter const &headerFooter);
+  //! add a header on some page
+  void addHeader(librevenge::RVNGString const &occurence, STOFFSubDocumentPtr document);
+  //! add a header on some page
+  void addFooter(librevenge::RVNGString const &occurence, STOFFSubDocumentPtr document);
   //! set the total page length
   void setFormLength(const double formLength)
   {
@@ -278,16 +226,7 @@ public:
   void getPageProperty(librevenge::RVNGPropertyList &pList) const;
   //! send the page's headers/footers if some exists
   void sendHeaderFooters(STOFFListener *listener) const;
-  //! send the page's headers/footers corresponding to an occurrence if some exists
-  void sendHeaderFooters(STOFFListener *listener, STOFFHeaderFooter::Occurrence occurrence) const;
 
-protected:
-  //! return the header footer positions in m_headerFooterList
-  int getHeaderFooterPosition(STOFFHeaderFooter::Type type, STOFFHeaderFooter::Occurrence occurrence);
-  //! remove a header footer
-  void removeHeaderFooter(STOFFHeaderFooter::Type type, STOFFHeaderFooter::Occurrence occurrence);
-  //! return true if we have a header footer in this position
-  bool containsHeaderFooter(STOFFHeaderFooter::Type type, STOFFHeaderFooter::Occurrence occurrence);
 private:
   double m_formLength/** the form length*/, m_formWidth /** the form width */;
   /** the form orientation */
@@ -302,8 +241,10 @@ private:
   STOFFColor m_backgroundColor;
   //! the page number ( or -1)
   int m_pageNumber;
-  //! the list of header
-  std::vector<STOFFHeaderFooter> m_headerFooterList;
+  //! the map occurence to header document
+  std::map<librevenge::RVNGString,STOFFSubDocumentPtr> m_occurenceHeaderMap;
+  //! the map occurence to footer document
+  std::map<librevenge::RVNGString,STOFFSubDocumentPtr> m_occurenceFooterMap;
   //! the number of page
   int m_pageSpan;
 };

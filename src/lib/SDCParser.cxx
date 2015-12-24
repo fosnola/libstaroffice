@@ -218,10 +218,13 @@ bool SDCParser::createZones()
 void SDCParser::createDocument(librevenge::RVNGSpreadsheetInterface *documentInterface)
 {
   if (!documentInterface) return;
-  m_state->m_numPages = 1;
-  STOFFPageSpan ps(getPageSpan());
-  ps.setPageSpan(1);
-  std::vector<STOFFPageSpan> pageList(1,ps);
+  std::vector<STOFFPageSpan> pageList;
+  if (!m_state->m_mainSpreadsheet || m_state->m_mainSpreadsheet->updatePageSpans(pageList, m_state->m_numPages)) {
+    STOFFPageSpan ps(getPageSpan());
+    ps.setPageSpan(1);
+    pageList.push_back(ps);
+    m_state->m_numPages = 1;
+  }
   //
   STOFFSpreadsheetListenerPtr listen(new STOFFSpreadsheetListener(*getParserState(), pageList, documentInterface));
   setSpreadsheetListener(listen);

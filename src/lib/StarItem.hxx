@@ -104,7 +104,7 @@ class StarItemStyle
 public:
   //! the different family style
   enum FamilyStyle {
-    F_Char=1, F_Paragraph=2, F_Frame=4, F_PAGE=8, F_PSEUDO=0x10, F_ALL=0xFE
+    F_Char=1, F_Paragraph=2, F_Frame=4, F_Page=8, F_Pseudo=0x10, F_ALL=0xFE
   };
   //! constructor
   StarItemStyle() : m_family(0), m_mask(0), m_itemSet(), m_helpId(0)
