@@ -159,6 +159,74 @@ protected:
   }
 };
 
+//! a list of item attribute of StarAttributeInternal
+class StarPAttributeItemSet : public StarAttributeItemSet
+{
+public:
+  //! constructor
+  StarPAttributeItemSet(Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits) :
+    StarAttributeItemSet(type, debugName, limits)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarPAttributeItemSet(*this));
+  }
+  //! add to a pageSpan
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool) const;
+
+protected:
+  //! copy constructor
+  StarPAttributeItemSet(StarAttributeItemSet const &orig) : StarAttributeItemSet(orig)
+  {
+  }
+};
+
+//! an Vec2i attribute
+class StarPAttributeVec2i : public StarAttributeVec2i
+{
+public:
+  //! constructor
+  StarPAttributeVec2i(Type type, std::string const &debugName, int intSize, STOFFVec2i value=STOFFVec2i(0,0)) : StarAttributeVec2i(type, debugName, intSize, value)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarPAttributeVec2i(*this));
+  }
+  //! add to a pageSpan
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool) const;
+protected:
+  //! copy constructor
+  StarPAttributeVec2i(StarAttributeVec2i const &orig) : StarAttributeVec2i(orig)
+  {
+  }
+};
+
+void StarPAttributeVec2i::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const
+{
+  if (m_type!=ATTR_SC_PAGE_SIZE)
+    return;
+  if (page.m_actualZone==0) {
+    page.m_propertiesList[0].insert("fo:page-width", double(m_value[0])/1440., librevenge::RVNG_INCH);
+    page.m_propertiesList[0].insert("fo:page-height", double(m_value[1])/1440., librevenge::RVNG_INCH);
+  }
+  else if (page.m_actualZone==1 || page.m_actualZone==2)
+    page.m_propertiesList[page.m_actualZone].insert("fo:min-height", double(m_value[1])/1440., librevenge::RVNG_INCH);
+}
+
+void StarPAttributeItemSet::addTo(STOFFPageSpan &page, StarItemPool const *pool) const
+{
+  if (m_type!=ATTR_SC_PAGE_HEADERSET && m_type!=ATTR_SC_PAGE_FOOTERSET)
+    return;
+  STOFFPageSpan::ZoneType prevZone=page.m_actualZone;
+  page.m_actualZone=m_type==ATTR_SC_PAGE_HEADERSET ? STOFFPageSpan::Header : STOFFPageSpan::Footer;
+  StarAttributeItemSet::addTo(page, pool);
+  page.m_actualZone=prevZone;
+}
+
 //! add a bool attribute
 void addAttributeBool(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
 {
@@ -557,6 +625,21 @@ namespace StarPageAttribute
 {
 void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
 {
+  map[StarAttribute::ATTR_SC_PAGE_SIZE]=shared_ptr<StarAttribute>(new StarPAttributeVec2i(StarAttribute::ATTR_SC_PAGE_SIZE, "page[size]", 4));
+
+  map[StarAttribute::ATTR_SC_PAGE_HEADERLEFT]=shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_HEADERLEFT, "header[left]"));
+  map[StarAttribute::ATTR_SC_PAGE_HEADERRIGHT]=shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_HEADERRIGHT, "header[right]"));
+  map[StarAttribute::ATTR_SC_PAGE_FOOTERLEFT]=shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_FOOTERLEFT, "footer[left]"));
+  map[StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT]=shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT, "footer[right]"));
+  std::vector<STOFFVec2i> limits;
+  limits.push_back(STOFFVec2i(142,142)); // BACKGROUND
+  limits.push_back(STOFFVec2i(144,146)); // BORDER->SHADOW
+  limits.push_back(STOFFVec2i(150,151)); // LRSPACE->ULSPACE
+  limits.push_back(STOFFVec2i(155,155)); // PAGESIZE
+  limits.push_back(STOFFVec2i(159,161)); // ON -> SHARED
+  map[StarAttribute::ATTR_SC_PAGE_HEADERSET]=shared_ptr<StarAttribute>(new StarPAttributeItemSet(StarAttribute::ATTR_SC_PAGE_HEADERSET, "setPageHeader", limits));
+  map[StarAttribute::ATTR_SC_PAGE_FOOTERSET]=shared_ptr<StarAttribute>(new StarPAttributeItemSet(StarAttribute::ATTR_SC_PAGE_FOOTERSET, "setPageFooter", limits));
+
   // TODO
   addAttributeUInt(map, StarAttribute::ATTR_SC_PAGE_PAPERTRAY,"page[papertray]",2,0);
   addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_HORCENTER,"page[horizontal,center]", false);
@@ -579,23 +662,10 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   map[StarAttribute::ATTR_SC_PAGE_OBJECTS]=shared_ptr<StarAttribute>(new StarPAttributeViewMode(StarAttribute::ATTR_SC_PAGE_OBJECTS, "page[objects]"));
   map[StarAttribute::ATTR_SC_PAGE_DRAWINGS]=shared_ptr<StarAttribute>(new StarPAttributeViewMode(StarAttribute::ATTR_SC_PAGE_DRAWINGS, "page[drawings]"));
   map[StarAttribute::ATTR_SC_PAGE_PRINTTABLES]=shared_ptr<StarAttribute>(new StarPAttributePrint(StarAttribute::ATTR_SC_PAGE_PRINTTABLES, "page[printtables]"));
-  map[StarAttribute::ATTR_SC_PAGE_HEADERLEFT]=shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_HEADERLEFT, "header[left]"));
-  map[StarAttribute::ATTR_SC_PAGE_HEADERRIGHT]=shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_HEADERRIGHT, "header[right]"));
-  map[StarAttribute::ATTR_SC_PAGE_FOOTERLEFT]=shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_FOOTERLEFT, "footer[left]"));
-  map[StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT]=shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT, "footer[right]"));
-  map[StarAttribute::ATTR_SC_PAGE_SIZE]=shared_ptr<StarAttribute>(new StarAttributeVec2i(StarAttribute::ATTR_SC_PAGE_SIZE, "page[size]", 4));
-  map[StarAttribute::ATTR_SC_PAGE_MAXSIZE]=shared_ptr<StarAttribute>(new StarAttributeVec2i(StarAttribute::ATTR_SC_PAGE_MAXSIZE, "page[maxsize]", 4));
+  map[StarAttribute::ATTR_SC_PAGE_MAXSIZE]=shared_ptr<StarAttribute>(new StarPAttributeVec2i(StarAttribute::ATTR_SC_PAGE_MAXSIZE, "page[maxsize]", 4));
   map[StarAttribute::ATTR_SC_PAGE_PRINTAREA]=shared_ptr<StarAttribute>(new StarPAttributeRangeItem(StarAttribute::ATTR_SC_PAGE_PRINTAREA, "page[printArea]"));
   map[StarAttribute::ATTR_SC_PAGE_REPEATCOL]=shared_ptr<StarAttribute>(new StarPAttributeRangeItem(StarAttribute::ATTR_SC_PAGE_REPEATCOL, "page[repeatCol]"));
   map[StarAttribute::ATTR_SC_PAGE_REPEATROW]=shared_ptr<StarAttribute>(new StarPAttributeRangeItem(StarAttribute::ATTR_SC_PAGE_REPEATROW, "page[repeatRow]"));
-  std::vector<STOFFVec2i> limits;
-  limits.push_back(STOFFVec2i(142,142)); // BACKGROUND
-  limits.push_back(STOFFVec2i(144,146)); // BORDER->SHADOW
-  limits.push_back(STOFFVec2i(150,151)); // LRSPACE->ULSPACE
-  limits.push_back(STOFFVec2i(155,155)); // PAGESIZE
-  limits.push_back(STOFFVec2i(159,161)); // ON -> SHARED
-  map[StarAttribute::ATTR_SC_PAGE_HEADERSET]=shared_ptr<StarAttribute>(new StarAttributeItemSet(StarAttribute::ATTR_SC_PAGE_HEADERSET, "setPageHeader", limits));
-  map[StarAttribute::ATTR_SC_PAGE_FOOTERSET]=shared_ptr<StarAttribute>(new StarAttributeItemSet(StarAttribute::ATTR_SC_PAGE_FOOTERSET, "setPageFooter", limits));
 }
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

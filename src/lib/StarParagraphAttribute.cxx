@@ -32,6 +32,7 @@
 */
 
 #include "STOFFParagraph.hxx"
+#include "STOFFPageSpan.hxx"
 
 #include "StarAttribute.hxx"
 #include "StarItemPool.hxx"
@@ -241,19 +242,20 @@ public:
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  //! add to a font
+  //! add to a paragraph
   virtual void addTo(STOFFParagraph &para, StarItemPool const */*pool*/) const;
+  //! add to a page
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
   //! debug function to print the data
   virtual void print(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     for (int i=0; i<3; ++i) {
-      if (m_margins[i]>=0&&m_margins[i]<=0)
-        continue;
       char const *(wh[])= {"left", "right", "firstLine"};
-      o << wh[i] << "=" << m_margins[i];
-      if (m_propMargins[i]!=100) o << ":" << m_propMargins[i] << ",";
-      o << ",";
+      if (m_propMargins[i]!=100)
+        o << wh[i] << "=" << m_propMargins[i] << "%,";
+      else if (m_margins[i])
+        o << wh[i] << "=" << m_margins[i] << ",";
     }
     if (m_textLeft) o << "text[left]=" << m_textLeft << ",";
     if (!m_autoFirst) o << "autoFirst=no,";
@@ -279,12 +281,91 @@ protected:
   int m_bullet;
 };
 
+//! a top, bottom, ... attribute
+class StarPAttributeULSpace : public StarAttribute
+{
+public:
+  //! constructor
+  StarPAttributeULSpace(Type type, std::string const &debugName) : StarAttribute(type, debugName)
+  {
+    for (int i=0; i<2; ++i) m_margins[i]=0;
+    for (int i=0; i<2; ++i) m_propMargins[i]=100;
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarPAttributeULSpace(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  // ! add to a paragraph
+  // virtual void addTo(STOFFParagraph &para, StarItemPool const */*pool*/) const;
+  //! add to a page
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    for (int i=0; i<2; ++i) {
+      char const *(wh[])= {"top", "bottom" };
+      if (m_propMargins[i]!=100)
+        o << wh[i] << "=" << m_propMargins[i] << "%,";
+      else if (m_margins[i])
+        o << wh[i] << "=" << m_margins[i] << ",";
+    }
+    o << "],";
+  }
+protected:
+  //! copy constructor
+  StarPAttributeULSpace(StarPAttributeULSpace const &orig) : StarAttribute(orig)
+  {
+    for (int i=0; i<2; ++i) m_margins[i]=orig.m_margins[i];
+    for (int i=0; i<2; ++i) m_propMargins[i]=orig.m_propMargins[i];
+  }
+  //! the margins: top, bottom
+  int m_margins[2];
+  //! the prop margins: top, bottom
+  int m_propMargins[2];
+};
+
 void StarPAttributeAdjust::addTo(STOFFParagraph &/*para*/, StarItemPool const */*pool*/) const
 {
 }
 
 void StarPAttributeLRSpace::addTo(STOFFParagraph &/*para*/, StarItemPool const */*pool*/) const
 {
+}
+
+void StarPAttributeLRSpace::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const
+{
+  if (m_type!=ATTR_FRM_LR_SPACE) return;
+  if (page.m_actualZone>=0 && page.m_actualZone<=2) {
+    if (m_propMargins[0]==100)
+      page.m_propertiesList[page.m_actualZone].insert("fo:margin-left", double(m_margins[0])/1440., librevenge::RVNG_INCH);
+    else
+      page.m_propertiesList[page.m_actualZone].insert("fo:margin-left", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
+
+    if (m_propMargins[1]==100)
+      page.m_propertiesList[page.m_actualZone].insert("fo:margin-right", double(m_margins[1])/1440., librevenge::RVNG_INCH);
+    else
+      page.m_propertiesList[page.m_actualZone].insert("fo:margin-right", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
+  }
+}
+
+void StarPAttributeULSpace::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const
+{
+  if (m_type!=ATTR_FRM_UL_SPACE) return;
+  if (page.m_actualZone>=0 && page.m_actualZone<=2) {
+    if (m_propMargins[0]==100)
+      page.m_propertiesList[page.m_actualZone].insert("fo:margin-top", double(m_margins[0])/1440., librevenge::RVNG_INCH);
+    else
+      page.m_propertiesList[page.m_actualZone].insert("fo:margin-top", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
+
+    if (m_propMargins[1]==100)
+      page.m_propertiesList[page.m_actualZone].insert("fo:margin-bottom", double(m_margins[1])/1440., librevenge::RVNG_INCH);
+    else
+      page.m_propertiesList[page.m_actualZone].insert("fo:margin-bottom", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
+  }
 }
 
 bool StarPAttributeAdjust::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
@@ -342,6 +423,25 @@ bool StarPAttributeLRSpace::read(StarZone &zone, int vers, long endPos, StarObje
   return input->tell()<=endPos;
 }
 
+bool StarPAttributeULSpace::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  for (int i=0; i<2; ++i) {
+    if (i<2)
+      m_margins[i]=(int) input->readULong(2);
+    else
+      m_margins[i]=(int) input->readLong(2);
+    m_propMargins[i]=(int) input->readULong(vers>=1 ? 2 : 1);
+  }
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
 }
 
 namespace StarParagraphAttribute
@@ -368,6 +468,7 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   map[StarAttribute::ATTR_PARA_ADJUST]=shared_ptr<StarAttribute>(new StarPAttributeAdjust(StarAttribute::ATTR_PARA_ADJUST,"parAtrAdjust"));
   map[StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE]=shared_ptr<StarAttribute>(new StarPAttributeLRSpace(StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE,"eeOutLrSpace"));
   map[StarAttribute::ATTR_FRM_LR_SPACE]=shared_ptr<StarAttribute>(new StarPAttributeLRSpace(StarAttribute::ATTR_FRM_LR_SPACE,"lrSpace"));
+  map[StarAttribute::ATTR_FRM_UL_SPACE]=shared_ptr<StarAttribute>(new StarPAttributeULSpace(StarAttribute::ATTR_FRM_UL_SPACE,"ulSpace"));
 }
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

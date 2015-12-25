@@ -38,7 +38,7 @@
  * the librevenge::RVNGSpreadsheetInterface
  */
 
-#define SENDHFREGION 1
+#define TEST_SEND_HEADERFOOTER_REGION 0
 
 #include <cmath>
 #include <cstring>
@@ -612,7 +612,7 @@ bool STOFFSpreadsheetListener::insertHeaderRegion(STOFFSubDocumentPtr subDocumen
   }
   librevenge::RVNGPropertyList propList;
   propList.insert("librevenge::region", which);
-#ifdef SENDHFREGION
+#if TEST_SEND_HEADERFOOTER_REGION
   m_documentInterface->openHeader(propList);
   handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER_REGION);
   m_documentInterface->closeHeader();
@@ -653,7 +653,7 @@ bool STOFFSpreadsheetListener::insertFooterRegion(STOFFSubDocumentPtr subDocumen
   }
   librevenge::RVNGPropertyList propList;
   propList.insert("librevenge::region", which);
-#ifdef SENDHFREGION
+#if TEST_SEND_HEADERFOOTER_REGION
   m_documentInterface->openFooter(propList);
   handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER_REGION);
   m_documentInterface->closeFooter();

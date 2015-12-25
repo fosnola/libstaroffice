@@ -1180,17 +1180,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     if (nVers>1)
       f << "percent=" << input->readULong(1) << "x"  << input->readULong(1) << ",";
     break;
-  case StarAttribute::ATTR_FRM_UL_SPACE:
-    f << "ulSpace,";
-    f << "upper=" << input->readULong(2);
-    val=(int) input->readULong(nVers==1 ? 2 : 1);
-    if (val) f << ":" << val;
-    f << ",";
-    f << "lower=" << input->readULong(2);
-    val=(int) input->readULong(nVers==1 ? 2 : 1);
-    if (val) f << ":" << val;
-    f << ",";
-    break;
   case StarAttribute::ATTR_FRM_PAGEDESC:
     f << "pageDesc,";
     if (nVers<1)

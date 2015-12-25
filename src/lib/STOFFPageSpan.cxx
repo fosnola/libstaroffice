@@ -100,13 +100,13 @@ void STOFFPageSpan::sendHeaderFooters(STOFFListener *listener) const
     for (it=m_occurrenceHFMap[i].begin(); it!=m_occurrenceHFMap[i].end(); ++it) {
       std::string occurrence=it->first;
       if (occurrence.empty()) continue;
-      librevenge::RVNGPropertyList propList(m_propertiesList[i+1]);
+      librevenge::RVNGPropertyList propList;
       propList.insert("librevenge:occurrence", occurrence.c_str());
       if (i==0)
         listener->openHeader(propList);
       else
         listener->openFooter(propList);
-      it->second.send(listener, true);
+      it->second.send(listener, i==0);
       if (i==0)
         listener->closeHeader();
       else
@@ -119,6 +119,13 @@ void STOFFPageSpan::getPageProperty(librevenge::RVNGPropertyList &propList) cons
 {
   propList=m_propertiesList[0];
   propList.insert("librevenge:num-pages", m_pageSpan);
+  for (int i=1; i<3; ++i) {
+    if (m_propertiesList[i].empty())
+      continue;
+    librevenge::RVNGPropertyListVector vect;
+    vect.append(m_propertiesList[i]);
+    propList.insert(i==1 ? "librevenge:header" : "librevenge:footer", vect);
+  }
 }
 
 
