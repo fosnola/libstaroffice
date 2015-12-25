@@ -333,7 +333,7 @@ struct State {
   State(StarObject &document, StarItemPool::Type type) :
     m_document(document), m_type(StarItemPool::T_Unknown), m_majorVersion(0), m_minorVersion(0), m_loadingVersion(-1),
     m_name(""), m_isSecondaryPool(false), m_secondaryPool(), m_currentVersion(0), m_verStart(0), m_verEnd(0), m_versionList(),
-    m_idToAttributeList(), m_slotIdToValuesMap(), m_styleIdToStyleMap(), m_simplifyNameToStyleNameMap(), m_delayedItemList()
+    m_idToAttributeList(), m_slotIdToValuesMap(), m_styleIdToStyleMap(), m_simplifyNameToStyleNameMap(), m_idToDefaultMap(), m_delayedItemList()
   {
     init(type);
   }
@@ -438,13 +438,19 @@ struct State {
   //! try to return a default attribute corresponding to which
   shared_ptr<StarAttribute> getDefaultAttribute(int which)
   {
+    if (m_idToDefaultMap.find(which)!=m_idToDefaultMap.end() && m_idToDefaultMap.find(which)->second)
+      return m_idToDefaultMap.find(which)->second;
+    shared_ptr<StarAttribute> res;
     StarItemPoolInternal::State *state=getPoolStateFor(which);
     if (!state || which<state->m_verStart || which>=state->m_verStart+int(state->m_idToAttributeList.size()) ||
         !state->m_document.getAttributeManager()) {
       STOFF_DEBUG_MSG(("StarItemPoolInternal::State::getDefaultAttribute: find unknown attribute\n"));
-      return StarAttributeManager::getDummyAttribute();
+      res=StarAttributeManager::getDummyAttribute();
     }
-    return m_document.getAttributeManager()->getDefaultAttribute(state->m_idToAttributeList[size_t(which-state->m_verStart)]);
+    else
+      res=m_document.getAttributeManager()->getDefaultAttribute(state->m_idToAttributeList[size_t(which-state->m_verStart)]);
+    m_idToDefaultMap[which]=res;
+    return res;
   }
   //! small function to simplify a string (bad hack)
   static librevenge::RVNGString getBasicString(librevenge::RVNGString const &s)
@@ -503,6 +509,8 @@ struct State {
   std::map<StyleId,StarItemStyle> m_styleIdToStyleMap;
   //! map simplify style name to style name
   std::map<librevenge::RVNGString, librevenge::RVNGString> m_simplifyNameToStyleNameMap;
+  //! map of created default attribute
+  std::map<int,shared_ptr<StarAttribute> > m_idToDefaultMap;
   //! list of item which need to be read
   std::vector<shared_ptr<StarItem> > m_delayedItemList;
 private:
