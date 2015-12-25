@@ -49,6 +49,24 @@ bool StarItemSet::add(shared_ptr<StarItem> item)
   return true;
 }
 
+std::string StarItemSet::printChild() const
+{
+  if (m_whichToItemMap.empty()) return "";
+  libstoff::DebugStream o;
+  o << "Attrib=[";
+  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_whichToItemMap.begin();
+       it!=m_whichToItemMap.end(); ++it) {
+    if (!it->second || !it->second->m_attribute) {
+      o << "_,";
+      continue;
+    }
+    it->second->m_attribute->print(o);
+    o << ",";
+  }
+  o << "],";
+  return o.str();
+}
+
 std::ostream &operator<<(std::ostream &o, StarItemStyle const &style)
 {
   for (int i=0; i<4; ++i) {
@@ -87,18 +105,7 @@ std::ostream &operator<<(std::ostream &o, StarItemStyle const &style)
   if (style.m_mask) o << "mask=" << std::hex << style.m_mask << std::dec << ",";
   if (style.m_helpId) o << "help[id]=" << style.m_helpId << ",";
 #if 0
-  o << "Attrib=[";
-  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style.m_itemSet.m_whichToItemMap.begin();
-       it!=style.m_itemSet.m_whichToItemMap.end(); ++it) {
-    if (!it->second || !it->second->m_attribute) {
-      o << "_,";
-      continue;
-    }
-    libstoff::DebugStream f2;
-    it->second->m_attribute->print(f2);
-    o << f2.str() << ",";
-  }
-  o << "],";
+  o << style.m_itemSet.printChild();
 #endif
   return o;
 }

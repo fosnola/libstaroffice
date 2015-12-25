@@ -43,7 +43,7 @@
 
 #include <libstaroffice/STOFFDocument.hxx>
 
-#include "STOFFEntry.hxx"
+#include "STOFFDebug.hxx"
 
 class StarAttribute;
 
@@ -90,6 +90,8 @@ public:
   }
   //! try to add a item
   bool add(shared_ptr<StarItem> item);
+  //! debug function to print the child field
+  std::string printChild() const;
   //! item set name
   librevenge::RVNGString m_style;
   //! the family

@@ -433,13 +433,15 @@ public:
 //! Internal: the state of a StarObjectSpreadsheet
 struct State {
   //! constructor
-  State() : m_tableList(), m_sheetNames()
+  State() : m_tableList(), m_sheetNames(), m_pageStyle("")
   {
   }
   //! the actual table
   std::vector<shared_ptr<Table> > m_tableList;
   //! the sheet names
   std::vector<librevenge::RVNGString> m_sheetNames;
+  //! the main page style
+  librevenge::RVNGString m_pageStyle;
 };
 
 ////////////////////////////////////////
@@ -525,25 +527,16 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
       STOFFPageSpan ps;
       ps.m_pageSpan=nPages;
       StarItemStyle const *style=(pool&&!styleName.empty()) ? pool->findStyleWithFamily(styleName, StarItemStyle::F_Page) : 0;
+      if (!style && pool && !m_state->m_pageStyle.empty())
+        style=pool->findStyleWithFamily(m_state->m_pageStyle, StarItemStyle::F_Page);
       if (style) {
         for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
              it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
           if (it->second && it->second->m_attribute)
             it->second->m_attribute->addTo(ps, pool.get());
         }
-#if 1
-        std::cerr << "Attrib\n";
-        for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
-             it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
-          if (!it->second || !it->second->m_attribute) {
-            std::cerr << "_,";
-            continue;
-          }
-          libstoff::DebugStream f2;
-          it->second->m_attribute->print(f2);
-          std::cerr << f2.str() << ",";
-        }
-        std::cerr << "\n";
+#if 0
+        std::cerr << style->m_itemSet.printChild() << "\n";
 #endif
       }
       pageSpan.push_back(ps);
@@ -1268,8 +1261,10 @@ try
         f << "###string";
         break;
       }
-      else if (!string.empty())
-        f << "pageStyle=" << libstoff::getString(string).cstr() << ",";
+      else if (!string.empty()) {
+        m_state->m_pageStyle=libstoff::getString(string);
+        f << "pageStyle=" << m_state->m_pageStyle.cstr() << ",";
+      }
       f << "protected=" << input->readULong(1) << ",";
       if (!zone.readString(string)) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
