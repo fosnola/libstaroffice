@@ -426,8 +426,13 @@ bool NumberFormatter::Format::updateNumberingProperties(STOFFCell &cell, std::st
     format.m_numberFormat=STOFFCell::F_NUMBER_DECIMAL;
     propList.insert("librevenge:value-type", "number");
     propList.insert("number:decimal-places", m_postfix);
-    if (m_prefix) propList.insert("number:min-integer-digits", m_prefix);
-    if (m_hasThousandSep) propList.insert("number:grouping", true);
+    int prefix=m_prefix;
+    if (m_hasThousandSep) {
+      // if set, prefix seems to contains leading+3 characters
+      propList.insert("number:grouping", true);
+      prefix-=3;
+    }
+    if (prefix>0) propList.insert("number:min-integer-digits", prefix);
     cell.setFormat(format);
     return true;
   }
