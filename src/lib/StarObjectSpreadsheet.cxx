@@ -326,14 +326,23 @@ public:
   {
     return m_maxRow;
   }
-  //! returns the column width in twip
-  std::vector<float> getColWidths() const
+  //! returns the col width dimension in inch
+  std::vector<float> getColumnWidths(std::vector<int> &repeated) const
   {
-    std::vector<float> res;
-    res.resize(m_colWidthList.size());
-    for (size_t i=0; i<m_colWidthList.size(); ++i)
-      res[i]=(float) m_colWidthList[i]/1440.f;
-    return res;
+    std::vector<float> widths;
+    repeated.clear();
+    size_t actPos=0;
+    int lastWidth=-1;
+    for (size_t i=0; i<=m_colWidthList.size(); ++i) {
+      if ((i==m_colWidthList.size() || lastWidth!=m_colWidthList[i]) && actPos<i) {
+        widths.push_back(float(lastWidth)/1440.f);
+        repeated.push_back(int(i-actPos));
+        actPos=i;
+      }
+      if (i==m_colWidthList.size()) break;
+      lastWidth=m_colWidthList[i];
+    }
+    return widths;
   }
   //! returns the row size in point
   float getRowHeight(int row) const
@@ -567,7 +576,9 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
     if (t) listener->insertBreak(STOFFListener::PageBreak);
     if (!m_state->m_tableList[t]) continue;
     StarObjectSpreadsheetInternal::Table &sheet=*m_state->m_tableList[t];
-    listener->openSheet(sheet.getColWidths(), librevenge::RVNG_INCH, sheet.m_name);
+    std::vector<int> repeated;
+    std::vector<float> widths=sheet.getColumnWidths(repeated);
+    listener->openSheet(widths, librevenge::RVNG_INCH, repeated, sheet.m_name);
 
     /* create a set to know which row needed to be send, each value of
        the set corresponding to a position where the rows change

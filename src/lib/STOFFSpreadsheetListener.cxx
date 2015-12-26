@@ -1201,7 +1201,7 @@ void STOFFSpreadsheetListener::_endSubDocument()
 ///////////////////
 // sheet
 ///////////////////
-void STOFFSpreadsheetListener::openSheet(std::vector<float> const &colWidth, librevenge::RVNGUnit unit, librevenge::RVNGString const &name)
+void STOFFSpreadsheetListener::openSheet(std::vector<float> const &colWidth, librevenge::RVNGUnit unit, std::vector<int> const &repeatColWidthNumber, librevenge::RVNGString const &name)
 {
   if (m_ds->m_isSheetOpened) {
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openSheet: called with m_isSheetOpened=true\n"));
@@ -1220,9 +1220,15 @@ void STOFFSpreadsheetListener::openSheet(std::vector<float> const &colWidth, lib
   librevenge::RVNGPropertyList propList;
   librevenge::RVNGPropertyListVector columns;
   size_t nCols = colWidth.size();
+  bool useRepeated=repeatColWidthNumber.size()==nCols;
+  if (!useRepeated&&!repeatColWidthNumber.empty()) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openSheet: repeatColWidthNumber seems bad\n"));
+  }
   for (size_t c = 0; c < nCols; c++) {
     librevenge::RVNGPropertyList column;
     column.insert("style:column-width", colWidth[c], unit);
+    if (useRepeated && repeatColWidthNumber[c]>1)
+      column.insert("table:number-columns-repeated", repeatColWidthNumber[c]);
     columns.append(column);
   }
   propList.insert("librevenge:columns", columns);

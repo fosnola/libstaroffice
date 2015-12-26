@@ -128,7 +128,8 @@ public:
 
   // ------- sheet -----------------
   /** open a sheet*/
-  void openSheet(std::vector<float> const &colWidth, librevenge::RVNGUnit unit, librevenge::RVNGString const &name="");
+  void openSheet(std::vector<float> const &colWidth, librevenge::RVNGUnit unit,
+                 std::vector<int> const &repeatColWidthNumber=std::vector<int>(), librevenge::RVNGString const &name="");
   /** closes this sheet */
   void closeSheet();
   /** open a row with given height ( if h < 0.0, set min-row-height = -h )*/
