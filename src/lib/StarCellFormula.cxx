@@ -304,20 +304,27 @@ bool Token::addToken(std::vector<std::vector<Token> > &stack, Token const &token
   bool isOperator=token.m_instruction.m_type==STOFFCellContent::FormulaInstruction::F_Operator;
   int nChild=int(token.m_longValue);
   int numElt=int(stack.size());
-  if (nChild<0 || nChild>numElt || (isOperator&& nChild!=1 && nChild!=2)) {
+  int special=0;
+  if (nChild<0) {
+    special=-nChild;
+    nChild=special==2 ? 1 : special;
+  }
+  if (nChild<0 || nChild>numElt || (special>3) || (isOperator && !special && nChild!=1 && nChild!=2)) {
     STOFF_DEBUG_MSG(("StarCellFormulaInternal::addToken: find unexpected number of child for token %s\n", token.m_instruction.m_content.cstr()));
     return false;
   }
-  if (!isOperator||nChild==1)
+  if (special==2 || (!special && (!isOperator || nChild==1)))
     child.push_back(token);
   Token sep;
   sep.m_type=StarCellFormulaInternal::Token::Function;
   sep.m_instruction.m_type=STOFFCellContent::FormulaInstruction::F_Operator;
   sep.m_instruction.m_content="(";
-  child.push_back(sep);
-
+  if (!special || special==2)
+    child.push_back(sep);
   for (int c=0; c<nChild; ++c) {
-    if (c && !isOperator) {
+    if (special)
+      ;
+    else if (c && !isOperator) {
       sep.m_instruction.m_content=";";
       child.push_back(sep);
     }
@@ -326,9 +333,15 @@ bool Token::addToken(std::vector<std::vector<Token> > &stack, Token const &token
     std::vector<Token> const &node=stack[size_t(numElt-nChild+c)];
     child.insert(child.end(), node.begin(), node.end());
   }
-
   sep.m_instruction.m_content=")";
-  child.push_back(sep);
+  if (!special)
+    child.push_back(sep);
+  else if (special==2) {
+    sep.m_instruction.m_content=";";
+    child.push_back(sep);
+  }
+  else
+    child.push_back(token);
   stack.resize(size_t(numElt-nChild+1));
   stack[size_t(numElt-nChild)] = child;
 
@@ -454,7 +467,7 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCellContent &content, i
     }
     f << "],";
   }
-  if (ok && !formulaSet) {
+  if (ok && !formulaSet && rpnList.size()) {
     std::vector<std::vector<StarCellFormulaInternal::Token> > stack;
     for (size_t i=0; i<rpnList.size(); ++i) {
       if (!StarCellFormulaInternal::Token::addToken(stack, rpnList[i])) {
@@ -480,6 +493,19 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCellContent &content, i
         formulaSet=true;
       }
     }
+#if 0
+    else {
+      std::cerr << "Bad=[\n";
+      for (size_t i=0; i<stack.size(); ++i) {
+        std::cerr << "\t";
+        std::vector<StarCellFormulaInternal::Token> &code=stack[i];
+        for (size_t j=0; j<code.size(); ++j)
+          std::cerr << code[j];
+        std::cerr << "\n";
+      }
+      std::cerr << "]\n";
+    }
+#endif
   }
   if (!formulaSet) {
     static bool first=true;
@@ -667,6 +693,9 @@ bool StarCellFormula::readSCToken(StarZone &zone, StarCellFormulaInternal::Token
     token.m_type=StarCellFormulaInternal::Token::Function;
     instr.m_type=STOFFCellContent::FormulaInstruction::F_Function;
     instr.m_content="If";
+    // normally associated with a cond If
+    token.m_content=StarCellFormulaInternal::Token::C_FunctionOperator;
+    token.m_longValue=-2;
     break;
   case 7:
     if (type) f << "##type=" << type << ",";
@@ -678,6 +707,9 @@ bool StarCellFormula::readSCToken(StarZone &zone, StarCellFormulaInternal::Token
     if (type) f << "##type=" << type << ",";
     token.m_type=StarCellFormulaInternal::Token::Function;
     instr.m_type=STOFFCellContent::FormulaInstruction::F_Operator;
+    // normally in If with [cond id] form0 form1
+    token.m_content=StarCellFormulaInternal::Token::C_FunctionOperator;
+    token.m_longValue=-3;
     instr.m_content=")";
     break;
   case 9:
@@ -685,6 +717,9 @@ bool StarCellFormula::readSCToken(StarZone &zone, StarCellFormulaInternal::Token
     token.m_type=StarCellFormulaInternal::Token::Function;
     instr.m_type=STOFFCellContent::FormulaInstruction::F_Operator;
     instr.m_content=";";
+    // normally in If to separe form0 and form1
+    token.m_content=StarCellFormulaInternal::Token::C_FunctionOperator;
+    token.m_longValue=-1;
     break;
   case 12:
     // extra space
