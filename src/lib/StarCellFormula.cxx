@@ -118,7 +118,8 @@ struct Token {
   bool get(STOFFCellContent::FormulaInstruction &instr, bool &ignore);
   //! try to update the function/operator
   bool updateFunction();
-
+  //! a static function to recompile a formula from Polish notation
+  static bool addToken(std::vector<std::vector<Token> > &stack, Token const &token);
   //! the type
   Type m_type;
   //! the content type
@@ -291,6 +292,49 @@ bool Token::updateFunction()
     return false;
   return true;
 }
+
+bool Token::addToken(std::vector<std::vector<Token> > &stack, Token const &token)
+{
+  std::vector<Token> child;
+  if (token.m_content==C_Data) {
+    child.push_back(token);
+    stack.push_back(child);
+    return true;
+  }
+  bool isOperator=token.m_instruction.m_type==STOFFCellContent::FormulaInstruction::F_Operator;
+  int nChild=int(token.m_longValue);
+  int numElt=int(stack.size());
+  if (nChild<0 || nChild>numElt || (isOperator&& nChild!=1 && nChild!=2)) {
+    STOFF_DEBUG_MSG(("StarCellFormulaInternal::addToken: find unexpected number of child for token %s\n", token.m_instruction.m_content.cstr()));
+    return false;
+  }
+  if (!isOperator||nChild==1)
+    child.push_back(token);
+  Token sep;
+  sep.m_type=StarCellFormulaInternal::Token::Function;
+  sep.m_instruction.m_type=STOFFCellContent::FormulaInstruction::F_Operator;
+  sep.m_instruction.m_content="(";
+  child.push_back(sep);
+
+  for (int c=0; c<nChild; ++c) {
+    if (c && !isOperator) {
+      sep.m_instruction.m_content=";";
+      child.push_back(sep);
+    }
+    else if (c)
+      child.push_back(token);
+    std::vector<Token> const &node=stack[size_t(numElt-nChild+c)];
+    child.insert(child.end(), node.begin(), node.end());
+  }
+
+  sep.m_instruction.m_content=")";
+  child.push_back(sep);
+  stack.resize(size_t(numElt-nChild+1));
+  stack[size_t(numElt-nChild)] = child;
+
+  return true;
+}
+
 }
 ////////////////////////////////////////////////////////////
 // main zone
@@ -355,7 +399,7 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCellContent &content, i
     return false;
   }
 
-  bool hasIndex=false;
+  bool hasIndex=false, formulaSet=false;
   for (size_t i=0; i<tokenList.size(); ++i) {
     STOFFCellContent::FormulaInstruction finalInstr;
     bool ignore;
@@ -364,18 +408,12 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCellContent &content, i
     else if (tokenList[i].m_type==StarCellFormulaInternal::Token::Index)
       hasIndex=true;
   }
-  if (hasIndex) {
-    static bool first=true;
-    if (first) {
-      STOFF_DEBUG_MSG(("StarCellFormula::readSCFormula: formula with index are not implemented\n"));
-      first=false;
-    }
-    f << "##index,";
+  if (hasIndex)
     content.m_formula.clear();
-  }
-  else
+  else {
     content.m_contentType=STOFFCellContent::C_FORMULA;
-
+    formulaSet=true;
+  }
   if (fFlags&0x80) {
     uint16_t nRPN;
     *input >> nRPN;
@@ -415,6 +453,41 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCellContent &content, i
       }
     }
     f << "],";
+  }
+  if (ok && !formulaSet) {
+    std::vector<std::vector<StarCellFormulaInternal::Token> > stack;
+    for (size_t i=0; i<rpnList.size(); ++i) {
+      if (!StarCellFormulaInternal::Token::addToken(stack, rpnList[i])) {
+        ok=false;
+        break;
+      }
+    }
+    if (ok && stack.size()==1) {
+      hasIndex=false;
+      std::vector<StarCellFormulaInternal::Token> &code=stack[0];
+      for (size_t i=0; i<code.size(); ++i) {
+        STOFFCellContent::FormulaInstruction finalInstr;
+        bool ignore;
+        if (code[i].get(finalInstr,ignore) && !ignore)
+          content.m_formula.push_back(finalInstr);
+        else if (code[i].m_type==StarCellFormulaInternal::Token::Index)
+          hasIndex=true;
+      }
+      if (hasIndex)
+        content.m_formula.clear();
+      else {
+        content.m_contentType=STOFFCellContent::C_FORMULA;
+        formulaSet=true;
+      }
+    }
+  }
+  if (!formulaSet) {
+    static bool first=true;
+    if (first) {
+      STOFF_DEBUG_MSG(("StarCellFormula::readSCFormula: can not reconstruct some formula\n"));
+      first=false;
+    }
+    f << "###";
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
