@@ -70,6 +70,8 @@ public:
 
   //! the list manager
   STOFFListManagerPtr m_listManager;
+  //! the graphic listener
+  STOFFGraphicListenerPtr m_graphicListener;
   //! the spreadsheet listener
   STOFFSpreadsheetListenerPtr m_spreadsheetListener;
 
@@ -120,6 +122,11 @@ public:
   {
     return m_parserState->m_pageSpan;
   }
+  //! returns the graphic listener
+  STOFFGraphicListenerPtr &getGraphicListener()
+  {
+    return m_parserState->m_graphicListener;
+  }
   //! returns the spreadsheet listener
   STOFFSpreadsheetListenerPtr &getSpreadsheetListener()
   {
@@ -141,6 +148,10 @@ protected:
   {
     m_parserState->m_version = vers;
   }
+  //! sets the graphic listener
+  void setGraphicListener(STOFFGraphicListenerPtr &listener);
+  //! resets the listener
+  void resetGraphicListener();
   //! sets the spreadsheet listener
   void setSpreadsheetListener(STOFFSpreadsheetListenerPtr &listener);
   //! resets the listener
@@ -179,6 +190,19 @@ protected:
   STOFFTextParser(STOFFInputStreamPtr input, STOFFHeader *header) : STOFFParser(STOFFParserState::Text, input, header) {}
   //! constructor using a state
   STOFFTextParser(STOFFParserStatePtr state) : STOFFParser(state) {}
+};
+
+/** virtual class which defines the ancestor of all graphic zone parser */
+class STOFFGraphicParser : public STOFFParser
+{
+public:
+  //! virtual function used to parse the input
+  virtual void parse(librevenge::RVNGDrawingInterface *documentInterface) = 0;
+protected:
+  //! constructor (protected)
+  STOFFGraphicParser(STOFFInputStreamPtr input, STOFFHeader *header) : STOFFParser(STOFFParserState::Graphic, input, header) {}
+  //! constructor using a state
+  STOFFGraphicParser(STOFFParserStatePtr state) : STOFFParser(state) {}
 };
 
 /** virtual class which defines the ancestor of all spreadsheet zone parser */

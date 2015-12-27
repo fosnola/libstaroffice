@@ -91,6 +91,10 @@ SOURCE=..\..\src\lib\SDCParser.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\SDDParser.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\SDWParser.cxx
 # End Source File
 # Begin Source File
@@ -120,6 +124,10 @@ SOURCE=..\..\src\lib\STOFFFont.cxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFGraphicDecoder.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFGraphicListener.cxx
 # End Source File
 # Begin Source File
 
@@ -319,6 +327,10 @@ SOURCE=..\..\src\lib\SDCParser.hxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\SDDParser.hxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\SDWParser.hxx
 # End Source File
 # Begin Source File
@@ -348,6 +360,10 @@ SOURCE=..\..\src\lib\STOFFFont.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFGraphicDecoder.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFGraphicListener.hxx
 # End Source File
 # Begin Source File
 

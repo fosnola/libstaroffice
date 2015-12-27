@@ -36,6 +36,7 @@
  */
 
 #include "SDCParser.hxx"
+#include "SDDParser.hxx"
 #include "SDWParser.hxx"
 
 #include "STOFFHeader.hxx"
@@ -49,6 +50,7 @@
 /** small namespace use to define private class/method used by STOFFDocument */
 namespace STOFFDocumentInternal
 {
+shared_ptr<STOFFGraphicParser> getGraphicParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
 shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
 shared_ptr<STOFFSpreadsheetParser> getSpreadsheetParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
 STOFFHeader *getHeader(STOFFInputStreamPtr &input, bool strict);
@@ -85,11 +87,20 @@ catch (...)
   return STOFF_C_NONE;
 }
 
-STOFFDocument::Result STOFFDocument::parse(librevenge::RVNGInputStream */*input*/, librevenge::RVNGDrawingInterface */*documentInterface*/, char const *)
+STOFFDocument::Result STOFFDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGDrawingInterface *documentInterface, char const *password)
 try
 {
-  STOFF_DEBUG_MSG(("STOFFDocument::parse[drawing]: is not implemented\n"));
-  return STOFF_R_UNKNOWN_ERROR;
+  if (!input)
+    return STOFF_R_UNKNOWN_ERROR;
+
+  STOFFInputStreamPtr ip(new STOFFInputStream(input, false));
+  shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
+
+  if (!header.get()) return STOFF_R_UNKNOWN_ERROR;
+  shared_ptr<STOFFGraphicParser> parser=STOFFDocumentInternal::getGraphicParserFromHeader(ip, header.get(), password);
+  if (!parser) return STOFF_R_UNKNOWN_ERROR;
+  parser->parse(documentInterface);
+  return STOFF_R_OK;
 }
 catch (libstoff::FileException)
 {
@@ -299,6 +310,22 @@ catch (...)
   return 0L;
 }
 
+/** Factory wrapper to construct a parser corresponding to an graphic header */
+shared_ptr<STOFFGraphicParser> getGraphicParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd)
+{
+  shared_ptr<STOFFGraphicParser> parser;
+  if (!header || header->getKind()!=STOFFDocument::STOFF_K_DRAW)
+    return parser;
+  try {
+    SDDParser *sddParser=new SDDParser(input, header);
+    parser.reset(sddParser);
+    if (passwd) sddParser->setDocumentPassword(passwd);
+  }
+  catch (...) {
+  }
+  return parser;
+}
+
 /** Factory wrapper to construct a parser corresponding to an text header */
 shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd)
 {
@@ -309,7 +336,7 @@ shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, 
   if (header->getKind()!=STOFFDocument::STOFF_K_TEXT)
     return parser;
 #else
-  if (header->getKind()==STOFFDocument::STOFF_K_SPREADSHEET)
+  if (header->getKind()==STOFFDocument::STOFF_K_SPREADSHEET || header->getKind()==STOFFDocument::STOFF_K_DRAW)
     return parser;
 #endif
   try {
@@ -344,6 +371,7 @@ try
 {
   shared_ptr<STOFFParser> parser=getTextParserFromHeader(input, &header, 0);
   if (!parser) parser=getSpreadsheetParserFromHeader(input, &header, 0);
+  if (!parser) parser=getGraphicParserFromHeader(input, &header, 0);
   if (!parser) return false;
   return parser->checkHeader(&header, strict);
 }

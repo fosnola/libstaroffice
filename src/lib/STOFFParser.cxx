@@ -34,13 +34,14 @@
 #include "libstaroffice_internal.hxx"
 
 #include "STOFFList.hxx"
+#include "STOFFGraphicListener.hxx"
 #include "STOFFSpreadsheetListener.hxx"
 
 #include "STOFFParser.hxx"
 
 STOFFParserState::STOFFParserState(STOFFParserState::Type type, STOFFInputStreamPtr input, STOFFHeader *header) :
   m_type(type), m_kind(STOFFDocument::STOFF_K_TEXT), m_version(0), m_input(input), m_header(header),
-  m_pageSpan(), m_listManager(), m_spreadsheetListener(),
+  m_pageSpan(), m_listManager(), m_graphicListener(), m_spreadsheetListener(),
   m_asciiFile(input)
 {
   if (header) {
@@ -62,6 +63,17 @@ STOFFParser::STOFFParser(STOFFParserState::Type type, STOFFInputStreamPtr input,
 
 STOFFParser::~STOFFParser()
 {
+}
+
+void STOFFParser::setGraphicListener(STOFFGraphicListenerPtr &listener)
+{
+  m_parserState->m_graphicListener=listener;
+}
+
+void STOFFParser::resetGraphicListener()
+{
+  if (getGraphicListener()) getGraphicListener()->endDocument();
+  m_parserState->m_graphicListener.reset();
 }
 
 void STOFFParser::setSpreadsheetListener(STOFFSpreadsheetListenerPtr &listener)

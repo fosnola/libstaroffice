@@ -38,7 +38,7 @@
  * the librevenge::RVNGSpreadsheetInterface
  */
 
-#define TEST_SEND_HEADERFOOTER_REGION 0
+#define TEST_SEND_HEADERFOOTER_REGION 1
 
 #include <cmath>
 #include <cstring>
@@ -53,6 +53,7 @@
 #include "STOFFCell.hxx"
 #include "STOFFChart.hxx"
 #include "STOFFFont.hxx"
+#include "STOFFGraphicStyle.hxx"
 #include "STOFFInputStream.hxx"
 #include "STOFFList.hxx"
 #include "STOFFPageSpan.hxx"
@@ -363,60 +364,19 @@ void STOFFSpreadsheetListener::insertField(STOFFField const &field)
     return;
   }
 
-  switch (field.m_type) {
-  case STOFFField::None:
-    break;
-  case STOFFField::PageCount:
-  case STOFFField::PageNumber:
-  case STOFFField::Title: {
+  librevenge::RVNGPropertyList propList;
+  if (field.addTo(propList)) {
     _flushDeferredTabs();
     _flushText();
     _openSpan();
-    librevenge::RVNGPropertyList propList;
-    if (field.m_type==STOFFField::Title) {
-      propList.insert("librevenge:field-type", "text:title");
-      m_documentInterface->insertField(propList);
-    }
-    else {
-      propList.insert("style:num-format", libstoff::numberingTypeToString(field.m_numberingType).c_str());
-      if (field.m_type == STOFFField::PageNumber) {
-        propList.insert("librevenge:field-type", "text:page-number");
-        m_documentInterface->insertField(propList);
-      }
-      else {
-        propList.insert("librevenge:field-type", "text:page-count");
-        m_documentInterface->insertField(propList);
-      }
-    }
-    break;
+    m_documentInterface->insertField(propList);
+    return;
   }
-  case STOFFField::Database:
-    if (field.m_data.length())
-      STOFFSpreadsheetListener::insertUnicodeString(field.m_data.c_str());
-    else
-      STOFFSpreadsheetListener::insertUnicodeString("#DATAFIELD#");
-    break;
-  case STOFFField::Date:
-  case STOFFField::Time: {
-    std::string format(field.m_DTFormat);
-    if (format.length()==0) {
-      if (field.m_type==STOFFField::Date)
-        format="%m/%d/%y";
-      else
-        format="%I:%M:%S %p";
-    }
-    time_t now = time(0L);
-    struct tm timeinfo;
-    if (localtime_r(&now, &timeinfo)) {
-      char buf[256];
-      strftime(buf, 256, format.c_str(), &timeinfo);
-      STOFFSpreadsheetListener::insertUnicodeString(librevenge::RVNGString(buf));
-    }
-    break;
-  }
-  default:
+  librevenge::RVNGString text=field.getString();
+  if (!text.empty())
+    STOFFSpreadsheetListener::insertUnicodeString(text);
+  else {
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertField: must not be called with type=%d\n", int(field.m_type)));
-    break;
   }
 }
 
@@ -1030,7 +990,7 @@ void STOFFSpreadsheetListener::closeGroup()
 {
 }
 
-bool STOFFSpreadsheetListener::openFrame(STOFFPosition const &pos)
+bool STOFFSpreadsheetListener::openFrame(STOFFPosition const &pos, STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isSheetOpened || m_ds->m_isSheetRowOpened) {
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame insert a frame outside a sheet is not implemented\n"));
@@ -1079,8 +1039,7 @@ bool STOFFSpreadsheetListener::openFrame(STOFFPosition const &pos)
     return false;
   }
 
-  librevenge::RVNGPropertyList propList;
-  //style.addFrameTo(propList);
+  librevenge::RVNGPropertyList propList(style.m_propertyList);
   if (!propList["draw:fill"])
     propList.insert("draw:fill","none");
   _handleFrameParameters(propList, fPos);
@@ -1401,13 +1360,13 @@ void STOFFSpreadsheetListener::closeSheetCell()
   m_documentInterface->closeSheetCell();
 }
 
-void STOFFSpreadsheetListener::insertTable(STOFFPosition const &pos, STOFFTable &table)
+void STOFFSpreadsheetListener::insertTable(STOFFPosition const &pos, STOFFTable &table, STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isSheetOpened || m_ds->m_isSheetRowOpened) {
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertTable insert a table outside a sheet is not implemented\n"));
     return;
   }
-  if (!openFrame(pos)) return;
+  if (!openFrame(pos, style)) return;
 
   _pushParsingState();
   _startSubDocument();
@@ -1431,13 +1390,13 @@ void STOFFSpreadsheetListener::insertTable(STOFFPosition const &pos, STOFFTable 
 // chart
 ///////////////////
 void STOFFSpreadsheetListener::insertChart
-(STOFFPosition const &pos, STOFFChart &chart)
+(STOFFPosition const &pos, STOFFChart &chart, STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isSheetOpened || m_ds->m_isSheetRowOpened) {
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertChart outside a chart in a sheet is not implemented\n"));
     return;
   }
-  if (!openFrame(pos)) return;
+  if (!openFrame(pos, style)) return;
 
   _pushParsingState();
   _startSubDocument();

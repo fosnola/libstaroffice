@@ -40,6 +40,8 @@
 
 #include "libstaroffice_internal.hxx"
 
+#include "STOFFGraphicStyle.hxx"
+
 class STOFFCell;
 class STOFFTable;
 
@@ -205,11 +207,11 @@ public:
     }
     insertTextBox(pos, subDocument, frameStyle);
   }
+#endif
   /** low level: tries to open a frame */
-  virtual bool openFrame(STOFFPosition const &pos, STOFFGraphicStyle const &style=STOFFGraphicStyle::emptyStyle()) = 0;
+  virtual bool openFrame(STOFFPosition const &pos, STOFFGraphicStyle const &style=STOFFGraphicStyle()) = 0;
   /** low level: tries to close the last opened frame */
   virtual void closeFrame() = 0;
-#endif
   /** low level: tries to open a group */
   virtual bool openGroup(STOFFPosition const &pos) = 0;
   /** low level: tries to close the last opened group */

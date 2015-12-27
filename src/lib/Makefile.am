@@ -18,6 +18,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_LDFLAGS =
 libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES = \
 	SDCParser.cxx				\
 	SDCParser.hxx				\
+	SDDParser.cxx				\
+	SDDParser.hxx				\
 	SDWParser.cxx				\
 	SDWParser.hxx				\
 	STOFFCell.cxx				\
@@ -34,6 +36,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFFont.hxx				\
 	STOFFGraphicDecoder.cxx			\
 	STOFFGraphicDecoder.hxx			\
+	STOFFGraphicListener.hxx		\
+	STOFFGraphicListener.cxx		\
 	STOFFGraphicStyle.cxx			\
 	STOFFGraphicStyle.hxx			\
 	STOFFHeader.cxx				\

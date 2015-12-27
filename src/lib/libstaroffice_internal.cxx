@@ -37,6 +37,7 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <time.h>
 
 #include <ctype.h>
 #include <locale.h>
@@ -229,6 +230,70 @@ std::string STOFFColor::str() const
   return stream.str();
 }
 
+// field function
+bool STOFFField::addTo(librevenge::RVNGPropertyList &propList) const
+{
+  switch (m_type) {
+    break;
+  case PageCount:
+    propList.insert("librevenge:field-type", "text:page-count");
+    propList.insert("style:num-format", numberingTypeToString(m_numberingType).c_str());
+    break;
+  case PageNumber:
+    propList.insert("librevenge:field-type", "text:page-number");
+    propList.insert("style:num-format", numberingTypeToString(m_numberingType).c_str());
+    break;
+  case Title:
+    propList.insert("librevenge:field-type", "text:title");
+    break;
+  case Database:
+  case Date:
+  case Time:
+  case None:
+  default:
+    return false;
+  }
+  return true;
+}
+
+librevenge::RVNGString STOFFField::getString() const
+{
+  librevenge::RVNGString res;
+  switch (m_type) {
+  case Database:
+    if (m_data.length())
+      res=librevenge::RVNGString(m_data.c_str());
+    else
+      res=librevenge::RVNGString("#DATAFIELD#");
+    break;
+  case Date:
+  case Time: {
+    std::string format(m_DTFormat);
+    if (format.length()==0) {
+      if (m_type==Date)
+        format="%m/%d/%y";
+      else
+        format="%I:%M:%S %p";
+    }
+    time_t now = time(0L);
+    struct tm timeinfo;
+    if (localtime_r(&now, &timeinfo)) {
+      char buf[256];
+      strftime(buf, 256, format.c_str(), &timeinfo);
+      res=librevenge::RVNGString(buf);
+    }
+    break;
+  }
+  case PageCount:
+  case PageNumber:
+  case Title:
+  case None:
+  default:
+    break;
+  }
+
+  return res;
+}
 // link function
 bool STOFFLink::addTo(librevenge::RVNGPropertyList &propList) const
 {

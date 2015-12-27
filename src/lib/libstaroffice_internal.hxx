@@ -358,6 +358,10 @@ struct STOFFField {
   STOFFField(Type type) : m_type(type), m_DTFormat(""), m_numberingType(libstoff::ARABIC), m_data("")
   {
   }
+  /** add the link property to proplist (if possible) */
+  bool addTo(librevenge::RVNGPropertyList &propList) const;
+  //! returns a string corresponding to the field (if possible) */
+  librevenge::RVNGString getString() const;
   //! the type
   Type m_type;
   //! the date/time format using strftime format if defined
@@ -461,12 +465,15 @@ class STOFFHeader;
 class STOFFParser;
 class STOFFPosition;
 
+class STOFFGraphicListener;
 class STOFFInputStream;
 class STOFFListener;
 class STOFFListManager;
 class STOFFParserState;
 class STOFFSpreadsheetListener;
 class STOFFSubDocument;
+//! a smart pointer of STOFFGraphicListener
+typedef shared_ptr<STOFFGraphicListener> STOFFGraphicListenerPtr;
 //! a smart pointer of STOFFInputStream
 typedef shared_ptr<STOFFInputStream> STOFFInputStreamPtr;
 //! a smart pointer of STOFFListener

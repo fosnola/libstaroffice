@@ -106,6 +106,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\..\src\lib\SDDParser.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\src\lib\SDWParser.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -135,6 +139,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\src\lib\STOFFGraphicDecoder.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\STOFFGraphicListener.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -321,6 +329,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\lib\SDCParser.hxx" />
+    <ClInclude Include="..\..\src\lib\SDDParser.hxx" />
     <ClInclude Include="..\..\src\lib\SDWParser.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFCell.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFCellStyle.hxx" />
@@ -329,6 +338,7 @@
     <ClInclude Include="..\..\src\lib\STOFFEntry.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFFont.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFGraphicDecoder.hxx" />
+    <ClInclude Include="..\..\src\lib\STOFFGraphicListener.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFGraphicStyle.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFHeader.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFInputStream.hxx" />
