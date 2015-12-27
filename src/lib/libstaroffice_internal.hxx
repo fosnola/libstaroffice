@@ -916,6 +916,8 @@ protected:
   T m_val[3];
 };
 
+/*! \brief STOFFVec3 of bool */
+typedef STOFFVec3<bool> STOFFVec3b;
 /*! \brief STOFFVec3 of unsigned char */
 typedef STOFFVec3<unsigned char> STOFFVec3uc;
 /*! \brief STOFFVec3 of int */

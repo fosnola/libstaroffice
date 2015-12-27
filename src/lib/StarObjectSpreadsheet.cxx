@@ -863,7 +863,7 @@ try
           f << "range[type]=" << rangeType << ",";
           f << "index=" << index << ",";
           if (nData&0xf) input->seek((nData&0xf), librevenge::RVNG_SEEK_CUR);
-          if (!StarCellFormula::readSCFormula(zone, cell, cell.m_content, version, endDataPos) || input->tell()>endDataPos)
+          if (!StarCellFormula::readSCFormula(zone, cell.m_content, version, endDataPos) || input->tell()>endDataPos)
             f << "###";
         }
         else {
@@ -875,7 +875,7 @@ try
           f << "range[type]=" << rangeType << ",";
           f << "index=" << index << ",";
           if (tokLen &&
-              (!StarCellFormula::readSCFormula3(zone, cell, cell.m_content, version, endDataPos) || input->tell()>endDataPos))
+              (!StarCellFormula::readSCFormula3(zone, cell.m_content, version, endDataPos) || input->tell()>endDataPos))
             f << "###";
         }
         ascFile.addPos(pos);
@@ -2258,7 +2258,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
         f.str("");
         f << "SCData[formula]:";
 
-        if (!StarCellFormula::readSCFormula(zone, cell, cell.m_content, version, endDataPos) || input->tell()>endDataPos) {
+        if (!StarCellFormula::readSCFormula(zone, cell.m_content, version, endDataPos) || input->tell()>endDataPos) {
           f << "###";
           scRecord.closeContent("SCData");
           ascFile.addDelimiter(input->tell(),'|');
@@ -2274,7 +2274,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
         f << "matrix[flags]=" << input->readULong(1) << ",";
         uint16_t codeLen;
         *input>>codeLen;
-        if (codeLen && (!StarCellFormula::readSCFormula3(zone, cell, cell.m_content, version, endDataPos) || input->tell()>endDataPos))
+        if (codeLen && (!StarCellFormula::readSCFormula3(zone, cell.m_content, version, endDataPos) || input->tell()>endDataPos))
           f << "###";
       }
       if (input->tell()!=endDataPos) {
