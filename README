@@ -5,7 +5,9 @@ http://www.documentliberation.org/projects/ ).
 
 Currently:
 - it only tries to convert the main content of a .sdc files, ie. the
-  cells' value/text/formula,
+  cells' value/text/formula, the cells' comments and the cells'
+  formattings. But it does not try to retrieve formatting in the bock
+  of texts or any embedded charts, pictures, ...
 - and it refuses to convert any other files: .sdw, ...
 
 Notes:

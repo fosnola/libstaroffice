@@ -35,6 +35,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -65,6 +66,8 @@ int printUsage()
   printf("\t-F:          Sets to output the formula which exists in the file\n");
   printf("\t-Dformat:    Sets the date format: default \"%%m/%%d/%%y\"\n");
   printf("\t-Tformat:    Sets the time format: default \"%%H:%%M:%%S\"\n");
+  printf("\t-N:          Output the number of sheets \n");
+  printf("\t-n num:      Sets the choose the sheet to convert (1: means first sheet) \n");
   printf("\t-o file.csv: Defines the ouput file\n");
   printf("\t-v:          Output stoff2csv version\n");
   printf("\n");
@@ -85,19 +88,24 @@ int printVersion()
 int main(int argc, char *argv[])
 {
   bool printHelp=false;
+  bool printNumberOfSheet=false;
   bool generateFormula=false;
+  int sheetToConvert=0;
   char const *output = 0;
   int ch;
   char decSeparator='.', fieldSeparator=',', textSeparator='"';
   std::string dateFormat("%m/%d/%y"), timeFormat("%H:%M:%S");
 
-  while ((ch = getopt(argc, argv, "hvo:d:f:t:D:FT:")) != -1) {
+  while ((ch = getopt(argc, argv, "hvo:d:f:t:D:FNn:T:")) != -1) {
     switch (ch) {
     case 'D':
       dateFormat=optarg;
       break;
     case 'F':
       generateFormula=true;
+      break;
+    case 'N':
+      printNumberOfSheet=true;
       break;
     case 'T':
       timeFormat=optarg;
@@ -110,6 +118,9 @@ int main(int argc, char *argv[])
       break;
     case 't':
       textSeparator=optarg[0];
+      break;
+    case 'n':
+      sheetToConvert=std::atoi(optarg);
       break;
     case 'o':
       output=optarg;
@@ -174,11 +185,16 @@ int main(int argc, char *argv[])
   if (error != STOFFDocument::STOFF_R_OK)
     return 1;
 
+  if (printNumberOfSheet) {
+    std::cout << vec.size() << "\n";
+    return 0;
+  }
+
   if (!output)
-    std::cout << vec[0].cstr() << std::endl;
+    std::cout << vec[sheetToConvert>0 ? unsigned(sheetToConvert-1) : 0].cstr() << std::endl;
   else {
     std::ofstream out(output);
-    out << vec[0].cstr() << std::endl;
+    out << vec[sheetToConvert>0 ? unsigned(sheetToConvert-1) : 0].cstr() << std::endl;
   }
   return 0;
 }

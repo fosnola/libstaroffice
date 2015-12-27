@@ -319,6 +319,7 @@ bool Token::addToken(std::vector<std::vector<Token> > &stack, Token const &token
   sep.m_type=StarCellFormulaInternal::Token::Function;
   sep.m_instruction.m_type=STOFFCellContent::FormulaInstruction::F_Operator;
   sep.m_instruction.m_content="(";
+  // todo: check if we really need to insert a ( when type is operator, ...
   if (!special || special==2)
     child.push_back(sep);
   for (int c=0; c<nChild; ++c) {
