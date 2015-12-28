@@ -38,7 +38,7 @@
  * the librevenge::RVNGSpreadsheetInterface
  */
 
-#define TEST_SEND_HEADERFOOTER_REGION 1
+#define TEST_SEND_HEADERFOOTER_REGION 0
 
 #include <cmath>
 #include <cstring>

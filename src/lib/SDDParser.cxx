@@ -271,7 +271,11 @@ bool SDDParser::checkHeader(STOFFHeader *header, bool /*strict*/)
     drawInput->seek(0, librevenge::RVNG_SEEK_SET);
     // fixme: check encryption
   }
+#ifndef DEBUG
+  return false;
+#else
   return true;
+#endif
 }
 
 

@@ -83,7 +83,7 @@ protected:
   //
   // data
   //
-  //! try to read a chart zone: StarCalcDocument .sdc
+  //! try to read a spreadsheet zone: StarCalcDocument .sdc
   bool readCalcDocument(STOFFInputStreamPtr input, std::string const &fileName);
   //! try to read a spreadshet style zone: SfxStyleSheets
   bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);

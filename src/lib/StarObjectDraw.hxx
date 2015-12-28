@@ -71,6 +71,10 @@ public:
   static bool readSdrModel(StarZone &zone, StarObject &doc);
 
 protected:
+  //! try to read a spreadsheet zone: StarDrawDocument .sdd
+  bool readDrawDocument(STOFFInputStreamPtr input, std::string const &fileName);
+  //! try to read a spreadsheet zone: StarDrawDocument3 .sdd
+  bool readDrawDocument3(STOFFInputStreamPtr input, std::string const &fileName);
   //! try to read a draw style zone: SfxStyleSheets
   bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
 

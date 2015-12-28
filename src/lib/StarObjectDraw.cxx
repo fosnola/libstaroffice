@@ -113,12 +113,20 @@ bool StarObjectDraw::parse()
       base = name.substr(pos+1);
     }
     ole->setReadInverted(true);
+    if (base=="StarDrawDocument") {
+      readDrawDocument(ole,name);
+      continue;
+    }
+    if (base=="StarDrawDocument3") {
+      readDrawDocument3(ole,name);
+      continue;
+    }
     if (base=="SfxStyleSheets") {
       readSfxStyleSheets(ole,name);
       continue;
     }
-    if (base!="StarDrawDocument" && base!="StarDrawDocument3" && base!="BasicManager2") {
-      STOFF_DEBUG_MSG(("StarObjectChart::parse: find unexpected ole %s\n", name.c_str()));
+    if (base!="BasicManager2") {
+      STOFF_DEBUG_MSG(("StarObjectDraw::parse: find unexpected ole %s\n", name.c_str()));
     }
     libstoff::DebugFile asciiFile(ole);
     asciiFile.open(name);
@@ -132,6 +140,52 @@ bool StarObjectDraw::parse()
   return true;
 }
 
+bool StarObjectDraw::readDrawDocument(STOFFInputStreamPtr input, std::string const &name)
+try
+{
+  StarZone zone(input, name, "SWDrawDocument", getPassword()); // checkme: do we need to pass the password
+  libstoff::DebugFile &ascFile=zone.ascii();
+  ascFile.open(name);
+
+  libstoff::DebugStream f;
+  f << "Entries(SCDrawDocument):";
+  ascFile.addPos(0);
+  ascFile.addNote(f.str().c_str());
+  if (0 && !input->isEnd()) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readDrawDocument: find extra data\n"));
+    ascFile.addPos(input->tell());
+    ascFile.addNote("SWDrawDocument:###extra");
+  }
+  return true;
+}
+catch (...)
+{
+  return false;
+}
+
+bool StarObjectDraw::readDrawDocument3(STOFFInputStreamPtr input, std::string const &name)
+try
+{
+  StarZone zone(input, name, "SWDrawDocument3", getPassword()); // checkme: do we need to pass the password
+  libstoff::DebugFile &ascFile=zone.ascii();
+  ascFile.open(name);
+
+  libstoff::DebugStream f;
+  f << "Entries(SCDraw3Document):";
+  ascFile.addPos(0);
+  ascFile.addNote(f.str().c_str());
+  if (0 && !input->isEnd()) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readDrawDocument3: find extra data\n"));
+    ascFile.addPos(input->tell());
+    ascFile.addNote("SWDraw3Document:###extra");
+  }
+  return true;
+}
+catch (...)
+{
+  return false;
+}
+
 bool StarObjectDraw::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name)
 {
   StarZone zone(input, name, "SfxStyleSheets", getPassword());
@@ -140,7 +194,7 @@ bool StarObjectDraw::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
   ascFile.open(name);
 
   if (getDocumentKind()!=STOFFDocument::STOFF_K_DRAW) {
-    STOFF_DEBUG_MSG(("StarObjectChart::readSfxStyleSheets: called with unexpected document\n"));
+    STOFF_DEBUG_MSG(("StarObjectDraw::readSfxStyleSheets: called with unexpected document\n"));
     ascFile.addPos(0);
     ascFile.addNote("Entries(SfxStyleSheets)");
     return false;
