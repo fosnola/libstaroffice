@@ -720,6 +720,9 @@ bool StarObjectSpreadsheet::parse()
   size_t numUnparsed = unparsedOLEs.size();
   STOFFInputStreamPtr input=directory.m_input;
   StarFileManager fileManager;
+
+  STOFFInputStreamPtr mainOle; // let store the StarCalcDocument to read it in last position
+  std::string mainName;
   for (size_t i = 0; i < numUnparsed; i++) {
     std::string const &name = unparsedOLEs[i];
     STOFFInputStreamPtr ole = input->getSubStreamByName(name.c_str());
@@ -742,7 +745,8 @@ bool StarObjectSpreadsheet::parse()
       continue;
     }
     if (base=="StarCalcDocument") {
-      readCalcDocument(ole,name);
+      mainOle=ole;
+      mainName=name;
       continue;
     }
     if (base!="BasicManager2") {
@@ -757,6 +761,13 @@ bool StarObjectSpreadsheet::parse()
     asciiFile.addNote(f.str().c_str());
     asciiFile.reset();
   }
+
+  if (!mainOle) {
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheet::parser: can not find the main calc document\n"));
+    return false;
+  }
+  else
+    readCalcDocument(mainOle,mainName);
   return true;
 }
 

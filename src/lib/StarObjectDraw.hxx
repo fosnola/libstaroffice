@@ -73,8 +73,6 @@ public:
 protected:
   //! try to read a spreadsheet zone: StarDrawDocument .sdd
   bool readDrawDocument(STOFFInputStreamPtr input, std::string const &fileName);
-  //! try to read a spreadsheet zone: StarDrawDocument3 .sdd
-  bool readDrawDocument3(STOFFInputStreamPtr input, std::string const &fileName);
   //! try to read a draw style zone: SfxStyleSheets
   bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
 
@@ -91,6 +89,8 @@ protected:
   //! try to read a list of Master Page zone: "DrML'
   static bool readSdrMPageDescList(StarZone &zone);
 
+  //! try to read a zone which appear at end of a zone: "DrPg'
+  static bool readSdrPageUnknownZone1(StarZone &zone, long lastPos);
 protected:
   //
   // data

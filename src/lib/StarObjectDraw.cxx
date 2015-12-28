@@ -95,7 +95,9 @@ bool StarObjectDraw::parse()
   std::vector<std::string> unparsedOLEs=directory.getUnparsedOles();
   size_t numUnparsed = unparsedOLEs.size();
   STOFFInputStreamPtr input=directory.m_input;
-  StarFileManager fileManager;
+
+  STOFFInputStreamPtr mainOle; // let store the StarDrawDocument to read it in last position
+  std::string mainName;
   for (size_t i = 0; i < numUnparsed; i++) {
     std::string const &name = unparsedOLEs[i];
     STOFFInputStreamPtr ole = input->getSubStreamByName(name.c_str());
@@ -113,13 +115,15 @@ bool StarObjectDraw::parse()
       base = name.substr(pos+1);
     }
     ole->setReadInverted(true);
-    if (base=="StarDrawDocument") {
-      readDrawDocument(ole,name);
-      continue;
-    }
-    if (base=="StarDrawDocument3") {
-      readDrawDocument3(ole,name);
-      continue;
+    if (base=="StarDrawDocument" || base=="StarDrawDocument3") {
+      if (mainOle) {
+        STOFF_DEBUG_MSG(("StarObjectDraw::parse: find unexpected second draw ole %s\n", name.c_str()));
+      }
+      else {
+        mainOle=ole;
+        mainName=name;
+        continue;
+      }
     }
     if (base=="SfxStyleSheets") {
       readSfxStyleSheets(ole,name);
@@ -137,6 +141,14 @@ bool StarObjectDraw::parse()
     asciiFile.addNote(f.str().c_str());
     asciiFile.reset();
   }
+
+  if (!mainOle) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::parser: can not find the main draw document\n"));
+    return false;
+  }
+  else
+    readDrawDocument(mainOle,mainName);
+
   return true;
 }
 
@@ -149,35 +161,20 @@ try
 
   libstoff::DebugStream f;
   f << "Entries(SCDrawDocument):";
-  ascFile.addPos(0);
+  if (!readSdrModel(zone, *this)) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readDrawDocument: can not read the main zone\n"));
+    f<<"###";
+    ascFile.addPos(0);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  long pos=input->tell();
+  ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   if (0 && !input->isEnd()) {
     STOFF_DEBUG_MSG(("StarObjectDraw::readDrawDocument: find extra data\n"));
     ascFile.addPos(input->tell());
     ascFile.addNote("SWDrawDocument:###extra");
-  }
-  return true;
-}
-catch (...)
-{
-  return false;
-}
-
-bool StarObjectDraw::readDrawDocument3(STOFFInputStreamPtr input, std::string const &name)
-try
-{
-  StarZone zone(input, name, "SWDrawDocument3", getPassword()); // checkme: do we need to pass the password
-  libstoff::DebugFile &ascFile=zone.ascii();
-  ascFile.open(name);
-
-  libstoff::DebugStream f;
-  f << "Entries(SCDraw3Document):";
-  ascFile.addPos(0);
-  ascFile.addNote(f.str().c_str());
-  if (0 && !input->isEnd()) {
-    STOFF_DEBUG_MSG(("StarObjectDraw::readDrawDocument3: find extra data\n"));
-    ascFile.addPos(input->tell());
-    ascFile.addNote("SWDraw3Document:###extra");
   }
   return true;
 }
@@ -583,7 +580,18 @@ bool StarObjectDraw::readSdrModel(StarZone &zone, StarObject &doc)
   }
 
   zone.closeRecord("SdrModelA1");
-  // in DrawingLayer, find also 0500000001 and 060000000000
+  // in DrawingLayer, find also 0500000001 and 060000000[01]00
+  pos=input->tell();
+  if (pos+4<=zone.getRecordLastPosition()) {
+    long sz=(long) input->readULong(4);
+    if (pos+sz==zone.getRecordLastPosition()) {
+      ascFile.addPos(pos);
+      ascFile.addNote("SdrModel:#extra");
+      input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+    }
+    else
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+  }
   zone.closeSDRHeader("SdrModel");
   return true;
 }
@@ -670,6 +678,7 @@ bool StarObjectDraw::readSdrPage(StarZone &zone, StarObject &doc)
   input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (magic!="DrPg" && magic!="DrMP") return false;
 
+  // svdpage.cxx operator>>
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(SdrPageDef)[" << zone.getRecordLevel() << "]:";
@@ -699,7 +708,7 @@ bool StarObjectDraw::readSdrPage(StarZone &zone, StarObject &doc)
 
   f.str("");
   f << "SdrPageDefA[" << zone.getRecordLevel() << "]:";
-  // svdpage.cxx SdrPageDef::ReadData
+  // svdpage.cxx SdrPage::ReadData
   bool hasExtraData=false;
   for (int tr=0; tr<2; ++tr) {
     long lastPos=zone.getRecordLastPosition();
@@ -883,7 +892,19 @@ bool StarObjectDraw::readSdrPage(StarZone &zone, StarObject &doc)
           f << libstoff::getString(string).cstr() << ",";
         // then if vers>={13|14|15|16}  671905111105671901000800000000000000
       }
+      else if (n==2 && pos+12==zone.getRecordLastPosition()) {
+        f << "empty,";
+        for (int i=0; i<4; ++i) { // always 0
+          int val=(int) input->readLong(2);
+          if (val) f << "f" << i << "=" << val << ",";
+        }
+      }
       else {
+        if (readSdrPageUnknownZone1(zone, zone.getRecordLastPosition())) {
+          zone.closeRecord("SdrPageDefB");
+          continue;
+        }
+        input->seek(pos+4, librevenge::RVNG_SEEK_SET);
         STOFF_DEBUG_MSG(("StarObjectDraw::readSdrPage: find some unknown zone\n"));
         f << "###unknown";
       }
@@ -900,6 +921,71 @@ bool StarObjectDraw::readSdrPage(StarZone &zone, StarObject &doc)
   }
 
   zone.closeSDRHeader("SdrPageDef");
+  return true;
+}
+
+bool StarObjectDraw::readSdrPageUnknownZone1(StarZone &zone, long lastPos)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell()-4;
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SdrPageUnkn1)[" << zone.getRecordLevel() << "]:";
+  if (pos+28>lastPos) return false;
+  int val=(int) input->readULong(2);
+  if (val!=3 && val!=7)
+    return false;
+  f << "f0=" << val << ",";
+  for (int i=0; i<3; ++i) { // 1
+    val=(int) input->readULong(1);
+    if (val!=1) f << "f" << i+1 << "=" << val << ",";
+  }
+  for (int i=0; i<5; ++i) { // g0=14|15|19, g1=1, g3=0-10,
+    val=(int) input->readLong(2);
+    if (val) f << "g" << i << "=" << val << ",";
+  }
+  val=(int) input->readLong(1); // always 1
+  if (val!=1) f << "f6=" << val << ",";
+  for (int i=0; i<3; ++i) { // g5=1|1e
+    val=(int) input->readLong(2);
+    if (val) f << "g" << i+5 << "=" << val << ",";
+  }
+  std::vector<uint32_t> string;
+  if (!zone.readString(string) || input->tell()>lastPos)
+    return false;
+  f << libstoff::getString(string).cstr() << ",";
+  int n=(int) input->readULong(4);
+  if (input->tell()+8*n>lastPos)
+    return false;
+  f << "unk=[";
+  for (int i=0; i<n; ++i) {
+    f << "[";
+    for (int j=0; j<4; ++j) {
+      val=(int) input->readLong(2);
+      if (val)
+        f << val << ",";
+      else
+        f << "_,";
+    }
+    f << "],";
+  }
+  f << "],";
+  int n1=int(lastPos-input->tell())/2;
+  f << "unkn1=[";
+  for (int i=0; i<n1; ++i) {
+    val=(int) input->readLong(2);
+    if (val)
+      f << val << ",";
+    else
+      f << "_,";
+  }
+  f << "],";
+  if (lastPos>input->tell()) {
+    ascFile.addDelimiter(input->tell(),'|');
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
   return true;
 }
 
