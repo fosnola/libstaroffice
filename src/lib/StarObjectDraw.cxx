@@ -155,32 +155,223 @@ bool StarObjectDraw::parse()
 bool StarObjectDraw::readDrawDocument(STOFFInputStreamPtr input, std::string const &name)
 try
 {
-  StarZone zone(input, name, "SWDrawDocument", getPassword()); // checkme: do we need to pass the password
+  StarZone zone(input, name, "SCDrawDocument", getPassword()); // checkme: do we need to pass the password
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
 
-  libstoff::DebugStream f;
-  f << "Entries(SCDrawDocument):";
   if (!readSdrModel(zone, *this)) {
     STOFF_DEBUG_MSG(("StarObjectDraw::readDrawDocument: can not read the main zone\n"));
-    f<<"###";
     ascFile.addPos(0);
-    ascFile.addNote(f.str().c_str());
+    ascFile.addNote("Entries(SCDrawDocument):###");
     return false;
   }
   long pos=input->tell();
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  if (0 && !input->isEnd()) {
+  if (!readPresentationData(zone))
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+  if (!input->isEnd()) {
     STOFF_DEBUG_MSG(("StarObjectDraw::readDrawDocument: find extra data\n"));
     ascFile.addPos(input->tell());
-    ascFile.addNote("SWDrawDocument:###extra");
+    ascFile.addNote("Entries(SCDrawDocument):###extra");
   }
   return true;
 }
 catch (...)
 {
   return false;
+}
+
+bool StarObjectDraw::readPresentationData(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  if (!zone.openSCHHeader()) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SCDrawPres):";
+  // sd_drawdoc.xx: operator>>(SdDrawDocument)
+  int vers=zone.getHeaderVersion();
+  long lastPos=zone.getRecordLastPosition();
+  f << "vers=" << vers << ",";
+  input->seek(1, librevenge::RVNG_SEEK_CUR); // dummy
+  for (int i=0; i<5; ++i) {
+    bool bVal;
+    *input>>bVal;
+    if (!bVal) continue;
+    char const *(wh[])= {"pres[all]", "pres[end]", "pres[manual]", "mouse[visible]", "mouse[asPen]"};
+    f << wh[i] << ",";
+  }
+  int firstPage=(int) input->readULong(4);
+  if (firstPage!=1) f << "firstPage=" << firstPage << ",";
+
+  if (input->tell()>lastPos) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readPresentationData: the zone is too short\n"));
+    f<<"###";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+    zone.closeSCHHeader("SCDrawPres");
+    return true;
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  f.str("");
+  f << "SCDrawPres:";
+  pos=input->tell();
+  if (vers>=1) {
+    bool hasFrameView;
+    *input>>hasFrameView;
+    if (hasFrameView && (!readSdrFrameView(zone) || input->tell()>lastPos)) {
+      f<<"###frameView";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+      zone.closeSCHHeader("SCDrawPres");
+      return true;
+    }
+  }
+
+  pos=input->tell();
+  if (vers>=2) { // we need to set the pool here
+    StarFileManager fileManager;
+    if (!fileManager.readJobSetUp(zone, true)) {
+      f<<"###setUp";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+      zone.closeSCHHeader("SCDrawPres");
+      return true;
+    }
+  }
+  pos=input->tell();
+  bool ok=true;
+  if (vers>=3) {
+    f << "language=" << input->readULong(4) << ",";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=4) {
+    int n=(int) input->readULong(4);
+    f << "num[frameView]=" << n << ",";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+    pos=input->tell();
+    f.str("");
+    f << "SCDrawPres:";
+    for (int i=0; i<n; ++i) {
+      if (!readSdrFrameView(zone) || input->tell()>lastPos) {
+        ok=false;
+        input->seek(pos, librevenge::RVNG_SEEK_SET);
+        break;
+      }
+    }
+    if (ok) pos=input->tell();
+  }
+  if (ok&&vers>=5) {
+    bool startWithNav;
+    *input >> startWithNav;
+    if (startWithNav) f << "start[withNav],";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=6) {
+    bool presLockedPage;
+    *input >> presLockedPage;
+    if (presLockedPage) f << "lock[pages],";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=7) {
+    bool presOnTop;
+    *input >> presOnTop;
+    if (presOnTop) f << "pres[onTop],";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=8) {
+    bool onlineSpell, hideSpell;
+    *input >> onlineSpell >> hideSpell;
+    if (onlineSpell) f << "spell[online],";
+    if (hideSpell) f << "spell[hide],";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=9) {
+    bool fullScreen;
+    *input >> fullScreen;
+    if (fullScreen) f << "pres[fullScreen],";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=10) {
+    std::vector<uint32_t> string;
+    if (!zone.readString(string) || input->tell()>lastPos) {
+      STOFF_DEBUG_MSG(("StarObjectDraw::readPresentationData: can not read presPage\n"));
+      ok=false;
+      f << "###presPage,";
+    }
+    else if (!string.empty())
+      f << libstoff::getString(string).cstr() << ",";
+  }
+  if (ok&&vers>=11) {
+    bool animOk;
+    *input >> animOk;
+    if (animOk) f << "anim[allowed],";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=12) {
+    int docType=(int) input->readULong(2);
+    if (docType==0) f << "impress,";
+    else if (docType==1) f << "draw,";
+    else {
+      STOFF_DEBUG_MSG(("StarObjectDraw::readPresentationData: unknown doc type\n"));
+      f << "###docType=" << docType << ",";
+    }
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=14) {
+    bool custShow;
+    *input>>custShow;
+    if (custShow) f << "customShow,";
+    int nCustShow=(int) input->readULong(4);
+    if (nCustShow) {
+      f << "n[custShow]=" << nCustShow << ",";
+      pos=input->tell();
+      f.str("");
+      f << "SCDrawPres:";
+      for (int i=0; i<nCustShow; ++i) {
+        if (!readSdrCustomShow(zone) || input->tell()>lastPos) {
+          ok=false;
+          input->seek(pos, librevenge::RVNG_SEEK_SET);
+          break;
+        }
+      }
+      if (ok) pos=input->tell();
+    }
+  }
+  if (ok&&vers>=15) {
+    f << "pageNum[type]=" << input->readULong(4) << ",";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=17) {
+    f << "sec[pause]=" << input->readULong(4) << ",";
+    bool showLogo;
+    *input>>showLogo;
+    if (showLogo) f << "show[logo],";
+    ok=input->tell()<=lastPos;
+  }
+  if (pos!=input->tell()) {
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+  }
+
+  if (input->tell()!=lastPos) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readPresentationData: find extra data\n"));
+    ascFile.addPos(input->tell());
+    ascFile.addNote("SCDrawPres:###extra");
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  }
+  zone.closeSCHHeader("SCDrawPres");
+  return true;
 }
 
 bool StarObjectDraw::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name)
@@ -632,12 +823,27 @@ bool StarObjectDraw::readSdrObject(StarZone &zone)
   *input>>identifier;
   f << magic << ", ident=" << std::hex << identifier << std::dec << ",";
   if (magic=="SVDr") {
-    static bool first=true;
-    if (first) { // see SdrObjFactory::MakeNewObject
-      STOFF_DEBUG_MSG(("StarObjectDraw::readSdrObject: read SVDr object is not implemented\n"));
-      first=false;
+    if (!readSVDRObject(zone, (int) identifier)) {
+      STOFF_DEBUG_MSG(("StarObjectDraw::readSdrObject: can not read SVDr object\n"));
+      f << "###";
     }
-    f << "##";
+    else {
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      pos=input->tell();
+      if (pos==lastPos) {
+        zone.closeSDRHeader("SdrObject");
+        return true;
+      }
+      f.str("");
+      f << "SVDR:##extra";
+      static bool first=true;
+      if (first) { // see SdrObjFactory::MakeNewObject
+        STOFF_DEBUG_MSG(("StarObjectDraw::readSdrObject: read SVDr object, find extra data\n"));
+        first=false;
+      }
+      f << "##";
+    }
   }
   else if (magic=="SCHU") {
     static bool first=true;
@@ -659,7 +865,8 @@ bool StarObjectDraw::readSdrObject(StarZone &zone)
     STOFF_DEBUG_MSG(("StarObjectDraw::readSdrObject: find unknown magic\n"));
     f << "###";
   }
-  ascFile.addDelimiter(input->tell(),'|');
+  if (pos!=input->tell())
+    ascFile.addDelimiter(input->tell(),'|');
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
@@ -899,11 +1106,7 @@ bool StarObjectDraw::readSdrPage(StarZone &zone, StarObject &doc)
           if (val) f << "f" << i << "=" << val << ",";
         }
       }
-      else {
-        if (readSdrPageUnknownZone1(zone, zone.getRecordLastPosition())) {
-          zone.closeRecord("SdrPageDefB");
-          continue;
-        }
+      else if (!readSdrPageUnknownZone1(zone, zone.getRecordLastPosition())) {
         input->seek(pos+4, librevenge::RVNG_SEEK_SET);
         STOFF_DEBUG_MSG(("StarObjectDraw::readSdrPage: find some unknown zone\n"));
         f << "###unknown";
@@ -926,6 +1129,7 @@ bool StarObjectDraw::readSdrPage(StarZone &zone, StarObject &doc)
 
 bool StarObjectDraw::readSdrPageUnknownZone1(StarZone &zone, long lastPos)
 {
+  // checkme: probably as draw pres: schheader: first a schheader, then 3 bool
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell()-4;
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1075,4 +1279,401 @@ bool StarObjectDraw::readSdrMPageDescList(StarZone &zone)
   return true;
 }
 
+bool StarObjectDraw::readSdrCustomShow(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  if (!zone.openSCHHeader()) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SdrCustomShow)[" << zone.getRecordLevel() << "]:";
+  int vers=zone.getHeaderVersion();
+  f << "vers=" << vers << ",";
+
+  long lastPos=zone.getRecordLastPosition();
+  std::vector<uint32_t> string;
+  if (!zone.readString(string) || input->tell()>lastPos) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readSdrCustomShow: can not read the name\n"));
+    f << "###string";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+    zone.closeSCHHeader("SdrCustomShow");
+    return true;
+  }
+  f << libstoff::getString(string).cstr() << ",";
+  long n=(int) input->readULong(4);
+  f << "N=" << n << ",";
+  if (input->tell()+2*n>lastPos) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readSdrCustomShow: the number of page seems bad\n"));
+    f << "###";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+    zone.closeSCHHeader("SdrCustomShow");
+    return true;
+  }
+  f << "pages=[";
+  for (long p=0; p<n; ++p)
+    f << input->readULong(2) << ",";
+  f << "],";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  if (input->tell()!=lastPos) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readSdrCustomShow: find extra data\n"));
+    ascFile.addPos(input->tell());
+    ascFile.addNote("SdrCustomShow:###extra");
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  }
+  zone.closeSCHHeader("SdrCustomShow");
+  return true;
+}
+
+bool StarObjectDraw::readSdrHelpLine(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  // first check magic
+  std::string magic("");
+  long pos=input->tell();
+  for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+  input->seek(pos, librevenge::RVNG_SEEK_SET);
+  if (magic!="DrHl" || !zone.openSDRHeader(magic)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SdrHelpLine)[" << zone.getRecordLevel() << "]:set,";
+  //svx_svdhlpln.cxx operator>>(SdrHelpLine)
+  int version=zone.getHeaderVersion();
+  f << magic << ",nVers=" << version << ",";
+  long lastPos=zone.getRecordLastPosition();
+  int val=(int) input->readULong(2);
+  if (val) f << "kind=" << val << ",";
+  int dim[2];
+  for (int i=0; i<2; ++i) dim[i]=(int) input->readLong(4);
+  f << "pos=" << STOFFVec2i(dim[0],dim[1]) << ",";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  if (input->tell()!=lastPos) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readSdrHelpLine: find extra data\n"));
+    ascFile.addPos(input->tell());
+    ascFile.addNote("SdrHelpLine:###extra");
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  }
+  zone.closeSDRHeader("SdrHelpLine");
+  return true;
+}
+
+bool StarObjectDraw::readSdrHelpLineSet(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  // first check magic
+  std::string magic("");
+  long pos=input->tell();
+  for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+  input->seek(pos, librevenge::RVNG_SEEK_SET);
+  if (magic!="DrHL" || !zone.openSDRHeader(magic)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SdrHelpLine)[" << zone.getRecordLevel() << "]:set,";
+  //svx_svdhlpln.cxx operator>>(SdrHelpLineList)
+  long lastPos=zone.getRecordLastPosition();
+  int version=zone.getHeaderVersion();
+  f << magic << ",nVers=" << version << ",";
+  int n=int(input->readULong(2));
+  if (n) f << "N=" << n << ",";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  for (int i=0; i<n; ++i) {
+    pos=input->tell();
+    if (!readSdrHelpLine(zone) || input->tell()>lastPos) {
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+      break;
+    }
+  }
+  if (input->tell()!=lastPos) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readSdrHelpLineSet: find extra data\n"));
+    ascFile.addPos(input->tell());
+    ascFile.addNote("SdrHelpLine:###extra");
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  }
+  zone.closeSDRHeader("SdrHelpLine");
+  return true;
+}
+
+bool StarObjectDraw::readSdrFrameView(StarZone &zone)
+{
+  //sd_frmview.cxx operator>>(FrameView)
+  if (!readSdrView(zone))
+    return false;
+
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  if (!zone.openSCHHeader()) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SdrFrameView)[" << zone.getRecordLevel() << "]:";
+  int vers=zone.getHeaderVersion();
+  f << "vers=" << vers << ",";
+
+  long lastPos=zone.getRecordLastPosition();
+  if (input->tell()+1+3*32>lastPos) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readSdrFrameView: the zone seems too short\n"));
+    f << "###short";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+    zone.closeSCHHeader("SdrFrameView");
+  }
+  if (input->readLong(1)) f << "ruler,";
+  for (int i=0; i<3; ++i) {
+    char const *(wh[])= {"visible","printtable","helpLine"};
+    f << "layers[" << wh[i] << "]=[";
+    int prevFl=-1, numSame=0;
+    for (int j=0; j<=32; ++j) {
+      int fl=j==32 ? -1 : (int) input->readULong(1);
+      if (fl==prevFl) {
+        ++numSame;
+        continue;
+      }
+      if (numSame) {
+        if (prevFl==0)
+          f << "_";
+        else if (prevFl==255)
+          f << "*";
+        else
+          f << std::hex << prevFl << std::dec;
+        if (numSame>1)
+          f << "x" << numSame;
+        f << ",";
+      }
+      prevFl=fl;
+      numSame=1;
+    }
+    f << "],";
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  pos=input->tell();
+  bool ok=true;
+  if (!readSdrHelpLineSet(zone)) { // standart line
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    ok=false;
+  }
+  if (ok&&vers>=1) {
+    // notes and handout line
+    for (int i=0; i<2; ++i) {
+      if (readSdrHelpLineSet(zone) && input->tell()<=lastPos)
+        continue;
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+      ok=false;
+      break;
+    }
+  }
+  if (ok) pos=input->tell();
+  f.str("");
+  f << "SdrFrameView:";
+  if (ok&&vers>=2) {
+    bool noColors, noAttribs;
+    *input>>noColors >> noAttribs;
+    if (noColors) f << "no[color],";
+    if (noAttribs) f << "no[attrib],";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=3) {
+    int dim[4];
+    for (int i=0; i<4; ++i) dim[i]=(int) input->readLong(4);
+    f << "vis[area]=" << STOFFBox2i(STOFFVec2i(dim[0],dim[1]),STOFFVec2i(dim[2],dim[3])) << ",";
+    f << "page[kind]=" << input->readULong(4) << ",";
+    f << "page[select]=" << input->readULong(2) << ",";
+    f << "page[editMode]=" << input->readULong(4) << ",";
+    bool layerMode;
+    *input>>layerMode;
+    if (layerMode) f << "layer[mode],";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=4) {
+    bool quickEdit;
+    *input>>quickEdit;
+    if (quickEdit) f << "edit[quick],";
+  }
+  if (ok&&vers>=5) {
+    bool dragWithCopy;
+    *input>>dragWithCopy;
+    if (dragWithCopy) f << "drag[withCopy],";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=6)
+    f << "slides[byRow]="<< input->readULong(2) << ",";
+  if (ok&&vers>=7) {
+    bool bigHandles, clickTextEdit, clickChangeRot;
+    *input >> bigHandles >> clickTextEdit >> clickChangeRot;
+    if (bigHandles) f << "handles[big],";
+    if (clickTextEdit) f << "click[textEdit],";
+    if (clickChangeRot) f << "click[changeRotation],";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=8) {
+    f << "notes[editMode]=" << input->readULong(4) << ",";
+    f << "notes[handoutMode]=" << input->readULong(4) << ",";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=9) {
+    f << "draw[mode]=" << input->readULong(4) << ",";
+    f << "draw[preview,mode]=" << input->readULong(4) << ",";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=10) {
+    bool inPageMode, inMasterPageMode;
+    *input >> inPageMode >> inMasterPageMode;
+    if (inPageMode) f << "showPreview[pageMode],";
+    if (inMasterPageMode) f << "showPreview[masterPageMode],";
+    ok=input->tell()<=lastPos;
+  }
+  if (ok&&vers>=11) {
+    bool inOutlineMode;
+    *input >> inOutlineMode;
+    if (inOutlineMode) f << "showPreview[outlineMode],";
+  }
+  if (pos!=input->tell()) {
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+  }
+
+  if (input->tell()!=lastPos) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readSdrFrameView: find extra data\n"));
+    ascFile.addPos(input->tell());
+    ascFile.addNote("SdrFrameView:###extra");
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  }
+  zone.closeSCHHeader("SdrFrameView");
+  return true;
+}
+
+bool StarObjectDraw::readSdrView(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  // first check magic
+  std::string magic("");
+  long pos=input->tell();
+  for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+  input->seek(pos, librevenge::RVNG_SEEK_SET);
+  if (magic!="DrVw" || !zone.openSDRHeader(magic)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SdrView)[" << zone.getRecordLevel() << "]:";
+  //svx_svdview.cxx operator>>(SdrView)
+  int version=zone.getHeaderVersion();
+  f << magic << ",nVers=" << version << ",";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  long lastPos=zone.getRecordLastPosition();
+  int n=0;
+  while (input->tell()<lastPos) {
+    // svx_svdio.cxx: SdrNamedSubRecord::SdrNamedSubRecord
+    pos=input->tell();
+    if (!zone.openRecord()) break;
+    f.str("");
+    f << "SdrViewA" << ++n << "[" << zone.getRecordLevel() << "]:";
+    if (pos+10>zone.getRecordLastPosition()) {
+      STOFF_DEBUG_MSG(("StarObjectDraw::readSdrView: sub named record seems too short\n"));
+      f << "###short";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      zone.closeRecord("SdrView");
+      continue;
+    }
+    std::string inventor("");
+    for (int i=0; i<4; ++i) inventor+=(char) input->readULong(1);
+    f << inventor << "-" << input->readULong(2) << ",";
+    if (input->tell()!=zone.getRecordLastPosition()) {
+      ascFile.addDelimiter(input->tell(),'|');
+      input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+    }
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    zone.closeRecord("SdrView");
+  }
+  if (input->tell()!=lastPos) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readSdrView: find extra data\n"));
+    ascFile.addPos(input->tell());
+    ascFile.addNote("SdrView:###extra");
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  }
+  zone.closeSDRHeader("SdrView");
+  return true;
+}
+
+////////////////////////////////////////////////////////////
+//  object
+////////////////////////////////////////////////////////////
+bool StarObjectDraw::readSVDRObject(StarZone &zone, int identifier)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  long endPos=zone.getRecordLastPosition();
+
+  if (identifier<=0 || identifier>32) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readSVDRObject: unknown identifier\n"));
+    return false;
+  }
+
+  char const *(wh[])= {"none", "group", "line", "rect", "circle",
+                       "sector", "arc", "ccut", "poly", "polyline",
+                       "pathline", "pathfill", "freeline", "freefill", "splineline",
+                       "splinefill", "text", "textextended", "fittext", "fitalltext",
+                       "titletext", "outlinetext", "graf", "ole2", "edge",
+                       "caption", "pathpoly", "pathline", "page", "measure",
+                       "dummy","frame", "uno"
+                      };
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SVDR)[" << zone.getRecordLevel() << "]:" << wh[identifier] << ",";
+
+  if (!zone.openRecord()) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readSVDRObject: can not open record\n"));
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+  long lastPos=zone.getRecordLastPosition();
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  zone.closeRecord("SVDR");
+
+  while (input->tell()<endPos) {
+    pos=input->tell();
+    f.str("");
+    f << "SVDR:" << wh[identifier] << ",";
+    if (!zone.openRecord())
+      return true;
+    lastPos=zone.getRecordLastPosition();
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+    zone.closeRecord("SVDR");
+  }
+  return true;
+}
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

@@ -680,7 +680,7 @@ bool StarFileManager::readFont(StarZone &zone)
   return true;
 }
 
-bool StarFileManager::readJobSetUp(StarZone &zone)
+bool StarFileManager::readJobSetUp(StarZone &zone, bool useJobLen)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -697,6 +697,15 @@ bool StarFileManager::readJobSetUp(StarZone &zone)
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
     return true;
+  }
+  if (useJobLen) {
+    if (pos+len>lastPos) {
+      STOFF_DEBUG_MSG(("StarFileManager::readJobSetUp: the jobs len seems bad\n"));
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+      return false;
+    }
+    else
+      lastPos=pos+len;
   }
   bool ok=false;
   int nSystem=0;

@@ -1463,7 +1463,7 @@ try
     case 0x422b: {
       f << "printer,";
       StarFileManager fileManager;
-      if (!fileManager.readJobSetUp(zone))
+      if (!fileManager.readJobSetUp(zone, false))
         break;
       // TODO store the page size
       break;

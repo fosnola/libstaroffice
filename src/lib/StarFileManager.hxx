@@ -83,7 +83,7 @@ public:
   static bool readOutPlaceObject(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
 
   //! try to read a printer zone
-  static bool readJobSetUp(StarZone &zone);
+  static bool readJobSetUp(StarZone &zone, bool usePrinterLen);
   //! try to read a font
   static bool readFont(StarZone &zone);
   //! try to read a SVGDI object

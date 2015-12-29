@@ -1137,7 +1137,7 @@ bool StarObjectText::readSWJobSetUp(StarZone &zone)
   else {
     f << "JobSetUp[container-" << zone.getRecordLevel() << "]:";
     StarFileManager fileManager;
-    fileManager.readJobSetUp(zone);
+    fileManager.readJobSetUp(zone, false);
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());

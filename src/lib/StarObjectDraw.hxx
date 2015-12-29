@@ -89,8 +89,25 @@ protected:
   //! try to read a list of Master Page zone: "DrML'
   static bool readSdrMPageDescList(StarZone &zone);
 
+  //! try to read a SdCustomShow
+  static bool readSdrCustomShow(StarZone &zone);
+  //! try to read a SdrFrameView
+  static bool readSdrFrameView(StarZone &zone);
+  //! try to read a SdrView
+  static bool readSdrView(StarZone &zone);
+  //! try to read a SdrHelpLine
+  static bool readSdrHelpLine(StarZone &zone);
+  //! try to read a SdrHelpLine list
+  static bool readSdrHelpLineSet(StarZone &zone);
+
+  //! try to read the presentation data
+  static bool readPresentationData(StarZone &zone);
+
   //! try to read a zone which appear at end of a zone: "DrPg'
   static bool readSdrPageUnknownZone1(StarZone &zone, long lastPos);
+
+  //! try to read a SVDr object
+  static bool readSVDRObject(StarZone &zone, int identifier);
 protected:
   //
   // data

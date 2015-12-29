@@ -175,7 +175,7 @@ try
 
   pos=input->tell();
   StarFileManager fileManager;
-  if (pos!=lastPos && !fileManager.readJobSetUp(zone))
+  if (pos!=lastPos && !fileManager.readJobSetUp(zone, false))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
 
   zone.closeRecord("SCChartDocument");
