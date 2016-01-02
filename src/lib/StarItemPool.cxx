@@ -1014,10 +1014,11 @@ shared_ptr<StarItem> StarItemPool::readItem(StarZone &zone, bool isDirect, long 
   if (nSlot) f << "slot=" << nSlot << ",";
   shared_ptr<StarItem> pItem;
   if (!m_state->isInRange(nWhich)) {
-    uint16_t nSurro, nVersion, nLength;
+    uint16_t nSurro;
     *input >> nSurro;
     bool ok=true;
     if (nSurro==0xffff) {
+      uint16_t nVersion, nLength;
       *input >> nVersion >> nLength;
       f << "nVersion=" << nVersion << ",";
       if (input->tell()+long(nLength)>endPos) {
@@ -1848,8 +1849,8 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
   long lastPos=zone.getRecordLevel() ? zone.getRecordLastPosition() : input->size();
   for (int i=0; ok && i<int(nCount); ++i) {
     pos=input->tell();
-    int id=0;
     if (poolVersion==2) {
+      int id=0;
       if (!mRecord.getNewContent("SfxStylePool", id))
         break;
       lastPos=mRecord.getLastContentPosition();

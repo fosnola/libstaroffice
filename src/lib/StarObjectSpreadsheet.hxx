@@ -109,7 +109,7 @@ protected:
   bool readSCOutlineArray(StarZone &zone);
 
   //! the state
-  shared_ptr<StarObjectSpreadsheetInternal::State> m_state;
+  shared_ptr<StarObjectSpreadsheetInternal::State> m_spreadsheetState;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

@@ -70,7 +70,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectChart::StarObjectChart(StarObject const &orig, bool duplicateState) : StarObject::StarObject(orig, duplicateState), m_state(new StarObjectChartInternal::State)
+StarObjectChart::StarObjectChart(StarObject const &orig, bool duplicateState) : StarObject::StarObject(orig, duplicateState), m_chartState(new StarObjectChartInternal::State)
 {
 }
 
@@ -108,13 +108,9 @@ bool StarObjectChart::parse()
     }
 
     std::string::size_type pos = name.find_last_of('/');
-    std::string dir(""), base;
+    std::string base;
     if (pos == std::string::npos) base = name;
-    else if (pos == 0) base = name.substr(1);
-    else {
-      dir = name.substr(0,pos);
-      base = name.substr(pos+1);
-    }
+    else base = name.substr(pos+1);
     ole->setReadInverted(true);
     if (base=="SfxStyleSheets") {
       readSfxStyleSheets(ole,name);

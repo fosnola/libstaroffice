@@ -60,6 +60,8 @@ public:
   {
     return !operator==(p);
   }
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, STOFFParagraph const &para);
   //! the properties
   librevenge::RVNGPropertyList m_propertyList;
   /** the actual level index */

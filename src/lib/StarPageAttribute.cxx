@@ -178,7 +178,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributeItemSet(StarAttributeItemSet const &orig) : StarAttributeItemSet(orig)
+  explicit StarPAttributeItemSet(StarAttributeItemSet const &orig) : StarAttributeItemSet(orig)
   {
   }
 };
@@ -200,7 +200,7 @@ public:
   virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool) const;
 protected:
   //! copy constructor
-  StarPAttributeVec2i(StarAttributeVec2i const &orig) : StarAttributeVec2i(orig)
+  explicit StarPAttributeVec2i(StarAttributeVec2i const &orig) : StarAttributeVec2i(orig)
   {
   }
 };
@@ -335,7 +335,7 @@ namespace StarPageAttribute
 class SubDocument : public STOFFSubDocument
 {
 public:
-  SubDocument(shared_ptr<StarObjectSmallText> text) :
+  explicit SubDocument(shared_ptr<StarObjectSmallText> text) :
     STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_smallText(text) {}
 
   //! destructor
@@ -583,7 +583,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributeViewMode(StarPAttributeUInt const &orig) : StarAttributeUInt(orig)
+  explicit StarPAttributeViewMode(StarPAttributeUInt const &orig) : StarAttributeUInt(orig)
   {
   }
 };

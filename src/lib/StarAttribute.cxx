@@ -1275,7 +1275,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     *input>>nMacros;
     f << "macros=[";
     for (int16_t i=0; i<nMacros; ++i) {
-      uint16_t nCurKey, eType;
+      uint16_t nCurKey;
       bool ok=true;
       f << "[";
       *input>>nCurKey;
@@ -1293,6 +1293,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
       }
       if (!ok) break;
       if (nVers>=1) {
+        uint16_t eType;
         *input>>eType;
         if (eType) f << "eType=" << eType << ",";
       }
@@ -1626,13 +1627,14 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
       f << "startColor=" << STOFFColor(uint8_t(red>>8),uint8_t(green>>8),uint8_t(blue>>8)) << ",";
       f << "endColor=" << STOFFColor(uint8_t(red2>>8),uint8_t(green2>>8),uint8_t(blue2>>8)) << ",";
       uint32_t angle;
-      uint16_t border, xOffset, yOffset, startIntens, endIntens, nStep;
+      uint16_t border, xOffset, yOffset, startIntens, endIntens;
       *input >> angle >> border >> xOffset >> yOffset >> startIntens >> endIntens;
       if (angle) f << "angle=" << angle << ",";
       if (border) f << "border=" << border << ",";
       f << "offset=" << xOffset << "x" << yOffset << ",";
       f << "intensity=[" << startIntens << "," << endIntens << "],";
       if (nVers>=1) {
+        uint16_t nStep;
         *input >> nStep;
         if (nStep) f << "step=" << nStep << ",";
       }

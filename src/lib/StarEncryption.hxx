@@ -54,7 +54,7 @@ public:
   //! constructor
   StarEncryption();
   //! constructor knowing the original password
-  StarEncryption(std::string const &password);
+  explicit StarEncryption(std::string const &password);
   //! destructor
   virtual ~StarEncryption() {}
 

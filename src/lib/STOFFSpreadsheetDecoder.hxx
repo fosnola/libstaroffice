@@ -49,7 +49,7 @@ class STOFFSpreadsheetDecoder : public STOFFPropertyHandler
 {
 public:
   /** constructor */
-  STOFFSpreadsheetDecoder(librevenge::RVNGSpreadsheetInterface *output) : STOFFPropertyHandler(), m_output(output) { }
+  explicit STOFFSpreadsheetDecoder(librevenge::RVNGSpreadsheetInterface *output) : STOFFPropertyHandler(), m_output(output) { }
   /** destructor */
   ~STOFFSpreadsheetDecoder() {};
 

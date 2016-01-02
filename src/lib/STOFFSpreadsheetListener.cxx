@@ -74,7 +74,7 @@ enum { PageBreakBit=0x1, ColumnBreakBit=0x2 };
 //! a class to store the document state of a STOFFSpreadsheetListener
 struct DocumentState {
   //! constructor
-  DocumentState(std::vector<STOFFPageSpan> const &pageList) :
+  explicit DocumentState(std::vector<STOFFPageSpan> const &pageList) :
     m_pageList(pageList), m_pageSpan(), m_metaData(), m_footNoteNumber(0), m_smallPictureNumber(0),
     m_isDocumentStarted(false), m_isSheetOpened(false), m_isSheetRowOpened(false),
     m_sentListMarkers(), m_numberingIdMap(),

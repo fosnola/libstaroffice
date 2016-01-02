@@ -66,7 +66,7 @@ class DebugFile
 {
 public:
   //! constructor given the input file
-  DebugFile(STOFFInputStreamPtr ip=STOFFInputStreamPtr())
+  explicit DebugFile(STOFFInputStreamPtr ip=STOFFInputStreamPtr())
     : m_fileName(""), m_file(), m_on(false), m_input(ip), m_actOffset(-1), m_notes(), m_skipZones() { }
 
   //! resets the input
@@ -198,7 +198,7 @@ public:
 class DebugFile
 {
 public:
-  DebugFile(STOFFInputStreamPtr) {}
+  explicit DebugFile(STOFFInputStreamPtr) {}
   DebugFile() {}
   static void setStream(STOFFInputStreamPtr) {  }
   ~DebugFile() { }

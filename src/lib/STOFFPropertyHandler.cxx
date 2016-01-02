@@ -145,7 +145,7 @@ class STOFFPropertyHandlerDecoder
 {
 public:
   //! constructor given a STOFFPropertyHandler
-  STOFFPropertyHandlerDecoder(STOFFPropertyHandler *hdl=0L):m_handler(hdl) {}
+  explicit STOFFPropertyHandlerDecoder(STOFFPropertyHandler *hdl=0L):m_handler(hdl) {}
 
   //! tries to read the data
   bool readData(librevenge::RVNGBinaryData const &encoded)

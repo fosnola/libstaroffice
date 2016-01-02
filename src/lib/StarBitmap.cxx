@@ -185,7 +185,6 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
   f << "Entries(StarBitmap)[" << zone.getRecordLevel() << "]:";
 
   // bitmap2.cxx: Bitmap::Read
-  long offset=0;
   long dataPos=0;
   if (inFileHeader) {
     // ImplReadDIBFileHeader
@@ -193,6 +192,7 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
     uint16_t header;
     *input >> header;
     bool ok=true;
+    long offset=0;
     if (header==0x4142) {
       input->seek(12, librevenge::RVNG_SEEK_CUR);
       ok=(input->readULong(2)==0x4d42);

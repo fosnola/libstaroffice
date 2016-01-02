@@ -141,7 +141,7 @@ protected:
   //! constructor (protected)
   STOFFParser(STOFFParserState::Type type, STOFFInputStreamPtr input, STOFFHeader *header);
   //! constructor using a state
-  STOFFParser(STOFFParserStatePtr state) : m_parserState(state), m_asciiName("") { }
+  explicit STOFFParser(STOFFParserStatePtr state) : m_parserState(state), m_asciiName("") { }
 
   //! sets the document's version
   void setVersion(int vers)
@@ -189,7 +189,7 @@ protected:
   //! constructor (protected)
   STOFFTextParser(STOFFInputStreamPtr input, STOFFHeader *header) : STOFFParser(STOFFParserState::Text, input, header) {}
   //! constructor using a state
-  STOFFTextParser(STOFFParserStatePtr state) : STOFFParser(state) {}
+  explicit STOFFTextParser(STOFFParserStatePtr state) : STOFFParser(state) {}
 };
 
 /** virtual class which defines the ancestor of all graphic zone parser */
@@ -202,7 +202,7 @@ protected:
   //! constructor (protected)
   STOFFGraphicParser(STOFFInputStreamPtr input, STOFFHeader *header) : STOFFParser(STOFFParserState::Graphic, input, header) {}
   //! constructor using a state
-  STOFFGraphicParser(STOFFParserStatePtr state) : STOFFParser(state) {}
+  explicit STOFFGraphicParser(STOFFParserStatePtr state) : STOFFParser(state) {}
 };
 
 /** virtual class which defines the ancestor of all spreadsheet zone parser */
@@ -215,7 +215,7 @@ protected:
   //! constructor (protected)
   STOFFSpreadsheetParser(STOFFInputStreamPtr input, STOFFHeader *header) : STOFFParser(STOFFParserState::Spreadsheet, input, header) {}
   //! constructor using a state
-  STOFFSpreadsheetParser(STOFFParserStatePtr state) : STOFFParser(state) {}
+  explicit STOFFSpreadsheetParser(STOFFParserStatePtr state) : STOFFParser(state) {}
 };
 
 #endif /* STOFFPARSER_H */

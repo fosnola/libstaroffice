@@ -70,7 +70,7 @@ namespace StarObjectSpreadsheetInternal
 //! Internal: a structure use to read ScMultiRecord zone of a StarObjectSpreadsheet
 struct ScMultiRecord {
   //! constructor
-  ScMultiRecord(StarZone &zone) : m_zone(zone), m_zoneOpened(false), m_actualRecord(0), m_numRecord(0),
+  explicit ScMultiRecord(StarZone &zone) : m_zone(zone), m_zoneOpened(false), m_actualRecord(0), m_numRecord(0),
     m_startPos(0), m_endPos(0), m_endContentPos(0), m_endRecordPos(0), m_offsetList(), m_extra("")
   {
   }
@@ -249,7 +249,7 @@ class Cell : public STOFFCell
 {
 public:
   //! constructor
-  Cell(STOFFVec2i pos=STOFFVec2i(0,0)) : STOFFCell(), m_content(), m_textZone(), m_hasNote(false)
+  explicit Cell(STOFFVec2i pos=STOFFVec2i(0,0)) : STOFFCell(), m_content(), m_textZone(), m_hasNote(false)
   {
     setPosition(pos);
   }
@@ -458,7 +458,7 @@ struct State {
 class SubDocument : public STOFFSubDocument
 {
 public:
-  SubDocument(librevenge::RVNGString const &text) :
+  explicit SubDocument(librevenge::RVNGString const &text) :
     STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_text(text) {}
 
   //! destructor
@@ -505,7 +505,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectSpreadsheet::StarObjectSpreadsheet(StarObject const &orig, bool duplicateState) : StarObject::StarObject(orig, duplicateState), m_state(new StarObjectSpreadsheetInternal::State)
+StarObjectSpreadsheet::StarObjectSpreadsheet(StarObject const &orig, bool duplicateState) : StarObject::StarObject(orig, duplicateState), m_spreadsheetState(new StarObjectSpreadsheetInternal::State)
 {
 }
 
@@ -520,15 +520,15 @@ StarObjectSpreadsheet::~StarObjectSpreadsheet()
 ////////////////////////////////////////////////////////////
 bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const
 {
-  if (m_state->m_tableList.empty()) return false;
-  numPages=int(m_state->m_tableList.size());
+  if (m_spreadsheetState->m_tableList.empty()) return false;
+  numPages=int(m_spreadsheetState->m_tableList.size());
 
   librevenge::RVNGString styleName("");
   int nPages=0;
   shared_ptr<StarItemPool> pool=const_cast<StarObjectSpreadsheet *>(this)->findItemPool(StarItemPool::T_SpreadsheetPool, false);
-  for (size_t i=0; i<=m_state->m_tableList.size(); ++i) {
-    bool isEnd=(i==m_state->m_tableList.size());
-    if (!isEnd && m_state->m_tableList[i] && m_state->m_tableList[i]->m_pageStyle==styleName) {
+  for (size_t i=0; i<=m_spreadsheetState->m_tableList.size(); ++i) {
+    bool isEnd=(i==m_spreadsheetState->m_tableList.size());
+    if (!isEnd && m_spreadsheetState->m_tableList[i] && m_spreadsheetState->m_tableList[i]->m_pageStyle==styleName) {
       ++nPages;
       continue;
     }
@@ -536,8 +536,8 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
       STOFFPageSpan ps;
       ps.m_pageSpan=nPages;
       StarItemStyle const *style=(pool&&!styleName.empty()) ? pool->findStyleWithFamily(styleName, StarItemStyle::F_Page) : 0;
-      if (!style && pool && !m_state->m_pageStyle.empty())
-        style=pool->findStyleWithFamily(m_state->m_pageStyle, StarItemStyle::F_Page);
+      if (!style && pool && !m_spreadsheetState->m_pageStyle.empty())
+        style=pool->findStyleWithFamily(m_spreadsheetState->m_pageStyle, StarItemStyle::F_Page);
       if (style) {
         for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
              it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
@@ -551,7 +551,7 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
       pageSpan.push_back(ps);
     }
     if (isEnd) break;
-    styleName=m_state->m_tableList[i] ? m_state->m_tableList[i]->m_pageStyle : "";
+    styleName=m_spreadsheetState->m_tableList[i] ? m_spreadsheetState->m_tableList[i]->m_pageStyle : "";
     nPages=1;
   }
   return true;
@@ -559,23 +559,23 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
 
 bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
 {
-  if (m_state->m_tableList.empty() || !listener) {
+  if (m_spreadsheetState->m_tableList.empty() || !listener) {
     STOFF_DEBUG_MSG(("StarObjectSpreadsheet::send: can not find the table\n"));
     return false;
   }
   // first creates the list of sheet names
-  m_state->m_sheetNames.clear();
-  for (size_t t=0; t<m_state->m_tableList.size(); ++t) {
-    if (!m_state->m_tableList[t])
-      m_state->m_sheetNames.push_back("");
+  m_spreadsheetState->m_sheetNames.clear();
+  for (size_t t=0; t<m_spreadsheetState->m_tableList.size(); ++t) {
+    if (!m_spreadsheetState->m_tableList[t])
+      m_spreadsheetState->m_sheetNames.push_back("");
     else
-      m_state->m_sheetNames.push_back(m_state->m_tableList[t]->m_name);
+      m_spreadsheetState->m_sheetNames.push_back(m_spreadsheetState->m_tableList[t]->m_name);
   }
 
-  for (size_t t=0; t<m_state->m_tableList.size(); ++t) {
+  for (size_t t=0; t<m_spreadsheetState->m_tableList.size(); ++t) {
     if (t) listener->insertBreak(STOFFListener::PageBreak);
-    if (!m_state->m_tableList[t]) continue;
-    StarObjectSpreadsheetInternal::Table &sheet=*m_state->m_tableList[t];
+    if (!m_spreadsheetState->m_tableList[t]) continue;
+    StarObjectSpreadsheetInternal::Table &sheet=*m_spreadsheetState->m_tableList[t];
     std::vector<int> repeated;
     std::vector<float> widths=sheet.getColumnWidths(repeated);
     listener->openSheet(widths, librevenge::RVNG_INCH, repeated, sheet.m_name);
@@ -597,7 +597,6 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
       newRowSet.insert(rows[1]+1);
     }
 
-    std::map<int, shared_ptr<StarObjectSpreadsheetInternal::Cell> >::iterator cellIt;
     for (std::set<int>::const_iterator it=newRowSet.begin(); it!=newRowSet.end();) {
       int row=*(it++);
       if (row<0) {
@@ -618,11 +617,11 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
 
 bool StarObjectSpreadsheet::sendRow(int table, int row, STOFFSpreadsheetListenerPtr listener)
 {
-  if (!listener || table<0 || table>=(int) m_state->m_tableList.size() || !m_state->m_tableList[size_t(table)]) {
+  if (!listener || table<0 || table>=(int) m_spreadsheetState->m_tableList.size() || !m_spreadsheetState->m_tableList[size_t(table)]) {
     STOFF_DEBUG_MSG(("StarObjectSpreadsheet::send: can not find the table %d\n", table));
     return false;
   }
-  StarObjectSpreadsheetInternal::Table &sheet=*m_state->m_tableList[size_t(table)];
+  StarObjectSpreadsheetInternal::Table &sheet=*m_spreadsheetState->m_tableList[size_t(table)];
   StarObjectSpreadsheetInternal::RowContent *rowC=sheet.getRow(row);
   if (!rowC) return true;
   rowC->compressItemList();
@@ -690,7 +689,7 @@ bool StarObjectSpreadsheet::sendCell(StarObjectSpreadsheetInternal::Cell &cell, 
     getFormatManager()->updateNumberingProperties(cell);
   }
   if (!cell.m_content.m_formula.empty())
-    StarCellFormula::updateFormula(cell.m_content, m_state->m_sheetNames, table);
+    StarCellFormula::updateFormula(cell.m_content, m_spreadsheetState->m_sheetNames, table);
 
   listener->openSheetCell(cell, cell.m_content, numRepeated);
   if (cell.m_content.m_contentType==STOFFCellContent::C_TEXT_BASIC)
@@ -732,13 +731,9 @@ bool StarObjectSpreadsheet::parse()
     }
 
     std::string::size_type pos = name.find_last_of('/');
-    std::string dir(""), base;
+    std::string base;
     if (pos == std::string::npos) base = name;
-    else if (pos == 0) base = name.substr(1);
-    else {
-      dir = name.substr(0,pos);
-      base = name.substr(pos+1);
-    }
+    else base = name.substr(pos+1);
     ole->setReadInverted(true);
     if (base=="SfxStyleSheets") {
       readSfxStyleSheets(ole,name);
@@ -819,7 +814,7 @@ try
       f << "table,";
       shared_ptr<StarObjectSpreadsheetInternal::Table> table;
       table.reset(new StarObjectSpreadsheetInternal::Table(version, maxRow));
-      m_state->m_tableList.push_back(table);
+      m_spreadsheetState->m_tableList.push_back(table);
       ok=readSCTable(zone, *table);
       break;
     }
@@ -829,11 +824,13 @@ try
       StarObjectSpreadsheetInternal::ScMultiRecord scRecord(zone);
       ok=scRecord.open();
       if (!ok) break;
-      uint16_t count, sharedMaxIndex, dummy;
+      uint16_t count, sharedMaxIndex;
       if (version >= 3)
         *input >> sharedMaxIndex >> count;
-      else
+      else {
+        uint16_t dummy;
         *input >> sharedMaxIndex >> dummy >> count;
+      }
       f << "index[sharedMax]=" << sharedMaxIndex << ";";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -1270,11 +1267,11 @@ try
       break;
     }
     long endPos=zone.getRecordLastPosition();
-    uint16_t vers;
     std::vector<uint32_t> string;
     switch (subId) {
     case 0x4221: {
       f << "docFlags,";
+      uint16_t vers;
       *input>>vers;
       version=(int) vers;
       f << "vers=" << vers << ",";
@@ -1284,8 +1281,8 @@ try
         break;
       }
       else if (!string.empty()) {
-        m_state->m_pageStyle=libstoff::getString(string);
-        f << "pageStyle=" << m_state->m_pageStyle.cstr() << ",";
+        m_spreadsheetState->m_pageStyle=libstoff::getString(string);
+        f << "pageStyle=" << m_spreadsheetState->m_pageStyle.cstr() << ",";
       }
       f << "protected=" << input->readULong(1) << ",";
       if (!zone.readString(string)) {
@@ -1896,8 +1893,8 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
         if (!string.empty()) {
           static char const *(wh[])= {"name", "comment", "pass"};
           f << wh[i] << "=" << libstoff::getString(string).cstr() << ",";
-          if (i==0 && !m_state->m_tableList.empty() && m_state->m_tableList.back())
-            m_state->m_tableList.back()->m_name=libstoff::getString(string);
+          if (i==0 && !m_spreadsheetState->m_tableList.empty() && m_spreadsheetState->m_tableList.back())
+            m_spreadsheetState->m_tableList.back()->m_name=libstoff::getString(string);
         }
         if (i==2) break;
         *input>>bVal;

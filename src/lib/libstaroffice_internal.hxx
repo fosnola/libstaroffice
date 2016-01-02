@@ -178,7 +178,7 @@ enum SubDocumentType { DOC_NONE, DOC_CHART, DOC_CHART_ZONE, DOC_COMMENT_ANNOTATI
 //! the class to store a color
 struct STOFFColor {
   //! constructor
-  STOFFColor(uint32_t argb=0) : m_value(argb)
+  explicit STOFFColor(uint32_t argb=0) : m_value(argb)
   {
   }
   //! constructor from color
@@ -355,7 +355,7 @@ struct STOFFField {
   enum Type { None, PageCount, PageNumber, Date, Time, Title, Database };
 
   /** basic constructor */
-  STOFFField(Type type) : m_type(type), m_DTFormat(""), m_numberingType(libstoff::ARABIC), m_data("")
+  explicit STOFFField(Type type) : m_type(type), m_DTFormat(""), m_numberingType(libstoff::ARABIC), m_data("")
   {
   }
   /** add the link property to proplist (if possible) */
@@ -391,7 +391,7 @@ struct STOFFNote {
   //! enum to define note type
   enum Type { FootNote, EndNote };
   //! constructor
-  STOFFNote(Type type) : m_type(type), m_label(""), m_number(-1)
+  explicit STOFFNote(Type type) : m_type(type), m_label(""), m_number(-1)
   {
   }
   //! the note type
@@ -497,7 +497,7 @@ template <class T> struct STOFFVariable {
   //! constructor
   STOFFVariable() : m_data(), m_set(false) {}
   //! constructor with a default value
-  STOFFVariable(T const &def) : m_data(def), m_set(false) {}
+  explicit STOFFVariable(T const &def) : m_data(def), m_set(false) {}
   //! copy constructor
   STOFFVariable(STOFFVariable const &orig) : m_data(orig.m_data), m_set(orig.m_set) {}
   //! copy operator
@@ -890,8 +890,8 @@ public:
   int cmp(STOFFVec3<T> const &p) const
   {
     for (int c = 0; c < 3; c++) {
-      T diff  = m_val[c]-p.m_val[c];
-      if (diff) return (diff < 0) ? -1 : 1;
+      if (m_val[c]<p.m_val[c]) return -1;
+      if (m_val[c]>p.m_val[c]) return 1;
     }
     return 0;
   }

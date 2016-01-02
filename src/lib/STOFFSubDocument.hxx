@@ -44,7 +44,7 @@ public:
   //! constructor from parser, input stream and zone in the input
   STOFFSubDocument(STOFFParser *pars, STOFFInputStreamPtr ip, STOFFEntry const &z);
   //! copy constructor
-  STOFFSubDocument(STOFFSubDocument const &doc);
+  explicit STOFFSubDocument(STOFFSubDocument const &doc);
   //! copy operator
   STOFFSubDocument &operator=(STOFFSubDocument const &doc);
   //! virtual destructor

@@ -49,7 +49,7 @@ class STOFFGraphicDecoder : public STOFFPropertyHandler
 {
 public:
   /** constructor */
-  STOFFGraphicDecoder(librevenge::RVNGDrawingInterface *output) : STOFFPropertyHandler(), m_output(output) { }
+  explicit STOFFGraphicDecoder(librevenge::RVNGDrawingInterface *output) : STOFFPropertyHandler(), m_output(output) { }
   /** destructor */
   ~STOFFGraphicDecoder() {};
 

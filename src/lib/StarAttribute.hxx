@@ -784,7 +784,7 @@ protected:
   {
   }
   //! copy constructor
-  StarAttribute(StarAttribute const &orig) : m_type(orig.m_type), m_debugName(orig.m_debugName)
+  explicit StarAttribute(StarAttribute const &orig) : m_type(orig.m_type), m_debugName(orig.m_debugName)
   {
   }
 

@@ -69,7 +69,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectSmallText::StarObjectSmallText(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_state(new StarObjectSmallTextInternal::State)
+StarObjectSmallText::StarObjectSmallText(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_textState(new StarObjectSmallTextInternal::State)
 {
 }
 
@@ -83,7 +83,7 @@ bool StarObjectSmallText::send(shared_ptr<STOFFListener> listener)
     STOFF_DEBUG_MSG(("StarObjectSmallText::send: call without listener\n"));
     return false;
   }
-  listener->insertUnicodeList(m_state->m_text);
+  listener->insertUnicodeList(m_textState->m_text);
   return true;
 }
 
@@ -168,7 +168,7 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
       else if (!text.empty())
         f << (j==0 ? "name" : "style") << "=" << libstoff::getString(text).cstr() << ",";
       if (j==0)
-        m_state->m_text=text;
+        m_textState->m_text=text;
     }
     uint16_t styleFamily;
     *input >> styleFamily;

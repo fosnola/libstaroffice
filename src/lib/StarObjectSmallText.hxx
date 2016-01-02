@@ -79,7 +79,7 @@ protected:
   //
 
   //! the state
-  shared_ptr<StarObjectSmallTextInternal::State> m_state;
+  shared_ptr<StarObjectSmallTextInternal::State> m_textState;
 private:
   StarObjectSmallText &operator=(StarObjectSmallText const &orig);
 };

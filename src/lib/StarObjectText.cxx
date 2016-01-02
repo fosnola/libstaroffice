@@ -71,7 +71,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectText::StarObjectText(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_state(new StarObjectTextInternal::State)
+StarObjectText::StarObjectText(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_textState(new StarObjectTextInternal::State)
 {
 }
 

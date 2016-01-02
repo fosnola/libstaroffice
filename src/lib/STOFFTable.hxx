@@ -62,7 +62,7 @@ public:
     Paragraph, Left, Center, Right
   };
   //! the constructor
-  STOFFTable(uint32_t givenData=BoxBit) :
+  explicit STOFFTable(uint32_t givenData=BoxBit) :
     m_givenData(givenData), m_setData(givenData), m_mergeBorders(true), m_cellsList(),
     m_numRows(0), m_numCols(0), m_rowsSize(), m_colsSize(), m_alignment(Paragraph), m_leftMargin(0), m_rightMargin(0),
     m_posToCellId() {}

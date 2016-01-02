@@ -208,7 +208,7 @@ STOFFColor STOFFColor::barycenter(float alpha, STOFFColor const &colA,
     unsigned char comp= (unsigned char)val;
     res+=uint32_t(comp<<depl);
   }
-  return res;
+  return STOFFColor(res);
 }
 
 std::ostream &operator<< (std::ostream &o, STOFFColor const &c)

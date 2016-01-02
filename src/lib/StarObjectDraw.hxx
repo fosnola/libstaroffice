@@ -154,7 +154,7 @@ protected:
   //
 
   //! the state
-  shared_ptr<StarObjectDrawInternal::State> m_state;
+  shared_ptr<StarObjectDrawInternal::State> m_drawState;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

@@ -55,7 +55,7 @@ namespace StarFileManagerInternal
 //! Internal: a structure use to read SfxMultiRecord zone of a StarFileManager
 struct SfxMultiRecord {
   //! constructor
-  SfxMultiRecord(StarZone &zone) : m_zone(zone), m_zoneType(0), m_zoneOpened(false), m_headerType(0), m_headerVersion(0), m_headerTag(0),
+  explicit SfxMultiRecord(StarZone &zone) : m_zone(zone), m_zoneType(0), m_zoneOpened(false), m_headerType(0), m_headerVersion(0), m_headerTag(0),
     m_actualRecord(0), m_numRecord(0), m_contentSize(0),
     m_startPos(0), m_endPos(0), m_offsetList(), m_extra("")
   {

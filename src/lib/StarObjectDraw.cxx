@@ -69,7 +69,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectDraw::StarObjectDraw(StarObject const &orig, bool duplicateState) : StarObject::StarObject(orig, duplicateState), m_state(new StarObjectDrawInternal::State)
+StarObjectDraw::StarObjectDraw(StarObject const &orig, bool duplicateState) : StarObject::StarObject(orig, duplicateState), m_drawState(new StarObjectDrawInternal::State)
 {
 }
 
@@ -112,10 +112,7 @@ bool StarObjectDraw::parse()
     std::string dir(""), base;
     if (pos == std::string::npos) base = name;
     else if (pos == 0) base = name.substr(1);
-    else {
-      dir = name.substr(0,pos);
-      base = name.substr(pos+1);
-    }
+    else base = name.substr(pos+1);
     ole->setReadInverted(true);
     if (base=="StarDrawDocument" || base=="StarDrawDocument3") {
       if (mainOle) {
