@@ -40,6 +40,7 @@
 
 #include "libstaroffice_internal.hxx"
 
+class StarBitmap;
 class StarObject;
 class StarZone;
 
@@ -91,6 +92,19 @@ public:
   std::string m_extra;
 };
 
+//! Class to store a graphic
+class StarGraphic
+{
+public:
+  //! constructor
+  StarGraphic() : m_bitmap()
+  {
+  }
+  //! try to read a graphic, give lastPos if you are sure of the end graphic position
+  bool read(StarZone &zone, long lastPos=-1);
+  //! the bitmap
+  shared_ptr<StarBitmap> m_bitmap;
+};
 }
 
 #endif

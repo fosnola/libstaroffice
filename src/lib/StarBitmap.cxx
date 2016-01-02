@@ -185,7 +185,8 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
   f << "Entries(StarBitmap)[" << zone.getRecordLevel() << "]:";
 
   // bitmap2.cxx: Bitmap::Read
-  unsigned long offset=0;
+  long offset=0;
+  long dataPos=0;
   if (inFileHeader) {
     // ImplReadDIBFileHeader
     f << "header,";
@@ -196,22 +197,24 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
       input->seek(12, librevenge::RVNG_SEEK_CUR);
       ok=(input->readULong(2)==0x4d42);
       input->seek(8, librevenge::RVNG_SEEK_CUR);
-      offset=input->readULong(4)-28ul;
+      offset=(long) input->readULong(4);
     }
     else if (header==0x4d42) {
       input->seek(8, librevenge::RVNG_SEEK_CUR);
-      offset=input->readULong(4)-14ul;
+      offset=(long) input->readULong(4);
     }
     else
       ok=false;
     f << "offset=" << offset << ",";
-    if (!ok || (long) offset<0 || input->tell()+(long) offset>lastPos) {
+    if (!ok || offset<0 || beginPos+(long) offset>lastPos) {
       STOFF_DEBUG_MSG(("StarBitmap::readBitmap: can not read the header\n"));
       f << "###";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       return false;
     }
+    if (offset)
+      dataPos=beginPos+offset;
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -294,6 +297,7 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
     (void)inflateEnd(&strm);
     shared_ptr<librevenge::RVNGInputStream> newStream(new STOFFStringStream(&converted[0], (unsigned)converted.size()));
     dInput.reset(new STOFFInputStream(newStream, input->readInverted()));
+    dataPos=0;
     endDataPos=dInput->size();
 #else
     STOFF_DEBUG_MSG(("StarBitmap::readBitmap: can not decode zip file\n"));
@@ -308,7 +312,7 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
   int const nColors=(bitCount>8) ? 0 : bitmap.m_numColors[0] ? int(bitmap.m_numColors[0]) : int(1 << bitCount);
   int const numComponent=bitmap.m_hasAlphaColor ? 4 : 3;
   if (dInput->tell()+numComponent*nColors > endDataPos) {
-    STOFF_DEBUG_MSG(("StarBitmap::readBitmap: is not implement\n"));
+    STOFF_DEBUG_MSG(("StarBitmap::readBitmap: can not read the color\n"));
     f << "###";
     ascFile.addDelimiter(input->tell(),'|');
     ascFile.addPos(pos);
@@ -330,13 +334,16 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
   ascFile.addNote(f.str().c_str());
 
   pos=input->tell();
+  if (dataPos && dataPos!=dInput->tell())
+    dInput->seek(dataPos, librevenge::RVNG_SEEK_SET);
   if (!readBitmapData(dInput, bitmap, endDataPos)) {
     STOFF_DEBUG_MSG(("StarBitmap::readBitmap: can not read the bitmap\n"));
     ascFile.addPos(pos);
     ascFile.addNote("StarBitmap:###unread");
     return false;
   }
-  ascFile.skipZone(pos,input->tell()-1);
+  if (bitmap.m_compression!=0x1004453)
+    ascFile.skipZone(pos,input->tell()-1);
   pos=input->tell();
 
   if (inFileHeader) {

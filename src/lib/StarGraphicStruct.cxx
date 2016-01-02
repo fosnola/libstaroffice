@@ -37,6 +37,8 @@
 
 #include "libstaroffice_internal.hxx"
 
+#include "StarBitmap.hxx"
+#include "StarFileManager.hxx"
 #include "StarObject.hxx"
 #include "StarZone.hxx"
 
@@ -119,7 +121,7 @@ static unsigned char *createAndInitBMPData(STOFFVec2i const &sz, unsigned &dibFi
 }
 
 //! Internal: helper function to create a BMP for a color bitmap (freely inspired from libpwg::WPGBitmap.cpp)
-bool getBMPData(std::vector<std::vector<STOFFColor> > const &orig, librevenge::RVNGBinaryData &data)
+inline bool getBMPData(std::vector<std::vector<STOFFColor> > const &orig, librevenge::RVNGBinaryData &data)
 {
   if (orig.empty() || orig[0].empty()) return false;
   STOFFVec2i sz((int) orig[0].size(),(int) orig.size());
@@ -302,6 +304,76 @@ bool StarBrush::read(StarZone &zone, int nVers, long /*endPos*/, StarObject &/*o
   return true;
 }
 
+////////////////////////////////////////////////////////////
+//  StarGraphic
+////////////////////////////////////////////////////////////
+bool StarGraphicStruct::StarGraphic::read(StarZone &zone, long endPos)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  long lastPos=endPos>0 ? endPos : zone.getRecordLevel()==0 ? input->size() : zone.getRecordLastPosition();
+  // impgraph.cxx operator>>(ImpGraphic&)
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SDRGraphic)[" << zone.getRecordLevel() << "]:";
+  if (pos+4>lastPos) {
+    STOFF_DEBUG_MSG(("StarGraphicStruct::StarGraphic::read: the zone seems too short\n"));
+    f << "###short,";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  std::string header;
+  for (int i=0; i<4; ++i) header+=(char) input->readULong(1);
+  bool ok=true;
+  if (header=="NAT5") { // NAT5
+    if (!zone.openVersionCompatHeader()) {
+      STOFF_DEBUG_MSG(("StarGraphicStruct::StarGraphic::read: can not open version compat header\n"));
+      f << "###vCompat,";
+      ok=false;
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarGraphicStruct::StarGraphic::read: reading native file is not implemented\n"));
+      f << "###Nat5";
+      ascFile.addDelimiter(input->tell(),'|');
+      input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+      zone.closeVersionCompatHeader("SDRGraphic");
+    }
+  }
+  else if (header=="SVGD") {
+    StarFileManager fileManager;
+    input->seek(-4, librevenge::RVNG_SEEK_CUR);
+    if (fileManager.readSVGDI(zone))
+      return true;
+
+    STOFF_DEBUG_MSG(("StarGraphicStruct::StarGraphic::read: can not read a SVGD file\n"));
+    f << "##SVGD,";
+    ok=false;
+  }
+  // can also some pict here, ...
+  else if (header[0]=='B') {
+    input->seek(-4, librevenge::RVNG_SEEK_CUR);
+    StarBitmap bitmap;
+    librevenge::RVNGBinaryData data;
+    std::string type;
+    if (!bitmap.readBitmap(zone, true, lastPos, data, type)) {
+      if (endPos>0)
+        f << "#unknown,";
+      else {
+        STOFF_DEBUG_MSG(("StarGraphicStruct::StarGraphic::read: unexpected header\n"));
+        f << "##header=" << header << ",";
+        ok=false;
+      }
+    }
+  }
+  else if (endPos>0)
+    f << "#unknown,";
+  if (endPos>0)
+    input->seek(endPos, librevenge::RVNG_SEEK_SET);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok;
+}
 
 }
 
