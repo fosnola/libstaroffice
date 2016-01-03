@@ -43,9 +43,9 @@
 
 #include "StarAttribute.hxx"
 #include "StarEncryption.hxx"
-#include "StarObject.hxx"
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
+#include "StarObject.hxx"
 #include "StarObjectDraw.hxx"
 #include "StarZone.hxx"
 #include "SWFieldManager.hxx"
@@ -76,6 +76,7 @@ StarObjectChart::StarObjectChart(StarObject const &orig, bool duplicateState) : 
 
 StarObjectChart::~StarObjectChart()
 {
+  cleanPools();
 }
 
 ////////////////////////////////////////////////////////////
@@ -937,5 +938,4 @@ bool StarObjectChart::readSCHMemChart(StarZone &zone)
   zone.closeSCHHeader("SCHMemChart");
   return true;
 }
-
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

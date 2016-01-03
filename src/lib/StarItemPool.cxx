@@ -339,6 +339,18 @@ struct State {
   }
   //! initialize a pool
   void init(StarItemPool::Type type);
+  //! clean the state
+  void clean()
+  {
+    if (m_secondaryPool) m_secondaryPool->clean();
+    m_versionList.clear();
+    m_idToAttributeList.clear();
+    m_slotIdToValuesMap.clear();
+    m_styleIdToStyleMap.clear();
+    m_simplifyNameToStyleNameMap.clear();
+    m_idToDefaultMap.clear();
+    m_delayedItemList.clear();
+  }
   //! set the pool name
   void setPoolName(librevenge::RVNGString const &name)
   {
@@ -882,6 +894,11 @@ StarItemPool::StarItemPool(StarObject &doc, StarItemPool::Type type) :
 
 StarItemPool::~StarItemPool()
 {
+}
+
+void StarItemPool::clean()
+{
+  m_state->clean();
 }
 
 bool StarItemPool::isSecondaryPool() const

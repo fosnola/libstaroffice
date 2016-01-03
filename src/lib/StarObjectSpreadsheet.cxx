@@ -511,6 +511,7 @@ StarObjectSpreadsheet::StarObjectSpreadsheet(StarObject const &orig, bool duplic
 
 StarObjectSpreadsheet::~StarObjectSpreadsheet()
 {
+  cleanPools();
 }
 
 ////////////////////////////////////////////////////////////

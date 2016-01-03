@@ -107,9 +107,9 @@ protected:
   static bool readSdrPageUnknownZone1(StarZone &zone, long lastPos);
 
   //! try to read a SVDr object
-  static bool readSVDRObject(StarZone &zone, int identifier, StarObject &doc);
+  static bool readSVDRObject(StarZone &zone, StarObject &doc, int identifier);
   //! try to read the first zone of SVDr object
-  static bool readSVDRObjectHeader(StarZone &zone);
+  static bool readSVDRObjectHeader(StarZone &zone, StarObject &doc);
   //! try to read the object attrib zone
   static bool readSVDRObjectAttrib(StarZone &zone, StarObject &doc);
   //! try to read the object text zone
@@ -144,10 +144,12 @@ protected:
   //! try to read a outliner para object
   static bool readSDROutlinerParaObject(StarZone &zone, StarObject &doc);
   //! try to read a SDR userData
-  static bool readSDRUserData(StarZone &zone, bool inRecord);
+  static bool readSDRUserData(StarZone &zone, StarObject &doc, bool inRecord);
   //! try to read a SDR userData list
-  static bool readSDRUserDataList(StarZone &zone, bool inRecord);
+  static bool readSDRUserDataList(StarZone &zone, StarObject &doc, bool inRecord);
 
+  //! try to read a SCHU object
+  static bool readSCHUObject(StarZone &zone, int identifier, StarObject &doc);
 protected:
   //
   // data

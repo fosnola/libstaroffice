@@ -47,6 +47,7 @@
 #include "StarGraphicStruct.hxx"
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
+#include "StarObjectChart.hxx"
 #include "StarObjectSmallText.hxx"
 #include "StarZone.hxx"
 
@@ -75,6 +76,7 @@ StarObjectDraw::StarObjectDraw(StarObject const &orig, bool duplicateState) : St
 
 StarObjectDraw::~StarObjectDraw()
 {
+  cleanPools();
 }
 
 ////////////////////////////////////////////////////////////
@@ -821,7 +823,7 @@ bool StarObjectDraw::readSdrObject(StarZone &zone, StarObject &doc)
   *input>>identifier;
   f << magic << ", ident=" << std::hex << identifier << std::dec << ",";
   if (magic=="SVDr") {
-    if (!readSVDRObject(zone, (int) identifier, doc)) {
+    if (!readSVDRObject(zone, doc, (int) identifier)) {
       STOFF_DEBUG_MSG(("StarObjectDraw::readSdrObject: can not read SVDr object\n"));
       f << "###";
     }
@@ -844,12 +846,27 @@ bool StarObjectDraw::readSdrObject(StarZone &zone, StarObject &doc)
     }
   }
   else if (magic=="SCHU") {
-    static bool first=true;
-    if (first) {
-      STOFF_DEBUG_MSG(("StarObjectDraw::readSdrObject: read SCHU object is not implemented\n"));
-      first=false;
+    if (!readSCHUObject(zone, (int) identifier, doc)) {
+      STOFF_DEBUG_MSG(("StarObjectDraw::readSdrObject: can not read SCHU object\n"));
+      f << "###";
     }
-    f << "##";
+    else {
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      pos=input->tell();
+      if (pos==lastPos) {
+        zone.closeSDRHeader("SdrObject");
+        return true;
+      }
+      f.str("");
+      f << "SdrObject:##extra";
+      static bool first=true;
+      if (first) { // see SdrObjFactory::MakeNewObject
+        STOFF_DEBUG_MSG(("StarObjectDraw::readSdrObject: read Schu object, find extra data\n"));
+        first=false;
+      }
+      f << "##";
+    }
   }
   else if (magic=="FM01") { // FmFormInventor
     static bool first=true;
@@ -1626,7 +1643,7 @@ bool StarObjectDraw::readSdrView(StarZone &zone)
 ////////////////////////////////////////////////////////////
 //  object
 ////////////////////////////////////////////////////////////
-bool StarObjectDraw::readSVDRObject(StarZone &zone, int identifier, StarObject &doc)
+bool StarObjectDraw::readSVDRObject(StarZone &zone, StarObject &doc, int identifier)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos;
@@ -1686,7 +1703,7 @@ bool StarObjectDraw::readSVDRObject(StarZone &zone, int identifier, StarObject &
     ok=readSVDRObjectCaption(zone, doc);
     break;
   case 28: { // page
-    ok=readSVDRObjectHeader(zone);
+    ok=readSVDRObjectHeader(zone, doc);
     if (!ok) break;
     pos=input->tell();
     if (!zone.openRecord()) {
@@ -1732,7 +1749,7 @@ bool StarObjectDraw::readSVDRObject(StarZone &zone, int identifier, StarObject &
     break;
   }
   default:
-    ok=readSVDRObjectHeader(zone);
+    ok=readSVDRObjectHeader(zone, doc);
     break;
   }
   pos=input->tell();
@@ -1776,7 +1793,7 @@ bool StarObjectDraw::readSVDRObjectAttrib(StarZone &zone, StarObject &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
-  if (!readSVDRObjectHeader(zone)) {
+  if (!readSVDRObjectHeader(zone, doc)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
@@ -2047,7 +2064,7 @@ bool StarObjectDraw::readSVDRObjectEdge(StarZone &zone, StarObject &doc)
   return true;
 }
 
-bool StarObjectDraw::readSVDRObjectHeader(StarZone &zone)
+bool StarObjectDraw::readSVDRObjectHeader(StarZone &zone, StarObject &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -2133,7 +2150,7 @@ bool StarObjectDraw::readSVDRObjectHeader(StarZone &zone)
       pos=input->tell();
       f.str("");
       f << "SVDR[headerC]:";
-      if (!readSDRUserDataList(zone, vers>=11)) {
+      if (!readSDRUserDataList(zone, doc, vers>=11)) {
         STOFF_DEBUG_MSG(("StarObjectDraw::readSVDRObjectHeader: can not find the data list record\n"));
         f << "###dataList";
       }
@@ -2281,7 +2298,7 @@ bool StarObjectDraw::readSVDRObjectGraph(StarZone &zone, StarObject &doc)
 
 bool StarObjectDraw::readSVDRObjectGroup(StarZone &zone, StarObject &doc)
 {
-  if (!readSVDRObjectHeader(zone))
+  if (!readSVDRObjectHeader(zone, doc))
     return false;
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -2925,7 +2942,7 @@ bool StarObjectDraw::readSDRGluePointList(StarZone &zone)
   return true;
 }
 
-bool StarObjectDraw::readSDRUserData(StarZone &zone, bool inRecord)
+bool StarObjectDraw::readSDRUserData(StarZone &zone, StarObject &doc, bool inRecord)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -2947,36 +2964,46 @@ bool StarObjectDraw::readSDRUserData(StarZone &zone, bool inRecord)
     for (int i=0; i<4; ++i) type+=(char) input->readULong(1);
     int id=(int) input->readULong(2);
     f << type << ",id=" << id << ",";
-    int nSz=-1;
     if (type=="SCHU") {
-      // find SCHU with id=1,2,3 here
-      if (id==2) nSz=4;
-      else if (id==3) nSz=6;
+      if (!readSCHUObject(zone, id, doc)) {
+        f << "##";
+        if (!inRecord) {
+          STOFF_DEBUG_MSG(("StarObjectDraw::readSDRUserData: can not determine end size\n"));
+          ascFile.addPos(pos);
+          ascFile.addNote(f.str().c_str());
+          return false;
+        }
+      }
+      else if (!inRecord)
+        lastPos=input->tell();
     }
-    else if (type=="SDUD" && id==1 && input->tell()+6<=lastPos) {
-      int val=(int) input->readULong(2); // 0
-      if (val) f << "f0=" << val << ",";
-      int sz=(int) input->readULong(4);
-      if (sz>=4 && input->tell()+sz-4<=lastPos)
-        nSz=sz-4;
-      else
-        f << "##sz=" << nSz << ",";
+    else {
+      int nSz=-1;
+      if (type=="SDUD" && id==1 && input->tell()+6<=lastPos) {
+        int val=(int) input->readULong(2); // 0
+        if (val) f << "f0=" << val << ",";
+        int sz=(int) input->readULong(4);
+        if (sz>=4 && input->tell()+sz-4<=lastPos)
+          nSz=sz-4;
+        else
+          f << "##sz=" << nSz << ",";
+      }
+      f << "#";
+      static bool first=true;
+      if (first) {
+        first=false;
+        STOFF_DEBUG_MSG(("StarObjectDraw::readSDRUserData: reading data is not implemented\n"));
+      }
+      if (!inRecord && nSz<0) {
+        STOFF_DEBUG_MSG(("StarObjectDraw::readSDRUserData: can not determine end size\n"));
+        f << "##";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        return false;
+      }
+      else if (!inRecord)
+        lastPos=input->tell()+nSz;
     }
-    f << "#";
-    static bool first=true;
-    if (first) {
-      first=false;
-      STOFF_DEBUG_MSG(("StarObjectDraw::readSDRUserData: reading data is not implemented\n"));
-    }
-    if (!inRecord && nSz<0) {
-      STOFF_DEBUG_MSG(("StarObjectDraw::readSDRUserData: can not determine end size\n"));
-      f << "##";
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      return false;
-    }
-    else if (!inRecord)
-      lastPos=input->tell()+nSz;
   }
   if (input->tell()!=lastPos) {
     ascFile.addDelimiter(input->tell(),'|');
@@ -2989,7 +3016,7 @@ bool StarObjectDraw::readSDRUserData(StarZone &zone, bool inRecord)
   return true;
 }
 
-bool StarObjectDraw::readSDRUserDataList(StarZone &zone, bool inRecord)
+bool StarObjectDraw::readSDRUserDataList(StarZone &zone, StarObject &doc, bool inRecord)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -3008,12 +3035,74 @@ bool StarObjectDraw::readSDRUserDataList(StarZone &zone, bool inRecord)
   ascFile.addNote(f.str().c_str());
   for (int i=0; i<n; ++i) {
     pos=input->tell();
-    if (!readSDRUserData(zone, inRecord)) {
+    if (!readSDRUserData(zone, doc, inRecord)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       STOFF_DEBUG_MSG(("StarObjectDraw::readSDRUserDataList: can not find a glue point\n"));
     }
   }
   if (inRecord) zone.closeRecord("SdrUserData");
+  return true;
+}
+
+////////////////////////////////////////////////////////////
+// SCHU object
+////////////////////////////////////////////////////////////
+bool StarObjectDraw::readSCHUObject(StarZone &zone, int identifier, StarObject &doc)
+{
+  if (identifier==1)
+    return readSVDRObjectGroup(zone, doc);
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+
+  // long endPos=zone.getRecordLastPosition();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SCHU):";
+  if (identifier<=0 || identifier>7) {
+    STOFF_DEBUG_MSG(("StarObjectDraw::readSCHUObject: find unknown identifier\n"));
+    f << "###id=" << identifier << ",";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+    return false;
+  }
+  char const(*wh[])= {"none", "group", "objectId", "objectAdjustId", "dataRowId", "dataPointId", "lightfactorId", "axisId"};
+  f << wh[identifier] << ",";
+  // sch_objfac.xx : SchObjFactory::MakeUserData
+  int vers=(int) input->readULong(2);
+  f << "vers=" << vers << ",";
+  switch (identifier) {
+  case 2:
+    f << "id=" << input->readULong(2) << ",";
+    break;
+  case 3:
+    f << "adjust=" << input->readULong(2) << ",";
+    if (vers>=1)
+      f << "orient=" << input->readULong(2) << ",";
+    break;
+  case 4:
+    f << "row=" << input->readLong(2) << ",";
+    break;
+  case 5:
+    f << "col=" << input->readLong(2) << ",";
+    f << "row=" << input->readLong(2) << ",";
+    break;
+  case 6: {
+    double val;
+    *input >> val;
+    f << "factor=" << val << ",";
+    break;
+  }
+  case 7:
+    f << "id=" << input->readULong(2) << ",";
+    break;
+  default:
+    f << "##";
+    break;
+  }
+
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
   return true;
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

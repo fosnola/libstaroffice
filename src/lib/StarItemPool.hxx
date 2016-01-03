@@ -77,6 +77,8 @@ public:
   //! destructor
   virtual ~StarItemPool();
 
+  //! clean the pool's list of attributes, ...
+  void clean();
   //! add a secondary pool
   void addSecondaryPool(shared_ptr<StarItemPool> secondary);
   //! returns true if a pool is a secondary pool

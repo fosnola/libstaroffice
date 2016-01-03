@@ -77,6 +77,7 @@ StarObjectText::StarObjectText(StarObject const &orig, bool duplicateState) : St
 
 StarObjectText::~StarObjectText()
 {
+  cleanPools();
 }
 
 ////////////////////////////////////////////////////////////

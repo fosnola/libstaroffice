@@ -98,6 +98,8 @@ public:
   }
 
   // the document pool
+  //! clean each pool
+  void cleanPools();
   //! returns a new item pool for this document
   shared_ptr<StarItemPool> getNewItemPool(StarItemPool::Type type);
   /** check if a pool corresponding to a given type is opened if so returned it.

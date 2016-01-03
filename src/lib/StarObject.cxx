@@ -91,6 +91,15 @@ StarObject::~StarObject()
 {
 }
 
+void StarObject::cleanPools()
+{
+  for (size_t i=0; i<m_state->m_poolList.size(); ++i) {
+    if (m_state->m_poolList[i])
+      m_state->m_poolList[i]->clean();
+  }
+  m_state->m_poolList.clear();
+}
+
 STOFFDocument::Kind StarObject::getDocumentKind() const
 {
   return m_directory ? m_directory->m_kind : STOFFDocument::STOFF_K_UNKNOWN;
