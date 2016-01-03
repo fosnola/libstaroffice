@@ -80,8 +80,6 @@ protected:
   static bool readSdrLayer(StarZone &zone);
   //! try to read a SdrLayerSet zone: "DrLS'
   static bool readSdrLayerSet(StarZone &zone);
-  //! try to read a object zone: "DrOb'
-  static bool readSdrObject(StarZone &zone, StarObject &doc);
   //! try to read a Page/MasterPage zone: "DrPg'
   static bool readSdrPage(StarZone &zone, StarObject &doc);
   //! try to read a Master Page descriptor zone: "DrMP'
@@ -106,50 +104,6 @@ protected:
   //! try to read a zone which appear at end of a zone: "DrPg'
   static bool readSdrPageUnknownZone1(StarZone &zone, long lastPos);
 
-  //! try to read a SVDr object
-  static bool readSVDRObject(StarZone &zone, StarObject &doc, int identifier);
-  //! try to read the first zone of SVDr object
-  static bool readSVDRObjectHeader(StarZone &zone, StarObject &doc);
-  //! try to read the object attrib zone
-  static bool readSVDRObjectAttrib(StarZone &zone, StarObject &doc);
-  //! try to read the object text zone
-  static bool readSVDRObjectText(StarZone &zone, StarObject &doc);
-  //! try to read the object rect zone
-  static bool readSVDRObjectRect(StarZone &zone, StarObject &doc, int identifier);
-  //! try to read the object caption zone
-  static bool readSVDRObjectCaption(StarZone &zone, StarObject &doc);
-  //! try to read the object circle zone
-  static bool readSVDRObjectCircle(StarZone &zone, StarObject &doc, int identifier);
-  //! try to read the object edge zone
-  static bool readSVDRObjectEdge(StarZone &zone, StarObject &doc);
-  //! try to read the object graph zone
-  static bool readSVDRObjectGraph(StarZone &zone, StarObject &doc);
-  //! try to read the object group zone
-  static bool readSVDRObjectGroup(StarZone &zone, StarObject &doc);
-  //! try to read the object measure zone
-  static bool readSVDRObjectMeasure(StarZone &zone, StarObject &doc);
-  //! try to read the object OLE zone
-  static bool readSVDRObjectOLE(StarZone &zone, StarObject &doc, int identifier);
-  //! try to read the object path zone
-  static bool readSVDRObjectPath(StarZone &zone, StarObject &doc, int identifier);
-
-  //! try to read a SDR gluepoint
-  static bool readSDRGluePoint(StarZone &zone);
-  //! try to read a SDR gluepoint list
-  static bool readSDRGluePointList(StarZone &zone);
-  //! try to read a SDR object connection
-  static bool readSDRObjectConnection(StarZone &zone);
-  //! try to read a SDR object surrogate
-  static bool readSDRObjectSurrogate(StarZone &zone);
-  //! try to read a outliner para object
-  static bool readSDROutlinerParaObject(StarZone &zone, StarObject &doc);
-  //! try to read a SDR userData
-  static bool readSDRUserData(StarZone &zone, StarObject &doc, bool inRecord);
-  //! try to read a SDR userData list
-  static bool readSDRUserDataList(StarZone &zone, StarObject &doc, bool inRecord);
-
-  //! try to read a SCHU object
-  static bool readSCHUObject(StarZone &zone, int identifier, StarObject &doc);
 protected:
   //
   // data
