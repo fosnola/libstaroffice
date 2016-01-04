@@ -114,6 +114,9 @@ protected:
   //! try to read a SCHU object
   bool readSCHUObject(StarZone &zone, int identifier);
 
+  //! try to read a SDDU object
+  bool readSDUDObject(StarZone &zone, int identifier);
+
 protected:
   //
   // data

@@ -1932,7 +1932,16 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
       if (poolVersion==1) return true;
       continue;
     }
-    if (nSize) {
+    if (nSize==3) { // frequent
+      libstoff::DebugStream f2;
+      f2 << "Entries(SfxBaseSheet):sz=" << nSize << ",";
+      f2 << "f0=" << std::hex << input->readULong(2) << std::dec << ",";
+      int val=(int) input->readULong(1); // often 0xc9
+      if (val!=0xc9) f2 << "f1=" << std::hex << val << std::dec << ",";
+      ascii.addPos(input->tell()-4);
+      ascii.addNote(f2.str().c_str());
+    }
+    else if (nSize) { // find also sz=6|8|10|27
       f << "#size=" << nSize << ",";
       static bool first=true;
       if (first) {

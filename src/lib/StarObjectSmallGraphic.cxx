@@ -1511,8 +1511,8 @@ bool StarObjectSmallGraphic::readSDRUserData(StarZone &zone, bool inRecord)
     for (int i=0; i<4; ++i) type+=(char) input->readULong(1);
     int id=(int) input->readULong(2);
     f << type << ",id=" << id << ",";
-    if (type=="SCHU") {
-      if (!readSCHUObject(zone, id)) {
+    if (type=="SCHU" || type=="SDUD") {
+      if ((type=="SCHU" && !readSCHUObject(zone, id)) || (type=="SDUD" && !readSDUDObject(zone, id))) {
         f << "##";
         if (!inRecord) {
           STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDRUserData: can not determine end size\n"));
@@ -1525,31 +1525,20 @@ bool StarObjectSmallGraphic::readSDRUserData(StarZone &zone, bool inRecord)
         lastPos=input->tell();
     }
     else {
-      int nSz=-1;
-      if (type=="SDUD" && id==1 && input->tell()+6<=lastPos) {
-        int val=(int) input->readULong(2); // 0
-        if (val) f << "f0=" << val << ",";
-        int sz=(int) input->readULong(4);
-        if (sz>=4 && input->tell()+sz-4<=lastPos)
-          nSz=sz-4;
-        else
-          f << "##sz=" << nSz << ",";
-      }
-      f << "#";
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDRUserData: find unknown type=%s\n", type.c_str()));
+      f << "###";
       static bool first=true;
       if (first) {
         first=false;
         STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDRUserData: reading data is not implemented\n"));
       }
-      if (!inRecord && nSz<0) {
+      if (!inRecord) {
         STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDRUserData: can not determine end size\n"));
         f << "##";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
         return false;
       }
-      else if (!inRecord)
-        lastPos=input->tell()+nSz;
     }
   }
   if (input->tell()!=lastPos) {
@@ -1653,4 +1642,176 @@ bool StarObjectSmallGraphic::readSCHUObject(StarZone &zone, int identifier)
   return true;
 }
 
+////////////////////////////////////////////////////////////
+// SCHU object
+////////////////////////////////////////////////////////////
+bool StarObjectSmallGraphic::readSDUDObject(StarZone &zone, int identifier)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(SDUD):";
+  if (identifier<=0 || identifier>2) {
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDUDObject: find unknown identifier\n"));
+    f << "###id=" << identifier << ",";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+    return false;
+  }
+  f << (identifier==1 ? "animationInfo" : "imapInfo") << ",";
+  // sd_sdobjfac.cxx : SchObjFactory::MakeUserData
+  int vers=(int) input->readULong(2);
+  f << "vers=" << vers << ",";
+  if (!zone.openSCHHeader()) {
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDUDObject: can not open main record\n"));
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  vers=zone.getHeaderVersion();
+  f << "vers[record]=" << vers << ",";
+  long endPos=zone.getRecordLastPosition();
+  if (identifier==1) {
+    // sd_anminfo.cxx SdAnimationInfo::ReadData
+    bool ok=true;
+    if (input->readULong(2)) {
+      uint16_t n;
+      *input >> n;
+      if (input->tell()+8*n>endPos) {
+        STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDUDObject: the number of point seems bad\n"));
+        f << "###n=" << n << ",";
+        ok=false;
+      }
+      else {
+        f << "poly=[";
+        for (int pt=0; pt<int(n); ++pt) f << input->readLong(4) << "x" << input->readLong(4) << ",";
+        f << "],";
+      }
+    }
+    if (ok) {
+      f << "start=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      f << "end=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+      f << "pres[effect]=" << input->readULong(2) << ",";
+      f << "speed=" << input->readULong(2) << ",";
+      for (int i=0; i<3; ++i) {
+        char const *(wh[])= {"active", "dim[previous]", "isMovie"};
+        if (input->readULong(2))
+          f << wh[i] << ",";
+      }
+      if (input->tell()>endPos) {
+        STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDUDObject: the zone is too short\n"));
+        f << "###short";
+        ok=false;
+      }
+    }
+    if (ok) {
+      for (int i=0; i<2; ++i) {
+        STOFFColor color;
+        if (!input->readColor(color) || input->tell()>endPos) {
+          STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDUDObject: can not find a color\n"));
+          f << "###aColor,";
+          ok=false;
+          break;
+        }
+        f << (i==0 ? "blueScreen" : "dim[color]") << "=" << color << ",";
+      }
+    }
+    int encoding=0;
+    if (ok && vers>0) {
+      encoding=int(input->readULong(2));
+      f << "encoding=" << encoding <<",";
+      std::vector<uint32_t> string;
+      if (ok && (!zone.readString(string, encoding) || input->tell()>endPos)) {
+        STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDUDObject: can not find string\n"));
+        f << "###string,";
+        ok=false;
+      }
+      else if (!string.empty())
+        f << "sound[file]=" << libstoff::getString(string).cstr() << ",";
+    }
+    if (ok && vers>1) {
+      bool sound;
+      *input >> sound;
+      if (sound) f << "sound,";
+    }
+    if (ok && vers>2) {
+      bool playFull;
+      *input >> playFull;
+      if (playFull) f << "playFull,";
+    }
+    if (ok && vers>3) {
+      int nFlag=(int) input->readULong(2);
+      if (nFlag==1) {
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        pos=input->tell();
+        f.str("");
+        f << "SDUD-B:";
+        if (!readSDRObjectSurrogate(zone) || input->tell()>endPos) {
+          STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDUDObject: can not read object surrogate\n"));
+          f << "###surrogate";
+          ok=false;
+        }
+        else
+          pos=input->tell();
+      }
+    }
+    if (ok && vers>4) {
+      f << "clickAction=" << input->readULong(2) << ",";
+      f << "secondEffect=" << input->readULong(2) << ",";
+      f << "secondSpeed=" << input->readULong(2) << ",";
+      for (int i=0; i<2; ++i) {
+        std::vector<uint32_t> string;
+        if (ok && (!zone.readString(string, encoding) || input->tell()>endPos)) {
+          STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDUDObject: can not find string\n"));
+          f << "###string,";
+          ok=false;
+          break;
+        }
+        else if (!string.empty())
+          f << (i==0 ? "bookmark]" : "soundFile[second]") << "=" << libstoff::getString(string).cstr() << ",";
+      }
+      if (ok) {
+        f << "invisible=" << input->readULong(2) << ",";
+        f << "verb=" << input->readULong(2) << ",";
+      }
+    }
+    if (ok && vers>5) {
+      bool sound, playFull;
+      *input >> sound >> playFull;
+      if (sound) f << "sound[second],";
+      if (playFull) f << "playFull[second],";
+    }
+    if (ok && vers>6) {
+      bool dimHide;
+      *input >> dimHide;
+      if (dimHide) f << "dim[hide],";
+    }
+    if (ok && vers>7)
+      f << "textEffect=" << input->readULong(2) << ",";
+    if (ok && vers>8)
+      f << "presOrder=" << input->readULong(4) << ",";
+    if (input->tell()!=endPos) {
+      ascFile.addDelimiter(input->tell(),'|');
+      if (ok) {
+        STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDUDObject: find extra data\n"));
+        f << "###";
+      }
+      input->seek(endPos, librevenge::RVNG_SEEK_SET);
+    }
+  }
+  else {
+    // imap2.cxx ImageMap::Read ; never seen, complex, so...
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDUDObject: reading imageMap is not implemented\n"));
+    f << "###";
+    input->seek(endPos, librevenge::RVNG_SEEK_SET);
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  zone.closeSCHHeader("SDUD");
+  return true;
+}
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
