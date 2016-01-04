@@ -111,6 +111,9 @@ protected:
   //! try to read a SDR userData list
   bool readSDRUserDataList(StarZone &zone, bool inRecord);
 
+  //! try to read a FM01 object
+  bool readFmFormObject(StarZone &zone, int identifier);
+
   //! try to read a SCHU object
   bool readSCHUObject(StarZone &zone, int identifier);
 

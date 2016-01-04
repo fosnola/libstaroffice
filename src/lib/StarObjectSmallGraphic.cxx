@@ -119,68 +119,53 @@ bool StarObjectSmallGraphic::readSdrObject(StarZone &zone)
   uint16_t identifier;
   *input>>identifier;
   f << magic << ", ident=" << std::hex << identifier << std::dec << ",";
+  bool ok=true;
   if (magic=="SVDr") {
     if (!readSVDRObject(zone, (int) identifier)) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSdrObject: can not read SVDr object\n"));
       f << "###";
-    }
-    else {
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      pos=input->tell();
-      if (pos==lastPos) {
-        zone.closeSDRHeader("SdrObject");
-        return true;
-      }
-      f.str("");
-      f << "SVDR:##extra";
-      static bool first=true;
-      if (first) { // see SdrObjFactory::MakeNewObject
-        STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSdrObject: read SVDr object, find extra data\n"));
-        first=false;
-      }
-      f << "##";
+      ok=false;
     }
   }
   else if (magic=="SCHU") {
     if (!readSCHUObject(zone, (int) identifier)) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSdrObject: can not read SCHU object\n"));
       f << "###";
-    }
-    else {
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      pos=input->tell();
-      if (pos==lastPos) {
-        zone.closeSDRHeader("SdrObject");
-        return true;
-      }
-      f.str("");
-      f << "SdrObject:##extra";
-      static bool first=true;
-      if (first) { // see SdrObjFactory::MakeNewObject
-        STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSdrObject: read Schu object, find extra data\n"));
-        first=false;
-      }
-      f << "##";
+      ok=false;
     }
   }
   else if (magic=="FM01") { // FmFormInventor
+    if (!readFmFormObject(zone, (int) identifier)) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSdrObject: can not read FM01 object\n"));
+      f << "###";
+      ok=false;
+    }
+  }
+  // to do magic=="E3D1" // E3dInventor
+  else {
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSdrObject: find unknown magic\n"));
+    f << "###";
+    ok=false;
+  }
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  if (ok) {
+    pos=input->tell();
+    if (pos==lastPos) {
+      zone.closeSDRHeader("SdrObject");
+      return true;
+    }
+    f.str("");
+    f << "SVDR:##extra";
     static bool first=true;
     if (first) {
-      STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSdrObject: read FM01 object is not implemented\n"));
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSdrObject: read object, find extra data\n"));
       first=false;
     }
     f << "##";
   }
-  else {
-    STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSdrObject: find unknown magic\n"));
-    f << "###";
-  }
   if (pos!=input->tell())
     ascFile.addDelimiter(input->tell(),'|');
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
 
   input->seek(lastPos, librevenge::RVNG_SEEK_SET);
   zone.closeSDRHeader("SdrObject");
@@ -284,7 +269,7 @@ bool StarObjectSmallGraphic::readSVDRObject(StarZone &zone, int identifier)
     // + SdrUnoObj::ReadData (checkme)
     std::vector<uint32_t> string;
     if (input->tell()!=zone.getRecordLastPosition() && (!zone.readString(string) || input->tell()>zone.getRecordLastPosition())) {
-      STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSVDRObjectAttrib: can not read uno string\n"));
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSVDRObject: can not read uno string\n"));
       f << "###uno";
       ok=false;
     }
@@ -1577,6 +1562,64 @@ bool StarObjectSmallGraphic::readSDRUserDataList(StarZone &zone, bool inRecord)
     }
   }
   if (inRecord) zone.closeRecord("SdrUserData");
+  return true;
+}
+
+////////////////////////////////////////////////////////////
+// FM01 object
+////////////////////////////////////////////////////////////
+bool StarObjectSmallGraphic::readFmFormObject(StarZone &zone, int identifier)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(FM01):";
+
+  if (identifier!=33) {
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readFmFormObject: find unknown identifier\n"));
+    f << "###id=" << identifier << ",";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+    return false;
+  }
+  // svx_fmobj.cxx FmFormObj::ReadData
+  // fixme: same code as SdrUnoObj::ReadData
+  if (!readSVDRObjectRect(zone, identifier)) {
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readFmFormObject: can not read rect data\n"));
+    f << "###id=" << identifier << ",";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+    return false;
+  }
+  pos=input->tell();
+  if (!zone.openRecord()) {
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readFmFormObject: can not open uno record\n"));
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    f << "###id=" << identifier << ",";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+    return false;
+  }
+  f << "FM01[uno]:";
+  // + SdrUnoObj::ReadData (checkme)
+  std::vector<uint32_t> string;
+  bool ok=true;
+  if (input->tell()!=zone.getRecordLastPosition() && (!zone.readString(string) || input->tell()>zone.getRecordLastPosition())) {
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readFmFormObject: can not read uno string\n"));
+    f << "###uno";
+    ok=false;
+  }
+  else if (!string.empty())
+    f << libstoff::getString(string).cstr() << ",";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  if (!ok)
+    input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+  zone.closeRecord("FM01");
   return true;
 }
 
