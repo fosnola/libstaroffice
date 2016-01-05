@@ -350,7 +350,7 @@ bool StarGraphicStruct::StarGraphic::read(StarZone &zone, long endPos)
     f << "##SVGD,";
     ok=false;
   }
-  // can also some pict here, ...
+  // can also some pict here or a data size[8 bytes]+bitmap ...
   else if (header[0]=='B') {
     input->seek(-4, librevenge::RVNG_SEEK_CUR);
     StarBitmap bitmap;

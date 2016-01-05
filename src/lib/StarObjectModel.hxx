@@ -32,61 +32,58 @@
 */
 
 /*
- * Parser to convert StarOffice's draw
+ * Parser to convert a SdrModel zone/OLE in a StarOffice document
  *
  */
-#ifndef STAR_OBJECT_DRAW
-#  define STAR_OBJECT_DRAW
+#ifndef STAR_OBJECT_MODEL
+#  define STAR_OBJECT_MODEL
 
 #include <vector>
-#include <string>
 
 #include "libstaroffice_internal.hxx"
-
 #include "StarObject.hxx"
 
-namespace StarObjectDrawInternal
+namespace StarObjectModelInternal
 {
+class Layer;
+class Page;
 struct State;
 }
 
-class StarObject;
 class StarZone;
 
-/** \brief the main class to read a StarOffice draw
+/** \brief the main class to read a SdrModel zone
  *
- * \note currently, it contains only static function :-~
+ *
  *
  */
-class StarObjectDraw : public StarObject
+class StarObjectModel : public StarObject
 {
 public:
   //! constructor
-  StarObjectDraw(StarObject const &orig, bool duplicateState);
+  StarObjectModel(StarObject const &orig, bool duplicateState);
   //! destructor
-  virtual ~StarObjectDraw();
-  //! try to parse the current object
-  bool parse();
+  virtual ~StarObjectModel();
+  //! try to read a SdrModel zone: "DrMd"
+  bool read(StarZone &zone);
 
 protected:
-  //! try to read a spreadsheet zone: StarDrawDocument .sdd
-  bool readDrawDocument(STOFFInputStreamPtr input, std::string const &fileName);
-  //! try to read a draw style zone: SfxStyleSheets
-  bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
+  //
+  // low level
+  //
+  //! try to read a SdrLayer zone: "DrLy'
+  bool readSdrLayer(StarZone &zone, StarObjectModelInternal::Layer &layer);
+  //! try to read a SdrLayerSet zone: "DrLS'
+  bool readSdrLayerSet(StarZone &zone);
+  //! try to read a Page/MasterPage zone: "DrPg'
+  bool readSdrPage(StarZone &zone);
+  /* try to read a Master Page descriptor zone: "DrMP' and add it the master page descriptor */
+  bool readSdrMPageDesc(StarZone &zone, StarObjectModelInternal::Page &page);
+  /* try to read a list of Master Page zone: "DrML' and add them in the master page descriptors */
+  bool readSdrMPageDescList(StarZone &zone,  StarObjectModelInternal::Page &page);
+  //! try to read a zone which appear at end of a zone: "DrPg'
+  bool readSdrPageUnknownZone1(StarZone &zone, long lastPos);
 
-  //! try to read a SdCustomShow
-  static bool readSdrCustomShow(StarZone &zone);
-  //! try to read a SdrFrameView
-  static bool readSdrFrameView(StarZone &zone);
-  //! try to read a SdrView
-  static bool readSdrView(StarZone &zone);
-  //! try to read a SdrHelpLine
-  static bool readSdrHelpLine(StarZone &zone);
-  //! try to read a SdrHelpLine list
-  static bool readSdrHelpLineSet(StarZone &zone);
-
-  //! try to read the presentation data
-  static bool readPresentationData(StarZone &zone);
 
 protected:
   //
@@ -94,7 +91,9 @@ protected:
   //
 
   //! the state
-  shared_ptr<StarObjectDrawInternal::State> m_drawState;
+  shared_ptr<StarObjectModelInternal::State> m_modelState;
+private:
+  StarObjectModel &operator=(StarObjectModel const &orig);
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

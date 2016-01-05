@@ -48,7 +48,7 @@
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarObjectChart.hxx"
-#include "StarObjectDraw.hxx"
+#include "StarObjectModel.hxx"
 #include "StarObjectSpreadsheet.hxx"
 #include "StarZone.hxx"
 
@@ -2092,7 +2092,8 @@ try
     break;
   }
   long pos=input->tell();
-  if (!StarObjectDraw::readSdrModel(zone, *this)) {
+  shared_ptr<StarObjectModel> model(new StarObjectModel(*this, true));
+  if (!model->read(zone)) {
     STOFF_DEBUG_MSG(("StarObjectText::readDrawingLayer: can not find the drawing model\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     ascFile.addPos(input->tell());

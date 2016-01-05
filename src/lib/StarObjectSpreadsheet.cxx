@@ -46,6 +46,7 @@
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarObjectDraw.hxx"
+#include "StarObjectModel.hxx"
 #include "StarObjectSmallText.hxx"
 #include "StarZone.hxx"
 
@@ -442,9 +443,11 @@ public:
 //! Internal: the state of a StarObjectSpreadsheet
 struct State {
   //! constructor
-  State() : m_tableList(), m_sheetNames(), m_pageStyle("")
+  State() : m_model(), m_tableList(), m_sheetNames(), m_pageStyle("")
   {
   }
+  //! the model
+  shared_ptr<StarObjectModel> m_model;
   //! the actual table
   std::vector<shared_ptr<Table> > m_tableList;
   //! the sheet names
@@ -1334,11 +1337,21 @@ try
             input->seek(pos, librevenge::RVNG_SEEK_SET);
           break;
         }
-        case 0x4261:
+        case 0x4261: {
           f << "sdrModel,";
-          if (!StarObjectDraw::readSdrModel(zone,*this))
+          shared_ptr<StarObjectModel> model(new StarObjectModel(*this, true));
+          if (model->read(zone)) {
+            if (m_spreadsheetState->m_model) {
+              STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: the model is already set\n"));
+              f << "###model";
+            }
+            else
+              m_spreadsheetState->m_model=model;
+          }
+          else
             input->seek(pos, librevenge::RVNG_SEEK_SET);
           break;
+        }
         default:
           STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: find unexpected type\n"));
           f << "###unknown";

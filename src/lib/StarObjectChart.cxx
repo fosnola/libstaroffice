@@ -47,6 +47,7 @@
 #include "StarItemPool.hxx"
 #include "StarObject.hxx"
 #include "StarObjectDraw.hxx"
+#include "StarObjectModel.hxx"
 #include "StarZone.hxx"
 #include "SWFieldManager.hxx"
 #include "StarFormatManager.hxx"
@@ -183,7 +184,8 @@ try
   }
 
   pos=input->tell();
-  if (!StarObjectDraw::readSdrModel(zone, *this)) {
+  shared_ptr<StarObjectModel> model(new StarObjectModel(*this, true));
+  if (!model->read(zone)) {
     STOFF_DEBUG_MSG(("StarObjectChart::readChartDocument: can not find the SdrModel\n"));
     ascFile.addPos(pos);
     ascFile.addNote("SCChartDocument:###SdrModel");
