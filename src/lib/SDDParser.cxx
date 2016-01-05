@@ -266,7 +266,7 @@ bool SDDParser::checkHeader(STOFFHeader *header, bool /*strict*/)
   if (header) {
     header->reset(1, STOFFDocument::STOFF_K_DRAW);
     drawInput->seek(0, librevenge::RVNG_SEEK_SET);
-    // fixme: check encryption
+    header->setEncrypted(drawInput->readULong(2)!=0x7244);
   }
 #ifndef DEBUG
   return false;

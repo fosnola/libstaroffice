@@ -548,6 +548,15 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
     f << "step=" << mfStep << "[" << mfStepHelp << "],";
     if (mfOrigin<0||mfOrigin>0) f << "origin=" << mfOrigin << ",";
     f << "],";
+    // sometimes the file stop just after mfStepHelp...
+    if (input->tell()>=lastPos) {
+      STOFF_DEBUG_MSG(("StarObjectChart::readSCHAttributes: can not read a axis\n"));
+      f << "###axis,";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      zone.closeSCHHeader("SCHAttributes");
+      return true;
+    }
   }
   double fMaxData;
   *input >> fMaxData;

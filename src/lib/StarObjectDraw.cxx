@@ -159,7 +159,20 @@ try
   StarZone zone(input, name, "SCDrawDocument", getPassword()); // checkme: do we need to pass the password
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
+  uint8_t firstByte=(uint8_t) input->readULong(1);
+  if (firstByte!=0x44) { // D
+    /* if the zone has a password, we can retrieve it knowing that the first byte must be 0x44
 
+       TODO: we must also check if the user has given a password and
+       if the user mask does correspond to the real mask.
+    */
+    input=StarEncryption::decodeStream(input, StarEncryption::getMaskToDecodeStream(firstByte, 0x44));
+    if (input) {
+      zone.setInput(input);
+      input->seek(0, librevenge::RVNG_SEEK_SET);
+    }
+  }
+  input->seek(0, librevenge::RVNG_SEEK_SET);
   if (!readSdrModel(zone, *this)) {
     STOFF_DEBUG_MSG(("StarObjectDraw::readDrawDocument: can not read the main zone\n"));
     ascFile.addPos(0);
