@@ -38,6 +38,7 @@
 #ifndef STAR_OBJECT_MODEL
 #  define STAR_OBJECT_MODEL
 
+#include <ostream>
 #include <vector>
 
 #include "libstaroffice_internal.hxx"
@@ -46,6 +47,7 @@
 namespace StarObjectModelInternal
 {
 class Layer;
+class LayerSet;
 class Page;
 struct State;
 }
@@ -66,7 +68,8 @@ public:
   virtual ~StarObjectModel();
   //! try to read a SdrModel zone: "DrMd"
   bool read(StarZone &zone);
-
+  //! small operator<< to print the content of the model
+  friend std::ostream &operator<<(std::ostream &o, StarObjectModel const &model);
 protected:
   //
   // low level
@@ -74,9 +77,9 @@ protected:
   //! try to read a SdrLayer zone: "DrLy'
   bool readSdrLayer(StarZone &zone, StarObjectModelInternal::Layer &layer);
   //! try to read a SdrLayerSet zone: "DrLS'
-  bool readSdrLayerSet(StarZone &zone);
+  bool readSdrLayerSet(StarZone &zone, StarObjectModelInternal::LayerSet &layers);
   //! try to read a Page/MasterPage zone: "DrPg'
-  bool readSdrPage(StarZone &zone);
+  shared_ptr<StarObjectModelInternal::Page> readSdrPage(StarZone &zone);
   /* try to read a Master Page descriptor zone: "DrMP' and add it the master page descriptor */
   bool readSdrMPageDesc(StarZone &zone, StarObjectModelInternal::Page &page);
   /* try to read a list of Master Page zone: "DrML' and add them in the master page descriptors */

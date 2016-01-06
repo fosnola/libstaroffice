@@ -53,6 +53,18 @@
 /** Internal: the structures of a StarObjectModel */
 namespace StarObjectModelInternal
 {
+//! small function used to convert a list of uint8_t to a bool vector
+static bool convertUint8ListToBoolList(std::vector<int> const &orig, std::vector<bool> &res)
+{
+  size_t n=orig.size();
+  res.resize(n*8);
+  for (size_t i=0, j=0; i<n; ++i) {
+    int val=orig[i];
+    for (int k=0, depl=0x80; k<8; depl>>=1, ++k)
+      res[j++]=(val&depl);
+  }
+  return true;
+}
 ////////////////////////////////////////
 //! Internal: class used to store a layer and its data
 class Layer
@@ -77,6 +89,38 @@ public:
   //! the layer type
   int m_type;
 };
+////////////////////////////////////////
+//! Internal: class used to store a layer set and its data
+class LayerSet
+{
+public:
+  //! constructor
+  LayerSet() : m_name(""), m_memberList(), m_excludeList()
+  {
+  }
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, LayerSet const &layer)
+  {
+    if (!layer.m_name.empty()) o << layer.m_name.cstr() << ",";
+    o << "members=[";
+    for (size_t i=0; i<layer.m_memberList.size(); ++i) {
+      if (layer.m_memberList[i]) o << i << ",";
+    }
+    o << "],";
+    o << "excludes=[";
+    for (size_t i=0; i<layer.m_excludeList.size(); ++i) {
+      if (layer.m_excludeList[i]) o << i << ",";
+    }
+    o << "],";
+    return o;
+  }
+  //! the layer name
+  librevenge::RVNGString m_name;
+  //! the list of member
+  std::vector<bool> m_memberList;
+  //! the list of exclude
+  std::vector<bool> m_excludeList;
+};
 
 ////////////////////////////////////////
 //! Internal: class used to store a page and its data
@@ -87,35 +131,50 @@ public:
   //! Internal: class used to store a page descriptor
   struct Descriptor {
     //! constructor
-    Descriptor() : m_pageNumber(1), m_layerList()
+    Descriptor() : m_masterId(1), m_layerList()
     {
     }
     //! operator<<
     friend std::ostream &operator<<(std::ostream &o, Descriptor const &desc)
     {
-      o << "pageNum=" << desc.m_pageNumber << ",";
-      o << "aVisLayer=[";
+      o << "id[master]=" << desc.m_masterId << ",";
+      o << "inVisLayer=[";
       for (size_t i=0; i<desc.m_layerList.size(); ++i) {
-        int c=desc.m_layerList[i];
-        if (c==255)
-          o << "*,";
-        else if (c)
-          o << c << ",";
-        else
-          o << "_,";
+        if (!desc.m_layerList[i])
+          o << i << ",";
       }
       o << "],";
       return o;
     }
     //! the page number
-    int m_pageNumber;
+    int m_masterId;
     //! a list of layer
-    std::vector<int> m_layerList;
+    std::vector<bool> m_layerList;
   };
   //! constructor
-  Page() : m_masterPage(false), m_size(0,0), m_masterPageDescList(), m_layer(), m_objectList(), m_background()
+  Page() : m_masterPage(false), m_size(0,0), m_masterPageDescList(), m_layer(), m_layerSet(), m_objectList(), m_background()
   {
     for (int i=0; i<4; ++i) m_borders[i]=0;
+  }
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, Page const &page)
+  {
+    if (page.m_masterPage) o << "master,";
+    o << "sz=" << page.m_size << ",";
+    o << "borders=[";
+    for (int i=0; i<4; ++i) o << page.m_borders[i] << ",";
+    o << "],";
+    if (!page.m_masterPageDescList.empty()) {
+      o << "desc=[";
+      for (size_t i=0; i<page.m_masterPageDescList.size(); ++i)
+        o << "[" << page.m_masterPageDescList[i] << "],";
+      o << "],";
+    }
+    o << "layer=[" << page.m_layer << "],";
+    o << "layerSet=[" << page.m_layerSet << "],";
+    o << "num[object]=" << page. m_objectList.size() << ",";
+    if (page.m_background) o << "hasBackground,";
+    return o;
   }
   //! a flag to know if the page is a master page
   bool m_masterPage;
@@ -127,6 +186,8 @@ public:
   std::vector<Descriptor> m_masterPageDescList;
   //! the layer
   Layer m_layer;
+  //! the layer set
+  LayerSet m_layerSet;
   //! the list of object
   std::vector<shared_ptr<StarObjectSmallGraphic> > m_objectList;
   //! the background object
@@ -137,9 +198,53 @@ public:
 //! Internal: the state of a StarObjectModel
 struct State {
   //! constructor
-  State()
+  State() : m_pageList(), m_masterPageList(), m_idToLayerMap(), m_layerSetList()
   {
   }
+  //! small operator<< to print the content of the state
+  friend std::ostream &operator<<(std::ostream &o, State const &state)
+  {
+    if (!state.m_pageList.empty()) {
+      o << "pages=[\n";
+      for (size_t i=0; i<state.m_pageList.size(); ++i) {
+        if (!state.m_pageList[i])
+          continue;
+        o << "\t" << *state.m_pageList[i] << "\n";
+      }
+      o << "]\n";
+    }
+    if (!state.m_masterPageList.empty()) {
+      o << "masterPages=[\n";
+      for (size_t i=0; i<state.m_masterPageList.size(); ++i) {
+        if (!state.m_masterPageList[i])
+          continue;
+        o << "\t" << *state.m_masterPageList[i] << "\n";
+      }
+      o << "]\n";
+    }
+    if (!state.m_idToLayerMap.empty()) {
+      o << "layers=[";
+      for (std::map<int, Layer>::const_iterator it=state.m_idToLayerMap.begin(); it!=state.m_idToLayerMap.end(); ++it)
+        o << "[" << it->second << "],";
+      o << "]\n";
+    }
+    if (!state.m_layerSetList.empty()) {
+      o << "layerSets=[\n";
+      for (size_t i=0; i<state.m_layerSetList.size(); ++i)
+        o << "\t" << state.m_layerSetList[i] << "\n";
+      o << "]\n";
+    }
+    return o;
+  }
+
+  //! list of pages
+  std::vector<shared_ptr<Page> > m_pageList;
+  //! list of master pages
+  std::vector<shared_ptr<Page> > m_masterPageList;
+  //! a map layerId to layer
+  std::map<int, Layer> m_idToLayerMap;
+  //! the list of layer set
+  std::vector<LayerSet> m_layerSetList;
 };
 
 }
@@ -153,6 +258,12 @@ StarObjectModel::StarObjectModel(StarObject const &orig, bool duplicateState) : 
 
 StarObjectModel::~StarObjectModel()
 {
+}
+
+std::ostream &operator<<(std::ostream &o, StarObjectModel const &model)
+{
+  o << *model.m_modelState;
+  return o;
 }
 
 ////////////////////////////////////////////////////////////
@@ -237,7 +348,10 @@ bool StarObjectModel::read(StarZone &zone)
       ok=false;
     }
     else {
-      // operator>>(..., SdrModelInfo&)
+      /* operator>>(..., SdrModelInfo&)
+
+         normally, this document also contains a SfxDocumentInfo, so it is safe to ignore them
+       */
       uint32_t date, time;
       uint8_t enc;
       *input >> date >> time >> enc;
@@ -361,11 +475,32 @@ bool StarObjectModel::read(StarZone &zone)
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     if (magic=="DrLy") {
       StarObjectModelInternal::Layer layer;
-      if (readSdrLayer(zone, layer))
+      if (readSdrLayer(zone, layer)) {
+        if (m_modelState->m_idToLayerMap.find(layer.m_id)!=m_modelState->m_idToLayerMap.end()) {
+          STOFF_DEBUG_MSG(("StarObjectModel::read: layer %d already exists\n", layer.m_id));
+        }
+        else
+          m_modelState->m_idToLayerMap[layer.m_id]=layer;
         continue;
+      }
     }
-    if (magic=="DrLS" && readSdrLayerSet(zone)) continue;
-    if ((magic=="DrPg" || magic=="DrMP") && readSdrPage(zone)) continue;
+    if (magic=="DrLS") {
+      StarObjectModelInternal::LayerSet layers;
+      if (readSdrLayerSet(zone, layers)) {
+        m_modelState->m_layerSetList.push_back(layers);
+        continue;
+      }
+    }
+    if ((magic=="DrPg" || magic=="DrMP")) {
+      shared_ptr<StarObjectModelInternal::Page> page=readSdrPage(zone);
+      if (page) {
+        if (magic=="DrPg")
+          m_modelState->m_pageList.push_back(page);
+        else
+          m_modelState->m_masterPageList.push_back(page);
+        continue;
+      }
+    }
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     if (!zone.openSDRHeader(magic)) {
@@ -434,10 +569,7 @@ bool StarObjectModel::readSdrLayer(StarZone &zone, StarObjectModelInternal::Laye
     ascFile.addNote(f.str().c_str());
     return false;
   }
-
-  uint8_t layerId;
-  *input>>layerId;
-  if (layerId) f << "layerId=" << int(layerId) << ",";
+  layer.m_id=(int) input->readULong(1);
   std::vector<uint32_t> string;
   if (!zone.readString(string)) {
     STOFF_DEBUG_MSG(("StarObjectModel::readSdrLayer: can not read a string\n"));
@@ -447,20 +579,18 @@ bool StarObjectModel::readSdrLayer(StarZone &zone, StarObjectModelInternal::Laye
     zone.closeSDRHeader("SdrLayerDef");
     return true;
   }
-  f << libstoff::getString(string).cstr() << ",";
-  if (version>=1) {
-    uint16_t nType;
-    *input>>nType;
-    if (nType==0) f << "userLayer,";
-  }
+  layer.m_name=libstoff::getString(string);
+  if (version>=1) layer.m_type=(int) input->readULong(2);
+  f << layer;
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   zone.closeSDRHeader("SdrLayerDef");
   return true;
 }
 
-bool StarObjectModel::readSdrLayerSet(StarZone &zone)
+bool StarObjectModel::readSdrLayerSet(StarZone &zone, StarObjectModelInternal::LayerSet &layers)
 {
+  layers=StarObjectModelInternal::LayerSet();
   STOFFInputStreamPtr input=zone.input();
   // first check magic
   std::string magic("");
@@ -491,34 +621,29 @@ bool StarObjectModel::readSdrLayerSet(StarZone &zone)
     ascFile.addNote(f.str().c_str());
     return false;
   }
-  for (int i=0; i<2; ++i) { // checkme: set of 32 bytes ?
-    f << (i==0 ? "member" : "exclude") << "=[";
-    for (int j=0; j<32; ++j) {
-      int c=(int) input->readULong(1);
-      if (c)
-        f << c << ",";
-      else
-        f << ",";
-    }
-    f << "],";
+  for (int i=0; i<2; ++i) {
+    std::vector<int> layerList;
+    for (int j=0; j<32; ++j) layerList.push_back((int) input->readULong(1));
+    StarObjectModelInternal::convertUint8ListToBoolList(layerList, i==0 ? layers.m_memberList : layers.m_excludeList);
   }
   std::vector<uint32_t> string;
   if (!zone.readString(string)) {
     STOFF_DEBUG_MSG(("StarObjectModel::readSdrLayerSet: can not read a string\n"));
-    f << "###string";
+    f << layers << "###string";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
     zone.closeSDRHeader("SdrLayerSet");
     return true;
   }
-  f << libstoff::getString(string).cstr() << ",";
+  layers.m_name=libstoff::getString(string).cstr();
+  f << layers;
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   zone.closeSDRHeader("SdrLayerSet");
   return true;
 }
 
-bool StarObjectModel::readSdrPage(StarZone &zone)
+shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   // first check magic
@@ -526,7 +651,7 @@ bool StarObjectModel::readSdrPage(StarZone &zone)
   long pos=input->tell();
   for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
   input->seek(pos, librevenge::RVNG_SEEK_SET);
-  if (magic!="DrPg" && magic!="DrMP") return false;
+  if (magic!="DrPg" && magic!="DrMP") return shared_ptr<StarObjectModelInternal::Page>();
 
   // svdpage.cxx operator>>
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -539,7 +664,7 @@ bool StarObjectModel::readSdrPage(StarZone &zone)
     f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    return false;
+    return shared_ptr<StarObjectModelInternal::Page>();
   }
   int version=zone.getHeaderVersion();
   f << magic << ",nVers=" << version << ",";
@@ -550,7 +675,7 @@ bool StarObjectModel::readSdrPage(StarZone &zone)
     f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    return false;
+    return shared_ptr<StarObjectModelInternal::Page>();
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -572,7 +697,7 @@ bool StarObjectModel::readSdrPage(StarZone &zone)
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       zone.closeSDRHeader("SdrPageDef");
-      return true;
+      return shared_ptr<StarObjectModelInternal::Page>();
     }
     if (tr==1 || zone.getRecordLastPosition()==lastPos)
       break;
@@ -630,7 +755,7 @@ bool StarObjectModel::readSdrPage(StarZone &zone)
       ascFile.addNote(f.str().c_str());
       zone.closeRecord("SdrPageDefA1");
       zone.closeSDRHeader("SdrPageDef");
-      return true;
+      return shared_ptr<StarObjectModelInternal::Page>();
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -658,7 +783,6 @@ bool StarObjectModel::readSdrPage(StarZone &zone)
   }
 
   long lastPos=zone.getRecordLastPosition();
-  bool layerSet=false;
   while (ok) {
     pos=input->tell();
     if (pos+4>lastPos)
@@ -667,7 +791,7 @@ bool StarObjectModel::readSdrPage(StarZone &zone)
     for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     if (magic=="DrLy" && readSdrLayer(zone, page->m_layer)) continue;
-    if (magic=="DrLS" && readSdrLayerSet(zone)) continue;
+    if (magic=="DrLS" && readSdrLayerSet(zone, page->m_layerSet)) continue;
     if (magic=="DrMP" && readSdrMPageDesc(zone, *page)) continue;
     if (magic=="DrML" && readSdrMPageDescList(zone, *page)) continue;
     break;
@@ -782,7 +906,7 @@ bool StarObjectModel::readSdrPage(StarZone &zone)
   }
 
   zone.closeSDRHeader("SdrPageDef");
-  return true;
+  return page;
 }
 
 bool StarObjectModel::readSdrPageUnknownZone1(StarZone &zone, long lastPos)
@@ -876,9 +1000,11 @@ bool StarObjectModel::readSdrMPageDesc(StarZone &zone, StarObjectModelInternal::
   int version=zone.getHeaderVersion();
   f << magic << ",nVers=" << version << ",";
   StarObjectModelInternal::Page::Descriptor desc;
-  desc.m_pageNumber=(int) input->readULong(2);
+  desc.m_masterId=(int) input->readULong(2);
+  std::vector<int> layers;
   for (int i=0; i<32; ++i)
-    desc.m_layerList.push_back((int) input->readULong(1));
+    layers.push_back((int) input->readULong(1));
+  StarObjectModelInternal::convertUint8ListToBoolList(layers, desc.m_layerList);
   f << desc;
   page.m_masterPageDescList.push_back(desc);
   ascFile.addPos(pos);
@@ -930,6 +1056,5 @@ bool StarObjectModel::readSdrMPageDescList(StarZone &zone, StarObjectModelIntern
   zone.closeSDRHeader("SdrMPageList");
   return true;
 }
-
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

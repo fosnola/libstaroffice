@@ -61,9 +61,11 @@ namespace StarObjectDrawInternal
 //! Internal: the state of a StarObjectDraw
 struct State {
   //! constructor
-  State()
+  State() : m_model()
   {
   }
+  //! the model
+  shared_ptr<StarObjectModel> m_model;
 };
 
 }
@@ -181,6 +183,10 @@ try
     ascFile.addNote("Entries(SCDrawDocument):###");
     return false;
   }
+  m_drawState->m_model=model;
+#if 0
+  std::cerr << *model << "\n";
+#endif
   long pos=input->tell();
   if (!readPresentationData(zone))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
