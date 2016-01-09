@@ -79,7 +79,7 @@ struct NumberFormatter {
                             };
         o << wh[-item.m_type];
       }
-      else if (item.m_type>0 && item.m_type<=50) {
+      else if (item.m_type>0 && item.m_type<50) {
         char const *(wh[])= {
           "", "E", "AMPM", "AP", "MI", "MMI", "M", "MM", // exp, 2a/p, 2min, 2month
           "MMM", "MMMM", "H", "HH", "S", "SS", "Q", "QQ", // 2month, 2hours, 2sec, 2quarter

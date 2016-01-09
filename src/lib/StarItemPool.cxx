@@ -1667,11 +1667,6 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
         break;
       }
 
-      static bool first=true;
-      if (first) {
-        STOFF_DEBUG_MSG(("StarItemPool::readV1: reading attribute is not implemented\n"));
-        first=false;
-      }
       uint16_t nSlot, nVersion, nCount=1;
       *input >> nSlot >> nVersion;
       if (step==0) *input >> nCount;

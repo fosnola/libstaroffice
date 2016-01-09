@@ -431,10 +431,7 @@ bool StarPAttributeULSpace::read(StarZone &zone, int vers, long endPos, StarObje
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   for (int i=0; i<2; ++i) {
-    if (i<2)
-      m_margins[i]=(int) input->readULong(2);
-    else
-      m_margins[i]=(int) input->readLong(2);
+    m_margins[i]=(int) input->readULong(2);
     m_propMargins[i]=(int) input->readULong(vers>=1 ? 2 : 1);
   }
   print(f);

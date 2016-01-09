@@ -45,6 +45,24 @@
 
 namespace StarObjectSmallGraphicInternal
 {
+class GluePoint;
+class OutlinerParaObject;
+
+class Graphic;
+// SDR graphic
+class SdrGraphic;
+class SdrGraphicAttribute;
+class SdrGraphicCaption;
+class SdrGraphicCircle;
+class SdrGraphicEdge;
+class SdrGraphicGraph;
+class SdrGraphicGroup;
+class SdrGraphicMeasure;
+class SdrGraphicOLE;
+class SdrGraphicPath;
+class SdrGraphicRect;
+class SdrGraphicText;
+
 struct State;
 }
 
@@ -64,61 +82,63 @@ public:
   virtual ~StarObjectSmallGraphic();
   //! try to read a object zone: "DrOb'
   bool readSdrObject(StarZone &zone);
+  //! small operator<< to print the content of the small graphic object
+  friend std::ostream &operator<<(std::ostream &o, StarObjectSmallGraphic const &graphic);
 
 protected:
   //
   // low level
   //
   //! try to read a SVDr object
-  bool readSVDRObject(StarZone &zone, int identifier);
+  shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> readSVDRObject(StarZone &zone, int identifier);
   //! try to read the first zone of SVDr object
-  bool readSVDRObjectHeader(StarZone &zone);
+  bool readSVDRObjectHeader(StarZone &zone, StarObjectSmallGraphicInternal::SdrGraphic &graphic);
   //! try to read the object attrib zone
-  bool readSVDRObjectAttrib(StarZone &zone);
+  bool readSVDRObjectAttrib(StarZone &zone, StarObjectSmallGraphicInternal::SdrGraphicAttribute &graphic);
   //! try to read the object text zone
-  bool readSVDRObjectText(StarZone &zone);
+  bool readSVDRObjectText(StarZone &zone, StarObjectSmallGraphicInternal::SdrGraphicText &graphic);
   //! try to read the object rect zone
-  bool readSVDRObjectRect(StarZone &zone, int identifier);
+  bool readSVDRObjectRect(StarZone &zone, StarObjectSmallGraphicInternal::SdrGraphicRect &graphic);
   //! try to read the object caption zone
-  bool readSVDRObjectCaption(StarZone &zone);
+  bool readSVDRObjectCaption(StarZone &zone, StarObjectSmallGraphicInternal::SdrGraphicCaption &graphic);
   //! try to read the object circle zone
-  bool readSVDRObjectCircle(StarZone &zone, int identifier);
+  bool readSVDRObjectCircle(StarZone &zone, StarObjectSmallGraphicInternal::SdrGraphicCircle &graphic);
   //! try to read the object edge zone
-  bool readSVDRObjectEdge(StarZone &zone);
+  bool readSVDRObjectEdge(StarZone &zone, StarObjectSmallGraphicInternal::SdrGraphicEdge &graphic);
   //! try to read the object graph zone
-  bool readSVDRObjectGraph(StarZone &zone);
+  bool readSVDRObjectGraph(StarZone &zone, StarObjectSmallGraphicInternal::SdrGraphicGraph &graphic);
   //! try to read the object group zone
-  bool readSVDRObjectGroup(StarZone &zone);
+  bool readSVDRObjectGroup(StarZone &zone, StarObjectSmallGraphicInternal::SdrGraphicGroup &graphic);
   //! try to read the object measure zone
-  bool readSVDRObjectMeasure(StarZone &zone);
+  bool readSVDRObjectMeasure(StarZone &zone, StarObjectSmallGraphicInternal::SdrGraphicMeasure &graphic);
   //! try to read the object OLE zone
-  bool readSVDRObjectOLE(StarZone &zone, int identifier);
+  bool readSVDRObjectOLE(StarZone &zone, StarObjectSmallGraphicInternal::SdrGraphicOLE &graphic);
   //! try to read the object path zone
-  bool readSVDRObjectPath(StarZone &zone, int identifier);
+  bool readSVDRObjectPath(StarZone &zone, StarObjectSmallGraphicInternal::SdrGraphicPath &graphic);
 
   //! try to read a SDR gluepoint
-  bool readSDRGluePoint(StarZone &zone);
+  bool readSDRGluePoint(StarZone &zone, StarObjectSmallGraphicInternal::GluePoint &point);
   //! try to read a SDR gluepoint list
-  bool readSDRGluePointList(StarZone &zone);
+  bool readSDRGluePointList(StarZone &zone, std::vector<StarObjectSmallGraphicInternal::GluePoint> &listPoints);
   //! try to read a SDR object connection
   bool readSDRObjectConnection(StarZone &zone);
   //! try to read a SDR object surrogate
   bool readSDRObjectSurrogate(StarZone &zone);
   //! try to read a outliner para object
-  bool readSDROutlinerParaObject(StarZone &zone);
+  bool readSDROutlinerParaObject(StarZone &zone, StarObjectSmallGraphicInternal::OutlinerParaObject &object);
   //! try to read a SDR userData
   bool readSDRUserData(StarZone &zone, bool inRecord);
   //! try to read a SDR userData list
   bool readSDRUserDataList(StarZone &zone, bool inRecord);
 
   //! try to read a FM01 object
-  bool readFmFormObject(StarZone &zone, int identifier);
+  shared_ptr<StarObjectSmallGraphicInternal::Graphic> readFmFormObject(StarZone &zone, int identifier);
 
   //! try to read a SCHU object
-  bool readSCHUObject(StarZone &zone, int identifier);
+  shared_ptr<StarObjectSmallGraphicInternal::Graphic> readSCHUObject(StarZone &zone, int identifier);
 
   //! try to read a SDDU object
-  bool readSDUDObject(StarZone &zone, int identifier);
+  shared_ptr<StarObjectSmallGraphicInternal::Graphic> readSDUDObject(StarZone &zone, int identifier);
 
 protected:
   //

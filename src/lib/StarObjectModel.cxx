@@ -172,8 +172,16 @@ public:
     }
     o << "layer=[" << page.m_layer << "],";
     o << "layerSet=[" << page.m_layerSet << "],";
-    o << "num[object]=" << page. m_objectList.size() << ",";
     if (page.m_background) o << "hasBackground,";
+#if 1
+    for (size_t i=0; i<page.m_objectList.size(); ++i) {
+      if (page.m_objectList[i])
+        o << "\n\t\t" << *page.m_objectList[i];
+    }
+    o << "\n";
+#else
+    o << "num[object]=" << page.m_objectList.size() << ",";
+#endif
     return o;
   }
   //! a flag to know if the page is a master page
@@ -198,12 +206,14 @@ public:
 //! Internal: the state of a StarObjectModel
 struct State {
   //! constructor
-  State() : m_pageList(), m_masterPageList(), m_idToLayerMap(), m_layerSetList()
+  State() : m_previewMasterPage(-1), m_pageList(), m_masterPageList(), m_idToLayerMap(), m_layerSetList()
   {
   }
   //! small operator<< to print the content of the state
   friend std::ostream &operator<<(std::ostream &o, State const &state)
   {
+    if (state.m_previewMasterPage>=0)
+      o << "prev[masterPage]=" << state.m_previewMasterPage << ",";
     if (!state.m_pageList.empty()) {
       o << "pages=[\n";
       for (size_t i=0; i<state.m_pageList.size(); ++i) {
@@ -237,6 +247,8 @@ struct State {
     return o;
   }
 
+  //! the default master page: -1 means not found, in general 1 in StarDrawDocument
+  int m_previewMasterPage;
   //! list of pages
   std::vector<shared_ptr<Page> > m_pageList;
   //! list of master pages
@@ -399,7 +411,9 @@ bool StarObjectModel::read(StarZone &zone)
         if (nTmp) f << "unk=" << nTmp << ",";
       }
       if (input->tell()+4<=zone.getRecordLastPosition()) {
-        f << "nStreamCompressed=" << input->readULong(2) << ",";
+        int compressedMode=(int) input->readULong(2);
+        if (compressedMode) // checkme: find 0 or 16-17, do not seems to cause problem
+          f << "#streamCompressed=" << compressedMode << ",";
         f << "nStreamNumberFormat=" << input->readULong(2) << ",";
       }
       zone.closeRecord("SdrModelFormatCompat");
@@ -414,12 +428,14 @@ bool StarObjectModel::read(StarZone &zone)
   if (ok) {
     int32_t nNum, nDen;
     uint16_t nTmp;
+    uint8_t nTmp8;
     *input>> nNum >> nDen >> nTmp;
     f << "objectUnit=" << nNum << "/" << nDen << ",";
     if (nTmp) f << "eObjUnit=" << nTmp << ",";
-    *input>>nTmp;
-    if (nTmp==1) f << "pageNotValid,";
-    input->seek(2, librevenge::RVNG_SEEK_CUR); // ???, reserved
+    input->seek(2, librevenge::RVNG_SEEK_CUR); // collapsed?
+    *input>>nTmp8;
+    if (nTmp8==1) f << "pageNotValid,";
+    input->seek(1, librevenge::RVNG_SEEK_CUR); // dummy
 
     if (version<1) {
       STOFF_DEBUG_MSG(("StarObjectModel::read: reading model format for version 0 is not implemented\n"));
@@ -427,7 +443,13 @@ bool StarObjectModel::read(StarZone &zone)
       ok=false;
     }
     else {
-      if (version<11) f << "nCharSet=" << input->readLong(2) << ",";
+      if (version<11) {
+        int charSet=(int) input->readLong(2);
+        if (StarEncoding::getEncodingForId(charSet)!=StarEncoding::E_DONTKNOW)
+          zone.setEncoding(StarEncoding::getEncodingForId(charSet));
+        else
+          f << "###nCharSet=" << charSet << ",";
+      }
       std::vector<uint32_t> string;
       for (int i=0; i<6; ++i) {
         if (!zone.readString(string)) {
@@ -458,7 +480,10 @@ bool StarObjectModel::read(StarZone &zone)
   if (ok && version>=14 && input->tell()<zone.getRecordLastPosition()) {
     uint16_t pNum;
     *input>> pNum;
-    if (pNum) f << "nStartPageNum=" << pNum << ",";
+    if (pNum!=0xFFFF) {
+      m_modelState->m_previewMasterPage=(int) pNum;
+      f << "nStartPageNum=" << pNum << ",";
+    }
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
