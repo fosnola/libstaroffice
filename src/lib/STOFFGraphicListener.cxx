@@ -974,24 +974,25 @@ void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGrap
       _openSpan();
   }
 
-  librevenge::RVNGPropertyList styleProp;
+  librevenge::RVNGPropertyList shapeProp, styleProp;
+  shape.addTo(shapeProp);
   style.addTo(styleProp);
   m_documentInterface->setStyle(styleProp);
   switch (shape.m_command) {
   case STOFFGraphicShape::C_Ellipse:
-    m_documentInterface->drawEllipse(shape.m_propertyList);
+    m_documentInterface->drawEllipse(shapeProp);
     break;
   case STOFFGraphicShape::C_Path:
-    m_documentInterface->drawPath(shape.m_propertyList);
+    m_documentInterface->drawPath(shapeProp);
     break;
   case STOFFGraphicShape::C_Polyline:
-    m_documentInterface->drawPolyline(shape.m_propertyList);
+    m_documentInterface->drawPolyline(shapeProp);
     break;
   case STOFFGraphicShape::C_Polygon:
-    m_documentInterface->drawPolygon(shape.m_propertyList);
+    m_documentInterface->drawPolygon(shapeProp);
     break;
   case STOFFGraphicShape::C_Rectangle:
-    m_documentInterface->drawRectangle(shape.m_propertyList);
+    m_documentInterface->drawRectangle(shapeProp);
     break;
   case STOFFGraphicShape::C_Unknown:
     break;

@@ -48,17 +48,19 @@ public:
   //! an enum used to define the interface command
   enum Command { C_Ellipse, C_Polyline, C_Rectangle, C_Path, C_Polygon, C_Unknown };
   //! constructor
-  STOFFGraphicShape() : m_command(C_Unknown), m_bdBox(), m_propertyList(), m_extra("")
+  STOFFGraphicShape() : m_command(C_Unknown), m_bdbox(), m_propertyList(), m_extra("")
   {
   }
   //! virtual destructor
   virtual ~STOFFGraphicShape() { }
+  //! add shape to property list
+  void addTo(librevenge::RVNGPropertyList &list) const;
   //! a print operator
   friend std::ostream &operator<<(std::ostream &o, STOFFGraphicShape const &sh);
   //! the command
   Command m_command;
-  //! the shape bdbox
-  STOFFBox2f m_bdBox;
+  //! the shape bdbox in twip
+  STOFFBox2f m_bdbox;
   //! the property
   librevenge::RVNGPropertyList m_propertyList;
   //! extra data

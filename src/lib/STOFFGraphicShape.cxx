@@ -53,9 +53,30 @@
 ////////////////////////////////////////////////////////////
 // STOFFGraphicShape
 ////////////////////////////////////////////////////////////
+void STOFFGraphicShape::addTo(librevenge::RVNGPropertyList &pList) const
+{
+  if (m_bdbox.size()[0]>0) {
+    pList.insert("svg:x",double(m_bdbox[0][0])/20., librevenge::RVNG_POINT);
+    pList.insert("svg:width",double(m_bdbox.size()[0])/20., librevenge::RVNG_POINT);
+  }
+  if (m_bdbox.size()[1]>0) {
+    pList.insert("svg:y",double(m_bdbox[0][1])/20., librevenge::RVNG_POINT);
+    pList.insert("svg:height",double(m_bdbox.size()[1])/20., librevenge::RVNG_POINT);
+  }
+
+  librevenge::RVNGPropertyList::Iter i(m_propertyList);
+  for (i.rewind(); i.next();) {
+    if (i.child()) {
+      pList.insert(i.key(), *i.child());
+      continue;
+    }
+    pList.insert(i.key(), i()->clone());
+  }
+}
+
 std::ostream &operator<<(std::ostream &o, STOFFGraphicShape const &sh)
 {
-  o << "box=" << sh.m_bdBox << ",";
+  o << "box=" << sh.m_bdbox << ",";
   switch (sh.m_command) {
   case STOFFGraphicShape::C_Ellipse:
     o << "ellipse,";

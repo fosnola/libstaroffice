@@ -39,6 +39,8 @@
 
 #include <librevenge/librevenge.h>
 
+#include "STOFFGraphicShape.hxx"
+#include "STOFFGraphicStyle.hxx"
 #include "STOFFListener.hxx"
 #include "STOFFOLEParser.hxx"
 
@@ -174,7 +176,7 @@ public:
   //! return the object name
   virtual std::string getName() const = 0;
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr /*listener*/)
+  virtual bool send(STOFFListenerPtr /*listener*/)
   {
     static bool first=true;
     if (first) {
@@ -322,6 +324,25 @@ public:
     std::stringstream s;
     s << "###type=" << m_identifier << ",";
     return s.str();
+  }
+  //! try to send the graphic to the listener
+  bool send(STOFFListenerPtr listener)
+  {
+    // REMOVEME
+    if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::Graphic::send: can not send a shape\n"));
+      return false;
+    }
+    STOFFGraphicShape shape;
+    shape.m_command=STOFFGraphicShape::C_Rectangle;
+    shape.m_bdbox=m_bdbox;
+    shape.m_propertyList.insert("text:anchor-type", "page");
+    STOFFGraphicStyle style;
+    style.m_propertyList.insert("draw:stroke", "solid");
+    style.m_propertyList.insert("svg:stroke-color", "#ff0000");
+    style.m_propertyList.insert("svg:stroke-width", 1, librevenge::RVNG_POINT);
+    listener->insertShape(shape, style);
+    return true;
   }
   //! basic print function
   virtual std::string print() const

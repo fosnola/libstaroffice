@@ -171,7 +171,7 @@ public:
     if (m_size[0]>0 && m_size[0]!=0x7fffffff)
       page.m_propertiesList[0].insert("fo:page-width", double(m_size[0])/1440., librevenge::RVNG_INCH);
     if (m_size[1]>0 && m_size[1]!=0x7fffffff)
-      page.m_propertiesList[0].insert("fo:page-length", double(m_size[1])/1440., librevenge::RVNG_INCH);
+      page.m_propertiesList[0].insert("fo:page-height", double(m_size[1])/1440., librevenge::RVNG_INCH);
     for (int i=0; i<4; ++i) {
       if (m_borders[i]<0 || m_borders[i]==0x7fffffff) continue;
       char const *(wh[])= {"left", "top", "right", "bottom"};
@@ -384,7 +384,7 @@ bool StarObjectModel::sendMasterPages(STOFFGraphicListenerPtr listener)
     page.updatePageSpan(ps);
     librevenge::RVNGString masterName;
     masterName.sprintf("Master%d", id);
-    ps.m_propertiesList[0].insert("draw:name", masterName);
+    ps.m_propertiesList[0].insert("librevenge:master-page-name", masterName);
     listener->openMasterPage(ps);
     sendPage(id, listener, true);
     listener->closeMasterPage();

@@ -1004,29 +1004,30 @@ void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFF
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertShape: must be called inside a cell\n"));
   }
 
-  librevenge::RVNGPropertyList list;
-  style.addTo(list);
+  librevenge::RVNGPropertyList shapeProp, styleProp;
+  shape.addTo(shapeProp);
+  style.addTo(styleProp);
 
   switch (shape.m_command) {
   case STOFFGraphicShape::C_Ellipse:
-    m_documentInterface->defineGraphicStyle(list);
-    m_documentInterface->drawEllipse(shape.m_propertyList);
+    m_documentInterface->defineGraphicStyle(styleProp);
+    m_documentInterface->drawEllipse(shapeProp);
     break;
   case STOFFGraphicShape::C_Path:
-    m_documentInterface->defineGraphicStyle(list);
-    m_documentInterface->drawPath(shape.m_propertyList);
+    m_documentInterface->defineGraphicStyle(styleProp);
+    m_documentInterface->drawPath(shapeProp);
     break;
   case STOFFGraphicShape::C_Polyline:
-    m_documentInterface->defineGraphicStyle(list);
-    m_documentInterface->drawPolyline(shape.m_propertyList);
+    m_documentInterface->defineGraphicStyle(styleProp);
+    m_documentInterface->drawPolyline(shapeProp);
     break;
   case STOFFGraphicShape::C_Polygon:
-    m_documentInterface->defineGraphicStyle(list);
-    m_documentInterface->drawPolygon(shape.m_propertyList);
+    m_documentInterface->defineGraphicStyle(styleProp);
+    m_documentInterface->drawPolygon(shapeProp);
     break;
   case STOFFGraphicShape::C_Rectangle:
-    m_documentInterface->defineGraphicStyle(list);
-    m_documentInterface->drawRectangle(shape.m_propertyList);
+    m_documentInterface->defineGraphicStyle(styleProp);
+    m_documentInterface->drawRectangle(shapeProp);
     break;
   case STOFFGraphicShape::C_Unknown:
     break;
