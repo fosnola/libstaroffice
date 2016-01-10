@@ -68,9 +68,18 @@ public:
   virtual ~StarObjectModel();
   //! try to read a SdrModel zone: "DrMd"
   bool read(StarZone &zone);
+
+  /** try to update the page span (to create draw document)*/
+  bool updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const;
+  //! try to send the master pages
+  bool sendMasterPages(STOFFGraphicListenerPtr listener);
+  //! try to send the different page
+  bool sendPages(STOFFListenerPtr listener);
   //! small operator<< to print the content of the model
   friend std::ostream &operator<<(std::ostream &o, StarObjectModel const &model);
 protected:
+  //! try to send a page content
+  bool sendPage(int pageId, STOFFListenerPtr listener, bool masterPage=false);
   //
   // low level
   //

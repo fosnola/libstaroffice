@@ -82,6 +82,8 @@ public:
   virtual ~StarObjectSmallGraphic();
   //! try to read a object zone: "DrOb'
   bool readSdrObject(StarZone &zone);
+  //! try to send a object to the listener
+  bool send(STOFFListenerPtr listener);
   //! small operator<< to print the content of the small graphic object
   friend std::ostream &operator<<(std::ostream &o, StarObjectSmallGraphic const &graphic);
 

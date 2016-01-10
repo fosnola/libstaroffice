@@ -173,6 +173,17 @@ public:
   }
   //! return the object name
   virtual std::string getName() const = 0;
+  //! try to send the graphic to the listener
+  bool send(STOFFListenerPtr /*listener*/)
+  {
+    static bool first=true;
+    if (first) {
+      first=false;
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::Graphic::send: not implemented\n"));
+    }
+    return false;
+  }
+
   //! the type
   int m_identifier;
 };
@@ -969,6 +980,23 @@ std::ostream &operator<<(std::ostream &o, StarObjectSmallGraphic const &graphic)
   if (graphic.m_graphicState->m_graphic)
     o << graphic.m_graphicState->m_graphic->print();
   return o;
+}
+
+bool StarObjectSmallGraphic::send(STOFFListenerPtr listener)
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphic::send: can not find the listener\n"));
+    return false;
+  }
+  if (!m_graphicState->m_graphic) {
+    static bool first=true;
+    if (first) {
+      first=false;
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphic::send: no object\n"));
+    }
+    return false;
+  }
+  return m_graphicState->m_graphic->send(listener);
 }
 
 ////////////////////////////////////////////////////////////

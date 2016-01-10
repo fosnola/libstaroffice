@@ -39,6 +39,7 @@
 
 #include <librevenge/librevenge.h>
 
+#include "STOFFGraphicListener.hxx"
 #include "STOFFOLEParser.hxx"
 
 #include "StarAttribute.hxx"
@@ -61,11 +62,13 @@ namespace StarObjectDrawInternal
 //! Internal: the state of a StarObjectDraw
 struct State {
   //! constructor
-  State() : m_model()
+  State() : m_model(), m_numPages()
   {
   }
   //! the model
   shared_ptr<StarObjectModel> m_model;
+  //! the list of pages number
+  int m_numPages;
 };
 
 }
@@ -84,9 +87,34 @@ StarObjectDraw::~StarObjectDraw()
 
 ////////////////////////////////////////////////////////////
 //
-// Intermediate level
+// send data
 //
 ////////////////////////////////////////////////////////////
+
+bool StarObjectDraw::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const
+{
+  if (!m_drawState->m_model)
+    return false;
+
+  if (!m_drawState->m_model->updatePageSpans(pageSpan, numPages))
+    return false;
+  m_drawState->m_numPages=numPages;
+  return numPages>0;
+}
+
+bool StarObjectDraw::sendMasterPages(STOFFGraphicListenerPtr listener)
+{
+  if (!m_drawState->m_model)
+    return false;
+  return m_drawState->m_model->sendMasterPages(listener);
+}
+
+bool StarObjectDraw::sendPages(STOFFGraphicListenerPtr listener)
+{
+  if (!m_drawState->m_model)
+    return false;
+  return m_drawState->m_model->sendPages(listener);
+}
 
 ////////////////////////////////////////////////////////////
 // main zone

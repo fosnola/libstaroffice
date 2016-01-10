@@ -35,12 +35,15 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <set>
 #include <sstream>
 
 #include <librevenge/librevenge.h>
 
+#include "STOFFGraphicListener.hxx"
 #include "STOFFListener.hxx"
 #include "STOFFOLEParser.hxx"
+#include "STOFFPageSpan.hxx"
 
 #include "StarAttribute.hxx"
 #include "StarItemPool.hxx"
@@ -156,6 +159,29 @@ public:
   {
     for (int i=0; i<4; ++i) m_borders[i]=0;
   }
+  //! returns the master page id
+  int getMasterPageId() const
+  {
+    if (m_masterPage || m_masterPageDescList.empty()) return -1;
+    return m_masterPageDescList[0].m_masterId;
+  }
+  //! update pagespan properties
+  void updatePageSpan(STOFFPageSpan &page) const
+  {
+    if (m_size[0]>0 && m_size[0]!=0x7fffffff)
+      page.m_propertiesList[0].insert("fo:page-width", double(m_size[0])/1440., librevenge::RVNG_INCH);
+    if (m_size[1]>0 && m_size[1]!=0x7fffffff)
+      page.m_propertiesList[0].insert("fo:page-length", double(m_size[1])/1440., librevenge::RVNG_INCH);
+    for (int i=0; i<4; ++i) {
+      if (m_borders[i]<0 || m_borders[i]==0x7fffffff) continue;
+      char const *(wh[])= {"left", "top", "right", "bottom"};
+      page.m_propertiesList[page.m_actualZone].insert((std::string("fo:margin-")+wh[i]).c_str(),
+          double(m_borders[i])/1440., librevenge::RVNG_INCH);
+    }
+    if (m_background) {
+      STOFF_DEBUG_MSG(("StarObjectModelInternal::Page::updatePageSpan: sorry sending background object is not implemented\n"));
+    }
+  }
   //! operator<<
   friend std::ostream &operator<<(std::ostream &o, Page const &page)
   {
@@ -206,7 +232,8 @@ public:
 //! Internal: the state of a StarObjectModel
 struct State {
   //! constructor
-  State() : m_previewMasterPage(-1), m_pageList(), m_masterPageList(), m_idToLayerMap(), m_layerSetList()
+  State() : m_previewMasterPage(-1), m_pageList(), m_masterPageList(), m_idToLayerMap(), m_layerSetList(),
+    m_pageToSendList(), m_masterPageToSendSet()
   {
   }
   //! small operator<< to print the content of the state
@@ -249,14 +276,30 @@ struct State {
 
   //! the default master page: -1 means not found, in general 1 in StarDrawDocument
   int m_previewMasterPage;
+  /*
+    in general: page0(master0), nothing
+    after by pair:
+       page 2*i+1(master 2*k+1): page content
+       page 2*i+2(master 2*k+2): a page graphic+a text zone(double click to add note)
+   */
   //! list of pages
   std::vector<shared_ptr<Page> > m_pageList;
+  /*
+    in general: master0 contains 4 small box associated with a page graphic 1,3,5,7
+    after by pair:
+        master 2*i+1: the content of the master page
+        master 2*i+2: a title text+text: maybe default text
+   */
   //! list of master pages
   std::vector<shared_ptr<Page> > m_masterPageList;
   //! a map layerId to layer
   std::map<int, Layer> m_idToLayerMap;
   //! the list of layer set
   std::vector<LayerSet> m_layerSetList;
+  //! the list of page to send
+  std::vector<int> m_pageToSendList;
+  //! the list of master page to send
+  std::set<int> m_masterPageToSendSet;
 };
 
 }
@@ -276,6 +319,97 @@ std::ostream &operator<<(std::ostream &o, StarObjectModel const &model)
 {
   o << *model.m_modelState;
   return o;
+}
+
+////////////////////////////////////////////////////////////
+// send data
+////////////////////////////////////////////////////////////
+bool StarObjectModel::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &number) const
+{
+  m_modelState->m_pageToSendList.clear();
+  m_modelState->m_masterPageToSendSet.clear();
+
+  pageSpan.clear();
+  int numMasterPage=(int) m_modelState->m_masterPageList.size();
+  for (size_t i=0; i<m_modelState->m_pageList.size(); ++i) {
+    if (!m_modelState->m_pageList[i])
+      continue;
+    StarObjectModelInternal::Page const &page=*m_modelState->m_pageList[i];
+    int id=page.getMasterPageId();
+    if (id<=0 || (id&1)!=1) continue;
+    m_modelState->m_pageToSendList.push_back(int(i));
+    STOFFPageSpan ps;
+    page.updatePageSpan(ps);
+    if (id<numMasterPage && m_modelState->m_masterPageList[size_t(id)]) {
+      m_modelState->m_masterPageToSendSet.insert(id);
+      librevenge::RVNGString masterName;
+      masterName.sprintf("Master%d", id);
+      ps.m_propertiesList[0].insert("librevenge:master-page-name", masterName);
+    }
+    pageSpan.push_back(ps);
+  }
+  number=(int) m_modelState->m_pageToSendList.size();
+  return number!=0;
+}
+
+bool StarObjectModel::sendPages(STOFFListenerPtr listener)
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarObjectModel::sendPages: can not find the listener\n"));
+    return false;
+  }
+  for (size_t i=0; i<m_modelState->m_pageToSendList.size(); ++i) {
+    if (i) listener->insertBreak(STOFFListener::PageBreak);
+    sendPage(m_modelState->m_pageToSendList[i], listener, false);
+  }
+  return true;
+}
+
+bool StarObjectModel::sendMasterPages(STOFFGraphicListenerPtr listener)
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarObjectModel::sendMasterPages: can not find the listener\n"));
+    return false;
+  }
+  int numMasters=(int) m_modelState->m_masterPageList.size();
+  for (std::set<int>::iterator it=m_modelState->m_masterPageToSendSet.begin();
+       it!=m_modelState->m_masterPageToSendSet.end(); ++it) {
+    int id=*it;
+    if (id<0 || id>=numMasters || !m_modelState->m_masterPageList[size_t(id)]) {
+      STOFF_DEBUG_MSG(("StarObjectModel::sendMasterPages: can not find master page %d\n", id));
+      continue;
+    }
+    StarObjectModelInternal::Page const &page=*m_modelState->m_masterPageList[size_t(id)];
+    STOFFPageSpan ps;
+    page.updatePageSpan(ps);
+    librevenge::RVNGString masterName;
+    masterName.sprintf("Master%d", id);
+    ps.m_propertiesList[0].insert("draw:name", masterName);
+    listener->openMasterPage(ps);
+    sendPage(id, listener, true);
+    listener->closeMasterPage();
+  }
+  return true;
+}
+
+bool StarObjectModel::sendPage(int pageId, STOFFListenerPtr listener, bool masterPage)
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarObjectModel::sendPage: can not find the listener\n"));
+    return false;
+  }
+  std::vector<shared_ptr<StarObjectModelInternal::Page> > const &pageList=
+    masterPage ? m_modelState->m_masterPageList : m_modelState->m_pageList;
+  if (pageId<0 || pageId>=(int) pageList.size() || !pageList[size_t(pageId)]) {
+    STOFF_DEBUG_MSG(("StarObjectModel::sendPage: can not find page %d\n", pageId));
+    return false;
+  }
+  StarObjectModelInternal::Page &page=*pageList[size_t(pageId)];
+  for (size_t i=0; i<page.m_objectList.size(); ++i) {
+    if (page.m_objectList[i])
+      page.m_objectList[i]->send(listener);
+  }
+  return true;
 }
 
 ////////////////////////////////////////////////////////////
@@ -834,7 +968,13 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
     }
     else {
       f << "pages=[";
-      for (int i=0; i<int(n); ++i) f << input->readULong(2) << ",";
+      StarObjectModelInternal::Page::Descriptor desc;
+      for (int i=0; i<int(n); ++i) {
+        int id=(int) input->readULong(2);
+        f << id << ",";
+        desc.m_masterId=id;
+        page->m_masterPageDescList.push_back(desc);
+      }
       f << "],";
     }
     ascFile.addPos(pos);

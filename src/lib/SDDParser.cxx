@@ -97,8 +97,8 @@ void SDDParser::parse(librevenge::RVNGDrawingInterface *docInterface)
     ok = createZones();
     if (ok) {
       createDocument(docInterface);
-      // sendGraphics();
-      ok=false;
+      if (m_state->m_mainGraphic)
+        m_state->m_mainGraphic->sendPages(getGraphicListener());
     }
     ascii().reset();
   }
@@ -129,9 +129,10 @@ bool SDDParser::createZones()
     }
     if (object.getDocumentKind()==STOFFDocument::STOFF_K_DRAW) {
       shared_ptr<StarObjectDraw> draw(new StarObjectDraw(object, false));
-      draw->parse();
       if (listDir[d]->m_dir.empty())
         m_state->m_mainGraphic=draw;
+      else
+        draw->parse();
       continue;
     }
     if (object.getDocumentKind()==STOFFDocument::STOFF_K_SPREADSHEET) {
@@ -207,7 +208,11 @@ bool SDDParser::createZones()
       asciiFile.reset();
     }
   }
-  return m_state->m_mainGraphic ? true : false;
+  if (!m_state->m_mainGraphic) {
+    STOFF_DEBUG_MSG(("SDDParser::createZones: error: can not find the main element\n"));
+    return false;
+  }
+  return m_state->m_mainGraphic->parse();
 }
 
 ////////////////////////////////////////////////////////////
@@ -216,19 +221,22 @@ bool SDDParser::createZones()
 void SDDParser::createDocument(librevenge::RVNGDrawingInterface *documentInterface)
 {
   if (!documentInterface) return;
-#if 0
-  // TODO
+
   std::vector<STOFFPageSpan> pageList;
-  STOFFPageSpan ps(getPageSpan());
-  ps.m_pageSpan=1;
-  pageList.push_back(ps);
-  m_state->m_numPages = 1;
+  if (!m_state->m_mainGraphic || !m_state->m_mainGraphic->updatePageSpans(pageList, m_state->m_numPages)) {
+    STOFFPageSpan ps(getPageSpan());
+    ps.m_pageSpan=1;
+    pageList.push_back(ps);
+    m_state->m_numPages = 1;
+  }
   STOFFGraphicListenerPtr listen(new STOFFGraphicListener(*getParserState(), pageList, documentInterface));
   setGraphicListener(listen);
   if (m_state->m_mainGraphic)
     listen->setDocumentMetaData(m_state->m_mainGraphic->getMetaData());
+
   listen->startDocument();
-#endif
+  if (m_state->m_mainGraphic)
+    m_state->m_mainGraphic->sendMasterPages(listen);
 }
 
 bool SDDParser::sendGraphics()

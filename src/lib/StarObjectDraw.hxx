@@ -68,6 +68,13 @@ public:
   //! try to parse the current object
   bool parse();
 
+  /** try to update the page span (to create draw document)*/
+  bool updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const;
+  //! try to send the different page
+  bool sendPages(STOFFGraphicListenerPtr listener);
+  //! try to send the master pages
+  bool sendMasterPages(STOFFGraphicListenerPtr listener);
+
 protected:
   //! try to read a spreadsheet zone: StarDrawDocument .sdd
   bool readDrawDocument(STOFFInputStreamPtr input, std::string const &fileName);

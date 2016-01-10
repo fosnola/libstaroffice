@@ -773,6 +773,9 @@ bool STOFFGraphicListener::openHeader(librevenge::RVNGPropertyList const &extras
     return false;
   }
 
+  // normally graphic document does not have header/footer, so do the minimum
+  STOFF_DEBUG_MSG(("STOFFGraphicListener::openHeader: Oops I am called\n"));
+
   // we do not have any header interface, so mimick it by creating a textbox
   STOFFPosition pos(STOFFVec2f(20,20), STOFFVec2f(-20,-10), librevenge::RVNG_POINT); // fixme
   pos.m_anchorTo=STOFFPosition::Page;
@@ -814,6 +817,9 @@ bool STOFFGraphicListener::openFooter(librevenge::RVNGPropertyList const &extras
     STOFF_DEBUG_MSG(("STOFFGraphicListener::openFooter: Oops a header/footer is already opened\n"));
     return false;
   }
+
+  // normally graphic document does not have header/footer, so do the minimum
+  STOFF_DEBUG_MSG(("STOFFGraphicListener::openFooter: Oops I am called\n"));
 
   // we do not have any footer interface, so mimick it by creating a textbox
   STOFFPosition pos(STOFFVec2f(700,20), STOFFVec2f(-20,-10), librevenge::RVNG_POINT); // fixme: ypos
