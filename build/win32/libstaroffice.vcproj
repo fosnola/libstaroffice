@@ -257,6 +257,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\STOFFGraphicShape.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\STOFFGraphicStyle.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -656,6 +664,8 @@
 			<File RelativePath="..\..\src\lib\STOFFGraphicDecoder.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFGraphicListener.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\STOFFGraphicShape.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFGraphicStyle.hxx">
 			</File>

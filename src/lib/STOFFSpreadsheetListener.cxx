@@ -54,6 +54,7 @@
 #include "STOFFChart.hxx"
 #include "STOFFFont.hxx"
 #include "STOFFGraphicStyle.hxx"
+#include "STOFFGraphicShape.hxx"
 #include "STOFFInputStream.hxx"
 #include "STOFFList.hxx"
 #include "STOFFPageSpan.hxx"
@@ -977,6 +978,63 @@ void STOFFSpreadsheetListener::insertComment(STOFFSubDocumentPtr &subDocument, l
   m_ps->m_isNote = false;
 }
 
+void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style)
+{
+  if (!m_ds->m_isSheetOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertShape insert a picture outside a sheet is not implemented\n"));
+    return;
+  }
+  // now check that the anchor is coherent with the actual state
+  librevenge::RVNGString anchor;
+  if (shape.m_propertyList["text:anchor-type"])
+    anchor=shape.m_propertyList["text:anchor-type"]->getStr();
+  if (anchor=="paragraph") {
+    if (m_ps->m_isParagraphOpened)
+      _flushText();
+    else
+      _openParagraph();
+  }
+  else if (anchor=="char" || anchor=="as-char") {
+    if (m_ps->m_isSpanOpened)
+      _flushText();
+    else
+      _openSpan();
+  }
+  else if (shape.m_propertyList["table:end-cell-address"] && !m_ds->m_isSheetRowOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertShape: must be called inside a cell\n"));
+  }
+
+  librevenge::RVNGPropertyList list;
+  style.addTo(list);
+
+  switch (shape.m_command) {
+  case STOFFGraphicShape::C_Ellipse:
+    m_documentInterface->defineGraphicStyle(list);
+    m_documentInterface->drawEllipse(shape.m_propertyList);
+    break;
+  case STOFFGraphicShape::C_Path:
+    m_documentInterface->defineGraphicStyle(list);
+    m_documentInterface->drawPath(shape.m_propertyList);
+    break;
+  case STOFFGraphicShape::C_Polyline:
+    m_documentInterface->defineGraphicStyle(list);
+    m_documentInterface->drawPolyline(shape.m_propertyList);
+    break;
+  case STOFFGraphicShape::C_Polygon:
+    m_documentInterface->defineGraphicStyle(list);
+    m_documentInterface->drawPolygon(shape.m_propertyList);
+    break;
+  case STOFFGraphicShape::C_Rectangle:
+    m_documentInterface->defineGraphicStyle(list);
+    m_documentInterface->drawRectangle(shape.m_propertyList);
+    break;
+  case STOFFGraphicShape::C_Unknown:
+    break;
+  default:
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertShape: unexpected shape\n"));
+    break;
+  }
+}
 ///////////////////
 // frame
 ///////////////////

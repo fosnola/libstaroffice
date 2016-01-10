@@ -38,6 +38,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFGraphicDecoder.hxx			\
 	STOFFGraphicListener.hxx		\
 	STOFFGraphicListener.cxx		\
+	STOFFGraphicShape.hxx			\
+	STOFFGraphicShape.cxx			\
 	STOFFGraphicStyle.cxx			\
 	STOFFGraphicStyle.hxx			\
 	STOFFHeader.cxx				\

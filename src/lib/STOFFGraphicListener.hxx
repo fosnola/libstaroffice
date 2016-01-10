@@ -179,12 +179,12 @@ public:
   void closeLink();
 
   // ------- subdocument -----------------
+  /** adds a shape picture in given position */
+  void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style);
 #if 0
   /** adds a picture with potential various representationin given position */
   void insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture,
                      STOFFGraphicStyle const &style=STOFFGraphicStyle::emptyStyle());
-  /** adds a shape picture in given position */
-  void insertShape(STOFFPosition const &pos, STOFFGraphicShape const &shape, STOFFGraphicStyle const &style);
   /** adds a textbox in given position */
   void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &style);
 #endif

@@ -146,6 +146,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\..\src\lib\STOFFGraphicShape.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\src\lib\STOFFGraphicStyle.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -347,6 +351,7 @@
     <ClInclude Include="..\..\src\lib\STOFFFont.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFGraphicDecoder.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFGraphicListener.hxx" />
+    <ClInclude Include="..\..\src\lib\STOFFGraphicShape.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFGraphicStyle.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFHeader.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFInputStream.hxx" />

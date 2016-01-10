@@ -44,8 +44,8 @@
 #include "STOFFCell.hxx"
 #include "STOFFFont.hxx"
 //#include "STOFFGraphicEncoder.hxx"
-//#include "STOFFGraphicStyle.hxx"
-//#include "STOFFGraphicShape.hxx"
+#include "STOFFGraphicStyle.hxx"
+#include "STOFFGraphicShape.hxx"
 #include "STOFFInputStream.hxx"
 #include "STOFFList.hxx"
 #include "STOFFParagraph.hxx"
@@ -947,6 +947,58 @@ void STOFFGraphicListener::insertGroup(STOFFBox2f const &bdbox, STOFFSubDocument
   if (!m_ds->m_isPageSpanOpened)
     _openPageSpan();
   handleSubDocument(bdbox[0], subDocument, libstoff::DOC_GRAPHIC_GROUP);
+}
+
+void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style)
+{
+  if (!m_ds->m_isDocumentStarted) {
+    STOFF_DEBUG_MSG(("STOFFGraphicListener::insertShape: the document is not started\n"));
+    return;
+  }
+  if (!m_ds->m_isPageSpanOpened)
+    _openPageSpan();
+  // now check that the anchor is coherent with the actual state
+  librevenge::RVNGString anchor;
+  if (shape.m_propertyList["text:anchor-type"])
+    anchor=shape.m_propertyList["text:anchor-type"]->getStr();
+  if (anchor=="paragraph") {
+    if (m_ps->m_isParagraphOpened)
+      _flushText();
+    else
+      _openParagraph();
+  }
+  else if (anchor=="char" || anchor=="as-char") {
+    if (m_ps->m_isSpanOpened)
+      _flushText();
+    else
+      _openSpan();
+  }
+
+  librevenge::RVNGPropertyList styleProp;
+  style.addTo(styleProp);
+  m_documentInterface->setStyle(styleProp);
+  switch (shape.m_command) {
+  case STOFFGraphicShape::C_Ellipse:
+    m_documentInterface->drawEllipse(shape.m_propertyList);
+    break;
+  case STOFFGraphicShape::C_Path:
+    m_documentInterface->drawPath(shape.m_propertyList);
+    break;
+  case STOFFGraphicShape::C_Polyline:
+    m_documentInterface->drawPolyline(shape.m_propertyList);
+    break;
+  case STOFFGraphicShape::C_Polygon:
+    m_documentInterface->drawPolygon(shape.m_propertyList);
+    break;
+  case STOFFGraphicShape::C_Rectangle:
+    m_documentInterface->drawRectangle(shape.m_propertyList);
+    break;
+  case STOFFGraphicShape::C_Unknown:
+    break;
+  default:
+    STOFF_DEBUG_MSG(("STOFFGraphicListener::insertShape: unexpected shape\n"));
+    break;
+  }
 }
 
 ///////////////////

@@ -131,6 +131,10 @@ SOURCE=..\..\src\lib\STOFFGraphicListener.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFGraphicShape.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFGraphicStyle.cxx
 # End Source File
 # Begin Source File
@@ -372,6 +376,10 @@ SOURCE=..\..\src\lib\STOFFGraphicDecoder.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFGraphicListener.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFGraphicShape.hxx
 # End Source File
 # Begin Source File
 
