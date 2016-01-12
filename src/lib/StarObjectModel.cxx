@@ -407,7 +407,7 @@ bool StarObjectModel::sendPage(int pageId, STOFFListenerPtr listener, bool maste
   StarObjectModelInternal::Page &page=*pageList[size_t(pageId)];
   for (size_t i=0; i<page.m_objectList.size(); ++i) {
     if (page.m_objectList[i])
-      page.m_objectList[i]->send(listener);
+      page.m_objectList[i]->send(listener, *this);
   }
   return true;
 }

@@ -96,7 +96,7 @@ public:
   /** tries to close a frame */
   void closeFrame();
   /** open a group (not implemented) */
-  bool openGroup(STOFFPosition const &pos);
+  bool openGroup();
   /** close a group (not implemented) */
   void closeGroup();
 

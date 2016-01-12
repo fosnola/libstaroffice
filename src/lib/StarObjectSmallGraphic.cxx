@@ -176,7 +176,7 @@ public:
   //! return the object name
   virtual std::string getName() const = 0;
   //! try to send the graphic to the listener
-  virtual bool send(STOFFListenerPtr /*listener*/)
+  virtual bool send(STOFFListenerPtr /*listener*/, StarObject &/*object*/)
   {
     static bool first=true;
     if (first) {
@@ -325,25 +325,6 @@ public:
     s << "###type=" << m_identifier << ",";
     return s.str();
   }
-  //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener)
-  {
-    // REMOVEME
-    if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
-      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::Graphic::send: can not send a shape\n"));
-      return false;
-    }
-    STOFFGraphicShape shape;
-    shape.m_command=STOFFGraphicShape::C_Rectangle;
-    shape.m_bdbox=m_bdbox;
-    shape.m_propertyList.insert("text:anchor-type", "page");
-    STOFFGraphicStyle style;
-    style.m_propertyList.insert("draw:stroke", "solid");
-    style.m_propertyList.insert("svg:stroke-color", "#ff0000");
-    style.m_propertyList.insert("svg:stroke-width", 1, librevenge::RVNG_POINT);
-    listener->insertShape(shape, style);
-    return true;
-  }
   //! basic print function
   virtual std::string print() const
   {
@@ -400,6 +381,43 @@ public:
     s << SdrGraphic::print() << *this << ",";
     return s.str();
   }
+  //! try to send the graphic to the listener
+  bool send(STOFFListenerPtr listener, StarObject &object)
+  {
+    // REMOVEME
+    if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicAttribute::send: can not send a shape\n"));
+      return false;
+    }
+    STOFFGraphicShape shape;
+    shape.m_command=STOFFGraphicShape::C_Rectangle;
+    shape.m_bdbox=m_bdbox;
+    shape.m_propertyList.insert("text:anchor-type", "page");
+    STOFFGraphicStyle style;
+    updateStyle(style, object);
+    listener->insertShape(shape, style);
+    return true;
+  }
+  //! try to update the style
+  void updateStyle(STOFFGraphicStyle &style, StarObject &object) const
+  {
+    shared_ptr<StarItemPool> pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
+    if (pool && !m_sheetStyle.empty()) {
+      StarItemStyle const *mStyle=pool->findStyleWithFamily(m_sheetStyle, StarItemStyle::F_Paragraph);
+      if (mStyle) {
+        for (std::map<int, shared_ptr<StarItem> >::const_iterator it=mStyle->m_itemSet.m_whichToItemMap.begin();
+             it!=mStyle->m_itemSet.m_whichToItemMap.end(); ++it) {
+          if (it->second && it->second->m_attribute)
+            it->second->m_attribute->addTo(style, pool.get());
+        }
+      }
+    }
+
+    for (size_t i=0; i<m_itemList.size(); ++i) {
+      if (m_itemList[i] && m_itemList[i]->m_attribute)
+        m_itemList[i]->m_attribute->addTo(style, pool.get());
+    }
+  }
   //! print object data
   friend std::ostream &operator<<(std::ostream &o, SdrGraphicAttribute const &graph)
   {
@@ -433,6 +451,21 @@ public:
     std::stringstream s;
     s << SdrGraphic::print() << *this << ",";
     return s.str();
+  }
+  //! try to send the graphic to the listener
+  bool send(STOFFListenerPtr listener, StarObject &object)
+  {
+    if (!listener) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicAttribute::send: unexpected listener\n"));
+      return false;
+    }
+    listener->openGroup();
+    for (size_t c=0; c<m_child.size(); ++c) {
+      if (m_child[c])
+        m_child[c]->send(listener, object);
+    }
+    listener->closeGroup();
+    return true;
   }
   //! print object data
   friend std::ostream &operator<<(std::ostream &o, SdrGraphicGroup const &graph)
@@ -580,6 +613,54 @@ public:
     std::stringstream s;
     s << SdrGraphicRect::print() << *this << ",";
     return s.str();
+  }
+  //! try to send the graphic to the listener
+  bool send(STOFFListenerPtr listener, StarObject &object)
+  {
+    if (!listener || m_textRectangle.size()[0]<=0 || m_textRectangle.size()[1]<=0) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicCircle::send: can not send a shape\n"));
+      return false;
+    }
+    STOFFGraphicShape shape;
+    shape.m_command=STOFFGraphicShape::C_Ellipse;
+    STOFFVec2f center=0.5f*STOFFVec2f(m_textRectangle[0]+m_textRectangle[1]);
+    shape.m_propertyList.insert("svg:cx",center.x(), librevenge::RVNG_TWIP);
+    shape.m_propertyList.insert("svg:cy",center.y(), librevenge::RVNG_TWIP);
+    STOFFVec2f radius=0.5*STOFFVec2f(m_textRectangle[1]-m_textRectangle[0]);
+    shape.m_propertyList.insert("svg:rx",radius.x(), librevenge::RVNG_TWIP);
+    shape.m_propertyList.insert("svg:ry",radius.y(), librevenge::RVNG_TWIP);
+    if (m_identifier!=4) {
+      shape.m_propertyList.insert("draw:start-angle", m_angles[0], librevenge::RVNG_GENERIC);
+      shape.m_propertyList.insert("draw:end-angle", m_angles[1], librevenge::RVNG_GENERIC);
+    }
+    if (m_identifier>=4 && m_identifier<=7) {
+      char const *(wh[])= {"full", "section", "arc", "cut"};
+      shape.m_propertyList.insert("draw:kind", wh[m_identifier-4]);
+    }
+    if (m_textDrehWink) {
+      // rotation around the first point, let do that by hand
+      librevenge::RVNGString transform;
+      center=STOFFVec2f(m_textRectangle[0]);
+      transform.sprintf("translate(%fpt %fpt) rotate(%f) translate(%fpt %fpt)",
+                        -center[0]/20.f,-center[1]/20.f,
+                        float(m_textDrehWink)/100.f*M_PI/180.f, // gradient
+                        center[0]/20.f,center[1]/20.f);
+      shape.m_propertyList.insert("draw:transform", transform);
+    }
+    shape.m_propertyList.insert("text:anchor-type", "page");
+    STOFFGraphicStyle style;
+    updateStyle(style, object);
+    listener->insertShape(shape, style);
+    return true;
+  }
+  //! try to update the style
+  void updateStyle(STOFFGraphicStyle &style, StarObject &object) const
+  {
+    SdrGraphicRect::updateStyle(style, object);
+    if (m_circleItem && m_circleItem->m_attribute) {
+      shared_ptr<StarItemPool> pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
+      m_circleItem->m_attribute->addTo(style, pool.get());
+    }
   }
   //! print object data
   friend std::ostream &operator<<(std::ostream &o, SdrGraphicCircle const &graph)
@@ -812,6 +893,12 @@ public:
     s << SdrGraphic::print() << *this << ",";
     return s.str();
   }
+  //! try to send the graphic to the listener
+  bool send(STOFFListenerPtr /*listener*/, StarObject &/*object*/)
+  {
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::Graphic::sendPage: unexpected call\n"));
+    return false;
+  }
   //! print object data
   friend std::ostream &operator<<(std::ostream &o, SdrGraphicPage const &graph)
   {
@@ -1003,7 +1090,7 @@ std::ostream &operator<<(std::ostream &o, StarObjectSmallGraphic const &graphic)
   return o;
 }
 
-bool StarObjectSmallGraphic::send(STOFFListenerPtr listener)
+bool StarObjectSmallGraphic::send(STOFFListenerPtr listener, StarObject &object)
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectSmallGraphic::send: can not find the listener\n"));
@@ -1017,7 +1104,7 @@ bool StarObjectSmallGraphic::send(STOFFListenerPtr listener)
     }
     return false;
   }
-  return m_graphicState->m_graphic->send(listener);
+  return m_graphicState->m_graphic->send(listener, object);
 }
 
 ////////////////////////////////////////////////////////////

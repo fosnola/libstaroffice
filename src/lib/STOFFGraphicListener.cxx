@@ -1201,7 +1201,7 @@ void STOFFGraphicListener::closeFrame()
   m_ps->m_isFrameOpened = false;
 }
 
-bool  STOFFGraphicListener::openGroup(STOFFPosition const &pos)
+bool  STOFFGraphicListener::openGroup()
 {
   if (!m_ds->m_isDocumentStarted) {
     STOFF_DEBUG_MSG(("STOFFGraphicListener::openGroup: the document is not started\n"));
@@ -1215,8 +1215,6 @@ bool  STOFFGraphicListener::openGroup(STOFFPosition const &pos)
     _openPageSpan();
 
   librevenge::RVNGPropertyList propList;
-  _handleFrameParameters(propList, pos, STOFFGraphicStyle());
-
   _pushParsingState();
   _startSubDocument();
   m_ps->m_isGroupOpened = true;

@@ -471,6 +471,8 @@ bool StarObjectDraw::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
     ascFile.addPos(input->tell());
     ascFile.addNote("Entries(SfxStyleSheets):###extra");
   }
+  // REMOVEME
+  if (mainPool) mainPool->updateStyles();
   return true;
 }
 

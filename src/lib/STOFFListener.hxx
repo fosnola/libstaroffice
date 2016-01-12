@@ -212,7 +212,7 @@ public:
   /** low level: tries to close the last opened frame */
   virtual void closeFrame() = 0;
   /** low level: tries to open a group */
-  virtual bool openGroup(STOFFPosition const &pos) = 0;
+  virtual bool openGroup() = 0;
   /** low level: tries to close the last opened group */
   virtual void closeGroup() = 0;
   /** low level: function called to add a subdocument */

@@ -99,7 +99,7 @@ public:
   /** close a frame */
   void closeFrame();
   /** open a group */
-  bool openGroup(STOFFPosition const &pos);
+  bool openGroup();
   /** close a group */
   void closeGroup();
   /** open a layer */

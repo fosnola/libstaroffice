@@ -1039,7 +1039,7 @@ void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFF
 ///////////////////
 // frame
 ///////////////////
-bool STOFFSpreadsheetListener::openGroup(STOFFPosition const &/*pos*/)
+bool STOFFSpreadsheetListener::openGroup()
 {
   STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openGroup is not implemented\n"));
   return false;

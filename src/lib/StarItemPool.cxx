@@ -316,9 +316,9 @@ struct StyleId {
   //! operator<
   bool operator<(StyleId const &other) const
   {
-    if (m_family<other.m_family) return true;
-    if (m_family>other.m_family) return false;
-    return m_name<other.m_name;
+    if (m_name<other.m_name) return true;
+    if (m_name>other.m_name) return false;
+    return m_family<other.m_family;
   }
   //! the name
   librevenge::RVNGString m_name;
@@ -2038,26 +2038,25 @@ StarItemStyle const *StarItemPool::findStyleWithFamily(librevenge::RVNGString co
 {
   if (style.empty())
     return 0;
-  StarItemPoolInternal::StyleId styleId(style, family);
-  std::map<StarItemPoolInternal::StyleId,StarItemStyle>::const_iterator it=m_state->m_styleIdToStyleMap.find(styleId);
-  if (it==m_state->m_styleIdToStyleMap.end()) {
-    // hack: try to retrieve the original style, ...
-    librevenge::RVNGString simpName=m_state->getBasicString(style);
-    if (m_state->m_simplifyNameToStyleNameMap.find(simpName)!=m_state->m_simplifyNameToStyleNameMap.end()) {
-      styleId.m_name=m_state->m_simplifyNameToStyleNameMap.find(simpName)->second;
-      it=m_state->m_styleIdToStyleMap.find(styleId);
-      static bool first=true;
-      if (first && it!=m_state->m_styleIdToStyleMap.end()) {
-        STOFF_DEBUG_MSG(("StarItemPool::findStyleWithFamily: try to recover some style names\n"));
-        first=false;
-      }
+  for (int step=0; step<2; ++step) {
+    librevenge::RVNGString name(style);
+    if (step==1) {
+      // hack: try to retrieve the original style, ...
+      librevenge::RVNGString simpName=m_state->getBasicString(style);
+      if (m_state->m_simplifyNameToStyleNameMap.find(simpName)==m_state->m_simplifyNameToStyleNameMap.end())
+        break;
+      name=m_state->m_simplifyNameToStyleNameMap.find(simpName)->second;
+    }
+    StarItemPoolInternal::StyleId styleId(name, 0);
+    std::map<StarItemPoolInternal::StyleId,StarItemStyle>::const_iterator it=m_state->m_styleIdToStyleMap.lower_bound(styleId);
+    while (it!=m_state->m_styleIdToStyleMap.end() && it->first.m_name==name) {
+      if ((it->first.m_family&family)==family)
+        return &it->second;
+      ++it;
     }
   }
-  if (it==m_state->m_styleIdToStyleMap.end()) {
-    STOFF_DEBUG_MSG(("StarItemPool::findStyleWithFamily: can not find with style %s-%d\n", style.cstr(), family));
-    return 0;
-  }
-  return &it->second;
+  STOFF_DEBUG_MSG(("StarItemPool::findStyleWithFamily: can not find with style %s-%d\n", style.cstr(), family));
+  return 0;
 }
 
 void StarItemPool::updateUsingStyles(StarItemSet &itemSet) const
