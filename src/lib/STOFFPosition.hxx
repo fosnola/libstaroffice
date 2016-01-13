@@ -49,204 +49,64 @@ class STOFFPosition
 public:
   //! a list of enum used to defined the anchor
   enum AnchorTo { Char, CharBaseLine, Frame, Paragraph, Page, Unknown };
-  //! an enum used to define the wrapping: none, ...
-  enum Wrapping { WNone, WBackground, WDynamic, WForeground, WParallel, WRunThrough };
-  //! an enum used to define the relative X position
-  enum XPos { XRight, XLeft, XCenter, XFull };
-  //! an enum used to define the relative Y position
-  enum YPos { YTop, YBottom, YCenter, YFull };
 
 public:
   //! constructor
-  STOFFPosition(STOFFVec2f const &orig=STOFFVec2f(), STOFFVec2f const &sz=STOFFVec2f(), librevenge::RVNGUnit theUnit=librevenge::RVNG_INCH):
-    m_anchorTo(Unknown), m_xPos(XLeft), m_yPos(YTop), m_wrapping(WNone),
-    m_page(0), m_orig(orig), m_size(sz), m_naturalSize(), m_LTClip(), m_RBClip(), m_unit(theUnit), m_order(0) {}
-
+  STOFFPosition() : m_anchorTo(Unknown), m_propertyList() {}
+  //! destructor
   virtual ~STOFFPosition() {}
+  //! add to the propList
+  void addTo(librevenge::RVNGPropertyList &propList) const
+  {
+    librevenge::RVNGPropertyList::Iter i(m_propertyList);
+    for (i.rewind(); i.next();) {
+      if (i.child()) {
+        STOFF_DEBUG_MSG(("STOFFPosition::addTo: find unexpected property child\n"));
+        propList.insert(i.key(), *i.child());
+        continue;
+      }
+      propList.insert(i.key(), i()->clone());
+    }
+  }
+  //! utility function to set a origin
+  void setOrigin(STOFFVec2f const &origin, librevenge::RVNGUnit unit)
+  {
+    m_propertyList.insert("svg:x",origin[0], unit);
+    m_propertyList.insert("svg:y",origin[1], unit);
+  }
+  //! utility function to set a size
+  void setSize(STOFFVec2f const &size, librevenge::RVNGUnit unit)
+  {
+    if (size.x()>0)
+      m_propertyList.insert("svg:width",size.x(), unit);
+    else if (size.x()<0)
+      m_propertyList.insert("fo:min-width",-size.x(), unit);
+    if (size.y()>0)
+      m_propertyList.insert("svg:height",size.y(), unit);
+    else if (size.y()<0)
+      m_propertyList.insert("fo:min-height",-size.y(), unit);
+  }
   //! operator<<
   friend  std::ostream &operator<<(std::ostream &o, STOFFPosition const &pos)
   {
-    STOFFVec2f dest(pos.m_orig+pos.m_size);
-    o << "Pos=(" << pos.m_orig << ")x(" << dest << ")";
-    switch (pos.m_unit) {
-    case librevenge::RVNG_INCH:
-      o << "(inch)";
-      break;
-    case librevenge::RVNG_POINT:
-      o << "(pt)";
-      break;
-    case librevenge::RVNG_TWIP:
-      o << "(tw)";
-      break;
-    case librevenge::RVNG_PERCENT:
-    case librevenge::RVNG_GENERIC:
-    case librevenge::RVNG_UNIT_ERROR:
-    default:
-      break;
-    }
-    if (pos.page()>0) o << ", page=" << pos.page();
+    o << "prop=[" << pos.m_propertyList.getPropString().cstr() << "],";
     return o;
   }
   //! basic operator==
   bool operator==(STOFFPosition const &f) const
   {
-    return cmp(f) == 0;
+    return m_anchorTo==f.m_anchorTo && m_propertyList.getPropString()==f.m_propertyList.getPropString();
   }
   //! basic operator!=
   bool operator!=(STOFFPosition const &f) const
   {
-    return cmp(f) != 0;
-  }
-  //! basic operator<
-  bool operator<(STOFFPosition const &f) const
-  {
-    return cmp(f) < 0;
-  }
-
-  //! returns the frame page
-  int page() const
-  {
-    return m_page;
-  }
-  //! return the frame origin
-  STOFFVec2f const &origin() const
-  {
-    return m_orig;
-  }
-  //! returns the frame size
-  STOFFVec2f const &size() const
-  {
-    return m_size;
-  }
-  //! returns the natural size (if known)
-  STOFFVec2f const &naturalSize() const
-  {
-    return m_naturalSize;
-  }
-  //! returns the left top clipping
-  STOFFVec2f const &leftTopClipping() const
-  {
-    return m_LTClip;
-  }
-  //! returns the right bottom clipping
-  STOFFVec2f const &rightBottomClipping() const
-  {
-    return m_RBClip;
-  }
-  //! returns the unit
-  librevenge::RVNGUnit unit() const
-  {
-    return m_unit;
-  }
-  //! returns a float which can be used to scale some data in object unit
-  float getInvUnitScale(librevenge::RVNGUnit fromUnit) const
-  {
-    return libstoff::getScaleFactor(fromUnit, m_unit);
-  }
-
-  //! sets the page
-  void setPage(int pg) const
-  {
-    const_cast<STOFFPosition *>(this)->m_page = pg;
-  }
-  //! sets the frame origin
-  void setOrigin(STOFFVec2f const &orig)
-  {
-    m_orig = orig;
-  }
-  //! sets the frame size
-  void setSize(STOFFVec2f const &sz)
-  {
-    m_size = sz;
-  }
-  //! sets the natural size (if known)
-  void setNaturalSize(STOFFVec2f const &naturalSz)
-  {
-    m_naturalSize = naturalSz;
-  }
-  //! sets the dimension unit
-  void setUnit(librevenge::RVNGUnit newUnit)
-  {
-    m_unit = newUnit;
-  }
-  //! sets/resets the page and the origin
-  void setPagePos(int pg, STOFFVec2f const &newOrig) const
-  {
-    const_cast<STOFFPosition *>(this)->m_page = pg;
-    const_cast<STOFFPosition *>(this)->m_orig = newOrig;
-  }
-
-  //! sets the relative position
-  void setRelativePosition(AnchorTo anchor, XPos X = XLeft, YPos Y=YTop)
-  {
-    m_anchorTo = anchor;
-    m_xPos = X;
-    m_yPos = Y;
-  }
-
-  //! sets the clipping position
-  void setClippingPosition(STOFFVec2f lTop, STOFFVec2f rBottom)
-  {
-    m_LTClip = lTop;
-    m_RBClip = rBottom;
-  }
-
-  //! returns background/foward order
-  int order() const
-  {
-    return m_order;
-  }
-  //! set background/foward order
-  void setOrder(int ord) const
-  {
-    m_order = ord;
+    return !operator==(f);
   }
 
   //! anchor position
   AnchorTo m_anchorTo;
-  //! X relative position
-  XPos m_xPos;
-  //! Y relative position
-  YPos m_yPos;
-  //! Wrapping
-  Wrapping m_wrapping;
-
-protected:
-  //! basic function to compare two positions
-  int cmp(STOFFPosition const &f) const
-  {
-    int diff = int(m_anchorTo) - int(f.m_anchorTo);
-    if (diff) return diff < 0 ? -1 : 1;
-    diff = int(m_xPos) - int(f.m_xPos);
-    if (diff) return diff < 0 ? -1 : 1;
-    diff = int(m_yPos) - int(f.m_yPos);
-    if (diff) return diff < 0 ? -1 : 1;
-    diff = page() - f.page();
-    if (diff) return diff < 0 ? -1 : 1;
-    diff = int(m_unit) - int(f.m_unit);
-    if (diff) return diff < 0 ? -1 : 1;
-    diff = m_orig.cmpY(f.m_orig);
-    if (diff) return diff;
-    diff = m_size.cmpY(f.m_size);
-    if (diff) return diff;
-    diff = m_naturalSize.cmpY(f.m_naturalSize);
-    if (diff) return diff;
-    diff = m_LTClip.cmpY(f.m_LTClip);
-    if (diff) return diff;
-    diff = m_RBClip.cmpY(f.m_RBClip);
-    if (diff) return diff;
-
-    return 0;
-  }
-
-  //! the page
-  int m_page;
-  STOFFVec2f m_orig /** the origin position in a page */, m_size /* the size of the data*/, m_naturalSize /** the natural size of the data (if known) */;
-  STOFFVec2f m_LTClip /** the left top clip position */, m_RBClip /* the right bottom clip position */;
-  //! the unit used in \a orig, in \a m_size and in \a m_LTClip , .... Default: in inches
-  librevenge::RVNGUnit m_unit;
-  //! background/foward order
-  mutable int m_order;
+  //! the property list
+  librevenge::RVNGPropertyList m_propertyList;
 };
 
 #endif

@@ -777,7 +777,9 @@ bool STOFFGraphicListener::openHeader(librevenge::RVNGPropertyList const &extras
   STOFF_DEBUG_MSG(("STOFFGraphicListener::openHeader: Oops I am called\n"));
 
   // we do not have any header interface, so mimick it by creating a textbox
-  STOFFPosition pos(STOFFVec2f(20,20), STOFFVec2f(-20,-10), librevenge::RVNG_POINT); // fixme
+  STOFFPosition pos;
+  pos.setOrigin(STOFFVec2f(20,20), librevenge::RVNG_POINT); // fixme
+  pos.setSize(STOFFVec2f(-20,-10), librevenge::RVNG_POINT);
   pos.m_anchorTo=STOFFPosition::Page;
   if (!openFrame(pos))
     return false;
@@ -822,7 +824,9 @@ bool STOFFGraphicListener::openFooter(librevenge::RVNGPropertyList const &extras
   STOFF_DEBUG_MSG(("STOFFGraphicListener::openFooter: Oops I am called\n"));
 
   // we do not have any footer interface, so mimick it by creating a textbox
-  STOFFPosition pos(STOFFVec2f(700,20), STOFFVec2f(-20,-10), librevenge::RVNG_POINT); // fixme: ypos
+  STOFFPosition pos;
+  pos.setOrigin(STOFFVec2f(20,700), librevenge::RVNG_POINT); // fixme: ypos
+  pos.setSize(STOFFVec2f(-20,-10), librevenge::RVNG_POINT);
   pos.m_anchorTo=STOFFPosition::Page;
   if (!openFrame(pos))
     return false;
@@ -1035,7 +1039,9 @@ void STOFFGraphicListener::openTable(STOFFTable const &table)
   if (!m_ps->m_isFrameOpened) {
     if (m_ps->m_isTextBoxOpened) {
       STOFF_DEBUG_MSG(("STOFFGraphicListener::openTable: must not be called inside a textbox\n"));
-      STOFFPosition pos(m_ps->m_origin, STOFFVec2f(400,100), librevenge::RVNG_POINT);
+      STOFFPosition pos;
+      pos.setOrigin(m_ps->m_origin, librevenge::RVNG_POINT);
+      pos.setSize(STOFFVec2f(400,100), librevenge::RVNG_POINT);
       pos.m_anchorTo=STOFFPosition::Page;
       openTable(pos, table);
       return;
@@ -1277,59 +1283,9 @@ void STOFFGraphicListener::_handleFrameParameters(librevenge::RVNGPropertyList &
 {
   if (!m_ds->m_isDocumentStarted)
     return;
-
-  librevenge::RVNGUnit unit = pos.unit();
-  float pointFactor = pos.getInvUnitScale(librevenge::RVNG_POINT);
-  // first compute the origin ( in given unit and in point)
-  //STOFFVec2f origin = pos.origin()-pointFactor*m_ps->m_origin;
-  STOFFVec2f originPt = (1.f/pointFactor)*pos.origin()-m_ps->m_origin;
-  STOFFVec2f size = pos.size();
+  pos.addTo(list);
   style.addTo(list);
 
-  list.insert("svg:x",originPt[0], librevenge::RVNG_POINT);
-  list.insert("svg:y",originPt[1], librevenge::RVNG_POINT);
-  if (size.x()>0)
-    list.insert("svg:width",size.x(), unit);
-  else if (size.x()<0)
-    list.insert("fo:min-width",-size.x(), unit);
-  if (size.y()>0)
-    list.insert("svg:height",size.y(), unit);
-  else if (size.y()<0)
-    list.insert("fo:min-height",-size.y(), unit);
-  if (pos.order() > 0)
-    list.insert("draw:z-index", pos.order());
-  if (pos.naturalSize().x() > 4*pointFactor && pos.naturalSize().y() > 4*pointFactor) {
-    list.insert("librevenge:naturalWidth", pos.naturalSize().x(), pos.unit());
-    list.insert("librevenge:naturalHeight", pos.naturalSize().y(), pos.unit());
-  }
-  STOFFVec2f TLClip = (1.f/pointFactor)*pos.leftTopClipping();
-  STOFFVec2f RBClip = (1.f/pointFactor)*pos.rightBottomClipping();
-  if (TLClip[0] > 0 || TLClip[1] > 0 || RBClip[0] > 0 || RBClip[1] > 0) {
-    // in ODF1.2 we need to separate the value with ,
-    std::stringstream s;
-    s << "rect(" << TLClip[1] << "pt " << RBClip[0] << "pt "
-      <<  RBClip[1] << "pt " << TLClip[0] << "pt)";
-    list.insert("fo:clip", s.str().c_str());
-  }
-
-  if (pos.m_wrapping ==  STOFFPosition::WDynamic)
-    list.insert("style:wrap", "dynamic");
-  else if (pos.m_wrapping ==  STOFFPosition::WBackground) {
-    list.insert("style:wrap", "run-through");
-    list.insert("style:run-through", "background");
-  }
-  else if (pos.m_wrapping ==  STOFFPosition::WForeground) {
-    list.insert("style:wrap", "run-through");
-    list.insert("style:run-through", "foreground");
-  }
-  else if (pos.m_wrapping ==  STOFFPosition::WParallel) {
-    list.insert("style:wrap", "parallel");
-    list.insert("style:run-through", "foreground");
-  }
-  else if (pos.m_wrapping ==  STOFFPosition::WRunThrough)
-    list.insert("style:wrap", "run-through");
-  else
-    list.insert("style:wrap", "none");
   STOFF_DEBUG_MSG(("STOFFGraphicListener::_handleFrameParameters: not fully implemented\n"));
 }
 

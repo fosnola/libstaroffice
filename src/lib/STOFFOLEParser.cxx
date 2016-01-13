@@ -791,9 +791,8 @@ bool STOFFOLEParser::readOlePres(STOFFInputStreamPtr ip, STOFFOLEParser::OleCont
   long extendY = (long)ip->readULong(4);
   if (extendX > 0 && extendY > 0) {
     STOFFPosition pos;
-    pos.setUnit(librevenge::RVNG_POINT);
-    pos.setRelativePosition(STOFFPosition::Char);
-    pos.setNaturalSize(STOFFVec2f(float(extendX)/20.f, float(extendY)/20.f));
+    pos.m_anchorTo=STOFFPosition::Char;
+    pos.setSize(STOFFVec2f(float(extendX)/20.f, float(extendY)/20.f), librevenge::RVNG_POINT);
     content.setPosition(pos);
   }
   long fSize = ip->readLong(4);
@@ -927,17 +926,21 @@ bool STOFFOLEParser::readContents(STOFFInputStreamPtr input, STOFFOLEParser::Ole
     return false;
   }
   STOFFPosition pos;
-  pos.setUnit(librevenge::RVNG_POINT);
-  pos.setRelativePosition(STOFFPosition::Char);
+  pos.m_anchorTo=STOFFPosition::Char;
+  bool sizeSet=false;
   if (dim[0] > 0 && dim[0] < 3000 &&
-      dim[1] > 0 && dim[1] < 3000)
-    pos.setSize(STOFFVec2f(float(dim[0]),float(dim[1])));
+      dim[1] > 0 && dim[1] < 3000) {
+    pos.setSize(STOFFVec2f(float(dim[0]),float(dim[1])), librevenge::RVNG_POINT);
+    sizeSet=true;
+  }
   else {
     STOFF_DEBUG_MSG(("STOFFOLEParser: warning: Contents odd size : %ld %ld\n", dim[0], dim[1]));
   }
   if (naturalSize[0] > 0 && naturalSize[0] < 5000 &&
-      naturalSize[1] > 0 && naturalSize[1] < 5000)
-    pos.setNaturalSize(STOFFVec2f(float(naturalSize[0]),float(naturalSize[1])));
+      naturalSize[1] > 0 && naturalSize[1] < 5000) {
+    if (!sizeSet)
+      pos.setSize(STOFFVec2f(float(naturalSize[0]),float(naturalSize[1])), librevenge::RVNG_POINT);
+  }
   else {
     STOFF_DEBUG_MSG(("STOFFOLEParser: warning: Contents odd naturalsize : %ld %ld\n", naturalSize[0], naturalSize[1]));
   }
@@ -1033,14 +1036,13 @@ bool STOFFOLEParser::readCONTENTS(STOFFInputStreamPtr input, STOFFOLEParser::Ole
   // checkme: two bdbox, in document then data : units ?
   //     Maybe first in POINT, second in TWIP ?
   STOFFPosition pos;
-  pos.setUnit(librevenge::RVNG_POINT);
-  pos.setRelativePosition(STOFFPosition::Char);
+  pos.m_anchorTo=STOFFPosition::Char;
   for (int st = 0; st < 2 ; st++) {
     long dim[4];
     for (int i = 0; i < 4; i++) dim[i] = input->readLong(4);
 
     bool ok = dim[0] >= 0 && dim[2] > dim[0] && dim[1] >= 0 && dim[3] > dim[2];
-    if (ok && st==0) pos.setNaturalSize(STOFFVec2f(float(dim[2]-dim[0]), float(dim[3]-dim[1])));
+    if (ok && st==0) pos.setSize(STOFFVec2f(float(dim[2]-dim[0]), float(dim[3]-dim[1])), librevenge::RVNG_POINT);
     if (st==0) f << ", bdbox(Text)";
     else f << ", bdbox(Data)";
     if (!ok) f << "###";

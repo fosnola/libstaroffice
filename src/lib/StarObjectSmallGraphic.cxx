@@ -316,7 +316,7 @@ public:
                            "pathline", "pathfill", "freeline", "freefill", "splineline",
                            "splinefill", "text", "textextended", "fittext", "fitalltext",
                            "titletext", "outlinetext", "graf", "ole2", "edge",
-                           "caption", "pathpoly", "pathline", "page", "measure",
+                           "caption", "pathpoly", "pathpline", "page", "measure",
                            "dummy","frame", "uno"
                           };
       return wh[m_identifier];
@@ -380,23 +380,6 @@ public:
     std::stringstream s;
     s << SdrGraphic::print() << *this << ",";
     return s.str();
-  }
-  //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, StarObject &object)
-  {
-    // REMOVEME
-    if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
-      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicAttribute::send: can not send a shape\n"));
-      return false;
-    }
-    STOFFGraphicShape shape;
-    shape.m_command=STOFFGraphicShape::C_Rectangle;
-    shape.m_bdbox=m_bdbox;
-    shape.m_propertyList.insert("text:anchor-type", "page");
-    STOFFGraphicStyle style;
-    updateStyle(style, object);
-    listener->insertShape(shape, style);
-    return true;
   }
   //! try to update the style
   void updateStyle(STOFFGraphicStyle &style, StarObject &object) const
@@ -500,6 +483,41 @@ public:
   SdrGraphicText(int id) : SdrGraphicAttribute(id), m_textKind(0), m_textRectangle(),
     m_textDrehWink(0), m_textShearWink(0), m_outlinerParaObject(), m_textBound()
   {
+  }
+  //! try to update the transformation
+  void updateTransformProperties(librevenge::RVNGPropertyList &list) const
+  {
+    if (m_textDrehWink) {
+      // rotation around the first point, let do that by hand
+      librevenge::RVNGString transform;
+      if (m_textRectangle[0]==STOFFVec2i(0,0))
+        transform.sprintf("rotate(%f)", float(m_textDrehWink)/100.f*M_PI/180.f);
+      else {
+        STOFFVec2f center=STOFFVec2f(m_textRectangle[0]);
+        transform.sprintf("translate(%fpt %fpt) rotate(%f) translate(%fpt %fpt)",
+                          -center[0]/20.f,-center[1]/20.f,
+                          float(m_textDrehWink)/100.f*M_PI/180.f, // gradient
+                          center[0]/20.f,center[1]/20.f);
+      }
+      list.insert("draw:transform", transform);
+    }
+  }
+  //! try to send the graphic to the listener
+  bool send(STOFFListenerPtr listener, StarObject &object)
+  {
+    // REMOVEME
+    if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicAttribute::send: can not send a shape\n"));
+      return false;
+    }
+    STOFFGraphicShape shape;
+    shape.m_command=STOFFGraphicShape::C_Rectangle;
+    shape.m_bdbox=m_bdbox;
+    shape.m_propertyList.insert("text:anchor-type", "page");
+    STOFFGraphicStyle style;
+    updateStyle(style, object);
+    listener->insertShape(shape, style);
+    return true;
   }
   //! basic print function
   virtual std::string print() const
@@ -637,16 +655,7 @@ public:
       char const *(wh[])= {"full", "section", "arc", "cut"};
       shape.m_propertyList.insert("draw:kind", wh[m_identifier-4]);
     }
-    if (m_textDrehWink) {
-      // rotation around the first point, let do that by hand
-      librevenge::RVNGString transform;
-      center=STOFFVec2f(m_textRectangle[0]);
-      transform.sprintf("translate(%fpt %fpt) rotate(%f) translate(%fpt %fpt)",
-                        -center[0]/20.f,-center[1]/20.f,
-                        float(m_textDrehWink)/100.f*M_PI/180.f, // gradient
-                        center[0]/20.f,center[1]/20.f);
-      shape.m_propertyList.insert("draw:transform", transform);
-    }
+    updateTransformProperties(shape.m_propertyList);
     shape.m_propertyList.insert("text:anchor-type", "page");
     STOFFGraphicStyle style;
     updateStyle(style, object);
@@ -913,10 +922,46 @@ public:
 class SdrGraphicPath : public SdrGraphicText
 {
 public:
+  //! a structure to keep a point and a flag
+  struct Point {
+    //! constructor
+    explicit Point(STOFFVec2i point=STOFFVec2i(), int flag=0) : m_point(point), m_flags(flag)
+    {
+    }
+    //! operator<<
+    friend std::ostream &operator<<(std::ostream &o, Point const &point)
+    {
+      o << point.m_point;
+      switch (point.m_flags) {
+      case 0:
+        break;
+      case 1: // smooth
+        o << ":s";
+        break;
+      case 2: // control
+        o << ":c";
+        break;
+      case 3: // symetric
+        o << ":S";
+        break;
+      default:
+        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::Point::operator<< unexpected flag\n"));
+        o << ":[##" << point.m_flags << "]";
+      }
+      return o;
+    }
+
+    //! the point
+    STOFFVec2i m_point;
+    //! the flags
+    int m_flags;
+  };
   //! constructor
-  SdrGraphicPath(int id) : SdrGraphicText(id), m_pathPolygon(), m_pathPolygonFlags()
+  SdrGraphicPath(int id) : SdrGraphicText(id), m_pathPolygons()
   {
   }
+  //! try to send the graphic to the listener
+  bool send(STOFFListenerPtr listener, StarObject &object);
   //! basic print function
   virtual std::string print() const
   {
@@ -928,31 +973,150 @@ public:
   friend std::ostream &operator<<(std::ostream &o, SdrGraphicPath const &graph)
   {
     o << graph.getName() << ",";
-    if (!graph.m_pathPolygon.empty()) {
-      if (graph.m_pathPolygonFlags.empty()) {
-        o << "poly=[";
-        for (size_t i=0; i<graph.m_pathPolygon.size(); ++i)
-          o << graph.m_pathPolygon[i] << ",";
+    if (!graph.m_pathPolygons.empty()) {
+      for (size_t p=0; p<graph.m_pathPolygons.size(); ++p) {
+        std::vector<Point> const &poly=graph.m_pathPolygons[p];
+        o << "poly" << p << "=[";
+        for (size_t i=0; i<poly.size(); ++i)
+          o << poly[i] << ",";
         o << "],";
-      }
-      else if (graph.m_pathPolygon.size()==graph.m_pathPolygonFlags.size()) {
-        o << "poly=[";
-        for (size_t i=0; i<graph.m_pathPolygon.size(); ++i)
-          o << graph.m_pathPolygon[i] << ":" << graph.m_pathPolygonFlags[i] << ",";
-        o << "],";
-      }
-      else {
-        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::operator<<: unexpected number of flags\n"));
-        o << "###poly,";
       }
     }
     return o;
   }
   //! the path polygon
-  std::vector<STOFFVec2i> m_pathPolygon;
-  //! the path polygon flags
-  std::vector<int> m_pathPolygonFlags;
+  std::vector<std::vector<Point> > m_pathPolygons;
 };
+
+bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object)
+{
+  if (!listener || m_pathPolygons.empty() || m_pathPolygons[0].empty()) {
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::send: can not send a shape\n"));
+    return false;
+  }
+
+  STOFFGraphicShape shape;
+  STOFFGraphicStyle style;
+  updateStyle(style, object);
+  librevenge::RVNGPropertyListVector vect;
+  bool isClosed=false;
+  switch (m_identifier) {
+  case 2: // line
+    if (m_pathPolygons.size()==2) {
+      // version <6 : two poly, one for each arrow?
+      static bool first=true;
+      if (first) {
+        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::send: find a line defined by two polygons, unsure\n"));
+        first=false;
+      }
+      if (m_pathPolygons[0].empty() || m_pathPolygons[1].empty()) {
+        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::send: the number of points is bad for a line\n"));
+        return false;
+      }
+      shape.m_command=STOFFGraphicShape::C_Polyline;
+      for (size_t i=0; i<2; ++i) {
+        librevenge::RVNGPropertyList list;
+        list.insert("svg:x",float(m_pathPolygons[i][0].m_point[0])/20.f, librevenge::RVNG_POINT);
+        list.insert("svg:y",float(m_pathPolygons[i][0].m_point[1])/20.f, librevenge::RVNG_POINT);
+        vect.append(list);
+      }
+      shape.m_propertyList.insert("svg:points", vect);
+      updateTransformProperties(shape.m_propertyList);
+      shape.m_propertyList.insert("text:anchor-type", "page");
+      listener->insertShape(shape, style);
+      return true;
+    }
+    if (m_pathPolygons[0].size()!=2) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::send: the number of points is bad for a line\n"));
+      return false;
+    }
+    break;
+  case 8: // polygon
+  case 11: // pathfill
+  case 13: // freefill
+  case 15: // splinefill
+  case 26: // pathpoly
+    isClosed=true;
+    break;
+  case 9: // polyline
+  case 10: // pathline
+  case 12: // freeline
+  case 14: // splineline
+  case 27: // pathpline
+    break;
+  default:
+    return SdrGraphicText::send(listener, object);
+  }
+
+  // first check if we have some spline, bezier flags
+  bool hasSpecialPoint=false;
+  for (size_t p=0; p<m_pathPolygons.size(); ++p) {
+    std::vector<Point> const &polygon=m_pathPolygons[p];
+    for (size_t i=0; i<polygon.size(); ++i)  {
+      if (!polygon[i].m_flags) continue;
+      hasSpecialPoint=true;
+      break;
+    }
+    if (hasSpecialPoint)
+      break;
+  }
+  if (!hasSpecialPoint && m_pathPolygons[0].size()==1) {
+    shape.m_command=isClosed ? STOFFGraphicShape::C_Polyline : STOFFGraphicShape::C_Polygon;
+    librevenge::RVNGPropertyList list;
+    for (size_t i=0; i<m_pathPolygons[0].size(); ++i) {
+      list.insert("svg:x",float(m_pathPolygons[0][i].m_point[0])/20.f, librevenge::RVNG_POINT);
+      list.insert("svg:y",float(m_pathPolygons[0][i].m_point[1])/20.f, librevenge::RVNG_POINT);
+      vect.append(list);
+    }
+    shape.m_propertyList.insert("svg:points", vect);
+  }
+  else {
+    shape.m_command=STOFFGraphicShape::C_Path;
+    librevenge::RVNGPropertyListVector path;
+    librevenge::RVNGPropertyList element;
+    for (size_t p=0; p<m_pathPolygons.size(); ++p) {
+      std::vector<Point> const &polygon=m_pathPolygons[p];
+      for (size_t i=0; i<polygon.size(); ++i) {
+        if (polygon[i].m_flags==2 && i+2<polygon.size() && polygon[i].m_flags==2) {
+          element.insert("svg:x1",float(polygon[i].m_point[0])/20.f, librevenge::RVNG_POINT);
+          element.insert("svg:y1",float(polygon[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+          element.insert("svg:x2",float(polygon[++i].m_point[0])/20.f, librevenge::RVNG_POINT);
+          element.insert("svg:y2",float(polygon[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+          element.insert("svg:x",float(polygon[++i].m_point[0])/20.f, librevenge::RVNG_POINT);
+          element.insert("svg:y",float(polygon[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+          element.insert("librevenge:path-action", "C");
+        }
+        else if (polygon[i].m_flags==2 && i+1<polygon.size()) {
+          /* unsure, let asume that this means the previous point is symetric,
+             but maybe we can also have a Bezier patch */
+          element.insert("svg:x1",float(polygon[i].m_point[0])/20.f, librevenge::RVNG_POINT);
+          element.insert("svg:y1",float(polygon[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+          element.insert("svg:x",float(polygon[++i].m_point[0])/20.f, librevenge::RVNG_POINT);
+          element.insert("svg:y",float(polygon[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+          element.insert("librevenge:path-action", "S");
+        }
+        else {
+          if (polygon[i].m_flags==2) {
+            STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::send: find unexpected flags\n"));
+            std::cerr << print() << "\n";
+          }
+          element.insert("svg:x",float(polygon[i].m_point[0])/20.f, librevenge::RVNG_POINT);
+          element.insert("svg:y",float(polygon[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+          element.insert("librevenge:path-action", (i==0 ? "M" : "L"));
+        }
+        path.append(element);
+      }
+      if (isClosed)
+        element.insert("librevenge:path-action", "Z");
+    }
+    shape.m_propertyList.insert("svg:d", path);
+  }
+  updateTransformProperties(shape.m_propertyList);
+  shape.m_propertyList.insert("text:anchor-type", "page");
+  listener->insertShape(shape, style);
+  return true;
+}
+
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic uno
 class SdrGraphicUno : public SdrGraphicRect
@@ -2113,10 +2277,12 @@ bool StarObjectSmallGraphic::readSVDRObjectPath(StarZone &zone, StarObjectSmallG
         ok=false;
         break;
       }
+      graphic.m_pathPolygons.push_back(std::vector<StarObjectSmallGraphicInternal::SdrGraphicPath::Point>());
+      std::vector<StarObjectSmallGraphicInternal::SdrGraphicPath::Point> &polygon=graphic.m_pathPolygons.back();
       for (int pt=0; pt<int(n); ++pt) {
         int dim[2];
         for (int i=0; i<2; ++i) dim[i]=(int) input->readLong(4);
-        graphic.m_pathPolygon.push_back(STOFFVec2i(dim[0],dim[1]));
+        polygon.push_back(StarObjectSmallGraphicInternal::SdrGraphicPath::Point(STOFFVec2i(dim[0],dim[1])));
       }
     }
   }
@@ -2139,12 +2305,16 @@ bool StarObjectSmallGraphic::readSVDRObjectPath(StarZone &zone, StarObjectSmallG
         ok=false;
         break;
       }
-      for (int pt=0; pt<int(n); ++pt) {
+      graphic.m_pathPolygons.push_back(std::vector<StarObjectSmallGraphicInternal::SdrGraphicPath::Point>());
+      std::vector<StarObjectSmallGraphicInternal::SdrGraphicPath::Point> &polygon=graphic.m_pathPolygons.back();
+      polygon.resize(size_t(n));
+      for (size_t pt=0; pt<size_t(n); ++pt) {
         int dim[2];
         for (int i=0; i<2; ++i) dim[i]=(int) input->readLong(4);
-        graphic.m_pathPolygon.push_back(STOFFVec2i(dim[0],dim[1]));
+        polygon[pt].m_point=STOFFVec2i(dim[0],dim[1]);
       }
-      for (int pt=0; pt<int(n); ++pt) graphic.m_pathPolygonFlags.push_back((int) input->readULong(1));
+      for (size_t pt=0; pt<size_t(n); ++pt)
+        polygon[pt].m_flags=(int) input->readULong(1);
     }
     if (recOpened) {
       if (input->tell()!=zone.getRecordLastPosition()) {
