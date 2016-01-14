@@ -45,9 +45,7 @@ class STOFFGraphicStyle
 {
 public:
   /** constructor */
-  STOFFGraphicStyle() : m_propertyList()
-  {
-  };
+  STOFFGraphicStyle();
   //! add to the propList
   void addTo(librevenge::RVNGPropertyList &propList) const;
 

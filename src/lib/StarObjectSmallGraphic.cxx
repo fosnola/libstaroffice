@@ -42,7 +42,7 @@
 #include "STOFFGraphicShape.hxx"
 #include "STOFFGraphicStyle.hxx"
 #include "STOFFListener.hxx"
-#include "STOFFOLEParser.hxx"
+#include "STOFFSubDocument.hxx"
 
 #include "StarAttribute.hxx"
 #include "StarBitmap.hxx"
@@ -143,6 +143,24 @@ public:
     if (obj.m_isEditDoc) o << "isEditDoc,";
     return o;
   }
+  //! try to send the text to the listener
+  bool send(STOFFListenerPtr listener)
+  {
+    if (!listener) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::OutlinerParaObject::send: no listener\n"));
+      return false;
+    }
+    if (m_textZone)
+      m_textZone->send(listener);
+    else {
+      for (size_t z=0; z<m_zones.size(); ++z) {
+        if (z) listener->insertEOL();
+        if (m_zones[z].m_text)
+          m_zones[z].m_text->send(listener);
+      }
+    }
+    return true;
+  }
   //! the version
   int m_version;
   //! the list of zones: version<=3
@@ -154,6 +172,55 @@ public:
   //! true if the object is a edit document
   bool m_isEditDoc;
 };
+
+////////////////////////////////////////
+//! Internal: the subdocument of a StarObjectSmallGraphic
+class SubDocument : public STOFFSubDocument
+{
+public:
+  explicit SubDocument(shared_ptr<OutlinerParaObject> text) :
+    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_text(text) {}
+
+  //! destructor
+  virtual ~SubDocument() {}
+
+  //! operator!=
+  virtual bool operator!=(STOFFSubDocument const &doc) const
+  {
+    if (STOFFSubDocument::operator!=(doc)) return true;
+    SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
+    if (!sDoc) return true;
+    if (m_text.get() != sDoc->m_text.get()) return true;
+    return false;
+  }
+
+  //! operator!==
+  virtual bool operator==(STOFFSubDocument const &doc) const
+  {
+    return !operator!=(doc);
+  }
+
+  //! the parser function
+  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type);
+
+protected:
+  //! the text
+  shared_ptr<OutlinerParaObject> m_text;
+};
+
+void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*type*/)
+{
+  if (!listener.get()) {
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SubDocument::parse: no listener\n"));
+    return;
+  }
+  if (!m_text)
+    listener->insertChar(' ');
+  else
+    m_text->send(listener);
+}
+
+/////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////
 //! Internal: virtual class to store a graphic
@@ -181,7 +248,7 @@ public:
     static bool first=true;
     if (first) {
       first=false;
-      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::Graphic::send: not implemented\n"));
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::Graphic::send: not implemented for identifier %d\n", m_identifier));
     }
     return false;
   }
@@ -502,29 +569,30 @@ public:
       list.insert("draw:transform", transform);
     }
   }
-  //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, StarObject &object)
-  {
-    // REMOVEME
-    if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
-      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicAttribute::send: can not send a shape\n"));
-      return false;
-    }
-    STOFFGraphicShape shape;
-    shape.m_command=STOFFGraphicShape::C_Rectangle;
-    shape.m_bdbox=m_bdbox;
-    shape.m_propertyList.insert("text:anchor-type", "page");
-    STOFFGraphicStyle style;
-    updateStyle(style, object);
-    listener->insertShape(shape, style);
-    return true;
-  }
   //! basic print function
   virtual std::string print() const
   {
     std::stringstream s;
     s << SdrGraphicAttribute::print() << *this << ",";
     return s.str();
+  }
+  //! try to send the text zone to the listener
+  bool sendTextZone(STOFFListenerPtr listener, StarObject &object)
+  {
+    if (!listener || m_textRectangle.size()[0]<=0 || m_textRectangle.size()[1]<=0) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicAttribute::send: can not send a shape\n"));
+      return false;
+    }
+    STOFFPosition position;
+    position.setOrigin(1.f/20.f*STOFFVec2f(m_textRectangle[0]), librevenge::RVNG_POINT);
+    position.setSize(1.f/20.f*STOFFVec2f(m_textRectangle.size()), librevenge::RVNG_POINT);
+    position.m_propertyList.insert("text:anchor-type", "page");
+    STOFFGraphicStyle style;
+    updateStyle(style, object);
+    style.m_propertyList.insert("draw:fill", "none");
+    shared_ptr<SubDocument> doc(new SubDocument(m_outlinerParaObject));
+    listener->insertTextBox(position, doc, style);
+    return true;
   }
   //! print object data
   friend std::ostream &operator<<(std::ostream &o, SdrGraphicText const &graph)
@@ -559,6 +627,28 @@ public:
   //! constructor
   SdrGraphicRect(int id) : SdrGraphicText(id), m_eckRag(0)
   {
+  }
+  //! try to send the graphic to the listener
+  bool send(STOFFListenerPtr listener, StarObject &object)
+  {
+    if (!listener || m_textRectangle.size()[0]<=0 || m_textRectangle.size()[1]<=0) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicText::send: can not send a shape\n"));
+      return false;
+    }
+    if (m_identifier!=16 && m_identifier!=17 && m_identifier!=20 && m_identifier!=21) { // basic rect
+      STOFFGraphicShape shape;
+      shape.m_command=STOFFGraphicShape::C_Rectangle;
+      shape.m_bdbox=m_textRectangle;
+      shape.m_propertyList.insert("text:anchor-type", "page");
+      STOFFGraphicStyle style;
+      updateStyle(style, object);
+      listener->insertShape(shape, style);
+      if (m_outlinerParaObject)
+        sendTextZone(listener, object);
+    }
+    else
+      sendTextZone(listener, object);
+    return true;
   }
   //! basic print function
   virtual std::string print() const
@@ -660,6 +750,8 @@ public:
     STOFFGraphicStyle style;
     updateStyle(style, object);
     listener->insertShape(shape, style);
+    if (m_outlinerParaObject)
+      sendTextZone(listener, object);
     return true;
   }
   //! try to update the style
@@ -831,6 +923,35 @@ public:
     std::stringstream s;
     s << SdrGraphicText::print() << *this << ",";
     return s.str();
+  }
+  //! try to send the graphic to the listener
+  bool send(STOFFListenerPtr listener, StarObject &object)
+  {
+    STOFFGraphicShape shape;
+    STOFFGraphicStyle style;
+    updateStyle(style, object);
+    librevenge::RVNGPropertyListVector vect;
+    shape.m_command=STOFFGraphicShape::C_Polyline;
+    librevenge::RVNGPropertyList list;
+    for (int i=0; i<2; ++i) {
+      list.insert("svg:x",float(m_measurePoints[i][0])/20.f, librevenge::RVNG_POINT);
+      list.insert("svg:y",float(m_measurePoints[i][1])/20.f, librevenge::RVNG_POINT);
+      vect.append(list);
+    }
+    shape.m_propertyList.insert("svg:points", vect);
+    updateTransformProperties(shape.m_propertyList);
+    shape.m_propertyList.insert("text:anchor-type", "page");
+    listener->insertShape(shape, style);
+    return true;
+  }
+  //! try to update the style
+  void updateStyle(STOFFGraphicStyle &style, StarObject &object) const
+  {
+    SdrGraphicText::updateStyle(style, object);
+    if (m_measureItem && m_measureItem->m_attribute) {
+      shared_ptr<StarItemPool> pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
+      m_measureItem->m_attribute->addTo(style, pool.get());
+    }
   }
   //! print object data
   friend std::ostream &operator<<(std::ostream &o, SdrGraphicMeasure const &graph)
@@ -1045,6 +1166,7 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object)
   case 27: // pathpline
     break;
   default:
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::send: find unexpected identifier %d\n", m_identifier));
     return SdrGraphicText::send(listener, object);
   }
 
@@ -1098,7 +1220,6 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object)
         else {
           if (polygon[i].m_flags==2) {
             STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::send: find unexpected flags\n"));
-            std::cerr << print() << "\n";
           }
           element.insert("svg:x",float(polygon[i].m_point[0])/20.f, librevenge::RVNG_POINT);
           element.insert("svg:y",float(polygon[i].m_point[1])/20.f, librevenge::RVNG_POINT);
@@ -1114,6 +1235,8 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object)
   updateTransformProperties(shape.m_propertyList);
   shape.m_propertyList.insert("text:anchor-type", "page");
   listener->insertShape(shape, style);
+  if (m_outlinerParaObject)
+    sendTextZone(listener, object);
   return true;
 }
 
@@ -1364,14 +1487,6 @@ shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> StarObjectSmallGraphic::r
   libstoff::DebugStream f;
 
   bool ok=true;
-  char const *(wh[])= {"none", "group", "line", "rect", "circle",
-                       "sector", "arc", "ccut", "poly", "polyline",
-                       "pathline", "pathfill", "freeline", "freefill", "splineline",
-                       "splinefill", "text", "textextended", "fittext", "fitalltext",
-                       "titletext", "outlinetext", "graf", "ole2", "edge",
-                       "caption", "pathpoly", "pathline", "page", "measure",
-                       "dummy","frame", "uno"
-                      };
   shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> graphic;
   switch (identifier) {
   case 1: { // group
@@ -1526,7 +1641,7 @@ shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> StarObjectSmallGraphic::r
   while (input->tell()<endPos) {
     pos=input->tell();
     f.str("");
-    f << "SVDR:" << wh[identifier] << ",###unknown,";
+    f << "SVDR:id=" << identifier << ",###unknown,";
     if (!zone.openRecord())
       return graphic;
     long lastPos=zone.getRecordLastPosition();

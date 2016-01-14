@@ -978,6 +978,40 @@ void STOFFSpreadsheetListener::insertComment(STOFFSubDocumentPtr &subDocument, l
   m_ps->m_isNote = false;
 }
 
+void STOFFSpreadsheetListener::insertTextBox
+(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &frameStyle)
+{
+  if (!m_ds->m_isSheetOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertTextBox insert a textbox outside a sheet is not implemented\n"));
+    return;
+  }
+  if (!openFrame(pos, frameStyle)) return;
+
+  librevenge::RVNGPropertyList propList;
+  if (frameStyle.m_propertyList["librevenge:next-frame-name"])
+    propList.insert("librevenge:next-frame-name",frameStyle.m_propertyList["librevenge:next-frame-name"]->clone());
+  m_documentInterface->openTextBox(propList);
+  handleSubDocument(subDocument, libstoff::DOC_TEXT_BOX);
+  m_documentInterface->closeTextBox();
+
+  closeFrame();
+}
+
+void STOFFSpreadsheetListener::insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture, STOFFGraphicStyle const &style)
+{
+  if (!m_ds->m_isSheetOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertPicture insert a picture outside a sheet is not implemented\n"));
+    return;
+  }
+  if (!openFrame(pos, style)) return;
+
+  librevenge::RVNGPropertyList propList;
+  if (picture.addTo(propList))
+    m_documentInterface->insertBinaryObject(propList);
+
+  closeFrame();
+}
+
 void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isSheetOpened) {

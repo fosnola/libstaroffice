@@ -61,7 +61,7 @@ public:
     return shared_ptr<StarAttribute>(new StarGAttributeBool(*this));
   }
   //! add to a graphic style
-  //virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
 
 protected:
   //! copy constructor
@@ -102,7 +102,7 @@ public:
   {
   }
   //! add to a graphic style
-  // virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -130,7 +130,7 @@ public:
     return shared_ptr<StarAttribute>(new StarGAttributeUInt(*this));
   }
   //! add to a graphic style
-  //virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
 protected:
   //! copy constructor
   StarGAttributeUInt(StarGAttributeUInt const &orig) : StarAttributeUInt(orig)
@@ -159,6 +159,48 @@ protected:
   {
   }
 };
+
+void StarGAttributeBool::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
+{
+  if (m_type==XATTR_LINESTARTCENTER)
+    graphic.m_propertyList.insert("draw:marker-start-center", m_value);
+  else if (m_type==XATTR_LINEENDCENTER)
+    graphic.m_propertyList.insert("draw:marker-end-center", m_value);
+}
+
+void StarGAttributeInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
+{
+  if (m_type==XATTR_LINEWIDTH)
+    graphic.m_propertyList.insert("svg:stroke-width", double(m_value)/2540.,librevenge::RVNG_INCH);
+  else if (m_type==XATTR_LINESTARTWIDTH)
+    graphic.m_propertyList.insert("draw:marker-start-width", double(m_value)/2540.,librevenge::RVNG_INCH);
+  else if (m_type==XATTR_LINEENDWIDTH)
+    graphic.m_propertyList.insert("draw:marker-end-width", double(m_value)/2540.,librevenge::RVNG_INCH);
+}
+
+void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
+{
+  if (m_type==XATTR_LINESTYLE) {
+    if (m_value<=2) {
+      char const *(wh[])= {"none", "solid", "dash"};
+      graphic.m_propertyList.insert("draw:stroke", wh[m_value]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown line style %d\n", int(m_value)));
+    }
+  }
+  else if (m_type==XATTR_LINETRANSPARENCE)
+    graphic.m_propertyList.insert("svg:stroke-opacity", 1-double(m_value)/100., librevenge::RVNG_PERCENT);
+  else if (m_type==XATTR_LINEJOINT) {
+    if (m_value<=4) {
+      char const *(wh[])= {"none", "middle", "bevel", "miter", "round"};
+      graphic.m_propertyList.insert("draw:stroke-linejoin", wh[m_value]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown line join %d\n", int(m_value)));
+    }
+  }
+}
 
 //! add a bool attribute
 inline void addAttributeBool(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
@@ -669,6 +711,22 @@ namespace StarGraphicAttribute
 {
 void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
 {
+  // --- xattr --- svx_xpool.cxx
+  addAttributeUInt(map, StarAttribute::XATTR_LINESTYLE,"line[style]",2,1); // solid
+  addAttributeInt(map, StarAttribute::XATTR_LINEWIDTH, "line[width]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::XATTR_LINESTARTWIDTH, "line[start,width]",4, 200); // metric
+  addAttributeInt(map, StarAttribute::XATTR_LINEENDWIDTH, "line[end,width]",4, 200); // metric
+  addAttributeBool(map, StarAttribute::XATTR_LINESTARTCENTER,"line[startCenter]", false);
+  addAttributeBool(map, StarAttribute::XATTR_LINEENDCENTER,"line[endCenter]", false);
+  addAttributeUInt(map, StarAttribute::XATTR_LINETRANSPARENCE,"line[transparence]",2,0);
+  addAttributeUInt(map, StarAttribute::XATTR_LINEJOINT,"line[joint]",2,4); // use arc
+
+  for (int type=StarAttribute::XATTR_LINERESERVED2; type<=StarAttribute::XATTR_LINERESERVED_LAST; ++type) {
+    std::stringstream s;
+    s << "line[reserved" << type-StarAttribute::XATTR_LINERESERVED2+2 << "]";
+    addAttributeVoid(map, StarAttribute::Type(type), s.str());
+  }
+
   map[StarAttribute::ATTR_FRM_BOX]=shared_ptr<StarAttribute>(new StarGAttributeBorder(StarAttribute::ATTR_FRM_BOX,"box"));
   map[StarAttribute::ATTR_SC_BORDER]=shared_ptr<StarAttribute>(new StarGAttributeBorder(StarAttribute::ATTR_SC_BORDER,"scBorder"));
   map[StarAttribute::ATTR_CHR_BACKGROUND]=shared_ptr<StarAttribute>(new StarGAttributeBrush(StarAttribute::ATTR_CHR_BACKGROUND,"chrBackground"));

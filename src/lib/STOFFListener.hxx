@@ -184,20 +184,20 @@ public:
   virtual void insertNote(STOFFNote const &note, STOFFSubDocumentPtr &subDocument)=0;
   /** adds comment */
   virtual void insertComment(STOFFSubDocumentPtr &subDocument, librevenge::RVNGString const &creator="", librevenge::RVNGString const &date="") = 0;
-  /** adds a shape picture in given position */
-  virtual void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style) = 0;
-#if 0
   /** adds a picture with various representationin given position.
    \note by default only send the first picture*/
   virtual void insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture,
-                             STOFFGraphicStyle const &style=STOFFGraphicStyle::emptyStyle())=0;
+                             STOFFGraphicStyle const &style=STOFFGraphicStyle())=0;
+  /** adds a shape picture in given position */
+  virtual void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style) = 0;
   /** adds a textbox in given position */
   virtual void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument,
-                             STOFFGraphicStyle const &frameStyle=STOFFGraphicStyle::emptyStyle()) = 0;
+                             STOFFGraphicStyle const &frameStyle=STOFFGraphicStyle()) = 0;
+#if 0
   /** adds a textbox in given position */
   virtual void insertTextBoxInShape(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument,
                                     STOFFGraphicShape const &/*shape*/,
-                                    STOFFGraphicStyle const &frameStyle=STOFFGraphicStyle::emptyStyle())
+                                    STOFFGraphicStyle const &frameStyle=STOFFGraphicStyle())
   {
     static bool first=true;
     if (first) {

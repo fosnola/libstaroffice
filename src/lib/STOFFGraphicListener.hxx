@@ -86,12 +86,7 @@ public:
   bool isDocumentStarted() const;
 
   /** function called to add a subdocument and modify the origin*/
-  void handleSubDocument(STOFFVec2f const &orig, STOFFSubDocumentPtr subDocument, libstoff::SubDocumentType subDocumentType);
-  /** function called to add a subdocument */
-  void handleSubDocument(STOFFSubDocumentPtr subDocument, libstoff::SubDocumentType subDocumentType)
-  {
-    handleSubDocument(STOFFVec2f(0,0), subDocument, subDocumentType);
-  }
+  void handleSubDocument(STOFFSubDocumentPtr subDocument, libstoff::SubDocumentType subDocumentType);
   /** returns try if a subdocument is open  */
   bool isSubDocumentOpened(libstoff::SubDocumentType &subdocType) const;
   /** store the position and the style (which will be needed further to insert a textbox or a table with openTable) */
@@ -181,15 +176,11 @@ public:
   // ------- subdocument -----------------
   /** adds a shape picture in given position */
   void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style);
-#if 0
+  /** adds a textbox in given position */
+  void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &style=STOFFGraphicStyle());
   /** adds a picture with potential various representationin given position */
   void insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture,
-                     STOFFGraphicStyle const &style=STOFFGraphicStyle::emptyStyle());
-  /** adds a textbox in given position */
-  void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &style);
-#endif
-  /** adds a group: ie. next insertion will be done relative to this bdbox[0] position */
-  void insertGroup(STOFFBox2f const &bdbox, STOFFSubDocumentPtr subDocument);
+                     STOFFGraphicStyle const &style=STOFFGraphicStyle());
   /** insert a note
 
    \note as RVNGDrawingInterface does not accept note, note can only be inserted in a text zone (and are inserted between --) */

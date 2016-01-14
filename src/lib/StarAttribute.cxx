@@ -286,19 +286,6 @@ void State::initAttributeMap()
   addAttributeBool(StarAttribute::ATTR_SCH_STOCK_UPDOWN,"stock[updown]", false);
   addAttributeXML(StarAttribute::ATTR_SCH_USER_DEFINED_ATTR,"sch[userDefined]");
   // --- xattr --- svx_xpool.cxx
-  addAttributeUInt(StarAttribute::XATTR_LINESTYLE,"line[style]",2,1); // solid
-  addAttributeInt(StarAttribute::XATTR_LINEWIDTH, "line[width]",4, 0); // metric
-  addAttributeInt(StarAttribute::XATTR_LINESTARTWIDTH, "line[start,width]",4, 200); // metric
-  addAttributeInt(StarAttribute::XATTR_LINEENDWIDTH, "line[end,width]",4, 200); // metric
-  addAttributeBool(StarAttribute::XATTR_LINESTARTCENTER,"line[startCenter]", false);
-  addAttributeBool(StarAttribute::XATTR_LINEENDCENTER,"line[endCenter]", false);
-  addAttributeUInt(StarAttribute::XATTR_LINETRANSPARENCE,"line[transparence]",2,0);
-  addAttributeUInt(StarAttribute::XATTR_LINEJOINT,"line[joint]",2,4); // use arc
-  for (int type=StarAttribute::XATTR_LINERESERVED2; type<=StarAttribute::XATTR_LINERESERVED_LAST; ++type) {
-    s.str("");
-    s << "line[reserved" << type-StarAttribute::XATTR_LINERESERVED2+2 << "]";
-    addAttributeVoid(StarAttribute::Type(type), s.str());
-  }
 
   addAttributeUInt(StarAttribute::XATTR_FILLSTYLE,"fill[style]",2,1); // solid
   addAttributeUInt(StarAttribute::XATTR_FILLTRANSPARENCE,"fill[transparence]",2,0);

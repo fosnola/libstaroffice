@@ -41,6 +41,14 @@
 
 // graphic style function
 
+STOFFGraphicStyle::STOFFGraphicStyle() : m_propertyList()
+{
+  // let init the default value
+  m_propertyList.insert("draw:stroke", "solid");
+  m_propertyList.insert("svg:stroke-color", "#000000");
+  m_propertyList.insert("svg:stroke-width", 0, librevenge::RVNG_INCH);
+}
+
 std::ostream &operator<<(std::ostream &o, STOFFGraphicStyle const &graphicStyle)
 {
   o << graphicStyle.m_propertyList.getPropString().cstr() << ",";;

@@ -797,7 +797,7 @@ bool STOFFGraphicListener::insertHeaderRegion(STOFFSubDocumentPtr subDocument, l
     STOFF_DEBUG_MSG(("STOFFGraphicListener::insertHeaderRegion: Oops can not open a new region\n"));
     return false;
   }
-  handleSubDocument(STOFFVec2f(20,20), subDocument, libstoff::DOC_HEADER_FOOTER_REGION);
+  handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER_REGION);
   return true;
 }
 
@@ -844,7 +844,7 @@ bool STOFFGraphicListener::insertFooterRegion(STOFFSubDocumentPtr subDocument, l
     STOFF_DEBUG_MSG(("STOFFGraphicListener::insertHeaderRegion: Oops can not open a new region\n"));
     return false;
   }
-  handleSubDocument(STOFFVec2f(700,20), subDocument, libstoff::DOC_HEADER_FOOTER_REGION);
+  handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER_REGION);
   return true;
 }
 
@@ -942,15 +942,26 @@ void STOFFGraphicListener::insertNote(STOFFNote const &, STOFFSubDocumentPtr &su
 ///////////////////
 // picture/textbox
 ///////////////////
-void STOFFGraphicListener::insertGroup(STOFFBox2f const &bdbox, STOFFSubDocumentPtr subDocument)
+void STOFFGraphicListener::insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture, STOFFGraphicStyle const &style)
 {
-  if (!m_ds->m_isDocumentStarted || m_ps->isInTextZone()) {
-    STOFF_DEBUG_MSG(("STOFFGraphicListener::insertGroup: can not insert a group\n"));
+  if (!m_ds->m_isDocumentStarted) {
+    STOFF_DEBUG_MSG(("STOFFGraphicListener::insertPicture: the document is not started\n"));
+    return;
+  }
+  if (m_ps->m_isFrameOpened) {
+    STOFF_DEBUG_MSG(("STOFFGraphicListener::insertPicture: a frame is already open\n"));
     return;
   }
   if (!m_ds->m_isPageSpanOpened)
     _openPageSpan();
-  handleSubDocument(bdbox[0], subDocument, libstoff::DOC_GRAPHIC_GROUP);
+  librevenge::RVNGPropertyList list;
+  style.addTo(list);
+  m_documentInterface->setStyle(list);
+
+  list.clear();
+  _handleFrameParameters(list, pos, style);
+  if (picture.addTo(list))
+    m_documentInterface->drawGraphicObject(list);
 }
 
 void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style)
@@ -1004,6 +1015,30 @@ void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGrap
     STOFF_DEBUG_MSG(("STOFFGraphicListener::insertShape: unexpected shape\n"));
     break;
   }
+}
+
+void STOFFGraphicListener::insertTextBox
+(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &style)
+{
+  if (!m_ds->m_isDocumentStarted) {
+    STOFF_DEBUG_MSG(("STOFFGraphicListener::insertTextBox: the document is not started\n"));
+    return;
+  }
+  if (!m_ds->m_isPageSpanOpened)
+    _openPageSpan();
+  if (m_ps->m_isTextBoxOpened) {
+    STOFF_DEBUG_MSG(("STOFFGraphicListener::insertTextBox: can not insert a textbox in a textbox\n"));
+    handleSubDocument(subDocument, libstoff::DOC_TEXT_BOX);
+    return;
+  }
+  if (!openFrame(pos))
+    return;
+  librevenge::RVNGPropertyList propList;
+  _handleFrameParameters(propList, pos, style);
+  m_documentInterface->startTextObject(propList);
+  handleSubDocument(subDocument, libstoff::DOC_TEXT_BOX);
+  m_documentInterface->endTextObject();
+  closeFrame();
 }
 
 ///////////////////
@@ -1285,14 +1320,12 @@ void STOFFGraphicListener::_handleFrameParameters(librevenge::RVNGPropertyList &
     return;
   pos.addTo(list);
   style.addTo(list);
-
-  STOFF_DEBUG_MSG(("STOFFGraphicListener::_handleFrameParameters: not fully implemented\n"));
 }
 
 ///////////////////
 // subdocument
 ///////////////////
-void STOFFGraphicListener::handleSubDocument(STOFFVec2f const &orig, STOFFSubDocumentPtr subDocument, libstoff::SubDocumentType subDocumentType)
+void STOFFGraphicListener::handleSubDocument(STOFFSubDocumentPtr subDocument, libstoff::SubDocumentType subDocumentType)
 {
   if (!m_ds->m_isDocumentStarted) {
     STOFF_DEBUG_MSG(("STOFFGraphicListener::handleSubDocument: the graphic is not started\n"));
@@ -1300,9 +1333,7 @@ void STOFFGraphicListener::handleSubDocument(STOFFVec2f const &orig, STOFFSubDoc
   }
   if (!m_ds->m_isPageSpanOpened)
     _openPageSpan();
-  STOFFVec2f actOrigin=m_ps->m_origin;
   _pushParsingState();
-  m_ps->m_origin=actOrigin-orig;
   _startSubDocument();
   m_ps->m_subDocumentType = subDocumentType;
 

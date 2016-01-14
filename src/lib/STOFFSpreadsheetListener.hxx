@@ -188,19 +188,17 @@ public:
   // ------- subdocument -----------------
   /** insert a note */
   void insertNote(STOFFNote const &note, STOFFSubDocumentPtr &subDocument);
-
   /** adds comment */
   void insertComment(STOFFSubDocumentPtr &subDocument, librevenge::RVNGString const &creator="", librevenge::RVNGString const &date="");
-  /** adds a shape picture in given position */
-  void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style);
-#if 0
+
   /** adds a picture with potential various representationin given position */
   void insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture,
-                     STOFFGraphicStyle const &style=STOFFGraphicStyle::emptyStyle());
+                     STOFFGraphicStyle const &style=STOFFGraphicStyle());
+  /** adds a shape picture in given position */
+  void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style);
   /** adds a textbox in given position */
   void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument,
-                     STOFFGraphicStyle const &frameStyle=STOFFGraphicStyle::emptyStyle());
-#endif
+                     STOFFGraphicStyle const &frameStyle=STOFFGraphicStyle());
   // ------- table -----------------
   /** adds a table in given position */
   void insertTable(STOFFPosition const &pos, STOFFTable &table, STOFFGraphicStyle const &style=STOFFGraphicStyle());
