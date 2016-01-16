@@ -341,6 +341,18 @@ std::ostream &operator<< (std::ostream &o, STOFFBorderLine const &border)
 }
 
 // picture function
+bool STOFFEmbeddedObject::addAsFillImageTo(librevenge::RVNGPropertyList &propList) const
+{
+  for (size_t i=0; i<m_dataList.size(); ++i) {
+    if (m_dataList[i].empty()) continue;
+    std::string type=m_typeList.size() ? m_typeList[i] : "image/pict";
+    propList.insert("librevenge:mime-type", type.c_str());
+    propList.insert("draw:fill-image", m_dataList[i].getBase64Data());
+    return true;
+  }
+  return false;
+}
+
 bool STOFFEmbeddedObject::addTo(librevenge::RVNGPropertyList &propList) const
 {
   bool firstSet=false;

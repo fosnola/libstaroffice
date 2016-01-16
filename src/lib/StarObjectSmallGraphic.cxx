@@ -392,6 +392,18 @@ public:
     s << "###type=" << m_identifier << ",";
     return s.str();
   }
+  //! try to update the style
+  void updateStyle(STOFFGraphicStyle &style, StarObject &/*object*/) const
+  {
+    if (m_flags[0] && m_flags[1])
+      style.m_propertyList.insert("style:protect", "position size");
+    else if (m_flags[0])
+      style.m_propertyList.insert("style:protect", "position");
+    else if (m_flags[1])
+      style.m_propertyList.insert("style:protect", "size");
+    style.m_propertyList.insert("style:print-content", !m_flags[2]);
+    // todo noVisible as master ie hide in master
+  }
   //! basic print function
   virtual std::string print() const
   {
@@ -451,6 +463,7 @@ public:
   //! try to update the style
   void updateStyle(STOFFGraphicStyle &style, StarObject &object) const
   {
+    SdrGraphic::updateStyle(style, object);
     shared_ptr<StarItemPool> pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
     if (pool && !m_sheetStyle.empty()) {
       StarItemStyle const *mStyle=pool->findStyleWithFamily(m_sheetStyle, StarItemStyle::F_Paragraph);
@@ -579,16 +592,17 @@ public:
   //! try to send the text zone to the listener
   bool sendTextZone(STOFFListenerPtr listener, StarObject &object)
   {
-    if (!listener || m_textRectangle.size()[0]<=0 || m_textRectangle.size()[1]<=0) {
+    if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicAttribute::send: can not send a shape\n"));
       return false;
     }
     STOFFPosition position;
-    position.setOrigin(1.f/20.f*STOFFVec2f(m_textRectangle[0]), librevenge::RVNG_POINT);
-    position.setSize(1.f/20.f*STOFFVec2f(m_textRectangle.size()), librevenge::RVNG_POINT);
+    position.setOrigin(1.f/20.f*STOFFVec2f(m_bdbox[0]), librevenge::RVNG_POINT);
+    position.setSize(1.f/20.f*STOFFVec2f(m_bdbox.size()), librevenge::RVNG_POINT);
     position.m_propertyList.insert("text:anchor-type", "page");
     STOFFGraphicStyle style;
     updateStyle(style, object);
+    if (!style.m_hasBackground) style.m_propertyList.insert("draw:fill", "none");
     style.m_propertyList.insert("draw:fill", "none");
     shared_ptr<SubDocument> doc(new SubDocument(m_outlinerParaObject));
     listener->insertTextBox(position, doc, style);
@@ -639,6 +653,7 @@ public:
       STOFFGraphicShape shape;
       shape.m_command=STOFFGraphicShape::C_Rectangle;
       shape.m_bdbox=m_textRectangle;
+      updateTransformProperties(shape.m_propertyList);
       shape.m_propertyList.insert("text:anchor-type", "page");
       STOFFGraphicStyle style;
       updateStyle(style, object);
@@ -1043,40 +1058,6 @@ public:
 class SdrGraphicPath : public SdrGraphicText
 {
 public:
-  //! a structure to keep a point and a flag
-  struct Point {
-    //! constructor
-    explicit Point(STOFFVec2i point=STOFFVec2i(), int flag=0) : m_point(point), m_flags(flag)
-    {
-    }
-    //! operator<<
-    friend std::ostream &operator<<(std::ostream &o, Point const &point)
-    {
-      o << point.m_point;
-      switch (point.m_flags) {
-      case 0:
-        break;
-      case 1: // smooth
-        o << ":s";
-        break;
-      case 2: // control
-        o << ":c";
-        break;
-      case 3: // symetric
-        o << ":S";
-        break;
-      default:
-        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::Point::operator<< unexpected flag\n"));
-        o << ":[##" << point.m_flags << "]";
-      }
-      return o;
-    }
-
-    //! the point
-    STOFFVec2i m_point;
-    //! the flags
-    int m_flags;
-  };
   //! constructor
   SdrGraphicPath(int id) : SdrGraphicText(id), m_pathPolygons()
   {
@@ -1095,18 +1076,13 @@ public:
   {
     o << graph.getName() << ",";
     if (!graph.m_pathPolygons.empty()) {
-      for (size_t p=0; p<graph.m_pathPolygons.size(); ++p) {
-        std::vector<Point> const &poly=graph.m_pathPolygons[p];
-        o << "poly" << p << "=[";
-        for (size_t i=0; i<poly.size(); ++i)
-          o << poly[i] << ",";
-        o << "],";
-      }
+      for (size_t p=0; p<graph.m_pathPolygons.size(); ++p)
+        o << "poly" << p << "=[" << graph.m_pathPolygons[p] << "],";
     }
     return o;
   }
   //! the path polygon
-  std::vector<std::vector<Point> > m_pathPolygons;
+  std::vector<StarGraphicStruct::StarPolygon> m_pathPolygons;
 };
 
 bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object)
@@ -1137,14 +1113,16 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object)
       shape.m_command=STOFFGraphicShape::C_Polyline;
       for (size_t i=0; i<2; ++i) {
         librevenge::RVNGPropertyList list;
-        list.insert("svg:x",float(m_pathPolygons[i][0].m_point[0])/20.f, librevenge::RVNG_POINT);
-        list.insert("svg:y",float(m_pathPolygons[i][0].m_point[1])/20.f, librevenge::RVNG_POINT);
+        list.insert("svg:x",float(m_pathPolygons[i].m_points[0].m_point[0])/20.f, librevenge::RVNG_POINT);
+        list.insert("svg:y",float(m_pathPolygons[i].m_points[0].m_point[1])/20.f, librevenge::RVNG_POINT);
         vect.append(list);
       }
       shape.m_propertyList.insert("svg:points", vect);
       updateTransformProperties(shape.m_propertyList);
       shape.m_propertyList.insert("text:anchor-type", "page");
       listener->insertShape(shape, style);
+      if (m_outlinerParaObject)
+        sendTextZone(listener, object);
       return true;
     }
     if (m_pathPolygons[0].size()!=2) {
@@ -1173,21 +1151,17 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object)
   // first check if we have some spline, bezier flags
   bool hasSpecialPoint=false;
   for (size_t p=0; p<m_pathPolygons.size(); ++p) {
-    std::vector<Point> const &polygon=m_pathPolygons[p];
-    for (size_t i=0; i<polygon.size(); ++i)  {
-      if (!polygon[i].m_flags) continue;
+    if (m_pathPolygons[p].hasSpecialPoints()) {
       hasSpecialPoint=true;
       break;
     }
-    if (hasSpecialPoint)
-      break;
   }
-  if (!hasSpecialPoint && m_pathPolygons[0].size()==1) {
-    shape.m_command=isClosed ? STOFFGraphicShape::C_Polyline : STOFFGraphicShape::C_Polygon;
+  if (!hasSpecialPoint && m_pathPolygons.size()==1) {
+    shape.m_command=isClosed ? STOFFGraphicShape::C_Polygon : STOFFGraphicShape::C_Polyline;
     librevenge::RVNGPropertyList list;
     for (size_t i=0; i<m_pathPolygons[0].size(); ++i) {
-      list.insert("svg:x",float(m_pathPolygons[0][i].m_point[0])/20.f, librevenge::RVNG_POINT);
-      list.insert("svg:y",float(m_pathPolygons[0][i].m_point[1])/20.f, librevenge::RVNG_POINT);
+      list.insert("svg:x",float(m_pathPolygons[0].m_points[i].m_point[0])/20.f, librevenge::RVNG_POINT);
+      list.insert("svg:y",float(m_pathPolygons[0].m_points[i].m_point[1])/20.f, librevenge::RVNG_POINT);
       vect.append(list);
     }
     shape.m_propertyList.insert("svg:points", vect);
@@ -1196,40 +1170,8 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object)
     shape.m_command=STOFFGraphicShape::C_Path;
     librevenge::RVNGPropertyListVector path;
     librevenge::RVNGPropertyList element;
-    for (size_t p=0; p<m_pathPolygons.size(); ++p) {
-      std::vector<Point> const &polygon=m_pathPolygons[p];
-      for (size_t i=0; i<polygon.size(); ++i) {
-        if (polygon[i].m_flags==2 && i+2<polygon.size() && polygon[i].m_flags==2) {
-          element.insert("svg:x1",float(polygon[i].m_point[0])/20.f, librevenge::RVNG_POINT);
-          element.insert("svg:y1",float(polygon[i].m_point[1])/20.f, librevenge::RVNG_POINT);
-          element.insert("svg:x2",float(polygon[++i].m_point[0])/20.f, librevenge::RVNG_POINT);
-          element.insert("svg:y2",float(polygon[i].m_point[1])/20.f, librevenge::RVNG_POINT);
-          element.insert("svg:x",float(polygon[++i].m_point[0])/20.f, librevenge::RVNG_POINT);
-          element.insert("svg:y",float(polygon[i].m_point[1])/20.f, librevenge::RVNG_POINT);
-          element.insert("librevenge:path-action", "C");
-        }
-        else if (polygon[i].m_flags==2 && i+1<polygon.size()) {
-          /* unsure, let asume that this means the previous point is symetric,
-             but maybe we can also have a Bezier patch */
-          element.insert("svg:x1",float(polygon[i].m_point[0])/20.f, librevenge::RVNG_POINT);
-          element.insert("svg:y1",float(polygon[i].m_point[1])/20.f, librevenge::RVNG_POINT);
-          element.insert("svg:x",float(polygon[++i].m_point[0])/20.f, librevenge::RVNG_POINT);
-          element.insert("svg:y",float(polygon[i].m_point[1])/20.f, librevenge::RVNG_POINT);
-          element.insert("librevenge:path-action", "S");
-        }
-        else {
-          if (polygon[i].m_flags==2) {
-            STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::send: find unexpected flags\n"));
-          }
-          element.insert("svg:x",float(polygon[i].m_point[0])/20.f, librevenge::RVNG_POINT);
-          element.insert("svg:y",float(polygon[i].m_point[1])/20.f, librevenge::RVNG_POINT);
-          element.insert("librevenge:path-action", (i==0 ? "M" : "L"));
-        }
-        path.append(element);
-      }
-      if (isClosed)
-        element.insert("librevenge:path-action", "Z");
-    }
+    for (size_t p=0; p<m_pathPolygons.size(); ++p)
+      m_pathPolygons[p].addToPath(path, isClosed);
     shape.m_propertyList.insert("svg:d", path);
   }
   updateTransformProperties(shape.m_propertyList);
@@ -2392,12 +2334,12 @@ bool StarObjectSmallGraphic::readSVDRObjectPath(StarZone &zone, StarObjectSmallG
         ok=false;
         break;
       }
-      graphic.m_pathPolygons.push_back(std::vector<StarObjectSmallGraphicInternal::SdrGraphicPath::Point>());
-      std::vector<StarObjectSmallGraphicInternal::SdrGraphicPath::Point> &polygon=graphic.m_pathPolygons.back();
+      graphic.m_pathPolygons.push_back(StarGraphicStruct::StarPolygon());
+      StarGraphicStruct::StarPolygon &polygon=graphic.m_pathPolygons.back();
       for (int pt=0; pt<int(n); ++pt) {
         int dim[2];
         for (int i=0; i<2; ++i) dim[i]=(int) input->readLong(4);
-        polygon.push_back(StarObjectSmallGraphicInternal::SdrGraphicPath::Point(STOFFVec2i(dim[0],dim[1])));
+        polygon.m_points.push_back(StarGraphicStruct::StarPolygon::Point(STOFFVec2i(dim[0],dim[1])));
       }
     }
   }
@@ -2420,16 +2362,16 @@ bool StarObjectSmallGraphic::readSVDRObjectPath(StarZone &zone, StarObjectSmallG
         ok=false;
         break;
       }
-      graphic.m_pathPolygons.push_back(std::vector<StarObjectSmallGraphicInternal::SdrGraphicPath::Point>());
-      std::vector<StarObjectSmallGraphicInternal::SdrGraphicPath::Point> &polygon=graphic.m_pathPolygons.back();
-      polygon.resize(size_t(n));
+      graphic.m_pathPolygons.push_back(StarGraphicStruct::StarPolygon());
+      StarGraphicStruct::StarPolygon &polygon=graphic.m_pathPolygons.back();
+      polygon.m_points.resize(size_t(n));
       for (size_t pt=0; pt<size_t(n); ++pt) {
         int dim[2];
         for (int i=0; i<2; ++i) dim[i]=(int) input->readLong(4);
-        polygon[pt].m_point=STOFFVec2i(dim[0],dim[1]);
+        polygon.m_points[pt].m_point=STOFFVec2i(dim[0],dim[1]);
       }
       for (size_t pt=0; pt<size_t(n); ++pt)
-        polygon[pt].m_flags=(int) input->readULong(1);
+        polygon.m_points[pt].m_flags=(int) input->readULong(1);
     }
     if (recOpened) {
       if (input->tell()!=zone.getRecordLastPosition()) {
@@ -2837,7 +2779,7 @@ bool StarObjectSmallGraphic::readSDRGluePointList
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
-
+  long lastPos=zone.getRecordLastPosition();
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(SdrGluePoint)[list]:";
@@ -2849,9 +2791,10 @@ bool StarObjectSmallGraphic::readSDRGluePointList
   for (int i=0; i<n; ++i) {
     pos=input->tell();
     StarObjectSmallGraphicInternal::GluePoint pt;
-    if (!readSDRGluePoint(zone, pt)) {
+    if (!readSDRGluePoint(zone, pt) || input->tell()>lastPos) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDRGluePointList: can not find a glue point\n"));
+      break;
     }
     listPoints.push_back(pt);
   }
@@ -2930,7 +2873,7 @@ bool StarObjectSmallGraphic::readSDRUserDataList(StarZone &zone, bool inRecord)
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
-
+  long lastPos=zone.getRecordLastPosition();
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(SdrUserData)[list]:";
@@ -2941,9 +2884,10 @@ bool StarObjectSmallGraphic::readSDRUserDataList(StarZone &zone, bool inRecord)
   ascFile.addNote(f.str().c_str());
   for (int i=0; i<n; ++i) {
     pos=input->tell();
-    if (!readSDRUserData(zone, inRecord)) {
+    if (!readSDRUserData(zone, inRecord) || input->tell()>lastPos) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDRUserDataList: can not find a glue point\n"));
+      break;
     }
   }
   if (inRecord) zone.closeRecord("SdrUserData");

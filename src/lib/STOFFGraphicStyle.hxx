@@ -60,6 +60,8 @@ public:
   }
   /** the property list */
   librevenge::RVNGPropertyList m_propertyList;
+  //! true if background attribute is set
+  bool m_hasBackground;
 };
 
 

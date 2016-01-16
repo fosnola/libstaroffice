@@ -105,6 +105,77 @@ public:
   //! the bitmap
   shared_ptr<StarBitmap> m_bitmap;
 };
+
+//! Class to store a polygon
+class StarPolygon
+{
+public:
+  //! a structure to keep a point and a flag
+  struct Point {
+    //! constructor
+    explicit Point(STOFFVec2i point=STOFFVec2i(), int flag=0) : m_point(point), m_flags(flag)
+    {
+    }
+    //! operator<<
+    friend std::ostream &operator<<(std::ostream &o, Point const &point)
+    {
+      o << point.m_point;
+      switch (point.m_flags) {
+      case 0:
+        break;
+      case 1: // smooth
+        o << ":s";
+        break;
+      case 2: // control
+        o << ":c";
+        break;
+      case 3: // symetric
+        o << ":S";
+        break;
+      default:
+        STOFF_DEBUG_MSG(("StarObjectSmallGraphicStruct::StarPolygon::Point::operator<< unexpected flag\n"));
+        o << ":[##" << point.m_flags << "]";
+      }
+      return o;
+    }
+    //! the point
+    STOFFVec2i m_point;
+    //! the flags
+    int m_flags;
+  };
+  //! contructor
+  StarPolygon() : m_points()
+  {
+  }
+  //! check if a polygon has special point
+  bool hasSpecialPoints() const
+  {
+    for (size_t i=0; i<m_points.size(); ++i) {
+      if (m_points[i].m_flags)
+        return true;
+    }
+    return false;
+  }
+  //! returns true if the polygon is empty
+  bool empty() const
+  {
+    return m_points.empty();
+  }
+  //! returns true if the polygon is empty
+  size_t size() const
+  {
+    return m_points.size();
+  }
+  //! add the polygon to a path
+  void addToPath(librevenge::RVNGPropertyListVector &path, bool isClosed) const;
+  //! convert a path in a string and update the bdbox
+  bool convert(librevenge::RVNGString &path, librevenge::RVNGString &viewbox) const;
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, StarPolygon const &poly);
+  //! the list of points
+  std::vector<Point> m_points;
+};
+
 }
 
 #endif

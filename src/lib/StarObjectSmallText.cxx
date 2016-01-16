@@ -167,8 +167,14 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
       }
       else if (!text.empty())
         f << (j==0 ? "name" : "style") << "=" << libstoff::getString(text).cstr() << ",";
-      if (j==0)
-        m_textState->m_text=text;
+      if (j==0) {
+        if (i==0)
+          m_textState->m_text=text;
+        else {
+          m_textState->m_text.push_back(0xd);
+          m_textState->m_text.insert(m_textState->m_text.end(), text.begin(), text.end());
+        }
+      }
     }
     uint16_t styleFamily;
     *input >> styleFamily;

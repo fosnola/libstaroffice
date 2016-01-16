@@ -166,6 +166,22 @@ StarBitmap::~StarBitmap()
 {
 }
 
+StarBitmap::StarBitmap(uint32_t const((&pixels)[32]), STOFFColor const((&colors)[2])) : m_state(new StarBitmapInternal::State)
+{
+  m_state->m_bitmap.m_width=m_state->m_bitmap.m_height=32;
+  for (int i=0; i<2; ++i)
+    m_state->m_bitmap.m_colorsList.push_back(colors[i]);
+  m_state->m_bitmap.m_indexDataList.resize(32*32);
+  size_t w=0;
+  uint32_t const *read=pixels;
+  for (int i=0; i<32; ++i) {
+    uint32_t depl=0x80000000;
+    uint32_t val=*(read++);
+    for (int comp=0; comp<32; ++comp, depl>>=1)
+      m_state->m_bitmap.m_indexDataList[w++]=(val&depl) ? 1 : 0;
+  }
+}
+
 bool StarBitmap::getData(librevenge::RVNGBinaryData &data, std::string &type) const
 {
   if (!m_state->m_bitmap.getPPMData(data))

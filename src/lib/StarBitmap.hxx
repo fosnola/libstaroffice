@@ -40,6 +40,7 @@
 
 #include <vector>
 
+#include "libstaroffice_internal.hxx"
 #include "STOFFDebug.hxx"
 #include "STOFFEntry.hxx"
 #include "STOFFInputStream.hxx"
@@ -63,6 +64,8 @@ class StarBitmap
 public:
   //! constructor
   StarBitmap();
+  //! constructor for pixmap 32*32
+  StarBitmap(uint32_t const((&pixels)[32]), STOFFColor const((&colors)[2]));
   //! destructor
   virtual ~StarBitmap();
 

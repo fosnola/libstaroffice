@@ -44,6 +44,7 @@
 std::ostream &operator<<(std::ostream &o, STOFFFont const &font)
 {
   o << font.m_propertyList.getPropString().cstr() << ",";
+  if (!font.m_shadowColor.isBlack()) o << "shadow[color]=" << font.m_shadowColor << ",";
   if (font.m_hyphen) o << "hyphen,";
   if (font.m_softHyphen) o << "hyphen[soft],";
   if (font.m_lineBreak) o << "line[break],";
@@ -52,7 +53,7 @@ std::ostream &operator<<(std::ostream &o, STOFFFont const &font)
 
 bool STOFFFont::operator==(STOFFFont const &font) const
 {
-  return m_propertyList.getPropString() == font.m_propertyList.getPropString() &&
+  return m_propertyList.getPropString() == font.m_propertyList.getPropString() && m_shadowColor==font.m_shadowColor &&
          m_hyphen==font.m_hyphen && m_softHyphen==font.m_softHyphen && m_lineBreak==font.m_lineBreak;
 }
 
@@ -66,6 +67,18 @@ void STOFFFont::addTo(librevenge::RVNGPropertyList &pList) const
       continue;
     }
     pList.insert(i.key(), i()->clone());
+  }
+  if (!m_shadowColor.isBlack() && pList["fo:text-shadow"] && pList["fo:text-shadow"]->getStr()!="none") {
+    // TODO: rewrite this code
+    std::string what(pList["fo:text-shadow"]->getStr().cstr());
+    if (what.empty() || what.find('#')!=std::string::npos) {
+      STOFF_DEBUG_MSG(("STOFFFont::addTo: adding complex shadow color is not implemented\n"));
+    }
+    else {
+      std::stringstream s;
+      s << what << " " << m_shadowColor.str();
+      pList.insert("fo:text-shadow", s.str().c_str());
+    }
   }
 }
 

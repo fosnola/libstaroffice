@@ -285,28 +285,8 @@ void State::initAttributeMap()
   addAttributeBool(StarAttribute::ATTR_SCH_STOCK_VOLUME,"stock[volume]", false);
   addAttributeBool(StarAttribute::ATTR_SCH_STOCK_UPDOWN,"stock[updown]", false);
   addAttributeXML(StarAttribute::ATTR_SCH_USER_DEFINED_ATTR,"sch[userDefined]");
+
   // --- xattr --- svx_xpool.cxx
-
-  addAttributeUInt(StarAttribute::XATTR_FILLSTYLE,"fill[style]",2,1); // solid
-  addAttributeUInt(StarAttribute::XATTR_FILLTRANSPARENCE,"fill[transparence]",2,0);
-  addAttributeUInt(StarAttribute::XATTR_GRADIENTSTEPCOUNT,"gradient[stepCount]",2,0);
-  addAttributeBool(StarAttribute::XATTR_FILLBMP_TILE,"fill[bmp,tile]", true);
-  addAttributeBool(StarAttribute::XATTR_FILLBMP_STRETCH,"fill[bmp,stretch]", true);
-  addAttributeBool(StarAttribute::XATTR_FILLBMP_SIZELOG,"fill[bmp,sizeLog]", true);
-  addAttributeBool(StarAttribute::XATTR_FILLBACKGROUND,"fill[background]", false);
-  addAttributeUInt(StarAttribute::XATTR_FILLBMP_POS,"fill[bmp,pos]",2,4); // middle-middle
-  addAttributeInt(StarAttribute::XATTR_FILLBMP_SIZEX, "fill[bmp,sizeX]",4, 0); // metric
-  addAttributeInt(StarAttribute::XATTR_FILLBMP_SIZEY, "fill[bmp,sizeY]",4, 0); // metric
-  addAttributeUInt(StarAttribute::XATTR_FILLBMP_TILEOFFSETX,"fill[bmp,tile,offX]",2,0);
-  addAttributeUInt(StarAttribute::XATTR_FILLBMP_TILEOFFSETY,"fill[bmp,tile,offY]",2,0);
-  addAttributeUInt(StarAttribute::XATTR_FILLBMP_POSOFFSETX,"fill[bmp,pos,offX]",2,0);
-  addAttributeUInt(StarAttribute::XATTR_FILLBMP_POSOFFSETY,"fill[bmp,pos,offY]",2,0);
-  for (int type=StarAttribute::XATTR_FILLRESERVED2; type<=StarAttribute::XATTR_FILLRESERVED_LAST; ++type) {
-    s.str("");
-    s << "fill[reserved" << type-StarAttribute::XATTR_FILLRESERVED2+2 << "]";
-    addAttributeVoid(StarAttribute::Type(type), s.str());
-  }
-
   addAttributeUInt(StarAttribute::XATTR_FORMTXTSTYLE,"formText[style]",2,4); // None
   addAttributeUInt(StarAttribute::XATTR_FORMTXTADJUST,"formText[adjust]",2,3); // Adjust
   addAttributeInt(StarAttribute::XATTR_FORMTXTDISTANCE, "formText[distance]",4, 0); // metric
@@ -324,14 +304,6 @@ void State::initAttributeMap()
     s << "form[reserved" << type-StarAttribute::XATTR_FTRESERVED2+2 << "]";
     addAttributeVoid(StarAttribute::Type(type), s.str());
   }
-  std::vector<STOFFVec2i> limits;
-  limits.resize(1);
-  limits[0]=STOFFVec2i(1000,1016);
-  addAttributeItemSet(StarAttribute::XATTR_SET_LINE,"setLine",limits);
-  limits[0]=STOFFVec2i(1018,1046);
-  addAttributeItemSet(StarAttribute::XATTR_SET_FILL,"setFill",limits);
-  limits[0]=STOFFVec2i(1048,1064);
-  addAttributeItemSet(StarAttribute::XATTR_SET_TEXT,"setText",limits);
 
   // ---- sdr ---- svx_svdattr.cxx
   addAttributeBool(StarAttribute::SDRATTR_SHADOW,"shadow", false); // onOff
@@ -546,6 +518,7 @@ void State::initAttributeMap()
     addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
+  std::vector<STOFFVec2i> limits;
   limits.resize(1);
   limits[0]=STOFFVec2i(1067,1078);
   addAttributeItemSet(StarAttribute::SDRATTR_SET_SHADOW,"setShadow",limits);
@@ -1535,203 +1508,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
   case StarAttribute::ATTR_SCH_SYMBOL_SIZE:
     f << "symbolSize[sch]=" << input->readLong(4) << "x" << input->readLong(4) << ",";
     break;
-
-  // name or index
-  case StarAttribute::XATTR_LINEDASH:
-  case StarAttribute::XATTR_LINECOLOR:
-  case StarAttribute::XATTR_LINESTART:
-  case StarAttribute::XATTR_LINEEND:
-  case StarAttribute::XATTR_FILLCOLOR:
-  case StarAttribute::XATTR_FILLGRADIENT:
-  case StarAttribute::XATTR_FILLHATCH:
-  case StarAttribute::XATTR_FILLBITMAP:
-  case StarAttribute::XATTR_FILLFLOATTRANSPARENCE:
-
-  case StarAttribute::XATTR_FORMTXTSHDWCOLOR: {
-    std::vector<uint32_t> text;
-    if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
-      f << "###string";
-      break;
-    }
-    if (!text.empty()) f << "name=" << libstoff::getString(text).cstr() << ",";
-    int32_t id;
-    *input >> id;
-    if (id>=0) f << "id=" << id << ",";
-    switch (nWhich) {
-    case StarAttribute::XATTR_LINEDASH: {
-      f << "line[dash],";
-      if (id>=0) break;
-      int32_t dashStyle;
-      uint16_t dots, dashes;
-      uint32_t dotLen, dashLen, distance;
-      *input >> dashStyle >> dots >> dotLen >> dashes >> dashLen >> distance;
-      if (dashStyle) f << "style=" << dashStyle << ",";
-      if (dots || dotLen) f << "dots=" << dots << ":" << dotLen << ",";
-      if (dashes || dashLen) f << "dashs=" << dashes << ":" << dashLen << ",";
-      if (distance) f << "distance=" << distance << ",";
-      break;
-    }
-    case StarAttribute::XATTR_LINECOLOR:
-    case StarAttribute::XATTR_FILLCOLOR:
-    case StarAttribute::XATTR_FORMTXTSHDWCOLOR: {
-      f << (nWhich==StarAttribute::XATTR_LINECOLOR ? "line[color]" :
-            nWhich==StarAttribute::XATTR_FILLCOLOR ? "fill[color]" : "shadow[form,color]") << ",";
-      if (id>=0) break;
-      STOFFColor col;
-      if (!input->readColor(col)) {
-        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a color\n"));
-        f << "###color,";
-        break;
-      }
-      if (!col.isBlack()) f << col << ",";
-      break;
-    }
-    case StarAttribute::XATTR_LINESTART:
-    case StarAttribute::XATTR_LINEEND: {
-      f << (nWhich==StarAttribute::XATTR_LINESTART ? "line[start]" : "line[end]") << ",";
-      if (id>=0) break;
-      uint32_t nPoints;
-      *input >> nPoints;
-      if (input->tell()+12*long(nPoints)>lastPos) {
-        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: bad num point\n"));
-        f << "###nPoints=" << nPoints << ",";
-        break;
-      }
-      f << "pts=[";
-      for (uint32_t i=0; i<nPoints; ++i)
-        f << input->readLong(4) << "x" << input->readLong(4) << ":" << input->readULong(4) << ",";
-      f << "],";
-      break;
-    }
-    case StarAttribute::XATTR_FILLGRADIENT:
-    case StarAttribute::XATTR_FILLFLOATTRANSPARENCE: {
-      f << (nWhich==StarAttribute::XATTR_FILLGRADIENT ? "gradient[fill]" : "transparence[float,fill]")  << ",";
-      if (id>=0) break;
-      uint16_t type, red, green, blue, red2, green2, blue2;
-      *input >> type >> red >> green >> blue >> red2 >> green2 >> blue2;
-      if (type) f << "type=" << type << ",";
-      f << "startColor=" << STOFFColor(uint8_t(red>>8),uint8_t(green>>8),uint8_t(blue>>8)) << ",";
-      f << "endColor=" << STOFFColor(uint8_t(red2>>8),uint8_t(green2>>8),uint8_t(blue2>>8)) << ",";
-      uint32_t angle;
-      uint16_t border, xOffset, yOffset, startIntens, endIntens;
-      *input >> angle >> border >> xOffset >> yOffset >> startIntens >> endIntens;
-      if (angle) f << "angle=" << angle << ",";
-      if (border) f << "border=" << border << ",";
-      f << "offset=" << xOffset << "x" << yOffset << ",";
-      f << "intensity=[" << startIntens << "," << endIntens << "],";
-      if (nVers>=1) {
-        uint16_t nStep;
-        *input >> nStep;
-        if (nStep) f << "step=" << nStep << ",";
-      }
-      if (nWhich==StarAttribute::XATTR_FILLFLOATTRANSPARENCE) {
-        bool enabled;
-        *input>>enabled;
-        if (enabled) f << "enabled,";
-      }
-      break;
-    }
-    case StarAttribute::XATTR_FILLHATCH: {
-      f << "hatch[fill],";
-      if (id>=0) break;
-      uint16_t type, red, green, blue;
-      int32_t distance, angle;
-      *input >> type >> red >> green >> blue >> distance >> angle;
-      if (type) f << "type=" << type << ",";
-      f << "color=" << STOFFColor(uint8_t(red>>8),uint8_t(green>>8),uint8_t(blue>>8)) << ",";
-      f << "distance=" << distance << ",";
-      f << "angle=" << angle << ",";
-      break;
-    }
-    case StarAttribute::XATTR_FILLBITMAP: {
-      f << "bitmap[fill],";
-      if (id>=0) break;
-      if (nVers==1) {
-        int16_t style, type;
-        *input >> style >> type;
-        if (style) f << "style=" << style << ",";
-        if (type) f << "type=" << type << ",";
-        if (type==1) {
-          if (input->tell()+128+2>lastPos) {
-            STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: the zone seems too short\n"));
-            f << "###short,";
-            break;
-          }
-          f << "val=[";
-          for (int i=0; i<64; ++i) {
-            uint16_t value;
-            *input>>value;
-            if (value) f << std::hex << value << std::dec << ",";
-            else f << "_,";
-          }
-          f << "],";
-          for (int i=0; i<2; ++i) {
-            STOFFColor col;
-            if (!input->readColor(col)) {
-              STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a color\n"));
-              f << "###color,";
-              break;
-            }
-            f << "col" << i << "=" << col << ",";
-          }
-          break;
-        }
-        if (type==2) break;
-        if (type!=0) {
-          STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: unexpected type\n"));
-          f << "###type,";
-          break;
-        }
-      }
-      StarBitmap bitmap;
-      librevenge::RVNGBinaryData data;
-      std::string dType;
-      if (!bitmap.readBitmap(zone, true, lastPos, data, dType)) break;
-      // TODO store the bitmap
-      break;
-    }
-
-    default:
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: unknown name id\n"));
-      f << "###nameId,";
-      break;
-    }
-    break;
-  }
-
-  // name or index
-  case StarAttribute::SDRATTR_SHADOWCOLOR: {
-    std::vector<uint32_t> text;
-    if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a string\n"));
-      f << "###string";
-      break;
-    }
-    if (!text.empty()) f << "name=" << libstoff::getString(text).cstr() << ",";
-    int32_t id;
-    *input >> id;
-    if (id>=0) f << "id=" << id << ",";
-    switch (nWhich) {
-    case StarAttribute::SDRATTR_SHADOWCOLOR: {
-      f << "sdrShadow[color],";
-      if (id>=0) break;
-      STOFFColor col;
-      if (!input->readColor(col)) {
-        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a color\n"));
-        f << "###color,";
-        break;
-      }
-      if (!col.isBlack()) f << col << ",";
-      break;
-    }
-    default:
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: unknown name id\n"));
-      f << "###nameId,";
-      break;
-    }
-    break;
-  }
 
   case StarAttribute::SDRATTR_AUTOSHAPE_ADJUSTMENT:
     f << "autoShapeAdjust[sdr],";

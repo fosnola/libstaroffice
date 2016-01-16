@@ -31,6 +31,7 @@
 * instead of those above.
 */
 
+#include <math.h>
 #include <sstream>
 
 #include <librevenge/librevenge.h>
@@ -176,6 +177,248 @@ static bool getBMPData(uint16_t const *pattern, STOFFColor const &col0,  STOFFCo
   delete [] tmpDIBBuffer;
 
   return true;
+}
+
+////////////////////////////////////////////////////////////
+// utilities to compute bdbox
+////////////////////////////////////////////////////////////
+static double getInchValue(librevenge::RVNGProperty const *prop)
+{
+  double value=prop->getDouble();
+  switch (prop->getUnit()) {
+  case librevenge::RVNG_INCH:
+  case librevenge::RVNG_GENERIC: // assume inch
+    return value;
+  case librevenge::RVNG_POINT:
+    return value/72.;
+  case librevenge::RVNG_TWIP:
+    return value/1440.;
+  case librevenge::RVNG_PERCENT:
+  case librevenge::RVNG_UNIT_ERROR:
+  default: {
+    static bool first=true;
+    if (first) {
+      STOFF_DEBUG_MSG(("StarGraphicStruct::getInchValue: call with no double value\n"));
+      first=false;
+    }
+    break;
+  }
+  }
+  return value;
+}
+
+static double quadraticExtreme(double t, double a, double b, double c)
+{
+  return (1.0-t)*(1.0-t)*a + 2.0*(1.0-t)*t*b + t*t*c;
+}
+
+static double quadraticDerivative(double a, double b, double c)
+{
+  double denominator = a - 2.0*b + c;
+  if (fabs(denominator)>1e-10*(a-b))
+    return (a - b)/denominator;
+  return -1.0;
+}
+
+static void getQuadraticBezierBBox(double x0, double y0, double x1, double y1, double x, double y,
+                                   double &xmin, double &ymin, double &xmax, double &ymax)
+{
+  xmin = x0 < x ? x0 : x;
+  xmax = x0 > x ? x0 : x;
+  ymin = y0 < y ? y0 : y;
+  ymax = y0 > y ? y0 : y;
+
+  double t = quadraticDerivative(x0, x1, x);
+  if (t>=0 && t<=1) {
+    double tmpx = quadraticExtreme(t, x0, x1, x);
+    xmin = tmpx < xmin ? tmpx : xmin;
+    xmax = tmpx > xmax ? tmpx : xmax;
+  }
+
+  t = quadraticDerivative(y0, y1, y);
+  if (t>=0 && t<=1) {
+    double tmpy = quadraticExtreme(t, y0, y1, y);
+    ymin = tmpy < ymin ? tmpy : ymin;
+    ymax = tmpy > ymax ? tmpy : ymax;
+  }
+}
+
+static double cubicBase(double t, double a, double b, double c, double d)
+{
+  return (1.0-t)*(1.0-t)*(1.0-t)*a + 3.0*(1.0-t)*(1.0-t)*t*b + 3.0*(1.0-t)*t*t*c + t*t*t*d;
+}
+
+static void getCubicBezierBBox(double x0, double y0, double x1, double y1, double x2, double y2, double x, double y,
+                               double &xmin, double &ymin, double &xmax, double &ymax)
+{
+  xmin = x0 < x ? x0 : x;
+  xmax = x0 > x ? x0 : x;
+  ymin = y0 < y ? y0 : y;
+  ymax = y0 > y ? y0 : y;
+
+  for (int i=0; i<=100; ++i) {
+    double t=double(i)/100.;
+    double tmpx = cubicBase(t, x0, x1, x2, x);
+    xmin = tmpx < xmin ? tmpx : xmin;
+    xmax = tmpx > xmax ? tmpx : xmax;
+    double tmpy = cubicBase(t, y0, y1, y2, y);
+    ymin = tmpy < ymin ? tmpy : ymin;
+    ymax = tmpy > ymax ? tmpy : ymax;
+  }
+}
+
+//! Internal: helper to compute a path bdbox
+static bool getPathBBox(const librevenge::RVNGPropertyListVector &path, double &px, double &py, double &qx, double &qy)
+{
+  // This must be a mistake and we do not want to crash lower
+  if (!path.count() || !path[0]["librevenge:path-action"] || path[0]["librevenge:path-action"]->getStr() == "Z") {
+    STOFF_DEBUG_MSG(("libodfgen:getPathBdBox: get a spurious path\n"));
+    return false;
+  }
+
+  // try to find the bounding box
+  // this is simple convex hull technique, the bounding box might not be
+  // accurate but that should be enough for this purpose
+  bool isFirstPoint = true;
+
+  double lastX = 0.0;
+  double lastY = 0.0;
+  double lastPrevX = 0.0;
+  double lastPrevY = 0.0;
+  px = py = qx = qy = 0.0;
+
+  for (unsigned k = 0; k < path.count(); ++k) {
+    if (!path[k]["librevenge:path-action"])
+      continue;
+    std::string action=path[k]["librevenge:path-action"]->getStr().cstr();
+    if (action.length()!=1 || action[0]=='Z') continue;
+
+    bool coordOk=path[k]["svg:x"]&&path[k]["svg:y"];
+    bool coord1Ok=coordOk && path[k]["svg:x1"]&&path[k]["svg:y1"];
+    bool coord2Ok=coord1Ok && path[k]["svg:x2"]&&path[k]["svg:y2"];
+    double x=lastX, y=lastY;
+    if (isFirstPoint) {
+      if (!coordOk) {
+        STOFF_DEBUG_MSG(("StarGraphicStruct::getPathBBox: the first point has no coordinate\n"));
+        continue;
+      }
+      qx = px = x = getInchValue(path[k]["svg:x"]);
+      qy = py = y = getInchValue(path[k]["svg:y"]);
+      lastPrevX = lastX = px;
+      lastPrevY = lastY = py;
+      isFirstPoint = false;
+    }
+    else {
+      if (path[k]["svg:x"]) x=getInchValue(path[k]["svg:x"]);
+      if (path[k]["svg:y"]) y=getInchValue(path[k]["svg:y"]);
+      px = (px > x) ? x : px;
+      py = (py > y) ? y : py;
+      qx = (qx < x) ? x : qx;
+      qy = (qy < y) ? y : qy;
+    }
+
+    double xmin=px, xmax=qx, ymin=py, ymax=qy;
+    bool lastPrevSet=false;
+
+    if (action[0] == 'C' && coord2Ok) {
+      getCubicBezierBBox(lastX, lastY, getInchValue(path[k]["svg:x1"]), getInchValue(path[k]["svg:y1"]),
+                         getInchValue(path[k]["svg:x2"]), getInchValue(path[k]["svg:y2"]),
+                         x, y, xmin, ymin, xmax, ymax);
+      lastPrevSet=true;
+      lastPrevX=2*x-getInchValue(path[k]["svg:x2"]);
+      lastPrevY=2*y-getInchValue(path[k]["svg:y2"]);
+    }
+    else if (action[0] == 'S' && coord1Ok) {
+      getCubicBezierBBox(lastX, lastY, lastPrevX, lastPrevY,
+                         getInchValue(path[k]["svg:x1"]), getInchValue(path[k]["svg:y1"]),
+                         x, y, xmin, ymin, xmax, ymax);
+      lastPrevSet=true;
+      lastPrevX=2*x-getInchValue(path[k]["svg:x1"]);
+      lastPrevY=2*y-getInchValue(path[k]["svg:y1"]);
+    }
+    else if (action[0] == 'Q' && coord1Ok) {
+      getQuadraticBezierBBox(lastX, lastY, getInchValue(path[k]["svg:x1"]), getInchValue(path[k]["svg:y1"]),
+                             x, y, xmin, ymin, xmax, ymax);
+      lastPrevSet=true;
+      lastPrevX=2*x-getInchValue(path[k]["svg:x1"]);
+      lastPrevY=2*y-getInchValue(path[k]["svg:y1"]);
+    }
+    else if (action[0] == 'T' && coordOk) {
+      getQuadraticBezierBBox(lastX, lastY, lastPrevX, lastPrevY,
+                             x, y, xmin, ymin, xmax, ymax);
+      lastPrevSet=true;
+      lastPrevX=2*x-lastPrevX;
+      lastPrevY=2*y-lastPrevY;
+    }
+    else if (action[0] != 'M' && action[0] != 'L' && action[0] != 'H' && action[0] != 'V') {
+      STOFF_DEBUG_MSG(("StarGraphicStruct::getPathBBox: problem reading a path\n"));
+    }
+    px = (px > xmin ? xmin : px);
+    py = (py > ymin ? ymin : py);
+    qx = (qx < xmax ? xmax : qx);
+    qy = (qy < ymax ? ymax : qy);
+    lastX = x;
+    lastY = y;
+    if (!lastPrevSet) {
+      lastPrevX=lastX;
+      lastPrevY=lastY;
+    }
+  }
+  return true;
+}
+
+//! Internal: helper to convert a path in a string
+static librevenge::RVNGString convertPath(const librevenge::RVNGPropertyListVector &path)
+{
+  librevenge::RVNGString sValue("");
+  for (unsigned i = 0; i < path.count(); ++i) {
+    if (!path[i]["librevenge:path-action"])
+      continue;
+    std::string action=path[i]["librevenge:path-action"]->getStr().cstr();
+    if (action.length()!=1) continue;
+    bool coordOk=path[i]["svg:x"]&&path[i]["svg:y"];
+    bool coord1Ok=coordOk && path[i]["svg:x1"]&&path[i]["svg:y1"];
+    bool coord2Ok=coord1Ok && path[i]["svg:x2"]&&path[i]["svg:y2"];
+    librevenge::RVNGString sElement;
+    // 2540 is 2.54*1000, 2.54 in = 1 inch
+    if (path[i]["svg:x"] && action[0] == 'H') {
+      sElement.sprintf("H%i", (int)(getInchValue(path[i]["svg:x"])*2540));
+      sValue.append(sElement);
+    }
+    else if (path[i]["svg:y"] && action[0] == 'V') {
+      sElement.sprintf("V%i", (int)(getInchValue(path[i]["svg:y"])*2540));
+      sValue.append(sElement);
+    }
+    else if (coordOk && (action[0] == 'M' || action[0] == 'L' || action[0] == 'T')) {
+      sElement.sprintf("%c%i %i", action[0], (int)(getInchValue(path[i]["svg:x"])*2540),
+                       (int)(getInchValue(path[i]["svg:y"])*2540));
+      sValue.append(sElement);
+    }
+    else if (coord1Ok && (action[0] == 'Q' || action[0] == 'S')) {
+      sElement.sprintf("%c%i %i %i %i", action[0], (int)(getInchValue(path[i]["svg:x1"])*2540),
+                       (int)(getInchValue(path[i]["svg:y1"])*2540), (int)(getInchValue(path[i]["svg:x"])*2540),
+                       (int)(getInchValue(path[i]["svg:y"])*2540));
+      sValue.append(sElement);
+    }
+    else if (coord2Ok && action[0] == 'C') {
+      sElement.sprintf("C%i %i %i %i %i %i", (int)(getInchValue(path[i]["svg:x1"])*2540),
+                       (int)(getInchValue(path[i]["svg:y1"])*2540), (int)(getInchValue(path[i]["svg:x2"])*2540),
+                       (int)(getInchValue(path[i]["svg:y2"])*2540), (int)(getInchValue(path[i]["svg:x"])*2540),
+                       (int)(getInchValue(path[i]["svg:y"])*2540));
+      sValue.append(sElement);
+    }
+    else if (coordOk && path[i]["svg:rx"] && path[i]["svg:ry"] && action[0] == 'A') {
+      sElement.sprintf("A%i %i %i %i %i %i %i", (int)((getInchValue(path[i]["svg:rx"]))*2540),
+                       (int)((getInchValue(path[i]["svg:ry"]))*2540), (path[i]["librevenge:rotate"] ? path[i]["librevenge:rotate"]->getInt() : 0),
+                       (path[i]["librevenge:large-arc"] ? path[i]["librevenge:large-arc"]->getInt() : 1),
+                       (path[i]["librevenge:sweep"] ? path[i]["librevenge:sweep"]->getInt() : 1),
+                       (int)(getInchValue(path[i]["svg:x"])*2540), (int)(getInchValue(path[i]["svg:y"])*2540));
+      sValue.append(sElement);
+    }
+    else if (action[0] == 'Z')
+      sValue.append(" Z");
+  }
+  return sValue;
 }
 
 bool StarBrush::getColor(STOFFColor &color) const
@@ -373,6 +616,69 @@ bool StarGraphicStruct::StarGraphic::read(StarZone &zone, long endPos)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return ok;
+}
+
+// StarPolygon
+void StarPolygon::addToPath(librevenge::RVNGPropertyListVector &path, bool isClosed) const
+{
+  librevenge::RVNGPropertyList element;
+  for (size_t i=0; i<m_points.size(); ++i) {
+    if (m_points[i].m_flags==2 && i+2<m_points.size() && m_points[i].m_flags==2) {
+      element.insert("svg:x1",float(m_points[i].m_point[0])/20.f, librevenge::RVNG_POINT);
+      element.insert("svg:y1",float(m_points[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+      element.insert("svg:x2",float(m_points[++i].m_point[0])/20.f, librevenge::RVNG_POINT);
+      element.insert("svg:y2",float(m_points[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+      element.insert("svg:x",float(m_points[++i].m_point[0])/20.f, librevenge::RVNG_POINT);
+      element.insert("svg:y",float(m_points[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+      element.insert("librevenge:path-action", "C");
+    }
+    else if (m_points[i].m_flags==2 && i+1<m_points.size()) {
+      /* unsure, let asume that this means the previous point is symetric,
+         but maybe we can also have a Bezier patch */
+      element.insert("svg:x1",float(m_points[i].m_point[0])/20.f, librevenge::RVNG_POINT);
+      element.insert("svg:y1",float(m_points[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+      element.insert("svg:x",float(m_points[++i].m_point[0])/20.f, librevenge::RVNG_POINT);
+      element.insert("svg:y",float(m_points[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+      element.insert("librevenge:path-action", "S");
+    }
+    else {
+      if (m_points[i].m_flags==2) {
+        STOFF_DEBUG_MSG(("StarGraphicStruct::StarPolygon::addToPath: find unexpected flags\n"));
+      }
+      element.insert("svg:x",float(m_points[i].m_point[0])/20.f, librevenge::RVNG_POINT);
+      element.insert("svg:y",float(m_points[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+      element.insert("librevenge:path-action", (i==0 ? "M" : "L"));
+    }
+    path.append(element);
+  }
+  if (isClosed) {
+    element.insert("librevenge:path-action", "Z");
+    path.append(element);
+  }
+}
+
+bool StarPolygon::convert(librevenge::RVNGString &path, librevenge::RVNGString &viewbox) const
+{
+  librevenge::RVNGPropertyListVector pathVect;
+  addToPath(pathVect, true);
+  path=convertPath(pathVect);
+  double bounds[4];
+  if (path.empty() || !getPathBBox(pathVect, bounds[0], bounds[1], bounds[2], bounds[3]))
+    return false;
+  std::stringstream s;
+  s << long(bounds[0]*2540) << " " << long(bounds[1]*2540) << " " << long(bounds[2]*2540) << " " << long(bounds[3]*2540);
+  viewbox=s.str().c_str();
+
+  return true;
+}
+
+std::ostream &operator<<(std::ostream &o, StarPolygon const &poly)
+{
+  o << "points=[";
+  for (size_t i=0; i<poly.m_points.size(); ++i)
+    o << poly.m_points[i] << ",";
+  o << "],";
+  return o;
 }
 
 }

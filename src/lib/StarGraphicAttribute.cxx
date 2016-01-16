@@ -31,11 +31,14 @@
 * instead of those above.
 */
 
+#include <iostream>
+
 #include "STOFFCellStyle.hxx"
 #include "STOFFFont.hxx"
 #include "STOFFGraphicStyle.hxx"
 
 #include "StarAttribute.hxx"
+#include "StarBitmap.hxx"
 #include "StarGraphicStruct.hxx"
 #include "StarItemPool.hxx"
 #include "StarLanguage.hxx"
@@ -160,12 +163,41 @@ protected:
   }
 };
 
+//! a list of item attribute of StarAttributeInternal
+class StarGAttributeItemSet : public StarAttributeItemSet
+{
+public:
+  //! constructor
+  StarGAttributeItemSet(Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits) :
+    StarAttributeItemSet(type, debugName, limits)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarGAttributeItemSet(*this));
+  }
+
+protected:
+  //! copy constructor
+  explicit StarGAttributeItemSet(StarAttributeItemSet const &orig) : StarAttributeItemSet(orig)
+  {
+  }
+};
+
 void StarGAttributeBool::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
 {
   if (m_type==XATTR_LINESTARTCENTER)
     graphic.m_propertyList.insert("draw:marker-start-center", m_value);
   else if (m_type==XATTR_LINEENDCENTER)
     graphic.m_propertyList.insert("draw:marker-end-center", m_value);
+  else if (m_type==XATTR_FILLBMP_TILE && m_value)
+    graphic.m_propertyList.insert("style:repeat", "repeat");
+  else if (m_type==XATTR_FILLBMP_STRETCH && m_value)
+    graphic.m_propertyList.insert("style:repeat", "stretch");
+  else if (m_type==XATTR_FILLBACKGROUND)
+    graphic.m_hasBackground=m_value;
+  // TODO: XATTR_FILLBMP_SIZELOG
 }
 
 void StarGAttributeInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
@@ -176,6 +208,10 @@ void StarGAttributeInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*
     graphic.m_propertyList.insert("draw:marker-start-width", double(m_value)/2540.,librevenge::RVNG_INCH);
   else if (m_type==XATTR_LINEENDWIDTH)
     graphic.m_propertyList.insert("draw:marker-end-width", double(m_value)/2540.,librevenge::RVNG_INCH);
+  else if (m_type==XATTR_FILLBMP_SIZEX)
+    graphic.m_propertyList.insert("draw:fill-image-width", double(m_value)/2540.,librevenge::RVNG_INCH);
+  else if (m_type==XATTR_FILLBMP_SIZEY)
+    graphic.m_propertyList.insert("draw:fill-image-height", double(m_value)/2540.,librevenge::RVNG_INCH);
 }
 
 void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
@@ -189,8 +225,19 @@ void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown line style %d\n", int(m_value)));
     }
   }
+  else if (m_type==XATTR_FILLSTYLE) {
+    if (m_value<=4) {
+      char const *(wh[])= {"none", "solid", "gradient", "hatch", "bitmap"};
+      graphic.m_propertyList.insert("draw:fill", wh[m_value]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown fill style %d\n", int(m_value)));
+    }
+  }
   else if (m_type==XATTR_LINETRANSPARENCE)
     graphic.m_propertyList.insert("svg:stroke-opacity", 1-double(m_value)/100., librevenge::RVNG_PERCENT);
+  else if (m_type==XATTR_FILLTRANSPARENCE)
+    graphic.m_propertyList.insert("draw:opacity", 1-double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==XATTR_LINEJOINT) {
     if (m_value<=4) {
       char const *(wh[])= {"none", "middle", "bevel", "miter", "round"};
@@ -199,6 +246,27 @@ void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
     else {
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown line join %d\n", int(m_value)));
     }
+  }
+  else if (m_type==XATTR_FILLBMP_POS) {
+    if (m_value<9) {
+      char const *(wh[])= {"top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right"};
+      graphic.m_propertyList.insert("draw:fill-image-ref-point", wh[m_value]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown bmp position %d\n", int(m_value)));
+    }
+  }
+  // CHECKME: from here never seen
+  else if (m_type==XATTR_GRADIENTSTEPCOUNT)
+    graphic.m_propertyList.insert("draw:gradient-step-count", m_value, librevenge::RVNG_GENERIC);
+  else if (m_type==XATTR_FILLBMP_POSOFFSETX)
+    graphic.m_propertyList.insert("draw:fill-image-ref-point-x", double(m_value)/100, librevenge::RVNG_PERCENT);
+  else if (m_type==XATTR_FILLBMP_POSOFFSETY)
+    graphic.m_propertyList.insert("draw:fill-image-ref-point-y", double(m_value)/100, librevenge::RVNG_PERCENT);
+  else if (m_type==XATTR_FILLBMP_TILEOFFSETX || XATTR_FILLBMP_TILEOFFSETY) {
+    std::stringstream s;
+    s << m_value << "% " << (m_type==XATTR_FILLBMP_TILEOFFSETX ? "horizontal" : "vertical");
+    graphic.m_propertyList.insert("draw:tile-repeat-offset", s.str().c_str());
   }
 }
 
@@ -374,6 +442,301 @@ protected:
   }
   //! the brush
   StarGraphicStruct::StarBrush m_brush;
+};
+
+//! a named attribute
+class StarGAttributeNamed : public StarAttribute
+{
+public:
+  //! constructor
+  StarGAttributeNamed(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_named(), m_namedId(0)
+  {
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    if (!m_named.empty())
+      o << m_named.cstr() << ",";
+    if (m_namedId>=0)
+      o << "id=" << m_namedId << ",";
+    o << "]";
+  }
+
+protected:
+  //! copy constructor
+  StarGAttributeNamed(StarGAttributeNamed const &orig) : StarAttribute(orig), m_named(orig.m_named), m_namedId(orig.m_namedId)
+  {
+  }
+  //! the named
+  librevenge::RVNGString m_named;
+  //! the name id
+  int m_namedId;
+};
+
+//! a arrow's named attribute
+class StarGAttributeNamedArrow : public StarGAttributeNamed
+{
+public:
+  //! constructor
+  StarGAttributeNamedArrow(Type type, std::string const &debugName) : StarGAttributeNamed(type, debugName), m_polygon()
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarGAttributeNamedArrow(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a graphic style
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    StarGAttributeNamed::print(o);
+    o << ":[" << m_polygon << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarGAttributeNamedArrow(StarGAttributeNamedArrow const &orig) : StarGAttributeNamed(orig), m_polygon(orig.m_polygon)
+  {
+  }
+  //! the polygon
+  StarGraphicStruct::StarPolygon m_polygon;
+};
+
+//! a bitmap's named attribute
+class StarGAttributeNamedBitmap : public StarGAttributeNamed
+{
+public:
+  //! constructor
+  StarGAttributeNamedBitmap(Type type, std::string const &debugName) :
+    StarGAttributeNamed(type, debugName)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarGAttributeNamedBitmap(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a graphic style
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    StarGAttributeNamed::print(o);
+    if (m_bitmap.isEmpty()) o << "empty";
+    o << ",";
+  }
+
+protected:
+  //! copy constructor
+  StarGAttributeNamedBitmap(StarGAttributeNamedBitmap const &orig) : StarGAttributeNamed(orig), m_bitmap(orig.m_bitmap)
+  {
+  }
+  //! the bitmap
+  STOFFEmbeddedObject m_bitmap;
+};
+
+//! a color's named attribute
+class StarGAttributeNamedColor : public StarGAttributeNamed
+{
+public:
+  //! constructor
+  StarGAttributeNamedColor(Type type, std::string const &debugName, STOFFColor const &defColor) :
+    StarGAttributeNamed(type, debugName), m_color(defColor)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarGAttributeNamedColor(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a font
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
+  //! add to a graphic style
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    StarGAttributeNamed::print(o);
+    o << ":[" << m_color << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarGAttributeNamedColor(StarGAttributeNamedColor const &orig) : StarGAttributeNamed(orig), m_color(orig.m_color)
+  {
+  }
+  //! the color
+  STOFFColor m_color;
+};
+
+//! a dash's named attribute
+class StarGAttributeNamedDash : public StarGAttributeNamed
+{
+public:
+  //! constructor
+  StarGAttributeNamedDash(Type type, std::string const &debugName) :
+    StarGAttributeNamed(type, debugName), m_dashStyle(0), m_distance(20)
+  {
+    for (int i=0; i<2; ++i) m_numbers[i]=1;
+    for (int i=0; i<2; ++i) m_lengths[i]=20;
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarGAttributeNamedDash(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a graphic style
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    StarGAttributeNamed::print(o);
+    o << ":[";
+    o << "style=" << m_dashStyle << ",";
+    for (int i=0; i<2; ++i) {
+      if (m_numbers[i])
+        o << (i==0 ? "dots" : "dashs") << "=" << m_numbers[i] << ":" << m_lengths[i] << ",";
+    }
+    if (m_distance) o << "distance=" << m_distance << ",";
+    o << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarGAttributeNamedDash(StarGAttributeNamedDash const &orig) : StarGAttributeNamed(orig), m_dashStyle(orig.m_dashStyle), m_distance(orig.m_distance)
+  {
+    for (int i=0; i<2; ++i) m_numbers[i]=orig.m_numbers[i];
+    for (int i=0; i<2; ++i) m_lengths[i]=orig.m_lengths[i];
+  }
+  //! the style:  XDASH_RECT, XDASH_ROUND, XDASH_RECTRELATIVE, XDASH_ROUNDRELATIVE
+  int m_dashStyle;
+  //! the number of dot/dash
+  int m_numbers[2];
+  //! the lengths of dot/dash
+  int m_lengths[2];
+  //! the distance
+  int m_distance;
+};
+
+//! a gradient's named attribute
+class StarGAttributeNamedGradient : public StarGAttributeNamed
+{
+public:
+  //! constructor
+  StarGAttributeNamedGradient(Type type, std::string const &debugName) : StarGAttributeNamed(type, debugName), m_gradientType(0), m_enable(true), m_angle(0), m_border(0), m_step(0)
+  {
+    for (int i=0; i<2; ++i) {
+      m_offsets[i]=50;
+      m_intensities[i]=100;
+    }
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarGAttributeNamedGradient(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a graphic style
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    StarGAttributeNamed::print(o);
+    o << ":[";
+    o << "type=" << m_gradientType << ",";
+    if (m_angle) o << "angle=" << m_angle << ",";
+    if (m_border) o << "border=" << m_border << ",";
+    if (m_step) o << "step=" << m_step << ",";
+    o << m_colors[0] << "->" << m_colors[1] << ",";
+    o << "offset=" << m_offsets[0] << "->" << m_offsets[1] << ",";
+    o << "intensity=" << m_intensities[0] << "->" << m_intensities[1] << ",";
+    if (!m_enable) o << "disable,";
+    o << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarGAttributeNamedGradient(StarGAttributeNamedGradient const &orig) : StarGAttributeNamed(orig), m_gradientType(orig.m_gradientType), m_enable(orig.m_enable), m_angle(orig.m_angle), m_border(orig.m_border), m_step(orig.m_step)
+  {
+    for (int i=0; i<2; ++i) {
+      m_colors[i]=orig.m_colors[i];
+      m_offsets[i]=orig.m_offsets[i];
+      m_intensities[i]=orig.m_intensities[i];
+    }
+  }
+  //! the gradient type
+  int m_gradientType;
+  //! a flag to know if the gradient is enable
+  bool m_enable;
+  //! the angle
+  int m_angle;
+  //! the border
+  int m_border;
+  //! the step
+  int m_step;
+  //! the colors
+  STOFFColor m_colors[2];
+  //! the x offsets
+  int m_offsets[2];
+  //! the intensities
+  int m_intensities[2];
+};
+
+//! a hatch's named attribute
+class StarGAttributeNamedHatch : public StarGAttributeNamed
+{
+public:
+  //! constructor
+  StarGAttributeNamedHatch(Type type, std::string const &debugName) : StarGAttributeNamed(type, debugName), m_hatchType(0), m_color(STOFFColor::black()), m_distance(0), m_angle(0)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarGAttributeNamedHatch(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a graphic style
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const;
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o) const
+  {
+    StarGAttributeNamed::print(o);
+    o << ":[";
+    o << "type=" << m_hatchType << ",";
+    o << m_color << ",";
+    if (m_distance) o << "distance=" << m_distance << ",";
+    if (m_angle) o << "angle=" << m_angle << ",";
+  }
+
+protected:
+  //! copy constructor
+  StarGAttributeNamedHatch(StarGAttributeNamedHatch const &orig) : StarGAttributeNamed(orig), m_hatchType(orig.m_hatchType), m_color(orig.m_color), m_distance(orig.m_distance), m_angle(orig.m_angle)
+  {
+  }
+  //! the type
+  int m_hatchType;
+  //! the color
+  STOFFColor m_color;
+  //! the distance
+  int m_distance;
+  //! the angle
+  int m_angle;
 };
 
 //! a shadow attribute
@@ -557,6 +920,105 @@ void StarGAttributeBrush::addTo(STOFFGraphicStyle &graphic, StarItemPool const *
   else
     graphic.m_propertyList.insert("draw:fill", "none");
 }
+
+void StarGAttributeNamedArrow::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
+{
+  if (m_type==XATTR_LINESTART || m_type==XATTR_LINEEND) {
+    char const *pathName=m_type==XATTR_LINESTART ? "draw:marker-start-path" : "draw:marker-end-path";
+    char const *viewboxName=m_type==XATTR_LINESTART ? "draw:marker-start-viewbox" : "draw:marker-end-viewbox";
+    if (m_polygon.empty()) {
+      if (graphic.m_propertyList[pathName]) graphic.m_propertyList.remove(pathName);
+      if (graphic.m_propertyList[viewboxName]) graphic.m_propertyList.remove(viewboxName);
+    }
+    else {
+      librevenge::RVNGString path, viewbox;
+      if (m_polygon.convert(path, viewbox)) {
+        graphic.m_propertyList.insert(pathName, path);
+        graphic.m_propertyList.insert(viewboxName, viewbox);
+      }
+    }
+  }
+}
+
+void StarGAttributeNamedBitmap::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
+{
+  if (m_type==XATTR_FILLBITMAP) {
+    if (!m_bitmap.isEmpty())
+      m_bitmap.addAsFillImageTo(graphic.m_propertyList);
+    else {
+      STOFF_DEBUG_MSG(("StarGAttributeNamedBitmap::addTo: can not find the bitmap\n"));
+    }
+  }
+}
+
+void StarGAttributeNamedColor::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
+{
+  if (m_type==XATTR_FORMTXTSHDWCOLOR)
+    font.m_shadowColor=m_color;
+}
+
+void StarGAttributeNamedColor::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
+{
+  if (m_type==XATTR_LINECOLOR)
+    graphic.m_propertyList.insert("svg:stroke-color", m_color.str().c_str());
+  else if (m_type==XATTR_FILLCOLOR)
+    graphic.m_propertyList.insert("draw:fill-color", m_color.str().c_str());
+  else if (m_type==SDRATTR_SHADOWCOLOR)
+    graphic.m_propertyList.insert("draw:shadow-color", m_color.str().c_str());
+}
+
+void StarGAttributeNamedDash::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
+{
+  if (m_type==XATTR_LINEDASH) {
+    graphic.m_propertyList.insert("draw:dots1", m_numbers[0]);
+    graphic.m_propertyList.insert("draw:dots1-length", double(m_lengths[0])/2540., librevenge::RVNG_INCH);
+    graphic.m_propertyList.insert("draw:dots2", m_numbers[1]);
+    graphic.m_propertyList.insert("draw:dots2-length", double(m_lengths[1])/2540., librevenge::RVNG_INCH);
+    graphic.m_propertyList.insert("draw:distance", double(m_distance)/2540., librevenge::RVNG_INCH);;
+  }
+}
+
+void StarGAttributeNamedGradient::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
+{
+  if (m_type==XATTR_FILLGRADIENT) {
+    // TODO XATTR_FILLFLOATTRANSPARENCE
+    if (!m_enable)
+      return;
+    if (m_gradientType>=0 && m_gradientType<=5) {
+      char const *(wh[])= {"linear", "axial", "radial", "ellipsoid", "square", "rectangle"};
+      graphic.m_propertyList.insert("draw:style", wh[m_gradientType]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarGAttributeNamedGradient::addTo: unknown hash type %d\n", m_gradientType));
+    }
+    graphic.m_propertyList.insert("draw:angle", double(m_angle)/10, librevenge::RVNG_GENERIC);
+    graphic.m_propertyList.insert("draw:border", double(m_border)/100, librevenge::RVNG_PERCENT);
+    graphic.m_propertyList.insert("draw:start-color", m_colors[0].str().c_str());
+    graphic.m_propertyList.insert("librevenge:start-opacity", double(m_intensities[0])/100, librevenge::RVNG_PERCENT);
+    graphic.m_propertyList.insert("draw:end-color", m_colors[1].str().c_str());
+    graphic.m_propertyList.insert("librevenge:end-opacity", double(m_intensities[1])/100, librevenge::RVNG_PERCENT);
+    graphic.m_propertyList.insert("svg:cx", double(m_offsets[0])/100, librevenge::RVNG_PERCENT);
+    graphic.m_propertyList.insert("svg:cy", double(m_offsets[1])/100, librevenge::RVNG_PERCENT);
+    // m_step ?
+  }
+}
+
+void StarGAttributeNamedHatch::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/) const
+{
+  if (m_type==XATTR_FILLHATCH) {
+    if (m_hatchType>=0 && m_hatchType<3) {
+      char const *(wh[])= {"single", "double", "triple"};
+      graphic.m_propertyList.insert("draw:style", wh[m_hatchType]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarGAttributeNamedHatch::addTo: unknown hash type %d\n", m_hatchType));
+    }
+    graphic.m_propertyList.insert("draw:color", m_color.str().c_str());
+    graphic.m_propertyList.insert("draw:distance", double(m_distance)/2540.,librevenge::RVNG_INCH);
+    if (m_angle) graphic.m_propertyList.insert("draw:rotation", double(m_angle)/10, librevenge::RVNG_GENERIC);
+  }
+}
+
 void StarGAttributeShadow::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
 {
   if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=100) {
@@ -676,6 +1138,257 @@ bool StarGAttributeBrush::read(StarZone &zone, int nVers, long endPos, StarObjec
   return ok && input->tell()<=endPos;
 }
 
+bool StarGAttributeNamed::read(StarZone &zone, int /*nVers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  std::vector<uint32_t> text;
+  if (!zone.readString(text)) {
+    STOFF_DEBUG_MSG(("StarGAttributeNamed::read: can not read a string\n"));
+    return false;
+  }
+  m_named=libstoff::getString(text);
+  m_namedId=int(input->readLong(4));
+  return input->tell()<=endPos;
+}
+
+bool StarGAttributeNamedArrow::read(StarZone &zone, int nVers, long endPos, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  if (!StarGAttributeNamed::read(zone, nVers, endPos, object)) {
+    STOFF_DEBUG_MSG(("StarGAttributeArrowNamed::read: can not read header\n"));
+    f << "###header";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  bool ok=true;
+  if (m_namedId<0) {
+    uint32_t nPoints;
+    *input >> nPoints;
+    if (input->tell()+12*long(nPoints)>endPos) {
+      STOFF_DEBUG_MSG(("StarGAttributeArrowNamed::read: bad num point\n"));
+      f << "###nPoints=" << nPoints << ",";
+      ok=false;
+      nPoints=0;
+    }
+    f << "pts=[";
+    m_polygon.m_points.resize(size_t(nPoints));
+    for (size_t i=0; i<size_t(nPoints); ++i) {
+      int dim[2];
+      for (int j=0; j<2; ++j) dim[j]=(int) input->readLong(4);
+      m_polygon.m_points[i].m_point=STOFFVec2i(dim[0],dim[1]);
+      m_polygon.m_points[i].m_flags=(int) input->readULong(4);
+    }
+    f << "],";
+  }
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok && input->tell()<=endPos;
+}
+
+bool StarGAttributeNamedBitmap::read(StarZone &zone, int nVers, long endPos, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  if (!StarGAttributeNamed::read(zone, nVers, endPos, object)) {
+    STOFF_DEBUG_MSG(("StarGAttributeNamedBitmap::read: can not read header\n"));
+    f << "###header";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  bool ok=true;
+  if (m_namedId<0) {
+    if (nVers==1) {
+      int16_t style, type;
+      *input >> style >> type;
+      if (style) f << "style=" << style << ",";
+      if (type) f << "type=" << type << ",";
+      if (type==1) {
+        if (input->tell()+128+2>endPos) {
+          STOFF_DEBUG_MSG(("StarGAttributeNamedBitmap::read: the zone seems too short\n"));
+          f << "###short,";
+          ok=false;
+        }
+        else {
+          f << "val=[";
+          uint32_t values[32];
+          for (int i=0; i<32; ++i) {
+            *input>>values[i];
+            if (values[i]) f << std::hex << values[i] << std::dec << ",";
+            else f << "_,";
+          }
+          f << "],";
+          STOFFColor colors[2];
+          for (int i=0; i<2; ++i) {
+            if (!input->readColor(colors[i])) {
+              STOFF_DEBUG_MSG(("StarGAttributeNamedBitmap::read: can not read a color\n"));
+              f << "###color,";
+              ok=false;
+              break;
+            }
+            f << "col" << i << "=" << colors[i] << ",";
+          }
+          if (ok) {
+            StarBitmap bitmap(values, colors);
+            librevenge::RVNGBinaryData data;
+            std::string dType;
+            if (bitmap.getData(data, dType))
+              m_bitmap.add(data,dType);
+          }
+        }
+      }
+      else if (type!=2 && type!=0) {
+        STOFF_DEBUG_MSG(("StarGAttributeNamedBitmap::read: unexpected type\n"));
+        f << "###type,";
+        ok=false;
+      }
+      if (type!=0 || !ok) {
+        print(f);
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        return ok && input->tell()<=endPos;
+      }
+    }
+    StarBitmap bitmap;
+    librevenge::RVNGBinaryData data;
+    std::string dType;
+    if (bitmap.readBitmap(zone, true, endPos, data, dType))
+      m_bitmap.add(data,dType);
+    else
+      ok=false;
+  }
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok && input->tell()<=endPos;
+}
+
+bool StarGAttributeNamedColor::read(StarZone &zone, int nVers, long endPos, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  if (!StarGAttributeNamed::read(zone, nVers, endPos, object)) {
+    STOFF_DEBUG_MSG(("StarGAttributeNamedColor::read: can not read header\n"));
+    f << "###header";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  bool ok=true;
+  if (m_namedId<0) {
+    if (!input->readColor(m_color)) {
+      STOFF_DEBUG_MSG(("StarGAttributeNamedColor::read: can not read a color\n"));
+      f << "###color,";
+      ok=false;
+    }
+  }
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok && input->tell()<=endPos;
+}
+
+bool StarGAttributeNamedDash::read(StarZone &zone, int nVers, long endPos, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  if (!StarGAttributeNamed::read(zone, nVers, endPos, object)) {
+    STOFF_DEBUG_MSG(("StarGAttributeNamedDash::read: can not read header\n"));
+    f << "###header";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  if (m_namedId<0) {
+    m_dashStyle=(int) input->readULong(4);
+    for (int i=0; i<2; ++i) {
+      m_numbers[i]=(int) input->readULong(2);
+      m_lengths[i]=(int) input->readULong(4);
+    }
+    m_distance=(int) input->readULong(4);
+  }
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
+bool StarGAttributeNamedGradient::read(StarZone &zone, int nVers, long endPos, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  if (!StarGAttributeNamed::read(zone, nVers, endPos, object)) {
+    STOFF_DEBUG_MSG(("StarGAttributeNamedGradient::read: can not read header\n"));
+    f << "###header";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  if (m_namedId<0) {
+    m_gradientType=(int) input->readULong(2);
+    uint16_t red, green, blue, red2, green2, blue2;
+    *input >> red >> green >> blue >> red2 >> green2 >> blue2;
+    m_colors[0]=STOFFColor(uint8_t(red>>8),uint8_t(green>>8),uint8_t(blue>>8));
+    m_colors[1]=STOFFColor(uint8_t(red2>>8),uint8_t(green2>>8),uint8_t(blue2>>8));
+    m_angle=(int) input->readULong(4);
+    m_border=(int) input->readULong(2);
+    for (int i=0; i<2; ++i) m_offsets[i]=(int) input->readULong(2);
+    for (int i=0; i<2; ++i) m_intensities[i]=(int) input->readULong(2);
+    if (nVers>=1) m_step=(int) input->readULong(2);
+    if (m_type==XATTR_FILLFLOATTRANSPARENCE) *input >> m_enable;
+  }
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
+bool StarGAttributeNamedHatch::read(StarZone &zone, int nVers, long endPos, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  if (!StarGAttributeNamed::read(zone, nVers, endPos, object)) {
+    STOFF_DEBUG_MSG(("StarGAttributeNamedHatch::read: can not read header\n"));
+    f << "###header";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  if (m_namedId<0) {
+    m_hatchType=(int) input->readULong(2);
+    uint16_t red, green, blue;
+    *input >> red >> green >> blue;
+    m_color=STOFFColor(uint8_t(red>>8),uint8_t(green>>8),uint8_t(blue>>8));
+    m_distance=(int) input->readLong(4);
+    m_angle=(int) input->readLong(4);
+  }
+  print(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
 bool StarGAttributeShadow::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -720,12 +1433,65 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeBool(map, StarAttribute::XATTR_LINEENDCENTER,"line[endCenter]", false);
   addAttributeUInt(map, StarAttribute::XATTR_LINETRANSPARENCE,"line[transparence]",2,0);
   addAttributeUInt(map, StarAttribute::XATTR_LINEJOINT,"line[joint]",2,4); // use arc
+  addAttributeUInt(map, StarAttribute::XATTR_FILLSTYLE,"fill[style]",2,1); // solid
+  addAttributeUInt(map, StarAttribute::XATTR_FILLTRANSPARENCE,"fill[transparence]",2,0);
+  addAttributeInt(map, StarAttribute::XATTR_FILLBMP_SIZEX, "fill[bmp,sizeX]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::XATTR_FILLBMP_SIZEY, "fill[bmp,sizeY]",4, 0); // metric
+  addAttributeBool(map, StarAttribute::XATTR_FILLBMP_TILE,"fill[bmp,tile]", true);
+  addAttributeBool(map, StarAttribute::XATTR_FILLBMP_STRETCH,"fill[bmp,stretch]", true);
+  addAttributeUInt(map, StarAttribute::XATTR_FILLBMP_POS,"fill[bmp,pos]",2,4); // middle-middle
+  addAttributeUInt(map, StarAttribute::XATTR_FILLBMP_POSOFFSETX,"fill[bmp,pos,offX]",2,0);
+  addAttributeUInt(map, StarAttribute::XATTR_FILLBMP_POSOFFSETY,"fill[bmp,pos,offY]",2,0);
+  addAttributeUInt(map, StarAttribute::XATTR_FILLBMP_TILEOFFSETX,"fill[bmp,tile,offX]",2,0);
+  addAttributeUInt(map, StarAttribute::XATTR_FILLBMP_TILEOFFSETY,"fill[bmp,tile,offY]",2,0);
+  addAttributeBool(map, StarAttribute::XATTR_FILLBACKGROUND,"fill[background]", false);
+  addAttributeUInt(map, StarAttribute::XATTR_GRADIENTSTEPCOUNT,"gradient[stepCount]",2,0);
+
+  map[StarAttribute::XATTR_LINECOLOR]=shared_ptr<StarAttribute>
+                                      (new StarGAttributeNamedColor(StarAttribute::XATTR_LINECOLOR,"line[color]",STOFFColor::black()));
+  map[StarAttribute::XATTR_LINESTART]=shared_ptr<StarAttribute>
+                                      (new StarGAttributeNamedArrow(StarAttribute::XATTR_LINESTART,"line[start]"));
+  map[StarAttribute::XATTR_LINEEND]=shared_ptr<StarAttribute>
+                                    (new StarGAttributeNamedArrow(StarAttribute::XATTR_LINEEND,"line[end]"));
+  map[StarAttribute::XATTR_LINEDASH]=shared_ptr<StarAttribute>
+                                     (new StarGAttributeNamedDash(StarAttribute::XATTR_LINEDASH,"line[dash]"));
+  map[StarAttribute::XATTR_FILLCOLOR]=shared_ptr<StarAttribute>
+                                      (new StarGAttributeNamedColor(StarAttribute::XATTR_FILLCOLOR,"fill[color]",STOFFColor::white()));
+  map[StarAttribute::XATTR_FILLGRADIENT]=shared_ptr<StarAttribute>
+                                         (new StarGAttributeNamedGradient(StarAttribute::XATTR_FILLGRADIENT,"gradient[fill]"));
+  map[StarAttribute::XATTR_FILLHATCH]=shared_ptr<StarAttribute>
+                                      (new StarGAttributeNamedHatch(StarAttribute::XATTR_FILLHATCH,"hatch[fill]"));
+  map[StarAttribute::XATTR_FILLBITMAP]=shared_ptr<StarAttribute>
+                                       (new StarGAttributeNamedBitmap(StarAttribute::XATTR_FILLBITMAP,"bitmap[fill]"));
+  map[StarAttribute::XATTR_FORMTXTSHDWCOLOR]=shared_ptr<StarAttribute>
+      (new StarGAttributeNamedColor(StarAttribute::XATTR_FORMTXTSHDWCOLOR,"shadow[form,color]",STOFFColor::black()));
+  map[StarAttribute::SDRATTR_SHADOWCOLOR]=shared_ptr<StarAttribute>
+                                          (new StarGAttributeNamedColor(StarAttribute::SDRATTR_SHADOWCOLOR,"sdrShadow[color]",STOFFColor::black()));
+  std::vector<STOFFVec2i> limits;
+  limits.resize(1);
+  limits[0]=STOFFVec2i(1000,1016);
+  map[StarAttribute::XATTR_SET_LINE]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::XATTR_SET_LINE,"setLine",limits));
+  limits[0]=STOFFVec2i(1018,1046);
+  map[StarAttribute::XATTR_SET_FILL]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::XATTR_SET_FILL,"setFill",limits));
+  limits[0]=STOFFVec2i(1048,1064);
+  map[StarAttribute::XATTR_SET_TEXT]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::XATTR_SET_TEXT,"setText",limits));
 
   for (int type=StarAttribute::XATTR_LINERESERVED2; type<=StarAttribute::XATTR_LINERESERVED_LAST; ++type) {
     std::stringstream s;
     s << "line[reserved" << type-StarAttribute::XATTR_LINERESERVED2+2 << "]";
     addAttributeVoid(map, StarAttribute::Type(type), s.str());
   }
+  for (int type=StarAttribute::XATTR_FILLRESERVED2; type<=StarAttribute::XATTR_FILLRESERVED_LAST; ++type) {
+    std::stringstream s;
+    s << "fill[reserved" << type-StarAttribute::XATTR_FILLRESERVED2+2 << "]";
+    addAttributeVoid(map, StarAttribute::Type(type), s.str());
+  }
+
+  // to do
+  addAttributeBool(map, StarAttribute::XATTR_FILLBMP_SIZELOG,"fill[bmp,sizeLog]", true);
+  map[StarAttribute::XATTR_FILLFLOATTRANSPARENCE]=shared_ptr<StarAttribute>
+      (new StarGAttributeNamedGradient(StarAttribute::XATTR_FILLFLOATTRANSPARENCE,"gradient[trans,fill]"));
+
 
   map[StarAttribute::ATTR_FRM_BOX]=shared_ptr<StarAttribute>(new StarGAttributeBorder(StarAttribute::ATTR_FRM_BOX,"box"));
   map[StarAttribute::ATTR_SC_BORDER]=shared_ptr<StarAttribute>(new StarGAttributeBorder(StarAttribute::ATTR_SC_BORDER,"scBorder"));

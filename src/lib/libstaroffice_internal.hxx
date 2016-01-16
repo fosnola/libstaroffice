@@ -442,6 +442,8 @@ struct STOFFEmbeddedObject {
   }
   /** add the link property to proplist */
   bool addTo(librevenge::RVNGPropertyList &propList) const;
+  /** add the link property to a graph style as bitmap */
+  bool addAsFillImageTo(librevenge::RVNGPropertyList &propList) const;
   /** operator<<*/
   friend std::ostream &operator<<(std::ostream &o, STOFFEmbeddedObject const &pict);
   /** a comparison function */
@@ -456,6 +458,7 @@ struct STOFFEmbeddedObject {
 // forward declarations of basic classes and smart pointers
 class STOFFFont;
 class STOFFGraphicShape;
+class STOFFGraphicStyle;
 class STOFFList;
 class STOFFParagraph;
 class STOFFSection;

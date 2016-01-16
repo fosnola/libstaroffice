@@ -32,6 +32,7 @@
 */
 
 #include <sstream>
+#include <string>
 
 #include <librevenge/librevenge.h>
 
@@ -41,12 +42,14 @@
 
 // graphic style function
 
-STOFFGraphicStyle::STOFFGraphicStyle() : m_propertyList()
+STOFFGraphicStyle::STOFFGraphicStyle() : m_propertyList(), m_hasBackground(false)
 {
   // let init the default value
   m_propertyList.insert("draw:stroke", "solid");
   m_propertyList.insert("svg:stroke-color", "#000000");
   m_propertyList.insert("svg:stroke-width", 0, librevenge::RVNG_INCH);
+  m_propertyList.insert("draw:fill", "solid");
+  m_propertyList.insert("draw:fill-color", "#ffffff");
 }
 
 std::ostream &operator<<(std::ostream &o, STOFFGraphicStyle const &graphicStyle)
@@ -57,7 +60,7 @@ std::ostream &operator<<(std::ostream &o, STOFFGraphicStyle const &graphicStyle)
 
 bool STOFFGraphicStyle::operator==(STOFFGraphicStyle const &graphicStyle) const
 {
-  return m_propertyList.getPropString() == graphicStyle.m_propertyList.getPropString();
+  return m_propertyList.getPropString() == graphicStyle.m_propertyList.getPropString() && m_hasBackground==graphicStyle.m_hasBackground;
 }
 
 void STOFFGraphicStyle::addTo(librevenge::RVNGPropertyList &pList) const
@@ -65,7 +68,9 @@ void STOFFGraphicStyle::addTo(librevenge::RVNGPropertyList &pList) const
   librevenge::RVNGPropertyList::Iter i(m_propertyList);
   for (i.rewind(); i.next();) {
     if (i.child()) {
-      STOFF_DEBUG_MSG(("STOFFGraphicStyle::addTo: find unexpected property child\n"));
+      if (strcmp(i.key(), "draw:hatch")!=0) {
+        STOFF_DEBUG_MSG(("STOFFGraphicStyle::addTo: find unexpected property child\n"));
+      }
       pList.insert(i.key(), *i.child());
       continue;
     }
