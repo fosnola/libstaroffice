@@ -102,7 +102,7 @@ public:
   void updateStyles();
   /** update a itemset by adding attribute corresponding to its styles*/
   void updateUsingStyles(StarItemSet &itemSet) const;
-  /** define all graphic styles 
+  /** define all graphic styles
    \note must be called after updateStyles is called*/
   void defineGraphicStyles(STOFFListenerPtr listener) const;
   /** try to find a style with a name and a family style */

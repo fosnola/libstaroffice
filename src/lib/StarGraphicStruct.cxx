@@ -586,8 +586,18 @@ bool StarGraphicStruct::StarGraphic::read(StarZone &zone, long endPos)
   else if (header=="SVGD") {
     StarFileManager fileManager;
     input->seek(-4, librevenge::RVNG_SEEK_CUR);
-    if (fileManager.readSVGDI(zone))
+    if (fileManager.readSVGDI(zone)) {
+      long actPos=input->tell();
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+      librevenge::RVNGBinaryData data;
+      if (!input->readDataBlock(actPos-pos,data)) {
+        STOFF_DEBUG_MSG(("StarGraphicStruct::StarGraphic::read: can not save a SVGD file\n"));
+        input->seek(actPos, librevenge::RVNG_SEEK_SET);
+      }
+      else
+        m_object.add(data, "image/svg");
       return true;
+    }
 
     STOFF_DEBUG_MSG(("StarGraphicStruct::StarGraphic::read: can not read a SVGD file\n"));
     f << "##SVGD,";

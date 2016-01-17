@@ -514,7 +514,7 @@ public:
   bool send(STOFFListenerPtr listener, StarObject &object)
   {
     if (!listener) {
-      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicAttribute::send: unexpected listener\n"));
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicGroup::send: unexpected listener\n"));
       return false;
     }
     listener->openGroup();
@@ -588,7 +588,7 @@ public:
   bool sendTextZone(STOFFListenerPtr listener, StarObject &object)
   {
     if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
-      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicAttribute::send: can not send a shape\n"));
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicText::send: can not send a shape\n"));
       return false;
     }
     STOFFPosition position;
@@ -736,7 +736,7 @@ public:
   bool send(STOFFListenerPtr listener, StarObject &object)
   {
     if (!listener || m_textRectangle.size()[0]<=0 || m_textRectangle.size()[1]<=0) {
-      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicCircle::send: can not send a shape\n"));
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicCircle::send: can not send a shape\n"));
       return false;
     }
     STOFFGraphicShape shape;
@@ -890,14 +890,14 @@ public:
   bool send(STOFFListenerPtr listener, StarObject &object)
   {
     if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
-      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicGraph::send: can not send a shape\n"));
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicGraph::send: can not send a shape\n"));
       return false;
     }
     if (!m_graphic || m_graphic->m_object.isEmpty()) {
       static bool first=true;
       if (first) {
         first=false;
-        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicGraph::send: sorry, can not find some graphic representation\n"));
+        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicGraph::send: sorry, can not find some graphic representation\n"));
       }
       return SdrGraphicRect::send(listener, object);
     }
@@ -1044,14 +1044,14 @@ public:
   bool send(STOFFListenerPtr listener, StarObject &object)
   {
     if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
-      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicOLE::send: can not send a shape\n"));
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: can not send a shape\n"));
       return false;
     }
     if (!m_graphic || m_graphic->m_object.isEmpty()) {
       static bool first=true;
       if (first) {
         first=false;
-        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicOLE::send: sorry, can not find some graphic representation\n"));
+        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: sorry, can not find some graphic representation\n"));
       }
       return SdrGraphicRect::send(listener, object);
     }
@@ -1105,7 +1105,7 @@ public:
   //! try to send the graphic to the listener
   bool send(STOFFListenerPtr /*listener*/, StarObject &/*object*/)
   {
-    STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::Graphic::sendPage: unexpected call\n"));
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPage::send: unexpected call\n"));
     return false;
   }
   //! print object data
@@ -2069,12 +2069,29 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
   if (vers<11) {
     // ReadDataTilV10
     shared_ptr<StarGraphicStruct::StarGraphic> smallGraphic(new StarGraphicStruct::StarGraphic);
+    long begPictPos=input->tell();
     if (!smallGraphic->read(zone) || input->tell()>lastPos) {
       f << "###graphic";
       ok=false;
     }
-    else
-      graphic.m_graphic=smallGraphic;
+    else {
+      if (smallGraphic->m_object.isEmpty()) {
+        long endPictPos=input->tell();
+        // try to recover can recover here the unknown graphic
+        input->seek(begPictPos, librevenge::RVNG_SEEK_SET);
+        librevenge::RVNGBinaryData data;
+        if (!input->readDataBlock(endPictPos-begPictPos,data)) {
+          STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSVDRObjectGraph: can not retrieve unknown data\n"));
+        }
+        else {
+          smallGraphic->m_object.add(data, "image/pct");
+          graphic.m_graphic=smallGraphic;
+        }
+        input->seek(endPictPos, librevenge::RVNG_SEEK_SET);
+      }
+      else
+        graphic.m_graphic=smallGraphic;
+    }
     if (ok && vers>=6) {
       int dim[4];
       for (int i=0; i<4; ++i) dim[i]=(int) input->readLong(4);
@@ -2340,10 +2357,20 @@ bool StarObjectSmallGraphic::readSVDRObjectOLE(StarZone &zone, StarObjectSmallGr
     if (objValid) f << "obj[refValid],";
     if (hasGraphic) {
       shared_ptr<StarGraphicStruct::StarGraphic> smallGraphic(new StarGraphicStruct::StarGraphic);
-      if (!smallGraphic->read(zone, lastPos) || input->tell()>lastPos) {
-        // TODO: we can recover here the unknown graphic
-        f << "###graphic";
-        ok=false;
+      long beginPos=input->tell();
+      if (!smallGraphic->read(zone, lastPos) || input->tell()>lastPos || smallGraphic->m_object.isEmpty()) {
+        // try to recover can recover here the unknown graphic
+        input->seek(beginPos, librevenge::RVNG_SEEK_SET);
+        librevenge::RVNGBinaryData data;
+        if (!input->readDataBlock(lastPos-beginPos,data)) {
+          STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSVDRObjectOLE: can not retrieve unknown data\n"));
+          f << "###graphic";
+          ok=false;
+        }
+        else {
+          smallGraphic->m_object.add(data, "image/pct");
+          graphic.m_graphic=smallGraphic;
+        }
       }
       else
         graphic.m_graphic=smallGraphic;
