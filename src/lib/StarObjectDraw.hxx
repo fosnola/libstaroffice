@@ -68,6 +68,8 @@ public:
   //! try to parse the current object
   bool parse();
 
+  /** define all graphic styles */
+  void defineGraphicStyles(STOFFListenerPtr listener);
   /** try to update the page span (to create draw document)*/
   bool updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const;
   //! try to send the different page

@@ -163,6 +163,10 @@ public:
   //! returns the actual paragraph
   STOFFParagraph const &getParagraph() const;
 
+  // ------ style definition -----------
+  /** defines a graphic styles, returns the style id */
+  void defineStyle(STOFFGraphicStyle const &style);
+
   // ------- fields ----------------
   //! adds a field type
   void insertField(STOFFField const &field);

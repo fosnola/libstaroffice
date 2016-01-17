@@ -235,8 +235,10 @@ void SDDParser::createDocument(librevenge::RVNGDrawingInterface *documentInterfa
     listen->setDocumentMetaData(m_state->m_mainGraphic->getMetaData());
 
   listen->startDocument();
-  if (m_state->m_mainGraphic)
+  if (m_state->m_mainGraphic) {
+    m_state->m_mainGraphic->defineGraphicStyles(listen);
     m_state->m_mainGraphic->sendMasterPages(listen);
+  }
 }
 
 bool SDDParser::sendGraphics()

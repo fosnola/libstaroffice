@@ -608,6 +608,8 @@ bool StarGraphicStruct::StarGraphic::read(StarZone &zone, long endPos)
         ok=false;
       }
     }
+    else
+      m_object.add(data, type);
   }
   else if (endPos>0)
     f << "#unknown,";

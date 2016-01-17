@@ -215,6 +215,11 @@ STOFFSpreadsheetListener::~STOFFSpreadsheetListener()
 {
 }
 
+void STOFFSpreadsheetListener::defineStyle(STOFFGraphicStyle const &style)
+{
+  m_documentInterface->defineGraphicStyle(style.m_propertyList);
+}
+
 ///////////////////
 // text data
 ///////////////////

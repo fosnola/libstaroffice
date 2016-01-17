@@ -44,6 +44,8 @@
 #include "StarFileManager.hxx"
 #include "StarObject.hxx"
 #include "StarZone.hxx"
+#include "STOFFGraphicStyle.hxx"
+#include "STOFFListener.hxx"
 
 #include "StarItemPool.hxx"
 
@@ -2057,6 +2059,24 @@ StarItemStyle const *StarItemPool::findStyleWithFamily(librevenge::RVNGString co
   }
   STOFF_DEBUG_MSG(("StarItemPool::findStyleWithFamily: can not find with style %s-%d\n", style.cstr(), family));
   return 0;
+}
+
+void StarItemPool::defineGraphicStyles(STOFFListenerPtr listener) const
+{
+  std::map<StarItemPoolInternal::StyleId,StarItemStyle>::const_iterator sIt;
+  for (sIt=m_state->m_styleIdToStyleMap.begin(); sIt!=m_state->m_styleIdToStyleMap.end(); ++sIt) {
+    StarItemPoolInternal::StyleId const &id=sIt->first;
+    if (id.m_name.empty() || !(id.m_family&StarItemStyle::F_Paragraph))
+      continue;
+    STOFFGraphicStyle gStyle;
+    gStyle.m_propertyList.insert("style:display-name", id.m_name);
+    for (std::map<int, shared_ptr<StarItem> >::const_iterator it=sIt->second.m_itemSet.m_whichToItemMap.begin();
+         it!=sIt->second.m_itemSet.m_whichToItemMap.end(); ++it) {
+      if (it->second && it->second->m_attribute)
+        it->second->m_attribute->addTo(gStyle, this);
+    }
+    listener->defineStyle(gStyle);
+  }
 }
 
 void StarItemPool::updateUsingStyles(StarItemSet &itemSet) const

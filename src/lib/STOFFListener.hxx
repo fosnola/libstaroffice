@@ -138,6 +138,10 @@ public:
   //! returns the actual paragraph
   virtual STOFFParagraph const &getParagraph() const=0;
 
+  // ------ style definition -----------
+  /** defines a graphic styles, return the graphic id */
+  virtual void defineStyle(STOFFGraphicStyle const &style) = 0;
+
   // ------- fields ----------------
   //! adds a field type
   virtual void insertField(STOFFField const &field)=0;

@@ -467,13 +467,8 @@ public:
     shared_ptr<StarItemPool> pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
     if (pool && !m_sheetStyle.empty()) {
       StarItemStyle const *mStyle=pool->findStyleWithFamily(m_sheetStyle, StarItemStyle::F_Paragraph);
-      if (mStyle) {
-        for (std::map<int, shared_ptr<StarItem> >::const_iterator it=mStyle->m_itemSet.m_whichToItemMap.begin();
-             it!=mStyle->m_itemSet.m_whichToItemMap.end(); ++it) {
-          if (it->second && it->second->m_attribute)
-            it->second->m_attribute->addTo(style, pool.get());
-        }
-      }
+      if (mStyle && !mStyle->m_names[0].empty())
+        style.m_propertyList.insert("librevenge:parent-display-name", mStyle->m_names[0]);
     }
 
     for (size_t i=0; i<m_itemList.size(); ++i) {
@@ -881,7 +876,7 @@ class SdrGraphicGraph : public SdrGraphicRect
 {
 public:
   //! constructor
-  SdrGraphicGraph() : SdrGraphicRect(22), m_bitmap(), m_graphRectangle(), m_mirrored(false), m_hasGraphicLink(false), m_graphItem()
+  SdrGraphicGraph() : SdrGraphicRect(22), m_graphic(), m_graphRectangle(), m_mirrored(false), m_hasGraphicLink(false), m_graphItem()
   {
   }
   //! basic print function
@@ -891,11 +886,50 @@ public:
     s << SdrGraphicRect::print() << *this << ",";
     return s.str();
   }
+  //! try to send the graphic to the listener
+  bool send(STOFFListenerPtr listener, StarObject &object)
+  {
+    if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicGraph::send: can not send a shape\n"));
+      return false;
+    }
+    if (!m_graphic || m_graphic->m_object.isEmpty()) {
+      static bool first=true;
+      if (first) {
+        first=false;
+        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicGraph::send: sorry, can not find some graphic representation\n"));
+      }
+      return SdrGraphicRect::send(listener, object);
+    }
+    STOFFPosition position;
+    position.setOrigin(1.f/20.f*STOFFVec2f(m_bdbox[0]), librevenge::RVNG_POINT);
+    position.setSize(1.f/20.f*STOFFVec2f(m_bdbox.size()), librevenge::RVNG_POINT);
+    position.m_propertyList.insert("text:anchor-type", "page");
+    STOFFGraphicStyle style;
+    updateStyle(style, object);
+    listener->insertPicture(position, m_graphic->m_object, style);
+
+    return true;
+  }
+  //! try to update the style
+  void updateStyle(STOFFGraphicStyle &style, StarObject &object) const
+  {
+    SdrGraphicRect::updateStyle(style, object);
+    if (m_graphItem && m_graphItem->m_attribute) {
+      shared_ptr<StarItemPool> pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
+      m_graphItem->m_attribute->addTo(style, pool.get());
+    }
+  }
   //! print object data
   friend std::ostream &operator<<(std::ostream &o, SdrGraphicGraph const &graph)
   {
     o << graph.getName() << ",";
-    if (graph.m_bitmap) o << "hasBitmap,";
+    if (graph.m_graphic) {
+      if (!graph.m_graphic->m_object.isEmpty())
+        o << "hasObject,";
+      else if (graph.m_graphic->m_bitmap)
+        o << "hasBitmap,";
+    }
     if (graph.m_graphRectangle.size()[0] || graph.m_graphRectangle.size()[1]) o << "rect=" << graph.m_graphRectangle << ",";
     for (int i=0; i<3; ++i) {
       if (graph.m_graphNames[i].empty()) continue;
@@ -910,8 +944,8 @@ public:
     }
     return o;
   }
-  //! the bitmap
-  shared_ptr<StarBitmap> m_bitmap;
+  //! the graphic
+  shared_ptr<StarGraphicStruct::StarGraphic> m_graphic;
   //! the rectangle
   STOFFBox2i m_graphRectangle;
   //! the name, filename, the filtername
@@ -996,7 +1030,7 @@ class SdrGraphicOLE : public SdrGraphicRect
 {
 public:
   //! constructor
-  SdrGraphicOLE(int id) : SdrGraphicRect(id), m_bitmap()
+  SdrGraphicOLE(int id) : SdrGraphicRect(id), m_graphic()
   {
   }
   //! basic print function
@@ -1006,6 +1040,31 @@ public:
     s << SdrGraphicRect::print() << *this << ",";
     return s.str();
   }
+  //! try to send the graphic to the listener
+  bool send(STOFFListenerPtr listener, StarObject &object)
+  {
+    if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicOLE::send: can not send a shape\n"));
+      return false;
+    }
+    if (!m_graphic || m_graphic->m_object.isEmpty()) {
+      static bool first=true;
+      if (first) {
+        first=false;
+        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::GraphicOLE::send: sorry, can not find some graphic representation\n"));
+      }
+      return SdrGraphicRect::send(listener, object);
+    }
+    STOFFPosition position;
+    position.setOrigin(1.f/20.f*STOFFVec2f(m_bdbox[0]), librevenge::RVNG_POINT);
+    position.setSize(1.f/20.f*STOFFVec2f(m_bdbox.size()), librevenge::RVNG_POINT);
+    position.m_propertyList.insert("text:anchor-type", "page");
+    STOFFGraphicStyle style;
+    updateStyle(style, object);
+    listener->insertPicture(position, m_graphic->m_object, style);
+
+    return true;
+  }
   //! print object data
   friend std::ostream &operator<<(std::ostream &o, SdrGraphicOLE const &graph)
   {
@@ -1014,13 +1073,18 @@ public:
       if (!graph.m_oleNames[i].empty())
         o << (i==0 ? "persist" : "program") << "[name]=" << graph.m_oleNames[i].cstr() << ",";
     }
-    if (graph.m_bitmap) o << "hasBitmap,";
+    if (graph.m_graphic) {
+      if (!graph.m_graphic->m_object.isEmpty())
+        o << "hasObject,";
+      else if (graph.m_graphic->m_bitmap)
+        o << "hasBitmap,";
+    }
     return o;
   }
   //! the persist and the program name
   librevenge::RVNGString m_oleNames[2];
-  //! the bitmap
-  shared_ptr<StarBitmap> m_bitmap;
+  //! the graphic
+  shared_ptr<StarGraphicStruct::StarGraphic> m_graphic;
 };
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic page
@@ -2004,13 +2068,13 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
   bool ok=true;
   if (vers<11) {
     // ReadDataTilV10
-    StarGraphicStruct::StarGraphic smallGraphic;
-    if (!smallGraphic.read(zone) || input->tell()>lastPos) {
+    shared_ptr<StarGraphicStruct::StarGraphic> smallGraphic(new StarGraphicStruct::StarGraphic);
+    if (!smallGraphic->read(zone) || input->tell()>lastPos) {
       f << "###graphic";
       ok=false;
     }
-    else if (smallGraphic.m_bitmap)
-      graphic.m_bitmap=smallGraphic.m_bitmap;
+    else
+      graphic.m_graphic=smallGraphic;
     if (ok && vers>=6) {
       int dim[4];
       for (int i=0; i<4; ++i) dim[i]=(int) input->readLong(4);
@@ -2050,14 +2114,14 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
         f << "graf,";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        StarGraphicStruct::StarGraphic smallGraphic;
-        if (!smallGraphic.read(zone, zone.getRecordLastPosition()) || input->tell()>zone.getRecordLastPosition()) {
+        shared_ptr<StarGraphicStruct::StarGraphic> smallGraphic(new StarGraphicStruct::StarGraphic);
+        if (!smallGraphic->read(zone, zone.getRecordLastPosition()) || input->tell()>zone.getRecordLastPosition()) {
           ascFile.addPos(pos);
           ascFile.addNote("SVDR[graph]:##graphic");
           input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
         }
-        else if (smallGraphic.m_bitmap)
-          graphic.m_bitmap=smallGraphic.m_bitmap;
+        else if (smallGraphic)
+          graphic.m_graphic=smallGraphic;
         pos=input->tell();
         f.str("");
         f << "SVDR[graph]:";
@@ -2275,14 +2339,14 @@ bool StarObjectSmallGraphic::readSVDRObjectOLE(StarZone &zone, StarObjectSmallGr
     *input >> objValid >> hasGraphic;
     if (objValid) f << "obj[refValid],";
     if (hasGraphic) {
-      StarGraphicStruct::StarGraphic smallGraphic;
-      if (!smallGraphic.read(zone, lastPos) || input->tell()>lastPos) {
+      shared_ptr<StarGraphicStruct::StarGraphic> smallGraphic(new StarGraphicStruct::StarGraphic);
+      if (!smallGraphic->read(zone, lastPos) || input->tell()>lastPos) {
         // TODO: we can recover here the unknown graphic
         f << "###graphic";
         ok=false;
       }
       else
-        graphic.m_bitmap=smallGraphic.m_bitmap;
+        graphic.m_graphic=smallGraphic;
     }
   }
   if (input->tell()!=lastPos) {

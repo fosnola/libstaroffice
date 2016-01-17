@@ -182,6 +182,11 @@ STOFFGraphicListener::~STOFFGraphicListener()
 {
 }
 
+void STOFFGraphicListener::defineStyle(STOFFGraphicStyle const &style)
+{
+  m_documentInterface->setStyle(style.m_propertyList);
+}
+
 ///////////////////
 // text data
 ///////////////////

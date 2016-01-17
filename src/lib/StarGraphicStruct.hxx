@@ -97,11 +97,13 @@ class StarGraphic
 {
 public:
   //! constructor
-  StarGraphic() : m_bitmap()
+  StarGraphic() : m_object(), m_bitmap()
   {
   }
   //! try to read a graphic, give lastPos if you are sure of the end graphic position
   bool read(StarZone &zone, long lastPos=-1);
+  //! the embedded object
+  STOFFEmbeddedObject m_object;
   //! the bitmap
   shared_ptr<StarBitmap> m_bitmap;
 };
