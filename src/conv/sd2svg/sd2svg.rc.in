@@ -1,0 +1,31 @@
+#include <winver.h>
+
+VS_VERSION_INFO VERSIONINFO
+  FILEVERSION @STAROFFICE_MAJOR_VERSION@,@STAROFFICE_MINOR_VERSION@,@STAROFFICE_MICRO_VERSION@,BUILDNUMBER
+  PRODUCTVERSION @STAROFFICE_MAJOR_VERSION@,@STAROFFICE_MINOR_VERSION@,@STAROFFICE_MICRO_VERSION@,0
+  FILEFLAGSMASK 0
+  FILEFLAGS 0
+  FILEOS VOS__WINDOWS32
+  FILETYPE VFT_APP
+  FILESUBTYPE VFT2_UNKNOWN
+  BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+      BLOCK "040904B0"
+      BEGIN
+	VALUE "CompanyName", "The libstaroffice developer community"
+	VALUE "FileDescription", "sd2svg"
+	VALUE "FileVersion", "@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@.@STAROFFICE_MICRO_VERSION@.BUILDNUMBER"
+	VALUE "InternalName", "sd2svg"
+	VALUE "LegalCopyright", "Copyright (C) 2002-2012 Laurent Alonso, William Lachance, Marc Maurer, Fridrich Strba, other contributers"
+	VALUE "OriginalFilename", "sd2svg.exe"
+	VALUE "ProductName", "libstaroffice"
+	VALUE "ProductVersion", "@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@.@STAROFFICE_MICRO_VERSION@"
+      END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+      VALUE "Translation", 0x409, 1200
+    END
+  END
+

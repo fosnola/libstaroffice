@@ -62,6 +62,7 @@ AS_CASE([$host],
 		SDC2CSV_WIN32_RESOURCE=sdc2csv-win32res.lo
 		SDW2HTML_WIN32_RESOURCE=sdw2html-win32res.lo
 		SD2RAW_WIN32_RESOURCE=sd2raw-win32res.lo
+		SD2SVG_WIN32_RESOURCE=sd2svg-win32res.lo
 		SD2TEXT_WIN32_RESOURCE=sd2text-win32res.lo
 	], [
 		native_win32=no
@@ -70,6 +71,7 @@ AS_CASE([$host],
 		SDC2CSV_WIN32_RESOURCE=
 		SDW2HTML_WIN32_RESOURCE=
 		SD2RAW_WIN32_RESOURCE=
+		SD2SVG_WIN32_RESOURCE=
 		SD2TEXT_WIN32_RESOURCE=
 	]
 )
@@ -79,6 +81,7 @@ AC_SUBST(LIBSTAROFFICE_STREAM_WIN32_RESOURCE)
 AC_SUBST(SDC2CSV_WIN32_RESOURCE)
 AC_SUBST(SDW2HTML_WIN32_RESOURCE)
 AC_SUBST(SD2RAW_WIN32_RESOURCE)
+AC_SUBST(SD2SVG_WIN32_RESOURCE)
 AC_SUBST(SD2TEXT_WIN32_RESOURCE)
 
 AC_MSG_CHECKING([for Win32 platform in general])
@@ -380,6 +383,8 @@ src/conv/sdw2html/Makefile
 src/conv/sdw2html/sdw2html.rc
 src/conv/sd2raw/Makefile
 src/conv/sd2raw/sd2raw.rc
+src/conv/sd2svg/Makefile
+src/conv/sd2svg/sd2svg.rc
 src/conv/sd2text/Makefile
 src/conv/sd2text/sd2text.rc
 src/lib/Makefile

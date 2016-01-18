@@ -35,10 +35,11 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <cstdlib>
+#include <cmath>
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 #include <librevenge/librevenge.h>
 #include <librevenge-generators/librevenge-generators.h>
@@ -56,90 +57,60 @@
 
 int printUsage()
 {
-  printf("Usage: stoff2csv [OPTION] a StarOffice .sdc document\n");
+  printf("Usage: sd2svg [OPTION] <StarOffice Graphic/Presentation Document>\n");
   printf("\n");
   printf("Options:\n");
-  printf("\t-h:          Shows this help message\n");
-  printf("\t-dc:         Sets the decimal commas to character c: default .\n");
-  printf("\t-fc:         Sets the field separator to character c: default ,\n");
-  printf("\t-tc:         Sets the text separator to character c: default \"\n");
-  printf("\t-F:          Sets to output the formula which exists in the file\n");
-  printf("\t-Dformat:    Sets the date format: default \"%%m/%%d/%%y\"\n");
-  printf("\t-Tformat:    Sets the time format: default \"%%H:%%M:%%S\"\n");
-  printf("\t-N:          Output the number of sheets \n");
-  printf("\t-n num:      Sets the choose the sheet to convert (1: means first sheet) \n");
-  printf("\t-o file.csv: Defines the ouput file\n");
-  printf("\t-v:          Output stoff2csv version\n");
+  printf("\t-h:                Shows this help message.\n");
+  printf("\t-o file.svg:       Defines the ouput file.\n");
+  printf("\t-N:                Output the number of sheets \n");
+  printf("\t-n num:            Sets the choose the sheet to convert (1: means first page) \n");
+  printf("\t-v:                Outputs sd2svg version. \n");
   printf("\n");
-  printf("Example:\n");
-  printf("\tstoff2cvs -d, -D\"%%d/%%m/%%y\" file : Converts a file using french locale\n");
-  printf("\n");
-  printf("Note:\n");
-  printf("\t If -F is present, the formula are generated which english names\n");
   return -1;
 }
 
 int printVersion()
 {
-  printf("stoff2csv %s\n", VERSION);
+  printf("stoff2svg %s\n", VERSION);
   return 0;
 }
 
 int main(int argc, char *argv[])
 {
-  bool printHelp=false;
-  bool printNumberOfSheet=false;
-  bool generateFormula=false;
-  int sheetToConvert=0;
-  char const *output = 0;
-  int ch;
-  char decSeparator='.', fieldSeparator=',', textSeparator='"';
-  std::string dateFormat("%m/%d/%y"), timeFormat("%H:%M:%S");
+  if (argc < 2)
+    return printUsage();
 
-  while ((ch = getopt(argc, argv, "hvo:d:f:t:D:FNn:T:")) != -1) {
+  char const *output = 0;
+  bool printHelp=false;
+  bool printNumberOfPages=false;
+  int ch, pageToConvert=0;
+
+  while ((ch = getopt(argc, argv, "ho:n:vN")) != -1) {
     switch (ch) {
-    case 'D':
-      dateFormat=optarg;
-      break;
-    case 'F':
-      generateFormula=true;
-      break;
-    case 'N':
-      printNumberOfSheet=true;
-      break;
-    case 'T':
-      timeFormat=optarg;
-      break;
-    case 'd':
-      decSeparator=optarg[0];
-      break;
-    case 'f':
-      fieldSeparator=optarg[0];
-      break;
-    case 't':
-      textSeparator=optarg[0];
-      break;
-    case 'n':
-      sheetToConvert=std::atoi(optarg);
-      break;
     case 'o':
       output=optarg;
       break;
     case 'v':
       printVersion();
       return 0;
+    case 'n':
+      pageToConvert=std::atoi(optarg);
+      break;
+    case 'N':
+      printNumberOfPages=true;
+      break;
     default:
     case 'h':
       printHelp = true;
       break;
     }
   }
+
   if (argc != 1+optind || printHelp) {
     printUsage();
     return -1;
   }
-  char const *file=argv[optind];
-  librevenge::RVNGFileStream input(file);
+  librevenge::RVNGFileStream input(argv[optind]);
 
   STOFFDocument::Kind kind;
   STOFFDocument::Confidence confidence = STOFFDocument::STOFF_C_NONE;
@@ -149,23 +120,29 @@ int main(int argc, char *argv[])
   catch (...) {
     confidence = STOFFDocument::STOFF_C_NONE;
   }
-  if (confidence != STOFFDocument::STOFF_C_EXCELLENT &&
+  if (confidence != STOFFDocument::STOFF_C_EXCELLENT  &&
       confidence != STOFFDocument::STOFF_C_SUPPORTED_ENCRYPTION) {
     fprintf(stderr,"ERROR: Unsupported file format!\n");
-    return 1;
-  }
-  if (kind != STOFFDocument::STOFF_K_SPREADSHEET && kind != STOFFDocument::STOFF_K_DATABASE) {
-    fprintf(stderr,"ERROR: not a spreadsheet!\n");
     return 1;
   }
   STOFFDocument::Result error=STOFFDocument::STOFF_R_OK;
   librevenge::RVNGStringVector vec;
 
   try {
-    librevenge::RVNGCSVSpreadsheetGenerator listenerImpl(vec, generateFormula);
-    listenerImpl.setSeparators(fieldSeparator, textSeparator, decSeparator);
-    listenerImpl.setDTFormats(dateFormat.c_str(),timeFormat.c_str());
-    error= STOFFDocument::parse(&input, &listenerImpl);
+    if (kind == STOFFDocument::STOFF_K_DRAW) {
+      librevenge::RVNGSVGDrawingGenerator listener(vec, "");
+      error = STOFFDocument::parse(&input, &listener);
+    }
+    else if (kind == STOFFDocument::STOFF_K_PRESENTATION) {
+      librevenge::RVNGSVGPresentationGenerator listener(vec);
+      error = STOFFDocument::parse(&input, &listener);
+    }
+    else {
+      fprintf(stderr,"ERROR: not a graphic/presentation document!\n");
+      return 1;
+    }
+    if (error==STOFFDocument::STOFF_R_OK && (vec.empty() || vec[0].empty()))
+      error = STOFFDocument::STOFF_R_UNKNOWN_ERROR;
   }
   catch (STOFFDocument::Result const &err) {
     error=err;
@@ -185,20 +162,27 @@ int main(int argc, char *argv[])
   if (error != STOFFDocument::STOFF_R_OK)
     return 1;
 
-  if (printNumberOfSheet) {
+  if (printNumberOfPages) {
     std::cout << vec.size() << "\n";
     return 0;
   }
 
-  unsigned page=sheetToConvert>0 ? unsigned(sheetToConvert-1) : 0;
+  unsigned page=pageToConvert>0 ? unsigned(pageToConvert-1) : 0;
   if (page>=vec.size()) {
     fprintf(stderr, "ERROR: can not find page %d!\n", (int) page);
     return 1;
   }
-  if (!output)
+  if (!output) {
+    std::cout << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n";
+    std::cout << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"";
+    std::cout << " \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
     std::cout << vec[page].cstr() << std::endl;
+  }
   else {
     std::ofstream out(output);
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n";
+    out << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"";
+    out << " \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
     out << vec[page].cstr() << std::endl;
   }
   return 0;
