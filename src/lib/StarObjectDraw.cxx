@@ -105,8 +105,10 @@ bool StarObjectDraw::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &
 void StarObjectDraw::defineGraphicStyles(STOFFListenerPtr listener)
 {
   shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
-  if (pool)
+  if (pool) {
     pool->defineGraphicStyles(listener);
+    pool->updateStyles();
+  }
 }
 
 bool StarObjectDraw::sendMasterPages(STOFFGraphicListenerPtr listener)
@@ -478,8 +480,6 @@ bool StarObjectDraw::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
     ascFile.addPos(input->tell());
     ascFile.addNote("Entries(SfxStyleSheets):###extra");
   }
-  if (mainPool)
-    mainPool->updateStyles();
   return true;
 }
 

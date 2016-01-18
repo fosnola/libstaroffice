@@ -39,6 +39,7 @@
 #  define STAR_ITEM_POOL_HXX
 
 #include <map>
+#include <set>
 #include <vector>
 
 #include <libstaroffice/STOFFDocument.hxx>
@@ -102,8 +103,7 @@ public:
   void updateStyles();
   /** update a itemset by adding attribute corresponding to its styles*/
   void updateUsingStyles(StarItemSet &itemSet) const;
-  /** define all graphic styles
-   \note must be called after updateStyles is called*/
+  /** define all graphic styles */
   void defineGraphicStyles(STOFFListenerPtr listener) const;
   /** try to find a style with a name and a family style */
   StarItemStyle const *findStyleWithFamily(librevenge::RVNGString const &style, int family) const;
@@ -117,6 +117,8 @@ public:
   bool loadSurrogate(StarItem &item);
 
 protected:
+  /** define a graphic style */
+  void defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName, std::set<librevenge::RVNGString> &done) const;
   //! try to read a "ItemPool" zone (version 1)
   bool readV1(StarZone &zone, StarItemPool *master);
   //! try to read a "ItemPool" zone (version 2)

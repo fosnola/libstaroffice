@@ -1976,6 +1976,8 @@ void StarItemPool::updateStyles()
       toDo.insert(it->first);
     else {
       StarItemPoolInternal::StyleId parentId(it->second.m_names[1], it->first.m_family);
+      // reset the parent name, as it must no longer be used when creating a styles...
+      it->second.m_names[1].clear();
       if (m_state->m_styleIdToStyleMap.find(parentId)==m_state->m_styleIdToStyleMap.end()) {
         STOFF_DEBUG_MSG(("StarItemPool::updateStyles: can not find style %s-%d\n", parentId.m_name.cstr(), parentId.m_family));
       }
@@ -2061,13 +2063,55 @@ StarItemStyle const *StarItemPool::findStyleWithFamily(librevenge::RVNGString co
   return 0;
 }
 
+void StarItemPool::defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName, std::set<librevenge::RVNGString> &done) const
+{
+  if (styleName.empty() || done.find(styleName)!=done.end())
+    return;
+  done.insert(styleName);
+  if (listener->isGraphicStyleDefined(styleName))
+    return;
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarItemPool::defineGraphicStyle: can not find the listener"));
+    return;
+  }
+  StarItemStyle const *style=findStyleWithFamily(styleName, StarItemStyle::F_Paragraph);
+  if (!style) {
+    STOFF_DEBUG_MSG(("StarItemPool::defineGraphicStyle: can not find graphic style with name %s", styleName.cstr()));
+    return;
+  }
+  STOFFGraphicStyle gStyle;
+  gStyle.m_propertyList.insert("style:display-name", styleName);
+  if (!style->m_names[1].empty()) {
+    if (done.find(style->m_names[1])!=done.end()) {
+      STOFF_DEBUG_MSG(("StarItemPool::defineGraphicStyle: oops find a look with %s", style->m_names[1].cstr()));
+    }
+    else {
+      defineGraphicStyle(listener, style->m_names[1], done);
+      gStyle.m_propertyList.insert("librevenge:parent-display-name", style->m_names[1]);
+    }
+  }
+  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
+       it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
+    if (it->second && it->second->m_attribute)
+      it->second->m_attribute->addTo(gStyle, this);
+  }
+  listener->defineStyle(gStyle);
+}
+
 void StarItemPool::defineGraphicStyles(STOFFListenerPtr listener) const
 {
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarItemPool::defineGraphicStyles: can not find the listener"));
+    return;
+  }
   std::map<StarItemPoolInternal::StyleId,StarItemStyle>::const_iterator sIt;
   for (sIt=m_state->m_styleIdToStyleMap.begin(); sIt!=m_state->m_styleIdToStyleMap.end(); ++sIt) {
     StarItemPoolInternal::StyleId const &id=sIt->first;
     if (id.m_name.empty() || !(id.m_family&StarItemStyle::F_Paragraph))
       continue;
+    std::set<librevenge::RVNGString> done;
+    defineGraphicStyle(listener, id.m_name, done);
+#if 0
     STOFFGraphicStyle gStyle;
     gStyle.m_propertyList.insert("style:display-name", id.m_name);
     for (std::map<int, shared_ptr<StarItem> >::const_iterator it=sIt->second.m_itemSet.m_whichToItemMap.begin();
@@ -2076,6 +2120,7 @@ void StarItemPool::defineGraphicStyles(STOFFListenerPtr listener) const
         it->second->m_attribute->addTo(gStyle, this);
     }
     listener->defineStyle(gStyle);
+#endif
   }
 }
 

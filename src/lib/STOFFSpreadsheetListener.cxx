@@ -40,11 +40,13 @@
 
 #define TEST_SEND_HEADERFOOTER_REGION 0
 
+#include <time.h>
+
 #include <cmath>
 #include <cstring>
 #include <iomanip>
+#include <set>
 #include <sstream>
-#include <time.h>
 
 #include <librevenge/librevenge.h>
 
@@ -79,7 +81,7 @@ struct DocumentState {
     m_pageList(pageList), m_pageSpan(), m_metaData(), m_footNoteNumber(0), m_smallPictureNumber(0),
     m_isDocumentStarted(false), m_isSheetOpened(false), m_isSheetRowOpened(false),
     m_sentListMarkers(), m_numberingIdMap(),
-    m_subDocuments()
+    m_subDocuments(), m_definedGraphicStyleSet()
   {
   }
   //! destructor
@@ -105,6 +107,8 @@ struct DocumentState {
   /** a map cell's format to id */
   std::map<librevenge::RVNGString,int> m_numberingIdMap;
   std::vector<STOFFSubDocumentPtr> m_subDocuments; /** list of document actually open */
+  //! the set of defined graphic style
+  std::set<librevenge::RVNGString> m_definedGraphicStyleSet;
 
 private:
   DocumentState(const DocumentState &);
@@ -217,9 +221,15 @@ STOFFSpreadsheetListener::~STOFFSpreadsheetListener()
 
 void STOFFSpreadsheetListener::defineStyle(STOFFGraphicStyle const &style)
 {
+  if (style.m_propertyList["style:display-name"])
+    m_ds->m_definedGraphicStyleSet.insert(style.m_propertyList["style:display-name"]->getStr());
   m_documentInterface->defineGraphicStyle(style.m_propertyList);
 }
 
+bool STOFFSpreadsheetListener::isGraphicStyleDefined(librevenge::RVNGString const &name) const
+{
+  return m_ds->m_definedGraphicStyleSet.find(name)!=m_ds->m_definedGraphicStyleSet.end();
+}
 ///////////////////
 // text data
 ///////////////////

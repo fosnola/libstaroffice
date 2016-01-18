@@ -141,7 +141,8 @@ public:
   // ------ style definition -----------
   /** defines a graphic styles, return the graphic id */
   virtual void defineStyle(STOFFGraphicStyle const &style) = 0;
-
+  /** check if a graphic style with a display name is already defined */
+  virtual bool isGraphicStyleDefined(librevenge::RVNGString const &name) const = 0;
   // ------- fields ----------------
   //! adds a field type
   virtual void insertField(STOFFField const &field)=0;

@@ -178,6 +178,8 @@ public:
   // ------ style definition -----------
   /** defines a graphic styles */
   void defineStyle(STOFFGraphicStyle const &style);
+  /** check if a graphic style with a display name is already defined */
+  bool isGraphicStyleDefined(librevenge::RVNGString const &name) const;
 
   // ------- fields ----------------
   //! adds a field type

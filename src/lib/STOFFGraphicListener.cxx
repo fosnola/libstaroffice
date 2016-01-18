@@ -31,10 +31,12 @@
 * instead of those above.
 */
 
+#include <time.h>
+
 #include <cstring>
 #include <iomanip>
+#include <set>
 #include <sstream>
-#include <time.h>
 
 #include <librevenge/librevenge.h>
 
@@ -66,7 +68,8 @@ struct GraphicState {
   explicit GraphicState(std::vector<STOFFPageSpan> const &pageList) :
     m_pageList(pageList), m_metaData(),
     m_isDocumentStarted(false), m_isPageSpanOpened(false), m_isMasterPageSpanOpened(false), m_isAtLeastOnePageOpened(false),
-    m_isHeaderFooterOpened(false), m_isHeaderFooterRegionOpened(false), m_pageSpan(), m_sentListMarkers(), m_subDocuments()
+    m_isHeaderFooterOpened(false), m_isHeaderFooterRegionOpened(false), m_pageSpan(), m_sentListMarkers(), m_subDocuments(),
+    m_definedGraphicStyleSet()
   {
   }
   //! destructor
@@ -94,6 +97,8 @@ struct GraphicState {
   std::vector<int> m_sentListMarkers;
   //! the list of actual subdocument
   std::vector<STOFFSubDocumentPtr> m_subDocuments;
+  //! the set of defined graphic style
+  std::set<librevenge::RVNGString> m_definedGraphicStyleSet;
 };
 
 /** the state of a STOFFGraphicListener */
@@ -184,7 +189,14 @@ STOFFGraphicListener::~STOFFGraphicListener()
 
 void STOFFGraphicListener::defineStyle(STOFFGraphicStyle const &style)
 {
+  if (style.m_propertyList["style:display-name"])
+    m_ds->m_definedGraphicStyleSet.insert(style.m_propertyList["style:display-name"]->getStr());
   m_documentInterface->setStyle(style.m_propertyList);
+}
+
+bool STOFFGraphicListener::isGraphicStyleDefined(librevenge::RVNGString const &name) const
+{
+  return m_ds->m_definedGraphicStyleSet.find(name)!=m_ds->m_definedGraphicStyleSet.end();
 }
 
 ///////////////////
