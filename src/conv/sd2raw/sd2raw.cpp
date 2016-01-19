@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 
   STOFFDocument::Result error = STOFFDocument::STOFF_R_OK;
   try {
-    if (kind == STOFFDocument::STOFF_K_DRAW) {
+    if (kind == STOFFDocument::STOFF_K_DRAW || kind == STOFFDocument::STOFF_K_GRAPHIC) {
       librevenge::RVNGRawDrawingGenerator documentGenerator(printIndentLevel);
       error=STOFFDocument::parse(&input, &documentGenerator,password);
     }

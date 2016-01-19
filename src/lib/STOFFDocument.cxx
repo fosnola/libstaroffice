@@ -35,8 +35,9 @@
  * libstoff API: implementation of main interface functions
  */
 
-#include "SDCParser.hxx"
 #include "SDAParser.hxx"
+#include "SDCParser.hxx"
+#include "SDGParser.hxx"
 #include "SDWParser.hxx"
 
 #include "STOFFHeader.hxx"
@@ -314,12 +315,19 @@ catch (...)
 shared_ptr<STOFFGraphicParser> getGraphicParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd)
 {
   shared_ptr<STOFFGraphicParser> parser;
-  if (!header || header->getKind()!=STOFFDocument::STOFF_K_DRAW)
+  if (!header || (header->getKind()!=STOFFDocument::STOFF_K_DRAW && header->getKind()!=STOFFDocument::STOFF_K_GRAPHIC))
     return parser;
   try {
-    SDAParser *sddParser=new SDAParser(input, header);
-    parser.reset(sddParser);
-    if (passwd) sddParser->setDocumentPassword(passwd);
+    if (header->getKind()==STOFFDocument::STOFF_K_DRAW) {
+      SDAParser *sdaParser=new SDAParser(input, header);
+      parser.reset(sdaParser);
+      if (passwd) sdaParser->setDocumentPassword(passwd);
+    }
+    else {
+      SDGParser *sdgParser=new SDGParser(input, header);
+      parser.reset(sdgParser);
+      if (passwd) sdgParser->setDocumentPassword(passwd);
+    }
   }
   catch (...) {
   }
@@ -336,7 +344,7 @@ shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, 
   if (header->getKind()!=STOFFDocument::STOFF_K_TEXT)
     return parser;
 #else
-  if (header->getKind()==STOFFDocument::STOFF_K_SPREADSHEET || header->getKind()==STOFFDocument::STOFF_K_DRAW)
+  if (header->getKind()==STOFFDocument::STOFF_K_SPREADSHEET || header->getKind()==STOFFDocument::STOFF_K_DRAW || header->getKind()==STOFFDocument::STOFF_K_GRAPHIC)
     return parser;
 #endif
   try {

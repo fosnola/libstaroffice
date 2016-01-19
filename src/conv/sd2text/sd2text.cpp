@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
   bool useStringVector=false;
   STOFFDocument::Result error = STOFFDocument::STOFF_R_OK;
   try {
-    if (kind == STOFFDocument::STOFF_K_DRAW) {
+    if (kind == STOFFDocument::STOFF_K_DRAW || kind == STOFFDocument::STOFF_K_GRAPHIC) {
       if (isInfo) {
         printf("ERROR: can not print info concerning a graphic document!\n");
         return 1;

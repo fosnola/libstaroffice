@@ -185,6 +185,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\SDGParser.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\SDWParser.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -646,6 +654,8 @@
 			<File RelativePath="..\..\src\lib\SDAParser.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\SDCParser.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\SDGParser.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\SDWParser.hxx">
 			</File>

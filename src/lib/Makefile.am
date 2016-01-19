@@ -20,6 +20,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	SDAParser.hxx				\
 	SDCParser.cxx				\
 	SDCParser.hxx				\
+	SDGParser.cxx				\
+	SDGParser.hxx				\
 	SDWParser.cxx				\
 	SDWParser.hxx				\
 	STOFFCell.cxx				\

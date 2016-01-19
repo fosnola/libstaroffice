@@ -241,12 +241,6 @@ void SDAParser::createDocument(librevenge::RVNGDrawingInterface *documentInterfa
   }
 }
 
-bool SDAParser::sendGraphics()
-{
-  STOFF_DEBUG_MSG(("SDAParser::sendGraphics: not implemented\n"));
-  return false;
-}
-
 ////////////////////////////////////////////////////////////
 //
 // Intermediate level

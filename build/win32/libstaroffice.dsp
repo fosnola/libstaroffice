@@ -95,6 +95,10 @@ SOURCE=..\..\src\lib\SDCParser.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\SDGParser.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\SDWParser.cxx
 # End Source File
 # Begin Source File
@@ -340,6 +344,10 @@ SOURCE=..\..\src\lib\SDAParser.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\SDCParser.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\SDGParser.hxx
 # End Source File
 # Begin Source File
 
