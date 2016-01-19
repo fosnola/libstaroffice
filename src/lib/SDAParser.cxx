@@ -53,13 +53,13 @@
 #include "StarObjectText.hxx"
 #include "StarZone.hxx"
 
-#include "SDDParser.hxx"
+#include "SDAParser.hxx"
 
-/** Internal: the structures of a SDDParser */
-namespace SDDParserInternal
+/** Internal: the structures of a SDAParser */
+namespace SDAParserInternal
 {
 ////////////////////////////////////////
-//! Internal: the state of a SDDParser
+//! Internal: the state of a SDAParser
 struct State {
   //! constructor
   State() : m_actPage(0), m_numPages(0), m_mainGraphic()
@@ -75,19 +75,19 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SDDParser::SDDParser(STOFFInputStreamPtr input, STOFFHeader *header) :
-  STOFFGraphicParser(input, header), m_password(0), m_oleParser(), m_state(new SDDParserInternal::State)
+SDAParser::SDAParser(STOFFInputStreamPtr input, STOFFHeader *header) :
+  STOFFGraphicParser(input, header), m_password(0), m_oleParser(), m_state(new SDAParserInternal::State)
 {
 }
 
-SDDParser::~SDDParser()
+SDAParser::~SDAParser()
 {
 }
 
 ////////////////////////////////////////////////////////////
 // the parser
 ////////////////////////////////////////////////////////////
-void SDDParser::parse(librevenge::RVNGDrawingInterface *docInterface)
+void SDAParser::parse(librevenge::RVNGDrawingInterface *docInterface)
 {
   if (!getInput().get() || !checkHeader(0L))  throw(libstoff::ParseException());
   bool ok = true;
@@ -103,7 +103,7 @@ void SDDParser::parse(librevenge::RVNGDrawingInterface *docInterface)
     ascii().reset();
   }
   catch (...) {
-    STOFF_DEBUG_MSG(("SDDParser::parse: exception catched when parsing\n"));
+    STOFF_DEBUG_MSG(("SDAParser::parse: exception catched when parsing\n"));
     ok = false;
   }
 
@@ -112,7 +112,7 @@ void SDDParser::parse(librevenge::RVNGDrawingInterface *docInterface)
 }
 
 
-bool SDDParser::createZones()
+bool SDAParser::createZones()
 {
   m_oleParser.reset(new STOFFOLEParser);
   m_oleParser->parse(getInput());
@@ -155,7 +155,7 @@ bool SDDParser::createZones()
       std::string const &name = unparsedOLEs[i];
       STOFFInputStreamPtr ole = getInput()->getSubStreamByName(name.c_str());
       if (!ole.get()) {
-        STOFF_DEBUG_MSG(("SDDParser::createZones: error: can not find OLE part: \"%s\"\n", name.c_str()));
+        STOFF_DEBUG_MSG(("SDAParser::createZones: error: can not find OLE part: \"%s\"\n", name.c_str()));
         continue;
       }
 
@@ -209,7 +209,7 @@ bool SDDParser::createZones()
     }
   }
   if (!m_state->m_mainGraphic) {
-    STOFF_DEBUG_MSG(("SDDParser::createZones: error: can not find the main element\n"));
+    STOFF_DEBUG_MSG(("SDAParser::createZones: error: can not find the main element\n"));
     return false;
   }
   return m_state->m_mainGraphic->parse();
@@ -218,7 +218,7 @@ bool SDDParser::createZones()
 ////////////////////////////////////////////////////////////
 // create the document and send data
 ////////////////////////////////////////////////////////////
-void SDDParser::createDocument(librevenge::RVNGDrawingInterface *documentInterface)
+void SDAParser::createDocument(librevenge::RVNGDrawingInterface *documentInterface)
 {
   if (!documentInterface) return;
 
@@ -241,9 +241,9 @@ void SDDParser::createDocument(librevenge::RVNGDrawingInterface *documentInterfa
   }
 }
 
-bool SDDParser::sendGraphics()
+bool SDAParser::sendGraphics()
 {
-  STOFF_DEBUG_MSG(("SDDParser::sendGraphics: not implemented\n"));
+  STOFF_DEBUG_MSG(("SDAParser::sendGraphics: not implemented\n"));
   return false;
 }
 
@@ -262,9 +262,9 @@ bool SDDParser::sendGraphics()
 ////////////////////////////////////////////////////////////
 // read the header
 ////////////////////////////////////////////////////////////
-bool SDDParser::checkHeader(STOFFHeader *header, bool /*strict*/)
+bool SDAParser::checkHeader(STOFFHeader *header, bool /*strict*/)
 {
-  *m_state = SDDParserInternal::State();
+  *m_state = SDAParserInternal::State();
 
   STOFFInputStreamPtr input = getInput();
   if (!input || !input->hasDataFork() || !input->isStructured())

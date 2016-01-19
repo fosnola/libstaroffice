@@ -169,7 +169,7 @@
 	</References>
 	<Files>
 		<FiltercName="Source Files" Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
-			<File RelativePath="..\..\src\lib\SDCParser.cxx">
+			<File RelativePath="..\..\src\lib\SDAParser.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
 				</FileConfiguration>
@@ -177,7 +177,7 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
-			<File RelativePath="..\..\src\lib\SDDParser.cxx">
+			<File RelativePath="..\..\src\lib\SDCParser.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
 				</FileConfiguration>
@@ -643,9 +643,9 @@
 			</File>
 		</Filter>
 		<Filter Name="Header Files" Filter="h;hpp;hxx;hm;inl">
-			<File RelativePath="..\..\src\lib\SDCParser.hxx">
+			<File RelativePath="..\..\src\lib\SDAParser.hxx">
 			</File>
-			<File RelativePath="..\..\src\lib\SDDParser.hxx">
+			<File RelativePath="..\..\src\lib\SDCParser.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\SDWParser.hxx">
 			</File>

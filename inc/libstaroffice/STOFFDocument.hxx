@@ -68,11 +68,12 @@ public:
     STOFF_K_BITMAP /** bitmap/image */,
     STOFF_K_CHART /** chart */,
     STOFF_K_DATABASE /** database */,
-    STOFF_K_DRAW /** vectorized graphic*/,
+    STOFF_K_DRAW /** vectorized graphic: .sda*/,
     STOFF_K_MATH /** math*/,
     STOFF_K_PRESENTATION /** presentation*/,
-    STOFF_K_SPREADSHEET /** spreadsheet */,
-    STOFF_K_TEXT /** word processing file*/
+    STOFF_K_SPREADSHEET /** spreadsheet: .sdc */,
+    STOFF_K_TEXT /** word processing file*/,
+    STOFF_K_GRAPHIC /** gallery graphic: .sdg */
   };
   /** an enum which defines the result of the file parsing */
   enum Result {

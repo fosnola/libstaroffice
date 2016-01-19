@@ -16,10 +16,10 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_LIBADD  =
 libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_DEPENDENCIES = @LIBSTAROFFICE_WIN32_RESOURCE@
 libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_LDFLAGS = $(version_info) -export-dynamic -no-undefined
 libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES = \
+	SDAParser.cxx				\
+	SDAParser.hxx				\
 	SDCParser.cxx				\
 	SDCParser.hxx				\
-	SDDParser.cxx				\
-	SDDParser.hxx				\
 	SDWParser.cxx				\
 	SDWParser.hxx				\
 	STOFFCell.cxx				\

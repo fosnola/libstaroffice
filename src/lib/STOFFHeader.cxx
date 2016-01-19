@@ -62,8 +62,16 @@ std::vector<STOFFHeader> STOFFHeader::constructHeader(STOFFInputStreamPtr input)
   if (!input) return res;
 
   // ----------- now check data fork ------------
-  if (!input->hasDataFork() || input->size() < 8 || !input->isStructured())
+  if (!input->hasDataFork() || input->size() < 8)
     return res;
+  if (!input->isStructured()) {
+    if (input->readULong(4)==0x53474133) {// SGA3
+      STOFF_DEBUG_MSG(("STOFFHeader::constructHeader: find a star graphic document\n"));
+      res.push_back(STOFFHeader(1, STOFFDocument::STOFF_K_GRAPHIC));
+    }
+    return res;
+  }
+
   if (input->getSubStreamByName("StarCalcDocument")) {
     STOFF_DEBUG_MSG(("STOFFHeader::constructHeader: find a star calc document\n"));
     res.push_back(STOFFHeader(1, STOFFDocument::STOFF_K_SPREADSHEET));

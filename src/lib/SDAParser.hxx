@@ -32,11 +32,11 @@
 */
 
 /*
- * Parser to convert sdd StarOffice document
+ * Parser to convert sda StarOffice document
  *
  */
-#ifndef SDD_PARSER
-#  define SDD_PARSER
+#ifndef SDA_PARSER
+#  define SDA_PARSER
 
 #include <vector>
 
@@ -46,7 +46,7 @@
 
 #include "STOFFParser.hxx"
 
-namespace SDDParserInternal
+namespace SDAParserInternal
 {
 struct State;
 }
@@ -56,18 +56,18 @@ class StarObject;
 class StarZone;
 class STOFFOLEParser;
 class StarFormatManager;
-/** \brief the main class to read a StarOffice sdd file
+/** \brief the main class to read a StarOffice sda file
  *
  *
  *
  */
-class SDDParser : public STOFFGraphicParser
+class SDAParser : public STOFFGraphicParser
 {
 public:
   //! constructor
-  SDDParser(STOFFInputStreamPtr input, STOFFHeader *header);
+  SDAParser(STOFFInputStreamPtr input, STOFFHeader *header);
   //! destructor
-  virtual ~SDDParser();
+  virtual ~SDAParser();
   //! set the document password
   void setDocumentPassword(char const *passwd)
   {
@@ -102,10 +102,10 @@ protected:
   //! the ole parser
   shared_ptr<STOFFOLEParser> m_oleParser;
   //! the state
-  shared_ptr<SDDParserInternal::State> m_state;
+  shared_ptr<SDAParserInternal::State> m_state;
 private:
-  SDDParser(SDDParser const &orig);
-  SDDParser &operator=(SDDParser const &orig);
+  SDAParser(SDAParser const &orig);
+  SDAParser &operator=(SDAParser const &orig);
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

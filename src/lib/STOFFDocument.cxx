@@ -36,7 +36,7 @@
  */
 
 #include "SDCParser.hxx"
-#include "SDDParser.hxx"
+#include "SDAParser.hxx"
 #include "SDWParser.hxx"
 
 #include "STOFFHeader.hxx"
@@ -317,7 +317,7 @@ shared_ptr<STOFFGraphicParser> getGraphicParserFromHeader(STOFFInputStreamPtr &i
   if (!header || header->getKind()!=STOFFDocument::STOFF_K_DRAW)
     return parser;
   try {
-    SDDParser *sddParser=new SDDParser(input, header);
+    SDAParser *sddParser=new SDAParser(input, header);
     parser.reset(sddParser);
     if (passwd) sddParser->setDocumentPassword(passwd);
   }

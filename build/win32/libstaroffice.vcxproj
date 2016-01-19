@@ -102,11 +102,11 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\lib\SDCParser.cxx">
+    <ClCompile Include="..\..\src\lib\SDAParser.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="..\..\src\lib\SDDParser.cxx">
+    <ClCompile Include="..\..\src\lib\SDCParser.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -340,8 +340,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\lib\SDAParser.hxx" />
     <ClInclude Include="..\..\src\lib\SDCParser.hxx" />
-    <ClInclude Include="..\..\src\lib\SDDParser.hxx" />
     <ClInclude Include="..\..\src\lib\SDWParser.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFCell.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFCellStyle.hxx" />
