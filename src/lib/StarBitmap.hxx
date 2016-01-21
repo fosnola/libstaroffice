@@ -77,7 +77,8 @@ public:
   bool readBitmap(StarZone &zone, bool inFileHeader, long lastPos, librevenge::RVNGBinaryData &data, std::string &type);
   //! try to convert the read data in ppm
   bool getData(librevenge::RVNGBinaryData &data, std::string &type) const;
-
+  //! try to return the bitmap size (in point)
+  STOFFVec2i getBitmapSize() const;
 protected:
   //! try to read the bitmap information block
   bool readBitmapInformation(StarZone &zone, StarBitmapInternal::Bitmap &info, long lastPos);

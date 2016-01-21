@@ -190,6 +190,11 @@ bool StarBitmap::getData(librevenge::RVNGBinaryData &data, std::string &type) co
   return true;
 }
 
+STOFFVec2i StarBitmap::getBitmapSize() const
+{
+  return STOFFVec2i((int) m_state->m_bitmap.m_width, (int) m_state->m_bitmap.m_height);
+}
+
 bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, librevenge::RVNGBinaryData &result, std::string &type)
 {
   result.clear();

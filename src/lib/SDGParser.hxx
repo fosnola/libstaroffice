@@ -90,6 +90,11 @@ protected:
   // low level
   //
 
+  //! try to read a SGA3 zone
+  bool readSGA3(StarZone &zone);
+  //! try to read a bitmap
+  bool readBitmap(StarZone &zone);
+
   //
   // data
   //
