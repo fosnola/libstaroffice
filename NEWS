@@ -1,3 +1,15 @@
+0.0.1:
+- 22/01/2015:
+   - try to retrieve cell's styles, number formatings, formula with Index and comments in .sdc files,
+   - try to retrieve basic shapes and bitmap in .sda files + some formatting(but not all),
+   - try to retrieve the bitmap in .sdg files,
+   - add a new kind in STOFFDocument.hxx: STOFF_K_GRAPHIC to indicate that the file is a .sdg file,
+
+   + finish to implement the StarItemPool and add functions to retrieve many
+     attributes' contents,
+   + correct a problem when we fail to retrieve all the texts in small EditZone
+     (still with no formattings)
+   
 0.0.0:
 - 09/29/2015: begin to reconstruct the "basic" content of sdc files, ie.
    - the sheets' names

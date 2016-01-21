@@ -135,7 +135,6 @@ bool SDGParser::createZones()
   ascFile.addPos(0);
   ascFile.addNote("FileHeader");
 
-  libstoff::DebugStream f;
   input->seek(0, librevenge::RVNG_SEEK_SET);
   long pos=input->tell();
   while (readSGA3(zone))
@@ -350,11 +349,7 @@ bool SDGParser::checkHeader(STOFFHeader *header, bool /*strict*/)
     return false;
   if (header)
     header->reset(1, STOFFDocument::STOFF_K_GRAPHIC);
-#ifdef DEBUG
   return true;
-#else
-  return false;
-#endif
 }
 
 
