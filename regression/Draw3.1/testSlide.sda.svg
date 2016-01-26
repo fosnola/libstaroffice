@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  >
+<defs>
+  <linearGradient id="grad1" >
+    <stop offset="0%" stop-color="#00ffff" stop-opacity="0.9000" />
+    <stop offset="100%" stop-color="#0000ff" stop-opacity="1.0000" />
+  </linearGradient>
+  <linearGradient xlink:href="#grad1" id="grad2" x1="0" y1="0" x2="0" y2="1" gradientTransform="rotate(-0 .5 .5)" gradientUnits="objectBoundingBox" >
+  </linearGradient>
+</defs>
+<rect x="0.0000" y="0.0000" width="1050.0000" height="1485.0000" style=""/>
+<text x="107.9000" y="353.5000">
+<tspan >
+Klicken Sie, um das Format des Titeltextes zu bearbeiten</tspan>
+</text>
+<text x="107.9000" y="1237.5000">
+<tspan >
+Klicken Sie, um die Formate des Gliederungstextes zu bearbeitenZweite GliederungsebeneDritte GliederungsebeneVierte GliederungsebeneFünfte GliederungsebeneSechste GliederungsebeneSiebente GliederungsebeneAchte GliederungsebeneNeunte Gliederungsebene</tspan>
+</text>
+<polygon points="17.6000 0.0000, 52.9500 0.0000, 52.9500 1166.7000, 17.6000 1308.1000, 17.6000 0.0000"
+style=""/>
+<polygon points="52.9500 0.0000, 88.3000 0.0000, 88.3000 990.0000, 52.9500 1131.3500, 52.9500 0.0000"
+style=""/>
+<polygon points="43.5000 0.0000, 61.1500 0.0000, 61.1500 883.8500, 43.5000 990.0000, 43.5000 0.0000"
+style=""/>
+<polygon points="830.7500 1449.5500, 1042.8500 1025.2500, 1042.8500 1449.5500, 830.7500 1449.5500"
+style=""/>
+<text x="107.9000" y="353.5500">
+<tspan >
+Doubleclick to add a title</tspan>
+</text>
+<image x="107.2500" y="388.8500" width="847.9000" height="848.6500" xlink:href="data:image/pct;base64,eggAAEJNNgAAAAAAAAB2AAAAKAAAAEAAAABAAAAAAQAEAAAAAAAACAAAAAAAAAAAAAAQAAAAAAAAAP///wH//wAB/wD/Af8AAAEA//8BAP8AAQAA/wGAgIABwMDAAYCAAAGAAIABgAAAAQCAgAEAgAABAACAAQAAAAGIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACIiIiIiIiIiIB3d3d3d3d3d3d3d3d3d3d3d3d3d3d3cIiIiIiIiIiIgHAAD2ZmbwDzMzPwD1VVXwD0RETwAABwiIiIiIiIiIiAcAAPZmZvAPMzM/APVVVfAPRERPAAAHCIiIiIiIiIiIBwAA9mZm8A8zMz8A9VVV8A9ERE8AAAcIiIiIiIiIiIgHAAD2ZmbwDzMzPwD1VVXwD0RETwAABwiIiIiIiIiIiAcAAPZmZvAPMzM/APVVVfAPRERPAAAHCIiIiIiIiIiIBwAA9mZm8A8zMz8A9VVV8A9ERE8AAAcIiIiIiIiIiIgHAAD2ZmbwDzMzPwD1VVXwD0RETwAABwiIiIiIiIiIiAcAAPZmZvAPMzM/APVVVfAPRERPAAAHCIiIiIiIiIiIBwAA9mZm8A8zMz8A9VVV8A9ERE8AAAcIiIiIiIiIiIgHAAD2ZmbwDzMzPwD1VVXwD0RETwAABwiIiIiIiIiIiAcAAPZmZvAPMzM/APVVVfAPRERPAAAHCIiIiIiIiIiIBwAA9mZm8A8zMz8A////8A9ERE8AAAcIiIiIiIiIiIgHAAD2ZmbwDzMzPwAAAAAAD0RETwAABwiIiIiIiIiIiAcAAP////APMzM/AAAAAAAPRERPAAAHCIiIiIiIiIiIBwAAAAAAAA8zMz8AAAAAAA9ERE8AAAcIiIiIiIiIiIgHAAAAAAAADzMzPwAAAAAAD////wAABwiIiIiIiIiIiAcAAAAAAAAPMzM/AAAAAAAAAAAAAAAHCIiIiIiIiIiIBwAAAAAAAA8zMz8AAAAAAAAAAAAAAAcIiIiIiIiIiIgHAAAAAAAAD////wAAAAAAAAAAAAAABwiIiIiIiIiIiAcAAAAAAAAAAAAAAAAAAAAAAAAAAAAHCIiIiIiIiIiIBwAAAAAAAAAAAAAAAAAAAAAAAAAAAAcIiIiIiIiIiIgHAAAAAAAAAAAAAAAAAAAAAAAAAAAABwiIiIiIiIiIiAd3d3d3d3d3d3d3d3d3d3d3d3d3d3d3CIiIiIiIiIiIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiA==" />
+<line x1="141.3500"  y1="459.5500" x2="530.2500"  y2="707.0500"
+style=""/>
+<ellipse cx="472.1000" cy="387.7000" rx="187.5000" ry="112.5000" style=""/>
+<ellipse cx="595.0000" cy="529.3500" rx="37.5000" ry="100.0000" style=""/>
+<ellipse cx="826.2000" cy="512.1000" rx="75.0000" ry="75.0000" style=""/>
+<ellipse cx="504.8500" cy="698.1500" rx="112.5000" ry="75.0000" style=""/>
+<line x1="600.0000"  y1="675.0000" x2="825.0000"  y2="475.0000"
+style=""/>
+<polyline points="200.0000 550.0000, 150.0000 575.0000, 75.0000 700.0000, 125.0000 700.0000, 150.0000 725.0000, 225.0000 725.0000, 250.0000 775.0000, 225.0000 850.0000, 400.0000 850.0000, 475.0000 675.0000, 425.0000 575.0000, 300.0000 650.0000, 250.0000 650.0000, 250.0000 675.0000, 575.0000 850.0000"
+style=""/>
+<polygon points="450.0000 250.0000, 425.0000 325.0000, 350.0000 400.0000, 350.0000 450.0000, 575.0000 325.0000, 450.0000 250.0000"
+style=""/>
+<path d=" 
+M275.0000,950.0000
+C85.3000,951.7500 205.6000,1100.6500 300.0000,1125.0000
+C632.5500,1210.8500 502.1000,770.2000 325.0000,950.0000
+L275.0000,1000.0000
+L400.0000,1025.0000" 
+style=""/>
+<path d=" 
+M571.0500,1048.1000
+C649.2500,1266.3500 840.3500,1015.0500 696.3500,948.5000
+C608.5000,907.8500 599.7500,1057.9500 645.9000,1098.3500
+L595.9500,1073.1500
+L571.0500,1048.1000
+Z" 
+style=""/>
+</svg>
+

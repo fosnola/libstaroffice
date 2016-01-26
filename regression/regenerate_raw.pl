@@ -4,7 +4,7 @@ $html = 1;
 
 sub GenRaw {
 
-    $STOFFVL = 'Calc3.1';
+    $STOFFVL = 'Calc3.1 Draw3.1';
 
     @stoffVersionList = split(/\s+/, $STOFFVL);
 
@@ -33,7 +33,7 @@ sub GenRaw {
 
 	    `sdw2html $filePath >$filePath.html` if $fileType eq "T";
 	    `sdc2csv -o $filePath.csv $filePath` if $fileType eq "S";
-	    #`sd2svg -t -o $filePath.svg $filePath` if ($fileType eq "G" || $fileType eq "P");
+	    `sd2svg  -o $filePath.svg $filePath` if ($fileType eq "G" || $fileType eq "P");
 
 	    `sd2odf $filePath > $filePath.writerperfect.tmp`;
 	    `xmllint --format $filePath.writerperfect.tmp > $filePath.writerperfect`;

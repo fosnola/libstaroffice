@@ -149,7 +149,7 @@ sub RegTest
   my $endLine=($html?"<br>\n":"\n");
 
   # list of directories containing test files
-  my @listDirectory = ( "Calc3.1" );
+  my @listDirectory = ( "Calc3.1", "Draw3.1" );
 
   # list of commands to test
   # type => [ "name", "extension", "array of accepted types", "command", "filter" ]
@@ -160,7 +160,7 @@ sub RegTest
     "html" => [ "Html", "html", ["T"], "sdw2html", 0],
     "odf" => ["WriterPerfect", "writerperfect", ["G", "P", "S", "T"], "sd2odf", "xmllint --format"],
     "raw"=>["Raw", "raw", ["G", "P", "S", "T"], "sd2raw", 0],
-    "svg" => ["SVG", "svg", ["G", "P"], "sd2svg -t", 0]
+    "svg" => ["SVG", "svg", ["G", "P"], "sd2svg", 0]
       );
   
   # valgrind command
