@@ -104,13 +104,11 @@ bool StarObjectText::parse()
     }
 
     std::string::size_type pos = name.find_last_of('/');
-    std::string dir(""), base;
+    std::string base;
     if (pos == std::string::npos) base = name;
     else if (pos == 0) base = name.substr(1);
-    else {
-      dir = name.substr(0,pos);
+    else
       base = name.substr(pos+1);
-    }
     ole->setReadInverted(true);
     if (base=="SwNumRules") {
       readSwNumRuleList(ole, name);

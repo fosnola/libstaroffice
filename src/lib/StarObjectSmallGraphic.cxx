@@ -228,7 +228,7 @@ class Graphic
 {
 public:
   //! constructor
-  Graphic(int id) : m_identifier(id)
+  explicit Graphic(int id) : m_identifier(id)
   {
   }
   //! destructor
@@ -263,7 +263,7 @@ class SCHUGraphic : public Graphic
 {
 public:
   //! constructor
-  SCHUGraphic(int id) : Graphic(id), m_id(0), m_adjust(0), m_orientation(0), m_column(0), m_row(0), m_factor(0)
+  explicit SCHUGraphic(int id) : Graphic(id), m_id(0), m_adjust(0), m_orientation(0), m_column(0), m_row(0), m_factor(0)
   {
   }
   //! return the object name
@@ -335,7 +335,7 @@ class SDUDGraphic : public Graphic
 {
 public:
   //! constructor
-  SDUDGraphic(int id) : Graphic(id)
+  explicit SDUDGraphic(int id) : Graphic(id)
   {
   }
   //! return the object name
@@ -370,7 +370,7 @@ class SdrGraphic : public Graphic
 {
 public:
   //! constructor
-  SdrGraphic(int id) : Graphic(id), m_bdbox(), m_layerId(-1), m_anchorPosition(0,0), m_polygon()
+  explicit SdrGraphic(int id) : Graphic(id), m_bdbox(), m_layerId(-1), m_anchorPosition(0,0), m_polygon()
   {
     for (int i=0; i<6; ++i) m_flags[i]=false;
   }
@@ -450,7 +450,7 @@ class SdrGraphicAttribute : public SdrGraphic
 {
 public:
   //! constructor
-  SdrGraphicAttribute(int id) : SdrGraphic(id), m_itemList(), m_sheetStyle("")
+  explicit SdrGraphicAttribute(int id) : SdrGraphic(id), m_itemList(), m_sheetStyle("")
   {
   }
   //! basic print function
@@ -502,7 +502,7 @@ class SdrGraphicGroup : public SdrGraphic
 {
 public:
   //! constructor
-  SdrGraphicGroup(int id) : SdrGraphic(id), m_groupName(), m_child(), m_refPoint(), m_hasRefPoint(false), m_groupDrehWink(0), m_groupShearWink(0)
+  explicit SdrGraphicGroup(int id) : SdrGraphic(id), m_groupName(), m_child(), m_refPoint(), m_hasRefPoint(false), m_groupDrehWink(0), m_groupShearWink(0)
   {
   }
   //! basic print function
@@ -557,7 +557,7 @@ class SdrGraphicText : public SdrGraphicAttribute
 {
 public:
   //! constructor
-  SdrGraphicText(int id) : SdrGraphicAttribute(id), m_textKind(0), m_textRectangle(),
+  explicit SdrGraphicText(int id) : SdrGraphicAttribute(id), m_textKind(0), m_textRectangle(),
     m_textDrehWink(0), m_textShearWink(0), m_outlinerParaObject(), m_textBound()
   {
   }
@@ -636,7 +636,7 @@ class SdrGraphicRect : public SdrGraphicText
 {
 public:
   //! constructor
-  SdrGraphicRect(int id) : SdrGraphicText(id), m_eckRag(0)
+  explicit SdrGraphicRect(int id) : SdrGraphicText(id), m_eckRag(0)
   {
   }
   //! try to send the graphic to the listener
@@ -723,7 +723,7 @@ class SdrGraphicCircle : public SdrGraphicRect
 {
 public:
   //! constructor
-  SdrGraphicCircle(int id) : SdrGraphicRect(id), m_circleItem()
+  explicit SdrGraphicCircle(int id) : SdrGraphicRect(id), m_circleItem()
   {
     m_angles[0]=m_angles[1]=0;
   }
@@ -1032,7 +1032,7 @@ class SdrGraphicOLE : public SdrGraphicRect
 {
 public:
   //! constructor
-  SdrGraphicOLE(int id) : SdrGraphicRect(id), m_graphic()
+  explicit SdrGraphicOLE(int id) : SdrGraphicRect(id), m_graphic()
   {
   }
   //! basic print function
@@ -1125,7 +1125,7 @@ class SdrGraphicPath : public SdrGraphicText
 {
 public:
   //! constructor
-  SdrGraphicPath(int id) : SdrGraphicText(id), m_pathPolygons()
+  explicit SdrGraphicPath(int id) : SdrGraphicText(id), m_pathPolygons()
   {
   }
   //! try to send the graphic to the listener
@@ -2319,7 +2319,7 @@ bool StarObjectSmallGraphic::readSVDRObjectMeasure(StarZone &zone, StarObjectSma
 
   std::string extra=f.str();
   f.str("");
-  f << "SVDR[" << zone.getRecordLevel() << "]:" << graphic;
+  f << "SVDR[" << zone.getRecordLevel() << "]:" << graphic << extra;
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 

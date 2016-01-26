@@ -97,7 +97,6 @@ std::ostream &operator<<(std::ostream &o, STOFFGraphicShape const &sh)
   case STOFFGraphicShape::C_Unknown:
     o << "undef,";
     break;
-    break;
   }
   o << "[" << sh.m_propertyList.getPropString().cstr() << "],";
   o << sh.m_extra;

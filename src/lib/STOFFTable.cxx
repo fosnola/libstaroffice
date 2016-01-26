@@ -56,7 +56,7 @@ namespace STOFFTableInternal
 {
 //! a comparaison structure used retrieve the rows and the columns
 struct Compare {
-  Compare(int dim) : m_coord(dim) {}
+  explicit Compare(int dim) : m_coord(dim) {}
   //! small structure to define a cell point
   struct Point {
     Point(int wh, STOFFCell const *cell, int cellId) : m_which(wh), m_cell(cell), m_cellId(cellId) {}
