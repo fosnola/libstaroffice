@@ -393,7 +393,7 @@ public:
     return s.str();
   }
   //! try to update the style
-  void updateStyle(STOFFGraphicStyle &style, StarObject &/*object*/) const
+  void updateStyle(STOFFGraphicStyle &style, StarObject &/*object*/, STOFFListenerPtr /*listener*/) const
   {
     if (m_flags[0] && m_flags[1])
       style.m_propertyList.insert("style:protect", "position size");
@@ -461,14 +461,16 @@ public:
     return s.str();
   }
   //! try to update the style
-  void updateStyle(STOFFGraphicStyle &style, StarObject &object) const
+  void updateStyle(STOFFGraphicStyle &style, StarObject &object, STOFFListenerPtr listener) const
   {
-    SdrGraphic::updateStyle(style, object);
+    SdrGraphic::updateStyle(style, object, listener);
     shared_ptr<StarItemPool> pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
     if (pool && !m_sheetStyle.empty()) {
       StarItemStyle const *mStyle=pool->findStyleWithFamily(m_sheetStyle, StarItemStyle::F_Paragraph);
-      if (mStyle && !mStyle->m_names[0].empty())
+      if (mStyle && !mStyle->m_names[0].empty()) {
+        if (listener) pool->defineGraphicStyle(listener, mStyle->m_names[0]);
         style.m_propertyList.insert("librevenge:parent-display-name", mStyle->m_names[0]);
+      }
     }
 
     for (size_t i=0; i<m_itemList.size(); ++i) {
@@ -596,7 +598,7 @@ public:
     position.setSize(1.f/20.f*STOFFVec2f(m_bdbox.size()), librevenge::RVNG_POINT);
     position.m_propertyList.insert("text:anchor-type", "page");
     STOFFGraphicStyle style;
-    updateStyle(style, object);
+    updateStyle(style, object, listener);
     if (!style.m_hasBackground) style.m_propertyList.insert("draw:fill", "none");
     style.m_propertyList.insert("draw:fill", "none");
     shared_ptr<SubDocument> doc(new SubDocument(m_outlinerParaObject));
@@ -651,7 +653,7 @@ public:
       updateTransformProperties(shape.m_propertyList);
       shape.m_propertyList.insert("text:anchor-type", "page");
       STOFFGraphicStyle style;
-      updateStyle(style, object);
+      updateStyle(style, object, listener);
       listener->insertShape(shape, style);
       if (m_outlinerParaObject)
         sendTextZone(listener, object);
@@ -758,16 +760,16 @@ public:
     updateTransformProperties(shape.m_propertyList);
     shape.m_propertyList.insert("text:anchor-type", "page");
     STOFFGraphicStyle style;
-    updateStyle(style, object);
+    updateStyle(style, object, listener);
     listener->insertShape(shape, style);
     if (m_outlinerParaObject)
       sendTextZone(listener, object);
     return true;
   }
   //! try to update the style
-  void updateStyle(STOFFGraphicStyle &style, StarObject &object) const
+  void updateStyle(STOFFGraphicStyle &style, StarObject &object, STOFFListenerPtr listener) const
   {
-    SdrGraphicRect::updateStyle(style, object);
+    SdrGraphicRect::updateStyle(style, object, listener);
     if (m_circleItem && m_circleItem->m_attribute) {
       shared_ptr<StarItemPool> pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
       m_circleItem->m_attribute->addTo(style, pool.get());
@@ -906,15 +908,15 @@ public:
     position.setSize(1.f/20.f*STOFFVec2f(m_bdbox.size()), librevenge::RVNG_POINT);
     position.m_propertyList.insert("text:anchor-type", "page");
     STOFFGraphicStyle style;
-    updateStyle(style, object);
+    updateStyle(style, object, listener);
     listener->insertPicture(position, m_graphic->m_object, style);
 
     return true;
   }
   //! try to update the style
-  void updateStyle(STOFFGraphicStyle &style, StarObject &object) const
+  void updateStyle(STOFFGraphicStyle &style, StarObject &object, STOFFListenerPtr listener) const
   {
-    SdrGraphicRect::updateStyle(style, object);
+    SdrGraphicRect::updateStyle(style, object, listener);
     if (m_graphItem && m_graphItem->m_attribute) {
       shared_ptr<StarItemPool> pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
       m_graphItem->m_attribute->addTo(style, pool.get());
@@ -978,7 +980,7 @@ public:
   {
     STOFFGraphicShape shape;
     STOFFGraphicStyle style;
-    updateStyle(style, object);
+    updateStyle(style, object, listener);
     librevenge::RVNGPropertyListVector vect;
     shape.m_command=STOFFGraphicShape::C_Polyline;
     librevenge::RVNGPropertyList list;
@@ -994,9 +996,9 @@ public:
     return true;
   }
   //! try to update the style
-  void updateStyle(STOFFGraphicStyle &style, StarObject &object) const
+  void updateStyle(STOFFGraphicStyle &style, StarObject &object, STOFFListenerPtr listener) const
   {
-    SdrGraphicText::updateStyle(style, object);
+    SdrGraphicText::updateStyle(style, object, listener);
     if (m_measureItem && m_measureItem->m_attribute) {
       shared_ptr<StarItemPool> pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
       m_measureItem->m_attribute->addTo(style, pool.get());
@@ -1060,7 +1062,7 @@ public:
     position.setSize(1.f/20.f*STOFFVec2f(m_bdbox.size()), librevenge::RVNG_POINT);
     position.m_propertyList.insert("text:anchor-type", "page");
     STOFFGraphicStyle style;
-    updateStyle(style, object);
+    updateStyle(style, object, listener);
     listener->insertPicture(position, m_graphic->m_object, style);
 
     return true;
@@ -1158,7 +1160,7 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object)
 
   STOFFGraphicShape shape;
   STOFFGraphicStyle style;
-  updateStyle(style, object);
+  updateStyle(style, object, listener);
   librevenge::RVNGPropertyListVector vect;
   bool isClosed=false;
   switch (m_identifier) {

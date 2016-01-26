@@ -41,6 +41,7 @@
 
 #include "STOFFGraphicListener.hxx"
 #include "STOFFOLEParser.hxx"
+#include "STOFFSubDocument.hxx"
 
 #include "StarBitmap.hxx"
 #include "StarZone.hxx"
@@ -50,20 +51,82 @@
 /** Internal: the structures of a SDGParser */
 namespace SDGParserInternal
 {
+
+////////////////////////////////////////
+//! Internal: small class use to store an image content in a SDGParser
+class Image
+{
+public:
+  //! constructor
+  Image() : m_object(), m_size(), m_link()
+  {
+  }
+  //! the object
+  STOFFEmbeddedObject m_object;
+  //! the bitmap size
+  STOFFVec2i m_size;
+  //! the link name
+  librevenge::RVNGString m_link;
+};
+
 ////////////////////////////////////////
 //! Internal: the state of a SDGParser
 struct State {
   //! constructor
-  State() : m_imagesList(), m_sizesList()
+  State() : m_imagesList()
   {
   }
 
   //! the list of image
-  std::vector<STOFFEmbeddedObject> m_imagesList;
-  //! the list of size
-  std::vector<STOFFVec2i> m_sizesList;
+  std::vector<Image> m_imagesList;
 };
 
+////////////////////////////////////////
+//! Internal: the subdocument of a SDGParser
+class SubDocument : public STOFFSubDocument
+{
+public:
+  explicit SubDocument(librevenge::RVNGString const &text) :
+    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_text(text) {}
+
+  //! destructor
+  virtual ~SubDocument() {}
+
+  //! operator!=
+  virtual bool operator!=(STOFFSubDocument const &doc) const
+  {
+    if (STOFFSubDocument::operator!=(doc)) return true;
+    SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
+    if (!sDoc) return true;
+    if (m_text != sDoc->m_text) return true;
+    return false;
+  }
+
+  //! operator!==
+  virtual bool operator==(STOFFSubDocument const &doc) const
+  {
+    return !operator!=(doc);
+  }
+
+  //! the parser function
+  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type);
+
+protected:
+  //! the text
+  librevenge::RVNGString m_text;
+};
+
+void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*type*/)
+{
+  if (!listener.get()) {
+    STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SubDocument::parse: no listener\n"));
+    return;
+  }
+  if (m_text.empty())
+    listener->insertChar(' ');
+  else
+    listener->insertUnicodeString(m_text);
+}
 }
 
 ////////////////////////////////////////////////////////////
@@ -92,22 +155,26 @@ void SDGParser::parse(librevenge::RVNGDrawingInterface *docInterface)
       createDocument(docInterface);
       STOFFListenerPtr listener=getGraphicListener();
       if (listener) {
-        // CHECKME: better if we have the bitmap size
         STOFFPosition position;
-        position.setOrigin(STOFFVec2f(20,20), librevenge::RVNG_POINT);
-        position.setSize(STOFFVec2f(400,400), librevenge::RVNG_POINT);
         position.m_propertyList.insert("text:anchor-type", "page");
         STOFFGraphicStyle style;
         style.m_propertyList.insert("draw:stroke", "none");
         style.m_propertyList.insert("draw:fill", "none");
-        bool useSize=m_state->m_sizesList.size()==m_state->m_imagesList.size();
         for (size_t i=0; i<m_state->m_imagesList.size(); ++i) {
           if (i) listener->insertBreak(STOFFListener::PageBreak);
-          if (m_state->m_imagesList[i].isEmpty())
+          SDGParserInternal::Image const &image=m_state->m_imagesList[i];
+          if (image.m_object.isEmpty())
             continue;
-          if (useSize)
-            position.setSize(m_state->m_sizesList[i], librevenge::RVNG_POINT);
-          listener->insertPicture(position, m_state->m_imagesList[i], style);
+          position.setOrigin(STOFFVec2f(20,20), librevenge::RVNG_POINT);
+          STOFFVec2f size=(image.m_size[0]>0 && image.m_size[1]>0) ? STOFFVec2f(image.m_size) : STOFFVec2f(400,400);
+          position.setSize(size, librevenge::RVNG_POINT);
+          listener->insertPicture(position, image.m_object, style);
+          if (!image.m_link.empty()) {
+            shared_ptr<SDGParserInternal::SubDocument> doc(new SDGParserInternal::SubDocument(image.m_link));
+            position.setOrigin(STOFFVec2f(20,30+size[1]), librevenge::RVNG_POINT);
+            position.setSize(STOFFVec2f(600,200), librevenge::RVNG_POINT);
+            listener->insertTextBox(position, doc, style);
+          }
         }
       }
     }
@@ -229,6 +296,7 @@ bool SDGParser::readBitmap(StarZone &zone)
     int const expected[]= {4,5,1};
     if (val!=expected[i]) f << "f" << i << "=" << val << ",";
   }
+  SDGParserInternal::Image image;
   int val;
   for (int step=0; step<2; ++step) {
     int type=(int) input->readULong(1);
@@ -252,8 +320,8 @@ bool SDGParser::readBitmap(StarZone &zone)
         return false;
       }
       else if (step==0 && bitmap.getData(data, bType)) {
-        m_state->m_imagesList.push_back(STOFFEmbeddedObject(data, bType));
-        m_state->m_sizesList.push_back(bitmap.getBitmapSize());
+        image.m_object.add(data, bType);
+        image.m_size=bitmap.getBitmapSize();
       }
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -295,8 +363,11 @@ bool SDGParser::readBitmap(StarZone &zone)
           ascFile.addNote(f.str().c_str());
           return false;
         }
-        else if (!text.empty())
+        else if (!text.empty()) {
+          if (i==0)
+            image.m_link=libstoff::getString(text);
           f << "text" << i << "=" << libstoff::getString(text).cstr() << ",";
+        }
         findText=true;
       }
     }
@@ -307,6 +378,8 @@ bool SDGParser::readBitmap(StarZone &zone)
     f << "SGA3:";
     if (findText) break;
   }
+  if (!image.m_object.isEmpty())
+    m_state->m_imagesList.push_back(image);
   if (input->checkPosition(input->tell()+2)) {
     long actPos=input->tell();
     val=(int) input->readULong(2);

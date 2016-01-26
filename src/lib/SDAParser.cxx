@@ -235,10 +235,8 @@ void SDAParser::createDocument(librevenge::RVNGDrawingInterface *documentInterfa
     listen->setDocumentMetaData(m_state->m_mainGraphic->getMetaData());
 
   listen->startDocument();
-  if (m_state->m_mainGraphic) {
-    m_state->m_mainGraphic->defineGraphicStyles(listen);
+  if (m_state->m_mainGraphic)
     m_state->m_mainGraphic->sendMasterPages(listen);
-  }
 }
 
 ////////////////////////////////////////////////////////////

@@ -102,15 +102,6 @@ bool StarObjectDraw::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &
   return numPages>0;
 }
 
-void StarObjectDraw::defineGraphicStyles(STOFFListenerPtr listener)
-{
-  shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
-  if (pool) {
-    pool->defineGraphicStyles(listener);
-    pool->updateStyles();
-  }
-}
-
 bool StarObjectDraw::sendMasterPages(STOFFGraphicListenerPtr listener)
 {
   if (!m_drawState->m_model)

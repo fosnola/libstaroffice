@@ -7,8 +7,10 @@
 
    + finish to implement the StarItemPool and add functions to retrieve many
      attributes' contents,
+   + update many styles classes to store only needed data,
    + correct a problem when we fail to retrieve all the texts in small EditZone
      (still with no formattings)
+   + add a convertissor to create .svg files
    
 0.0.0:
 - 09/29/2015: begin to reconstruct the "basic" content of sdc files, ie.

@@ -105,6 +105,12 @@ public:
   void updateUsingStyles(StarItemSet &itemSet) const;
   /** define all graphic styles */
   void defineGraphicStyles(STOFFListenerPtr listener) const;
+  /** define a graphic style */
+  void defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName) const
+  {
+    std::set<librevenge::RVNGString> done;
+    defineGraphicStyle(listener, styleName, done);
+  }
   /** try to find a style with a name and a family style */
   StarItemStyle const *findStyleWithFamily(librevenge::RVNGString const &style, int family) const;
   //! try to read an attribute
