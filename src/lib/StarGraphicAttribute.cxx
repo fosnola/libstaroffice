@@ -515,7 +515,7 @@ class StarGAttributeNamedBitmap : public StarGAttributeNamed
 public:
   //! constructor
   StarGAttributeNamedBitmap(Type type, std::string const &debugName) :
-    StarGAttributeNamed(type, debugName)
+    StarGAttributeNamed(type, debugName), m_bitmap()
   {
   }
   //! create a new attribute

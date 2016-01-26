@@ -36,6 +36,7 @@
 #include <unistd.h>
 
 #include <cmath>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iostream>

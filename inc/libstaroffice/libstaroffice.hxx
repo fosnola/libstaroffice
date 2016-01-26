@@ -27,14 +27,16 @@
 #define STOFF_CHART_VERSION 0
 /** Defines the database possible conversion (actually none) */
 #define STOFF_DATABASE_VERSION 0
-/** Defines the vector graphic possible conversion (actually none) */
-#define STOFF_GRAPHIC_VERSION 0
+/** Defines the vector graphic possible conversion
+    - 1: begin to convert some .sda and some .sdg file +
+         add STOFF_K_GRAPHIC enum(from libstoff-0.0.1) */
+#define STOFF_GRAPHIC_VERSION 1
 /** Defines the math possible conversion (actually none) */
 #define STOFF_MATH_VERSION 0
 /** Defines the presentation possible conversion (actually none) */
 #define STOFF_PRESENTATION_VERSION 0
 /** Defines the spreadsheet processing possible conversion:
-    - 1: can convert some basic document(from libstoff-0.0) */
+    - 1: can convert some basic document(from libstoff-0.0.0) */
 #define STOFF_SPREADSHEET_VERSION 1
 /** Defines the word processing possible conversion (actually none) */
 #define STOFF_TEXT_VERSION 0
