@@ -263,7 +263,7 @@ void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
     graphic.m_propertyList.insert("draw:fill-image-ref-point-x", double(m_value)/100, librevenge::RVNG_PERCENT);
   else if (m_type==XATTR_FILLBMP_POSOFFSETY)
     graphic.m_propertyList.insert("draw:fill-image-ref-point-y", double(m_value)/100, librevenge::RVNG_PERCENT);
-  else if (m_type==XATTR_FILLBMP_TILEOFFSETX || XATTR_FILLBMP_TILEOFFSETY) {
+  else if (m_type==XATTR_FILLBMP_TILEOFFSETX || m_type==XATTR_FILLBMP_TILEOFFSETY) {
     std::stringstream s;
     s << m_value << "% " << (m_type==XATTR_FILLBMP_TILEOFFSETX ? "horizontal" : "vertical");
     graphic.m_propertyList.insert("draw:tile-repeat-offset", s.str().c_str());
@@ -1169,7 +1169,7 @@ bool StarGAttributeNamedArrow::read(StarZone &zone, int nVers, long endPos, Star
   if (m_namedId<0) {
     uint32_t nPoints;
     *input >> nPoints;
-    if (input->tell()+12*long(nPoints)>endPos) {
+    if (uint32_t(endPos-input->tell())/12<nPoints || input->tell()+12*long(nPoints)>endPos) {
       STOFF_DEBUG_MSG(("StarGAttributeArrowNamed::read: bad num point\n"));
       f << "###nPoints=" << nPoints << ",";
       ok=false;

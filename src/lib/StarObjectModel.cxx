@@ -1106,7 +1106,7 @@ bool StarObjectModel::readSdrPageUnknownZone1(StarZone &zone, long lastPos)
     return false;
   f << libstoff::getString(string).cstr() << ",";
   int n=(int) input->readULong(4);
-  if (input->tell()+8*n>lastPos)
+  if (n<0 || (lastPos-input->tell())/8<n || input->tell()+8*n>lastPos)
     return false;
   f << "unk=[";
   for (int i=0; i<n; ++i) {

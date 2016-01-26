@@ -2809,7 +2809,7 @@ bool StarObjectSmallGraphic::readSDROutlinerParaObject(StarZone &zone, StarObjec
     f.str("");
     f << "SdrParaObject:";
     shared_ptr<StarObjectSmallText> smallText(new StarObjectSmallText(*this, true)); // checkme, we must use the text edit pool here
-    if (!smallText->read(zone, lastPos) || input->tell()+N*2>lastPos) {
+    if (!smallText->read(zone, lastPos) || N>(lastPos-input->tell())/2 || input->tell()+N*2>lastPos) {
       f << "###editTextObject";
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       ascFile.addPos(pos);
