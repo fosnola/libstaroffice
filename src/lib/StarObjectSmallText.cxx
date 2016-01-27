@@ -204,7 +204,7 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
       *input>>nAttr16;
       nAttr=nAttr16;
     }
-    if (input->tell()+long(nAttr)*8 > lastPos) {
+    if (lastPos-input->tell()<long(nAttr)*8 || input->tell()+long(nAttr)*8 > lastPos) {
       STOFF_DEBUG_MSG(("StarObjectSmallText::read: can not read attrib list\n"));
       f << "###attrib list,";
       ascFile.addPos(pos);

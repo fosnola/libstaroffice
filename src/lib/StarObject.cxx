@@ -685,6 +685,11 @@ bool StarObject::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libstoff
   *input >> N;
   f << "N=" << N << ",";
   for (uint16_t i=0; i<N; ++i) {
+    if (input->isEnd()) {
+      STOFF_DEBUG_MSG(("StarObject::readStarFrameworkConfigFile: oops, end of file\n"));
+      f << "###";
+      break;
+    }
     f << "item" << i << "=[";
     uint16_t nType;
     int32_t lPos, lLength;

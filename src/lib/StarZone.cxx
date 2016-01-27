@@ -648,7 +648,7 @@ bool StarZone::readRecordSizes(long pos)
   f << "N=" << nCount << ",";
   closeFlagZone();
 
-  if (!m_input->checkPosition(m_input->tell()+8*nCount)) {
+  if (nCount<0 || (getRecordLastPosition()-m_input->tell())/8<nCount || !m_input->checkPosition(m_input->tell()+8*nCount)) {
     STOFF_DEBUG_MSG(("StarZone::readRecordSizes: endCPos seems bad\n"));
     f << "###badN,";
 

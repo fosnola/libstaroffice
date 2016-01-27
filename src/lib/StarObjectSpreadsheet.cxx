@@ -1501,7 +1501,7 @@ try
       if (!n) break;
       f << "ranges=[";
       if (version<0x12) {
-        if (input->tell()+8*long(n) > endPos) {
+        if (uint32_t(endPos-input->tell())/8<n || input->tell()+8*long(n) > endPos) {
           STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read some ranges\n"));
           f << "###ranges";
           break;
@@ -1593,7 +1593,8 @@ try
       }
       uint32_t nRange;
       *input >> nRange;
-      if ((unsigned long)input->tell()+8*(unsigned long)(nRange)<=(unsigned long)zone.getRecordLastPosition()) {
+      if (uint32_t(zone.getRecordLastPosition()-input->tell())<nRange ||
+          (unsigned long)input->tell()+8*(unsigned long)(nRange)<=(unsigned long)zone.getRecordLastPosition()) {
         f << "ranges=[";
         for (uint32_t j=0; j<nRange; ++j)
           f << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
@@ -2969,12 +2970,20 @@ bool StarObjectSpreadsheet::readSCOutlineArray(StarZone &zone)
     pos=input->tell();
     f.str("");
     f << "SCOutlineArray-" << lev << ",";
+    if (pos>zone.getRecordLastPosition()) {
+      f << "###";
+      STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCOutlineArray:can not find some content\n"));
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      scRecord.close("SCOutlineArray");
+      return true;
+    }
     int count=(int) input->readULong(2);
     f << "entries=[";
     for (int i=0; i<count; ++i) {
       if (!scRecord.openContent("SCOutlineArray")) {
         f << "###";
-        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCOutlineArray:can not find some content\n"));
+        STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCOutlineArray:can not find some content(II)\n"));
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
         scRecord.close("SCOutlineArray");
@@ -2991,7 +3000,6 @@ bool StarObjectSpreadsheet::readSCOutlineArray(StarZone &zone)
     f << "],";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-
   }
   scRecord.close("SCOutlineArray");
   return true;

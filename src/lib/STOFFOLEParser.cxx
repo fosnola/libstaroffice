@@ -470,7 +470,7 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
   long pSetSize=(long) input->readULong(4);
   int N=(int) input->readULong(4);
   f << "N=" << N << ",";
-  if (input->size()<pos+pSetSize || pSetSize<8+8*N) {
+  if (pSetSize<0 || input->size()-pos<pSetSize || pSetSize<8+8*N) {
     STOFF_DEBUG_MSG(("STOFFOLEParser::readSummaryInformation: psetstruct is bad\n"));
     f << "###";
     ascii.addPos(pos);
@@ -501,8 +501,8 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
     f << "SumInfo-B" << it->second << ":";
     int type=(int) input->readULong(4);
     if (type==0x1e) {
-      int sSz=(int) input->readULong(4);
-      if (pos+8+sSz>input->size()) {
+      long sSz=(long) input->readULong(4);
+      if (sSz<0 || (input->size()-pos-8)<sSz || pos+8+sSz>input->size()) {
         STOFF_DEBUG_MSG(("STOFFOLEParser::readSummaryInformation: string size is bad\n"));
         f << "##stringSz=" << sSz << ",";
         ascii.addPos(pos);
@@ -510,7 +510,7 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
         continue;
       }
       std::string text("");
-      for (int c=0; c < sSz; ++c) text+=(char) input->readULong(1);
+      for (long c=0; c < sSz; ++c) text+=(char) input->readULong(1);
       f << text;
     }
     else if (type==0x40) {

@@ -845,7 +845,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
     int32_t nActionSize;
     *input>>type>>nActionSize;
     long endDataPos=pos+2+nActionSize;
-    if (nActionSize<4 || endDataPos>lastPos) {
+    if (nActionSize<4 || (lastPos-pos-2)<nActionSize || endDataPos>lastPos) {
       STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad size\n"));
       f << "###";
       ascFile.addPos(pos);
@@ -915,7 +915,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       *input >> nTmp;
       for (int poly=0; poly<int(nTmp); ++poly) {
         *input >> nTmp1;
-        if (nTmp1<0 || input->tell()+8*nTmp1>endDataPos) {
+        if (nTmp1<0 || (endDataPos-input->tell())/8<nTmp1 || input->tell()+8*nTmp1>endDataPos) {
           STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad number of points\n"));
           f << "###poly[nPts=" << nTmp1 << "],";
           break;

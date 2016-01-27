@@ -508,7 +508,7 @@ bool StarObjectDraw::readSdrCustomShow(StarZone &zone)
   f << libstoff::getString(string).cstr() << ",";
   long n=(int) input->readULong(4);
   f << "N=" << n << ",";
-  if (input->tell()+2*n>lastPos) {
+  if (n<0 || (lastPos-input->tell())/2<n || input->tell()+2*n>lastPos) {
     STOFF_DEBUG_MSG(("StarObjectDraw::readSdrCustomShow: the number of page seems bad\n"));
     f << "###";
     ascFile.addPos(pos);
