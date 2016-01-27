@@ -470,7 +470,7 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
   long pSetSize=(long) input->readULong(4);
   int N=(int) input->readULong(4);
   f << "N=" << N << ",";
-  if (pSetSize<0 || input->size()-pos<pSetSize || pSetSize<8+8*N) {
+  if (pSetSize<0 || input->size()-pos<pSetSize || (pSetSize-8)/8<N) {
     STOFF_DEBUG_MSG(("STOFFOLEParser::readSummaryInformation: psetstruct is bad\n"));
     f << "###";
     ascii.addPos(pos);

@@ -582,9 +582,14 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
     return true;
   }
   uint32_t alignWidth=bitmap.m_width*bitmap.m_bitCount;
+  if (alignWidth/bitmap.m_width!=bitmap.m_bitCount) {
+    STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: the bitmap width seems bad\n"));
+    return false;
+  }
   alignWidth=(((alignWidth+31)>>5)<<2);
   long actPos=input->tell();
-  if (actPos+long(bitmap.m_height*alignWidth)>lastPos) {
+  if (uint32_t(lastPos-actPos)/alignWidth < bitmap.m_height ||
+      actPos+long(bitmap.m_height*alignWidth)>lastPos) {
     STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: the zone seems too short\n"));
     return false;
   }

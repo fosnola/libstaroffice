@@ -1125,7 +1125,8 @@ void StarFormatManager::updateNumberingProperties(STOFFCell &cell) const
       m_state->m_idNumberFormatMap.find(unsigned(style.m_format))->second.updateNumberingProperties(cell))
     return;
   // CHECKME: style.m_format/1000 is the language format,
-  switch (style.m_format%1000) {
+  int formatId=(style.m_format%1000);
+  switch (formatId) {
   case 0: // standart
     break;
   case 1: // decimal
@@ -1137,7 +1138,7 @@ void StarFormatManager::updateNumberingProperties(STOFFCell &cell) const
     cell.setFormat(format);
     propList.insert("librevenge:value-type", "number");
     propList.insert("number:decimal-places", (style.m_format&1) ? 0 : 2);
-    if (style.m_format>=3) propList.insert("number:grouping", true);
+    if (formatId>=3) propList.insert("number:grouping", true);
     return;
   case 10:
   case 11:
@@ -1184,7 +1185,7 @@ void StarFormatManager::updateNumberingProperties(STOFFCell &cell) const
     char const *(wh[])= {"%m/%d/%y", "%a %d/%b %y", "%m/%y", "%b %d", "%B",
                          "%Q Quarter %y", "%m/%d/%Y"
                         };
-    if (format.convertDTFormat(wh[style.m_format-30], pVect))
+    if (format.convertDTFormat(wh[formatId-30], pVect))
       propList.insert("librevenge:format", pVect);
     return;
   }
@@ -1199,7 +1200,7 @@ void StarFormatManager::updateNumberingProperties(STOFFCell &cell) const
     propList.insert("librevenge:value-type", "time");
     propList.insert("number:automatic-order", "true");
     char const *(wh[])= {"%H:%M", "%H:%M:%S", "%I:%M %p","%I:%M:%S %p", "%H:%M:%S", "%M:%s" };
-    if (format.convertDTFormat(wh[style.m_format-40], pVect))
+    if (format.convertDTFormat(wh[formatId-40], pVect))
       propList.insert("librevenge:format", pVect);
     return;
   }
@@ -1216,7 +1217,7 @@ void StarFormatManager::updateNumberingProperties(STOFFCell &cell) const
     cell.setFormat(format);
     propList.insert("librevenge:value-type", "scientific");
     propList.insert("number:decimal-places", 2);
-    propList.insert("number:min-exponent-digits", style.m_format==60 ? 3 : 2);
+    propList.insert("number:min-exponent-digits", formatId==60 ? 3 : 2);
     return;
   case 70:
   case 71:
@@ -1224,8 +1225,8 @@ void StarFormatManager::updateNumberingProperties(STOFFCell &cell) const
     format.m_numberFormat=STOFFCell::F_NUMBER_FRACTION;
     cell.setFormat(format);
     propList.insert("librevenge:value-type", "fraction");
-    propList.insert("number:min-numerator-digits", style.m_format==70 ? 1 : 2);
-    propList.insert("number:min-denominator-digits", style.m_format==70 ? 1 : 2);
+    propList.insert("number:min-numerator-digits", formatId==70 ? 1 : 2);
+    propList.insert("number:min-denominator-digits", formatId==70 ? 1 : 2);
     return;
   case 99:
     format.m_format=STOFFCell::F_BOOLEAN;

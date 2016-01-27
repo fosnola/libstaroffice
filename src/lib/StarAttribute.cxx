@@ -543,8 +543,13 @@ void State::initAttributeMap()
 ////////////////////////////////////////////////////////////
 // basic attribute function
 ////////////////////////////////////////////////////////////
-void StarAttributeItemSet::addTo(STOFFCellStyle &cell, StarItemPool const *pool) const
+void StarAttributeItemSet::addTo(STOFFCellStyle &cell, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
 {
+  if (done.find(this)!=done.end()) {
+    STOFF_DEBUG_MSG(("StarAttributeItemSet::addTo: find a cycle\n"));
+    return;
+  }
+  done.insert(this);
   StarItemSet finalSet;
   bool newSet=false;
   if (pool && !m_itemSet.m_style.empty()) {
@@ -556,12 +561,17 @@ void StarAttributeItemSet::addTo(STOFFCellStyle &cell, StarItemPool const *pool)
   for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
        it!=set.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(cell, pool);
+      it->second->m_attribute->addTo(cell, pool, done);
   }
 }
 
-void StarAttributeItemSet::addTo(STOFFFont &font, StarItemPool const *pool) const
+void StarAttributeItemSet::addTo(STOFFFont &font, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
 {
+  if (done.find(this)!=done.end()) {
+    STOFF_DEBUG_MSG(("StarAttributeItemSet::addTo: find a cycle\n"));
+    return;
+  }
+  done.insert(this);
   StarItemSet finalSet;
   bool newSet=false;
   if (pool && !m_itemSet.m_style.empty()) {
@@ -573,12 +583,17 @@ void StarAttributeItemSet::addTo(STOFFFont &font, StarItemPool const *pool) cons
   for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
        it!=set.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(font, pool);
+      it->second->m_attribute->addTo(font, pool, done);
   }
 }
 
-void StarAttributeItemSet::addTo(STOFFGraphicStyle &graphic, StarItemPool const *pool) const
+void StarAttributeItemSet::addTo(STOFFGraphicStyle &graphic, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
 {
+  if (done.find(this)!=done.end()) {
+    STOFF_DEBUG_MSG(("StarAttributeItemSet::addTo: find a cycle\n"));
+    return;
+  }
+  done.insert(this);
   StarItemSet finalSet;
   bool newSet=false;
   if (pool && !m_itemSet.m_style.empty()) {
@@ -590,12 +605,17 @@ void StarAttributeItemSet::addTo(STOFFGraphicStyle &graphic, StarItemPool const 
   for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
        it!=set.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(graphic, pool);
+      it->second->m_attribute->addTo(graphic, pool, done);
   }
 }
 
-void StarAttributeItemSet::addTo(STOFFParagraph &para, StarItemPool const *pool) const
+void StarAttributeItemSet::addTo(STOFFParagraph &para, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
 {
+  if (done.find(this)!=done.end()) {
+    STOFF_DEBUG_MSG(("StarAttributeItemSet::addTo: find a cycle\n"));
+    return;
+  }
+  done.insert(this);
   StarItemSet finalSet;
   bool newSet=false;
   if (pool && !m_itemSet.m_style.empty()) {
@@ -607,12 +627,17 @@ void StarAttributeItemSet::addTo(STOFFParagraph &para, StarItemPool const *pool)
   for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
        it!=set.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(para, pool);
+      it->second->m_attribute->addTo(para, pool, done);
   }
 }
 
-void StarAttributeItemSet::addTo(STOFFPageSpan &page, StarItemPool const *pool) const
+void StarAttributeItemSet::addTo(STOFFPageSpan &page, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
 {
+  if (done.find(this)!=done.end()) {
+    STOFF_DEBUG_MSG(("StarAttributeItemSet::addTo: find a cycle\n"));
+    return;
+  }
+  done.insert(this);
   StarItemSet finalSet;
   bool newSet=false;
   if (pool && !m_itemSet.m_style.empty()) {
@@ -624,19 +649,25 @@ void StarAttributeItemSet::addTo(STOFFPageSpan &page, StarItemPool const *pool) 
   for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
        it!=set.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(page, pool);
+      it->second->m_attribute->addTo(page, pool, done);
   }
 }
 
-void StarAttributeItemSet::print(libstoff::DebugStream &o) const
+void StarAttributeItemSet::print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const
 {
+  if (done.find(this)!=done.end()) {
+    STOFF_DEBUG_MSG(("StarAttributeItemSet::print: find a cycle\n"));
+    o << "###cycle[" << m_debugName << "]";
+    return;
+  }
+  done.insert(this);
   o << m_debugName;
   if (!m_itemSet.empty()) {
     o << "[";
     for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
          it!=m_itemSet.m_whichToItemMap.end(); ++it) {
       if (it->second && it->second->m_attribute)
-        it->second->m_attribute->print(o);
+        it->second->m_attribute->print(o, done);
       else
         o << "_";
       o << ",";

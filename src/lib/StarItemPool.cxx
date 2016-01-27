@@ -2111,16 +2111,6 @@ void StarItemPool::defineGraphicStyles(STOFFListenerPtr listener) const
       continue;
     std::set<librevenge::RVNGString> done;
     defineGraphicStyle(listener, id.m_name, done);
-#if 0
-    STOFFGraphicStyle gStyle;
-    gStyle.m_propertyList.insert("style:display-name", id.m_name);
-    for (std::map<int, shared_ptr<StarItem> >::const_iterator it=sIt->second.m_itemSet.m_whichToItemMap.begin();
-         it!=sIt->second.m_itemSet.m_whichToItemMap.end(); ++it) {
-      if (it->second && it->second->m_attribute)
-        it->second->m_attribute->addTo(gStyle, this);
-    }
-    listener->defineStyle(gStyle);
-#endif
   }
 }
 

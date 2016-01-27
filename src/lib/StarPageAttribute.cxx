@@ -60,7 +60,7 @@ public:
     return shared_ptr<StarAttribute>(new StarPAttributeBool(*this));
   }
   //! add to a page
-  virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
 
 protected:
   //! copy constructor
@@ -83,7 +83,7 @@ public:
     return shared_ptr<StarAttribute>(new StarPAttributeColor(*this));
   }
   //! add to a page
-  // virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
+  // virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   StarPAttributeColor(StarPAttributeColor const &orig) : StarAttributeColor(orig)
@@ -101,7 +101,7 @@ public:
   {
   }
   //! add to a page
-  // virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
+  // virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -129,7 +129,7 @@ public:
     return shared_ptr<StarAttribute>(new StarPAttributeUInt(*this));
   }
   //! add to a page
-  virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool) const;
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   StarPAttributeUInt(StarPAttributeUInt const &orig) : StarAttributeUInt(orig)
@@ -146,7 +146,7 @@ public:
   {
   }
   //! add to a page
-  // virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
+  // virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -174,7 +174,7 @@ public:
     return shared_ptr<StarAttribute>(new StarPAttributeItemSet(*this));
   }
   //! add to a pageSpan
-  virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool) const;
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
 
 protected:
   //! copy constructor
@@ -197,7 +197,7 @@ public:
     return shared_ptr<StarAttribute>(new StarPAttributeVec2i(*this));
   }
   //! add to a pageSpan
-  virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool) const;
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   explicit StarPAttributeVec2i(StarAttributeVec2i const &orig) : StarAttributeVec2i(orig)
@@ -205,7 +205,7 @@ protected:
   }
 };
 
-void StarPAttributeBool::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const
+void StarPAttributeBool::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_SC_PAGE_HORCENTER) {
     if (page.m_actualZone==0) {
@@ -254,7 +254,7 @@ void StarPAttributeBool::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/
   }
 }
 
-void StarPAttributeUInt::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const
+void StarPAttributeUInt::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_SC_PAGE_SCALE) {
     if (page.m_actualZone==0) {
@@ -278,7 +278,7 @@ void StarPAttributeUInt::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/
   }
 }
 
-void StarPAttributeVec2i::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const
+void StarPAttributeVec2i::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type!=ATTR_SC_PAGE_SIZE)
     return;
@@ -290,13 +290,17 @@ void StarPAttributeVec2i::addTo(STOFFPageSpan &page, StarItemPool const */*pool*
     page.m_propertiesList[page.m_actualZone].insert("fo:min-height", double(m_value[1])/1440., librevenge::RVNG_INCH);
 }
 
-void StarPAttributeItemSet::addTo(STOFFPageSpan &page, StarItemPool const *pool) const
+void StarPAttributeItemSet::addTo(STOFFPageSpan &page, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
 {
+  if (done.find(this)!=done.end()) {
+    STOFF_DEBUG_MSG(("StarPAttributeItemSet::addTo: find a cycle\n"));
+    return;
+  }
   if (m_type!=ATTR_SC_PAGE_HEADERSET && m_type!=ATTR_SC_PAGE_FOOTERSET)
     return;
   STOFFPageSpan::ZoneType prevZone=page.m_actualZone;
   page.m_actualZone=m_type==ATTR_SC_PAGE_HEADERSET ? STOFFPageSpan::Header : STOFFPageSpan::Footer;
-  StarAttributeItemSet::addTo(page, pool);
+  StarAttributeItemSet::addTo(page, pool, done);
   page.m_actualZone=prevZone;
 }
 
@@ -391,11 +395,11 @@ public:
     return shared_ptr<StarAttribute>(new StarPAttributePage(*this));
   }
   //! add to a page
-  virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName << "=[";
     if (!m_name.empty()) o << m_name.cstr();
@@ -443,11 +447,11 @@ public:
     return shared_ptr<StarAttribute>(new StarPAttributePageHF(*this));
   }
   //! add to a page
-  virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName << "=*,";
   }
@@ -478,7 +482,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName << "=[";
     for (size_t i=0; i<m_tableList.size(); ++i)
@@ -512,7 +516,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName << "=[";
     o << "range=" << m_range << ",";
@@ -553,7 +557,7 @@ public:
     return shared_ptr<StarAttribute>(new StarPAttributeViewMode(*this));
   }
   //! add to a page
-  virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! try to read a field
   bool read(StarZone &zone, int vers, long endPos, StarObject &object)
   {
@@ -564,7 +568,7 @@ public:
     return StarAttributeUInt::read(zone, vers, endPos, object);
   }
   //! print data
-  void print(libstoff::DebugStream &o) const
+  void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName;
     switch (m_value) {
@@ -588,7 +592,7 @@ protected:
   }
 };
 
-void StarPAttributePage::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const
+void StarPAttributePage::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type!=ATTR_SC_PAGE || page.m_actualZone!=STOFFPageSpan::Page)
     return;
@@ -602,7 +606,7 @@ void StarPAttributePage::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/
   }
 }
 
-void StarPAttributePageHF::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const
+void StarPAttributePageHF::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   bool isHeader=m_type==ATTR_SC_PAGE_HEADERLEFT || m_type==ATTR_SC_PAGE_HEADERRIGHT;
   if (!isHeader && m_type!=ATTR_SC_PAGE_FOOTERLEFT && m_type!=ATTR_SC_PAGE_FOOTERRIGHT)
@@ -619,7 +623,7 @@ void StarPAttributePageHF::addTo(STOFFPageSpan &page, StarItemPool const */*pool
   page.addHeaderFooter(isHeader,wh, hf);
 }
 
-void StarPAttributeViewMode::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/) const
+void StarPAttributeViewMode::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_SC_PAGE_CHARTS || m_type==ATTR_SC_PAGE_OBJECTS || m_type==ATTR_SC_PAGE_DRAWINGS) {
     if (page.m_actualZone==0 && m_value==0) {
@@ -659,7 +663,7 @@ bool StarPAttributePage::read(StarZone &zone, int /*vers*/, long endPos, StarObj
   m_pageType=(int) input->readULong(1);
   *input >> m_landscape;
   m_used=(int) input->readULong(2);
-  print(f);
+  StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -683,7 +687,7 @@ bool StarPAttributePageHF::read(StarZone &zone, int /*vers*/, long endPos, StarO
     }
     m_zones[i]=smallText;
   }
-  print(f);
+  StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return ok && input->tell()<=endPos;
@@ -706,7 +710,7 @@ bool StarPAttributePrint::read(StarZone &zone, int /*vers*/, long endPos, StarOb
   }
   for (int i=0; i<int(n); ++i)
     m_tableList.push_back((int) input->readULong(2));
-  print(f);
+  StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return ok && input->tell()<=endPos;
@@ -734,7 +738,7 @@ bool StarPAttributeRangeItem::read(StarZone &zone, int vers, long endPos, StarOb
     }
   }
   m_range=STOFFBox2i(STOFFVec2i(dim[0],dim[1]),STOFFVec2i(dim[2],dim[3]));
-  print(f);
+  StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;

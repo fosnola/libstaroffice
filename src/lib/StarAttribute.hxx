@@ -38,6 +38,7 @@
 #ifndef STAR_ATTRIBUTE
 #  define STAR_ATTRIBUTE
 
+#include <set>
 #include <sstream>
 #include <vector>
 
@@ -749,23 +750,53 @@ public:
   //! read an attribute zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &document)=0;
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &/*cell*/, StarItemPool const */*pool*/) const
+  void addTo(STOFFCellStyle &cell, StarItemPool const *pool) const
   {
+    std::set<StarAttribute const *> done;
+    addTo(cell, pool, done);
   }
   //! add to a font
-  virtual void addTo(STOFFFont &/*font*/, StarItemPool const */*pool*/) const
+  void addTo(STOFFFont &font, StarItemPool const *pool) const
   {
+    std::set<StarAttribute const *> done;
+    addTo(font, pool, done);
   }
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &/*graphic*/, StarItemPool const */*pool*/) const
+  void addTo(STOFFGraphicStyle &graphic, StarItemPool const *pool) const
   {
+    std::set<StarAttribute const *> done;
+    addTo(graphic, pool, done);
   }
   //! add to a pageSpan
-  virtual void addTo(STOFFPageSpan &/*page*/, StarItemPool const */*pool*/) const
+  void addTo(STOFFPageSpan &page, StarItemPool const *pool) const
   {
+    std::set<StarAttribute const *> done;
+    addTo(page, pool, done);
   }
   //! add to a paragraph
-  virtual void addTo(STOFFParagraph &/*para*/, StarItemPool const */*pool*/) const
+  void addTo(STOFFParagraph &para, StarItemPool const *pool) const
+  {
+    std::set<StarAttribute const *> done;
+    addTo(para, pool, done);
+  }
+  //! add to a cell style(internal)
+  virtual void addTo(STOFFCellStyle &/*cell*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+  {
+  }
+  //! add to a font(internal)
+  virtual void addTo(STOFFFont &/*font*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+  {
+  }
+  //! add to a graphic style(internal)
+  virtual void addTo(STOFFGraphicStyle &/*graphic*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+  {
+  }
+  //! add to a pageSpan(internal)
+  virtual void addTo(STOFFPageSpan &/*page*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+  {
+  }
+  //! add to a paragraph(internal)
+  virtual void addTo(STOFFParagraph &/*para*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
   {
   }
   //! returns the debug name
@@ -774,7 +805,12 @@ public:
     return m_debugName;
   }
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  void print(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << ",";
+  }
+  //! debug function to print the data
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName << ",";
   }
@@ -817,7 +853,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int ver, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName;
     if (m_value) o << "=true";
@@ -848,7 +884,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName << "[col=" << m_value << "],";
   }
@@ -880,7 +916,7 @@ public:
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
 
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName;
     if (m_value<0 || m_value>0) o << "=" << m_value;
@@ -915,7 +951,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName;
     if (m_value) o << "=" << m_value;
@@ -953,7 +989,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName;
     if (m_value) o << "=" << m_value;
@@ -990,7 +1026,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName;
     if (m_value!=STOFFVec2i(0,0)) o << "=" << m_value;
@@ -1022,23 +1058,23 @@ public:
   {
     return shared_ptr<StarAttribute>(new StarAttributeItemSet(*this));
   }
-  //! add to a cell style
-  virtual void addTo(STOFFCellStyle &graphic, StarItemPool const *pool) const;
-  //! add to a font
-  virtual void addTo(STOFFFont &font, StarItemPool const *pool) const;
-  //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const *pool) const;
-  //! add to a pageSpan
-  virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool) const;
-  //! add to a paragraph
-  virtual void addTo(STOFFParagraph &para, StarItemPool const *pool) const;
-
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const;
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const;
 
 protected:
+  //! add to a cell style
+  virtual void addTo(STOFFCellStyle &graphic, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
+  //! add to a font
+  virtual void addTo(STOFFFont &font, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
+  //! add to a graphic style
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
+  //! add to a pageSpan
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
+  //! add to a paragraph
+  virtual void addTo(STOFFParagraph &para, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
+
   //! copy constructor
   StarAttributeItemSet(StarAttributeItemSet const &orig) : StarAttribute(orig), m_limits(orig.m_limits), m_itemSet()
   {

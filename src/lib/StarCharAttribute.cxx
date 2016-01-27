@@ -58,7 +58,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeBool(*this));
   }
   //! add to a font
-  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
 
 protected:
   //! copy constructor
@@ -81,7 +81,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeColor(*this));
   }
   //! add to a font
-  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   StarCAttributeColor(StarCAttributeColor const &orig) : StarAttributeColor(orig)
@@ -99,7 +99,7 @@ public:
   {
   }
   //! add to a font
-  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -127,7 +127,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeUInt(*this));
   }
   //! add to a font
-  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   StarCAttributeUInt(StarCAttributeUInt const &orig) : StarAttributeUInt(orig)
@@ -144,7 +144,7 @@ public:
   {
   }
   //! add to a font
-  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -183,7 +183,7 @@ inline void addAttributeVoid(std::map<int, shared_ptr<StarAttribute> > &map, Sta
   map[type]=shared_ptr<StarAttribute>(new StarCAttributeVoid(type,debugName));
 }
 
-void StarCAttributeBool::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
+void StarCAttributeBool::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_CHR_CONTOUR)
     font.m_propertyList.insert("style:text-outline", m_value);
@@ -205,19 +205,19 @@ void StarCAttributeBool::addTo(STOFFFont &font, StarItemPool const */*pool*/) co
     font.m_lineBreak=!m_value;
 }
 
-void StarCAttributeColor::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
+void StarCAttributeColor::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_CHR_COLOR)
     font.m_propertyList.insert("fo:color", m_value.str().c_str());
 }
 
-void StarCAttributeInt::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
+void StarCAttributeInt::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_CHR_KERNING)
     font.m_propertyList.insert("fo:letter-spacing", m_value, librevenge::RVNG_TWIP);
 }
 
-void StarCAttributeUInt::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
+void StarCAttributeUInt::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_CHR_CROSSEDOUT) {
     switch (m_value) {
@@ -372,7 +372,7 @@ void StarCAttributeUInt::addTo(STOFFFont &font, StarItemPool const */*pool*/) co
   }
 }
 
-void StarCAttributeVoid::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
+void StarCAttributeVoid::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_TXT_SOFTHYPH)
     font.m_softHyphen=true;
@@ -400,9 +400,9 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a font
-  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName << "=[";
     if (m_delta) o << "decal=" << m_delta << "%,";
@@ -437,9 +437,9 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a font
-  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName << "=[";
     if (!m_name.empty()) o << "name=" << m_name.cstr() << ",";
@@ -505,14 +505,14 @@ protected:
   int m_pitch;
 };
 
-void StarCAttributeEscapement::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
+void StarCAttributeEscapement::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   std::stringstream s;
   s << m_delta << "% " << m_scale << "%";
   font.m_propertyList.insert("style:text-position", s.str().c_str());
 }
 
-void StarCAttributeFont::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
+void StarCAttributeFont::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (!m_name.empty()) {
     if (m_type==ATTR_CHR_FONT)
@@ -542,7 +542,7 @@ bool StarCAttributeEscapement::read(StarZone &zone, int /*vers*/, long endPos, S
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   m_scale=(int) input->readULong(1);
   m_delta=(int)  input->readLong(2);
-  print(f);
+  StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -562,7 +562,7 @@ bool StarCAttributeFont::read(StarZone &zone, int /*vers*/, long endPos, StarObj
   std::vector<uint32_t> fName, string;
   if (!zone.readString(fName)) {
     STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeFont::read: can not find the name\n"));
-    print(f);
+    StarAttribute::print(f);
     f << "###aName,";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -571,7 +571,7 @@ bool StarCAttributeFont::read(StarZone &zone, int /*vers*/, long endPos, StarObj
   m_name=libstoff::getString(fName);
   if (!zone.readString(string)) {
     STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeFont::read: can not find the style\n"));
-    print(f);
+    StarAttribute::print(f);
     f << "###aStyle,";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -583,7 +583,7 @@ bool StarCAttributeFont::read(StarZone &zone, int /*vers*/, long endPos, StarObj
       // reread data in unicode
       if (!zone.readString(fName)) {
         STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeFont::read: can not find the name\n"));
-        print(f);
+        StarAttribute::print(f);
         f << "###aName,";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -593,7 +593,7 @@ bool StarCAttributeFont::read(StarZone &zone, int /*vers*/, long endPos, StarObj
         f << "aNameUni=" << libstoff::getString(fName).cstr() << ",";
       if (!zone.readString(string)) {
         STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeFont::read: can not find the style\n"));
-        print(f);
+        StarAttribute::print(f);
         f << "###aStyle,";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -605,7 +605,7 @@ bool StarCAttributeFont::read(StarZone &zone, int /*vers*/, long endPos, StarObj
     else input->seek(-3, librevenge::RVNG_SEEK_CUR);
   }
 
-  print(f);
+  StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -628,9 +628,9 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a font
-  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName << "=[";
     if (m_size!=240) o << "sz=" << m_size << ",";
@@ -671,13 +671,13 @@ bool StarCAttributeFontSize::read(StarZone &zone, int nVers, long endPos, StarOb
   m_size=(int) input->readULong(2);
   m_proportion=(int) input->readULong((nVers>=1) ? 2 : 1);
   if (nVers>=2) m_unit=(int) input->readULong(2);
-  print(f);
+  StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
 }
 
-void StarCAttributeFontSize::addTo(STOFFFont &font, StarItemPool const */*pool*/) const
+void StarCAttributeFontSize::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   std::string wh(m_type==ATTR_CHR_FONTSIZE ? "fo:font-size" :
                  m_type==ATTR_CHR_CJK_FONTSIZE ? "style:font-size-asian" :

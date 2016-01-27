@@ -61,7 +61,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeBool(*this));
   }
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
 
 protected:
   //! copy constructor
@@ -84,7 +84,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeColor(*this));
   }
   //! add to a cell style
-  //virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
+  //virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   StarCAttributeColor(StarCAttributeColor const &orig) : StarAttributeColor(orig)
@@ -102,7 +102,7 @@ public:
   {
   }
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -130,7 +130,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeUInt(*this));
   }
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   StarCAttributeUInt(StarCAttributeUInt const &orig) : StarAttributeUInt(orig)
@@ -152,7 +152,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeVoid(*this));
   }
   //! add to a cell style
-  //virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
+  //virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   StarCAttributeVoid(StarCAttributeVoid const &orig) : StarAttributeVoid(orig)
@@ -160,13 +160,13 @@ protected:
   }
 };
 
-void StarCAttributeBool::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
+void StarCAttributeBool::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_SC_LINEBREAK)
     cell.m_propertyList.insert("fo:wrap-option",m_value ? "wrap" : "no-wrap");
 }
 
-void StarCAttributeInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
+void StarCAttributeInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_SC_ROTATE_VALUE) {
     int prevRot=cell.m_propertyList["style:rotation-angle"] ? cell.m_propertyList["style:rotation-angle"]->getInt() : 0;
@@ -174,7 +174,7 @@ void StarCAttributeInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/
   }
 }
 
-void StarCAttributeUInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
+void StarCAttributeUInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_SC_VALUE_FORMAT)
     cell.m_format=(unsigned) m_value;
@@ -309,9 +309,9 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName << "=[";
     for (int i=0; i<4; ++i) {
@@ -347,9 +347,9 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName;
     if (m_span!=STOFFVec2i(1,1)) o << "=" << m_span;
@@ -411,9 +411,9 @@ public:
     return ok && input->tell()<=endPos;
   }
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const
   {
-    StarAttributeItemSet::print(o);
+    StarAttributeItemSet::print(o, done);
     if (m_style.empty())
       return;
     o << "style=" << m_style.cstr() << ",";
@@ -444,9 +444,9 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const;
+  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
   {
     o << m_debugName << "=[";
     if (m_protected) o << "protected,";
@@ -471,7 +471,7 @@ protected:
   bool m_doNotPrint;
 };
 
-void StarCAttributeMargins::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
+void StarCAttributeMargins::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type!=ATTR_SC_MARGIN)
     return;
@@ -481,7 +481,7 @@ void StarCAttributeMargins::addTo(STOFFCellStyle &cell, StarItemPool const */*po
   }
 }
 
-void StarCAttributeMerge::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
+void StarCAttributeMerge::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type!=ATTR_SC_MERGE)
     return;
@@ -495,7 +495,7 @@ void StarCAttributeMerge::addTo(STOFFCellStyle &cell, StarItemPool const */*pool
     cell.m_numberCellSpanned=m_span;
 }
 
-void StarCAttributeProtection::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/) const
+void StarCAttributeProtection::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type!=ATTR_SC_PROTECTION)
     return;
@@ -520,7 +520,7 @@ bool StarCAttributeMargins::read(StarZone &zone, int /*vers*/, long endPos, Star
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   for (int i=0; i<4; ++i)
     m_margins[i]=(int) input->readLong(2);
-  print(f);
+  StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -538,7 +538,7 @@ bool StarCAttributeMerge::read(StarZone &zone, int /*vers*/, long endPos, StarOb
   for (int i=0; i<2; ++i)
     span[i]=(int) input->readLong(2);
   m_span=STOFFVec2i(span[0], span[1]);
-  print(f);
+  StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -555,7 +555,7 @@ bool StarCAttributeProtection::read(StarZone &zone, int /*vers*/, long endPos, S
   *input >> m_hiddenFormula;
   *input >> m_hiddenCell;
   *input >> m_doNotPrint;
-  print(f);
+  StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
