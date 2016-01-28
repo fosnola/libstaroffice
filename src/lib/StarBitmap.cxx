@@ -332,7 +332,7 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
   int const bitCount=bitmap.m_bitCount<=1 ? 1 : bitmap.m_bitCount<=4 ? 4 : bitmap.m_bitCount<=8 ? 8 : 24;
   int const nColors=(bitCount>8) ? 0 : bitmap.m_numColors[0] ? int(bitmap.m_numColors[0]) : int(1 << bitCount);
   int const numComponent=bitmap.m_hasAlphaColor ? 4 : 3;
-  if (dInput->tell()+numComponent*nColors > endDataPos) {
+  if ((endDataPos-dInput->tell())/numComponent<nColors || dInput->tell()+numComponent*nColors > endDataPos) {
     STOFF_DEBUG_MSG(("StarBitmap::readBitmap: can not read the color\n"));
     f << "###";
     ascFile.addDelimiter(input->tell(),'|');
@@ -582,13 +582,13 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
     return true;
   }
   uint32_t alignWidth=bitmap.m_width*bitmap.m_bitCount;
-  if (alignWidth/bitmap.m_width!=bitmap.m_bitCount) {
+  if (bitmap.m_width==0 || alignWidth/bitmap.m_width!=bitmap.m_bitCount) {
     STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: the bitmap width seems bad\n"));
     return false;
   }
   alignWidth=(((alignWidth+31)>>5)<<2);
   long actPos=input->tell();
-  if (uint32_t(lastPos-actPos)/alignWidth < bitmap.m_height ||
+  if (alignWidth==0 || uint32_t(lastPos-actPos)/alignWidth < bitmap.m_height ||
       actPos+long(bitmap.m_height*alignWidth)>lastPos) {
     STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: the zone seems too short\n"));
     return false;
