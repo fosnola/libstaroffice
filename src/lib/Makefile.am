@@ -5,10 +5,6 @@ version_info = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 endif
 
 lib_LTLIBRARIES = libstaroffice-@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@.la $(target_libstaroffice_stream)
-libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_includedir = $(includedir)/libstaroffice-@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@/libstaroffice
-libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_include_HEADERS = \
-	$(top_srcdir)/inc/libstaroffice/libstaroffice.hxx \
-	$(top_srcdir)/inc/libstaroffice/STOFFDocument.hxx
 
 AM_CXXFLAGS =  -I$(top_srcdir)/inc $(REVENGE_CFLAGS) $(DEBUG_CXXFLAGS) $(ZLIB_CFLAGS) -DBUILD_STAROFFICE=1
 
