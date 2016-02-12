@@ -48,23 +48,28 @@
 #define VERSION "UNKNOWN VERSION"
 #endif
 
+#define TOOLNAME "sd2text"
+
 int printUsage()
 {
-  printf("Usage: sd2text [OPTION] <StarOffice Document>\n");
+  printf("`" TOOLNAME "' converts StarOffice documents to plain text.\n");
+  printf("\n");
+  printf("Usage: " TOOLNAME " [OPTION] INPUT\n");
   printf("\n");
   printf("Options:\n");
-  printf(" -i                Display document metadata instead of the text\n");
-  printf(" -h                Shows this help message\n");
-  printf(" -o file.txt       Define the output[default stdout]\n");
-  printf(" -p password       Gives the document password\n");
-  printf(" -v                Output sd2text version \n");
+  printf("\t-i                show document metadata instead of the text\n");
+  printf("\t-h                show this help message\n");
+  printf("\t-o OUTPUT         write ouput to OUTPUT\n");
+  printf("\t-p PASSWORD       set password to open the file\n");
+  printf("\t-v                show version information\n");
   printf("\n");
-  return -1;
+  printf("Report bugs to <https://github.com/fosnola/libstaroffice/issues>.\n");
+  return 0;
 }
 
 int printVersion()
 {
-  printf("sd2text %s\n", VERSION);
+  printf("%s %s\n", TOOLNAME, VERSION);
   return 0;
 }
 

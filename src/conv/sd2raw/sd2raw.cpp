@@ -45,25 +45,34 @@
 #include "config.h"
 #endif
 
+#ifndef PACKAGE
+#define PACKAGE "libstaroffice"
+#endif
 #ifndef VERSION
 #define VERSION "UNKNOWN VERSION"
 #endif
 
+#define TOOLNAME "sd2raw"
+
 int printUsage()
 {
-  printf("Usage: sd2raw [OPTION] <StarOffice Document>\n");
+  printf("`" TOOLNAME "' is used to test " PACKAGE ".\n");
+  printf("\n");
+  printf("Usage: " TOOLNAME " [OPTION] INPUT\n");
   printf("\n");
   printf("Options:\n");
-  printf("\t-c:                Display the call graph nesting level\n");
-  printf("\t-h:                Shows this help message\n");
-  printf("\t-p password:       Gives the document password\n");
-  printf("\t-v:                Output sd2raw version \n");
-  return -1;
+  printf("\t-c                 display the call graph nesting level\n");
+  printf("\t-h                 show this help message\n");
+  printf("\t-p PASSWORD        set password to open the file\n");
+  printf("\t-v                 show version information\n");
+  printf("\n");
+  printf("Report bugs to <https://github.com/fosnola/libstaroffice/issues>.\n");
+  return 0;
 }
 
 int printVersion()
 {
-  printf("sd2raw %s\n", VERSION);
+  printf("%s %s\n", TOOLNAME, VERSION);
   return 0;
 }
 

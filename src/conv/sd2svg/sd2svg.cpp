@@ -56,23 +56,28 @@
 #define VERSION "UNKNOWN VERSION"
 #endif
 
+#define TOOLNAME "sd2svg"
+
 int printUsage()
 {
-  printf("Usage: sd2svg [OPTION] <StarOffice Graphic/Presentation Document>\n");
+  printf("`" TOOLNAME "' converts StarOffice graphic documents and presentations to SVG.\n");
+  printf("\n");
+  printf("Usage: " TOOLNAME " [OPTION] INPUT\n");
   printf("\n");
   printf("Options:\n");
-  printf("\t-h:                Shows this help message.\n");
-  printf("\t-o file.svg:       Defines the ouput file.\n");
-  printf("\t-N:                Output the number of sheets \n");
-  printf("\t-n num:            Sets the choose the sheet to convert (1: means first page) \n");
-  printf("\t-v:                Outputs sd2svg version. \n");
+  printf("\t-h                 show this help message\n");
+  printf("\t-o OUTPUT          write ouput to OUTPUT\n");
+  printf("\t-N                 Output the number of sheets\n");
+  printf("\t-n NUM             choose the page to convert (1: means first page)\n");
+  printf("\t-v                 show version information\n");
   printf("\n");
+  printf("Report bugs to <https://github.com/fosnola/libstaroffice/issues>.\n");
   return -1;
 }
 
 int printVersion()
 {
-  printf("stoff2svg %s\n", VERSION);
+  printf("%s %s\n", TOOLNAME, VERSION);
   return 0;
 }
 

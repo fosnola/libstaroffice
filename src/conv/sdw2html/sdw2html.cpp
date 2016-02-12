@@ -49,20 +49,26 @@
 #define VERSION "UNKNOWN VERSION"
 #endif
 
+#define TOOLNAME "sdw2html"
+
 int printUsage()
 {
-  printf("Usage: sdw2html [OPTION] <Star Office Document>\n");
+  printf("`" TOOLNAME "' converts StarOffice documents to HTML.\n");
+  printf("\n");
+  printf("Usage: " TOOLNAME " [OPTION] INPUT\n");
   printf("\n");
   printf("Options:\n");
-  printf("\t-h:                Shows this help message\n");
-  printf("\t-p password:       Gives the document password\n");
-  printf("\t-v:                Output sdw2html version \n");
-  return -1;
+  printf("\t-h                show this help message\n");
+  printf("\t-p PASSWORD       set password to open the file\n");
+  printf("\t-v                show version information\n");
+  printf("\n");
+  printf("Report bugs to <https://github.com/fosnola/libstaroffice/issues>.\n");
+  return 0;
 }
 
 int printVersion()
 {
-  printf("sdw2html %s\n", VERSION);
+  printf("%s %s\n", TOOLNAME, VERSION);
   return 0;
 }
 

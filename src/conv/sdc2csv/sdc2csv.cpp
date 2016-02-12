@@ -54,34 +54,40 @@
 #define VERSION "UNKNOWN VERSION"
 #endif
 
+#define TOOLNAME "sdc2csv"
+
 int printUsage()
 {
-  printf("Usage: stoff2csv [OPTION] a StarOffice .sdc document\n");
+  printf("`" TOOLNAME "' converts StarOffice spreadsheets to CSV.\n");
+  printf("\n");
+  printf("Usage: " TOOLNAME " [OPTION] INPUT\n");
   printf("\n");
   printf("Options:\n");
-  printf("\t-h:          Shows this help message\n");
-  printf("\t-dc:         Sets the decimal commas to character c: default .\n");
-  printf("\t-fc:         Sets the field separator to character c: default ,\n");
-  printf("\t-tc:         Sets the text separator to character c: default \"\n");
-  printf("\t-F:          Sets to output the formula which exists in the file\n");
-  printf("\t-Dformat:    Sets the date format: default \"%%m/%%d/%%y\"\n");
-  printf("\t-Tformat:    Sets the time format: default \"%%H:%%M:%%S\"\n");
-  printf("\t-N:          Output the number of sheets \n");
-  printf("\t-n num:      Sets the choose the sheet to convert (1: means first sheet) \n");
-  printf("\t-o file.csv: Defines the ouput file\n");
-  printf("\t-v:          Output stoff2csv version\n");
+  printf("\t-h           show this help message\n");
+  printf("\t-d C         set decimal separator: default `.'\n");
+  printf("\t-f C         set field separator: default `,'\n");
+  printf("\t-t C         set text separator: default `\"'\n");
+  printf("\t-F           set to output the formula which exists in the file\n");
+  printf("\t-D FORMAT    set date format: default \"%%m/%%d/%%y\"\n");
+  printf("\t-T FORMAT    set time format: default \"%%H:%%M:%%S\"\n");
+  printf("\t-N           print the number of sheets\n");
+  printf("\t-n NUM       choose the sheet to convert (1: means first sheet)\n");
+  printf("\t-o OUTPUT    write ouput to OUTPUT\n");
+  printf("\t-v           show version information\n");
   printf("\n");
-  printf("Example:\n");
-  printf("\tstoff2cvs -d, -D\"%%d/%%m/%%y\" file : Converts a file using french locale\n");
+  printf("Examples:\n");
+  printf("\t" TOOLNAME " -d, -D\"%%d/%%m/%%y\" file : Converts a file using french locale\n");
   printf("\n");
   printf("Note:\n");
-  printf("\t If -F is present, the formula are generated which english names\n");
-  return -1;
+  printf("\t If -F is present, the formula are generated which english names.\n");
+  printf("\n");
+  printf("Report bugs to <https://github.com/fosnola/libstaroffice/issues>.\n");
+  return 0;
 }
 
 int printVersion()
 {
-  printf("stoff2csv %s\n", VERSION);
+  printf("%s %s\n", TOOLNAME, VERSION);
   return 0;
 }
 
