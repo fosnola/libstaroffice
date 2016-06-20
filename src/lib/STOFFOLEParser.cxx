@@ -386,7 +386,7 @@ bool STOFFOLEParser::readOle(STOFFInputStreamPtr ip, std::string const &oleName,
 
   int val[20];
   for (int i= 0; i < 20; i++) {
-    val[i] = (int) ip->readLong(1);
+    val[i] = int(ip->readLong(1));
     if (val[i] < -10 || val[i] > 10) return false;
   }
 
@@ -413,7 +413,7 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
   input->seek(0, librevenge::RVNG_SEEK_SET);
   libstoff::DebugStream f;
   f << "Entries(SumInfo):";
-  int val=(int) input->readULong(2);
+  int val=int(input->readULong(2));
   if (val==0xfeff) {
     input->setReadInverted(false);
     val=0xfffe;
@@ -426,10 +426,10 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
     return true;
   }
   for (int i=0; i<11; ++i) { // f1=1, f2=0-2
-    val=(int) input->readULong(2);
+    val=int(input->readULong(2));
     if (val) f << "f" << i << "=" << val << ",";
   }
-  val=(int) input->readULong(4);
+  val=int(input->readULong(4));
   if (val!=1) {
     STOFF_DEBUG_MSG(("STOFFOLEParser::readSummaryInformation: summary info is bad\n"));
     f << "###sumInfo=" << val << ",";
@@ -438,8 +438,8 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
     return true;
   }
   for (int i=0; i<4; ++i) {
-    val=(int) input->readULong(4);
-    static int const expected[]= {(int) 0xf29f85e0,0x10684ff9,0x891ab,(int)0xd9b3272b};
+    val=int(input->readULong(4));
+    static int const expected[]= {int(0xf29f85e0),0x10684ff9,0x891ab,int(0xd9b3272b)};
     if (val==expected[i]) continue;
     STOFF_DEBUG_MSG(("STOFFOLEParser::readSummaryInformation: fmid is bad\n"));
     f << "###fmid" << i << "=" << std::hex << val << std::dec << ",";
@@ -447,7 +447,7 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
     ascii.addNote(f.str().c_str());
     return true;
   }
-  int decal=(int) input->readULong(4);
+  int decal=int(input->readULong(4));
   if (decal<0x30 || input->size()<decal) {
     STOFF_DEBUG_MSG(("STOFFOLEParser::readSummaryInformation: decal is bad\n"));
     f << "decal=" << val << ",";
@@ -467,8 +467,8 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
   long pos=input->tell();
   f.str("");
   f << "SumInfo-A:";
-  long pSetSize=(long) input->readULong(4);
-  int N=(int) input->readULong(4);
+  long pSetSize=long(input->readULong(4));
+  int N=int(input->readULong(4));
   f << "N=" << N << ",";
   if (pSetSize<0 || input->size()-pos<pSetSize || (pSetSize-8)/8<N) {
     STOFF_DEBUG_MSG(("STOFFOLEParser::readSummaryInformation: psetstruct is bad\n"));
@@ -480,8 +480,8 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
   f << "[";
   std::map<long,int> posToTypeMap;
   for (int i=0; i<N; ++i) {
-    int type=(int) input->readULong(4);
-    int depl=(int) input->readULong(4);
+    int type=int(input->readULong(4));
+    int depl=int(input->readULong(4));
     if (depl==0) continue;
     f << std::hex << depl << std::dec << ":" << type << ",";
     if (depl<8+8*N || depl+4>pSetSize || posToTypeMap.find(pos+depl)!=posToTypeMap.end()) {
@@ -499,9 +499,9 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     f.str("");
     f << "SumInfo-B" << it->second << ":";
-    int type=(int) input->readULong(4);
+    int type=int(input->readULong(4));
     if (type==0x1e) {
-      long sSz=(long) input->readULong(4);
+      long sSz=long(input->readULong(4));
       if (sSz<0 || (input->size()-pos-8)<sSz || pos+8+sSz>input->size()) {
         STOFF_DEBUG_MSG(("STOFFOLEParser::readSummaryInformation: string size is bad\n"));
         f << "##stringSz=" << sSz << ",";
@@ -510,7 +510,7 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
         continue;
       }
       std::string text("");
-      for (long c=0; c < sSz; ++c) text+=(char) input->readULong(1);
+      for (long c=0; c < sSz; ++c) text+=char(input->readULong(1));
       f << text;
     }
     else if (type==0x40) {
@@ -564,7 +564,7 @@ bool STOFFOLEParser::readCompObj(STOFFInputStreamPtr ip, STOFFOLEParser::OleDire
   ip->seek(0,librevenge::RVNG_SEEK_SET);
 
   for (int i = 0; i < 6; i++) {
-    int val = (int) ip->readLong(2);
+    int val = int(ip->readLong(2));
     f << val << ", ";
   }
 
@@ -585,7 +585,7 @@ bool STOFFOLEParser::readCompObj(STOFFInputStreamPtr ip, STOFFOLEParser::OleDire
     if (!directory.m_clsName.empty())
       f << "'" << directory.m_clsName << "'";
     else {
-      STOFF_DEBUG_MSG(("STOFFOLEParser::readCompObj: unknown clsid=%ld\n", (long) clsData[0]));
+      STOFF_DEBUG_MSG(("STOFFOLEParser::readCompObj: unknown clsid=%ld\n", long(clsData[0])));
       f << "unknCLSID='" << std::hex << clsData[0] << "'";
     }
   }
@@ -617,7 +617,7 @@ bool STOFFOLEParser::readCompObj(STOFFInputStreamPtr ip, STOFFOLEParser::OleDire
     }
     else {
       for (int i = 0; i < sz; i++)
-        st += (char) ip->readULong(1);
+        st += char(ip->readULong(1));
     }
 
     f.str("");
@@ -753,12 +753,12 @@ bool STOFFOLEParser::readOlePres(STOFFInputStreamPtr ip, STOFFOLEParser::OleCont
         std::string str;
         bool find = false;
         while (ip->tell() < endHPos) {
-          unsigned char c = (unsigned char)ip->readULong(1);
+          unsigned char c = static_cast<unsigned char>(ip->readULong(1));
           if (c == 0) {
             find = true;
             break;
           }
-          str += (char) c;
+          str += char(c);
         }
         if (!find) {
           ok = false;
@@ -787,8 +787,8 @@ bool STOFFOLEParser::readOlePres(STOFFInputStreamPtr ip, STOFFOLEParser::OleCont
     f << val << ", ";
   }
   // dim in TWIP ?
-  long extendX = (long) ip->readULong(4);
-  long extendY = (long)ip->readULong(4);
+  long extendX = long(ip->readULong(4));
+  long extendY = long(ip->readULong(4));
   if (extendX > 0 && extendY > 0) {
     STOFFPosition pos;
     pos.m_anchorTo=STOFFPosition::Char;
@@ -908,7 +908,7 @@ bool STOFFOLEParser::readContents(STOFFInputStreamPtr input, STOFFOLEParser::Ole
   f << "bdbox0=(" << dim[0] << "," << dim[1]<<"),";
   for (int i = 0; i < 3; i++) {
     /* 0,{10|21|75|101|116}x2 */
-    long val = (long) input->readULong(4);
+    long val = long(input->readULong(4));
     if (val < 1000)
       f << val << ",";
     else
@@ -947,7 +947,7 @@ bool STOFFOLEParser::readContents(STOFFInputStreamPtr input, STOFFOLEParser::Ole
   content.setPosition(pos);
 
   long actPos = input->tell();
-  long size = (long) input->readULong(4);
+  long size = long(input->readULong(4));
   if (size <= 0) ok = false;
   if (ok) {
     input->seek(actPos+size+4, librevenge::RVNG_SEEK_SET);
@@ -1010,7 +1010,7 @@ bool STOFFOLEParser::readCONTENTS(STOFFInputStreamPtr input, STOFFOLEParser::Ole
   input->seek(0, librevenge::RVNG_SEEK_SET);
   f << "Entries(CONTMAJ):";
 
-  long hSize = (long)input->readULong(4);
+  long hSize = long(input->readULong(4));
   if (input->isEnd()) return false;
   f << "hSize=" << std::hex << hSize << std::dec;
 
@@ -1023,9 +1023,9 @@ bool STOFFOLEParser::readCONTENTS(STOFFInputStreamPtr input, STOFFOLEParser::Ole
 
   // minimal checking of the "copied" header
   input->seek(4, librevenge::RVNG_SEEK_SET);
-  long type = (long) input->readULong(4);
+  long type = long(input->readULong(4));
   if (type < 0 || type > 4) return false;
-  long newSize = (long) input->readULong(4);
+  long newSize = long(input->readULong(4));
 
   f << ", type=" << type;
   if (newSize < 8) return false;
@@ -1050,15 +1050,15 @@ bool STOFFOLEParser::readCONTENTS(STOFFInputStreamPtr input, STOFFOLEParser::Ole
   }
   content.setPosition(pos);
   char dataType[5];
-  for (int i = 0; i < 4; i++) dataType[i] = (char) input->readULong(1);
+  for (int i = 0; i < 4; i++) dataType[i] = char(input->readULong(1));
   dataType[4] = '\0';
   f << ",typ=\""<<dataType<<"\""; // always " EMF" ?
 
   for (int i = 0; i < 2; i++) { // always id0=0, id1=1 ?
-    int val = (int) input->readULong(2);
+    int val = int(input->readULong(2));
     if (val) f << ",id"<< i << "=" << val;
   }
-  long dataLength = (long) input->readULong(4);
+  long dataLength = long(input->readULong(4));
   f << ",length=" << dataLength+hSize;
 
   ascii.addPos(0);
@@ -1072,14 +1072,14 @@ bool STOFFOLEParser::readCONTENTS(STOFFInputStreamPtr input, STOFFOLEParser::Ole
     // or f0=a,f1=1,f2=2,f3=6c,f5=480,f6=360,f7=140,f8=f0
     // or f0=61,f1=1,f2=2,f3=58,f5=280,f6=1e0,f7=a9,f8=7f
     // f3=some header sub size ? f5/f6 and f7/f8 two other bdbox ?
-    long val = (long) input->readULong(4);
+    long val = long(input->readULong(4));
     if (val) f << std::hex << ",f" << i << "=" << val;
   }
   for (int i = 0; 2*i+100 < hSize; i++) {
     // g0=e3e3,g1=6,g2=4e6e,g3=4
     // g0=e200,g1=4,g2=a980,g3=3,g4=4c,g5=50
     // ---
-    long val = (long) input->readULong(2);
+    long val = long(input->readULong(2));
     if (val) f << std::hex << ",g" << i << "=" << val;
   }
   ascii.addNote(f.str().c_str());

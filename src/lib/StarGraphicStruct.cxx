@@ -54,16 +54,16 @@ namespace StarGraphicStruct
 //
 static void writeU16(unsigned char *buffer, unsigned &position, const unsigned value)
 {
-  buffer[position++] = (unsigned char)(value & 0xFF);
-  buffer[position++] = (unsigned char)((value >> 8) & 0xFF);
+  buffer[position++] = static_cast<unsigned char>(value & 0xFF);
+  buffer[position++] = static_cast<unsigned char>((value >> 8) & 0xFF);
 }
 
 static void writeU32(unsigned char *buffer, unsigned &position, const unsigned value)
 {
-  buffer[position++] = (unsigned char)(value & 0xFF);
-  buffer[position++] = (unsigned char)((value >> 8) & 0xFF);
-  buffer[position++] = (unsigned char)((value >> 16) & 0xFF);
-  buffer[position++] = (unsigned char)((value >> 24) & 0xFF);
+  buffer[position++] = static_cast<unsigned char>(value & 0xFF);
+  buffer[position++] = static_cast<unsigned char>((value >> 8) & 0xFF);
+  buffer[position++] = static_cast<unsigned char>((value >> 16) & 0xFF);
+  buffer[position++] = static_cast<unsigned char>((value >> 24) & 0xFF);
 }
 
 //! Internal: helper function to create a BMP for a color bitmap (freely inspired from libpwg::WPGBitmap.cpp)
@@ -92,19 +92,19 @@ static unsigned char *createAndInitBMPData(STOFFVec2i const &sz, unsigned &dibFi
   bufferPosition = 0;
   // Create DIB file header
   writeU16(tmpDIBBuffer, bufferPosition, 0x4D42);  // Type
-  writeU32(tmpDIBBuffer, bufferPosition, (unsigned) dibFileSize); // Size
+  writeU32(tmpDIBBuffer, bufferPosition, unsigned(dibFileSize)); // Size
   writeU16(tmpDIBBuffer, bufferPosition, 0); // Reserved1
   writeU16(tmpDIBBuffer, bufferPosition, 0); // Reserved2
-  writeU32(tmpDIBBuffer, bufferPosition, (unsigned) tmpDIBOffsetBits); // OffsetBits
+  writeU32(tmpDIBBuffer, bufferPosition, unsigned(tmpDIBOffsetBits)); // OffsetBits
 
   // Create DIB Info header
   writeU32(tmpDIBBuffer, bufferPosition, headerSize); // Size
-  writeU32(tmpDIBBuffer, bufferPosition, (unsigned) sz[0]);  // Width
-  writeU32(tmpDIBBuffer, bufferPosition, (unsigned) sz[1]); // Height
+  writeU32(tmpDIBBuffer, bufferPosition, unsigned(sz[0]));  // Width
+  writeU32(tmpDIBBuffer, bufferPosition, unsigned(sz[1])); // Height
   writeU16(tmpDIBBuffer, bufferPosition, 1); // Planes
   writeU16(tmpDIBBuffer, bufferPosition, 32); // BitCount
   writeU32(tmpDIBBuffer, bufferPosition, 0); // Compression
-  writeU32(tmpDIBBuffer, bufferPosition, (unsigned)tmpDIBImageSize); // SizeImage
+  writeU32(tmpDIBBuffer, bufferPosition, unsigned(tmpDIBImageSize)); // SizeImage
   writeU32(tmpDIBBuffer, bufferPosition, 5904); // XPelsPerMeter: 300ppi
   writeU32(tmpDIBBuffer, bufferPosition, 5904); // YPelsPerMeter: 300ppi
   writeU32(tmpDIBBuffer, bufferPosition, 0); // ColorsUsed
@@ -125,7 +125,7 @@ static unsigned char *createAndInitBMPData(STOFFVec2i const &sz, unsigned &dibFi
 inline bool getBMPData(std::vector<std::vector<STOFFColor> > const &orig, librevenge::RVNGBinaryData &data)
 {
   if (orig.empty() || orig[0].empty()) return false;
-  STOFFVec2i sz((int) orig[0].size(),(int) orig.size());
+  STOFFVec2i sz(int(orig[0].size()),int(orig.size()));
   unsigned tmpBufferPosition, tmpDIBFileSize;
   unsigned char *tmpDIBBuffer=createAndInitBMPData(sz, tmpDIBFileSize, tmpBufferPosition);
   if (!tmpDIBBuffer) return false;
@@ -134,12 +134,12 @@ inline bool getBMPData(std::vector<std::vector<STOFFColor> > const &orig, librev
   for (int i = sz[1] - 1; i >= 0 && tmpBufferPosition < tmpDIBFileSize; i--) {
     std::vector<STOFFColor> const &row = orig[size_t(i)];
     for (int j = 0; j < sz[0] && tmpBufferPosition < tmpDIBFileSize; j++) {
-      uint32_t col = (j< (int) row.size()) ? row[size_t(j)].value() : 0;
+      uint32_t col = (j< int(row.size())) ? row[size_t(j)].value() : 0;
 
-      tmpDIBBuffer[tmpBufferPosition++]=(unsigned char)(col&0xFF);
-      tmpDIBBuffer[tmpBufferPosition++]=(unsigned char)((col>>8)&0xFF);
-      tmpDIBBuffer[tmpBufferPosition++]=(unsigned char)((col>>16)&0xFF);
-      tmpDIBBuffer[tmpBufferPosition++]=(unsigned char)((col>>24)&0xFF);
+      tmpDIBBuffer[tmpBufferPosition++]=static_cast<unsigned char>(col&0xFF);
+      tmpDIBBuffer[tmpBufferPosition++]=static_cast<unsigned char>((col>>8)&0xFF);
+      tmpDIBBuffer[tmpBufferPosition++]=static_cast<unsigned char>((col>>16)&0xFF);
+      tmpDIBBuffer[tmpBufferPosition++]=static_cast<unsigned char>((col>>24)&0xFF);
     }
   }
   data.clear();
@@ -165,10 +165,10 @@ static bool getBMPData(uint16_t const *pattern, STOFFColor const &col0,  STOFFCo
     for (int j = 0, depl=0x80; j < 8 && tmpBufferPosition < tmpDIBFileSize; j++, depl>>=1) {
       uint32_t const &col = cols[(row&depl) ? 1 : 0];
 
-      tmpDIBBuffer[tmpBufferPosition++]=(unsigned char)(col&0xFF);
-      tmpDIBBuffer[tmpBufferPosition++]=(unsigned char)((col>>8)&0xFF);
-      tmpDIBBuffer[tmpBufferPosition++]=(unsigned char)((col>>16)&0xFF);
-      tmpDIBBuffer[tmpBufferPosition++]=(unsigned char)((col>>24)&0xFF);
+      tmpDIBBuffer[tmpBufferPosition++]=static_cast<unsigned char>(col&0xFF);
+      tmpDIBBuffer[tmpBufferPosition++]=static_cast<unsigned char>((col>>8)&0xFF);
+      tmpDIBBuffer[tmpBufferPosition++]=static_cast<unsigned char>((col>>16)&0xFF);
+      tmpDIBBuffer[tmpBufferPosition++]=static_cast<unsigned char>((col>>24)&0xFF);
     }
   }
   data.clear();
@@ -382,37 +382,37 @@ static librevenge::RVNGString convertPath(const librevenge::RVNGPropertyListVect
     librevenge::RVNGString sElement;
     // 2540 is 2.54*1000, 2.54 in = 1 inch
     if (path[i]["svg:x"] && action[0] == 'H') {
-      sElement.sprintf("H%i", (int)(getInchValue(path[i]["svg:x"])*2540));
+      sElement.sprintf("H%i", int(getInchValue(path[i]["svg:x"])*2540));
       sValue.append(sElement);
     }
     else if (path[i]["svg:y"] && action[0] == 'V') {
-      sElement.sprintf("V%i", (int)(getInchValue(path[i]["svg:y"])*2540));
+      sElement.sprintf("V%i", int(getInchValue(path[i]["svg:y"])*2540));
       sValue.append(sElement);
     }
     else if (coordOk && (action[0] == 'M' || action[0] == 'L' || action[0] == 'T')) {
-      sElement.sprintf("%c%i %i", action[0], (int)(getInchValue(path[i]["svg:x"])*2540),
-                       (int)(getInchValue(path[i]["svg:y"])*2540));
+      sElement.sprintf("%c%i %i", action[0], int(getInchValue(path[i]["svg:x"])*2540),
+                       int(getInchValue(path[i]["svg:y"])*2540));
       sValue.append(sElement);
     }
     else if (coord1Ok && (action[0] == 'Q' || action[0] == 'S')) {
-      sElement.sprintf("%c%i %i %i %i", action[0], (int)(getInchValue(path[i]["svg:x1"])*2540),
-                       (int)(getInchValue(path[i]["svg:y1"])*2540), (int)(getInchValue(path[i]["svg:x"])*2540),
-                       (int)(getInchValue(path[i]["svg:y"])*2540));
+      sElement.sprintf("%c%i %i %i %i", action[0], int(getInchValue(path[i]["svg:x1"])*2540),
+                       int(getInchValue(path[i]["svg:y1"])*2540), int(getInchValue(path[i]["svg:x"])*2540),
+                       int(getInchValue(path[i]["svg:y"])*2540));
       sValue.append(sElement);
     }
     else if (coord2Ok && action[0] == 'C') {
-      sElement.sprintf("C%i %i %i %i %i %i", (int)(getInchValue(path[i]["svg:x1"])*2540),
-                       (int)(getInchValue(path[i]["svg:y1"])*2540), (int)(getInchValue(path[i]["svg:x2"])*2540),
-                       (int)(getInchValue(path[i]["svg:y2"])*2540), (int)(getInchValue(path[i]["svg:x"])*2540),
-                       (int)(getInchValue(path[i]["svg:y"])*2540));
+      sElement.sprintf("C%i %i %i %i %i %i", int(getInchValue(path[i]["svg:x1"])*2540),
+                       int(getInchValue(path[i]["svg:y1"])*2540), int(getInchValue(path[i]["svg:x2"])*2540),
+                       int(getInchValue(path[i]["svg:y2"])*2540), int(getInchValue(path[i]["svg:x"])*2540),
+                       int(getInchValue(path[i]["svg:y"])*2540));
       sValue.append(sElement);
     }
     else if (coordOk && path[i]["svg:rx"] && path[i]["svg:ry"] && action[0] == 'A') {
-      sElement.sprintf("A%i %i %i %i %i %i %i", (int)((getInchValue(path[i]["svg:rx"]))*2540),
-                       (int)((getInchValue(path[i]["svg:ry"]))*2540), (path[i]["librevenge:rotate"] ? path[i]["librevenge:rotate"]->getInt() : 0),
+      sElement.sprintf("A%i %i %i %i %i %i %i", int((getInchValue(path[i]["svg:rx"]))*2540),
+                       int((getInchValue(path[i]["svg:ry"]))*2540), (path[i]["librevenge:rotate"] ? path[i]["librevenge:rotate"]->getInt() : 0),
                        (path[i]["librevenge:large-arc"] ? path[i]["librevenge:large-arc"]->getInt() : 1),
                        (path[i]["librevenge:sweep"] ? path[i]["librevenge:sweep"]->getInt() : 1),
-                       (int)(getInchValue(path[i]["svg:x"])*2540), (int)(getInchValue(path[i]["svg:y"])*2540));
+                       int(getInchValue(path[i]["svg:x"])*2540), int(getInchValue(path[i]["svg:y"])*2540));
       sValue.append(sElement);
     }
     else if (action[0] == 'Z')
@@ -513,12 +513,12 @@ bool StarBrush::read(StarZone &zone, int nVers, long /*endPos*/, StarObject &/*o
     m_extra="###fillColor,";
     return false;
   }
-  m_style=(int) input->readULong(1);
+  m_style=int(input->readULong(1));
   if (nVers<1) {
     m_position=10; // area
     return true;
   }
-  int doLoad=(int) input->readULong(2);
+  int doLoad=int(input->readULong(2));
   if (doLoad & 1) { // TODO: svx_frmitems.cxx:1948
     STOFF_DEBUG_MSG(("StarGraphicStruct::StarBrush::read: do not know how to load graphic\n"));
     return false;
@@ -543,7 +543,7 @@ bool StarBrush::read(StarZone &zone, int nVers, long /*endPos*/, StarObject &/*o
     else
       m_filterName=libstoff::getString(filter);
   }
-  m_position=(int) input->readULong(1);
+  m_position=int(input->readULong(1));
   return true;
 }
 
@@ -567,7 +567,7 @@ bool StarGraphicStruct::StarGraphic::read(StarZone &zone, long endPos)
     return false;
   }
   std::string header;
-  for (int i=0; i<4; ++i) header+=(char) input->readULong(1);
+  for (int i=0; i<4; ++i) header+=char(input->readULong(1));
   bool ok=true;
   if (header=="NAT5") { // NAT5
     if (!zone.openVersionCompatHeader()) {

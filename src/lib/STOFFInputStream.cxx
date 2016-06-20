@@ -76,7 +76,7 @@ shared_ptr<STOFFInputStream> STOFFInputStream::get(librevenge::RVNGBinaryData co
     return res;
   }
   res.reset(new STOFFInputStream(dataStream, inverted));
-  if (res && res->size()>=(long) data.size()) {
+  if (res && res->size()>=long(data.size())) {
     res->seek(0, librevenge::RVNG_SEEK_SET);
     return res;
   }
@@ -126,8 +126,8 @@ int STOFFInputStream::seek(long offset, librevenge::RVNG_SEEK_TYPE seekType)
 
   if (offset < 0)
     offset = 0;
-  if (m_readLimit > 0 && offset > (long)m_readLimit)
-    offset = (long)m_readLimit;
+  if (m_readLimit > 0 && offset > long(m_readLimit))
+    offset = long(m_readLimit);
   if (offset > size())
     offset = size();
 
@@ -157,24 +157,24 @@ unsigned long STOFFInputStream::readULong(librevenge::RVNGInputStream *stream, i
   case 2:
   case 1: {
     unsigned long numBytesRead;
-    uint8_t const *p = stream->read((unsigned long) num, numBytesRead);
+    uint8_t const *p = stream->read(static_cast<unsigned long>(num), numBytesRead);
     if (!p || int(numBytesRead) != num)
       return 0;
     switch (num) {
     case 4:
-      return (unsigned long)p[3]|((unsigned long)p[2]<<8)|
-             ((unsigned long)p[1]<<16)|((unsigned long)p[0]<<24)|((a<<16)<<16);
+      return static_cast<unsigned long>(p[3])|(static_cast<unsigned long>(p[2])<<8)|
+             (static_cast<unsigned long>(p[1])<<16)|(static_cast<unsigned long>(p[0])<<24)|((a<<16)<<16);
     case 2:
-      return ((unsigned long)p[1])|((unsigned long)p[0]<<8)|(a<<16);
+      return (static_cast<unsigned long>(p[1]))|(static_cast<unsigned long>(p[0])<<8)|(a<<16);
     case 1:
-      return ((unsigned long)p[0])|(a<<8);
+      return (static_cast<unsigned long>(p[0]))|(a<<8);
     default:
       break;
     }
     break;
   }
   default:
-    return readULong(stream, num-1,(a<<8) + (unsigned long)readU8(stream), inverseRead);
+    return readULong(stream, num-1,(a<<8) + static_cast<unsigned long>(readU8(stream)), inverseRead);
   }
   return 0;
 }
@@ -184,11 +184,11 @@ long STOFFInputStream::readLong(int num)
   long v = long(readULong(num));
   switch (num) {
   case 4:
-    return (int32_t) v;
+    return static_cast<int32_t>(v);
   case 2:
-    return (int16_t) v;
+    return static_cast<int16_t>(v);
   case 1:
-    return (int8_t) v;
+    return static_cast<int8_t>(v);
   default:
     break;
   }
@@ -207,13 +207,13 @@ uint8_t STOFFInputStream::readU8(librevenge::RVNGInputStream *stream)
   if (!p || numBytesRead != sizeof(uint8_t))
     return 0;
 
-  return *(uint8_t const *)(p);
+  return *reinterpret_cast<uint8_t const *>(p);
 }
 
 int STOFFInputStream::peek()
 {
   if (isEnd()) return -1;
-  int res=(int) readULong(1);
+  int res=int(readULong(1));
   seek(-1, librevenge::RVNG_SEEK_CUR);
   return res;
 }
@@ -221,11 +221,11 @@ int STOFFInputStream::peek()
 bool STOFFInputStream::readColor(STOFFColor &color)
 {
   if (!m_stream || !checkPosition(tell()+2)) return false;
-  int colId=(int) readULong(2);
+  int colId=int(readULong(2));
   if (colId & 0x8000) {
     if (!checkPosition(tell()+6)) return false;
     unsigned char col[3];
-    for (int i=0; i<3; ++i) col[i]=(unsigned char)(readULong(2)>>8);
+    for (int i=0; i<3; ++i) col[i]=static_cast<unsigned char>(readULong(2)>>8);
     color=STOFFColor(col[0],col[1],col[2]);
     return true;
   }
@@ -298,7 +298,7 @@ bool STOFFInputStream::readCompressedULong(unsigned long &res)
 
     if (!p || numBytesRead != 2*sizeof(uint8_t))
       return false;
-    res= (res<<16)|(unsigned long)(p[1]<<8)|p[0];//checkme
+    res= (res<<16)|static_cast<unsigned long>(p[1]<<8)|p[0];//checkme
     return true;
   }
   if ((p[0]&0xf0)==0xe0) {
@@ -307,7 +307,7 @@ bool STOFFInputStream::readCompressedULong(unsigned long &res)
 
     if (!p || numBytesRead != 3*sizeof(uint8_t))
       return false;
-    res=(res<<24)|(unsigned long)(p[0]<<16)|(unsigned long)(p[2]<<8)|p[1];//checkme
+    res=(res<<24)|static_cast<unsigned long>(p[0]<<16)|static_cast<unsigned long>(p[2]<<8)|p[1];//checkme
     return true;
   }
   if ((p[0]&0xf8)==0xf0) {
@@ -353,7 +353,7 @@ bool STOFFInputStream::readCompressedLong(long &res)
     long pos=tell();
     if (m_readLimit > 0 && pos+4 > m_readLimit) return false;
     if (pos+4 > m_streamSize) return false;
-    res=(long) readULong(4);
+    res=long(readULong(4));
     return true;
   }
   return false;
@@ -369,12 +369,12 @@ bool STOFFInputStream::readDouble8(double &res, bool &isNotANumber)
   isNotANumber=false;
   res=0;
   int mantExp=int(readULong(1));
-  int val=(int) readULong(1);
+  int val=int(readULong(1));
   int exp=(mantExp<<4)+(val>>4);
   double mantisse=double(val&0xF)/16.;
   double factor=1./16/256.;
   for (int j = 0; j < 6; ++j, factor/=256)
-    mantisse+=(double)readULong(1)*factor;
+    mantisse+=double(readULong(1))*factor;
   int sign = 1;
   if (exp & 0x800) {
     exp &= 0x7ff;
@@ -408,7 +408,7 @@ bool STOFFInputStream::readDouble10(double &res, bool &isNotANumber)
   if (m_readLimit > 0 && pos+10 > m_readLimit) return false;
   if (pos+10 > m_streamSize) return false;
 
-  int exp = (int) readULong(2);
+  int exp = int(readULong(2));
   int sign = 1;
   if (exp & 0x8000) {
     exp &= 0x7fff;
@@ -417,7 +417,7 @@ bool STOFFInputStream::readDouble10(double &res, bool &isNotANumber)
   exp -= 0x3fff;
 
   isNotANumber=false;
-  unsigned long mantisse = (unsigned long) readULong(4);
+  unsigned long mantisse = static_cast<unsigned long>(readULong(4));
   if ((mantisse & 0x80000001) == 0) {
     // unormalized number are not frequent, but can appear at least for date, ...
     if (readULong(4) != 0)
@@ -452,15 +452,15 @@ bool STOFFInputStream::readDoubleReverted8(double &res, bool &isNotANumber)
   isNotANumber=false;
   res=0;
   int bytes[6];
-  for (int i=0; i<6; ++i) bytes[i]=(int) readULong(1);
+  for (int i=0; i<6; ++i) bytes[i]=int(readULong(1));
 
-  int val=(int) readULong(1);
+  int val=int(readULong(1));
   int mantExp=int(readULong(1));
   int exp=(mantExp<<4)+(val>>4);
   double mantisse=double(val&0xF)/16.;
   double factor=1./16./256.;
   for (int j = 0; j < 6; ++j, factor/=256)
-    mantisse+=(double)bytes[5-j]*factor;
+    mantisse+=double(bytes[5-j])*factor;
   int sign = 1;
   if (exp & 0x800) {
     exp &= 0x7ff;
@@ -580,11 +580,11 @@ bool STOFFInputStream::readDataBlock(long sz, librevenge::RVNGBinaryData &data)
   if (sz == 0) return true;
   long endPos=tell()+sz;
   if (endPos > size()) return false;
-  if (m_readLimit > 0 && endPos > (long)m_readLimit) return false;
+  if (m_readLimit > 0 && endPos > long(m_readLimit)) return false;
 
   const unsigned char *readData;
   unsigned long sizeRead;
-  if ((readData=m_stream->read((unsigned long)sz, sizeRead)) == 0 || long(sizeRead)!=sz)
+  if ((readData=m_stream->read(static_cast<unsigned long>(sz), sizeRead)) == 0 || long(sizeRead)!=sz)
     return false;
   data.append(readData, sizeRead);
   return true;

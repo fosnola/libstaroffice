@@ -67,11 +67,11 @@ librevenge::RVNGString getString(std::vector<uint32_t> const &unicode)
     if (unicode[i]<0x20 && unicode[i]!=0x9 && unicode[i]!=0xa && unicode[i]!=0xd) {
       static int numErrors=0;
       if (++numErrors<10) {
-        STOFF_DEBUG_MSG(("libstoff::getString: find odd char %x\n", (unsigned int)unicode[i]));
+        STOFF_DEBUG_MSG(("libstoff::getString: find odd char %x\n", static_cast<unsigned int>(unicode[i])));
       }
     }
     else if (unicode[i]<0x80)
-      res.append((char) unicode[i]);
+      res.append(char(unicode[i]));
     else
       appendUnicode(unicode[i], res);
   }
@@ -114,7 +114,7 @@ void appendUnicode(uint32_t val, librevenge::RVNGString &buffer)
     val >>= 6;
   }
   outbuf[0] = uint8_t(val | first);
-  for (i = 0; i < len; i++) buffer.append((char)outbuf[i]);
+  for (i = 0; i < len; i++) buffer.append(char(outbuf[i]));
 }
 }
 
@@ -204,7 +204,7 @@ STOFFColor STOFFColor::barycenter(float alpha, STOFFColor const &colA,
     float val=alpha*float((colA.m_value>>depl)&0xFF)+beta*float((colB.m_value>>depl)&0xFF);
     if (val < 0) val=0;
     if (val > 256) val=256;
-    unsigned char comp= (unsigned char)val;
+    unsigned char comp= static_cast<unsigned char>(val);
     res+=uint32_t(comp<<depl);
   }
   return STOFFColor(res);

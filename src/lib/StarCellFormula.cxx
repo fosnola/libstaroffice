@@ -355,7 +355,7 @@ bool Token::addToken(std::vector<std::vector<Token> > &stack, Token const &token
 ////////////////////////////////////////////////////////////
 void StarCellFormula::updateFormula(STOFFCellContent &content, std::vector<librevenge::RVNGString> const &sheetNames, int sheetId)
 {
-  int numNames=(int) sheetNames.size();
+  int numNames=int(sheetNames.size());
   for (size_t i=0; i<content.m_formula.size(); ++i) {
     STOFFCellContent::FormulaInstruction &form=content.m_formula[i];
     if ((form.m_type!=STOFFCellContent::FormulaInstruction::F_Cell &&
@@ -452,7 +452,7 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCellContent &content, i
           idx=int((b1&0x3f) | (input->readULong(1)<<6));
         else
           idx=int(b1);
-        if (idx<0 || idx>=(int) tokenList.size()) {
+        if (idx<0 || idx>=int(tokenList.size())) {
           STOFF_DEBUG_MSG(("StarCellFormula::readSCFormula: can not find the original token\n"));
           f << "[###Index" << idx << "]";
         }
@@ -588,7 +588,7 @@ bool StarCellFormula::readSCToken(StarZone &zone, StarCellFormulaInternal::Token
   case 8: // external
   default: { // ?
     if (type==8) {
-      int cByte=(int) input->readULong(1);
+      int cByte=int(input->readULong(1));
       if (cByte)
         f << "cByte=" << cByte << ",";
       f << "external,";
@@ -606,7 +606,7 @@ bool StarCellFormula::readSCToken(StarZone &zone, StarCellFormulaInternal::Token
     token.m_type=type==2 ? StarCellFormulaInternal::Token::String :
                  type==8 ? StarCellFormulaInternal::Token::External : StarCellFormulaInternal::Token::String2;
     std::vector<uint8_t> text;
-    for (int i=0; i<int(nBytes); ++i) text.push_back((uint8_t) input->readULong(1));
+    for (int i=0; i<int(nBytes); ++i) text.push_back(static_cast<uint8_t>(input->readULong(1)));
     std::vector<uint32_t> string;
     StarEncoding::convert(text, zone.getEncoding(), string);
     token.m_textValue=libstoff::getString(string);
@@ -647,7 +647,7 @@ bool StarCellFormula::readSCToken(StarZone &zone, StarCellFormulaInternal::Token
   }
   case 6:
     token.m_type=StarCellFormulaInternal::Token::Index;
-    token.m_longValue=(long)input->readULong(2);
+    token.m_longValue=long(input->readULong(2));
     break;
   case 7: {
     uint8_t nByte;
@@ -660,7 +660,7 @@ bool StarCellFormula::readSCToken(StarZone &zone, StarCellFormulaInternal::Token
     }
     token.m_type=StarCellFormulaInternal::Token::Jump;
     f << "J=[";
-    for (int i=0; i<(int) nByte; ++i) {
+    for (int i=0; i<int(nByte); ++i) {
       token.m_jumpPositions.push_back(int(input->readLong(2)));
       f << token.m_jumpPositions.back() << ",";
     }
@@ -846,7 +846,7 @@ bool StarCellFormula::readSCToken3(StarZone &zone, StarCellFormulaInternal::Toke
   }
   case 4: // name
     token.m_type=StarCellFormulaInternal::Token::Index;
-    token.m_longValue=(long)input->readULong(2);
+    token.m_longValue=long(input->readULong(2));
     break;
   case 5: // jump 3
     token.m_type=StarCellFormulaInternal::Token::Function;

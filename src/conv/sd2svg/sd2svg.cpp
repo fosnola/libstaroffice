@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
 
   unsigned page=pageToConvert>0 ? unsigned(pageToConvert-1) : 0;
   if (page>=vec.size()) {
-    fprintf(stderr, "ERROR: can not find page %d!\n", (int) page);
+    fprintf(stderr, "ERROR: can not find page %d!\n", int(page));
     return 1;
   }
   if (!output) {

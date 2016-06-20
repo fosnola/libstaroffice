@@ -194,7 +194,7 @@ public:
   //! returns the record level
   int getRecordLevel() const
   {
-    return (int) m_positionStack.size();
+    return int(m_positionStack.size());
   }
   //! returns the actual record last position
   long getRecordLastPosition() const
@@ -224,7 +224,7 @@ public:
   bool getPoolName(int poolId, librevenge::RVNGString &res) const
   {
     res="";
-    if (poolId>=0 && poolId<(int) m_poolList.size()) {
+    if (poolId>=0 && poolId<int(m_poolList.size())) {
       res=m_poolList[size_t(poolId)];
       return true;
     }

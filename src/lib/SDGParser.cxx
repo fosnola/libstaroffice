@@ -220,7 +220,7 @@ void SDGParser::createDocument(librevenge::RVNGDrawingInterface *documentInterfa
 {
   if (!documentInterface) return;
 
-  int numImages=(int) m_state->m_imagesList.size();
+  int numImages=int(m_state->m_imagesList.size());
   std::vector<STOFFPageSpan> pageList;
   STOFFPageSpan ps(getPageSpan());
   ps.m_pageSpan=numImages ? numImages : 1;
@@ -249,7 +249,7 @@ bool SDGParser::readSGA3(StarZone &zone)
       findHeader=false;
       break;
     }
-    long val=(int) input->readULong(4);
+    long val=int(input->readULong(4));
     if (val==0x33414753) {
       findHeader=true;
       break;
@@ -292,14 +292,14 @@ bool SDGParser::readBitmap(StarZone &zone)
   if (!input->checkPosition(pos+7)) return false;
   f << "Entries(SGA3):";
   for (int i=0; i<3; ++i) { // f0=4, f1=5|6, f2=1|2|5
-    int val=(int) input->readULong(2);
+    int val=int(input->readULong(2));
     int const expected[]= {4,5,1};
     if (val!=expected[i]) f << "f" << i << "=" << val << ",";
   }
   SDGParserInternal::Image image;
   int val;
   for (int step=0; step<2; ++step) {
-    int type=(int) input->readULong(1);
+    int type=int(input->readULong(1));
     if (type>2) {
       input->seek(-1, librevenge::RVNG_SEEK_CUR);
       break;
@@ -309,7 +309,7 @@ bool SDGParser::readBitmap(StarZone &zone)
       StarBitmap bitmap;
       librevenge::RVNGBinaryData data;
       std::string bType;
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       input->seek(-2, librevenge::RVNG_SEEK_CUR);
       if (val!=0x4D42 || !bitmap.readBitmap(zone, true, input->size(), data, bType)) {
         STOFF_DEBUG_MSG(("SDGParser::readBitmap: sorry, can not read a bitmap\n"));
@@ -330,12 +330,12 @@ bool SDGParser::readBitmap(StarZone &zone)
       f << "SGA3:";
     }
 
-    val=(int) input->readULong(2);
+    val=int(input->readULong(2));
     bool findText=false;
     if (val==0x1962) {
       f << "empty,";
       for (int i=0; i<3; ++i) {
-        val=(int) input->readULong(2);
+        val=int(input->readULong(2));
         int const(expected[])= {0x2509, 0x201, 0xacb2};
         if (val!=expected[i])
           f << "f" << i << "=" << std::hex << val << std::dec << ",";
@@ -345,7 +345,7 @@ bool SDGParser::readBitmap(StarZone &zone)
       input->seek(-2, librevenge::RVNG_SEEK_CUR);
       for (int i=0; i<2; ++i) {
         std::vector<uint32_t> text;
-        val=(int) input->readULong(2);
+        val=int(input->readULong(2));
         if (val==0x5300 || (type==0 && val>=0x80)) {
           input->seek(-2, librevenge::RVNG_SEEK_CUR);
           break;
@@ -382,12 +382,12 @@ bool SDGParser::readBitmap(StarZone &zone)
     m_state->m_imagesList.push_back(image);
   if (input->checkPosition(input->tell()+2)) {
     long actPos=input->tell();
-    val=(int) input->readULong(2);
+    val=int(input->readULong(2));
     if (val==0x4753 || val==0x5300)
       input->seek(actPos, librevenge::RVNG_SEEK_SET);
     else {
       f << "val=" << std::hex << val << std::dec << ",";
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       if (val==0x4753)
         input->seek(actPos+2, librevenge::RVNG_SEEK_SET);
       else

@@ -85,7 +85,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
     f << "Entries(SWFieldType)[" << cKind << "-" << zone.getRecordLevel() << "]:";
   else
     f << "Entries(SWFieldType)[" << zone.getRecordLevel() << "]:";
-  int fieldType=(int) input->readULong(cKind=='Y' ? 1 : 2);
+  int fieldType=int(input->readULong(cKind=='Y' ? 1 : 2));
   if (cKind!='Y') {
     if (zone.isCompatibleWith(0x202)) {
       f << "fldFmt=" << input->readULong(4) << ",";
@@ -115,7 +115,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
           f << libstoff::getString(name).cstr() << ",";
       }
       else {
-        val=(int) input->readULong(2);
+        val=int(input->readULong(2));
         if (!zone.getPoolName(val, poolName))
           f << "###nPoolId=" << val << ",";
         else if (!poolName.empty())
@@ -123,7 +123,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       }
       if (cKind=='Y') {
         if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
-          val=(int) input->readULong(2);
+          val=int(input->readULong(2));
           if (!zone.getPoolName(val, poolName))
             f << "###nDbName=" << val << ",";
           else if (!poolName.empty())
@@ -142,7 +142,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       if (zone.isCompatibleWith(0xa))
         f << "cFlag=" << std::hex << input->readULong(1) << std::dec << ",";
       if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
-        val=(int) input->readULong(2);
+        val=int(input->readULong(2));
         if (!zone.getPoolName(val, poolName))
           f << "###nDbName=" << val << ",";
         else if (!poolName.empty())
@@ -151,15 +151,15 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     // lcl_sw3io_InDBField
-    int cFlag=(int) input->readULong(1);
+    int cFlag=int(input->readULong(1));
     if (cFlag)
       f << "cFlag=" << std::hex << cFlag << std::dec << ",";
-    val=(int) input->readULong(2);
+    val=int(input->readULong(2));
     if (!zone.getPoolName(val, poolName))
       f << "###nColNamePoolId=" << val << ",";
     else if (!poolName.empty())
       f << "colName=" << poolName.cstr() << ",";
-    val=(int) input->readULong(2);
+    val=int(input->readULong(2));
     if (!zone.getPoolName(val, poolName))
       f << "###dbNamePoolId=" << val << ",";
     else if (!poolName.empty())
@@ -195,7 +195,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
         f << libstoff::getString(name).cstr() << ",";
     }
     else {
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       if (!zone.getPoolName(val, poolName))
         f << "###nPoolId=" << val << ",";
       else if (!poolName.empty())
@@ -230,7 +230,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       else if (res<0||res>0)
         f << "value=" << res << ",";
     }
-    val=(int) input->readULong(2);
+    val=int(input->readULong(2));
     f << "type=" << val << ",";
     break;
   }
@@ -252,7 +252,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
     if (cKind=='Y') break;
     // lcl_sw3io_InDBNameField
     if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       if (!zone.getPoolName(val, poolName))
         f << "###nDbName=" << val << ",";
       else if (!poolName.empty())
@@ -273,7 +273,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
     // lcl_sw3io_InPageNumberField40 && lcl_sw3io_InPageNumberField: TODO
     if (!zone.isCompatibleWith(0x202)) {
       f << "nOff=" << input->readLong(2) << ",";
-      int nSub=(int) input->readULong(2);
+      int nSub=int(input->readULong(2));
       f << "nSub=" << nSub << ",";
       if (!zone.isCompatibleWith(0x9)) break;
       if (!zone.readString(name)) {
@@ -349,7 +349,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
     f << "setExp,";
     if (cKind!='Y' && zone.isCompatibleWith(0x202)) {
       // lcl_sw3io_InSetExpField
-      int cFlags=(int) input->readULong(1);
+      int cFlags=int(input->readULong(1));
       if (cFlags) f << "flag=" << cFlags << ",";
       f << "nPoolId=" << input->readULong(2) << ",";
       if (!zone.readString(name)) {
@@ -385,7 +385,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
     }
     int nType=0;
     if (cKind=='Y') {
-      nType=(int) input->readULong(2);
+      nType=int(input->readULong(2));
       f << "nType=" << nType << ",";
     }
     if (!zone.isCompatibleWith(0xa)) {
@@ -398,7 +398,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
         f << libstoff::getString(name).cstr() << ",";
     }
     else {
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       if (!zone.getPoolName(val, poolName))
         f << "###nPoolId=" << val << ",";
       else if (!poolName.empty())
@@ -406,15 +406,15 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
     }
     if (cKind=='Y') {
       if ((nType&8) && zone.isCompatibleWith(0x202)) {
-        val=(int) input->readULong(1);
+        val=int(input->readULong(1));
         if (val) f << "cDelim=" << val << ",";
-        val=(int) input->readULong(1);
+        val=int(input->readULong(1));
         if (val) f << "nLevel=" << val << ",";
       }
       break;
     }
     // lcl_sw3io_InSetExpField40 end
-    int cFlags=(int) input->readULong(1);
+    int cFlags=int(input->readULong(1));
     if (cFlags)
       f << "cFlags=" << cFlags << ",";
     if (!zone.readString(name)) {
@@ -580,7 +580,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
   case 22: { // ddefld
     f << "link,";
     if (cKind!='Y' && !zone.isCompatibleWith(0xa)) {
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       if (!zone.getPoolName(val, poolName))
         f << "###nPoolId=" << val << ",";
       else if (!poolName.empty())
@@ -588,7 +588,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     // lcl_sw3io_InDDEField
-    val=(int) input->readULong(2);
+    val=int(input->readULong(2));
     f << "nType=" << val << ",";
     if (!zone.isCompatibleWith(0xa)) {
       if (!zone.readString(name)) {
@@ -600,7 +600,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
         f << libstoff::getString(name).cstr() << ",";
     }
     else {
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       if (!zone.getPoolName(val, poolName))
         f << "###nPoolId=" << val << ",";
       else if (!poolName.empty())
@@ -657,7 +657,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
     if (!zone.isCompatibleWith(0x202))
       f << "nSub=" << input->readULong(2) << ",";
     else {
-      int flag=(int) input->readULong(1);
+      int flag=int(input->readULong(1));
       if (!zone.readString(name)) {
         f << "###string,";
         STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
@@ -701,7 +701,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
     else if (!name.empty())
       f << "aName=" << libstoff::getString(name).cstr() << ",";
     if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       if (!zone.getPoolName(val, poolName))
         f << "###nPoolId=" << val << ",";
       else if (!poolName.empty())
@@ -728,7 +728,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
     else if (!name.empty())
       f << (inverted ? "aCond=" : "aNumber=") << libstoff::getString(name).cstr() << ",";
     if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       if (!zone.getPoolName(val, poolName))
         f << "###nPoolId=" << val << ",";
       else if (!poolName.empty())
@@ -742,7 +742,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
     // lcl_sw3io_InDBSetNumberField
     f << "n=" << input->readULong(4) << ",";
     if (zone.isCompatibleWith(0x10,0x22, 0x101)) {
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       if (!zone.getPoolName(val, poolName))
         f << "###nPoolId=" << val << ",";
       else if (!poolName.empty())
@@ -819,7 +819,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
         f << "target=" << libstoff::getString(name).cstr() << ",";
     }
     if (zone.isCompatibleWith(0x11,0x13)) {
-      int nCnt=(int) input->readULong(2);
+      int nCnt=int(input->readULong(2));
       f << "N=" << nCnt << ",";
       f << "libMac=[";
       for (int i=0; i<nCnt; ++i) {
@@ -915,15 +915,15 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     if (cKind!='Y') break;
-    val=(int) zone.openFlagZone();
+    val=int(zone.openFlagZone());
     if (val&0xf0) f << "flag=" << (val>>4) << ",";
-    int N=(int) input->readULong(2);
+    int N=int(input->readULong(2));
     if (N) f << "N=" << N << ",";
-    val=(int) input->readULong(1);
+    val=int(input->readULong(1));
     if (val) f << "cPrefix=" << val << ",";
-    val=(int) input->readULong(1);
+    val=int(input->readULong(1));
     if (val) f << "cSuffix=" << val << ",";
-    int nSort=(int) input->readULong(2);
+    int nSort=int(input->readULong(2));
     if (nSort) f << "cSortCount=" << nSort << ",";
     zone.closeFlagZone();
 

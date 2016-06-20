@@ -251,7 +251,7 @@ void STOFFSpreadsheetListener::insertChar(uint8_t character)
   }
   _flushDeferredTabs();
   if (!m_ps->m_isSpanOpened) _openSpan();
-  m_ps->m_textBuffer.append((char) character);
+  m_ps->m_textBuffer.append(char(character));
 }
 
 void STOFFSpreadsheetListener::insertUnicode(uint32_t val)
@@ -524,7 +524,7 @@ void STOFFSpreadsheetListener::_openPageSpan(bool sendHeaderFooters)
   std::vector<STOFFPageSpan>::iterator it = m_ds->m_pageList.begin();
   ++m_ps->m_currentPage;
   while (true) {
-    actPage+=(unsigned)it->m_pageSpan;
+    actPage+=unsigned(it->m_pageSpan);
     if (actPage >= m_ps->m_currentPage)
       break;
     if (++it == m_ds->m_pageList.end()) {
@@ -761,7 +761,7 @@ void STOFFSpreadsheetListener::_closeListElement()
 
 int STOFFSpreadsheetListener::_getListId() const
 {
-  size_t newLevel= (size_t) m_ps->m_paragraph.m_listLevelIndex;
+  size_t newLevel= size_t(m_ps->m_paragraph.m_listLevelIndex);
   if (newLevel == 0) return -1;
   int newListId = m_ps->m_paragraph.m_listId;
   if (newListId > 0) return newListId;
@@ -785,7 +785,7 @@ void STOFFSpreadsheetListener::_changeList()
     _closeParagraph();
 
   size_t actualLevel = m_ps->m_listOrderedLevels.size();
-  size_t newLevel= (size_t) m_ps->m_paragraph.m_listLevelIndex;
+  size_t newLevel= size_t(m_ps->m_paragraph.m_listLevelIndex);
   int newListId = newLevel>0 ? _getListId() : -1;
   bool changeList = newLevel &&
                     (m_ps->m_list && m_ps->m_list->getId()!=newListId);
@@ -808,7 +808,7 @@ void STOFFSpreadsheetListener::_changeList()
     }
     m_parserState.m_listManager->needToSend(newListId, m_ds->m_sentListMarkers);
     m_ps->m_list = theList;
-    m_ps->m_list->setLevel((int)newLevel);
+    m_ps->m_list->setLevel(int(newLevel));
   }
 
   m_ps->m_listOrderedLevels.resize(newLevel, false);
@@ -1375,7 +1375,7 @@ void STOFFSpreadsheetListener::openSheetCell(STOFFCell const &cell, STOFFCellCon
       name << "Numbering" << numberingId;
     }
     else if (!numberingStyle.empty()) {
-      numberingId=(int) m_ds->m_numberingIdMap.size();
+      numberingId=int(m_ds->m_numberingIdMap.size());
       name << "Numbering" << numberingId;
 
       librevenge::RVNGPropertyList numList(numberingStyle);

@@ -504,8 +504,8 @@ std::ostream &operator<<(std::ostream &o, STOFFCellContent::FormulaInstruction c
     if (!inst.m_positionRelative[0][0]) o << "$";
     if (inst.m_position[0][0]<0) o << "C" << inst.m_position[0][0];
     else {
-      if (inst.m_position[0][0]>=26) o << (char)(inst.m_position[0][0]/26-1 + 'A');
-      o << (char)(inst.m_position[0][0]%26+'A');
+      if (inst.m_position[0][0]>=26) o << char(inst.m_position[0][0]/26-1 + 'A');
+      o << char(inst.m_position[0][0]%26+'A');
     }
     if (!inst.m_positionRelative[0][1]) o << "$";
     if (inst.m_position[0][1]<0) o << "R" << inst.m_position[0][1];
@@ -522,8 +522,8 @@ std::ostream &operator<<(std::ostream &o, STOFFCellContent::FormulaInstruction c
       if (!inst.m_positionRelative[l][0]) o << "$";
       if (inst.m_position[l][0]<0) o << "C" << inst.m_position[l][0];
       else {
-        if (inst.m_position[l][0]>=26) o << (char)(inst.m_position[l][0]/26-1 + 'A');
-        o << (char)(inst.m_position[l][0]%26+'A');
+        if (inst.m_position[l][0]>=26) o << char(inst.m_position[l][0]/26-1 + 'A');
+        o << char(inst.m_position[l][0]%26+'A');
       }
       if (!inst.m_positionRelative[l][1]) o << "$";
       if (inst.m_position[l][1]<0) o << "R" << inst.m_position[l][1];

@@ -60,10 +60,10 @@ bool StarEncodingJapanese::readJapanese1
     return false;
   }
   if (pos>=src.size()) return false;
-  int c=(int) src[pos++], c2=0;
+  int c=int(src[pos++]), c2=0;
   if ((c>=0x81 && c<=0x9f) || (c>=0xa1 && c<=0xfc)) {
     if (pos>=src.size()) return false;
-    c2=(int) src[pos++];
+    c2=int(src[pos++]);
   }
   uint32_t unicode=uint32_t(c);
   switch (c) {
@@ -98,10 +98,10 @@ bool StarEncodingJapanese::readJapanese1
         0x212B, 0x2030, 0x266F, 0x266D, 0x266A, 0x2020, 0x2021, 0x00B6, /* 0xF0 */
         0, 	 0, 	 0, 	 0, 0x25EF							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x82:
     if (c2>=0x4f && c2<=0xf1) {
@@ -131,10 +131,10 @@ bool StarEncodingJapanese::readJapanese1
         0x3092, 0x3093													/* 0xF0 */
         /* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x4f];
+      unicode=static_cast<uint32_t>(val[c2-0x4f]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x83:
     if (c2>=0x40 && c2<=0xd6) {
@@ -160,10 +160,10 @@ bool StarEncodingJapanese::readJapanese1
         0x03C3, 0x03C4, 0x03C5, 0x03C6, 0x03C7, 0x03C8, 0x03C9			/* 0xD0 */
         /* 0xD0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x84:
     if (c2>=0x40 && c2<=0xbe) {
@@ -185,10 +185,10 @@ bool StarEncodingJapanese::readJapanese1
         0x2523, 0x2533, 0x252B, 0x253B, 0x254B, 0x2520, 0x252F, 0x2528, /* 0xB0 */
         0x2537, 0x253F, 0x251D, 0x2530, 0x2525, 0x2538, 0x2542			/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x85:
     if (encoding==StarEncoding::E_APPLE_JAPANESE && c2>=0x40 && c2<=0xf4) {
@@ -218,10 +218,10 @@ bool StarEncodingJapanese::readJapanese1
         0x24B1, 0x24B2, 0x24B3, 0x24B4, 0x24B5							/* 0xF0 */
         /* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=(unicode<<8)+(uint32_t) c2;
+      unicode=(unicode<<8)+static_cast<uint32_t>(c2);
     break;
   case 0x86:
     if (encoding==StarEncoding::E_APPLE_JAPANESE && c2>=0x40 && c2<=0xd2) {
@@ -247,10 +247,10 @@ bool StarEncodingJapanese::readJapanese1
         0x21E6, 0x21E7, 0x21E9											/* 0xD0 */
         /* 0xD0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=(unicode<<8)+(uint32_t)c2;
+      unicode=(unicode<<8)+static_cast<uint32_t>(c2);
     break;
   case 0x87:
     if (encoding!=StarEncoding::E_APPLE_JAPANESE && c2>=0x40 && c2<=0x9c) {
@@ -268,7 +268,7 @@ bool StarEncodingJapanese::readJapanese1
         0x2252, 0x2261, 0x222B, 0x222E, 0x2211, 0x221A, 0x22A5, 0x2220, /* 0x90 */
         0x221F, 0x22BF, 0x2235, 0x2229, 0x222A							/* 0x90 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else if (encoding==StarEncoding::E_APPLE_JAPANESE && c2>=0x40 && c2<=0xfa) {
       static int const(val[])= {
@@ -297,10 +297,10 @@ bool StarEncodingJapanese::readJapanese1
         0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, /* 0xF0 */
         0, 	 0, 0x337F											/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=(unicode<<8)+(uint32_t)c2;
+      unicode=(unicode<<8)+static_cast<uint32_t>(c2);
     break;
   case 0x88:
     if (encoding!=StarEncoding::E_APPLE_JAPANESE && c2>=0x9f && c2<=0xfc) {
@@ -320,7 +320,7 @@ bool StarEncodingJapanese::readJapanese1
         0x828B, 0x9C2F, 0x5141, 0x5370, 0x54BD, 0x54E1, 0x56E0, 0x59FB, /* 0xF0 */
         0x5F15, 0x98F2, 0x6DEB, 0x80E4, 0x852D							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x9f];
+      unicode=static_cast<uint32_t>(val[c2-0x9f]);
     }
     else if (encoding==StarEncoding::E_APPLE_JAPANESE && c2>=0x40 && c2<=0xfc) {
       static int const(val[])= {
@@ -349,10 +349,10 @@ bool StarEncodingJapanese::readJapanese1
         0x828B, 0x9C2F, 0x5141, 0x5370, 0x54BD, 0x54E1, 0x56E0, 0x59FB, /* 0xF0 */
         0x5F15, 0x98F2, 0x6DEB, 0x80E4, 0x852D							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=(unicode<<8)+(uint32_t)c2;
+      unicode=(unicode<<8)+static_cast<uint32_t>(c2);
     break;
   case 0x89:
     if (c2>=0x40 && c2<=0xfc) {
@@ -382,10 +382,10 @@ bool StarEncodingJapanese::readJapanese1
         0x89E3, 0x56DE, 0x584A, 0x58CA, 0x5EFB, 0x5FEB, 0x602A, 0x6094, /* 0xF0 */
         0x6062, 0x61D0, 0x6212, 0x62D0, 0x6539							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8a:
     if (c2>=0x40 && c2<=0xfc) {
@@ -415,10 +415,10 @@ bool StarEncodingJapanese::readJapanese1
         0x5B09, 0x5BC4, 0x5C90, 0x5E0C, 0x5E7E, 0x5FCC, 0x63EE, 0x673A, /* 0xF0 */
         0x65D7, 0x65E2, 0x671F, 0x68CB, 0x68C4							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8b:
     if (c2>=0x40 && c2<=0xfc) {
@@ -448,10 +448,10 @@ bool StarEncodingJapanese::readJapanese1
         0x611A, 0x865E, 0x55B0, 0x7A7A, 0x5076, 0x5BD3, 0x9047, 0x9685, /* 0xF0 */
         0x4E32, 0x6ADB, 0x91E7, 0x5C51, 0x5C48							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8c:
     if (c2>=0x40 && c2<=0xfc) {
@@ -481,10 +481,10 @@ bool StarEncodingJapanese::readJapanese1
         0x4EA4, 0x4F7C, 0x4FAF, 0x5019, 0x5016, 0x5149, 0x516C, 0x529F, /* 0xF0 */
         0x52B9, 0x52FE, 0x539A, 0x53E3, 0x5411							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8d:
     if (c2>=0x40 && c2<=0xfc) {
@@ -514,10 +514,10 @@ bool StarEncodingJapanese::readJapanese1
         0x6628, 0x6714, 0x67F5, 0x7A84, 0x7B56, 0x7D22, 0x932F, 0x685C, /* 0xF0 */
         0x9BAD, 0x7B39, 0x5319, 0x518A, 0x5237							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8e:
     if (c2>=0x40 && c2<=0xfc) {
@@ -547,10 +547,10 @@ bool StarEncodingJapanese::readJapanese1
         0x9152, 0x9996, 0x5112, 0x53D7, 0x546A, 0x5BFF, 0x6388, 0x6A39, /* 0xF0 */
         0x7DAC, 0x9700, 0x56DA, 0x53CE, 0x5468							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8f:
     if (c2>=0x40 && c2<=0xfc) {
@@ -580,10 +580,10 @@ bool StarEncodingJapanese::readJapanese1
         0x6761, 0x6756, 0x6D44, 0x72B6, 0x7573, 0x7A63, 0x84B8, 0x8B72, /* 0xF0 */
         0x91B8, 0x9320, 0x5631, 0x57F4, 0x98FE							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x90:
     if (c2>=0x40 && c2<=0xfc) {
@@ -613,10 +613,10 @@ bool StarEncodingJapanese::readJapanese1
         0x6813, 0x6834, 0x6CC9, 0x6D45, 0x6D17, 0x67D3, 0x6F5C, 0x714E, /* 0xF0 */
         0x717D, 0x65CB, 0x7A7F, 0x7BAD, 0x7DDA							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x91:
     if (c2>=0x40 && c2<=0xfc) {
@@ -646,10 +646,10 @@ bool StarEncodingJapanese::readJapanese1
         0x629E, 0x62D3, 0x6CA2, 0x6FEF, 0x7422, 0x8A17, 0x9438, 0x6FC1, /* 0xF0 */
         0x8AFE, 0x8338, 0x51E7, 0x86F8, 0x53EA							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x92:
     if (c2>=0x40 && c2<=0xfc) {
@@ -679,10 +679,10 @@ bool StarEncodingJapanese::readJapanese1
         0x633A, 0x63D0, 0x68AF, 0x6C40, 0x7887, 0x798E, 0x7A0B, 0x7DE0, /* 0xF0 */
         0x8247, 0x8A02, 0x8AE6, 0x8E44, 0x9013							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x93:
     if (c2>=0x40 && c2<=0xfc) {
@@ -712,10 +712,10 @@ bool StarEncodingJapanese::readJapanese1
         0x6C5D, 0x4E8C, 0x5C3C, 0x5F10, 0x8FE9, 0x5302, 0x8CD1, 0x8089, /* 0xF0 */
         0x8679, 0x5EFF, 0x65E5, 0x4E73, 0x5165							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x94:
     if (c2>=0x40 && c2<=0xfc) {
@@ -745,10 +745,10 @@ bool StarEncodingJapanese::readJapanese1
         0x907F, 0x975E, 0x98DB, 0x6A0B, 0x7C38, 0x5099, 0x5C3E, 0x5FAE, /* 0xF0 */
         0x6787, 0x6BD8, 0x7435, 0x7709, 0x7F8E							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x95:
     if (c2>=0x40 && c2<=0xfc) {
@@ -778,10 +778,10 @@ bool StarEncodingJapanese::readJapanese1
         0x5446, 0x5831, 0x5949, 0x5B9D, 0x5CF0, 0x5CEF, 0x5D29, 0x5E96, /* 0xF0 */
         0x62B1, 0x6367, 0x653E, 0x65B9, 0x670B							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x96:
     if (c2>=0x40 && c2<=0xfc) {
@@ -811,10 +811,10 @@ bool StarEncodingJapanese::readJapanese1
         0x5F79, 0x7D04, 0x85AC, 0x8A33, 0x8E8D, 0x9756, 0x67F3, 0x85AE, /* 0xF0 */
         0x9453, 0x6109, 0x6108, 0x6CB9, 0x7652							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x97:
     if (c2>=0x40 && c2<=0xfc) {
@@ -844,10 +844,10 @@ bool StarEncodingJapanese::readJapanese1
         0x6B74, 0x5217, 0x52A3, 0x70C8, 0x88C2, 0x5EC9, 0x604B, 0x6190, /* 0xF0 */
         0x6F23, 0x7149, 0x7C3E, 0x7DF4, 0x806F							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x98:
     if (c2>=0x40 && c2<=0xfc) {
@@ -877,10 +877,10 @@ bool StarEncodingJapanese::readJapanese1
         0x6703, 0x5055, 0x5050, 0x5048, 0x505A, 0x5056, 0x506C, 0x5078, /* 0xF0 */
         0x5080, 0x509A, 0x5085, 0x50B4, 0x50B2							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x99:
     if (c2>=0x40 && c2<=0xfc) {
@@ -910,10 +910,10 @@ bool StarEncodingJapanese::readJapanese1
         0x5480, 0x5476, 0x5484, 0x5490, 0x5486, 0x54C7, 0x54A2, 0x54B8, /* 0xF0 */
         0x54A5, 0x54AC, 0x54C4, 0x54C8, 0x54A8							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9a:
     if (c2>=0x40 && c2<=0xfc) {
@@ -943,10 +943,10 @@ bool StarEncodingJapanese::readJapanese1
         0x5938, 0x593E, 0x7AD2, 0x5955, 0x5950, 0x594E, 0x595A, 0x5958, /* 0xF0 */
         0x5962, 0x5960, 0x5967, 0x596C, 0x5969							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9b:
     if (c2>=0x40 && c2<=0xfc) {
@@ -976,10 +976,10 @@ bool StarEncodingJapanese::readJapanese1
         0x5E64, 0x5E47, 0x5E75, 0x5E76, 0x5E7A, 0x9EBC, 0x5E7F, 0x5EA0, /* 0xF0 */
         0x5EC1, 0x5EC2, 0x5EC8, 0x5ED0, 0x5ECF							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9c:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1009,10 +1009,10 @@ bool StarEncodingJapanese::readJapanese1
         0x61FA, 0x61F4, 0x61FF, 0x61FD, 0x61FC, 0x61FE, 0x6200, 0x6208, /* 0xF0 */
         0x6209, 0x620D, 0x620C, 0x6214, 0x621B							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9d:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1042,10 +1042,10 @@ bool StarEncodingJapanese::readJapanese1
         0x6670, 0x6683, 0x6688, 0x668E, 0x6689, 0x6684, 0x6698, 0x669D, /* 0xF0 */
         0x66C1, 0x66B9, 0x66C9, 0x66BE, 0x66BC							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9e:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1075,10 +1075,10 @@ bool StarEncodingJapanese::readJapanese1
         0x6A47, 0x6A62, 0x6A59, 0x6A66, 0x6A48, 0x6A38, 0x6A22, 0x6A90, /* 0xF0 */
         0x6A8D, 0x6AA0, 0x6A84, 0x6AA2, 0x6AA3							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9f:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1108,10 +1108,10 @@ bool StarEncodingJapanese::readJapanese1
         0x6E9F, 0x6F41, 0x6F11, 0x704C, 0x6EEC, 0x6EF8, 0x6EFE, 0x6F3F, /* 0xF0 */
         0x6EF2, 0x6F31, 0x6EEF, 0x6F32, 0x6ECC							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe0:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1141,10 +1141,10 @@ bool StarEncodingJapanese::readJapanese1
         0x7469, 0x7470, 0x7463, 0x746A, 0x7476, 0x747E, 0x748B, 0x749E, /* 0xF0 */
         0x74A7, 0x74CA, 0x74CF, 0x74D4, 0x73F1							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe1:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1174,10 +1174,10 @@ bool StarEncodingJapanese::readJapanese1
         0x78A3, 0x78B5, 0x78AA, 0x78AF, 0x78D1, 0x78C6, 0x78CB, 0x78D4, /* 0xF0 */
         0x78BE, 0x78BC, 0x78C5, 0x78CA, 0x78EC							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe2:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1207,10 +1207,10 @@ bool StarEncodingJapanese::readJapanese1
         0x7CC5, 0x7CC2, 0x7CD8, 0x7CD2, 0x7CDC, 0x7CE2, 0x9B3B, 0x7CEF, /* 0xF0 */
         0x7CF2, 0x7CF4, 0x7CF6, 0x7CFA, 0x7D06							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe3:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1240,10 +1240,10 @@ bool StarEncodingJapanese::readJapanese1
         0x80D9, 0x80DD, 0x80C4, 0x80DA, 0x80D6, 0x8109, 0x80EF, 0x80F1, /* 0xF0 */
         0x811B, 0x8129, 0x8123, 0x812F, 0x814B							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe4:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1273,10 +1273,10 @@ bool StarEncodingJapanese::readJapanese1
         0x84FF, 0x84F4, 0x8517, 0x8518, 0x852C, 0x851F, 0x8515, 0x8514, /* 0xF0 */
         0x84FC, 0x8540, 0x8563, 0x8558, 0x8548							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe5:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1306,10 +1306,10 @@ bool StarEncodingJapanese::readJapanese1
         0x891E, 0x8925, 0x892A, 0x892B, 0x8941, 0x8944, 0x893B, 0x8936, /* 0xF0 */
         0x8938, 0x894C, 0x891D, 0x8960, 0x895E							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe6:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1339,10 +1339,10 @@ bool StarEncodingJapanese::readJapanese1
         0x8DFC, 0x8E08, 0x8E09, 0x8DFF, 0x8E1D, 0x8E1E, 0x8E10, 0x8E1F, /* 0xF0 */
         0x8E42, 0x8E35, 0x8E30, 0x8E34, 0x8E4A							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe7:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1372,10 +1372,10 @@ bool StarEncodingJapanese::readJapanese1
         0x929C, 0x9296, 0x9293, 0x929B, 0x925A, 0x92CF, 0x92B9, 0x92B7, /* 0xF0 */
         0x92E9, 0x930F, 0x92FA, 0x9344, 0x932E							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe8:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1405,10 +1405,10 @@ bool StarEncodingJapanese::readJapanese1
         0x980F, 0x980C, 0x9838, 0x9824, 0x9821, 0x9837, 0x983D, 0x9846, /* 0xF0 */
         0x984F, 0x984B, 0x986B, 0x986F, 0x9870							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe9:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1438,10 +1438,10 @@ bool StarEncodingJapanese::readJapanese1
         0x9D2A, 0x9D26, 0x9DAF, 0x9D23, 0x9D1F, 0x9D44, 0x9D15, 0x9D12, /* 0xF0 */
         0x9D41, 0x9D3F, 0x9D3E, 0x9D46, 0x9D48							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xea:
     if (c2>=0x40 && c2<=0xa4) {
@@ -1461,10 +1461,10 @@ bool StarEncodingJapanese::readJapanese1
         0x69C7, 0x9059, 0x7464, 0x51DC, 0x7199							/* 0xA0 */
         /* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xeb:
     if (encoding==StarEncoding::E_APPLE_JAPANESE && c2>=0x51 && c2<=0x7a) {
@@ -1476,10 +1476,10 @@ bool StarEncodingJapanese::readJapanese1
         0xFE38, 0xFE3F, 0xFE40, 0xFE3D, 0xFE3E, 0xFE41, 0xFE42, 0xFE43, /* 0x70 */
         0xFE44, 0xFE3B, 0xFE3C											/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x51];
+      unicode=static_cast<uint32_t>(val[c2-0x51]);
     }
     else
-      unicode=(unicode<<8)+(uint32_t) c2;
+      unicode=(unicode<<8)+static_cast<uint32_t>(c2);
     break;
   case 0xed:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1509,10 +1509,10 @@ bool StarEncodingJapanese::readJapanese1
         0x7007, 0x7028, 0x7085, 0x70AB, 0x710F, 0x7104, 0x715C, 0x7146, /* 0xF0 */
         0x7147, 0xFA15, 0x71C1, 0x71FE, 0x72B1							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xee:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1542,10 +1542,10 @@ bool StarEncodingJapanese::readJapanese1
         0x2171, 0x2172, 0x2173, 0x2174, 0x2175, 0x2176, 0x2177, 0x2178, /* 0xF0 */
         0x2179, 0xFFE2, 0xFFE4, 0xFF07, 0xFF02							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xfa:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1575,10 +1575,10 @@ bool StarEncodingJapanese::readJapanese1
         0x6A73, 0x6A7E, 0x6AE2, 0x6AE4, 0x6BD6, 0x6C3F, 0x6C5C, 0x6C86, /* 0xF0 */
         0x6C6F, 0x6CDA, 0x6D04, 0x6D87, 0x6D6F							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xfb:
     if (c2>=0x40 && c2<=0xfc) {
@@ -1608,10 +1608,10 @@ bool StarEncodingJapanese::readJapanese1
         0x974D, 0x974F, 0x9751, 0x9755, 0x9857, 0x9865, 0xFA2A, 0xFA2B, /* 0xF0 */
         0x9927, 0xFA2C, 0x999E, 0x9A4E, 0x9AD9							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xfc:
     if (c2>=0x40 && c2<=0x4b) {
@@ -1619,10 +1619,10 @@ bool StarEncodingJapanese::readJapanese1
         0x9ADC, 0x9B75, 0x9B72, 0x9B8F, 0x9BB1, 0x9BBB, 0x9C00, 0x9D70, /* 0x40 */
         0x9D6B, 0xFA2D, 0x9E19, 0x9ED1									/* 0x40 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xfd:
     unicode=0xa9;
@@ -1637,13 +1637,13 @@ bool StarEncodingJapanese::readJapanese1
     if (c<=0x7f || c==0xa0)
       ;
     else if (c>0xa0 && c<0xe0)
-      unicode=0xfec0+(uint32_t) c;
+      unicode=0xfec0+static_cast<uint32_t>(c);
     else if (c==0xec || (c>=0xef && c<=0xf9))
-      unicode=(unicode<<8)+(uint32_t)c2;
+      unicode=(unicode<<8)+static_cast<uint32_t>(c2);
     break;
   }
   if (!unicode) {
-    STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese1: unknown caracter %x\n", (unsigned int)c));
+    STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese1: unknown caracter %x\n", static_cast<unsigned int>(c)));
   }
   dest.push_back(unicode);
   return true;
@@ -1666,11 +1666,11 @@ bool StarEncodingJapanese::readJapaneseEUC
 
   if (c==0x8e) {
     if (pos>=src.size()) return false;
-    c=(int) src[pos++];
+    c=int(src[pos++]);
     if (c>=0xa1&&c<=0xdf)
       dest.push_back(uint32_t(0xff61+(c-0xa1)));
     else {
-      STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapaneseEUC: unknown char %x\n",(unsigned int) c));
+      STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapaneseEUC: unknown char %x\n",static_cast<unsigned int>(c)));
       return false;
     }
   }
@@ -1692,7 +1692,7 @@ bool StarEncodingJapanese::readJapanese208
   }
   int const trailOff=encoding==StarEncoding::E_EUC_JP ? 0x80 : 0;
   if (pos+1>=src.size()) return false;
-  int c=(int) src[pos++], c2=src[pos++];
+  int c=int(src[pos++]), c2=src[pos++];
   if (c<trailOff || c2<trailOff) {
     STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese208: bad trail off\n"));
     return false;
@@ -1717,10 +1717,10 @@ bool StarEncodingJapanese::readJapanese208
         0xFF04, 0x00A2, 0x00A3, 0xFF05, 0xFF03, 0xFF06, 0xFF0A, 0xFF20, /* 0x70 */
         0x00A7, 0x2606, 0x2605, 0x25CB, 0x25CF, 0x25CE, 0x25C7			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x22:
     if (c2>=0x21 && c2<=0x7e) {
@@ -1738,10 +1738,10 @@ bool StarEncodingJapanese::readJapanese208
         0, 	 0, 0x212B, 0x2030, 0x266F, 0x266D, 0x266A, 0x2020, /* 0x70 */
         0x2021, 0x00B6, 	 0, 	 0, 	 0, 	 0, 0x25EF			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x23:
     if (c2>=0x30 && c2<=0x7a) {
@@ -1757,10 +1757,10 @@ bool StarEncodingJapanese::readJapanese208
         0xFF50, 0xFF51, 0xFF52, 0xFF53, 0xFF54, 0xFF55, 0xFF56, 0xFF57, /* 0x70 */
         0xFF58, 0xFF59, 0xFF5A											/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x30];
+      unicode=static_cast<uint32_t>(val[c2-0x30]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x24:
     if (c2>=0x21 && c2<=0x73) {
@@ -1778,10 +1778,10 @@ bool StarEncodingJapanese::readJapanese208
         0x3090, 0x3091, 0x3092, 0x3093									/* 0x70 */
         /* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x25:
     if (c2>=0x21 && c2<=0x76) {
@@ -1799,10 +1799,10 @@ bool StarEncodingJapanese::readJapanese208
         0x30F0, 0x30F1, 0x30F2, 0x30F3, 0x30F4, 0x30F5, 0x30F6			/* 0x70 */
         /* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x26:
     if (c2>=0x21 && c2<=0x58) {
@@ -1816,10 +1816,10 @@ bool StarEncodingJapanese::readJapanese208
         0x03C0, 0x03C1, 0x03C3, 0x03C4, 0x03C5, 0x03C6, 0x03C7, 0x03C8, /* 0x50 */
         0x03C9															/* 0x50 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x27:
     if (c2>=0x21 && c2<=0x71) {
@@ -1837,10 +1837,10 @@ bool StarEncodingJapanese::readJapanese208
         0x044E, 0x044F													/* 0x70 */
         /* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x28:
     if (c2>=0x21 && c2<=0x40) {
@@ -1852,10 +1852,10 @@ bool StarEncodingJapanese::readJapanese208
         0x2542															/* 0x40 */
         /* 0x40 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x2d:
     if (c2>=0x21 && c2<=0x7c) {
@@ -1873,10 +1873,10 @@ bool StarEncodingJapanese::readJapanese208
         0x2252, 0x2261, 0x222B, 0x222E, 0x2211, 0x221A, 0x22A5, 0x2220, /* 0x70 */
         0x221F, 0x22BF, 0x2235, 0x2229, 0x222A                          /* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x30:
     if (c2>=0x21 && c2<=0x7e) {
@@ -1894,10 +1894,10 @@ bool StarEncodingJapanese::readJapanese208
         0x7A32, 0x8328, 0x828B, 0x9C2F, 0x5141, 0x5370, 0x54BD, 0x54E1, /* 0x70 */
         0x56E0, 0x59FB, 0x5F15, 0x98F2, 0x6DEB, 0x80E4, 0x852D			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x31:
     if (c2>=0x21 && c2<=0x7e) {
@@ -1915,10 +1915,10 @@ bool StarEncodingJapanese::readJapanese208
         0x8276, 0x82D1, 0x8597, 0x9060, 0x925B, 0x9D1B, 0x5869, 0x65BC, /* 0x70 */
         0x6C5A, 0x7525, 0x51F9, 0x592E, 0x5965, 0x5F80, 0x5FDC			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x32:
     if (c2>=0x21 && c2<=0x7e) {
@@ -1936,10 +1936,10 @@ bool StarEncodingJapanese::readJapanese208
         0x4ECB, 0x4F1A, 0x89E3, 0x56DE, 0x584A, 0x58CA, 0x5EFB, 0x5FEB, /* 0x70 */
         0x602A, 0x6094, 0x6062, 0x61D0, 0x6212, 0x62D0, 0x6539			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x33:
     if (c2>=0x21 && c2<=0x7e) {
@@ -1957,10 +1957,10 @@ bool StarEncodingJapanese::readJapanese208
         0x53F6, 0x691B, 0x6A3A, 0x9784, 0x682A, 0x515C, 0x7AC3, 0x84B2, /* 0x70 */
         0x91DC, 0x938C, 0x565B, 0x9D28, 0x6822, 0x8305, 0x8431			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x34:
     if (c2>=0x21 && c2<=0x7e) {
@@ -1978,10 +1978,10 @@ bool StarEncodingJapanese::readJapanese208
         0x57FA, 0x5947, 0x5B09, 0x5BC4, 0x5C90, 0x5E0C, 0x5E7E, 0x5FCC, /* 0x70 */
         0x63EE, 0x673A, 0x65D7, 0x65E2, 0x671F, 0x68CB, 0x68C4			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x35:
     if (c2>=0x21 && c2<=0x7e) {
@@ -1999,10 +1999,10 @@ bool StarEncodingJapanese::readJapanese208
         0x5DE8, 0x62D2, 0x62E0, 0x6319, 0x6E20, 0x865A, 0x8A31, 0x8DDD, /* 0x70 */
         0x92F8, 0x6F01, 0x79A6, 0x9B5A, 0x4EA8, 0x4EAB, 0x4EAC			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x36:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2020,10 +2020,10 @@ bool StarEncodingJapanese::readJapanese208
         0x99D2, 0x5177, 0x611A, 0x865E, 0x55B0, 0x7A7A, 0x5076, 0x5BD3, /* 0x70 */
         0x9047, 0x9685, 0x4E32, 0x6ADB, 0x91E7, 0x5C51, 0x5C48			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x37:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2041,10 +2041,10 @@ bool StarEncodingJapanese::readJapanese208
         0x5039, 0x5026, 0x5065, 0x517C, 0x5238, 0x5263, 0x55A7, 0x570F, /* 0x70 */
         0x5805, 0x5ACC, 0x5EFA, 0x61B2, 0x61F8, 0x62F3, 0x6372			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x38:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2062,10 +2062,10 @@ bool StarEncodingJapanese::readJapanese208
         0x4E5E, 0x9BC9, 0x4EA4, 0x4F7C, 0x4FAF, 0x5019, 0x5016, 0x5149, /* 0x70 */
         0x516C, 0x529F, 0x52B9, 0x52FE, 0x539A, 0x53E3, 0x5411			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x39:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2083,10 +2083,10 @@ bool StarEncodingJapanese::readJapanese208
         0x544A, 0x56FD, 0x7A40, 0x9177, 0x9D60, 0x9ED2, 0x7344, 0x6F09, /* 0x70 */
         0x8170, 0x7511, 0x5FFD, 0x60DA, 0x9AA8, 0x72DB, 0x8FBC			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x3a:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2104,10 +2104,10 @@ bool StarEncodingJapanese::readJapanese208
         0x548B, 0x643E, 0x6628, 0x6714, 0x67F5, 0x7A84, 0x7B56, 0x7D22, /* 0x70 */
         0x932F, 0x685C, 0x9BAD, 0x7B39, 0x5319, 0x518A, 0x5237			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x3b:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2125,10 +2125,10 @@ bool StarEncodingJapanese::readJapanese208
         0x8AEE, 0x8CC7, 0x8CDC, 0x96CC, 0x98FC, 0x6B6F, 0x4E8B, 0x4F3C, /* 0x70 */
         0x4F8D, 0x5150, 0x5B57, 0x5BFA, 0x6148, 0x6301, 0x6642			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x3c:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2146,10 +2146,10 @@ bool StarEncodingJapanese::readJapanese208
         0x816B, 0x8DA3, 0x9152, 0x9996, 0x5112, 0x53D7, 0x546A, 0x5BFF, /* 0x70 */
         0x6388, 0x6A39, 0x7DAC, 0x9700, 0x56DA, 0x53CE, 0x5468			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x3d:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2167,10 +2167,10 @@ bool StarEncodingJapanese::readJapanese208
         0x7F72, 0x66F8, 0x85AF, 0x85F7, 0x8AF8, 0x52A9, 0x53D9, 0x5973, /* 0x70 */
         0x5E8F, 0x5F90, 0x6055, 0x92E4, 0x9664, 0x50B7, 0x511F			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x3e:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2188,10 +2188,10 @@ bool StarEncodingJapanese::readJapanese208
         0x60C5, 0x64FE, 0x6761, 0x6756, 0x6D44, 0x72B6, 0x7573, 0x7A63, /* 0x70 */
         0x84B8, 0x8B72, 0x91B8, 0x9320, 0x5631, 0x57F4, 0x98FE			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x3f:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2209,10 +2209,10 @@ bool StarEncodingJapanese::readJapanese208
         0x745E, 0x9AC4, 0x5D07, 0x5D69, 0x6570, 0x67A2, 0x8DA8, 0x96DB, /* 0x70 */
         0x636E, 0x6749, 0x6919, 0x83C5, 0x9817, 0x96C0, 0x88FE			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x40:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2230,10 +2230,10 @@ bool StarEncodingJapanese::readJapanese208
         0x6247, 0x64B0, 0x6813, 0x6834, 0x6CC9, 0x6D45, 0x6D17, 0x67D3, /* 0x70 */
         0x6F5C, 0x714E, 0x717D, 0x65CB, 0x7A7F, 0x7BAD, 0x7DDA			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x41:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2251,10 +2251,10 @@ bool StarEncodingJapanese::readJapanese208
         0x8349, 0x8358, 0x846C, 0x84BC, 0x85FB, 0x88C5, 0x8D70, 0x9001, /* 0x70 */
         0x906D, 0x9397, 0x971C, 0x9A12, 0x50CF, 0x5897, 0x618E			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x42:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2272,10 +2272,10 @@ bool StarEncodingJapanese::readJapanese208
         0x5B85, 0x6258, 0x629E, 0x62D3, 0x6CA2, 0x6FEF, 0x7422, 0x8A17, /* 0x70 */
         0x9438, 0x6FC1, 0x8AFE, 0x8338, 0x51E7, 0x86F8, 0x53EA			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x43:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2293,10 +2293,10 @@ bool StarEncodingJapanese::readJapanese208
         0x8A3B, 0x914E, 0x92F3, 0x99D0, 0x6A17, 0x7026, 0x732A, 0x82E7, /* 0x70 */
         0x8457, 0x8CAF, 0x4E01, 0x5146, 0x51CB, 0x558B, 0x5BF5			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x44:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2314,10 +2314,10 @@ bool StarEncodingJapanese::readJapanese208
         0x608C, 0x62B5, 0x633A, 0x63D0, 0x68AF, 0x6C40, 0x7887, 0x798E, /* 0x70 */
         0x7A0B, 0x7DE0, 0x8247, 0x8A02, 0x8AE6, 0x8E44, 0x9013			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x45:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2335,10 +2335,10 @@ bool StarEncodingJapanese::readJapanese208
         0x76D7, 0x6DD8, 0x6E6F, 0x6D9B, 0x706F, 0x71C8, 0x5F53, 0x75D8, /* 0x70 */
         0x7977, 0x7B49, 0x7B54, 0x7B52, 0x7CD6, 0x7D71, 0x5230			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x46:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2356,10 +2356,10 @@ bool StarEncodingJapanese::readJapanese208
         0x8EDF, 0x96E3, 0x6C5D, 0x4E8C, 0x5C3C, 0x5F10, 0x8FE9, 0x5302, /* 0x70 */
         0x8CD1, 0x8089, 0x8679, 0x5EFF, 0x65E5, 0x4E73, 0x5165			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x47:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2377,10 +2377,10 @@ bool StarEncodingJapanese::readJapanese208
         0x67CF, 0x6CCA, 0x767D, 0x7B94, 0x7C95, 0x8236, 0x8584, 0x8FEB, /* 0x70 */
         0x66DD, 0x6F20, 0x7206, 0x7E1B, 0x83AB, 0x99C1, 0x9EA6			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x48:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2398,10 +2398,10 @@ bool StarEncodingJapanese::readJapanese208
         0x8AB9, 0x8CBB, 0x907F, 0x975E, 0x98DB, 0x6A0B, 0x7C38, 0x5099, /* 0x70 */
         0x5C3E, 0x5FAE, 0x6787, 0x6BD8, 0x7435, 0x7709, 0x7F8E			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x49:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2419,10 +2419,10 @@ bool StarEncodingJapanese::readJapanese208
         0x6B66, 0x821E, 0x8461, 0x856A, 0x90E8, 0x5C01, 0x6953, 0x98A8, /* 0x70 */
         0x847A, 0x8557, 0x4F0F, 0x526F, 0x5FA9, 0x5E45, 0x670D			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x4a:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2440,10 +2440,10 @@ bool StarEncodingJapanese::readJapanese208
         0x4FF8, 0x5305, 0x5446, 0x5831, 0x5949, 0x5B9D, 0x5CF0, 0x5CEF, /* 0x70 */
         0x5D29, 0x5E96, 0x62B1, 0x6367, 0x653E, 0x65B9, 0x670B			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x4b:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2461,10 +2461,10 @@ bool StarEncodingJapanese::readJapanese208
         0x9C52, 0x685D, 0x4EA6, 0x4FE3, 0x53C8, 0x62B9, 0x672B, 0x6CAB, /* 0x70 */
         0x8FC4, 0x4FAD, 0x7E6D, 0x9EBF, 0x4E07, 0x6162, 0x6E80			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x4c:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2482,10 +2482,10 @@ bool StarEncodingJapanese::readJapanese208
         0x77E2, 0x5384, 0x5F79, 0x7D04, 0x85AC, 0x8A33, 0x8E8D, 0x9756, /* 0x70 */
         0x67F3, 0x85AE, 0x9453, 0x6109, 0x6108, 0x6CB9, 0x7652			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x4d:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2503,10 +2503,10 @@ bool StarEncodingJapanese::readJapanese208
         0x4E71, 0x5375, 0x5D50, 0x6B04, 0x6FEB, 0x85CD, 0x862D, 0x89A7, /* 0x70 */
         0x5229, 0x540F, 0x5C65, 0x674E, 0x68A8, 0x7406, 0x7483			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x4e:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2524,10 +2524,10 @@ bool StarEncodingJapanese::readJapanese208
         0x9F62, 0x66A6, 0x6B74, 0x5217, 0x52A3, 0x70C8, 0x88C2, 0x5EC9, /* 0x70 */
         0x604B, 0x6190, 0x6F23, 0x7149, 0x7C3E, 0x7DF4, 0x806F			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x4f:
     if (c2>=0x21 && c2<=0x53) {
@@ -2541,10 +2541,10 @@ bool StarEncodingJapanese::readJapanese208
         0x6900, 0x6E7E, 0x7897, 0x8155									/* 0x50 */
         /* 0x50 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x50:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2562,10 +2562,10 @@ bool StarEncodingJapanese::readJapanese208
         0x5043, 0x5047, 0x6703, 0x5055, 0x5050, 0x5048, 0x505A, 0x5056, /* 0x70 */
         0x506C, 0x5078, 0x5080, 0x509A, 0x5085, 0x50B4, 0x50B2			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x51:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2583,10 +2583,10 @@ bool StarEncodingJapanese::readJapanese208
         0x525E, 0x5254, 0x526A, 0x5274, 0x5269, 0x5273, 0x527F, 0x527D, /* 0x70 */
         0x528D, 0x5294, 0x5292, 0x5271, 0x5288, 0x5291, 0x8FA8			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x52:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2604,10 +2604,10 @@ bool StarEncodingJapanese::readJapanese208
         0x5492, 0x547B, 0x5480, 0x5476, 0x5484, 0x5490, 0x5486, 0x54C7, /* 0x70 */
         0x54A2, 0x54B8, 0x54A5, 0x54AC, 0x54C4, 0x54C8, 0x54A8			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x53:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2625,10 +2625,10 @@ bool StarEncodingJapanese::readJapanese208
         0x56BC, 0x56C1, 0x56C3, 0x56C0, 0x56C8, 0x56CE, 0x56D1, 0x56D3, /* 0x70 */
         0x56D7, 0x56EE, 0x56F9, 0x5700, 0x56FF, 0x5704, 0x5709			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x54:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2646,10 +2646,10 @@ bool StarEncodingJapanese::readJapanese208
         0x592D, 0x5932, 0x5938, 0x593E, 0x7AD2, 0x5955, 0x5950, 0x594E, /* 0x70 */
         0x595A, 0x5958, 0x5962, 0x5960, 0x5967, 0x596C, 0x5969			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x55:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2667,10 +2667,10 @@ bool StarEncodingJapanese::readJapanese208
         0x5BF3, 0x5C05, 0x5C07, 0x5C08, 0x5C0D, 0x5C13, 0x5C20, 0x5C22, /* 0x70 */
         0x5C28, 0x5C38, 0x5C39, 0x5C41, 0x5C46, 0x5C4E, 0x5C53			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x56:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2688,10 +2688,10 @@ bool StarEncodingJapanese::readJapanese208
         0x5E5F, 0x5E62, 0x5E64, 0x5E47, 0x5E75, 0x5E76, 0x5E7A, 0x9EBC, /* 0x70 */
         0x5E7F, 0x5EA0, 0x5EC1, 0x5EC2, 0x5EC8, 0x5ED0, 0x5ECF			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x57:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2709,10 +2709,10 @@ bool StarEncodingJapanese::readJapanese208
         0x604A, 0x6046, 0x604D, 0x6063, 0x6043, 0x6064, 0x6042, 0x606C, /* 0x70 */
         0x606B, 0x6059, 0x6081, 0x608D, 0x60E7, 0x6083, 0x609A			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x58:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2730,10 +2730,10 @@ bool StarEncodingJapanese::readJapanese208
         0x61E3, 0x61F6, 0x61FA, 0x61F4, 0x61FF, 0x61FD, 0x61FC, 0x61FE, /* 0x70 */
         0x6200, 0x6208, 0x6209, 0x620D, 0x620C, 0x6214, 0x621B			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x59:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2751,10 +2751,10 @@ bool StarEncodingJapanese::readJapanese208
         0x651D, 0x6417, 0x6428, 0x640F, 0x6467, 0x646F, 0x6476, 0x644E, /* 0x70 */
         0x652A, 0x6495, 0x6493, 0x64A5, 0x64A9, 0x6488, 0x64BC			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x5a:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2772,10 +2772,10 @@ bool StarEncodingJapanese::readJapanese208
         0x665F, 0x6662, 0x6670, 0x6683, 0x6688, 0x668E, 0x6689, 0x6684, /* 0x70 */
         0x6698, 0x669D, 0x66C1, 0x66B9, 0x66C9, 0x66BE, 0x66BC			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x5b:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2793,10 +2793,10 @@ bool StarEncodingJapanese::readJapanese208
         0x68B5, 0x68A0, 0x68BA, 0x690F, 0x688D, 0x687E, 0x6901, 0x68CA, /* 0x70 */
         0x6908, 0x68D8, 0x6922, 0x6926, 0x68E1, 0x690C, 0x68CD			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x5c:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2814,10 +2814,10 @@ bool StarEncodingJapanese::readJapanese208
         0x6A36, 0x6A78, 0x6A47, 0x6A62, 0x6A59, 0x6A66, 0x6A48, 0x6A38, /* 0x70 */
         0x6A22, 0x6A90, 0x6A8D, 0x6AA0, 0x6A84, 0x6AA2, 0x6AA3			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x5d:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2835,10 +2835,10 @@ bool StarEncodingJapanese::readJapanese208
         0x6C7E, 0x6C68, 0x6C73, 0x6C92, 0x6C90, 0x6CC4, 0x6CF1, 0x6CD3, /* 0x70 */
         0x6CBD, 0x6CD7, 0x6CC5, 0x6CDD, 0x6CAE, 0x6CB1, 0x6CBE			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x5e:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2856,10 +2856,10 @@ bool StarEncodingJapanese::readJapanese208
         0x6EA5, 0x6EC2, 0x6E9F, 0x6F41, 0x6F11, 0x704C, 0x6EEC, 0x6EF8, /* 0x70 */
         0x6EFE, 0x6F3F, 0x6EF2, 0x6F31, 0x6EEF, 0x6F32, 0x6ECC			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x5f:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2877,10 +2877,10 @@ bool StarEncodingJapanese::readJapanese208
         0x7195, 0x71A8, 0x71AC, 0x71D7, 0x71B9, 0x71BE, 0x71D2, 0x71C9, /* 0x70 */
         0x71D4, 0x71CE, 0x71E0, 0x71EC, 0x71E7, 0x71F5, 0x71FC			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x60:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2898,10 +2898,10 @@ bool StarEncodingJapanese::readJapanese208
         0x7441, 0x745C, 0x7469, 0x7470, 0x7463, 0x746A, 0x7476, 0x747E, /* 0x70 */
         0x748B, 0x749E, 0x74A7, 0x74CA, 0x74CF, 0x74D4, 0x73F1			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x61:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2919,10 +2919,10 @@ bool StarEncodingJapanese::readJapanese208
         0x7630, 0x763B, 0x7647, 0x7648, 0x7646, 0x765C, 0x7658, 0x7661, /* 0x70 */
         0x7662, 0x7668, 0x7669, 0x766A, 0x7667, 0x766C, 0x7670			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x62:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2940,10 +2940,10 @@ bool StarEncodingJapanese::readJapanese208
         0x789A, 0x788C, 0x78A3, 0x78B5, 0x78AA, 0x78AF, 0x78D1, 0x78C6, /* 0x70 */
         0x78CB, 0x78D4, 0x78BE, 0x78BC, 0x78C5, 0x78CA, 0x78EC			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x63:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2961,10 +2961,10 @@ bool StarEncodingJapanese::readJapanese208
         0x7AE6, 0x7AED, 0x7AF0, 0x7B02, 0x7B0F, 0x7B0A, 0x7B06, 0x7B33, /* 0x70 */
         0x7B18, 0x7B19, 0x7B1E, 0x7B35, 0x7B28, 0x7B36, 0x7B50			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x64:
     if (c2>=0x21 && c2<=0x7e) {
@@ -2982,10 +2982,10 @@ bool StarEncodingJapanese::readJapanese208
         0x7CBD, 0x7CC0, 0x7CC5, 0x7CC2, 0x7CD8, 0x7CD2, 0x7CDC, 0x7CE2, /* 0x70 */
         0x9B3B, 0x7CEF, 0x7CF2, 0x7CF4, 0x7CF6, 0x7CFA, 0x7D06			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x65:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3003,10 +3003,10 @@ bool StarEncodingJapanese::readJapanese208
         0x8FAE, 0x7E7F, 0x7E88, 0x7E89, 0x7E8C, 0x7E92, 0x7E90, 0x7E93, /* 0x70 */
         0x7E94, 0x7E96, 0x7E8E, 0x7E9B, 0x7E9C, 0x7F38, 0x7F3A			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x66:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3024,10 +3024,10 @@ bool StarEncodingJapanese::readJapanese208
         0x80DB, 0x80E5, 0x80D9, 0x80DD, 0x80C4, 0x80DA, 0x80D6, 0x8109, /* 0x70 */
         0x80EF, 0x80F1, 0x811B, 0x8129, 0x8123, 0x812F, 0x814B			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x67:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3045,10 +3045,10 @@ bool StarEncodingJapanese::readJapanese208
         0x82E3, 0x82DF, 0x82D2, 0x82F4, 0x82F3, 0x82FA, 0x8393, 0x8303, /* 0x70 */
         0x82FB, 0x82F9, 0x82DE, 0x8306, 0x82DC, 0x8309, 0x82D9			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x68:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3066,10 +3066,10 @@ bool StarEncodingJapanese::readJapanese208
         0x84A1, 0x8521, 0x84FF, 0x84F4, 0x8517, 0x8518, 0x852C, 0x851F, /* 0x70 */
         0x8515, 0x8514, 0x84FC, 0x8540, 0x8563, 0x8558, 0x8548			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x69:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3087,10 +3087,10 @@ bool StarEncodingJapanese::readJapanese208
         0x8737, 0x873B, 0x8725, 0x8729, 0x871A, 0x8760, 0x875F, 0x8778, /* 0x70 */
         0x874C, 0x874E, 0x8774, 0x8757, 0x8768, 0x876E, 0x8759			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x6a:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3108,10 +3108,10 @@ bool StarEncodingJapanese::readJapanese208
         0x8913, 0x8943, 0x891E, 0x8925, 0x892A, 0x892B, 0x8941, 0x8944, /* 0x70 */
         0x893B, 0x8936, 0x8938, 0x894C, 0x891D, 0x8960, 0x895E			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x6b:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3129,10 +3129,10 @@ bool StarEncodingJapanese::readJapanese208
         0x8B33, 0x97AB, 0x8B26, 0x8B2B, 0x8B3E, 0x8B28, 0x8B41, 0x8B4C, /* 0x70 */
         0x8B4F, 0x8B4E, 0x8B49, 0x8B56, 0x8B5B, 0x8B5A, 0x8B6B			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x6c:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3150,10 +3150,10 @@ bool StarEncodingJapanese::readJapanese208
         0x8DDF, 0x8DE3, 0x8DFC, 0x8E08, 0x8E09, 0x8DFF, 0x8E1D, 0x8E1E, /* 0x70 */
         0x8E10, 0x8E1F, 0x8E42, 0x8E35, 0x8E30, 0x8E34, 0x8E4A			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x6d:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3171,10 +3171,10 @@ bool StarEncodingJapanese::readJapanese208
         0x9005, 0x8FF9, 0x8FFA, 0x9011, 0x9015, 0x9021, 0x900D, 0x901E, /* 0x70 */
         0x9016, 0x900B, 0x9027, 0x9036, 0x9035, 0x9039, 0x8FF8			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x6e:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3192,10 +3192,10 @@ bool StarEncodingJapanese::readJapanese208
         0x924B, 0x9250, 0x929C, 0x9296, 0x9293, 0x929B, 0x925A, 0x92CF, /* 0x70 */
         0x92B9, 0x92B7, 0x92E9, 0x930F, 0x92FA, 0x9344, 0x932E			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x6f:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3213,10 +3213,10 @@ bool StarEncodingJapanese::readJapanese208
         0x95DC, 0x95E1, 0x95E5, 0x95E2, 0x9621, 0x9628, 0x962E, 0x962F, /* 0x70 */
         0x9642, 0x964C, 0x964F, 0x964B, 0x9677, 0x965C, 0x965E			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x70:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3234,10 +3234,10 @@ bool StarEncodingJapanese::readJapanese208
         0x97F6, 0x97F5, 0x980F, 0x980C, 0x9838, 0x9824, 0x9821, 0x9837, /* 0x70 */
         0x983D, 0x9846, 0x984F, 0x984B, 0x986B, 0x986F, 0x9870			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x71:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3255,10 +3255,10 @@ bool StarEncodingJapanese::readJapanese208
         0x9ACF, 0x9AD1, 0x9AD3, 0x9AD4, 0x9ADE, 0x9ADF, 0x9AE2, 0x9AE3, /* 0x70 */
         0x9AE6, 0x9AEF, 0x9AEB, 0x9AEE, 0x9AF4, 0x9AF1, 0x9AF7			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x72:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3276,10 +3276,10 @@ bool StarEncodingJapanese::readJapanese208
         0x9D03, 0x9D06, 0x9D2A, 0x9D26, 0x9DAF, 0x9D23, 0x9D1F, 0x9D44, /* 0x70 */
         0x9D15, 0x9D12, 0x9D41, 0x9D3F, 0x9D3E, 0x9D46, 0x9D48			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x73:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3297,10 +3297,10 @@ bool StarEncodingJapanese::readJapanese208
         0x9F54, 0x9F63, 0x9F5F, 0x9F60, 0x9F61, 0x9F66, 0x9F67, 0x9F6C, /* 0x70 */
         0x9F6A, 0x9F77, 0x9F72, 0x9F76, 0x9F95, 0x9F9C, 0x9FA0			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x74:
     if (c2>=0x21 && c2<=0x26) {
@@ -3308,20 +3308,20 @@ bool StarEncodingJapanese::readJapanese208
         0x582F, 0x69C7, 0x9059, 0x7464, 0x51DC, 0x7199			/* 0x20 */
         /* 0x20 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   default:
     if ((c>=0x10 && c<=0x20) || (c>=0x29 && c<=0x2c) || c==0x2e || c==0x2f || (c>=0x75 && c<=0x7e))
-      unicode=(unicode<<8)+(uint32_t)c2;
+      unicode=(unicode<<8)+static_cast<uint32_t>(c2);
     else
       unicode=0;
     break;
   }
   if (!unicode) {
-    STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese208: unknown caracter %x\n", (unsigned int)c));
+    STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese208: unknown caracter %x\n", static_cast<unsigned int>(c)));
   }
   dest.push_back(unicode);
   return true;
@@ -3336,7 +3336,7 @@ bool StarEncodingJapanese::readJapanese212
   }
   int const trailOff=encoding==StarEncoding::E_EUC_JP ? 0x80 : 0;
   if (pos+1>=src.size()) return false;
-  int c=(int) src[pos++], c2=src[pos++];
+  int c=int(src[pos++]), c2=src[pos++];
   if (c<trailOff || c2<trailOff) {
     STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese212: bad trail off\n"));
     return false;
@@ -3361,10 +3361,10 @@ bool StarEncodingJapanese::readJapanese212
         0x00A4, 0x2116													/* 0x70 */
         /* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x2f];
+      unicode=static_cast<uint32_t>(val[c2-0x2f]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x26:
     if (c2>=0x61 && c2<=0x7c) {
@@ -3374,10 +3374,10 @@ bool StarEncodingJapanese::readJapanese212
         0, 0x03AC, 0x03AD, 0x03AE, 0x03AF, 0x03CA, 0x0390, 0x03CC, /* 0x70 */
         0x03C2, 0x03CD, 0x03CB, 0x03B0, 0x03CE							/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x61];
+      unicode=static_cast<uint32_t>(val[c2-0x61]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x27:
     if (c2>=0x42 && c2<=0x7e) {
@@ -3391,10 +3391,10 @@ bool StarEncodingJapanese::readJapanese212
         0, 	 0, 0x0452, 0x0453, 0x0454, 0x0455, 0x0456, 0x0457, /* 0x70 */
         0x0458, 0x0459, 0x045A, 0x045B, 0x045C, 0x045E, 0x045F			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x42];
+      unicode=static_cast<uint32_t>(val[c2-0x42]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x29:
     if (c2>=0x21 && c2<=0x50) {
@@ -3409,10 +3409,10 @@ bool StarEncodingJapanese::readJapanese212
         /* 0x50 */
 
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x2a:
     if (c2>=0x21 && c2<=0x77) {
@@ -3430,10 +3430,10 @@ bool StarEncodingJapanese::readJapanese212
         0x01D5, 0x0174, 0x00DD, 0x0178, 0x0176, 0x0179, 0x017D, 0x017B, /* 0x70 */
         /* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x2b:
     if (c2>=0x21 && c2<=0x77) {
@@ -3451,10 +3451,10 @@ bool StarEncodingJapanese::readJapanese212
         0x01D6, 0x0175, 0x00FD, 0x00FF, 0x0177, 0x017A, 0x017E, 0x017C	/* 0x70 */
         /* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x30:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3472,10 +3472,10 @@ bool StarEncodingJapanese::readJapanese212
         0x4F5F, 0x4F63, 0x4F6A, 0x4F6C, 0x4F6E, 0x4F71, 0x4F77, 0x4F78, /* 0x70 */
         0x4F79, 0x4F7A, 0x4F7D, 0x4F7E, 0x4F81, 0x4F82, 0x4F84			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x31:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3493,10 +3493,10 @@ bool StarEncodingJapanese::readJapanese212
         0x5066, 0x5067, 0x506A, 0x506D, 0x5070, 0x5071, 0x503B, 0x5081, /* 0x70 */
         0x5083, 0x5084, 0x5086, 0x508A, 0x508E, 0x508F, 0x5090			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x32:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3514,10 +3514,10 @@ bool StarEncodingJapanese::readJapanese212
         0x5183, 0x5184, 0x518B, 0x518E, 0x5198, 0x519D, 0x51A1, 0x51A3, /* 0x70 */
         0x51AD, 0x51B8, 0x51BA, 0x51BC, 0x51BE, 0x51BF, 0x51C2			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x33:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3535,10 +3535,10 @@ bool StarEncodingJapanese::readJapanese212
         0x52E1, 0x52E5, 0x52E8, 0x52E9, 0x52EA, 0x52EC, 0x52F0, 0x52F1, /* 0x70 */
         0x52F4, 0x52F6, 0x52F7, 0x5300, 0x5303, 0x530A, 0x530B			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x34:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3556,10 +3556,10 @@ bool StarEncodingJapanese::readJapanese212
         0x5444, 0x5447, 0x544D, 0x544F, 0x545E, 0x5462, 0x5464, 0x5466, /* 0x70 */
         0x5467, 0x5469, 0x546B, 0x546D, 0x546E, 0x5474, 0x547F			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x35:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3577,10 +3577,10 @@ bool StarEncodingJapanese::readJapanese212
         0x5597, 0x55A3, 0x55A4, 0x55AD, 0x55B2, 0x55BF, 0x55C1, 0x55C3, /* 0x70 */
         0x55C6, 0x55C9, 0x55CB, 0x55CC, 0x55CE, 0x55D1, 0x55D2			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x36:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3598,10 +3598,10 @@ bool StarEncodingJapanese::readJapanese212
         0x56CC, 0x56CD, 0x56D9, 0x56DC, 0x56DD, 0x56DF, 0x56E1, 0x56E4, /* 0x70 */
         0x56E5, 0x56E6, 0x56E7, 0x56E8, 0x56F1, 0x56EB, 0x56ED			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x37:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3619,10 +3619,10 @@ bool StarEncodingJapanese::readJapanese212
         0x57E7, 0x57E9, 0x57ED, 0x57F0, 0x57F5, 0x57F6, 0x57F8, 0x57FD, /* 0x70 */
         0x57FE, 0x57FF, 0x5803, 0x5804, 0x5808, 0x5809, 0x57E1			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x38:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3640,10 +3640,10 @@ bool StarEncodingJapanese::readJapanese212
         0x5936, 0x593F, 0x5943, 0x5946, 0x5952, 0x5953, 0x5959, 0x595B, /* 0x70 */
         0x595D, 0x595E, 0x595F, 0x5961, 0x5963, 0x596B, 0x596D			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x39:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3661,10 +3661,10 @@ bool StarEncodingJapanese::readJapanese212
         0x5A9C, 0x5A9E, 0x5A9F, 0x5AA0, 0x5AA2, 0x5AA7, 0x5AAC, 0x5AB1, /* 0x70 */
         0x5AB2, 0x5AB3, 0x5AB5, 0x5AB8, 0x5ABA, 0x5ABB, 0x5ABF			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x3a:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3682,10 +3682,10 @@ bool StarEncodingJapanese::readJapanese212
         0x5C2B, 0x5C2C, 0x5C2E, 0x5C30, 0x5C32, 0x5C35, 0x5C36, 0x5C59, /* 0x70 */
         0x5C5A, 0x5C5C, 0x5C62, 0x5C63, 0x5C67, 0x5C68, 0x5C69			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x3b:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3703,10 +3703,10 @@ bool StarEncodingJapanese::readJapanese212
         0x5DA7, 0x5DAB, 0x5DB0, 0x5DB4, 0x5DB8, 0x5DB9, 0x5DC3, 0x5DC7, /* 0x70 */
         0x5DCB, 0x5DD0, 0x5DCE, 0x5DD8, 0x5DD9, 0x5DE0, 0x5DE4			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x3c:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3724,10 +3724,10 @@ bool StarEncodingJapanese::readJapanese212
         0x5F3D, 0x5F3F, 0x5F40, 0x5F44, 0x5F45, 0x5F47, 0x5F4D, 0x5F50, /* 0x70 */
         0x5F54, 0x5F58, 0x5F5B, 0x5F60, 0x5F63, 0x5F64, 0x5F67			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x3d:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3745,10 +3745,10 @@ bool StarEncodingJapanese::readJapanese212
         0x608A, 0x608E, 0x6091, 0x6093, 0x6095, 0x6098, 0x609D, 0x609E, /* 0x70 */
         0x60A2, 0x60A4, 0x60A5, 0x60A8, 0x60B0, 0x60B1, 0x60B7			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x3e:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3766,10 +3766,10 @@ bool StarEncodingJapanese::readJapanese212
         0x61C0, 0x61C1, 0x61C2, 0x61CE, 0x61CF, 0x61D5, 0x61DC, 0x61DD, /* 0x70 */
         0x61DE, 0x61DF, 0x61E1, 0x61E2, 0x61E7, 0x61E9, 0x61E5			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x3f:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3787,10 +3787,10 @@ bool StarEncodingJapanese::readJapanese212
         0x634A, 0x634B, 0x634E, 0x6352, 0x6353, 0x6354, 0x6358, 0x635B, /* 0x70 */
         0x6365, 0x6366, 0x636C, 0x636D, 0x6371, 0x6374, 0x6375			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x40:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3808,10 +3808,10 @@ bool StarEncodingJapanese::readJapanese212
         0x6491, 0x6498, 0x6499, 0x649B, 0x649D, 0x649F, 0x64A1, 0x64A3, /* 0x70 */
         0x64A6, 0x64A8, 0x64AC, 0x64B3, 0x64BD, 0x64BE, 0x64BF			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x41:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3829,10 +3829,10 @@ bool StarEncodingJapanese::readJapanese212
         0x65F4, 0x65F5, 0x65F9, 0x65FE, 0x65FF, 0x6600, 0x6604, 0x6608, /* 0x70 */
         0x6609, 0x660D, 0x6611, 0x6612, 0x6615, 0x6616, 0x661D			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x42:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3850,10 +3850,10 @@ bool StarEncodingJapanese::readJapanese212
         0x670E, 0x6713, 0x6719, 0x671C, 0x6720, 0x6722, 0x6733, 0x673E, /* 0x70 */
         0x6745, 0x6747, 0x6748, 0x674C, 0x6754, 0x6755, 0x675D			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x43:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3871,10 +3871,10 @@ bool StarEncodingJapanese::readJapanese212
         0x6898, 0x689A, 0x689C, 0x68A1, 0x68A3, 0x68A5, 0x68A9, 0x68AA, /* 0x70 */
         0x68AE, 0x68B2, 0x68BB, 0x68C5, 0x68C8, 0x68CC, 0x68CF			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x44:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3892,10 +3892,10 @@ bool StarEncodingJapanese::readJapanese212
         0x69F5, 0x69FE, 0x6A00, 0x6A01, 0x6A03, 0x6A0F, 0x6A11, 0x6A15, /* 0x70 */
         0x6A1A, 0x6A1D, 0x6A20, 0x6A24, 0x6A28, 0x6A30, 0x6A32			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x45:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3913,10 +3913,10 @@ bool StarEncodingJapanese::readJapanese212
         0x6B3F, 0x6B46, 0x6B4A, 0x6B4D, 0x6B52, 0x6B56, 0x6B58, 0x6B5D, /* 0x70 */
         0x6B60, 0x6B67, 0x6B6B, 0x6B6E, 0x6B70, 0x6B75, 0x6B7D			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x46:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3934,10 +3934,10 @@ bool StarEncodingJapanese::readJapanese212
         0x6C98, 0x6C9C, 0x6C9F, 0x6CB0, 0x6CB2, 0x6CB4, 0x6CC2, 0x6CC6, /* 0x70 */
         0x6CCD, 0x6CCF, 0x6CD0, 0x6CD1, 0x6CD2, 0x6CD4, 0x6CD6			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x47:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3955,10 +3955,10 @@ bool StarEncodingJapanese::readJapanese212
         0x6E3C, 0x6E44, 0x6E45, 0x6E48, 0x6E49, 0x6E4B, 0x6E4F, 0x6E51, /* 0x70 */
         0x6E52, 0x6E53, 0x6E54, 0x6E57, 0x6E5C, 0x6E5D, 0x6E5E			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x48:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3976,10 +3976,10 @@ bool StarEncodingJapanese::readJapanese212
         0x6FA0, 0x6FA5, 0x6FA6, 0x6FA7, 0x6FA8, 0x6FAE, 0x6FAF, 0x6FB0, /* 0x70 */
         0x6FB5, 0x6FB6, 0x6FBC, 0x6FC5, 0x6FC7, 0x6FC8, 0x6FCA			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x49:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3997,10 +3997,10 @@ bool StarEncodingJapanese::readJapanese212
         0x7131, 0x7138, 0x7141, 0x7145, 0x7146, 0x7147, 0x714A, 0x714B, /* 0x70 */
         0x7150, 0x7152, 0x7157, 0x715A, 0x715C, 0x715E, 0x7160			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x4a:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4018,10 +4018,10 @@ bool StarEncodingJapanese::readJapanese212
         0x72B4, 0x72BE, 0x72C1, 0x72C7, 0x72C9, 0x72CC, 0x72D5, 0x72D6, /* 0x70 */
         0x72D8, 0x72DF, 0x72E5, 0x72F3, 0x72F4, 0x72FA, 0x72FB			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x4b:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4039,10 +4039,10 @@ bool StarEncodingJapanese::readJapanese212
         0x73D6, 0x73D9, 0x73DD, 0x73E1, 0x73E3, 0x73E6, 0x73E7, 0x73E9, /* 0x70 */
         0x73F4, 0x73F5, 0x73F7, 0x73F9, 0x73FA, 0x73FB, 0x73FD			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x4c:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4060,10 +4060,10 @@ bool StarEncodingJapanese::readJapanese212
         0x74DA, 0x74DB, 0x74DE, 0x74DF, 0x74E4, 0x74E8, 0x74EA, 0x74EB, /* 0x70 */
         0x74EF, 0x74F4, 0x74FA, 0x74FB, 0x74FC, 0x74FF, 0x7506			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x4d:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4081,10 +4081,10 @@ bool StarEncodingJapanese::readJapanese212
         0x7619, 0x761B, 0x761C, 0x761D, 0x761E, 0x7623, 0x7625, 0x7626, /* 0x70 */
         0x7629, 0x762D, 0x7632, 0x7633, 0x7635, 0x7638, 0x7639			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x4e:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4102,10 +4102,10 @@ bool StarEncodingJapanese::readJapanese212
         0x7742, 0x7745, 0x7746, 0x774A, 0x774D, 0x774E, 0x774F, 0x7752, /* 0x70 */
         0x7756, 0x7757, 0x775C, 0x775E, 0x775F, 0x7760, 0x7762			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x4f:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4123,10 +4123,10 @@ bool StarEncodingJapanese::readJapanese212
         0x788F, 0x7894, 0x7898, 0x78A1, 0x789D, 0x789E, 0x789F, 0x78A4, /* 0x70 */
         0x78A8, 0x78AC, 0x78AD, 0x78B0, 0x78B1, 0x78B2, 0x78B3			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x50:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4144,10 +4144,10 @@ bool StarEncodingJapanese::readJapanese212
         0x79B1, 0x79B4, 0x79B8, 0x79BB, 0x79C2, 0x79C4, 0x79C7, 0x79C8, /* 0x70 */
         0x79CA, 0x79CF, 0x79D4, 0x79D6, 0x79DA, 0x79DD, 0x79DE			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x51:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4165,10 +4165,10 @@ bool StarEncodingJapanese::readJapanese212
         0x7AFB, 0x7AFD, 0x7AFE, 0x7B07, 0x7B14, 0x7B1F, 0x7B23, 0x7B27, /* 0x70 */
         0x7B29, 0x7B2A, 0x7B2B, 0x7B2D, 0x7B2E, 0x7B2F, 0x7B30			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x52:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4186,10 +4186,10 @@ bool StarEncodingJapanese::readJapanese212
         0x7C36, 0x7C39, 0x7C3A, 0x7C46, 0x7C4A, 0x7C55, 0x7C51, 0x7C52, /* 0x70 */
         0x7C53, 0x7C59, 0x7C5A, 0x7C5B, 0x7C5C, 0x7C5D, 0x7C5E			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x53:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4207,10 +4207,10 @@ bool StarEncodingJapanese::readJapanese212
         0x7D7B, 0x7D7F, 0x7D81, 0x7D82, 0x7D83, 0x7D85, 0x7D86, 0x7D88, /* 0x70 */
         0x7D8B, 0x7D8C, 0x7D8D, 0x7D91, 0x7D96, 0x7D97, 0x7D9D			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x54:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4228,10 +4228,10 @@ bool StarEncodingJapanese::readJapanese212
         0x7F43, 0x7F44, 0x7F47, 0x7F4F, 0x7F52, 0x7F53, 0x7F5B, 0x7F5C, /* 0x70 */
         0x7F5D, 0x7F61, 0x7F63, 0x7F64, 0x7F65, 0x7F66, 0x7F6D			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x55:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4249,10 +4249,10 @@ bool StarEncodingJapanese::readJapanese212
         0x80A7, 0x80AB, 0x80B8, 0x80B9, 0x80C8, 0x80CD, 0x80CF, 0x80D2, /* 0x70 */
         0x80D4, 0x80D5, 0x80D7, 0x80D8, 0x80E0, 0x80ED, 0x80EE			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x56:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4270,10 +4270,10 @@ bool StarEncodingJapanese::readJapanese212
         0x8213, 0x8214, 0x8219, 0x821A, 0x821D, 0x8221, 0x8222, 0x8228, /* 0x70 */
         0x8232, 0x8234, 0x823A, 0x8243, 0x8244, 0x8245, 0x8246			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x57:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4291,10 +4291,10 @@ bool StarEncodingJapanese::readJapanese212
         0x833A, 0x833C, 0x833D, 0x8342, 0x8343, 0x8344, 0x8347, 0x834D, /* 0x70 */
         0x834E, 0x8351, 0x8355, 0x8356, 0x8357, 0x8370, 0x8378			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x58:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4312,10 +4312,10 @@ bool StarEncodingJapanese::readJapanese212
         0x84A9, 0x84AA, 0x84AF, 0x84B1, 0x84B4, 0x84BA, 0x84BD, 0x84BE, /* 0x70 */
         0x84C0, 0x84C2, 0x84C7, 0x84C8, 0x84CC, 0x84CF, 0x84D3			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x59:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4333,10 +4333,10 @@ bool StarEncodingJapanese::readJapanese212
         0x85C7, 0x85CA, 0x85CB, 0x85CE, 0x85AD, 0x85D8, 0x85DA, 0x85DF, /* 0x70 */
         0x85E0, 0x85E6, 0x85E8, 0x85ED, 0x85F3, 0x85F6, 0x85FC			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x5a:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4354,10 +4354,10 @@ bool StarEncodingJapanese::readJapanese212
         0x86FD, 0x8704, 0x8705, 0x8707, 0x870B, 0x870E, 0x870F, 0x8710, /* 0x70 */
         0x8713, 0x8714, 0x8719, 0x871E, 0x871F, 0x8721, 0x8723			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x5b:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4375,10 +4375,10 @@ bool StarEncodingJapanese::readJapanese212
         0x8812, 0x8813, 0x8814, 0x8818, 0x881A, 0x881B, 0x881C, 0x881E, /* 0x70 */
         0x881F, 0x8828, 0x882D, 0x882E, 0x8830, 0x8832, 0x8835			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x5c:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4396,10 +4396,10 @@ bool StarEncodingJapanese::readJapanese212
         0x894F, 0x8952, 0x8957, 0x895A, 0x895B, 0x895C, 0x8961, 0x8962, /* 0x70 */
         0x8963, 0x896B, 0x896E, 0x8970, 0x8973, 0x8975, 0x897A			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x5d:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4417,10 +4417,10 @@ bool StarEncodingJapanese::readJapanese212
         0x8A83, 0x8A86, 0x8A8B, 0x8A8F, 0x8A90, 0x8A92, 0x8A96, 0x8A97, /* 0x70 */
         0x8A99, 0x8A9F, 0x8AA7, 0x8AA9, 0x8AAE, 0x8AAF, 0x8AB3			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x5e:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4438,10 +4438,10 @@ bool StarEncodingJapanese::readJapanese212
         0x8C5B, 0x8C5D, 0x8C59, 0x8C63, 0x8C64, 0x8C66, 0x8C68, 0x8C69, /* 0x70 */
         0x8C6D, 0x8C73, 0x8C75, 0x8C76, 0x8C7B, 0x8C7E, 0x8C86			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x5f:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4459,10 +4459,10 @@ bool StarEncodingJapanese::readJapanese212
         0x8DF1, 0x8DF2, 0x8DF4, 0x8DFD, 0x8E01, 0x8E04, 0x8E05, 0x8E06, /* 0x70 */
         0x8E0B, 0x8E11, 0x8E14, 0x8E16, 0x8E20, 0x8E21, 0x8E22			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x60:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4480,10 +4480,10 @@ bool StarEncodingJapanese::readJapanese212
         0x8F21, 0x8F23, 0x8F25, 0x8F27, 0x8F28, 0x8F2C, 0x8F2D, 0x8F2E, /* 0x70 */
         0x8F34, 0x8F35, 0x8F36, 0x8F37, 0x8F3A, 0x8F40, 0x8F41			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x61:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4501,10 +4501,10 @@ bool StarEncodingJapanese::readJapanese212
         0x9099, 0x909B, 0x90A0, 0x90A1, 0x90A2, 0x90A5, 0x90B0, 0x90B2, /* 0x70 */
         0x90B3, 0x90B4, 0x90B6, 0x90BD, 0x90CC, 0x90BE, 0x90C3			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x62:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4522,10 +4522,10 @@ bool StarEncodingJapanese::readJapanese212
         0x91A1, 0x91A6, 0x91A8, 0x91AC, 0x91AD, 0x91AE, 0x91B0, 0x91B1, /* 0x70 */
         0x91B2, 0x91B3, 0x91B6, 0x91BB, 0x91BC, 0x91BD, 0x91BF			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x63:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4543,10 +4543,10 @@ bool StarEncodingJapanese::readJapanese212
         0x9276, 0x9277, 0x9278, 0x9279, 0x927B, 0x927C, 0x927D, 0x927F, /* 0x70 */
         0x9288, 0x9289, 0x928A, 0x928D, 0x928E, 0x9292, 0x9297			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x64:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4564,10 +4564,10 @@ bool StarEncodingJapanese::readJapanese212
         0x9358, 0x935A, 0x935E, 0x9364, 0x9365, 0x9367, 0x9369, 0x936A, /* 0x70 */
         0x936D, 0x936F, 0x9370, 0x9371, 0x9373, 0x9374, 0x9376			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x65:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4585,10 +4585,10 @@ bool StarEncodingJapanese::readJapanese212
         0x945C, 0x945F, 0x9461, 0x9463, 0x9468, 0x946B, 0x946D, 0x946E, /* 0x70 */
         0x946F, 0x9471, 0x9472, 0x9484, 0x9483, 0x9578, 0x9579			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x66:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4606,10 +4606,10 @@ bool StarEncodingJapanese::readJapanese212
         0x96B3, 0x96BA, 0x96CA, 0x96D2, 0x5DB2, 0x96D8, 0x96DA, 0x96DD, /* 0x70 */
         0x96DE, 0x96DF, 0x96E9, 0x96EF, 0x96F1, 0x96FA, 0x9702			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x67:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4627,10 +4627,10 @@ bool StarEncodingJapanese::readJapanese212
         0x97F7, 0x97F8, 0x97FA, 0x9807, 0x980A, 0x9819, 0x980D, 0x980E, /* 0x70 */
         0x9814, 0x9816, 0x981C, 0x981E, 0x9820, 0x9823, 0x9826			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x68:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4648,10 +4648,10 @@ bool StarEncodingJapanese::readJapanese212
         0x9958, 0x9959, 0x995B, 0x995C, 0x995E, 0x995F, 0x9960, 0x999B, /* 0x70 */
         0x999D, 0x999F, 0x99A6, 0x99B0, 0x99B1, 0x99B2, 0x99B5			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x69:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4669,10 +4669,10 @@ bool StarEncodingJapanese::readJapanese212
         0x9AE5, 0x9AE7, 0x9AE9, 0x9AEC, 0x9AF2, 0x9AF3, 0x9AF5, 0x9AF9, /* 0x70 */
         0x9AFA, 0x9AFD, 0x9AFF, 0x9B00, 0x9B01, 0x9B02, 0x9B03			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x6a:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4690,10 +4690,10 @@ bool StarEncodingJapanese::readJapanese212
         0x9BC8, 0x9BCE, 0x9BD0, 0x9BD7, 0x9BD8, 0x9BDD, 0x9BDF, 0x9BE5, /* 0x70 */
         0x9BE7, 0x9BEA, 0x9BEB, 0x9BEF, 0x9BF3, 0x9BF7, 0x9BF8			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x6b:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4711,10 +4711,10 @@ bool StarEncodingJapanese::readJapanese212
         0x9D47, 0x9D4A, 0x9D53, 0x9D54, 0x9D5F, 0x9D63, 0x9D62, 0x9D65, /* 0x70 */
         0x9D69, 0x9D6A, 0x9D6B, 0x9D70, 0x9D76, 0x9D77, 0x9D7B			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x6c:
     if (c2>=0x21 && c2<=0x7e) {
@@ -4732,10 +4732,10 @@ bool StarEncodingJapanese::readJapanese212
         0x9EB5, 0x9EC6, 0x9EC8, 0x9ECB, 0x9ED5, 0x9EDF, 0x9EE4, 0x9EE7, /* 0x70 */
         0x9EEC, 0x9EED, 0x9EEE, 0x9EF0, 0x9EF1, 0x9EF2, 0x9EF5			/* 0x70 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x6d:
     if (c2>=0x21 && c2<=0x63) {
@@ -4751,20 +4751,20 @@ bool StarEncodingJapanese::readJapanese212
         0x9FA1, 0x9FA2, 0x9FA3, 0x9FA5									/* 0x60 */
         /* 0x60 */
       };
-      unicode=(uint32_t) val[c2-0x21];
+      unicode=static_cast<uint32_t>(val[c2-0x21]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   default:
     if ((c>=0x10 && c<=0x21) || (c>=0x23&&c<=0x25) || c==0x28 || (c>=0x2c && c<=0x2f) || (c>=0x6e && c<=0x7e))
-      unicode=(unicode<<8)+(uint32_t)c2;
+      unicode=(unicode<<8)+static_cast<uint32_t>(c2);
     else
       unicode=0;
     break;
   }
   if (!unicode) {
-    STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese212: unknown caracter %x\n", (unsigned int)c));
+    STOFF_DEBUG_MSG(("StarEncodingJapanese::readJapanese212: unknown caracter %x\n", static_cast<unsigned int>(c)));
   }
   dest.push_back(unicode);
   return true;

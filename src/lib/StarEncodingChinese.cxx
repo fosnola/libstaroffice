@@ -64,12 +64,12 @@ bool StarEncodingChinese::readChinese1
   bool gbt=encoding==StarEncoding::E_GBT_12345;
   bool gbkOff=gbkOr936 ? 0 : 0x61;
   if (pos>=src.size()) return false;
-  int c=(int) src[pos++], c2=0;
+  int c=int(src[pos++]), c2=0;
   if (c>=(encoding==StarEncoding::E_APPLE_CHINSIMP ? 0x83 : 0x81) &&
       c<=(encoding==StarEncoding::E_APPLE_CHINSIMP ? 0xfc : 0xfe) &&
       (c!=0xa0 || gbkOr936)) {
     if (pos>=src.size()) return false;
-    c2=(int) src[pos++];
+    c2=int(src[pos++]);
   }
   uint32_t unicode=uint32_t(c);
   switch (c) {
@@ -108,10 +108,10 @@ bool StarEncodingChinese::readChinese1
         0x4F8C, 0x4F8E, 0x4F90, 0x4F92, 0x4F93, 0x4F95, 0x4F96, 0x4F98, /* 0xF0 */
         0x4F99, 0x4F9A, 0x4F9C, 0x4F9E, 0x4F9F, 0x4FA1, 0x4FA2			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x82:
     if (encoding==StarEncoding::E_APPLE_CHINSIMP) {
@@ -145,10 +145,10 @@ bool StarEncodingChinese::readChinese1
         0x50AA, 0x50AB, 0x50AD, 0x50AE, 0x50AF, 0x50B0, 0x50B1, 0x50B3, /* 0xF0 */
         0x50B4, 0x50B5, 0x50B6, 0x50B7, 0x50B8, 0x50B9, 0x50BC			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x83:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -178,10 +178,10 @@ bool StarEncodingChinese::readChinese1
         0x51C1, 0x51C2, 0x51C3, 0x51C5, 0x51C8, 0x51CA, 0x51CD, 0x51CE, /* 0xF0 */
         0x51D0, 0x51D2, 0x51D3, 0x51D4, 0x51D5, 0x51D6, 0x51D7			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x84:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -211,10 +211,10 @@ bool StarEncodingChinese::readChinese1
         0x52F7, 0x52F8, 0x52FB, 0x52FC, 0x52FD, 0x5301, 0x5302, 0x5303, /* 0xF0 */
         0x5304, 0x5307, 0x5309, 0x530A, 0x530B, 0x530C, 0x530E			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x85:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -244,10 +244,10 @@ bool StarEncodingChinese::readChinese1
         0x5485, 0x5487, 0x5488, 0x5489, 0x548A, 0x548D, 0x5491, 0x5493, /* 0xF0 */
         0x5497, 0x5498, 0x549C, 0x549E, 0x549F, 0x54A0, 0x54A1			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x86:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -277,10 +277,10 @@ bool StarEncodingChinese::readChinese1
         0x55EE, 0x55F0, 0x55F1, 0x55F4, 0x55F6, 0x55F8, 0x55F9, 0x55FA, /* 0xF0 */
         0x55FB, 0x55FC, 0x55FF, 0x5602, 0x5603, 0x5604, 0x5605			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x87:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -310,10 +310,10 @@ bool StarEncodingChinese::readChinese1
         0x56F8, 0x56FB, 0x56FC, 0x5700, 0x5701, 0x5702, 0x5705, 0x5707, /* 0xF0 */
         0x570B, 0x570C, 0x570D, 0x570E, 0x570F, 0x5710, 0x5711			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x88:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -343,10 +343,10 @@ bool StarEncodingChinese::readChinese1
         0x582D, 0x582E, 0x582F, 0x5831, 0x5832, 0x5833, 0x5834, 0x5836, /* 0xF0 */
         0x5837, 0x5838, 0x5839, 0x583A, 0x583B, 0x583C, 0x583D			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x89:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -376,10 +376,10 @@ bool StarEncodingChinese::readChinese1
         0x591D, 0x591E, 0x5920, 0x5921, 0x5922, 0x5923, 0x5926, 0x5928, /* 0xF0 */
         0x592C, 0x5930, 0x5932, 0x5933, 0x5935, 0x5936, 0x593B			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8a:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -409,10 +409,10 @@ bool StarEncodingChinese::readChinese1
         0x5A50, 0x5A51, 0x5A52, 0x5A53, 0x5A54, 0x5A56, 0x5A57, 0x5A58, /* 0xF0 */
         0x5A59, 0x5A5B, 0x5A5C, 0x5A5D, 0x5A5E, 0x5A5F, 0x5A60			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8b:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -442,10 +442,10 @@ bool StarEncodingChinese::readChinese1
         0x5B38, 0x5B39, 0x5B3A, 0x5B3B, 0x5B3C, 0x5B3D, 0x5B3E, 0x5B3F, /* 0xF0 */
         0x5B41, 0x5B42, 0x5B43, 0x5B44, 0x5B45, 0x5B46, 0x5B47			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8c:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -475,10 +475,10 @@ bool StarEncodingChinese::readChinese1
         0x5C8E, 0x5C8F, 0x5C92, 0x5C93, 0x5C95, 0x5C9D, 0x5C9E, 0x5C9F, /* 0xF0 */
         0x5CA0, 0x5CA1, 0x5CA4, 0x5CA5, 0x5CA6, 0x5CA7, 0x5CA8			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8d:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -508,10 +508,10 @@ bool StarEncodingChinese::readChinese1
         0x5D90, 0x5D91, 0x5D92, 0x5D93, 0x5D94, 0x5D95, 0x5D96, 0x5D97, /* 0xF0 */
         0x5D98, 0x5D9A, 0x5D9B, 0x5D9C, 0x5D9E, 0x5D9F, 0x5DA0			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8e:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -541,10 +541,10 @@ bool StarEncodingChinese::readChinese1
         0x5EB0, 0x5EB1, 0x5EB2, 0x5EB4, 0x5EBA, 0x5EBB, 0x5EBC, 0x5EBD, /* 0xF0 */
         0x5EBF, 0x5EC0, 0x5EC1, 0x5EC2, 0x5EC3, 0x5EC4, 0x5EC5			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8f:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -574,10 +574,10 @@ bool StarEncodingChinese::readChinese1
         0x5FE6, 0x5FE8, 0x5FE9, 0x5FEC, 0x5FEF, 0x5FF0, 0x5FF2, 0x5FF3, /* 0xF0 */
         0x5FF4, 0x5FF6, 0x5FF7, 0x5FF9, 0x5FFA, 0x5FFC, 0x6007			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x90:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -607,10 +607,10 @@ bool StarEncodingChinese::readChinese1
         0x6137, 0x6138, 0x6139, 0x613A, 0x613B, 0x613C, 0x613D, 0x613E, /* 0xF0 */
         0x6140, 0x6141, 0x6142, 0x6143, 0x6144, 0x6145, 0x6146			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x91:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -640,10 +640,10 @@ bool StarEncodingChinese::readChinese1
         0x6230, 0x6231, 0x6232, 0x6235, 0x6236, 0x6238, 0x6239, 0x623A, /* 0xF0 */
         0x623B, 0x623C, 0x6242, 0x6244, 0x6245, 0x6246, 0x624A			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x92:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -673,10 +673,10 @@ bool StarEncodingChinese::readChinese1
         0x639F, 0x63A1, 0x63A4, 0x63A6, 0x63AB, 0x63AF, 0x63B1, 0x63B2, /* 0xF0 */
         0x63B5, 0x63B6, 0x63B9, 0x63BB, 0x63BD, 0x63BF, 0x63C0			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x93:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -706,10 +706,10 @@ bool StarEncodingChinese::readChinese1
         0x64C6, 0x64C7, 0x64C8, 0x64C9, 0x64CA, 0x64CB, 0x64CC, 0x64CF, /* 0xF0 */
         0x64D1, 0x64D3, 0x64D4, 0x64D5, 0x64D6, 0x64D9, 0x64DA			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x94:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -739,10 +739,10 @@ bool StarEncodingChinese::readChinese1
         0x65D4, 0x65D5, 0x65D8, 0x65D9, 0x65DA, 0x65DB, 0x65DC, 0x65DD, /* 0xF0 */
         0x65DE, 0x65DF, 0x65E1, 0x65E3, 0x65E4, 0x65EA, 0x65EB			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x95:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -772,10 +772,10 @@ bool StarEncodingChinese::readChinese1
         0x66EB, 0x66EC, 0x66ED, 0x66EE, 0x66EF, 0x66F1, 0x66F5, 0x66F6, /* 0xF0 */
         0x66F8, 0x66FA, 0x66FB, 0x66FD, 0x6701, 0x6702, 0x6703			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x96:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -805,10 +805,10 @@ bool StarEncodingChinese::readChinese1
         0x6836, 0x683A, 0x683B, 0x683F, 0x6847, 0x684B, 0x684D, 0x684F, /* 0xF0 */
         0x6852, 0x6856, 0x6857, 0x6858, 0x6859, 0x685A, 0x685B			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x97:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -838,10 +838,10 @@ bool StarEncodingChinese::readChinese1
         0x694C, 0x694D, 0x694E, 0x694F, 0x6950, 0x6951, 0x6952, 0x6953, /* 0xF0 */
         0x6955, 0x6956, 0x6958, 0x6959, 0x695B, 0x695C, 0x695F			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x98:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -871,10 +871,10 @@ bool StarEncodingChinese::readChinese1
         0x6A49, 0x6A4A, 0x6A4B, 0x6A4C, 0x6A4D, 0x6A4E, 0x6A4F, 0x6A51, /* 0xF0 */
         0x6A52, 0x6A53, 0x6A54, 0x6A55, 0x6A56, 0x6A57, 0x6A5A			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x99:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -904,10 +904,10 @@ bool StarEncodingChinese::readChinese1
         0x6B1A, 0x6B1B, 0x6B1C, 0x6B1D, 0x6B1E, 0x6B1F, 0x6B25, 0x6B26, /* 0xF0 */
         0x6B28, 0x6B29, 0x6B2A, 0x6B2B, 0x6B2C, 0x6B2D, 0x6B2E			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9a:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -937,10 +937,10 @@ bool StarEncodingChinese::readChinese1
         0x6C3F, 0x6C43, 0x6C44, 0x6C45, 0x6C48, 0x6C4B, 0x6C4C, 0x6C4D, /* 0xF0 */
         0x6C4E, 0x6C4F, 0x6C51, 0x6C52, 0x6C53, 0x6C56, 0x6C58			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9b:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -970,10 +970,10 @@ bool StarEncodingChinese::readChinese1
         0x6DB4, 0x6DB6, 0x6DB7, 0x6DB9, 0x6DBA, 0x6DBB, 0x6DBC, 0x6DBD, /* 0xF0 */
         0x6DBE, 0x6DC1, 0x6DC2, 0x6DC3, 0x6DC8, 0x6DC9, 0x6DCA			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9c:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -1003,10 +1003,10 @@ bool StarEncodingChinese::readChinese1
         0x6ED2, 0x6ED6, 0x6ED8, 0x6ED9, 0x6EDB, 0x6EDC, 0x6EDD, 0x6EE3, /* 0xF0 */
         0x6EE7, 0x6EEA, 0x6EEB, 0x6EEC, 0x6EED, 0x6EEE, 0x6EEF			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9d:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -1036,10 +1036,10 @@ bool StarEncodingChinese::readChinese1
         0x6FD4, 0x6FD5, 0x6FD6, 0x6FD7, 0x6FD8, 0x6FD9, 0x6FDA, 0x6FDB, /* 0xF0 */
         0x6FDC, 0x6FDD, 0x6FDF, 0x6FE2, 0x6FE3, 0x6FE4, 0x6FE5			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9e:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -1069,10 +1069,10 @@ bool StarEncodingChinese::readChinese1
         0x70C9, 0x70CB, 0x70CC, 0x70CD, 0x70CE, 0x70CF, 0x70D0, 0x70D1, /* 0xF0 */
         0x70D2, 0x70D3, 0x70D4, 0x70D5, 0x70D6, 0x70D7, 0x70DA			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9f:
     if (gbkOr936 && c2>=0x40 && c2<=0xfe) {
@@ -1102,10 +1102,10 @@ bool StarEncodingChinese::readChinese1
         0x71C4, 0x71C5, 0x71C6, 0x71C7, 0x71C8, 0x71C9, 0x71CA, 0x71CB, /* 0xF0 */
         0x71CC, 0x71CD, 0x71CF, 0x71D0, 0x71D1, 0x71D2, 0x71D3			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa0:
     if (gbkOr936) {
@@ -1136,10 +1136,10 @@ bool StarEncodingChinese::readChinese1
           0x72C6, 0x72C7, 0x72C9, 0x72CA, 0x72CB, 0x72CC, 0x72CF, 0x72D1, /* 0xF0 */
           0x72D3, 0x72D4, 0x72D5, 0x72D6, 0x72D8, 0x72DA, 0x72DB			/* 0xF0 */
         };
-        unicode=(uint32_t) val[c2-0x40];
+        unicode=static_cast<uint32_t>(val[c2-0x40]);
       }
       else
-        unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+        unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     }
     break;
   case 0xa1:
@@ -1158,10 +1158,10 @@ bool StarEncodingChinese::readChinese1
         0x25CB, 0x25CF, 0x25CE, 0x25C7, 0x25C6, 0x25A1, 0x25A0, 0x25B3, /* 0xF0 */
         0x25B2, 0x203B, 0x2192, 0x2190, 0x2191, 0x2193, 0x3013			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa2:
     if (c2>0xa1 && c2<=0xfc) {
@@ -1179,10 +1179,10 @@ bool StarEncodingChinese::readChinese1
         0, 0x2160, 0x2161, 0x2162, 0x2163, 0x2164, 0x2165, 0x2166, /* 0xF0 */
         0x2167, 0x2168, 0x2169, 0x216A, 0x216B							/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa3:
     if (c2>0xa1 && c2<=0xfe) {
@@ -1200,10 +1200,10 @@ bool StarEncodingChinese::readChinese1
         0xFF50, 0xFF51, 0xFF52, 0xFF53, 0xFF54, 0xFF55, 0xFF56, 0xFF57, /* 0xF0 */
         0xFF58, 0xFF59, 0xFF5A, 0xFF5B, 0xFF5C, 0xFF5D, 0xFFE3			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa4:
     if (c2>0xa1 && c2<=0xf3) {
@@ -1221,10 +1221,10 @@ bool StarEncodingChinese::readChinese1
         0x3090, 0x3091, 0x3092, 0x3093									/* 0xF0 */
         /* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa5:
     if (c2>0xa1 && c2<=0xf6) {
@@ -1242,10 +1242,10 @@ bool StarEncodingChinese::readChinese1
         0x30F0, 0x30F1, 0x30F2, 0x30F3, 0x30F4, 0x30F5, 0x30F6			/* 0xF0 */
         /* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa6:
     if (c2>0xa1 && c2<=0xf5) {
@@ -1263,10 +1263,10 @@ bool StarEncodingChinese::readChinese1
         0xFE37, 0xFE38, 0xFE31, 	 0, 0xFE33, 0xFE34					/* 0xF0 */
         /* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa7:
     if (c2>0xa1 && c2<=0xf1) {
@@ -1284,10 +1284,10 @@ bool StarEncodingChinese::readChinese1
         0x044E, 0x044F													/* 0xF0 */
         /* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa8:
     if (c2>=0x40+gbkOff && c2<=0xe9) {
@@ -1315,10 +1315,10 @@ bool StarEncodingChinese::readChinese1
         0x3120, 0x3121, 0x3122, 0x3123, 0x3124, 0x3125, 0x3126, 0x3127, /* 0xE0 */
         0x3128, 0x3129													/* 0xE0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa9:
     if (c2>=0x40+gbkOff && c2<=0xef) {
@@ -1346,10 +1346,10 @@ bool StarEncodingChinese::readChinese1
         0x253C, 0x253D, 0x253E, 0x253F, 0x2540, 0x2541, 0x2542, 0x2543, /* 0xE0 */
         0x2544, 0x2545, 0x2546, 0x2547, 0x2548, 0x2549, 0x254A, 0x254B	/* 0xE0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xaa:
     if (gbkOr936 && c2>=0x40 && c2<=0xa0) {
@@ -1369,10 +1369,10 @@ bool StarEncodingChinese::readChinese1
         0x7371															/* 0xA0 */
         /* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xab:
     if (gbkOr936 && c2>=0x40 && c2<=0xa0) {
@@ -1392,10 +1392,10 @@ bool StarEncodingChinese::readChinese1
         0x73F7															/* 0xA0 */
         /* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xac:
     if (gbkOr936 && c2>=0x40 && c2<=0xa0) {
@@ -1415,10 +1415,10 @@ bool StarEncodingChinese::readChinese1
         0x747A															/* 0xA0 */
         /* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xad:
     if (gbkOr936 && c2>=0x40 && c2<=0xa0) {
@@ -1438,10 +1438,10 @@ bool StarEncodingChinese::readChinese1
         0x74F2															/* 0xA0 */
         /* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xae:
     if (gbkOr936 && c2>=0x40 && c2<=0xa0) {
@@ -1461,10 +1461,10 @@ bool StarEncodingChinese::readChinese1
         0x7587															/* 0xA0 */
         /* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xaf:
     if (gbkOr936 && c2>=0x40 && c2<=0xa0) {
@@ -1484,10 +1484,10 @@ bool StarEncodingChinese::readChinese1
         0x7644															/* 0xA0 */
         /* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb0:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -1505,7 +1505,7 @@ bool StarEncodingChinese::readChinese1
         0x6886, 0x699C, 0x8180, 0x7D81, 0x68D2, 0x78C5, 0x868C, 0x938A, /* 0xF0 */
         0x508D, 0x8B17, 0x82DE, 0x80DE, 0x5305, 0x8912, 0x5265			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -1534,10 +1534,10 @@ bool StarEncodingChinese::readChinese1
         0x6886, 0x699C, 0x8180, 0x7ED1, 0x68D2, 0x78C5, 0x868C, 0x9551, /* 0xF0 */
         0x508D, 0x8C24, 0x82DE, 0x80DE, 0x5305, 0x8912, 0x5265			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb1:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -1555,7 +1555,7 @@ bool StarEncodingChinese::readChinese1
         0x522B, 0x765F, 0x5F6C, 0x658C, 0x7015, 0x6FF1, 0x8CD3, 0x64EF, /* 0xF0 */
         0x5175, 0x51B0, 0x67C4, 0x4E19, 0x79C9, 0x9905, 0x70B3			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -1584,10 +1584,10 @@ bool StarEncodingChinese::readChinese1
         0x522B, 0x762A, 0x5F6C, 0x658C, 0x6FD2, 0x6EE8, 0x5BBE, 0x6448, /* 0xF0 */
         0x5175, 0x51B0, 0x67C4, 0x4E19, 0x79C9, 0x997C, 0x70B3			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb2:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -1605,7 +1605,7 @@ bool StarEncodingChinese::readChinese1
         0x62C6, 0x67F4, 0x8C7A, 0x6519, 0x647B, 0x87EC, 0x995E, 0x8B92, /* 0xF0 */
         0x7E8F, 0x93DF, 0x7523, 0x95E1, 0x986B, 0x660C, 0x7316			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -1634,10 +1634,10 @@ bool StarEncodingChinese::readChinese1
         0x62C6, 0x67F4, 0x8C7A, 0x6400, 0x63BA, 0x8749, 0x998B, 0x8C17, /* 0xF0 */
         0x7F20, 0x94F2, 0x4EA7, 0x9610, 0x98A4, 0x660C, 0x7316			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb3:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -1655,7 +1655,7 @@ bool StarEncodingChinese::readChinese1
         0x4EC7, 0x7DA2, 0x7785, 0x919C, 0x81ED, 0x521D, 0x51FA, 0x6A71, /* 0xF0 */
         0x53A8, 0x8E87, 0x92E4, 0x96DB, 0x6EC1, 0x9664, 0x695A			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -1684,10 +1684,10 @@ bool StarEncodingChinese::readChinese1
         0x4EC7, 0x7EF8, 0x7785, 0x4E11, 0x81ED, 0x521D, 0x51FA, 0x6A71, /* 0xF0 */
         0x53A8, 0x8E87, 0x9504, 0x96CF, 0x6EC1, 0x9664, 0x695A			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb4:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -1705,7 +1705,7 @@ bool StarEncodingChinese::readChinese1
         0x7B54, 0x7629, 0x6253, 0x5927, 0x5446, 0x6B79, 0x50A3, 0x6234, /* 0xF0 */
         0x5E36, 0x6B86, 0x4EE3, 0x8CB8, 0x888B, 0x5F85, 0x902E			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -1734,10 +1734,10 @@ bool StarEncodingChinese::readChinese1
         0x7B54, 0x7629, 0x6253, 0x5927, 0x5446, 0x6B79, 0x50A3, 0x6234, /* 0xF0 */
         0x5E26, 0x6B86, 0x4EE3, 0x8D37, 0x888B, 0x5F85, 0x902E			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb5:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -1755,7 +1755,7 @@ bool StarEncodingChinese::readChinese1
         0x53FC, 0x96D5, 0x51CB, 0x5201, 0x6389, 0x540A, 0x91E3, 0x8ABF, /* 0xF0 */
         0x8DCC, 0x7239, 0x789F, 0x8776, 0x8FED, 0x8ADC, 0x758A			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -1784,10 +1784,10 @@ bool StarEncodingChinese::readChinese1
         0x53FC, 0x96D5, 0x51CB, 0x5201, 0x6389, 0x540A, 0x9493, 0x8C03, /* 0xF0 */
         0x8DCC, 0x7239, 0x789F, 0x8776, 0x8FED, 0x8C0D, 0x53E0			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb6:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -1805,7 +1805,7 @@ bool StarEncodingChinese::readChinese1
         0x5A25, 0x60E1, 0x5384, 0x627C, 0x904F, 0x9102, 0x9913, 0x6069, /* 0xF0 */
         0x800C, 0x5152, 0x8033, 0x723E, 0x990C, 0x6D31, 0x4E8C			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -1834,10 +1834,10 @@ bool StarEncodingChinese::readChinese1
         0x5A25, 0x6076, 0x5384, 0x627C, 0x904F, 0x9102, 0x997F, 0x6069, /* 0xF0 */
         0x800C, 0x513F, 0x8033, 0x5C14, 0x9975, 0x6D31, 0x4E8C			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb7:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -1855,7 +1855,7 @@ bool StarEncodingChinese::readChinese1
         0x4F5B, 0x5426, 0x592B, 0x6577, 0x819A, 0x5B75, 0x6276, 0x62C2, /* 0xF0 */
         0x8F3B, 0x5E45, 0x6C1F, 0x7B26, 0x4F0F, 0x4FD8, 0x670D			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -1884,10 +1884,10 @@ bool StarEncodingChinese::readChinese1
         0x4F5B, 0x5426, 0x592B, 0x6577, 0x80A4, 0x5B75, 0x6276, 0x62C2, /* 0xF0 */
         0x8F90, 0x5E45, 0x6C1F, 0x7B26, 0x4F0F, 0x4FD8, 0x670D			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb8:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -1905,7 +1905,7 @@ bool StarEncodingChinese::readChinese1
         0x845B, 0x683C, 0x86E4, 0x95A3, 0x9694, 0x927B, 0x500B, 0x5404, /* 0xF0 */
         0x7D66, 0x6839, 0x8DDF, 0x8015, 0x66F4, 0x5E9A, 0x7FB9			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -1934,10 +1934,10 @@ bool StarEncodingChinese::readChinese1
         0x845B, 0x683C, 0x86E4, 0x9601, 0x9694, 0x94EC, 0x4E2A, 0x5404, /* 0xF0 */
         0x7ED9, 0x6839, 0x8DDF, 0x8015, 0x66F4, 0x5E9A, 0x7FB9			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb9:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -1955,7 +1955,7 @@ bool StarEncodingChinese::readChinese1
         0x6842, 0x6AC3, 0x8DEA, 0x8CB4, 0x528A, 0x8F25, 0x6EDA, 0x68CD, /* 0xF0 */
         0x934B, 0x90ED, 0x570B, 0x679C, 0x88F9, 0x904E, 0x54C8			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -1984,10 +1984,10 @@ bool StarEncodingChinese::readChinese1
         0x6842, 0x67DC, 0x8DEA, 0x8D35, 0x523D, 0x8F8A, 0x6EDA, 0x68CD, /* 0xF0 */
         0x9505, 0x90ED, 0x56FD, 0x679C, 0x88F9, 0x8FC7, 0x54C8			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xba:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2005,7 +2005,7 @@ bool StarEncodingChinese::readChinese1
         0x543C, 0x539A, 0x5019, 0x5F8C, 0x547C, 0x4E4E, 0x5FFD, 0x745A, /* 0xF0 */
         0x58FA, 0x846B, 0x80E1, 0x8774, 0x72D0, 0x7CCA, 0x6E56			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2034,10 +2034,10 @@ bool StarEncodingChinese::readChinese1
         0x543C, 0x539A, 0x5019, 0x540E, 0x547C, 0x4E4E, 0x5FFD, 0x745A, /* 0xF0 */
         0x58F6, 0x846B, 0x80E1, 0x8774, 0x72D0, 0x7CCA, 0x6E56			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xbb:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2055,7 +2055,7 @@ bool StarEncodingChinese::readChinese1
         0x706B, 0x7372, 0x6216, 0x60D1, 0x970D, 0x8CA8, 0x798D, 0x64CA, /* 0xF0 */
         0x573E, 0x57FA, 0x6A5F, 0x7578, 0x7A3D, 0x7A4D, 0x7B95			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2084,10 +2084,10 @@ bool StarEncodingChinese::readChinese1
         0x706B, 0x83B7, 0x6216, 0x60D1, 0x970D, 0x8D27, 0x7978, 0x51FB, /* 0xF0 */
         0x573E, 0x57FA, 0x673A, 0x7578, 0x7A3D, 0x79EF, 0x7B95			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xbc:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2105,7 +2105,7 @@ bool StarEncodingChinese::readChinese1
         0x63C0, 0x64BF, 0x7C21, 0x5109, 0x526A, 0x51CF, 0x85A6, 0x6ABB, /* 0xF0 */
         0x9452, 0x8E10, 0x8CE4, 0x898B, 0x9375, 0x7BAD, 0x4EF6			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2134,10 +2134,10 @@ bool StarEncodingChinese::readChinese1
         0x62E3, 0x6361, 0x7B80, 0x4FED, 0x526A, 0x51CF, 0x8350, 0x69DB, /* 0xF0 */
         0x9274, 0x8DF5, 0x8D31, 0x89C1, 0x952E, 0x7BAD, 0x4EF6			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xbd:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2155,7 +2155,7 @@ bool StarEncodingChinese::readChinese1
         0x91D1, 0x4ECA, 0x6D25, 0x895F, 0x7DCA, 0x9326, 0x50C5, 0x8B39, /* 0xF0 */
         0x9032, 0x9773, 0x6649, 0x7981, 0x8FD1, 0x71FC, 0x6D78			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2184,10 +2184,10 @@ bool StarEncodingChinese::readChinese1
         0x91D1, 0x4ECA, 0x6D25, 0x895F, 0x7D27, 0x9526, 0x4EC5, 0x8C28, /* 0xF0 */
         0x8FDB, 0x9773, 0x664B, 0x7981, 0x8FD1, 0x70EC, 0x6D78			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xbe:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2205,7 +2205,7 @@ bool StarEncodingChinese::readChinese1
         0x652B, 0x6289, 0x6398, 0x5014, 0x7235, 0x89BA, 0x51B3, 0x8A23, /* 0xF0 */
         0x7D76, 0x5747, 0x83CC, 0x921E, 0x8ECD, 0x541B, 0x5CFB			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2234,10 +2234,10 @@ bool StarEncodingChinese::readChinese1
         0x652B, 0x6289, 0x6398, 0x5014, 0x7235, 0x89C9, 0x51B3, 0x8BC0, /* 0xF0 */
         0x7EDD, 0x5747, 0x83CC, 0x94A7, 0x519B, 0x541B, 0x5CFB			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xbf:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2255,7 +2255,7 @@ bool StarEncodingChinese::readChinese1
         0x7B50, 0x72C2, 0x6846, 0x7926, 0x7736, 0x66E0, 0x51B5, 0x8667, /* 0xF0 */
         0x76D4, 0x5DCB, 0x7ABA, 0x8475, 0x594E, 0x9B41, 0x5080			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2284,10 +2284,10 @@ bool StarEncodingChinese::readChinese1
         0x7B50, 0x72C2, 0x6846, 0x77FF, 0x7736, 0x65F7, 0x51B5, 0x4E8F, /* 0xF0 */
         0x76D4, 0x5CBF, 0x7AA5, 0x8475, 0x594E, 0x9B41, 0x5080			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc0:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2305,7 +2305,7 @@ bool StarEncodingChinese::readChinese1
         0x9BC9, 0x79AE, 0x8389, 0x8354, 0x540F, 0x6817, 0x9E97, 0x53B2, /* 0xF0 */
         0x52F5, 0x792B, 0x6B77, 0x5229, 0x5088, 0x4F8B, 0x4FD0			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2334,10 +2334,10 @@ bool StarEncodingChinese::readChinese1
         0x9CA4, 0x793C, 0x8389, 0x8354, 0x540F, 0x6817, 0x4E3D, 0x5389, /* 0xF0 */
         0x52B1, 0x783E, 0x5386, 0x5229, 0x5088, 0x4F8B, 0x4FD0			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc1:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2355,7 +2355,7 @@ bool StarEncodingChinese::readChinese1
         0x7409, 0x69B4, 0x786B, 0x993E, 0x7559, 0x5289, 0x7624, 0x6D41, /* 0xF0 */
         0x67F3, 0x516D, 0x9F8D, 0x807E, 0x56A8, 0x7C60, 0x7ABF			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2384,10 +2384,10 @@ bool StarEncodingChinese::readChinese1
         0x7409, 0x69B4, 0x786B, 0x998F, 0x7559, 0x5218, 0x7624, 0x6D41, /* 0xF0 */
         0x67F3, 0x516D, 0x9F99, 0x804B, 0x5499, 0x7B3C, 0x7ABF			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc2:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2405,7 +2405,7 @@ bool StarEncodingChinese::readChinese1
         0x55CE, 0x57CB, 0x8CB7, 0x9EA5, 0x8CE3, 0x9081, 0x8109, 0x779E, /* 0xF0 */
         0x9945, 0x883B, 0x6EFF, 0x8513, 0x66FC, 0x6162, 0x6F2B			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2434,10 +2434,10 @@ bool StarEncodingChinese::readChinese1
         0x5417, 0x57CB, 0x4E70, 0x9EA6, 0x5356, 0x8FC8, 0x8109, 0x7792, /* 0xF0 */
         0x9992, 0x86EE, 0x6EE1, 0x8513, 0x66FC, 0x6162, 0x6F2B			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc3:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2455,7 +2455,7 @@ bool StarEncodingChinese::readChinese1
         0x6EC5, 0x6C11, 0x62BF, 0x76BF, 0x654F, 0x61AB, 0x95A9, 0x660E, /* 0xF0 */
         0x879F, 0x9CF4, 0x9298, 0x540D, 0x547D, 0x8B2C, 0x6478			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2484,10 +2484,10 @@ bool StarEncodingChinese::readChinese1
         0x706D, 0x6C11, 0x62BF, 0x76BF, 0x654F, 0x60AF, 0x95FD, 0x660E, /* 0xF0 */
         0x879F, 0x9E23, 0x94ED, 0x540D, 0x547D, 0x8C2C, 0x6478			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc4:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2505,7 +2505,7 @@ bool StarEncodingChinese::readChinese1
         0x91C0, 0x9CE5, 0x5C3F, 0x634F, 0x8076, 0x5B7D, 0x5699, 0x9477, /* 0xF0 */
         0x93B3, 0x6D85, 0x60A8, 0x6AB8, 0x7370, 0x51DD, 0x5BE7			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2534,10 +2534,10 @@ bool StarEncodingChinese::readChinese1
         0x917F, 0x9E1F, 0x5C3F, 0x634F, 0x8042, 0x5B7D, 0x556E, 0x954A, /* 0xF0 */
         0x954D, 0x6D85, 0x60A8, 0x67E0, 0x72DE, 0x51DD, 0x5B81			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc5:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2555,7 +2555,7 @@ bool StarEncodingChinese::readChinese1
         0x787C, 0x7BF7, 0x81A8, 0x670B, 0x9D6C, 0x6367, 0x78B0, 0x576F, /* 0xF0 */
         0x7812, 0x9739, 0x6279, 0x62AB, 0x5288, 0x7435, 0x6BD7			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2584,10 +2584,10 @@ bool StarEncodingChinese::readChinese1
         0x787C, 0x7BF7, 0x81A8, 0x670B, 0x9E4F, 0x6367, 0x78B0, 0x576F, /* 0xF0 */
         0x7812, 0x9739, 0x6279, 0x62AB, 0x5288, 0x7435, 0x6BD7			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc6:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2605,7 +2605,7 @@ bool StarEncodingChinese::readChinese1
         0x8D77, 0x8C48, 0x4E5E, 0x4F01, 0x5553, 0x5951, 0x780C, 0x5668, /* 0xF0 */
         0x6C23, 0x8FC4, 0x68C4, 0x6C7D, 0x6CE3, 0x8A16, 0x6390			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2634,10 +2634,10 @@ bool StarEncodingChinese::readChinese1
         0x8D77, 0x5C82, 0x4E5E, 0x4F01, 0x542F, 0x5951, 0x780C, 0x5668, /* 0xF0 */
         0x6C14, 0x8FC4, 0x5F03, 0x6C7D, 0x6CE3, 0x8BAB, 0x6390			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc7:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2655,7 +2655,7 @@ bool StarEncodingChinese::readChinese1
         0x4E18, 0x90B1, 0x7403, 0x6C42, 0x56DA, 0x914B, 0x6CC5, 0x8DA8, /* 0xF0 */
         0x5340, 0x86C6, 0x66F2, 0x8EC0, 0x5C48, 0x9A45, 0x6E20			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2684,10 +2684,10 @@ bool StarEncodingChinese::readChinese1
         0x4E18, 0x90B1, 0x7403, 0x6C42, 0x56DA, 0x914B, 0x6CC5, 0x8D8B, /* 0xF0 */
         0x533A, 0x86C6, 0x66F2, 0x8EAF, 0x5C48, 0x9A71, 0x6E20			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc8:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2705,7 +2705,7 @@ bool StarEncodingChinese::readChinese1
         0x745E, 0x92ED, 0x958F, 0x6F64, 0x82E5, 0x5F31, 0x6492, 0x7051, /* 0xF0 */
         0x85A9, 0x816E, 0x9C13, 0x585E, 0x8CFD, 0x4E09, 0x53C1			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2734,10 +2734,10 @@ bool StarEncodingChinese::readChinese1
         0x745E, 0x9510, 0x95F0, 0x6DA6, 0x82E5, 0x5F31, 0x6492, 0x6D12, /* 0xF0 */
         0x8428, 0x816E, 0x9CC3, 0x585E, 0x8D5B, 0x4E09, 0x53C1			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc9:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2755,7 +2755,7 @@ bool StarEncodingChinese::readChinese1
         0x7D33, 0x795E, 0x6C88, 0x5BE9, 0x5B38, 0x751A, 0x814E, 0x614E, /* 0xF0 */
         0x6EF2, 0x8072, 0x751F, 0x7525, 0x7272, 0x5347, 0x7E69			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2784,10 +2784,10 @@ bool StarEncodingChinese::readChinese1
         0x7EC5, 0x795E, 0x6C88, 0x5BA1, 0x5A76, 0x751A, 0x80BE, 0x614E, /* 0xF0 */
         0x6E17, 0x58F0, 0x751F, 0x7525, 0x7272, 0x5347, 0x7EF3			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xca:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2805,7 +2805,7 @@ bool StarEncodingChinese::readChinese1
         0x7F72, 0x8700, 0x9ECD, 0x9F20, 0x5C6C, 0x8853, 0x8FF0, 0x6A39, /* 0xF0 */
         0x675F, 0x620D, 0x7AEA, 0x5885, 0x5EB6, 0x6578, 0x6F31			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2834,10 +2834,10 @@ bool StarEncodingChinese::readChinese1
         0x7F72, 0x8700, 0x9ECD, 0x9F20, 0x5C5E, 0x672F, 0x8FF0, 0x6811, /* 0xF0 */
         0x675F, 0x620D, 0x7AD6, 0x5885, 0x5EB6, 0x6570, 0x6F31			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xcb:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2855,7 +2855,7 @@ bool StarEncodingChinese::readChinese1
         0x640D, 0x7B0B, 0x84D1, 0x68AD, 0x5506, 0x7E2E, 0x7463, 0x7D22, /* 0xF0 */
         0x9396, 0x6240, 0x584C, 0x4ED6, 0x5B83, 0x5979, 0x5854			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2884,10 +2884,10 @@ bool StarEncodingChinese::readChinese1
         0x635F, 0x7B0B, 0x84D1, 0x68AD, 0x5506, 0x7F29, 0x7410, 0x7D22, /* 0xF0 */
         0x9501, 0x6240, 0x584C, 0x4ED6, 0x5B83, 0x5979, 0x5854			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xcc:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2905,7 +2905,7 @@ bool StarEncodingChinese::readChinese1
         0x751C, 0x606C, 0x8214, 0x8146, 0x6311, 0x689D, 0x8FE2, 0x773A, /* 0xF0 */
         0x8DF3, 0x8CBC, 0x9435, 0x5E16, 0x5EF3, 0x807D, 0x70F4			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2934,10 +2934,10 @@ bool StarEncodingChinese::readChinese1
         0x751C, 0x606C, 0x8214, 0x8146, 0x6311, 0x6761, 0x8FE2, 0x773A, /* 0xF0 */
         0x8DF3, 0x8D34, 0x94C1, 0x5E16, 0x5385, 0x542C, 0x70C3			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xcd:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -2955,7 +2955,7 @@ bool StarEncodingChinese::readChinese1
         0x5B9B, 0x5A49, 0x842C, 0x8155, 0x6C6A, 0x738B, 0x4EA1, 0x6789, /* 0xF0 */
         0x7DB2, 0x5F80, 0x65FA, 0x671B, 0x5FD8, 0x5984, 0x5A01			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -2984,10 +2984,10 @@ bool StarEncodingChinese::readChinese1
         0x5B9B, 0x5A49, 0x4E07, 0x8155, 0x6C6A, 0x738B, 0x4EA1, 0x6789, /* 0xF0 */
         0x7F51, 0x5F80, 0x65FA, 0x671B, 0x5FD8, 0x5984, 0x5A01			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xce:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3005,7 +3005,7 @@ bool StarEncodingChinese::readChinese1
         0x52FF, 0x52D9, 0x609F, 0x8AA4, 0x6614, 0x7199, 0x6790, 0x897F, /* 0xF0 */
         0x7852, 0x77FD, 0x6670, 0x563B, 0x5438, 0x932B, 0x72A7			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3034,10 +3034,10 @@ bool StarEncodingChinese::readChinese1
         0x52FF, 0x52A1, 0x609F, 0x8BEF, 0x6614, 0x7199, 0x6790, 0x897F, /* 0xF0 */
         0x7852, 0x77FD, 0x6670, 0x563B, 0x5438, 0x9521, 0x727A			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xcf:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3055,7 +3055,7 @@ bool StarEncodingChinese::readChinese1
         0x6A61, 0x50CF, 0x5411, 0x8C61, 0x856D, 0x785D, 0x9704, 0x524A, /* 0xF0 */
         0x54EE, 0x56C2, 0x92B7, 0x6D88, 0x5BB5, 0x6DC6, 0x66C9			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3084,10 +3084,10 @@ bool StarEncodingChinese::readChinese1
         0x6A61, 0x50CF, 0x5411, 0x8C61, 0x8427, 0x785D, 0x9704, 0x524A, /* 0xF0 */
         0x54EE, 0x56A3, 0x9500, 0x6D88, 0x5BB5, 0x6DC6, 0x6653			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd0:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3105,7 +3105,7 @@ bool StarEncodingChinese::readChinese1
         0x53D9, 0x65ED, 0x5E8F, 0x755C, 0x6064, 0x7D6E, 0x5A7F, 0x7DD2, /* 0xF0 */
         0x7E8C, 0x8ED2, 0x55A7, 0x5BA3, 0x61F8, 0x65CB, 0x7384			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3134,10 +3134,10 @@ bool StarEncodingChinese::readChinese1
         0x53D9, 0x65ED, 0x5E8F, 0x755C, 0x6064, 0x7D6E, 0x5A7F, 0x7EEA, /* 0xF0 */
         0x7EED, 0x8F69, 0x55A7, 0x5BA3, 0x60AC, 0x65CB, 0x7384			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd1:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3155,7 +3155,7 @@ bool StarEncodingChinese::readChinese1
         0x4F6F, 0x760D, 0x7F8A, 0x6D0B, 0x967D, 0x6C27, 0x4EF0, 0x7662, /* 0xF0 */
         0x990A, 0x6A23, 0x6F3E, 0x9080, 0x8170, 0x5996, 0x7476			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3184,10 +3184,10 @@ bool StarEncodingChinese::readChinese1
         0x4F6F, 0x75A1, 0x7F8A, 0x6D0B, 0x9633, 0x6C27, 0x4EF0, 0x75D2, /* 0xF0 */
         0x517B, 0x6837, 0x6F3E, 0x9080, 0x8170, 0x5996, 0x7476			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd2:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3205,7 +3205,7 @@ bool StarEncodingChinese::readChinese1
         0x8335, 0x852D, 0x56E0, 0x6BB7, 0x97F3, 0x9670, 0x59FB, 0x541F, /* 0xF0 */
         0x9280, 0x6DEB, 0x5BC5, 0x98F2, 0x5C39, 0x5F15, 0x96B1			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3234,10 +3234,10 @@ bool StarEncodingChinese::readChinese1
         0x8335, 0x836B, 0x56E0, 0x6BB7, 0x97F3, 0x9634, 0x59FB, 0x541F, /* 0xF0 */
         0x94F6, 0x6DEB, 0x5BC5, 0x996E, 0x5C39, 0x5F15, 0x9690			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd3:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3255,7 +3255,7 @@ bool StarEncodingChinese::readChinese1
         0x7FBD, 0x7389, 0x57DF, 0x828B, 0x9B31, 0x5401, 0x9047, 0x55BB, /* 0xF0 */
         0x5CEA, 0x5FA1, 0x6108, 0x6B32, 0x7344, 0x80B2, 0x8B7D			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3284,10 +3284,10 @@ bool StarEncodingChinese::readChinese1
         0x7FBD, 0x7389, 0x57DF, 0x828B, 0x90C1, 0x5401, 0x9047, 0x55BB, /* 0xF0 */
         0x5CEA, 0x5FA1, 0x6108, 0x6B32, 0x72F1, 0x80B2, 0x8A89			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd4:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3305,7 +3305,7 @@ bool StarEncodingChinese::readChinese1
         0x8CAC, 0x64C7, 0x5247, 0x6FA4, 0x8CCA, 0x600E, 0x589E, 0x618E, /* 0xF0 */
         0x66FE, 0x8D08, 0x624E, 0x55B3, 0x6E23, 0x672D, 0x8ECB			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3334,10 +3334,10 @@ bool StarEncodingChinese::readChinese1
         0x8D23, 0x62E9, 0x5219, 0x6CFD, 0x8D3C, 0x600E, 0x589E, 0x618E, /* 0xF0 */
         0x66FE, 0x8D60, 0x624E, 0x55B3, 0x6E23, 0x672D, 0x8F67			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd5:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3355,7 +3355,7 @@ bool StarEncodingChinese::readChinese1
         0x9707, 0x632F, 0x93AE, 0x9663, 0x84B8, 0x6399, 0x775C, 0x5F81, /* 0xF0 */
         0x7319, 0x722D, 0x6014, 0x6574, 0x62EF, 0x6B63, 0x653F			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3384,10 +3384,10 @@ bool StarEncodingChinese::readChinese1
         0x9707, 0x632F, 0x9547, 0x9635, 0x84B8, 0x6323, 0x7741, 0x5F81, /* 0xF0 */
         0x72F0, 0x4E89, 0x6014, 0x6574, 0x62EF, 0x6B63, 0x653F			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd6:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3405,7 +3405,7 @@ bool StarEncodingChinese::readChinese1
         0x9010, 0x7AF9, 0x71ED, 0x716E, 0x62C4, 0x77DA, 0x56D1, 0x4E3B, /* 0xF0 */
         0x8457, 0x67F1, 0x52A9, 0x86C0, 0x8CAF, 0x9444, 0x7BC9			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3434,10 +3434,10 @@ bool StarEncodingChinese::readChinese1
         0x9010, 0x7AF9, 0x70DB, 0x716E, 0x62C4, 0x77A9, 0x5631, 0x4E3B, /* 0xF0 */
         0x8457, 0x67F1, 0x52A9, 0x86C0, 0x8D2E, 0x94F8, 0x7B51			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd7:
     if (gbt && c2>=0xa1 && c2<=0xf9) {
@@ -3455,7 +3455,7 @@ bool StarEncodingChinese::readChinese1
         0x5C0A, 0x9075, 0x6628, 0x5DE6, 0x4F50, 0x67DE, 0x505A, 0x4F5C, /* 0xF0 */
         0x5750, 0x5EA7													/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xf9) {
       static int const(val[])= {
@@ -3484,10 +3484,10 @@ bool StarEncodingChinese::readChinese1
         0x5C0A, 0x9075, 0x6628, 0x5DE6, 0x4F50, 0x67DE, 0x505A, 0x4F5C, /* 0xF0 */
         0x5750, 0x5EA7													/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd8:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3505,7 +3505,7 @@ bool StarEncodingChinese::readChinese1
         0x4EDE, 0x50B4, 0x4EF3, 0x4F22, 0x4F64, 0x4EF5, 0x5000, 0x5096, /* 0xF0 */
         0x4F09, 0x4F47, 0x4F5E, 0x4F67, 0x6538, 0x4F5A, 0x4F5D			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3534,10 +3534,10 @@ bool StarEncodingChinese::readChinese1
         0x4EDE, 0x4F1B, 0x4EF3, 0x4F22, 0x4F64, 0x4EF5, 0x4F25, 0x4F27, /* 0xF0 */
         0x4F09, 0x4F2B, 0x4F5E, 0x4F67, 0x6538, 0x4F5A, 0x4F5D			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd9:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3555,7 +3555,7 @@ bool StarEncodingChinese::readChinese1
         0x5156, 0x4EB3, 0x886E, 0x88A4, 0x893B, 0x81E0, 0x88D2, 0x7980, /* 0xF0 */
         0x5B34, 0x8803, 0x7FB8, 0x51AB, 0x51B1, 0x51BD, 0x51BC			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3584,10 +3584,10 @@ bool StarEncodingChinese::readChinese1
         0x5156, 0x4EB3, 0x886E, 0x88A4, 0x4EB5, 0x8114, 0x88D2, 0x7980, /* 0xF0 */
         0x5B34, 0x8803, 0x7FB8, 0x51AB, 0x51B1, 0x51BD, 0x51BC			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xda:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3605,7 +3605,7 @@ bool StarEncodingChinese::readChinese1
         0x9674, 0x9688, 0x968D, 0x9697, 0x96B0, 0x9097, 0x909B, 0x913A, /* 0xF0 */
         0x9099, 0x9114, 0x90A1, 0x90B4, 0x90B3, 0x90B6, 0x9134			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3634,10 +3634,10 @@ bool StarEncodingChinese::readChinese1
         0x9674, 0x9688, 0x968D, 0x9697, 0x96B0, 0x9097, 0x909B, 0x909D, /* 0xF0 */
         0x9099, 0x90AC, 0x90A1, 0x90B4, 0x90B3, 0x90B6, 0x90BA			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xdb:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3655,7 +3655,7 @@ bool StarEncodingChinese::readChinese1
         0x57A7, 0x5816, 0x5793, 0x57A0, 0x57D5, 0x5852, 0x581D, 0x5864, /* 0xF0 */
         0x57D2, 0x57B8, 0x57F4, 0x57EF, 0x57F8, 0x57E4, 0x57DD			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3684,10 +3684,10 @@ bool StarEncodingChinese::readChinese1
         0x57A7, 0x57B4, 0x5793, 0x57A0, 0x57D5, 0x57D8, 0x57DA, 0x57D9, /* 0xF0 */
         0x57D2, 0x57B8, 0x57F4, 0x57EF, 0x57F8, 0x57E4, 0x57DD			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xdc:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3705,7 +3705,7 @@ bool StarEncodingChinese::readChinese1
         0x839B, 0x854E, 0x832F, 0x834F, 0x8347, 0x8343, 0x8588, 0x8340, /* 0xF0 */
         0x8317, 0x85BA, 0x832D, 0x833A, 0x8333, 0x7296, 0x6ECE			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3734,10 +3734,10 @@ bool StarEncodingChinese::readChinese1
         0x839B, 0x835E, 0x832F, 0x834F, 0x8347, 0x8343, 0x835F, 0x8340, /* 0xF0 */
         0x8317, 0x8360, 0x832D, 0x833A, 0x8333, 0x8366, 0x8365			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xdd:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3755,7 +3755,7 @@ bool StarEncodingChinese::readChinese1
         0x84BA, 0x863A, 0x84A1, 0x84B9, 0x84B4, 0x8497, 0x93A3, 0x8577, /* 0xF0 */
         0x850C, 0x750D, 0x8538, 0x84F0, 0x861E, 0x851F, 0x85FA			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3784,10 +3784,10 @@ bool StarEncodingChinese::readChinese1
         0x84BA, 0x84E0, 0x84A1, 0x84B9, 0x84B4, 0x8497, 0x84E5, 0x84E3, /* 0xF0 */
         0x850C, 0x750D, 0x8538, 0x84F0, 0x8539, 0x851F, 0x853A			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xde:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3805,7 +3805,7 @@ bool StarEncodingChinese::readChinese1
         0x6452, 0x63C6, 0x63BE, 0x6504, 0x6441, 0x640B, 0x641B, 0x6420, /* 0xF0 */
         0x640C, 0x6426, 0x6421, 0x645E, 0x6516, 0x646D, 0x6496			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3834,10 +3834,10 @@ bool StarEncodingChinese::readChinese1
         0x6452, 0x63C6, 0x63BE, 0x6445, 0x6441, 0x640B, 0x641B, 0x6420, /* 0xF0 */
         0x640C, 0x6426, 0x6421, 0x645E, 0x6484, 0x646D, 0x6496			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xdf:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3855,7 +3855,7 @@ bool StarEncodingChinese::readChinese1
         0x5523, 0x550F, 0x5511, 0x5527, 0x552A, 0x5616, 0x558F, 0x55B5, /* 0xF0 */
         0x5549, 0x56C0, 0x5541, 0x5555, 0x553F, 0x5550, 0x553C			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3884,10 +3884,10 @@ bool StarEncodingChinese::readChinese1
         0x5523, 0x550F, 0x5511, 0x5527, 0x552A, 0x5567, 0x558F, 0x55B5, /* 0xF0 */
         0x5549, 0x556D, 0x5541, 0x5555, 0x553F, 0x5550, 0x553C			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe0:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3905,7 +3905,7 @@ bool StarEncodingChinese::readChinese1
         0x5707, 0x56EB, 0x56F9, 0x56FF, 0x5704, 0x570A, 0x5709, 0x571C, /* 0xF0 */
         0x5E43, 0x5E19, 0x5E14, 0x5E11, 0x5E6C, 0x5E58, 0x5E57			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3934,10 +3934,10 @@ bool StarEncodingChinese::readChinese1
         0x56F5, 0x56EB, 0x56F9, 0x56FF, 0x5704, 0x570A, 0x5709, 0x571C, /* 0xF0 */
         0x5E0F, 0x5E19, 0x5E14, 0x5E11, 0x5E31, 0x5E3B, 0x5E3C			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe1:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -3955,7 +3955,7 @@ bool StarEncodingChinese::readChinese1
         0x72C3, 0x72C1, 0x72CE, 0x72CD, 0x72D2, 0x72E8, 0x736A, 0x72E9, /* 0xF0 */
         0x733B, 0x72F4, 0x72F7, 0x7301, 0x72F3, 0x736B, 0x72FA			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -3984,10 +3984,10 @@ bool StarEncodingChinese::readChinese1
         0x72C3, 0x72C1, 0x72CE, 0x72CD, 0x72D2, 0x72E8, 0x72EF, 0x72E9, /* 0xF0 */
         0x72F2, 0x72F4, 0x72F7, 0x7301, 0x72F3, 0x7303, 0x72FA			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe2:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4005,7 +4005,7 @@ bool StarEncodingChinese::readChinese1
         0x6035, 0x6026, 0x601B, 0x600F, 0x600D, 0x6029, 0x602B, 0x600A, /* 0xF0 */
         0x61CC, 0x6021, 0x615F, 0x61E8, 0x60FB, 0x6137, 0x6042			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4034,10 +4034,10 @@ bool StarEncodingChinese::readChinese1
         0x6035, 0x6026, 0x601B, 0x600F, 0x600D, 0x6029, 0x602B, 0x600A, /* 0xF0 */
         0x603F, 0x6021, 0x6078, 0x6079, 0x607B, 0x607A, 0x6042			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe3:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4055,7 +4055,7 @@ bool StarEncodingChinese::readChinese1
         0x6CAD, 0x7027, 0x7018, 0x6CF1, 0x6CD7, 0x6CB2, 0x6CE0, 0x6CD6, /* 0xF0 */
         0x6FFC, 0x6CEB, 0x6CEE, 0x6CB1, 0x6CD3, 0x6CEF, 0x6D87			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4084,10 +4084,10 @@ bool StarEncodingChinese::readChinese1
         0x6CAD, 0x6CF7, 0x6CF8, 0x6CF1, 0x6CD7, 0x6CB2, 0x6CE0, 0x6CD6, /* 0xF0 */
         0x6CFA, 0x6CEB, 0x6CEE, 0x6CB1, 0x6CD3, 0x6CEF, 0x6CFE			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe4:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4105,7 +4105,7 @@ bool StarEncodingChinese::readChinese1
         0x6F2F, 0x6F36, 0x7032, 0x6F74, 0x6F2A, 0x6F09, 0x6F29, 0x6F89, /* 0xF0 */
         0x6F8D, 0x6F8C, 0x6F78, 0x6F72, 0x6F7C, 0x6F7A, 0x7028			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4134,10 +4134,10 @@ bool StarEncodingChinese::readChinese1
         0x6F2F, 0x6F36, 0x6F4B, 0x6F74, 0x6F2A, 0x6F09, 0x6F29, 0x6F89, /* 0xF0 */
         0x6F8D, 0x6F8C, 0x6F78, 0x6F72, 0x6F7C, 0x6F7A, 0x6FD1			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe5:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4155,7 +4155,7 @@ bool StarEncodingChinese::readChinese1
         0x5C68, 0x7FBC, 0x5F33, 0x5F29, 0x5F2D, 0x8274, 0x5F3C, 0x9B3B, /* 0xF0 */
         0x5C6E, 0x5981, 0x5983, 0x598D, 0x5AF5, 0x5AD7, 0x59A3			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4184,10 +4184,10 @@ bool StarEncodingChinese::readChinese1
         0x5C66, 0x7FBC, 0x5F2A, 0x5F29, 0x5F2D, 0x8274, 0x5F3C, 0x9B3B, /* 0xF0 */
         0x5C6E, 0x5981, 0x5983, 0x598D, 0x59A9, 0x59AA, 0x59A3			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe6:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4205,7 +4205,7 @@ bool StarEncodingChinese::readChinese1
         0x9A16, 0x9A41, 0x9A2E, 0x9A38, 0x9A43, 0x9A44, 0x9A4F, 0x9A65, /* 0xF0 */
         0x9A64, 0x7CF9, 0x7D06, 0x7D02, 0x7D07, 0x7D08, 0x7E8A			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4234,10 +4234,10 @@ bool StarEncodingChinese::readChinese1
         0x9A9B, 0x9A9C, 0x9A9D, 0x9A9F, 0x9AA0, 0x9AA2, 0x9AA3, 0x9AA5, /* 0xF0 */
         0x9AA7, 0x7E9F, 0x7EA1, 0x7EA3, 0x7EA5, 0x7EA8, 0x7EA9			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe7:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4255,7 +4255,7 @@ bool StarEncodingChinese::readChinese1
         0x740A, 0x73E9, 0x73E7, 0x73DE, 0x74BD, 0x743F, 0x7489, 0x742A, /* 0xF0 */
         0x745B, 0x7426, 0x7425, 0x7428, 0x7430, 0x742E, 0x742C			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4284,10 +4284,10 @@ bool StarEncodingChinese::readChinese1
         0x740A, 0x73E9, 0x73E7, 0x73DE, 0x73BA, 0x73F2, 0x740F, 0x742A, /* 0xF0 */
         0x745B, 0x7426, 0x7425, 0x7428, 0x7430, 0x742E, 0x742C			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe8:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4305,7 +4305,7 @@ bool StarEncodingChinese::readChinese1
         0x684A, 0x6849, 0x6829, 0x68B5, 0x688F, 0x6874, 0x6877, 0x6893, /* 0xF0 */
         0x686B, 0x6B1E, 0x696E, 0x68FC, 0x6ADD, 0x69E7, 0x68F9			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4334,10 +4334,10 @@ bool StarEncodingChinese::readChinese1
         0x684A, 0x6849, 0x6829, 0x68B5, 0x688F, 0x6874, 0x6877, 0x6893, /* 0xF0 */
         0x686B, 0x68C2, 0x696E, 0x68FC, 0x691F, 0x6920, 0x68F9			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe9:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4355,7 +4355,7 @@ bool StarEncodingChinese::readChinese1
         0x8EFB, 0x8F64, 0x8EF9, 0x8EFC, 0x8EEB, 0x8EE4, 0x8F62, 0x8EFA, /* 0xF0 */
         0x8EFE, 0x8F0A, 0x8F07, 0x8F05, 0x8F12, 0x8F26, 0x8F1E			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4384,10 +4384,10 @@ bool StarEncodingChinese::readChinese1
         0x8F72, 0x8F73, 0x8F75, 0x8F76, 0x8F78, 0x8F77, 0x8F79, 0x8F7A, /* 0xF0 */
         0x8F7C, 0x8F7E, 0x8F81, 0x8F82, 0x8F84, 0x8F87, 0x8F8B			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xea:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4405,7 +4405,7 @@ bool StarEncodingChinese::readChinese1
         0x726E, 0x729F, 0x725D, 0x7266, 0x726F, 0x727E, 0x727F, 0x7284, /* 0xF0 */
         0x728B, 0x728D, 0x728F, 0x7292, 0x6308, 0x6332, 0x63B0			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4434,10 +4434,10 @@ bool StarEncodingChinese::readChinese1
         0x726E, 0x729F, 0x725D, 0x7266, 0x726F, 0x727E, 0x727F, 0x7284, /* 0xF0 */
         0x728B, 0x728D, 0x728F, 0x7292, 0x6308, 0x6332, 0x63B0			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xeb:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4455,7 +4455,7 @@ bool StarEncodingChinese::readChinese1
         0x817D, 0x816D, 0x8167, 0x584D, 0x5AB5, 0x8188, 0x8182, 0x81CF, /* 0xF0 */
         0x6ED5, 0x81A3, 0x81AA, 0x81CC, 0x6726, 0x81CA, 0x81BB			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4484,10 +4484,10 @@ bool StarEncodingChinese::readChinese1
         0x817D, 0x816D, 0x8167, 0x584D, 0x5AB5, 0x8188, 0x8182, 0x8191, /* 0xF0 */
         0x6ED5, 0x81A3, 0x81AA, 0x81CC, 0x6726, 0x81CA, 0x81BB			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xec:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4505,7 +4505,7 @@ bool StarEncodingChinese::readChinese1
         0x7953, 0x795A, 0x79B0, 0x7957, 0x7960, 0x798E, 0x7967, 0x797A, /* 0xF0 */
         0x79AA, 0x798A, 0x799A, 0x79A7, 0x79B3, 0x5FD1, 0x5FD0			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4534,10 +4534,10 @@ bool StarEncodingChinese::readChinese1
         0x7953, 0x795A, 0x7962, 0x7957, 0x7960, 0x796F, 0x7967, 0x797A, /* 0xF0 */
         0x7985, 0x798A, 0x799A, 0x79A7, 0x79B3, 0x5FD1, 0x5FD0			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xed:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4555,7 +4555,7 @@ bool StarEncodingChinese::readChinese1
         0x7707, 0x7708, 0x771A, 0x7722, 0x7719, 0x772D, 0x7726, 0x7735, /* 0xF0 */
         0x7738, 0x775E, 0x77BC, 0x7747, 0x7743, 0x775A, 0x7768			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4584,10 +4584,10 @@ bool StarEncodingChinese::readChinese1
         0x7707, 0x7708, 0x771A, 0x7722, 0x7719, 0x772D, 0x7726, 0x7735, /* 0xF0 */
         0x7738, 0x7750, 0x7751, 0x7747, 0x7743, 0x775A, 0x7768			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xee:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4605,7 +4605,7 @@ bool StarEncodingChinese::readChinese1
         0x92AA, 0x92EE, 0x92CF, 0x9403, 0x92E3, 0x943A, 0x92B1, 0x92A6, /* 0xF0 */
         0x93A7, 0x9296, 0x92CC, 0x92A9, 0x93F5, 0x9293, 0x927F			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4634,10 +4634,10 @@ bool StarEncodingChinese::readChinese1
         0x94D5, 0x94D6, 0x94D7, 0x94D9, 0x94D8, 0x94DB, 0x94DE, 0x94DF, /* 0xF0 */
         0x94E0, 0x94E2, 0x94E4, 0x94E5, 0x94E7, 0x94E8, 0x94EA			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xef:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4655,7 +4655,7 @@ bool StarEncodingChinese::readChinese1
         0x9463, 0x937E, 0x77E7, 0x77EC, 0x96C9, 0x79D5, 0x79ED, 0x79E3, /* 0xF0 */
         0x79EB, 0x7A06, 0x5D47, 0x7A03, 0x7A02, 0x7A1E, 0x7A14			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4684,10 +4684,10 @@ bool StarEncodingChinese::readChinese1
         0x9573, 0x953A, 0x77E7, 0x77EC, 0x96C9, 0x79D5, 0x79ED, 0x79E3, /* 0xF0 */
         0x79EB, 0x7A06, 0x5D47, 0x7A03, 0x7A02, 0x7A1E, 0x7A14			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf0:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4705,7 +4705,7 @@ bool StarEncodingChinese::readChinese1
         0x75E7, 0x7603, 0x75F1, 0x75FC, 0x75FF, 0x7610, 0x7600, 0x7649, /* 0xF0 */
         0x760C, 0x761E, 0x760A, 0x7625, 0x763B, 0x7615, 0x7619			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4734,10 +4734,10 @@ bool StarEncodingChinese::readChinese1
         0x75E7, 0x7603, 0x75F1, 0x75FC, 0x75FF, 0x7610, 0x7600, 0x7605, /* 0xF0 */
         0x760C, 0x7617, 0x760A, 0x7625, 0x7618, 0x7615, 0x7619			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf1:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4755,7 +4755,7 @@ bool StarEncodingChinese::readChinese1
         0x8029, 0x8028, 0x8031, 0x800B, 0x8035, 0x8043, 0x8046, 0x8079, /* 0xF0 */
         0x8052, 0x8075, 0x8071, 0x8983, 0x9807, 0x980E, 0x980F			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4784,10 +4784,10 @@ bool StarEncodingChinese::readChinese1
         0x8029, 0x8028, 0x8031, 0x800B, 0x8035, 0x8043, 0x8046, 0x804D, /* 0xF0 */
         0x8052, 0x8069, 0x8071, 0x8983, 0x9878, 0x9880, 0x9883			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf2:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4805,7 +4805,7 @@ bool StarEncodingChinese::readChinese1
         0x8760, 0x8770, 0x874C, 0x876E, 0x878B, 0x8753, 0x8763, 0x87BB, /* 0xF0 */
         0x8764, 0x8759, 0x8765, 0x8793, 0x87AF, 0x87CE, 0x87D2			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4834,10 +4834,10 @@ bool StarEncodingChinese::readChinese1
         0x8760, 0x8770, 0x874C, 0x876E, 0x878B, 0x8753, 0x8763, 0x877C, /* 0xF0 */
         0x8764, 0x8759, 0x8765, 0x8793, 0x87AF, 0x87A8, 0x87D2			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf3:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4855,7 +4855,7 @@ bool StarEncodingChinese::readChinese1
         0x7BB4, 0x7C23, 0x7BC1, 0x7BCC, 0x7BDD, 0x7BDA, 0x7BE5, 0x7BE6, /* 0xF0 */
         0x7BEA, 0x7C0C, 0x7BFE, 0x7BFC, 0x7C0F, 0x7C6A, 0x7C0B			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4884,10 +4884,10 @@ bool StarEncodingChinese::readChinese1
         0x7BB4, 0x7BD1, 0x7BC1, 0x7BCC, 0x7BDD, 0x7BDA, 0x7BE5, 0x7BE6, /* 0xF0 */
         0x7BEA, 0x7C0C, 0x7BFE, 0x7BFC, 0x7C0F, 0x7C16, 0x7C0B			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf4:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4905,7 +4905,7 @@ bool StarEncodingChinese::readChinese1
         0x9EB4, 0x8D73, 0x8D84, 0x8D94, 0x8D91, 0x8DB2, 0x8D67, 0x8D6D, /* 0xF0 */
         0x8C47, 0x8C49, 0x914A, 0x9150, 0x914E, 0x914F, 0x9164			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4934,10 +4934,10 @@ bool StarEncodingChinese::readChinese1
         0x9EB4, 0x8D73, 0x8D84, 0x8D94, 0x8D91, 0x8DB1, 0x8D67, 0x8D6D, /* 0xF0 */
         0x8C47, 0x8C49, 0x914A, 0x9150, 0x914E, 0x914F, 0x9164			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf5:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -4955,7 +4955,7 @@ bool StarEncodingChinese::readChinese1
         0x8E94, 0x8E90, 0x8EA6, 0x8E9E, 0x8C78, 0x8C82, 0x8C8A, 0x8C85, /* 0xF0 */
         0x8C98, 0x8C94, 0x659B, 0x89D6, 0x89F4, 0x89DA, 0x89DC			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -4984,10 +4984,10 @@ bool StarEncodingChinese::readChinese1
         0x8E94, 0x8E90, 0x8E9C, 0x8E9E, 0x8C78, 0x8C82, 0x8C8A, 0x8C85, /* 0xF0 */
         0x8C98, 0x8C94, 0x659B, 0x89D6, 0x89DE, 0x89DA, 0x89DC			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf6:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -5005,7 +5005,7 @@ bool StarEncodingChinese::readChinese1
         0x9BE7, 0x9BDD, 0x9BE2, 0x9BF0, 0x9BDB, 0x9BF4, 0x9BD4, 0x9C5D, /* 0xF0 */
         0x9C08, 0x9C10, 0x9C0D, 0x9C12, 0x9C09, 0x9BFF, 0x9C20			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -5034,10 +5034,10 @@ bool StarEncodingChinese::readChinese1
         0x9CB3, 0x9CB4, 0x9CB5, 0x9CB6, 0x9CB7, 0x9CBA, 0x9CBB, 0x9CBC, /* 0xF0 */
         0x9CBD, 0x9CC4, 0x9CC5, 0x9CC6, 0x9CC7, 0x9CCA, 0x9CCB			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf7:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -5055,7 +5055,7 @@ bool StarEncodingChinese::readChinese1
         0x9EDF, 0x9EE2, 0x9EF7, 0x9EE7, 0x9EE5, 0x9EF2, 0x9EEF, 0x9F22, /* 0xF0 */
         0x9F2C, 0x9F2F, 0x9F39, 0x9F37, 0x9F3D, 0x9F3E, 0x9F44			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (!gbt && c2>=0x40+gbkOff && c2<=0xfe) {
       static int const(val[])= {
@@ -5084,10 +5084,10 @@ bool StarEncodingChinese::readChinese1
         0x9EDF, 0x9EE2, 0x9EE9, 0x9EE7, 0x9EE5, 0x9EEA, 0x9EEF, 0x9F22, /* 0xF0 */
         0x9F2C, 0x9F2F, 0x9F39, 0x9F37, 0x9F3D, 0x9F3E, 0x9F44			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf8:
     if (gbt && c2>=0xa1 && c2<=0xfe) {
@@ -5105,7 +5105,7 @@ bool StarEncodingChinese::readChinese1
         0x7CF0, 0x4E07, 0x4FC2, 0x7E6B, 0x9E79, 0x56AE, 0x9B1A, 0x846F, /* 0xF0 */
         0x53F6, 0x90C1, 0x79A6, 0x7C72, 0x613F, 0x4E91, 0x9AD2			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (gbkOr936 && c2>=0x40 && c2<=0xa0) {
       static int const(val[])= {
@@ -5124,10 +5124,10 @@ bool StarEncodingChinese::readChinese1
         0x9D42															/* 0xA0 */
         /* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf9:
     if (gbt && c2>=0xa1 && c2<=0xa9) {
@@ -5135,7 +5135,7 @@ bool StarEncodingChinese::readChinese1
         0x75C7, 0x96BB, 0x53EA, 0x7DFB, 0x88FD, 0x79CD, 0x7843, /* 0xA0 */
         0x7B51, 0x51C6													/* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else if (gbkOr936 && c2>=0x40 && c2<=0xa0) {
       static int const(val[])= {
@@ -5154,10 +5154,10 @@ bool StarEncodingChinese::readChinese1
         0x9DA2															/* 0xA0 */
         /* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xfa:
     if (gbkOr936 && c2>=0x40 && c2<=0xa0) {
@@ -5177,10 +5177,10 @@ bool StarEncodingChinese::readChinese1
         0x9E02															/* 0xA0 */
         /* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xfb:
     if (gbkOr936 && c2>=0x40 && c2<=0xa0) {
@@ -5200,10 +5200,10 @@ bool StarEncodingChinese::readChinese1
         0x9EAA															/* 0xA0 */
         /* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xfc:
     if (gbkOr936 && c2>=0x40 && c2<=0xa0) {
@@ -5223,10 +5223,10 @@ bool StarEncodingChinese::readChinese1
         0x9F31															/* 0xA0 */
         /* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xfd:
     if (encoding==StarEncoding::E_APPLE_CHINSIMP) {
@@ -5250,10 +5250,10 @@ bool StarEncodingChinese::readChinese1
         0xF9F1															/* 0xA0 */
         /* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xfe:
     if (encoding==StarEncoding::E_APPLE_CHINSIMP) {
@@ -5275,10 +5275,10 @@ bool StarEncodingChinese::readChinese1
         0,      0, 0x4CA3, 0x4C9F, 0x4CA0, 0x4CA1, 0x4C77, 0x4CA2, /* 0x90 */
         0x4D13, 0x4D14, 0x4D15, 0x4D16, 0x4D17, 0x4D18, 0x4D19, 0x4DAE  /* 0x90 */
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xff:
     if (encoding==StarEncoding::E_APPLE_CHINSIMP) {
@@ -5290,7 +5290,7 @@ bool StarEncodingChinese::readChinese1
     break;
   }
   if (!unicode) {
-    STOFF_DEBUG_MSG(("StarEncodingChinese::readChinese1: unknown caracter %x\n", (unsigned int)c));
+    STOFF_DEBUG_MSG(("StarEncodingChinese::readChinese1: unknown caracter %x\n", static_cast<unsigned int>(c)));
   }
   dest.push_back(unicode);
   return true;

@@ -330,7 +330,7 @@ bool StarObjectModel::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int 
   m_modelState->m_masterPageToSendSet.clear();
 
   pageSpan.clear();
-  int numMasterPage=(int) m_modelState->m_masterPageList.size();
+  int numMasterPage=int(m_modelState->m_masterPageList.size());
   for (size_t i=0; i<m_modelState->m_pageList.size(); ++i) {
     if (!m_modelState->m_pageList[i])
       continue;
@@ -348,7 +348,7 @@ bool StarObjectModel::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int 
     }
     pageSpan.push_back(ps);
   }
-  number=(int) m_modelState->m_pageToSendList.size();
+  number=int(m_modelState->m_pageToSendList.size());
   return number!=0;
 }
 
@@ -371,7 +371,7 @@ bool StarObjectModel::sendMasterPages(STOFFGraphicListenerPtr listener)
     STOFF_DEBUG_MSG(("StarObjectModel::sendMasterPages: can not find the listener\n"));
     return false;
   }
-  int numMasters=(int) m_modelState->m_masterPageList.size();
+  int numMasters=int(m_modelState->m_masterPageList.size());
   for (std::set<int>::iterator it=m_modelState->m_masterPageToSendSet.begin();
        it!=m_modelState->m_masterPageToSendSet.end(); ++it) {
     int id=*it;
@@ -400,7 +400,7 @@ bool StarObjectModel::sendPage(int pageId, STOFFListenerPtr listener, bool maste
   }
   std::vector<shared_ptr<StarObjectModelInternal::Page> > const &pageList=
     masterPage ? m_modelState->m_masterPageList : m_modelState->m_pageList;
-  if (pageId<0 || pageId>=(int) pageList.size() || !pageList[size_t(pageId)]) {
+  if (pageId<0 || pageId>=int(pageList.size()) || !pageList[size_t(pageId)]) {
     STOFF_DEBUG_MSG(("StarObjectModel::sendPage: can not find page %d\n", pageId));
     return false;
   }
@@ -421,7 +421,7 @@ bool StarObjectModel::read(StarZone &zone)
   // first check magic
   std::string magic("");
   long pos=input->tell();
-  for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+  for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
   input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (magic!="DrMd") return false;
 
@@ -471,7 +471,7 @@ bool StarObjectModel::read(StarZone &zone)
   bool ok=true;
   if (version>=11) {
     magic="";
-    for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+    for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
     f << "joeM";
     if (magic!="JoeM" || !zone.openRecord()) { // SdrModelA2
       STOFF_DEBUG_MSG(("StarObjectModel::read: unexpected magic2 data\n"));
@@ -545,7 +545,7 @@ bool StarObjectModel::read(StarZone &zone)
         if (nTmp) f << "unk=" << nTmp << ",";
       }
       if (input->tell()+4<=zone.getRecordLastPosition()) {
-        int compressedMode=(int) input->readULong(2);
+        int compressedMode=int(input->readULong(2));
         if (compressedMode) // checkme: find 0 or 16-17, do not seems to cause problem
           f << "#streamCompressed=" << compressedMode << ",";
         f << "nStreamNumberFormat=" << input->readULong(2) << ",";
@@ -578,7 +578,7 @@ bool StarObjectModel::read(StarZone &zone)
     }
     else {
       if (version<11) {
-        int charSet=(int) input->readLong(2);
+        int charSet=int(input->readLong(2));
         if (StarEncoding::getEncodingForId(charSet)!=StarEncoding::E_DONTKNOW)
           zone.setEncoding(StarEncoding::getEncodingForId(charSet));
         else
@@ -615,7 +615,7 @@ bool StarObjectModel::read(StarZone &zone)
     uint16_t pNum;
     *input>> pNum;
     if (pNum!=0xFFFF) {
-      m_modelState->m_previewMasterPage=(int) pNum;
+      m_modelState->m_previewMasterPage=int(pNum);
       f << "nStartPageNum=" << pNum << ",";
     }
   }
@@ -630,7 +630,7 @@ bool StarObjectModel::read(StarZone &zone)
     if (pos+4>zone.getRecordLastPosition())
       break;
     magic="";
-    for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+    for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     if (magic=="DrLy") {
       StarObjectModelInternal::Layer layer;
@@ -682,7 +682,7 @@ bool StarObjectModel::read(StarZone &zone)
   // in DrawingLayer, find also 0500000001 and 060000000[01]00
   pos=input->tell();
   if (pos+4<=zone.getRecordLastPosition()) {
-    long sz=(long) input->readULong(4);
+    long sz=long(input->readULong(4));
     if (pos+sz==zone.getRecordLastPosition()) {
       ascFile.addPos(pos);
       ascFile.addNote("SdrModel:#extra");
@@ -702,7 +702,7 @@ bool StarObjectModel::readSdrLayer(StarZone &zone, StarObjectModelInternal::Laye
   // first check magic
   std::string magic("");
   long pos=input->tell();
-  for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+  for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
   input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (magic!="DrLy") return false;
 
@@ -728,7 +728,7 @@ bool StarObjectModel::readSdrLayer(StarZone &zone, StarObjectModelInternal::Laye
     ascFile.addNote(f.str().c_str());
     return false;
   }
-  layer.m_id=(int) input->readULong(1);
+  layer.m_id=int(input->readULong(1));
   std::vector<uint32_t> string;
   if (!zone.readString(string)) {
     STOFF_DEBUG_MSG(("StarObjectModel::readSdrLayer: can not read a string\n"));
@@ -739,7 +739,7 @@ bool StarObjectModel::readSdrLayer(StarZone &zone, StarObjectModelInternal::Laye
     return true;
   }
   layer.m_name=libstoff::getString(string);
-  if (version>=1) layer.m_type=(int) input->readULong(2);
+  if (version>=1) layer.m_type=int(input->readULong(2));
   f << layer;
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -754,7 +754,7 @@ bool StarObjectModel::readSdrLayerSet(StarZone &zone, StarObjectModelInternal::L
   // first check magic
   std::string magic("");
   long pos=input->tell();
-  for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+  for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
   input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (magic!="DrLS") return false;
 
@@ -782,7 +782,7 @@ bool StarObjectModel::readSdrLayerSet(StarZone &zone, StarObjectModelInternal::L
   }
   for (int i=0; i<2; ++i) {
     std::vector<int> layerList;
-    for (int j=0; j<32; ++j) layerList.push_back((int) input->readULong(1));
+    for (int j=0; j<32; ++j) layerList.push_back(int(input->readULong(1)));
     StarObjectModelInternal::convertUint8ListToBoolList(layerList, i==0 ? layers.m_memberList : layers.m_excludeList);
   }
   std::vector<uint32_t> string;
@@ -808,7 +808,7 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
   // first check magic
   std::string magic("");
   long pos=input->tell();
-  for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+  for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
   input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (magic!="DrPg" && magic!="DrMP") return shared_ptr<StarObjectModelInternal::Page>();
 
@@ -905,7 +905,7 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
   bool ok=true;
   if (version>=11) {
     magic="";
-    for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+    for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
     f << "joeM";
     if (magic!="JoeM" || !zone.openRecord()) { // SdrPageDefA2
       STOFF_DEBUG_MSG(("StarObjectModel::readSdrPage: unexpected magic2 data\n"));
@@ -931,7 +931,7 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
     f << "dim=" << nWdt << "x" << nHgt << ",";
     f << "border=[" << borders[0] << "x" << borders[1] << "-" << borders[2] << "x" << borders[3] << "],";
     page->m_size=STOFFVec2i(int(nWdt), int(nHgt));
-    for (int i=0; i<4; ++i) page->m_borders[i]=(int) borders[i];
+    for (int i=0; i<4; ++i) page->m_borders[i]=int(borders[i]);
     if (n) f << "n=" << n << ","; // link to page name?
   }
   ascFile.addPos(pos);
@@ -947,7 +947,7 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
     if (pos+4>lastPos)
       break;
     magic="";
-    for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+    for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     if (magic=="DrLy" && readSdrLayer(zone, page->m_layer)) continue;
     if (magic=="DrLS" && readSdrLayerSet(zone, page->m_layerSet)) continue;
@@ -970,7 +970,7 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
       f << "pages=[";
       StarObjectModelInternal::Page::Descriptor desc;
       for (int i=0; i<int(n); ++i) {
-        int id=(int) input->readULong(2);
+        int id=int(input->readULong(2));
         f << id << ",";
         desc.m_masterId=id;
         page->m_masterPageDescList.push_back(desc);
@@ -992,7 +992,7 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
     }
 
     magic="";
-    for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+    for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     if (magic=="DrXX" && zone.openSDRHeader(magic)) {
       f.str("");
@@ -1049,7 +1049,7 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
       else if (n==2 && pos+12==zone.getRecordLastPosition()) {
         f << "empty,";
         for (int i=0; i<4; ++i) { // always 0
-          int val=(int) input->readLong(2);
+          int val=int(input->readLong(2));
           if (val) f << "f" << i << "=" << val << ",";
         }
       }
@@ -1083,36 +1083,36 @@ bool StarObjectModel::readSdrPageUnknownZone1(StarZone &zone, long lastPos)
   libstoff::DebugStream f;
   f << "Entries(SdrPageUnkn1)[" << zone.getRecordLevel() << "]:";
   if (pos+28>lastPos) return false;
-  int val=(int) input->readULong(2);
+  int val=int(input->readULong(2));
   if (val!=3 && val!=7)
     return false;
   f << "f0=" << val << ",";
   for (int i=0; i<3; ++i) { // 1
-    val=(int) input->readULong(1);
+    val=int(input->readULong(1));
     if (val!=1) f << "f" << i+1 << "=" << val << ",";
   }
   for (int i=0; i<5; ++i) { // g0=14|15|19, g1=1, g3=0-10,
-    val=(int) input->readLong(2);
+    val=int(input->readLong(2));
     if (val) f << "g" << i << "=" << val << ",";
   }
-  val=(int) input->readLong(1); // always 1
+  val=int(input->readLong(1)); // always 1
   if (val!=1) f << "f6=" << val << ",";
   for (int i=0; i<3; ++i) { // g5=1|1e
-    val=(int) input->readLong(2);
+    val=int(input->readLong(2));
     if (val) f << "g" << i+5 << "=" << val << ",";
   }
   std::vector<uint32_t> string;
   if (!zone.readString(string) || input->tell()>lastPos)
     return false;
   f << libstoff::getString(string).cstr() << ",";
-  int n=(int) input->readULong(4);
+  int n=int(input->readULong(4));
   if (n<0 || (lastPos-input->tell())/8<n || input->tell()+8*n>lastPos)
     return false;
   f << "unk=[";
   for (int i=0; i<n; ++i) {
     f << "[";
     for (int j=0; j<4; ++j) {
-      val=(int) input->readLong(2);
+      val=int(input->readLong(2));
       if (val)
         f << val << ",";
       else
@@ -1124,7 +1124,7 @@ bool StarObjectModel::readSdrPageUnknownZone1(StarZone &zone, long lastPos)
   int n1=int(lastPos-input->tell())/2;
   f << "unkn1=[";
   for (int i=0; i<n1; ++i) {
-    val=(int) input->readLong(2);
+    val=int(input->readLong(2));
     if (val)
       f << val << ",";
     else
@@ -1146,7 +1146,7 @@ bool StarObjectModel::readSdrMPageDesc(StarZone &zone, StarObjectModelInternal::
   // first check magic
   std::string magic("");
   long pos=input->tell();
-  for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+  for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
   input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (magic!="DrMD") return false;
 
@@ -1165,10 +1165,10 @@ bool StarObjectModel::readSdrMPageDesc(StarZone &zone, StarObjectModelInternal::
   int version=zone.getHeaderVersion();
   f << magic << ",nVers=" << version << ",";
   StarObjectModelInternal::Page::Descriptor desc;
-  desc.m_masterId=(int) input->readULong(2);
+  desc.m_masterId=int(input->readULong(2));
   std::vector<int> layers;
   for (int i=0; i<32; ++i)
-    layers.push_back((int) input->readULong(1));
+    layers.push_back(int(input->readULong(1)));
   StarObjectModelInternal::convertUint8ListToBoolList(layers, desc.m_layerList);
   f << desc;
   page.m_masterPageDescList.push_back(desc);
@@ -1184,7 +1184,7 @@ bool StarObjectModel::readSdrMPageDescList(StarZone &zone, StarObjectModelIntern
   // first check magic
   std::string magic("");
   long pos=input->tell();
-  for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+  for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
   input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (magic!="DrML") return false;
 

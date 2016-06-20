@@ -190,7 +190,7 @@ try
   StarZone zone(input, name, "SCDrawDocument", getPassword()); // checkme: do we need to pass the password
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
-  uint8_t firstByte=(uint8_t) input->readULong(1);
+  uint8_t firstByte=static_cast<uint8_t>(input->readULong(1));
   if (firstByte!=0x44) { // D
     /* if the zone has a password, we can retrieve it knowing that the first byte must be 0x44
 
@@ -254,7 +254,7 @@ bool StarObjectDraw::readPresentationData(StarZone &zone)
     char const *(wh[])= {"pres[all]", "pres[end]", "pres[manual]", "mouse[visible]", "mouse[asPen]"};
     f << wh[i] << ",";
   }
-  int firstPage=(int) input->readULong(4);
+  int firstPage=int(input->readULong(4));
   if (firstPage!=1) f << "firstPage=" << firstPage << ",";
 
   if (input->tell()>lastPos) {
@@ -304,7 +304,7 @@ bool StarObjectDraw::readPresentationData(StarZone &zone)
     ok=input->tell()<=lastPos;
   }
   if (ok&&vers>=4) {
-    int n=(int) input->readULong(4);
+    int n=int(input->readULong(4));
     f << "num[frameView]=" << n << ",";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -369,7 +369,7 @@ bool StarObjectDraw::readPresentationData(StarZone &zone)
     ok=input->tell()<=lastPos;
   }
   if (ok&&vers>=12) {
-    int docType=(int) input->readULong(2);
+    int docType=int(input->readULong(2));
     if (docType==0) f << "impress,";
     else if (docType==1) f << "draw,";
     else {
@@ -382,7 +382,7 @@ bool StarObjectDraw::readPresentationData(StarZone &zone)
     bool custShow;
     *input>>custShow;
     if (custShow) f << "customShow,";
-    int nCustShow=(int) input->readULong(4);
+    int nCustShow=int(input->readULong(4));
     if (nCustShow) {
       f << "n[custShow]=" << nCustShow << ",";
       pos=input->tell();
@@ -451,7 +451,7 @@ bool StarObjectDraw::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
     }
     if (pool && pool->read(zone)) {
       if (extraPool) {
-        STOFF_DEBUG_MSG(("StarObjectDraw::readSfxStyleSheets: create extra pool of type %d\n", (int) pool->getType()));
+        STOFF_DEBUG_MSG(("StarObjectDraw::readSfxStyleSheets: create extra pool of type %d\n", int(pool->getType())));
       }
       if (!mainPool) mainPool=pool;
       pool.reset();
@@ -506,7 +506,7 @@ bool StarObjectDraw::readSdrCustomShow(StarZone &zone)
     return true;
   }
   f << libstoff::getString(string).cstr() << ",";
-  long n=(int) input->readULong(4);
+  long n=long(input->readULong(4));
   f << "N=" << n << ",";
   if (n<0 || (lastPos-input->tell())/2<n || input->tell()+2*n>lastPos) {
     STOFF_DEBUG_MSG(("StarObjectDraw::readSdrCustomShow: the number of page seems bad\n"));
@@ -540,7 +540,7 @@ bool StarObjectDraw::readSdrHelpLine(StarZone &zone)
   // first check magic
   std::string magic("");
   long pos=input->tell();
-  for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+  for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
   input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (magic!="DrHl" || !zone.openSDRHeader(magic)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -554,10 +554,10 @@ bool StarObjectDraw::readSdrHelpLine(StarZone &zone)
   int version=zone.getHeaderVersion();
   f << magic << ",nVers=" << version << ",";
   long lastPos=zone.getRecordLastPosition();
-  int val=(int) input->readULong(2);
+  int val=int(input->readULong(2));
   if (val) f << "kind=" << val << ",";
   int dim[2];
-  for (int i=0; i<2; ++i) dim[i]=(int) input->readLong(4);
+  for (int i=0; i<2; ++i) dim[i]=int(input->readLong(4));
   f << "pos=" << STOFFVec2i(dim[0],dim[1]) << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -578,7 +578,7 @@ bool StarObjectDraw::readSdrHelpLineSet(StarZone &zone)
   // first check magic
   std::string magic("");
   long pos=input->tell();
-  for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+  for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
   input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (magic!="DrHL" || !zone.openSDRHeader(magic)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -647,7 +647,7 @@ bool StarObjectDraw::readSdrFrameView(StarZone &zone)
     f << "layers[" << wh[i] << "]=[";
     int prevFl=-1, numSame=0;
     for (int j=0; j<=32; ++j) {
-      int fl=j==32 ? -1 : (int) input->readULong(1);
+      int fl=j==32 ? -1 : int(input->readULong(1));
       if (fl==prevFl) {
         ++numSame;
         continue;
@@ -699,7 +699,7 @@ bool StarObjectDraw::readSdrFrameView(StarZone &zone)
   }
   if (ok&&vers>=3) {
     int dim[4];
-    for (int i=0; i<4; ++i) dim[i]=(int) input->readLong(4);
+    for (int i=0; i<4; ++i) dim[i]=int(input->readLong(4));
     f << "vis[area]=" << STOFFBox2i(STOFFVec2i(dim[0],dim[1]),STOFFVec2i(dim[2],dim[3])) << ",";
     f << "page[kind]=" << input->readULong(4) << ",";
     f << "page[select]=" << input->readULong(2) << ",";
@@ -773,7 +773,7 @@ bool StarObjectDraw::readSdrView(StarZone &zone)
   // first check magic
   std::string magic("");
   long pos=input->tell();
-  for (int i=0; i<4; ++i) magic+=(char) input->readULong(1);
+  for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
   input->seek(pos, librevenge::RVNG_SEEK_SET);
   if (magic!="DrVw" || !zone.openSDRHeader(magic)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -806,7 +806,7 @@ bool StarObjectDraw::readSdrView(StarZone &zone)
       continue;
     }
     std::string inventor("");
-    for (int i=0; i<4; ++i) inventor+=(char) input->readULong(1);
+    for (int i=0; i<4; ++i) inventor+=char(input->readULong(1));
     f << inventor << "-" << input->readULong(2) << ",";
     if (input->tell()!=zone.getRecordLastPosition()) {
       ascFile.addDelimiter(input->tell(),'|');

@@ -194,14 +194,14 @@ struct SfxMultiRecord {
     if (m_headerType==7) // mixtags?
       input->seek(2, librevenge::RVNG_SEEK_CUR);
     else if (m_headerType==8) // relocate
-      id=(int) input->readULong(2);
+      id=int(input->readULong(2));
     return true;
   }
   //! returns the last content position
   long getLastContentPosition() const
   {
     if (m_actualRecord >= m_numRecord) return m_endPos;
-    if (m_headerType==2) return m_startPos+m_actualRecord*(long)m_contentSize;
+    if (m_headerType==2) return m_startPos+m_actualRecord*long(m_contentSize);
     if (m_actualRecord >= uint16_t(m_offsetList.size())) {
       STOFF_DEBUG_MSG(("StarItemPoolInternal::SfxMultiRecord::getLastContentPosition: argh, find unexpected index\n"));
       return m_endPos;
@@ -422,7 +422,7 @@ struct State {
         Version const &vers=m_versionList[i];
         if (vers.m_version<=m_loadingVersion)
           continue;
-        if (nFileWhich<vers.m_start || nFileWhich>=vers.m_start+(int) vers.m_list.size()) {
+        if (nFileWhich<vers.m_start || nFileWhich>=vers.m_start+int(vers.m_list.size())) {
           STOFF_DEBUG_MSG(("StarItemPoolInternal::State::getWhich: argh nFileWhich=%d is not in good range\n", nFileWhich));
           break;
         }
@@ -1083,7 +1083,7 @@ shared_ptr<StarItem> StarItemPool::readItem(StarZone &zone, bool isDirect, long 
     }
     else if (nLength) {
       long endAttrPos=input->tell()+long(nLength);
-      shared_ptr<StarAttribute> attribute=readAttribute(zone, int(nWhich), (int) nVersion, endAttrPos);
+      shared_ptr<StarAttribute> attribute=readAttribute(zone, int(nWhich), int(nVersion), endAttrPos);
       pItem.reset(new StarItem(attribute, nWhich));
       if (!attribute) {
         STOFF_DEBUG_MSG(("StarItemPool::readItem: can not read an attribute\n"));
@@ -1153,7 +1153,7 @@ shared_ptr<StarItem> StarItemPool::loadSurrogate(StarZone &zone, uint16_t &nWhic
     return shared_ptr<StarItem>();
   }
   if (m_state->m_loadingVersion<0) // the pool is not read, so we wait
-    return createItem(int(nWhich), (int) nSurrog, localId);
+    return createItem(int(nWhich), int(nSurrog), localId);
   shared_ptr<StarItem> res(new StarItem(int(nWhich)));
   int aWhich=(localId && m_state->m_currentVersion!=m_state->m_loadingVersion) ?
              m_state->getWhich(nWhich) : nWhich;
@@ -1164,7 +1164,7 @@ shared_ptr<StarItem> StarItemPool::loadSurrogate(StarZone &zone, uint16_t &nWhic
       if (!isInside() && m_state->m_document.getAttributeManager())
         res->m_attribute=m_state->getDefaultAttribute(aWhich);
       else // we must wait that the pool is read
-        return createItem(int(nWhich), (int) nSurrog, localId);
+        return createItem(int(nWhich), int(nSurrog), localId);
     }
     else
       res->m_attribute=values->m_default;
@@ -1174,7 +1174,7 @@ shared_ptr<StarItem> StarItemPool::loadSurrogate(StarZone &zone, uint16_t &nWhic
   if (!values || values->m_idValueMap.find(int(nSurrog))==values->m_idValueMap.end()) {
     if (isInside()) {
       // ok, we must wait that the pool is read
-      return createItem(int(nWhich), (int) nSurrog, localId);
+      return createItem(int(nWhich), int(nSurrog), localId);
     }
     STOFF_DEBUG_MSG(("StarItemPool::loadSurrogate: can not find the attribute array for %d\n", aWhich));
     f << "###notFind,";
@@ -1393,7 +1393,7 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
             uint16_t nRef;
             *input>>nRef;
             f << "ref=" << nRef << ",";
-            attribute=readAttribute(zone, which, (int) nVersion, mRecord1.getLastContentPosition());
+            attribute=readAttribute(zone, which, int(nVersion), mRecord1.getLastContentPosition());
             if (!attribute)
               f << "###";
             else if (input->tell()!=mRecord1.getLastContentPosition()) {
@@ -1417,7 +1417,7 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
         if (values->m_default) {
           STOFF_DEBUG_MSG(("StarItemPool::readV2: the default slot %d is already created\n", aWhich));
         }
-        attribute=readAttribute(zone, which, (int) nVersion, mRecord.getLastContentPosition());
+        attribute=readAttribute(zone, which, int(nVersion), mRecord.getLastContentPosition());
         if (!attribute) {
           f.str("");
           f << "Entries(StarAttribute)[" <<  which << "]:";
@@ -1511,7 +1511,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
   }
   else if (attribSize) {
     f << "attr[sz]=" << attribSize << ",";
-    input->seek((long)attribSize, librevenge::RVNG_SEEK_CUR);
+    input->seek(long(attribSize), librevenge::RVNG_SEEK_CUR);
   }
   else {
     STOFF_DEBUG_MSG(("StarItemPool::readV1: attribSize\n"));
@@ -1530,7 +1530,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
   uint32_t tableSize;
   *input>>tableSize;
   long tablePos=input->tell();
-  long beginEndPos=tablePos+(long) tableSize;
+  long beginEndPos=tablePos+long(tableSize);
   if (beginEndPos+4>endPos) {
     STOFF_DEBUG_MSG(("StarItemPool::readV1: tableSize is bad\n"));
     f << "###";
@@ -1548,10 +1548,10 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
   ascii.addPos(pos);
   ascii.addNote(f.str().c_str());
 
-  long endTablePos=tablePos+(long)tableSize;
+  long endTablePos=tablePos+long(tableSize);
   if (nMinorVers>=3 && tableSize>=4) { // CHECKME: never seens
     input->seek(endTablePos-4, librevenge::RVNG_SEEK_SET);
-    pos=(long) input->readULong(4);
+    pos=long(input->readULong(4));
     endTablePos-=4;
     if (pos<tablePos || pos>=endTablePos) {
       STOFF_DEBUG_MSG(("StarItemPool::readV1: arrgh can not find versionmap position\n"));
@@ -1613,7 +1613,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
   ascii.addNote(f.str().c_str());
 
   // now read the attribute and default
-  long endDataPos=attribPos+(long) attribSize;
+  long endDataPos=attribPos+long(attribSize);
   size_t n=0;
   for (int step=0; step<2; ++step) {
     std::string const what(step==0 ? "attrib" : "default");
@@ -1698,8 +1698,8 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
         pos=input->tell();
         f.str("");
         f << "StarAttribute:inPool,wh=" <<  which << ",";
-        if (n >= sizeAttr.size() || debAttPos+(long)sizeAttr[n]>endDataPos ||
-            input->tell()>debAttPos+(long)sizeAttr[n]) {
+        if (n >= sizeAttr.size() || debAttPos+long(sizeAttr[n])>endDataPos ||
+            input->tell()>debAttPos+long(sizeAttr[n])) {
           ok=false;
 
           STOFF_DEBUG_MSG(("StarItemPool::readV1: can not find attrib size\n"));
@@ -1708,7 +1708,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
           ascii.addNote(f.str().c_str());
           break;
         }
-        long endAttPos=debAttPos+(long)sizeAttr[n];
+        long endAttPos=debAttPos+long(sizeAttr[n]);
         shared_ptr<StarAttribute> attribute;
         if (input->tell()==endAttPos) {
           ascii.addPos(pos);
@@ -1724,7 +1724,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
           f << "ref=" << nRef << ",";
         }
         if (nRef) {
-          attribute=readAttribute(zone, which, (int) nVersion, debAttPos+(long) sizeAttr[n]);
+          attribute=readAttribute(zone, which, int(nVersion), debAttPos+long(sizeAttr[n]));
           if (!attribute)
             f << "###";
         }
@@ -1732,12 +1732,12 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
           values->m_idValueMap[i]=attribute;
         else
           values->m_default=attribute;
-        if (input->tell()!=debAttPos+(long)sizeAttr[n]) {
+        if (input->tell()!=debAttPos+long(sizeAttr[n])) {
           STOFF_DEBUG_MSG(("StarItemPool::readV1: find extra attrib data\n"));
           f << "###extra,";
           if (input->tell()!=pos)
             ascii.addDelimiter(input->tell(),'|');
-          input->seek(debAttPos+(long) sizeAttr[n], librevenge::RVNG_SEEK_SET);
+          input->seek(debAttPos+long(sizeAttr[n]), librevenge::RVNG_SEEK_SET);
         }
         ascii.addPos(pos);
         ascii.addNote(f.str().c_str());
@@ -1889,8 +1889,8 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
       if (poolVersion==1) return true;
       continue;
     }
-    style.m_family=(int) input->readULong(2);
-    style.m_mask=(int) input->readULong(2);
+    style.m_family=int(input->readULong(2));
+    style.m_mask=int(input->readULong(2));
     if (!zone.readString(text, charSet) || input->tell()>=lastPos) {
       STOFF_DEBUG_MSG(("StarItemPool::readStyles: can not find helpFile\n"));
       f << style << "###helpFile";
@@ -1900,7 +1900,7 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
       continue;
     }
     style.m_names[3]=libstoff::getString(text);
-    style.m_helpId=(unsigned) input->readULong(helpIdSize32 ? 4 : 2);
+    style.m_helpId=unsigned(input->readULong(helpIdSize32 ? 4 : 2));
     std::vector<STOFFVec2i> limits; // unknown
     if (!doc.readItemSet(zone, limits, lastPos, style.m_itemSet, this, false)) {
       f << style << "###itemList";
@@ -1933,7 +1933,7 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
       libstoff::DebugStream f2;
       f2 << "Entries(SfxBaseSheet):sz=" << nSize << ",";
       f2 << "f0=" << std::hex << input->readULong(2) << std::dec << ",";
-      int val=(int) input->readULong(1); // often 0xc9
+      int val=int(input->readULong(1)); // often 0xc9
       if (val!=0xc9) f2 << "f1=" << std::hex << val << std::dec << ",";
       ascii.addPos(input->tell()-4);
       ascii.addNote(f2.str().c_str());
@@ -1951,7 +1951,7 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
       ascii.addPos(input->tell()-4);
       ascii.addNote(f2.str().c_str());
       ascii.addDelimiter(input->tell(),'|');
-      input->seek((long) nSize, librevenge::RVNG_SEEK_CUR);
+      input->seek(long(nSize), librevenge::RVNG_SEEK_CUR);
     }
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());

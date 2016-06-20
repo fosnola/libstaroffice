@@ -89,12 +89,12 @@ const unsigned char *STOFFStringStream::read(unsigned long numBytes, unsigned lo
 
   long numBytesToRead;
 
-  if ((unsigned long)m_data->m_offset+numBytes < m_data->m_buffer.size())
-    numBytesToRead = (long) numBytes;
+  if (static_cast<unsigned long>(m_data->m_offset)+numBytes < m_data->m_buffer.size())
+    numBytesToRead = long(numBytes);
   else
-    numBytesToRead = (long) m_data->m_buffer.size() - m_data->m_offset;
+    numBytesToRead = long(m_data->m_buffer.size()) - m_data->m_offset;
 
-  numBytesRead = (unsigned long) numBytesToRead; // about as paranoid as we can be..
+  numBytesRead = static_cast<unsigned long>(numBytesToRead); // about as paranoid as we can be..
 
   if (numBytesToRead == 0)
     return 0;
@@ -119,14 +119,14 @@ int STOFFStringStream::seek(long offset, librevenge::RVNG_SEEK_TYPE seekType)
   else if (seekType == librevenge::RVNG_SEEK_SET)
     m_data->m_offset = offset;
   else if (seekType == librevenge::RVNG_SEEK_END)
-    m_data->m_offset = offset+(long) m_data->m_buffer.size();
+    m_data->m_offset = offset+long(m_data->m_buffer.size());
 
   if (m_data->m_offset < 0) {
     m_data->m_offset = 0;
     return -1;
   }
-  if ((long)m_data->m_offset > (long)m_data->m_buffer.size()) {
-    m_data->m_offset = (long) m_data->m_buffer.size();
+  if (long(m_data->m_offset) > long(m_data->m_buffer.size())) {
+    m_data->m_offset = long(m_data->m_buffer.size());
     return -1;
   }
 
@@ -135,7 +135,7 @@ int STOFFStringStream::seek(long offset, librevenge::RVNG_SEEK_TYPE seekType)
 
 bool STOFFStringStream::isEnd()
 {
-  if (!m_data || (long)m_data->m_offset >= (long)m_data->m_buffer.size())
+  if (!m_data || long(m_data->m_offset) >= long(m_data->m_buffer.size()))
     return true;
 
   return false;

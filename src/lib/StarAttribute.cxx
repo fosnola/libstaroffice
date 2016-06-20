@@ -743,7 +743,7 @@ bool StarAttributeInt::read(StarZone &zone, int /*vers*/, long endPos, StarObjec
   long pos=input->tell();
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
-  if (m_intSize) m_value=(int) input->readLong(m_intSize);
+  if (m_intSize) m_value=int(input->readLong(m_intSize));
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -758,7 +758,7 @@ bool StarAttributeVec2i::read(StarZone &zone, int /*vers*/, long endPos, StarObj
   libstoff::DebugStream f;
   if (m_intSize) {
     int dim[2];
-    for (int i=0; i<2; ++i) dim[i]=(int) input->readLong(m_intSize);
+    for (int i=0; i<2; ++i) dim[i]=int(input->readLong(m_intSize));
     m_value=STOFFVec2i(dim[0],dim[1]);
   }
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
@@ -787,7 +787,7 @@ bool StarAttributeUInt::read(StarZone &zone, int /*vers*/, long endPos, StarObje
   long pos=input->tell();
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
-  if (m_intSize) m_value=(unsigned int) input->readULong(m_intSize);
+  if (m_intSize) m_value=static_cast<unsigned int>(input->readULong(m_intSize));
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -910,7 +910,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
       f << "target=" << libstoff::getString(string).cstr() << ",";
     f << "nId1=" << input->readULong(2) << ",";
     f << "nId2=" << input->readULong(2) << ",";
-    int nCnt=(int) input->readULong(2);
+    int nCnt=int(input->readULong(2));
     bool ok=true;
     f << "libMac=[";
     for (int i=0; i<nCnt; ++i) {
@@ -950,7 +950,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
         f << "aName1=" << libstoff::getString(string).cstr() << ",";
     }
     if (nVers>=2) {
-      nCnt=(int) input->readULong(2);
+      nCnt=int(input->readULong(2));
       f << "libMac2=[";
       for (int i=0; i<nCnt; ++i) {
         f << "nCurKey=" << input->readULong(2) << ",";
@@ -993,7 +993,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
   }
   case StarAttribute::ATTR_TXT_TOXMARK: {
     f << "textAtrToXMark,";
-    int cType=(int) input->readULong(1);
+    int cType=int(input->readULong(1));
     f << "cType=" << cType << ",";
     f << "nLevel=" << input->readULong(2) << ",";
     std::vector<uint32_t> string;
@@ -1008,7 +1008,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
         f << "aTypeName=" << libstoff::getString(string).cstr() << ",";
     }
     else {
-      nStringId=(int) input->readULong(2);
+      nStringId=int(input->readULong(2));
       if (nStringId!=0xFFFF)
         f << "nStringId=" << nStringId << ",";
     }
@@ -1034,9 +1034,9 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     if (!string.empty())
       f << "aSecKey=" << libstoff::getString(string).cstr() << ",";
     if (nVers>=2) {
-      cType=(int) input->readULong(1);
+      cType=int(input->readULong(1));
       f << "cType=" << cType << ",";
-      nStringId=(int) input->readULong(2);
+      nStringId=int(input->readULong(2));
       if (nStringId!=0xFFFF)
         f << "nStringId=" << nStringId << ",";
       f << "cFlags=" << input->readULong(1) << ",";
@@ -1122,7 +1122,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     break;
   case StarAttribute::ATTR_PARA_TABSTOP: {
     f << "parAtrTabStop,";
-    int N=(int) input->readULong(1);
+    int N=int(input->readULong(1));
     if (input->tell()+7*N>lastPos) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: N is too big\n"));
       f << "###N=" << N << ",";
@@ -1130,7 +1130,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     }
     f << "tabs=[";
     for (int i=0; i<N; ++i) {
-      int nPos=(int) input->readLong(4);
+      int nPos=int(input->readLong(4));
       f << nPos << "->" << input->readLong(1) << ":" << input->readLong(1) << ":" << input->readLong(1) << ",";
     }
     f << "],";
@@ -1230,7 +1230,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
   }
   case StarAttribute::ATTR_FRM_PROTECT:
     f << "protect,";
-    val=(int) input->readULong(1);
+    val=int(input->readULong(1));
     if (val&1) f << "pos[protect],";
     if (val&2) f << "size[protect],";
     if (val&4) f << "cntnt[protect],";
@@ -1268,7 +1268,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
   case StarAttribute::ATTR_FRM_FRMMACRO: { // macitem.cxx SvxMacroTableDtor::Read
     f << "frmMacro,";
     if (nVers>=1) {
-      nVers=(uint16_t) input->readULong(2);
+      nVers=static_cast<uint16_t>(input->readULong(2));
       f << "nVersion=" << nVers << ",";
     }
     int16_t nMacros;
@@ -1308,14 +1308,14 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     f << "bOrtho=" << input->readULong(1) << ",";
     f << "nLineHeight=" << input->readULong(1) << ",";
     f << "nGutterWidth=" << input->readLong(2) << ",";
-    int nWishWidth=(int) input->readULong(2);
+    int nWishWidth=int(input->readULong(2));
     f << "nWishWidth=" << nWishWidth << ",";
     f << "nPenStyle=" << input->readULong(1) << ",";
     f << "nPenWidth=" << input->readLong(2) << ",";
     f << "nPenRed=" << (input->readULong(2)>>8) << ",";
     f << "nPenGreen=" << (input->readULong(2)>>8) << ",";
     f << "nPenBlue=" << (input->readULong(2)>>8) << ",";
-    int nCol=(int) input->readULong(2);
+    int nCol=int(input->readULong(2));
     f << "N=" << nCol << ",";
     if (nWishWidth==0)
       break;

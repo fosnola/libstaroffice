@@ -144,37 +144,37 @@ public:
   //! operator>> for uint8_t
   STOFFInputStream &operator>>(uint8_t &res)
   {
-    res=(uint8_t) readULong(1);
+    res=static_cast<uint8_t>(readULong(1));
     return *this;
   }
   //! operator>> for int8_t
   STOFFInputStream &operator>>(int8_t &res)
   {
-    res=(int8_t) readLong(1);
+    res=static_cast<int8_t>(readLong(1));
     return *this;
   }
   //! operator>> for uint16_t
   STOFFInputStream &operator>>(uint16_t &res)
   {
-    res=(uint16_t) readULong(2);
+    res=static_cast<uint16_t>(readULong(2));
     return *this;
   }
   //! operator>> for int16_t
   STOFFInputStream &operator>>(int16_t &res)
   {
-    res=(int16_t) readLong(2);
+    res=static_cast<int16_t>(readLong(2));
     return *this;
   }
   //! operator>> for uint32_t
   STOFFInputStream &operator>>(uint32_t &res)
   {
-    res=(uint32_t) readULong(4);
+    res=static_cast<uint32_t>(readULong(4));
     return *this;
   }
   //! operator>> for int32_t
   STOFFInputStream &operator>>(int32_t &res)
   {
-    res=(int32_t) readLong(4);
+    res=static_cast<int32_t>(readLong(4));
     return *this;
   }
   //! operator>> for double

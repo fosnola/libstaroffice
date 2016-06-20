@@ -108,7 +108,7 @@ bool StarEncryption::checkPassword(uint32_t date, uint32_t time, std::vector<uin
   }
   std::vector<uint8_t> oData(16);
   for (size_t i=0; i<16; ++i)
-    oData[i]=(uint8_t) data.cstr()[i];
+    oData[i]=static_cast<uint8_t>(data.cstr()[i]);
   decode(oData);
   if (oData==cryptDateTime)
     return true;
@@ -126,7 +126,7 @@ bool StarEncryption::guessPassword(uint32_t date, uint32_t time, std::vector<uin
   }
   std::vector<uint8_t> oData(16);
   for (size_t i=0; i<16; ++i)
-    oData[i]=(uint8_t) data.cstr()[i];
+    oData[i]=static_cast<uint8_t>(data.cstr()[i]);
   static const uint8_t cEncode[16] = {
     0xAB, 0x9E, 0x43, 0x05, 0x38, 0x12, 0x4d, 0x44,
     0xD5, 0x7e, 0xe3, 0x84, 0x98, 0x23, 0x3f, 0xba
@@ -198,7 +198,7 @@ STOFFInputStreamPtr StarEncryption::decodeStream(STOFFInputStreamPtr input, uint
   long dataSize=input->size();
   input->seek(0, librevenge::RVNG_SEEK_SET);
   const uint8_t *data=input->read(size_t(dataSize), numRead);
-  if (!data || numRead!=(unsigned long) dataSize) {
+  if (!data || numRead!=static_cast<unsigned long>(dataSize)) {
     STOFF_DEBUG_MSG(("StarEncryption::decodeStream: can not read the original stream\n"));
     return res;
   }
@@ -207,7 +207,7 @@ STOFFInputStreamPtr StarEncryption::decodeStream(STOFFInputStreamPtr input, uint
   uint8_t *finalDataPtr=finalData;
   for (long l=0; l<dataSize; ++l, ++data)
     *(finalDataPtr++) = uint8_t((*data>>4)|(*data<<4))^mask;
-  shared_ptr<STOFFStringStream> stream(new STOFFStringStream((const unsigned char *)finalData,(unsigned int) dataSize));
+  shared_ptr<STOFFStringStream> stream(new STOFFStringStream(reinterpret_cast<const unsigned char *>(finalData),static_cast<unsigned int>(dataSize)));
   delete[] finalData;
   if (!stream) return res;
   res.reset(new STOFFInputStream(stream, input->readInverted()));

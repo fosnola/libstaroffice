@@ -78,7 +78,7 @@ try
 
   if (!header.get())
     return STOFF_C_NONE;
-  kind = (STOFFDocument::Kind)header->getKind();
+  kind = static_cast<STOFFDocument::Kind>(header->getKind());
   return header->isEncrypted() ? STOFF_C_SUPPORTED_ENCRYPTION : STOFF_C_EXCELLENT;
 }
 catch (...)

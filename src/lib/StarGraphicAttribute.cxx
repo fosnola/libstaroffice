@@ -1069,11 +1069,11 @@ bool StarGAttributeBorder::read(StarZone &zone, int nVers, long endPos, StarObje
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  m_distance=(int) input->readULong(2);
+  m_distance=int(input->readULong(2));
   int cLine=0;
   bool ok=true;
   while (input->tell()<endPos) {
-    cLine=(int) input->readULong(1);
+    cLine=int(input->readULong(1));
     if (cLine>3) break;
     STOFFBorderLine border;
     if (!input->readColor(border.m_color)) {
@@ -1082,9 +1082,9 @@ bool StarGAttributeBorder::read(StarZone &zone, int nVers, long endPos, StarObje
       ok=false;
       break;
     }
-    border.m_outWidth=(int) input->readULong(2);
-    border.m_inWidth=(int) input->readULong(2);
-    border.m_distance=(int) input->readULong(2);
+    border.m_outWidth=int(input->readULong(2));
+    border.m_inWidth=int(input->readULong(2));
+    border.m_distance=int(input->readULong(2));
     m_borders[cLine]=border;
   }
   if (ok && nVers>=1 && cLine&0x10) {
@@ -1093,7 +1093,7 @@ bool StarGAttributeBorder::read(StarZone &zone, int nVers, long endPos, StarObje
       f << "###distances,";
     }
     else {
-      for (int i=0; i<4; ++i) m_distances[i]=(int) input->readULong(2);
+      for (int i=0; i<4; ++i) m_distances[i]=int(input->readULong(2));
     }
   }
   StarAttribute::print(f);
@@ -1110,11 +1110,11 @@ bool StarGAttributeBoxInfo::read(StarZone &zone, int /*nVers*/, long endPos, Sta
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  m_flags=(int) input->readULong(1);
-  m_distance=(int) input->readULong(2);
+  m_flags=int(input->readULong(1));
+  m_distance=int(input->readULong(2));
   bool ok=true;
   while (input->tell()<endPos) {
-    int cLine=(int) input->readULong(1);
+    int cLine=int(input->readULong(1));
     if (cLine>1) break;
     STOFFBorderLine border;
     if (!input->readColor(border.m_color)) {
@@ -1123,9 +1123,9 @@ bool StarGAttributeBoxInfo::read(StarZone &zone, int /*nVers*/, long endPos, Sta
       ok=false;
       break;
     }
-    border.m_outWidth=(int) input->readULong(2);
-    border.m_inWidth=(int) input->readULong(2);
-    border.m_distance=(int) input->readULong(2);
+    border.m_outWidth=int(input->readULong(2));
+    border.m_inWidth=int(input->readULong(2));
+    border.m_distance=int(input->readULong(2));
     m_borderList.push_back(border);
   }
   StarAttribute::print(f);
@@ -1195,9 +1195,9 @@ bool StarGAttributeNamedArrow::read(StarZone &zone, int nVers, long endPos, Star
     m_polygon.m_points.resize(size_t(nPoints));
     for (size_t i=0; i<size_t(nPoints); ++i) {
       int dim[2];
-      for (int j=0; j<2; ++j) dim[j]=(int) input->readLong(4);
+      for (int j=0; j<2; ++j) dim[j]=int(input->readLong(4));
       m_polygon.m_points[i].m_point=STOFFVec2i(dim[0],dim[1]);
-      m_polygon.m_points[i].m_flags=(int) input->readULong(4);
+      m_polygon.m_points[i].m_flags=int(input->readULong(4));
     }
     f << "],";
   }
@@ -1331,12 +1331,12 @@ bool StarGAttributeNamedDash::read(StarZone &zone, int nVers, long endPos, StarO
     return false;
   }
   if (m_namedId<0) {
-    m_dashStyle=(int) input->readULong(4);
+    m_dashStyle=int(input->readULong(4));
     for (int i=0; i<2; ++i) {
-      m_numbers[i]=(int) input->readULong(2);
-      m_lengths[i]=(int) input->readULong(4);
+      m_numbers[i]=int(input->readULong(2));
+      m_lengths[i]=int(input->readULong(4));
     }
-    m_distance=(int) input->readULong(4);
+    m_distance=int(input->readULong(4));
   }
   StarAttribute::print(f);
   ascFile.addPos(pos);
@@ -1359,16 +1359,16 @@ bool StarGAttributeNamedGradient::read(StarZone &zone, int nVers, long endPos, S
     return false;
   }
   if (m_namedId<0) {
-    m_gradientType=(int) input->readULong(2);
+    m_gradientType=int(input->readULong(2));
     uint16_t red, green, blue, red2, green2, blue2;
     *input >> red >> green >> blue >> red2 >> green2 >> blue2;
     m_colors[0]=STOFFColor(uint8_t(red>>8),uint8_t(green>>8),uint8_t(blue>>8));
     m_colors[1]=STOFFColor(uint8_t(red2>>8),uint8_t(green2>>8),uint8_t(blue2>>8));
-    m_angle=(int) input->readULong(4);
-    m_border=(int) input->readULong(2);
-    for (int i=0; i<2; ++i) m_offsets[i]=(int) input->readULong(2);
-    for (int i=0; i<2; ++i) m_intensities[i]=(int) input->readULong(2);
-    if (nVers>=1) m_step=(int) input->readULong(2);
+    m_angle=int(input->readULong(4));
+    m_border=int(input->readULong(2));
+    for (int i=0; i<2; ++i) m_offsets[i]=int(input->readULong(2));
+    for (int i=0; i<2; ++i) m_intensities[i]=int(input->readULong(2));
+    if (nVers>=1) m_step=int(input->readULong(2));
     if (m_type==XATTR_FILLFLOATTRANSPARENCE) *input >> m_enable;
   }
   StarAttribute::print(f);
@@ -1392,12 +1392,12 @@ bool StarGAttributeNamedHatch::read(StarZone &zone, int nVers, long endPos, Star
     return false;
   }
   if (m_namedId<0) {
-    m_hatchType=(int) input->readULong(2);
+    m_hatchType=int(input->readULong(2));
     uint16_t red, green, blue;
     *input >> red >> green >> blue;
     m_color=STOFFColor(uint8_t(red>>8),uint8_t(green>>8),uint8_t(blue>>8));
-    m_distance=(int) input->readLong(4);
-    m_angle=(int) input->readLong(4);
+    m_distance=int(input->readLong(4));
+    m_angle=int(input->readLong(4));
   }
   StarAttribute::print(f);
   ascFile.addPos(pos);
@@ -1413,9 +1413,9 @@ bool StarGAttributeShadow::read(StarZone &zone, int /*vers*/, long endPos, StarO
   libstoff::DebugStream f;
   bool ok=true;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  m_location=(int) input->readULong(1);
-  m_width=(int) input->readULong(2);
-  m_transparency=(int) input->readULong(1);
+  m_location=int(input->readULong(1));
+  m_width=int(input->readULong(2));
+  m_transparency=int(input->readULong(1));
   if (!input->readColor(m_color)) {
     STOFF_DEBUG_MSG(("StarGraphicAttribute::StarGAttributeShadow::read: can not find a fill color\n"));
     f << "###color,";
@@ -1426,7 +1426,7 @@ bool StarGAttributeShadow::read(StarZone &zone, int /*vers*/, long endPos, StarO
     f << "###fillcolor,";
     ok=false;
   }
-  if (ok) m_style=(int) input->readULong(1);
+  if (ok) m_style=int(input->readULong(1));
 
   StarAttribute::print(f);
   ascFile.addPos(pos);

@@ -187,7 +187,7 @@ void StarCAttributeInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/
 void StarCAttributeUInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_SC_VALUE_FORMAT)
-    cell.m_format=(unsigned) m_value;
+    cell.m_format=unsigned(m_value);
   else if (m_type==ATTR_SC_HORJUSTIFY) {
     cell.m_propertyList.insert("style:repeat-content", false);
     switch (m_value) {
@@ -414,7 +414,7 @@ public:
       m_itemSet.m_style=libstoff::getString(text);
       if (!text.empty())
         f << "name=" << m_itemSet.m_style.cstr() << ",";
-      m_itemSet.m_family=(int) input->readULong(2);
+      m_itemSet.m_family=int(input->readULong(2));
     }
     bool ok=object.readItemSet(zone, m_limits, endPos, m_itemSet, object.getCurrentPool(false).get());
     if (!ok) f << "###";
@@ -535,7 +535,7 @@ bool StarCAttributeMargins::read(StarZone &zone, int /*vers*/, long endPos, Star
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   for (int i=0; i<4; ++i)
-    m_margins[i]=(int) input->readLong(2);
+    m_margins[i]=int(input->readLong(2));
   StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -552,7 +552,7 @@ bool StarCAttributeMerge::read(StarZone &zone, int /*vers*/, long endPos, StarOb
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   int span[2];
   for (int i=0; i<2; ++i)
-    span[i]=(int) input->readLong(2);
+    span[i]=int(input->readLong(2));
   m_span=STOFFVec2i(span[0], span[1]);
   StarAttribute::print(f);
   ascFile.addPos(pos);

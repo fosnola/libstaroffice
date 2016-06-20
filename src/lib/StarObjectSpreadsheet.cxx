@@ -121,7 +121,7 @@ struct ScMultiRecord {
     }
     m_numRecord=tableLen/4;
     for (uint32_t i=0; i<m_numRecord; ++i)
-      m_offsetList.push_back((uint32_t) input->readULong(4));
+      m_offsetList.push_back(static_cast<uint32_t>(input->readULong(4)));
     input->seek(m_startPos, librevenge::RVNG_SEEK_SET);
     return true;
   }
@@ -358,7 +358,7 @@ public:
     std::map<STOFFVec2i,int>::const_iterator rIt=m_rowHeightMap.lower_bound(STOFFVec2i(-1,row));
     if (rIt!=m_rowHeightMap.end() && rIt->first[0]<=row && rIt->first[1]>=row)
       return float(rIt->second)/20.f;
-    return (float) 12;
+    return 12.f;
   }
   //! returns a row content
   RowContent *getRow(int row)
@@ -633,7 +633,7 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
 
 bool StarObjectSpreadsheet::sendRow(int table, int row, STOFFSpreadsheetListenerPtr listener)
 {
-  if (!listener || table<0 || table>=(int) m_spreadsheetState->m_tableList.size() || !m_spreadsheetState->m_tableList[size_t(table)]) {
+  if (!listener || table<0 || table>=int(m_spreadsheetState->m_tableList.size()) || !m_spreadsheetState->m_tableList[size_t(table)]) {
     STOFF_DEBUG_MSG(("StarObjectSpreadsheet::send: can not find the table %d\n", table));
     return false;
   }
@@ -1289,7 +1289,7 @@ try
       f << "docFlags,";
       uint16_t vers;
       *input>>vers;
-      version=(int) vers;
+      version=int(vers);
       f << "vers=" << vers << ",";
       if (!zone.readString(string)) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: can not read a string\n"));
@@ -1313,13 +1313,13 @@ try
       if (input->tell()<endPos) f << "visibleTab=" << input->readULong(2) << ",";
       if (input->tell()<endPos) {
         *input>>vers;
-        version=(int) vers;
+        version=int(vers);
         f << "vers=" << vers << ",";
       }
       if (input->tell()<endPos) {
         uint16_t nMaxRow;
         *input>>nMaxRow;
-        maxRow=(int) nMaxRow;
+        maxRow=int(nMaxRow);
         if (nMaxRow!=8191) f << "maxRow=" << nMaxRow << ",";
       }
       break;
@@ -1493,10 +1493,10 @@ try
     }
     case 0x422c: {
       f << "charset,";
-      int guiType=(int) input->readULong(1);
+      int guiType=int(input->readULong(1));
       f << "gui[type]=" << guiType << ",";
       zone.setGuiType(guiType);
-      int charSet=(int) input->readULong(1);
+      int charSet=int(input->readULong(1));
       f << "set=" << charSet << ",";
       if (StarEncoding::getEncodingForId(charSet)!=StarEncoding::E_DONTKNOW)
         zone.setEncoding(StarEncoding::getEncodingForId(charSet));
@@ -1606,7 +1606,7 @@ try
       uint32_t nRange;
       *input >> nRange;
       if (uint32_t(zone.getRecordLastPosition()-input->tell())<nRange ||
-          (unsigned long)input->tell()+8*(unsigned long)(nRange)<=(unsigned long)zone.getRecordLastPosition()) {
+          static_cast<unsigned long>(input->tell())+8*static_cast<unsigned long>(nRange)<=static_cast<unsigned long>(zone.getRecordLastPosition())) {
         f << "ranges=[";
         for (uint32_t j=0; j<nRange; ++j)
           f << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
@@ -1795,7 +1795,7 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
       while (input->tell()<endDataPos) {
         if (table.getLoadingVersion()>=6) {
           pos=input->tell();
-          nCol=(int) input->readULong(1);
+          nCol=int(input->readULong(1));
           f.str("");
           f << "SCTable:C" << nCol << ",";
           ascFile.addPos(pos);
@@ -2080,7 +2080,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
       *input >> nCount;
       f << "n=" << nCount << ",";
       for (int i=0; i<nCount; ++i) {
-        int row=(int) input->readULong(2);
+        int row=int(input->readULong(2));
         f << "note" << i << "[R" << row << ",";
         StarObjectSpreadsheetInternal::Cell &cell=table.getCell(STOFFVec2i(column, row));
         // sc_cell.cxx ScBaseCell::LoadNotes, ScPostIt operator>>
@@ -2118,7 +2118,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
       std::cerr << "Attrib\n";
 #endif
       for (int i=0,row=0; i<nCount; ++i) {
-        int newRow=(int) input->readULong(2);
+        int newRow=int(input->readULong(2));
         f << newRow << ":";
         uint16_t nWhich=149;//StarAttribute::ATTR_SC_PATTERN-3;
         shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
@@ -2177,7 +2177,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(SCData)[C" << column << "-" << zone.getRecordLevel() << "]:" << scRecord;
-  int count=(int) input->readULong(2);
+  int count=int(input->readULong(2));
   f << "count=" << count << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -2195,7 +2195,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
       ascFile.addNote(f.str().c_str());
       break;
     }
-    int row=(int) input->readULong(2);
+    int row=int(input->readULong(2));
     f << "row=" << row << ",";
     uint8_t what;
     *input>>what;
@@ -2524,7 +2524,7 @@ bool StarObjectSpreadsheet::readSCChangeTrack(StarZone &zone, int /*version*/, l
       }
       default:
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack:unknown type\n"));
-        f << "###type=" << (int) type << ",";
+        f << "###type=" << int(type) << ",";
         break;
       }
       scRecord.closeContent("SCChangeTrack");
@@ -2682,11 +2682,11 @@ bool StarObjectSpreadsheet::readSCDBData(StarZone &zone, int /*version*/, long l
     f << "query" << i << "=[";
     f << libstoff::getString(string).cstr() << ",";
     f << "field=" << queryField << ",";
-    f << "op=" << (int)queryOp << ",";
+    f << "op=" << int(queryOp) << ",";
     if (queryByString) f << "byString,";
     if (!string.empty()) f << libstoff::getString(string).cstr() << ",";
     if (val<0 || val>0) f << "val=" << val << ",";
-    f << "connect=" << (int)queryConnect << ",";
+    f << "connect=" << int(queryConnect) << ",";
     f << "],";
   }
   for (int i=0; i<3; ++i) {
@@ -2973,7 +2973,7 @@ bool StarObjectSpreadsheet::readSCOutlineArray(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(SCOutlineArray)[" << zone.getRecordLevel() << "]:";
-  int depth=(int) input->readULong(2);
+  int depth=int(input->readULong(2));
   f << "depth=" << depth << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -2990,7 +2990,7 @@ bool StarObjectSpreadsheet::readSCOutlineArray(StarZone &zone)
       scRecord.close("SCOutlineArray");
       return true;
     }
-    int count=(int) input->readULong(2);
+    int count=int(input->readULong(2));
     f << "entries=[";
     for (int i=0; i<count; ++i) {
       if (!scRecord.openContent("SCOutlineArray")) {

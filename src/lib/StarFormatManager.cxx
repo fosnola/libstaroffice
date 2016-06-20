@@ -232,7 +232,7 @@ bool NumberFormatter::FormatItem::updateNumberingProperties(librevenge::RVNGProp
   switch (m_type) {
   case -3: {
     if (m_text.empty()) break;
-    int fChar=(int) m_text.cstr()[0];
+    int fChar=int(m_text.cstr()[0]);
     if (fChar>=32) {
       static int cCharWidths[ 128-32 ] = {
         1,1,1,2,2,3,2,1,1,1,1,2,1,1,1,1,
@@ -524,7 +524,7 @@ bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &d
   f << "nPoolId=" << input->readULong(2) << ",";
   int stringId=0xFFFF;
   if (flags&0x10) {
-    stringId=(int) input->readULong(2);
+    stringId=int(input->readULong(2));
     if (stringId!=0xffff)
       f << "nStringId=" << stringId << ",";
   }
@@ -532,7 +532,7 @@ bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &d
     f << "nObjRef=" << input->readULong(4) << ",";
   int moreFlags=0;
   if (flags&(zone.isCompatibleWith(0x201) ? 0x80:0x40)) {
-    moreFlags=(int) input->readULong(1);
+    moreFlags=int(input->readULong(1));
     f << "flags[more]=" << std::hex << moreFlags << std::dec << ",";
   }
   zone.closeFlagZone();
@@ -568,7 +568,7 @@ bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &d
 
   long lastPos=zone.getRecordLastPosition();
   while (input->tell()<lastPos) {
-    pos=(int) input->tell();
+    pos=long(input->tell());
     int rType=input->peek();
     if (rType=='S' && StarObjectText::readSWAttributeList(zone, doc))
       continue;
@@ -642,7 +642,7 @@ bool StarFormatManager::readSWNumberFormat(StarZone &zone)
     if (input->tell()<zone.getRecordLastPosition()) {
       f << "width=" << input->readLong(4) << ",";
       f << "height=" << input->readLong(4) << ",";
-      int cF=(int) input->readULong(1);
+      int cF=int(input->readULong(1));
       if (cF&1) f << "nVer[brush]=" << input->readULong(2) << ",";
       if (cF&2) f << "nVer[vertOrient]=" << input->readULong(2) << ",";
     }
@@ -790,7 +790,7 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
   long pos=input->tell();
   libstoff::DebugStream f;
   f << "Entries(NumberFormatter)[" << zone.getRecordLevel() << "]:";
-  long dataSz=(int) input->readULong(4);
+  long dataSz=int(input->readULong(4));
   long lastPos=zone.getRecordLastPosition();
   if (input->tell()+dataSz+6>lastPos) {
     STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: data size seems bad\n"));
@@ -808,9 +808,9 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
   f.str("");
   f << "NumberFormatter-T:";
   input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
-  int val=(int) input->readULong(2);
+  int val=int(input->readULong(2));
   if (val) f << "nId=" << val << ",";
-  long nSizeTableLen=(long) input->readULong(4);
+  long nSizeTableLen=long(input->readULong(4));
   f << "nTableSize=" << nSizeTableLen << ","; // copy in pMemStream
   long lastZonePos=input->tell()+nSizeTableLen;
   std::vector<long> fieldSize;
@@ -824,7 +824,7 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
 
   f << "listSize=[";
   for (long i=0; i<nSizeTableLen/4; ++i) {
-    fieldSize.push_back((long) input->readULong(4));
+    fieldSize.push_back(long(input->readULong(4)));
     f << std::hex << fieldSize.back() << std::dec << ",";
   }
   f << "],";
@@ -835,16 +835,16 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
   input->seek(actPos, librevenge::RVNG_SEEK_SET);
   f.str("");
   f << "NumberFormatter:";
-  int nVers=(int) input->readULong(2);
+  int nVers=int(input->readULong(2));
   f << "vers=" << nVers << ",";
-  val=(int) input->readULong(2);
+  val=int(input->readULong(2));
   if (val) f << "nSysOnStore=" << std::hex << val << std::dec << ",";
-  val=(int) input->readULong(2);
+  val=int(input->readULong(2));
   if (val) f << "eLge=" << val << ",";
   ascFile.addPos(actPos);
   ascFile.addNote(f.str().c_str());
 
-  unsigned long id=(unsigned long) input->readULong(4);
+  unsigned long id=static_cast<unsigned long>(input->readULong(4));
   size_t n=0;
   while (id!=0xffffffff) {
     pos=input->tell();
@@ -857,7 +857,7 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
     f.str("");
     StarFormatManagerInternal::NumberFormatter form;
     input->seek(2, librevenge::RVNG_SEEK_CUR);
-    form.m_language=(int) input->readULong(2);
+    form.m_language=int(input->readULong(2));
 
     if (n>=fieldSize.size()||input->tell()+fieldSize[n]>endDataPos) {
       STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: can not find end of field\n"));
@@ -890,7 +890,7 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
       }
     }
     for (int i=0; i<2; ++i)
-      form.m_limitsOp[i]=(int) input->readULong(2);
+      form.m_limitsOp[i]=int(input->readULong(2));
     *input >> form.m_isStandart;
     *input >> form.m_isUsed;
 
@@ -898,7 +898,7 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
     for (int i=0; i<4; ++i) {
       // ImpSvNumFor::Load
       StarFormatManagerInternal::NumberFormatter::Format subForm;
-      int N=(int) input->readULong(2);
+      int N=int(input->readULong(2));
       if (input->tell()+4*N>endFieldPos) break;
       for (int c=0; c<N; ++c) {
         StarFormatManagerInternal::NumberFormatter::FormatItem item;
@@ -909,16 +909,16 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
           break;
         }
         item.m_text=libstoff::getString(text).cstr();
-        item.m_type=(int) input->readLong(2);
+        item.m_type=int(input->readLong(2));
         subForm.m_itemList.push_back(item);
       }
       if (!ok) break;
-      subForm.m_type=(int) input->readULong(2);
+      subForm.m_type=int(input->readULong(2));
       *input>>subForm.m_hasThousandSep;
-      subForm.m_thousand=(int) input->readULong(2);
-      subForm.m_prefix=(int) input->readULong(2);
-      subForm.m_postfix=(int) input->readULong(2);
-      subForm.m_exponential=(int) input->readULong(2);
+      subForm.m_thousand=int(input->readULong(2));
+      subForm.m_prefix=int(input->readULong(2));
+      subForm.m_postfix=int(input->readULong(2));
+      subForm.m_exponential=int(input->readULong(2));
       if (!zone.readString(text) || input->tell()>endFieldPos) {
         STOFF_DEBUG_MSG(("StarFormatManager::readNumberFormatter: can not read the color name\n"));
         f << "###colorname";
@@ -958,7 +958,7 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
     }
 
     if (ok && input->tell()!=endFieldPos) {
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       if (val) f << "nNewStandardDefined=" << val << ",";
     }
 
@@ -979,7 +979,7 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
       break;
     }
     input->seek(endFieldPos, librevenge::RVNG_SEEK_SET);
-    id=(unsigned long) input->readULong(4);
+    id=static_cast<unsigned long>(input->readULong(4));
   }
 
   if (input->tell()+4>=endDataPos)
@@ -1047,7 +1047,7 @@ bool StarFormatManager::readSWPatternLCL(StarZone &zone)
     f.str("");
     f << "SWPatternLCL[token-" << zone.getRecordLevel() << "]:";
     zone.openFlagZone();
-    int nType=(int) input->readULong(2);
+    int nType=int(input->readULong(2));
     f << "nType=" << nType << ",";
     f << "nStrIdx=" << input->readULong(2) << ",";
     zone.closeFlagZone();

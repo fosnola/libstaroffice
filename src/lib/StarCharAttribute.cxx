@@ -349,7 +349,7 @@ void StarCAttributeUInt::addTo(STOFFFont &font, StarItemPool const */*pool*/, st
     std::string prefix(basic ? "fo:" : "style:");
     std::string extension(basic ? "" :  m_type==ATTR_CHR_CJK_LANGUAGE ? "-asian" : "-complex");
     std::string lang, country;
-    if (StarLanguage::getLanguageId((int) m_value, lang, country)) {
+    if (StarLanguage::getLanguageId(int(m_value), lang, country)) {
       if (!lang.empty())
         font.m_propertyList.insert((prefix + "language" + extension).c_str(), lang.c_str());
       if (!country.empty())
@@ -361,7 +361,7 @@ void StarCAttributeUInt::addTo(STOFFFont &font, StarItemPool const */*pool*/, st
   else if (m_type==ATTR_CHR_EMPHASIS_MARK) {
     if (m_value && ((m_value&0xC000)==0 || (m_value&0x3000)==0x3000 || (m_value&0xFFF)>4 || (m_value&0xFFF)==0)) {
       font.m_propertyList.insert("style:text-emphasize", "none");
-      STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown emphasis mark=%x\n", (unsigned)m_value));
+      STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeUInt: find unknown emphasis mark=%x\n", unsigned(m_value)));
     }
     else if (m_value) {
       std::string what((m_value&7)== 1 ? "dot" : (m_value&7)== 2 ? "circle" : (m_value&7)== 3 ? "disc" : "accent");
@@ -540,8 +540,8 @@ bool StarCAttributeEscapement::read(StarZone &zone, int /*vers*/, long endPos, S
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  m_scale=(int) input->readULong(1);
-  m_delta=(int)  input->readLong(2);
+  m_scale=int(input->readULong(1));
+  m_delta=int(input->readLong(2));
   StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -556,9 +556,9 @@ bool StarCAttributeFont::read(StarZone &zone, int /*vers*/, long endPos, StarObj
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
 
-  m_family=(int) input->readULong(1);
-  m_pitch=(int) input->readULong(1);
-  m_encoding=(int) input->readULong(1);
+  m_family=int(input->readULong(1));
+  m_pitch=int(input->readULong(1));
+  m_encoding=int(input->readULong(1));
   std::vector<uint32_t> fName, string;
   if (!zone.readString(fName)) {
     STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeFont::read: can not find the name\n"));
@@ -668,9 +668,9 @@ bool StarCAttributeFontSize::read(StarZone &zone, int nVers, long endPos, StarOb
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  m_size=(int) input->readULong(2);
-  m_proportion=(int) input->readULong((nVers>=1) ? 2 : 1);
-  if (nVers>=2) m_unit=(int) input->readULong(2);
+  m_size=int(input->readULong(2));
+  m_proportion=int(input->readULong((nVers>=1) ? 2 : 1));
+  if (nVers>=2) m_unit=int(input->readULong(2));
   StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());

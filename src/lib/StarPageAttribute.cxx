@@ -676,9 +676,9 @@ bool StarPAttributePage::read(StarZone &zone, int /*vers*/, long endPos, StarObj
   }
   if (!text.empty())
     m_name=libstoff::getString(text);
-  m_pageType=(int) input->readULong(1);
+  m_pageType=int(input->readULong(1));
   *input >> m_landscape;
-  m_used=(int) input->readULong(2);
+  m_used=int(input->readULong(2));
   StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -725,7 +725,7 @@ bool StarPAttributePrint::read(StarZone &zone, int /*vers*/, long endPos, StarOb
     ok=false;
   }
   for (int i=0; i<int(n); ++i)
-    m_tableList.push_back((int) input->readULong(2));
+    m_tableList.push_back(int(input->readULong(2)));
   StarAttribute::print(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -742,11 +742,11 @@ bool StarPAttributeRangeItem::read(StarZone &zone, int vers, long endPos, StarOb
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   int dim[4];
   if (vers==0) {
-    m_table=(int) input->readULong(2);
-    for (int i=0; i<4; ++i) dim[i]=(int) input->readULong(2);
+    m_table=int(input->readULong(2));
+    for (int i=0; i<4; ++i) dim[i]=int(input->readULong(2));
   }
   else {
-    for (int i=0; i<4; ++i) dim[i]=(int) input->readULong(2);
+    for (int i=0; i<4; ++i) dim[i]=int(input->readULong(2));
     if (vers>=2) {
       *input>>m_flags[0];
       if (input->tell()+1==endPos) // checkme

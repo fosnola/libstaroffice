@@ -403,8 +403,8 @@ bool StarPAttributeAdjust::read(StarZone &zone, int vers, long endPos, StarObjec
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   StarAttribute::print(f);
-  m_adjust=(int) input->readULong(1);
-  if (vers>=1) m_flags=(int) input->readULong(1);
+  m_adjust=int(input->readULong(1));
+  if (vers>=1) m_flags=int(input->readULong(1));
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -419,20 +419,20 @@ bool StarPAttributeLRSpace::read(StarZone &zone, int vers, long endPos, StarObje
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   for (int i=0; i<3; ++i) {
     if (i<2)
-      m_margins[i]=(int) input->readULong(2);
+      m_margins[i]=int(input->readULong(2));
     else
-      m_margins[i]=(int) input->readLong(2);
-    m_propMargins[i]=(int) input->readULong(vers>=1 ? 2 : 1);
+      m_margins[i]=int(input->readLong(2));
+    m_propMargins[i]=int(input->readULong(vers>=1 ? 2 : 1));
   }
   if (vers>=2)
-    m_textLeft=(int) input->readLong(2);
+    m_textLeft=int(input->readLong(2));
   uint8_t autofirst=0;
   if (vers>=3) {
     *input >> autofirst;
     m_autoFirst=(autofirst&1);
-    long marker=(long) input->readULong(4);
+    long marker=long(input->readULong(4));
     if (marker==0x599401FE)
-      m_bullet=(int) input->readULong(2);
+      m_bullet=int(input->readULong(2));
     else
       input->seek(-4, librevenge::RVNG_SEEK_CUR);
   }
@@ -458,8 +458,8 @@ bool StarPAttributeULSpace::read(StarZone &zone, int vers, long endPos, StarObje
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   for (int i=0; i<2; ++i) {
-    m_margins[i]=(int) input->readULong(2);
-    m_propMargins[i]=(int) input->readULong(vers>=1 ? 2 : 1);
+    m_margins[i]=int(input->readULong(2));
+    m_propMargins[i]=int(input->readULong(vers>=1 ? 2 : 1));
   }
   StarAttribute::print(f);
   ascFile.addPos(pos);

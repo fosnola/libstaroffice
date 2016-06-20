@@ -353,7 +353,7 @@ try
     return false;
   }
   long pictPos=input->tell();
-  int header=(int) input->readULong(2);
+  int header=int(input->readULong(2));
   input->seek(pictPos, librevenge::RVNG_SEEK_SET);
   std::string extension("pict");
   if (header==0x4142 || header==0x4d42) {
@@ -662,7 +662,7 @@ bool StarFileManager::readFont(StarZone &zone)
   if (wordline) f << "wordline,";
   if (outline) f << "outline,";
   if (shadow) f << "shadow,";
-  if (kerning) f << "kerning=" << (int) kerning << ",";
+  if (kerning) f << "kerning=" << int(kerning) << ",";
   if (zone.getHeaderVersion() >= 2) {
     bool vertical;
     int8_t relief;
@@ -691,7 +691,7 @@ bool StarFileManager::readJobSetUp(StarZone &zone, bool useJobLen)
   // sfx2_printer.cxx: SfxPrinter::Create
   // jobset.cxx: JobSetup operator>>
   long lastPos=zone.getRecordLastPosition();
-  int len=(int) input->readULong(2);
+  int len=int(input->readULong(2));
   f << "nLen=" << len << ",";
   if (len==0) {
     ascFile.addPos(pos);
@@ -710,14 +710,14 @@ bool StarFileManager::readJobSetUp(StarZone &zone, bool useJobLen)
   bool ok=false;
   int nSystem=0;
   if (input->tell()+2+64+3*32<=lastPos) {
-    nSystem=(int) input->readULong(2);
+    nSystem=int(input->readULong(2));
     f << "system=" << nSystem << ",";
     for (int i=0; i<4; ++i) {
       long actPos=input->tell();
       int const length=(i==0 ? 64 : 32);
       std::string name("");
       for (int c=0; c<length; ++c) {
-        char ch=(char)input->readULong(1);
+        char ch=char(input->readULong(1));
         if (ch==0) break;
         name+=ch;
       }
@@ -742,7 +742,7 @@ bool StarFileManager::readJobSetUp(StarZone &zone, bool useJobLen)
     int driverDataLen=0;
     f << "nSize2=" << input->readULong(2) << ",";
     f << "nSystem2=" << input->readULong(2) << ",";
-    driverDataLen=(int) input->readULong(4);
+    driverDataLen=int(input->readULong(4));
     f << "nOrientation=" << input->readULong(2) << ",";
     f << "nPaperBin=" << input->readULong(2) << ",";
     f << "nPaperFormat=" << input->readULong(2) << ",";
@@ -801,7 +801,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
   libstoff::DebugStream f;
   f << "Entries(ImageSVGDI)[" << zone.getRecordLevel() << "]:";
   std::string code;
-  for (int i=0; i<5; ++i) code+=(char) input->readULong(1);
+  for (int i=0; i<5; ++i) code+=char(input->readULong(1));
   if (code!="SVGDI") {
     input->seek(0, librevenge::RVNG_SEEK_SET);
     return false;
@@ -860,7 +860,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
     switch (type) {
     case 1:
       f << "pixel=" << input->readLong(4) << "x" << input->readLong(4) << ",";
-      for (int c=0; c<3; ++c) col[c]=(unsigned char)(input->readULong(2)>>8);
+      for (int c=0; c<3; ++c) col[c]=static_cast<unsigned char>(input->readULong(2)>>8);
       f << "col=" << STOFFColor(col[0],col[1],col[2]) << ",";
       break;
     case 2:
@@ -930,7 +930,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       }
       if (type==1025) {
         f << "style=" << input->readULong(2) << ",";
-        for (int c=0; c<3; ++c) col[c]=(unsigned char)(input->readULong(2)>>8);
+        for (int c=0; c<3; ++c) col[c]=static_cast<unsigned char>(input->readULong(2)>>8);
         f << "col=" << STOFFColor(col[0],col[1],col[2]) << ",";
         f << "distance=" << input->readLong(4) << ",";
         f << "nComment=" << input->readULong(4) << ",";
@@ -956,14 +956,14 @@ bool StarFileManager::readSVGDI(StarZone &zone)
         break;
       }
       text.clear();
-      for (int c=0; c<int(nTmp); ++c) text.push_back((uint32_t) input->readULong(1));
+      for (int c=0; c<int(nTmp); ++c) text.push_back(static_cast<uint32_t>(input->readULong(1)));
       input->seek(1, librevenge::RVNG_SEEK_CUR);
       f << libstoff::getString(text).cstr() << ",";
-      if (nUnicodeCommentActionNumber!=(uint32_t) i) break;
+      if (nUnicodeCommentActionNumber!=static_cast<uint32_t>(i)) break;
       uint16_t type1;
       uint32_t len;
       *input >> type1 >> len;
-      if (long(len)<4 || input->tell()+(long)len>endDataPos) {
+      if (long(len)<4 || input->tell()+long(len)>endDataPos) {
         STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad string\n"));
         f << "###unicode";
         break;
@@ -971,7 +971,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       if (type1==1032) {
         text.clear();
         int nUnicode=int(len-4)/2;
-        for (int c=0; c<nUnicode; ++c) text.push_back((uint32_t) input->readULong(2));
+        for (int c=0; c<nUnicode; ++c) text.push_back(static_cast<uint32_t>(input->readULong(2)));
         f << libstoff::getString(text).cstr() << ",";
       }
       else {
@@ -992,17 +992,17 @@ bool StarFileManager::readSVGDI(StarZone &zone)
         break;
       }
       text.clear();
-      for (int c=0; c<int(nTmp); ++c) text.push_back((uint32_t) input->readULong(1));
+      for (int c=0; c<int(nTmp); ++c) text.push_back(static_cast<uint32_t>(input->readULong(1)));
       input->seek(1, librevenge::RVNG_SEEK_CUR);
       f << libstoff::getString(text).cstr() << ",";
       f << "ary=[";
       for (int ary=0; ary<int(nAryLen); ++ary) f << input->readLong(4) << ",";
       f << "],";
-      if (nUnicodeCommentActionNumber!=(uint32_t) i) break;
+      if (nUnicodeCommentActionNumber!=static_cast<uint32_t>(i)) break;
       uint16_t type1;
       uint32_t len;
       *input >> type1 >> len;
-      if (long(len)<4 || input->tell()+(long)len>endDataPos) {
+      if (long(len)<4 || input->tell()+long(len)>endDataPos) {
         STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad string\n"));
         f << "###unicode";
         break;
@@ -1010,7 +1010,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       if (type1==1032) {
         text.clear();
         int nUnicode=int(len-4)/2;
-        for (int c=0; c<nUnicode; ++c) text.push_back((uint32_t) input->readULong(2));
+        for (int c=0; c<nUnicode; ++c) text.push_back(static_cast<uint32_t>(input->readULong(2)));
         f << libstoff::getString(text).cstr() << ",";
       }
       else {
@@ -1044,7 +1044,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
     }
     case 19:
       f << "pen,";
-      for (int c=0; c<3; ++c) col[c]=(unsigned char)(input->readULong(2)>>8);
+      for (int c=0; c<3; ++c) col[c]=static_cast<unsigned char>(input->readULong(2)>>8);
       color=STOFFColor(col[0],col[1],col[2]);
       if (!color.isBlack()) f << "col=" << color << ",";
       f << "penWidth=" << input->readULong(4) << ",";
@@ -1053,7 +1053,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
     case 20: {
       f << "font,";
       for (int c=0; c<2; ++c) {
-        for (int j=0; j<3; ++j) col[j]=(unsigned char)(input->readULong(2)>>8);
+        for (int j=0; j<3; ++j) col[j]=static_cast<unsigned char>(input->readULong(2)>>8);
         color=STOFFColor(col[0],col[1],col[2]);
         if ((c==1&&!color.isWhite()) || (c==0&&!color.isBlack()))
           f << (c==0 ? "col" : "col[fill]") << "=" << color << ",";
@@ -1066,7 +1066,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       }
       std::string name("");
       for (int c=0; c<32; ++c) {
-        char ch=(char) input->readULong(1);
+        char ch=char(input->readULong(1));
         if (!ch) break;
         name+=ch;
       }
@@ -1095,7 +1095,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
     case 21: // unsure
     case 22:
       f << (type==21 ? "brush[back]" : "brush[fill]") << ",";
-      for (int j=0; j<3; ++j) col[j]=(unsigned char)(input->readULong(2)>>8);
+      for (int j=0; j<3; ++j) col[j]=static_cast<unsigned char>(input->readULong(2)>>8);
       f << STOFFColor(col[0],col[1],col[2]) << ",";
       input->seek(6, librevenge::RVNG_SEEK_CUR); // unknown
       f << "style=" << input->readLong(2) << ",";
@@ -1176,7 +1176,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       f << (type==30 ? "mtf" : "floatComment") << ",";;
       // gdimtf.cxx operator>>(... GDIMetaFile )
       std::string name("");
-      for (int c=0; c<6; ++c) name+=(char) input->readULong(1);
+      for (int c=0; c<6; ++c) name+=char(input->readULong(1));
       if (name!="VCLMTF") {
         STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: find unexpected header\n"));
         f << "###name=" << name << ",";
@@ -1223,7 +1223,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
         << input->readLong(4) << "x" << input->readLong(4) << ",";
       f << "style=" << input->readULong(2) << ",";
       for (int c=0; c<2; ++c) {
-        for (int j=0; j<3; ++j) col[j]=(unsigned char)(input->readULong(2)>>8);
+        for (int j=0; j<3; ++j) col[j]=static_cast<unsigned char>(input->readULong(2)>>8);
         color=STOFFColor(col[0],col[1],col[2]);
         f << "col" << c << "=" << color << ",";
       }
@@ -1241,7 +1241,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       break;
     case 1027:
       f << "textline[color,comment],";
-      for (int j=0; j<3; ++j) col[j]=(unsigned char)(input->readULong(2)>>8);
+      for (int j=0; j<3; ++j) col[j]=static_cast<unsigned char>(input->readULong(2)>>8);
       f << "col=" << STOFFColor(col[0],col[1],col[2]) << ",";
       f << "set=" << input->readULong(1) << ",";
       f << "nComments=" << input->readULong(4) << ",";

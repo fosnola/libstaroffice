@@ -191,7 +191,7 @@ bool StarEncoding::read
   if (encoding==E_MS_1361)
     return StarEncodingOtherKorean::readKoreanMS1361(src, pos, encoding, dest);
   if (pos>=src.size()) return false;
-  int c=(int) src[pos++];
+  int c=int(src[pos++]);
   uint32_t unicode=uint32_t(c);
   switch (encoding) {
   case E_DONTKNOW: // MS1252 seems to be the default encoding
@@ -216,7 +216,7 @@ bool StarEncoding::read
       0x00F0, 0x00F1, 0x00F2, 0x00F3, 0x00F4, 0x00F5, 0x00F6, 0x00F7, /* 0xF0 */
       0x00F8, 0x00F9, 0x00FA, 0x00FB, 0x00FC, 0x00FD, 0x00FE, 0x00FF  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_APPLE_ROMAN: {
@@ -239,7 +239,7 @@ bool StarEncoding::read
       0xF8FF, 0x00D2, 0x00DA, 0x00DB, 0x00D9, 0x0131, 0x02C6, 0x02DC, /* 0xF0 */
       0x00AF, 0x02D8, 0x02D9, 0x02DA, 0x00B8, 0x02DD, 0x02DB, 0x02C7  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_IBM_437: {
@@ -262,7 +262,7 @@ bool StarEncoding::read
       0x2261, 0x00B1, 0x2265, 0x2264, 0x2320, 0x2321, 0x00F7, 0x2248, /* 0xF0 */
       0x00B0, 0x2219, 0x00B7, 0x221A, 0x207F, 0x00B2, 0x25A0, 0x00A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_IBM_850: {
@@ -285,7 +285,7 @@ bool StarEncoding::read
       0x00AD, 0x00B1, 0x2017, 0x00BE, 0x00B6, 0x00A7, 0x00F7, 0x00B8, /* 0xF0 */
       0x00B0, 0x00A8, 0x00B7, 0x00B9, 0x00B3, 0x00B2, 0x25A0, 0x00A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_IBM_860: {
@@ -308,7 +308,7 @@ bool StarEncoding::read
       0x2261, 0x00B1, 0x2265, 0x2264, 0x2320, 0x2321, 0x00F7, 0x2248, /* 0xF0 */
       0x00B0, 0x2219, 0x00B7, 0x221A, 0x207F, 0x00B2, 0x25A0, 0x00A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_IBM_861: {
@@ -331,7 +331,7 @@ bool StarEncoding::read
       0x2261, 0x00B1, 0x2265, 0x2264, 0x2320, 0x2321, 0x00F7, 0x2248, /* 0xF0 */
       0x00B0, 0x2219, 0x00B7, 0x221A, 0x207F, 0x00B2, 0x25A0, 0x00A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_IBM_863: {
@@ -354,7 +354,7 @@ bool StarEncoding::read
       0x2261, 0x00B1, 0x2265, 0x2264, 0x2320, 0x2321, 0x00F7, 0x2248, /* 0xF0 */
       0x00B0, 0x2219, 0x00B7, 0x221A, 0x207F, 0x00B2, 0x25A0, 0x00A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_IBM_865: {
@@ -377,12 +377,12 @@ bool StarEncoding::read
       0x2261, 0x00B1, 0x2265, 0x2264, 0x2320, 0x2321, 0x00F7, 0x2248, /* 0xF0 */
       0x00B0, 0x2219, 0x00B7, 0x221A, 0x207F, 0x00B2, 0x25A0, 0x00A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_SYMBOL: {
     if (c<0x1f) break;
-    unicode=(uint32_t)(0xF000+c);
+    unicode=static_cast<uint32_t>(0xF000+c);
     break;
   }
   case E_ISO_8859_1: {
@@ -401,7 +401,7 @@ bool StarEncoding::read
       0x00F0, 0x00F1, 0x00F2, 0x00F3, 0x00F4, 0x00F5, 0x00F6, 0x00F7, /* 0xF0 */
       0x00F8, 0x00F9, 0x00FA, 0x00FB, 0x00FC, 0x00FD, 0x00FE, 0x00FF  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0xa0];
+    unicode=static_cast<uint32_t>(val[c-0xa0]);
     break;
   }
   case E_ISO_8859_2: {
@@ -420,7 +420,7 @@ bool StarEncoding::read
       0x0111, 0x0144, 0x0148, 0x00F3, 0x00F4, 0x0151, 0x00F6, 0x00F7, /* 0xF0 */
       0x0159, 0x016F, 0x00FA, 0x0171, 0x00FC, 0x00FD, 0x0163, 0x02D9  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0xa0];
+    unicode=static_cast<uint32_t>(val[c-0xa0]);
     break;
   }
   case E_ISO_8859_3: {
@@ -439,7 +439,7 @@ bool StarEncoding::read
       0, 0x00F1, 0x00F2, 0x00F3, 0x00F4, 0x0121, 0x00F6, 0x00F7, /* 0xF0 */
       0x011D, 0x00F9, 0x00FA, 0x00FB, 0x00FC, 0x016D, 0x015D, 0x02D9  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0xa0];
+    unicode=static_cast<uint32_t>(val[c-0xa0]);
     break;
   }
   case E_ISO_8859_4: {
@@ -458,7 +458,7 @@ bool StarEncoding::read
       0x0111, 0x0146, 0x014D, 0x0137, 0x00F4, 0x00F5, 0x00F6, 0x00F7, /* 0xF0 */
       0x00F8, 0x0173, 0x00FA, 0x00FB, 0x00FC, 0x0169, 0x016B, 0x02D9  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0xa0];
+    unicode=static_cast<uint32_t>(val[c-0xa0]);
     break;
   }
   case E_ISO_8859_5: {
@@ -477,7 +477,7 @@ bool StarEncoding::read
       0x2116, 0x0451, 0x0452, 0x0453, 0x0454, 0x0455, 0x0456, 0x0457, /* 0xF0 */
       0x0458, 0x0459, 0x045A, 0x045B, 0x045C, 0x00A7, 0x045E, 0x045F  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0xa0];
+    unicode=static_cast<uint32_t>(val[c-0xa0]);
     break;
   }
   case E_ISO_8859_6: {
@@ -496,7 +496,7 @@ bool StarEncoding::read
       0x0650, 0x0651, 0x0652                                          /* 0xF0 */
       /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0xa0];
+    unicode=static_cast<uint32_t>(val[c-0xa0]);
     break;
   }
   case E_ISO_8859_7: {
@@ -515,7 +515,7 @@ bool StarEncoding::read
       0x03C0, 0x03C1, 0x03C2, 0x03C3, 0x03C4, 0x03C5, 0x03C6, 0x03C7, /* 0xF0 */
       0x03C8, 0x03C9, 0x03CA, 0x03CB, 0x03CC, 0x03CD, 0x03CE,      0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0xa0];
+    unicode=static_cast<uint32_t>(val[c-0xa0]);
     break;
   }
   case E_ISO_8859_8: {
@@ -534,7 +534,7 @@ bool StarEncoding::read
       0x05E0, 0x05E1, 0x05E2, 0x05E3, 0x05E4, 0x05E5, 0x05E6, 0x05E7, /* 0xF0 */
       0x05E8, 0x05E9, 0x05EA,      0,      0, 0x200E, 0x200F          /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0xa0];
+    unicode=static_cast<uint32_t>(val[c-0xa0]);
     break;
   }
   case E_ISO_8859_9: {
@@ -553,7 +553,7 @@ bool StarEncoding::read
       0x011F, 0x00F1, 0x00F2, 0x00F3, 0x00F4, 0x00F5, 0x00F6, 0x00F7, /* 0xF0 */
       0x00F8, 0x00F9, 0x00FA, 0x00FB, 0x00FC, 0x0131, 0x015F, 0x00FF  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0xa0];
+    unicode=static_cast<uint32_t>(val[c-0xa0]);
     break;
   }
   case E_ISO_8859_10: {
@@ -572,7 +572,7 @@ bool StarEncoding::read
       0x00F0, 0x0146, 0x014D, 0x00F3, 0x00F4, 0x00F5, 0x00F6, 0x0169, /* 0xF0 */
       0x00F8, 0x0173, 0x00FA, 0x00FB, 0x00FC, 0x00FD, 0x00FE, 0x0138  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0xa0];
+    unicode=static_cast<uint32_t>(val[c-0xa0]);
     break;
   }
   case E_ISO_8859_13: {
@@ -591,7 +591,7 @@ bool StarEncoding::read
       0x0161, 0x0144, 0x0146, 0x00F3, 0x014D, 0x00F5, 0x00F6, 0x00F7, /* 0xF0 */
       0x0173, 0x0142, 0x015B, 0x016B, 0x00FC, 0x017C, 0x017E, 0x2019  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0xa0];
+    unicode=static_cast<uint32_t>(val[c-0xa0]);
     break;
   }
   case E_ISO_8859_14: {
@@ -610,7 +610,7 @@ bool StarEncoding::read
       0x0175, 0x00F1, 0x00F2, 0x00F3, 0x00F4, 0x00F5, 0x00F6, 0x1E6B, /* 0xF0 */
       0x00F8, 0x00F9, 0x00FA, 0x00FB, 0x00FC, 0x00FD, 0x0177, 0x00FF  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0xa0];
+    unicode=static_cast<uint32_t>(val[c-0xa0]);
     break;
   }
   case E_ISO_8859_15: {
@@ -629,7 +629,7 @@ bool StarEncoding::read
       0x00F0, 0x00F1, 0x00F2, 0x00F3, 0x00F4, 0x00F5, 0x00F6, 0x00F7, /* 0xF0 */
       0x00F8, 0x00F9, 0x00FA, 0x00FB, 0x00FC, 0x00FD, 0x00FE, 0x00FF  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0xa0];
+    unicode=static_cast<uint32_t>(val[c-0xa0]);
     break;
   }
   case E_IBM_737: {
@@ -652,7 +652,7 @@ bool StarEncoding::read
       0x038F, 0x00B1, 0x2265, 0x2264, 0x03AA, 0x03AB, 0x00F7, 0x2248, /* 0xF0 */
       0x00B0, 0x2219, 0x00B7, 0x221A, 0x207F, 0x00B2, 0x25A0, 0x00A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_IBM_775: {
@@ -675,7 +675,7 @@ bool StarEncoding::read
       0x00AD, 0x00B1, 0x201C, 0x00BE, 0x00B6, 0x00A7, 0x00F7, 0x201E, /* 0xF0 */
       0x00B0, 0x2219, 0x00B7, 0x00B9, 0x00B3, 0x00B2, 0x25A0, 0x00A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_IBM_852: {
@@ -698,7 +698,7 @@ bool StarEncoding::read
       0x00AD, 0x02DD, 0x02DB, 0x02C7, 0x02D8, 0x00A7, 0x00F7, 0x00B8, /* 0xF0 */
       0x00B0, 0x00A8, 0x02D9, 0x0171, 0x0158, 0x0159, 0x25A0, 0x00A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_IBM_855: {
@@ -721,7 +721,7 @@ bool StarEncoding::read
       0x00AD, 0x044B, 0x042B, 0x0437, 0x0417, 0x0448, 0x0428, 0x044D, /* 0xF0 */
       0x042D, 0x0449, 0x0429, 0x0447, 0x0427, 0x00A7, 0x25A0, 0x00A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_IBM_857: {
@@ -744,7 +744,7 @@ bool StarEncoding::read
       0x00AD, 0x00B1,      0, 0x00BE, 0x00B6, 0x00A7, 0x00F7, 0x00B8, /* 0xF0 */
       0x00B0, 0x00A8, 0x00B7, 0x00B9, 0x00B3, 0x00B2, 0x25A0, 0x00A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_IBM_862: {
@@ -767,7 +767,7 @@ bool StarEncoding::read
       0x2261, 0x00B1, 0x2265, 0x2264, 0x2320, 0x2321, 0x00F7, 0x2248, /* 0xF0 */
       0x00B0, 0x2219, 0x00B7, 0x221A, 0x207F, 0x00B2, 0x25A0, 0x00A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_IBM_864: {
@@ -790,7 +790,7 @@ bool StarEncoding::read
       0xFE7D, 0x0651, 0xFEE5, 0xFEE9, 0xFEEC, 0xFEF0, 0xFEF2, 0xFED0, /* 0xF0 */
       0xFED5, 0xFEF5, 0xFEF6, 0xFEDD, 0xFED9, 0xFEF1, 0x25A0          /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_IBM_866: {
@@ -813,7 +813,7 @@ bool StarEncoding::read
       0x0401, 0x0451, 0x0404, 0x0454, 0x0407, 0x0457, 0x040E, 0x045E, /* 0xF0 */
       0x00B0, 0x2219, 0x00B7, 0x221A, 0x2116, 0x00A4, 0x25A0, 0x00A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_IBM_869: {
@@ -836,7 +836,7 @@ bool StarEncoding::read
       0x00AD, 0x00B1, 0x03C5, 0x03C6, 0x03C7, 0x00A7, 0x03C8, 0x0385, /* 0xF0 */
       0x00B0, 0x00A8, 0x03C9, 0x03CB, 0x03B0, 0x03CE, 0x25A0, 0x00A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x86];
+    unicode=static_cast<uint32_t>(val[c-0x86]);
     break;
   }
   case E_TIS_620: // checkme
@@ -856,7 +856,7 @@ bool StarEncoding::read
       0x0E50, 0x0E51, 0x0E52, 0x0E53, 0x0E54, 0x0E55, 0x0E56, 0x0E57, /* 0xF0 */
       0x0E58, 0x0E59, 0x0E5A, 0x0E5B                                  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0xa0];
+    unicode=static_cast<uint32_t>(val[c-0xa0]);
     break;
   }
   case E_MS_1250: {
@@ -879,7 +879,7 @@ bool StarEncoding::read
       0x0111, 0x0144, 0x0148, 0x00F3, 0x00F4, 0x0151, 0x00F6, 0x00F7, /* 0xF0 */
       0x0159, 0x016F, 0x00FA, 0x0171, 0x00FC, 0x00FD, 0x0163, 0x02D9  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_MS_1251: {
@@ -902,7 +902,7 @@ bool StarEncoding::read
       0x0440, 0x0441, 0x0442, 0x0443, 0x0444, 0x0445, 0x0446, 0x0447, /* 0xF0 */
       0x0448, 0x0449, 0x044A, 0x044B, 0x044C, 0x044D, 0x044E, 0x044F  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_MS_1253: {
@@ -925,7 +925,7 @@ bool StarEncoding::read
       0x03C0, 0x03C1, 0x03C2, 0x03C3, 0x03C4, 0x03C5, 0x03C6, 0x03C7, /* 0xF0 */
       0x03C8, 0x03C9, 0x03CA, 0x03CB, 0x03CC, 0x03CD, 0x03CE,      0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_MS_1254: {
@@ -948,7 +948,7 @@ bool StarEncoding::read
       0x011F, 0x00F1, 0x00F2, 0x00F3, 0x00F4, 0x00F5, 0x00F6, 0x00F7, /* 0xF0 */
       0x00F8, 0x00F9, 0x00FA, 0x00FB, 0x00FC, 0x0131, 0x015F, 0x00FF  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_MS_1255: {
@@ -971,7 +971,7 @@ bool StarEncoding::read
       0x05E0, 0x05E1, 0x05E2, 0x05E3, 0x05E4, 0x05E5, 0x05E6, 0x05E7, /* 0xF0 */
       0x05E8, 0x05E9, 0x05EA,      0,      0, 0x200E, 0x200F,      0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_MS_1256: {
@@ -994,7 +994,7 @@ bool StarEncoding::read
       0x064B, 0x064C, 0x064D, 0x064E, 0x00F4, 0x064F, 0x0650, 0x00F7, /* 0xF0 */
       0x0651, 0x00F9, 0x0652, 0x00FB, 0x00FC, 0x200E, 0x200F, 0x06D2  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_MS_1257: {
@@ -1017,7 +1017,7 @@ bool StarEncoding::read
       0x0161, 0x0144, 0x0146, 0x00F3, 0x014D, 0x00F5, 0x00F6, 0x00F7, /* 0xF0 */
       0x0173, 0x0142, 0x015B, 0x016B, 0x00FC, 0x017C, 0x017E, 0x02D9  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_MS_1258: {
@@ -1040,7 +1040,7 @@ bool StarEncoding::read
       0x0111, 0x00F1, 0x0323, 0x00F3, 0x00F4, 0x01A1, 0x00F6, 0x00F7, /* 0xF0 */
       0x00F8, 0x00F9, 0x00FA, 0x00FB, 0x00FC, 0x01B0, 0x20AB, 0x00FF  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_APPLE_CENTEURO: {
@@ -1063,7 +1063,7 @@ bool StarEncoding::read
       0x016B, 0x016E, 0x00DA, 0x016F, 0x0170, 0x0171, 0x0172, 0x0173, /* 0xF0 */
       0x00DD, 0x00FD, 0x0137, 0x017B, 0x0141, 0x017C, 0x0122, 0x02C7  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_APPLE_CROATIAN: {
@@ -1086,7 +1086,7 @@ bool StarEncoding::read
       0x0111, 0x00D2, 0x00DA, 0x00DB, 0x00D9, 0x0131, 0x02C6, 0x02DC, /* 0xF0 */
       0x00AF, 0x03C0, 0x00CB, 0x02DA, 0x00B8, 0x00CA, 0x00E6, 0x02C7  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_APPLE_CYRILLIC: {
@@ -1109,7 +1109,7 @@ bool StarEncoding::read
       0x0440, 0x0441, 0x0442, 0x0443, 0x0444, 0x0445, 0x0446, 0x0447, /* 0xF0 */
       0x0448, 0x0449, 0x044A, 0x044B, 0x044C, 0x044D, 0x044E, 0x00A4  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_APPLE_GREEK: {
@@ -1132,7 +1132,7 @@ bool StarEncoding::read
       0x03C0, 0x03CE, 0x03C1, 0x03C3, 0x03C4, 0x03B8, 0x03C9, 0x03C2, /* 0xF0 */
       0x03C7, 0x03C5, 0x03B6, 0x03CA, 0x03CB, 0x0390, 0x03B0, 0xF8A0  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_APPLE_ICELAND: {
@@ -1155,7 +1155,7 @@ bool StarEncoding::read
       0xF8FF, 0x00D2, 0x00DA, 0x00DB, 0x00D9, 0x0131, 0x02C6, 0x02DC, /* 0xF0 */
       0x00AF, 0x02D8, 0x02D9, 0x02DA, 0x00B8, 0x02DD, 0x02DB, 0x02C7  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_APPLE_ROMANIAN: {
@@ -1178,7 +1178,7 @@ bool StarEncoding::read
       0xF8FF, 0x00D2, 0x00DA, 0x00DB, 0x00D9, 0x0131, 0x02C6, 0x02DC, /* 0xF0 */
       0x00AF, 0x02D8, 0x02D9, 0x02DA, 0x00B8, 0x02DD, 0x02DB, 0x02C7  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_APPLE_TURKISH: {
@@ -1201,7 +1201,7 @@ bool StarEncoding::read
       0xF8FF, 0x00D2, 0x00DA, 0x00DB, 0x00D9, 0xF8A0, 0x02C6, 0x02DC, /* 0xF0 */
       0x00AF, 0x02D8, 0x02D9, 0x02DA, 0x00B8, 0x02DD, 0x02DB, 0x02C7  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_APPLE_UKRAINIAN: {
@@ -1224,7 +1224,7 @@ bool StarEncoding::read
       0x0440, 0x0441, 0x0442, 0x0443, 0x0444, 0x0445, 0x0446, 0x0447, /* 0xF0 */
       0x0448, 0x0449, 0x044A, 0x044B, 0x044C, 0x044D, 0x044E, 0x00A4  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_KOI8_R: {
@@ -1247,14 +1247,14 @@ bool StarEncoding::read
       0x041F, 0x042F, 0x0420, 0x0421, 0x0422, 0x0423, 0x0416, 0x0412, /* 0xF0 */
       0x042C, 0x042B, 0x0417, 0x0428, 0x042D, 0x0429, 0x0427, 0x042A  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_UTF7: {
     // we must decode the complete string here
     --pos;
     while (pos < src.size()) {
-      c=(int) src[pos++];
+      c=int(src[pos++]);
       if (c!=int('+')) {
         dest.push_back(uint32_t(c));
         continue;
@@ -1263,10 +1263,10 @@ bool StarEncoding::read
       int nBits=0;
       uint32_t actValue=0;
       while (pos<src.size()) {
-        c=(int) src[pos++];
+        c=int(src[pos++]);
         if (c=='-') {
           if (!firstWrite) // +- is +
-            dest.push_back((uint32_t) '+');
+            dest.push_back(static_cast<uint32_t>('+'));
           else if (nBits>=6) {
             STOFF_DEBUG_MSG(("StarEncoding::read: arrgh nBits=%d\n", nBits));
           }
@@ -1294,7 +1294,7 @@ bool StarEncoding::read
           49,   50,   51, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF      /* 0x78-0x7F xyz{|}~ */
         };
         if (c>=0x80 || charToId[c]==0xff) {
-          STOFF_DEBUG_MSG(("StarEncoding::read: arrgh find for %x\n", (unsigned int)c));
+          STOFF_DEBUG_MSG(("StarEncoding::read: arrgh find for %x\n", static_cast<unsigned int>(c)));
           return false;
         }
         nBits+=6;
@@ -1321,17 +1321,17 @@ bool StarEncoding::read
       else bad=true;
     }
     if (bad||pos+numExtra>src.size()) {
-      STOFF_DEBUG_MSG(("StarEncoding::read: can not read some caracter for %x\n", (unsigned int)c));
+      STOFF_DEBUG_MSG(("StarEncoding::read: can not read some caracter for %x\n", static_cast<unsigned int>(c)));
       return false;
     }
     dest.push_back(uint32_t(c));
     for (size_t i=0; i<numExtra; ++i) {
-      c=(char)src[pos++];
+      c=char(src[pos++]);
       if ((c&0xc0)!=0x80) {
-        STOFF_DEBUG_MSG(("StarEncoding::read: some extra caracter seems bad for %x, try to correct\n", (unsigned int)c));
+        STOFF_DEBUG_MSG(("StarEncoding::read: some extra caracter seems bad for %x, try to correct\n", static_cast<unsigned int>(c)));
         c=(c&0x3f)|0x80;
       }
-      dest.push_back((uint32_t)c);
+      dest.push_back(static_cast<uint32_t>(c));
     }
     return true;
   }
@@ -1355,15 +1355,15 @@ bool StarEncoding::read
       0x041F, 0x042F, 0x0420, 0x0421, 0x0422, 0x0423, 0x0416, 0x0412, /* 0xF0 */
       0x042C, 0x042B, 0x0417, 0x0428, 0x042D, 0x0429, 0x0427, 0x042A  /* 0xF0 */
     };
-    unicode=(uint32_t) val[c-0x80];
+    unicode=static_cast<uint32_t>(val[c-0x80]);
     break;
   }
   case E_ISCII_DEVANAGARI: {
     if (c==0x9) {
       if (pos>=src.size()) return false;
-      c=(int) src[pos++];
+      c=int(src[pos++]);
       if (c<1 || c>0x5a) {
-        STOFF_DEBUG_MSG(("StarEncoding::read: find unexpected char 0x09%x\n", (unsigned int)(c)));
+        STOFF_DEBUG_MSG(("StarEncoding::read: find unexpected char 0x09%x\n", static_cast<unsigned int>(c)));
         break;
       }
       static int const(val[])= {
@@ -1380,7 +1380,7 @@ bool StarEncoding::read
         0, 0x0966, 0x0967, 0x0968, 0x0969, 0x096A, 0x096B, 0x096C, /* F0 */
         0x096D, 0x096E, 0x096F
       };
-      unicode=(uint32_t) val[c-1];
+      unicode=static_cast<uint32_t>(val[c-1]);
       break;
     }
     if (c<0xa1 || c>0xfa) break;
@@ -1398,7 +1398,7 @@ bool StarEncoding::read
       0, 0x0966, 0x0967, 0x0968, 0x0969, 0x096A, 0x096B, 0x096C, /* F0 */
       0x096D, 0x096E, 0x096F
     };
-    unicode=(uint32_t) val[c-0xa1];
+    unicode=static_cast<uint32_t>(val[c-0xa1]);
     break;
   }
   case E_JIS_X_0201: // ok
@@ -1440,7 +1440,7 @@ bool StarEncoding::read
   if (!unicode) {
     static int numError=0;
     if (++numError<10) {
-      STOFF_DEBUG_MSG(("StarEncoding::read: unknown caracter %x\n", (unsigned int)c));
+      STOFF_DEBUG_MSG(("StarEncoding::read: unknown caracter %x\n", static_cast<unsigned int>(c)));
     }
   }
   dest.push_back(unicode);

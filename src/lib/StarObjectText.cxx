@@ -173,7 +173,7 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
     }
     if (pool && pool->read(zone)) {
       if (extraPool) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSfxStyleSheets: create extra pool of type %d\n", (int) pool->getType()));
+        STOFF_DEBUG_MSG(("StarObjectText::readSfxStyleSheets: create extra pool of type %d\n", int(pool->getType())));
       }
       if (!mainPool) mainPool=pool;
       pool.reset();
@@ -229,7 +229,7 @@ try
     switch (type) {
     case '+': { // extra outline
       zone.openFlagZone();
-      int N=(int) input->readULong(1);
+      int N=int(input->readULong(1));
       f << "N=" << N << ",";
       zone.closeFlagZone();
       if (input->tell()+3*N>zone.getRecordLastPosition()) {
@@ -306,7 +306,7 @@ try
     switch (type) {
     case 'P': {
       zone.openFlagZone();
-      int N=(int) input->readULong(2);
+      int N=int(input->readULong(2));
       f << "N=" << N << ",";
       zone.closeFlagZone();
       for (int i=0; i<N; ++i) {
@@ -363,7 +363,7 @@ bool StarObjectText::readSWPageDef(StarZone &zone)
   f << "Entries(SWPageDef)[" << zone.getRecordLevel() << "]:";
   int fl=zone.openFlagZone();
   if (fl&0xf0) f << "fl=" << (fl>>4) << ",";
-  int val=(int) input->readULong(2);
+  int val=int(input->readULong(2));
   librevenge::RVNGString poolName;
   if (!zone.getPoolName(val, poolName)) {
     STOFF_DEBUG_MSG(("StarObjectText::readSwPageDef: can not find a pool name\n"));
@@ -371,16 +371,16 @@ bool StarObjectText::readSWPageDef(StarZone &zone)
   }
   else if (!poolName.empty())
     f << poolName.cstr() << ",";
-  val=(int) input->readULong(2);
+  val=int(input->readULong(2));
   if (val) f << "nFollow=" << val << ",";
-  val=(int) input->readULong(2);
+  val=int(input->readULong(2));
   if (val) f << "nPoolId2=" << val << ",";
-  val=(int) input->readULong(1);
+  val=int(input->readULong(1));
   if (val) f << "nNumType=" << val << ",";
-  val=(int) input->readULong(2);
+  val=int(input->readULong(2));
   if (val) f << "nUseOn=" << val << ",";
   if (zone.isCompatibleWith(0x16,0x22, 0x101)) {
-    val=(int) input->readULong(2);
+    val=int(input->readULong(2));
     if (val!=0xffff) f << "regCollIdx=" << val << ",";
   }
   zone.closeFlagZone();
@@ -405,16 +405,16 @@ bool StarObjectText::readSWPageDef(StarZone &zone)
     case '1': // foot info
     case '2': { // page foot info
       f << (type=='1' ? "footInfo" : "pageFootInfo") << ",";
-      val=(int) input->readLong(4);
+      val=int(input->readLong(4));
       if (val) f << "height=" << val << ",";
-      val=(int) input->readLong(4);
+      val=int(input->readLong(4));
       if (val) f << "topDist=" << val << ",";
-      val=(int) input->readLong(4);
+      val=int(input->readLong(4));
       if (val) f << "bottomDist=" << val << ",";
-      val=(int) input->readLong(2);
+      val=int(input->readLong(2));
       if (val) f << "adjust=" << val << ",";
       f << "width=" << input->readLong(4) << "/" << input->readLong(4) << ",";
-      val=(int) input->readLong(2);
+      val=int(input->readLong(2));
       if (val) f << "penWidth=" << val << ",";
       STOFFColor col;
       if (!input->readColor(col)) {
@@ -458,15 +458,15 @@ bool StarObjectText::readSWAttribute(StarZone &zone, StarObject &doc)
   if (fl&0x10) *input >> nBegin;
   if (fl&0x20) *input >> nEnd;
 
-  int which=(int) nWhich;
+  int which=int(nWhich);
   if (which>0x6001 && zone.getDocumentVersion()!=0x0219) // bug correction 0x95500
     which+=15;
-  if (which>=0x1000 && which<=0x1024) which+=-0x1000+(int) StarAttribute::ATTR_CHR_CASEMAP;
-  else if (which>=0x2000 && which<=0x2009) which+=-0x2000+(int) StarAttribute::ATTR_TXT_INETFMT;
-  else if (which>=0x3000 && which<=0x3006) which+=-0x3000+(int) StarAttribute::ATTR_TXT_FIELD;
-  else if (which>=0x4000 && which<=0x4013) which+=-0x4000+(int) StarAttribute::ATTR_PARA_LINESPACING;
-  else if (which>=0x5000 && which<=0x5022) which+=-0x5000+(int) StarAttribute::ATTR_FRM_FILL_ORDER;
-  else if (which>=0x6000 && which<=0x6013) which+=-0x6000+(int) StarAttribute::ATTR_GRF_MIRRORGRF;
+  if (which>=0x1000 && which<=0x1024) which+=-0x1000+int(StarAttribute::ATTR_CHR_CASEMAP);
+  else if (which>=0x2000 && which<=0x2009) which+=-0x2000+int(StarAttribute::ATTR_TXT_INETFMT);
+  else if (which>=0x3000 && which<=0x3006) which+=-0x3000+int(StarAttribute::ATTR_TXT_FIELD);
+  else if (which>=0x4000 && which<=0x4013) which+=-0x4000+int(StarAttribute::ATTR_PARA_LINESPACING);
+  else if (which>=0x5000 && which<=0x5022) which+=-0x5000+int(StarAttribute::ATTR_FRM_FILL_ORDER);
+  else if (which>=0x6000 && which<=0x6013) which+=-0x6000+int(StarAttribute::ATTR_GRF_MIRRORGRF);
   else {
     STOFF_DEBUG_MSG(("StarObjectText::readSWAttribute: find unexpected which value\n"));
     which=-1;
@@ -556,11 +556,11 @@ bool StarObjectText::readSWBookmarkList(StarZone &zone)
       f << libstoff::getString(text).cstr();
     if (ok) {
       zone.openFlagZone();
-      int val=(int) input->readULong(2);
+      int val=int(input->readULong(2));
       if (val) f << "nOffset=" << val << ",";
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       if (val) f << "nKey=" << val << ",";
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       if (val) f << "nMod=" << val << ",";
       zone.closeFlagZone();
     }
@@ -601,11 +601,11 @@ bool StarObjectText::readSWContent(StarZone &zone)
     zone.openFlagZone();
   int nNodes;
   if (zone.isCompatibleWith(0x201))
-    nNodes=(int) input->readULong(4);
+    nNodes=int(input->readULong(4));
   else {
     if (zone.isCompatibleWith(5))
       f << "sectId=" << input->readULong(2) << ",";
-    nNodes=(int) input->readULong(2);
+    nNodes=int(input->readULong(2));
   }
   f << "N=" << nNodes << ",";
   if (zone.isCompatibleWith(5))
@@ -720,7 +720,7 @@ bool StarObjectText::readSWDBName(StarZone &zone)
       f << "sTableName=" << libstoff::getString(text).cstr() << ",";
   }
   if (zone.isCompatibleWith(0x12,0x22, 0x101)) {
-    int nCount=(int) input->readULong(2);
+    int nCount=int(input->readULong(2));
     f << "nCount=" << nCount << ",";
     if (nCount>0 && zone.isCompatibleWith(0x28)) {
       f << "dbData=[";
@@ -1002,11 +1002,11 @@ bool StarObjectText::readSWGraphNode(StarZone &zone)
       zone.closeFlagZone();
       if (polyFl&0x10) {
         // poly2.cxx operator>>
-        int numPoly=(int) input->readULong(2);
+        int numPoly=int(input->readULong(2));
         for (int i=0; i<numPoly; ++i) {
           f << "poly" << i << "=[";
           // poly.cxx operator>>
-          int numPoints=(int) input->readULong(2);
+          int numPoints=int(input->readULong(2));
           if (input->tell()+8*numPoints>lastPos) {
             STOFF_DEBUG_MSG(("StarObjectText::readSWGraphNode: can not read a polygon\n"));
             f << "###poly";
@@ -1080,7 +1080,7 @@ bool StarObjectText::readSWImageMap(StarZone &zone)
   if (flag&0x20) {
     // svt_imap.cxx: ImageMap::Read
     std::string cMagic("");
-    for (int i=0; i<6; ++i) cMagic+=(char) input->readULong(1);
+    for (int i=0; i<6; ++i) cMagic+=char(input->readULong(1));
     if (cMagic!="SDIMAP") {
       STOFF_DEBUG_MSG(("StarObjectText::readSWImageMap: cMagic is bad\n"));
       f << "###cMagic=" << cMagic << ",";
@@ -1177,7 +1177,7 @@ bool StarObjectText::readSWLayoutInfo(StarZone &zone)
       break;
     }
     f.str("");
-    f << "SWLayoutInfo[" << std::hex << int((unsigned char)type) << std::dec << "]:";
+    f << "SWLayoutInfo[" << std::hex << int(static_cast<unsigned char>(type)) << std::dec << "]:";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
     zone.closeSWRecord(type, "SWLayoutInfo");
@@ -1205,13 +1205,13 @@ bool StarObjectText::readSWLayoutSub(StarZone &zone)
   f << "Entries(SWLayoutSub)[" << std::hex << rType << std::dec << "-" << zone.getRecordLevel() << "]:";
   int const expectedSz=rType==0xd2 ? 11 : 9;
   long lastPos=zone.getRecordLastPosition();
-  int val=(int) input->readULong(1);
+  int val=int(input->readULong(1));
   if (val!=0x11) f << "f0=" << val << ",";
-  val=(int) input->readULong(1);
+  val=int(input->readULong(1));
   if (val!=0xaf) f << "f1=" << val << ",";
-  val=(int) input->readULong(1); // small value 1-1f
+  val=int(input->readULong(1)); // small value 1-1f
   if (val) f << "f2=" << val << ",";
-  val=(int) input->readULong(1);
+  val=int(input->readULong(1));
   if (val) f << "f3=" << std::hex << val << std::dec << ",";
   if (input->tell()+(val&0xf)+expectedSz>lastPos) {
     STOFF_DEBUG_MSG(("StarObjectText::readSWLayoutSub: the zone seems too short\n"));
@@ -1233,7 +1233,7 @@ bool StarObjectText::readSWLayoutSub(StarZone &zone)
       break;
     }
     f.str("");
-    f << "SWLayoutSub[" << std::hex << int((unsigned char)type) << std::dec << "]:";
+    f << "SWLayoutSub[" << std::hex << int(static_cast<unsigned char>(type)) << std::dec << "]:";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
     input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
@@ -1330,8 +1330,8 @@ bool StarObjectText::readSWNumRule(StarZone &zone, char cKind)
   f << "Entries(SWNumRuleDef)[" << cKind << "-" << zone.getRecordLevel() << "]:";
   int val;
   if (zone.isCompatibleWith(0x201)) {
-    int cFlags=(int) zone.openFlagZone();
-    int nStringId=(int) input->readULong(2);
+    int cFlags=int(zone.openFlagZone());
+    int nStringId=int(input->readULong(2));
     librevenge::RVNGString poolName;
     if (nStringId==0xFFFF)
       ;
@@ -1340,19 +1340,19 @@ bool StarObjectText::readSWNumRule(StarZone &zone, char cKind)
     else if (!poolName.empty())
       f << poolName.cstr() << ",";
     if (cFlags&0x10) {
-      int nPoolId=(int) input->readULong(2);
+      int nPoolId=int(input->readULong(2));
       f << "PoolId=" << nPoolId << ",";
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       if (val) f << "poolHelpId=" << val << ",";
-      val=(int) input->readULong(1);
+      val=int(input->readULong(1));
       if (val) f << "poolHelpFileId=" << val << ",";
     }
   }
-  val=(int) input->readULong(1);
+  val=int(input->readULong(1));
   if (val) f << "eType=" << val << ",";
   if (zone.isCompatibleWith(0x201))
     zone.closeFlagZone();
-  int nFormat=(int) input->readULong(1);
+  int nFormat=int(input->readULong(1));
   long lastPos=zone.getRecordLastPosition();
   f << "nFormat=" << nFormat << ",";
   if (input->tell()+nFormat>lastPos) {
@@ -1453,7 +1453,7 @@ bool StarObjectText::readSWRedlineList(StarZone &zone)
       break;
     }
     zone.openFlagZone();
-    int N=(int) input->readULong(2);
+    int N=int(input->readULong(2));
     zone.closeFlagZone();
     f << "N=" << N << ",";
     ascFile.addPos(pos);
@@ -1472,9 +1472,9 @@ bool StarObjectText::readSWRedlineList(StarZone &zone)
       }
 
       zone.openFlagZone();
-      int val=(int) input->readULong(1);
+      int val=int(input->readULong(1));
       if (val) f << "cType=" << val << ",";
-      val=(int) input->readULong(2);
+      val=int(input->readULong(2));
       if (val) f << "stringId=" << val << ",";
       zone.closeFlagZone();
 
@@ -1689,9 +1689,9 @@ bool StarObjectText::readSWTextZone(StarZone &zone)
   int fl=zone.openFlagZone();
   f << "nColl=" << input->readULong(2) << ",";
   if (fl&0x10 && !zone.isCompatibleWith(0x201)) {
-    int val=(int) input->readULong(1);
+    int val=int(input->readULong(1));
     if (val==200 && zone.isCompatibleWith(0xf,0x101) && input->tell() < zone.getFlagLastPosition())
-      val=(int) input->readULong(1);
+      val=int(input->readULong(1));
     if (val)
       f << "nLevel=" << val << ",";
   }
@@ -1755,7 +1755,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone)
       // sw_sw3num InNodeNum
       f << "nodeNum,";
       int cFlag=zone.openFlagZone();
-      int nLevel=(int) input->readULong(1);
+      int nLevel=int(input->readULong(1));
       if (nLevel!=201)
         f << "nLevel=" << nLevel<< ",";
       if (cFlag&0x20) f << "nSetValue=" << input->readULong(2) << ",";
@@ -1784,7 +1784,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone)
       f << "nBeginInv=" << input->readULong(2) << ",";
       f << "nEndInc=" << input->readULong(2) << ",";
       zone.closeFlagZone();
-      int N =(int) input->readULong(2);
+      int N =int(input->readULong(2));
       if (input->tell()+4*N>zone.getRecordLastPosition()) {
         STOFF_DEBUG_MSG(("StarObjectText::readSWTextZone: find bad count\n"));
         f << "###N=" << N << ",";
@@ -1881,7 +1881,7 @@ bool StarObjectText::readSWTOXList(StarZone &zone)
         f << "aDummy=" << libstoff::getString(string).cstr() << ",";
     }
 
-    int N=(int) input->readULong(1);
+    int N=int(input->readULong(1));
     f << "nPatterns=" << N << ",";
     bool ok=true;
     for (int i=0; i<N; ++i) {
@@ -1897,19 +1897,19 @@ bool StarObjectText::readSWTOXList(StarZone &zone)
       zone.closeSWRecord(type, "SWTOXList");
       continue;
     }
-    N=(int) input->readULong(1);
+    N=int(input->readULong(1));
     f << "nTmpl=" << N << ",";
     f << "tmpl[strId]=[";
     for (int i=0; i<N; ++i)
       f << input->readULong(2) << ",";
     f << "],";
-    N=(int) input->readULong(1);
+    N=int(input->readULong(1));
     f << "nStyle=" << N << ",";
     f << "style=[";
     for (int i=0; i<N; ++i) {
       f << "[";
       f << "level=" << input->readULong(1) << ",";
-      int nCount=(int) input->readULong(2);
+      int nCount=int(input->readULong(2));
       f << "nCount=" << nCount << ",";
       if (input->tell()+2*nCount>lastRecordPos) {
         STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read some string id\n"));
@@ -1919,7 +1919,7 @@ bool StarObjectText::readSWTOXList(StarZone &zone)
       }
       librevenge::RVNGString poolName;
       for (int j=0; j<nCount; ++j) {
-        int val=(int) input->readULong(2);
+        int val=int(input->readULong(2));
         if (!zone.getPoolName(val, poolName))
           f << "###nPoolId=" << val << ",";
         else
@@ -1981,7 +1981,7 @@ bool StarObjectText::readSWTOX51List(StarZone &zone)
     }
     f << "SWTOX51List:";
     if (zone.isCompatibleWith(0x201)) {
-      int strId=(int) input->readULong(2);
+      int strId=int(input->readULong(2));
       librevenge::RVNGString poolName;
       if (strId!=0xFFFF && !zone.getPoolName(strId, poolName))
         f << "###nPoolId=" << strId << ",";
@@ -2016,7 +2016,7 @@ bool StarObjectText::readSWTOX51List(StarZone &zone)
     if (zone.isCompatibleWith(0x213) && (fl&0x10))
       f << "firstTabPos=" << input->readULong(2) << ",";
 
-    int N=(int) input->readULong(1);
+    int N=int(input->readULong(1));
     f << "nPat=" << N << ",";
     f << "pat=[";
     bool ok=true;
@@ -2037,7 +2037,7 @@ bool StarObjectText::readSWTOX51List(StarZone &zone)
       zone.closeSWRecord(type, "SWTOX51List");
       continue;
     }
-    N=(int) input->readULong(1);
+    N=int(input->readULong(1));
     f << "nTmpl=" << N << ",";
     f << "tmpl[strId]=[";
     for (int i=0; i<N; ++i)
@@ -2081,7 +2081,7 @@ try
     if (pool && pool->read(zone)) {
       if (extraPool) {
         STOFF_DEBUG_MSG(("StarObjectText::readDrawingLayer: create extra pool for %d of type %d\n",
-                         (int) getDocumentKind(), (int) pool->getType()));
+                         int(getDocumentKind()), int(pool->getType())));
       }
       pool.reset();
       continue;
@@ -2234,7 +2234,7 @@ try
         break;
       }
       for (int i=0; i<5; ++i) { // f0=f1=1
-        int val=(int) input->readULong(1);
+        int val=int(input->readULong(1));
         if (val) f << "f" << i << "=" << val << ",";
       }
       if (!zone.readString(string)) {
@@ -2284,7 +2284,7 @@ try
       break;
     case '7': { // config, ignored by LibreOffice, and find no code
       f << "config,";
-      int fl=(int) zone.openFlagZone();
+      int fl=int(zone.openFlagZone());
       if (fl&0xf0) f << "fl=" << (fl>>4) << ",";
       f << "f0=" << input->readULong(1) << ","; // 1
       for (int i=0; i<5; ++i) // e,1,5,1,5
@@ -2325,7 +2325,7 @@ try
       break;
     case 'C': { // ignored by LibreOffice
       std::string comment("");
-      while (lastPos && input->tell()<lastPos) comment+=(char) input->readULong(1);
+      while (lastPos && input->tell()<lastPos) comment+=char(input->readULong(1));
       f << "comment=" << comment << ",";
       break;
     }

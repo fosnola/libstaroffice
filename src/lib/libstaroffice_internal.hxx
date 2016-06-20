@@ -197,9 +197,9 @@ struct STOFFColor {
   {
     double w=1.-double(k)/255.;
     return STOFFColor
-           ((unsigned char)(255 * (1-double(c)/255) * w),
-            (unsigned char)(255 * (1-double(m)/255) * w),
-            (unsigned char)(255 * (1-double(y)/255) * w)
+           (static_cast<unsigned char>(255 * (1-double(c)/255) * w),
+            static_cast<unsigned char>(255 * (1-double(m)/255) * w),
+            static_cast<unsigned char>(255 * (1-double(y)/255) * w)
            );
   }
   //! return a color from a hsl color (basic)
@@ -209,15 +209,15 @@ struct STOFFColor {
              double(S)/255;
     double tmp=std::fmod((double(H)*6/255),2)-1;
     double x=c*(1-(tmp>0 ? tmp : -tmp));
-    unsigned char C=(unsigned char)(255*c);
-    unsigned char M=(unsigned char)(double(L)-255*c/2);
-    unsigned char X=(unsigned char)(255*x);
-    if (H<=42) return STOFFColor((unsigned char)(M+C),(unsigned char)(M+X),(unsigned char)M);
-    if (H<=85) return STOFFColor((unsigned char)(M+X),(unsigned char)(M+C),(unsigned char)M);
-    if (H<=127) return STOFFColor((unsigned char)M,(unsigned char)(M+C),(unsigned char)(M+X));
-    if (H<=170) return STOFFColor((unsigned char)M,(unsigned char)(M+X),(unsigned char)(M+C));
-    if (H<=212) return STOFFColor((unsigned char)(M+X),(unsigned char)M,(unsigned char)(M+C));
-    return STOFFColor((unsigned char)(M+C),(unsigned char)(M),(unsigned char)(M+X));
+    unsigned char C=static_cast<unsigned char>(255*c);
+    unsigned char M=static_cast<unsigned char>(double(L)-255*c/2);
+    unsigned char X=static_cast<unsigned char>(255*x);
+    if (H<=42) return STOFFColor(static_cast<unsigned char>(M+C),static_cast<unsigned char>(M+X),static_cast<unsigned char>(M));
+    if (H<=85) return STOFFColor(static_cast<unsigned char>(M+X),static_cast<unsigned char>(M+C),static_cast<unsigned char>(M));
+    if (H<=127) return STOFFColor(static_cast<unsigned char>(M),static_cast<unsigned char>(M+C),static_cast<unsigned char>(M+X));
+    if (H<=170) return STOFFColor(static_cast<unsigned char>(M),static_cast<unsigned char>(M+X),static_cast<unsigned char>(M+C));
+    if (H<=212) return STOFFColor(static_cast<unsigned char>(M+X),static_cast<unsigned char>(M),static_cast<unsigned char>(M+C));
+    return STOFFColor(static_cast<unsigned char>(M+C),static_cast<unsigned char>(M),static_cast<unsigned char>(M+X));
   }
   //! return the back color
   static STOFFColor black()
@@ -241,7 +241,7 @@ struct STOFFColor {
   //! returns the alpha value
   unsigned char getAlpha() const
   {
-    return (unsigned char)((m_value>>24)&0xFF);
+    return static_cast<unsigned char>((m_value>>24)&0xFF);
   }
   //! reset the alpha value
   void setAlpha(unsigned char alpha)
@@ -251,17 +251,17 @@ struct STOFFColor {
   //! returns the green value
   unsigned char getBlue() const
   {
-    return (unsigned char)(m_value&0xFF);
+    return static_cast<unsigned char>(m_value&0xFF);
   }
   //! returns the red value
   unsigned char getRed() const
   {
-    return (unsigned char)((m_value>>16)&0xFF);
+    return static_cast<unsigned char>((m_value>>16)&0xFF);
   }
   //! returns the green value
   unsigned char getGreen() const
   {
-    return (unsigned char)((m_value>>8)&0xFF);
+    return static_cast<unsigned char>((m_value>>8)&0xFF);
   }
   //! return true if the color is black
   bool isBlack() const

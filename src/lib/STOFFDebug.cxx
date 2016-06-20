@@ -172,7 +172,7 @@ void DebugFile::write()
       ++noteIter;
     }
 
-    long ch = (long) m_input->readULong(1);
+    long ch = long(m_input->readULong(1));
     m_file << std::setw(2) << ch;
     actualPos++;
 
@@ -213,7 +213,7 @@ std::string flattenFileName(std::string const &name)
 {
   std::string res;
   for (size_t i = 0; i < name.length(); i++) {
-    unsigned char c = (unsigned char) name[i];
+    unsigned char c = static_cast<unsigned char>(name[i]);
     switch (c) {
     case '\0':
     case '/':

@@ -259,7 +259,7 @@ bool StarObjectChart::readSfxStyleSheets(STOFFInputStreamPtr input, std::string 
     }
     if (pool && pool->read(zone)) {
       if (extraPool) {
-        STOFF_DEBUG_MSG(("StarObjectChart::readSfxStyleSheets: create extra pool of type %d\n", (int) pool->getType()));
+        STOFF_DEBUG_MSG(("StarObjectChart::readSfxStyleSheets: create extra pool of type %d\n", int(pool->getType())));
       }
       if (!mainPool) mainPool=pool;
       pool.reset();
@@ -864,8 +864,8 @@ bool StarObjectChart::readSCHMemChart(StarZone &zone)
   uint16_t nCol, nRow;
   *input >> nCol >> nRow;
   f << "nCol=" << nCol << ",nRow=" << nRow << ",";
-  if ((unsigned long)(lastPos-input->tell())<8*(unsigned long)nCol*(unsigned long)nRow ||
-      (unsigned long)input->tell()+8*(unsigned long)nCol*(unsigned long)nRow>(unsigned long)lastPos) {
+  if (static_cast<unsigned long>(lastPos-input->tell())<8*static_cast<unsigned long>(nCol)*static_cast<unsigned long>(nRow) ||
+      static_cast<unsigned long>(input->tell())+8*static_cast<unsigned long>(nCol)*static_cast<unsigned long>(nRow)>static_cast<unsigned long>(lastPos)) {
     STOFF_DEBUG_MSG(("StarObjectChart::readSCHMemChart: dim seems bad\n"));
     f << "###";
     ascFile.addPos(pos);

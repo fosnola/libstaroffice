@@ -81,15 +81,15 @@ void STOFFPropertyHandlerEncoder::characters(librevenge::RVNGString const &sChar
 void STOFFPropertyHandlerEncoder::writeString(const librevenge::RVNGString &string)
 {
   unsigned long sz = string.size()+1;
-  writeLong((long) sz);
-  m_f.write(string.cstr(), (int) sz);
+  writeLong(long(sz));
+  m_f.write(string.cstr(), int(sz));
 }
 
 void STOFFPropertyHandlerEncoder::writeLong(long val)
 {
-  int32_t value=(int32_t) val;
-  unsigned char const allValue[]= {(unsigned char)(value&0xFF), (unsigned char)((value>>8)&0xFF), (unsigned char)((value>>16)&0xFF), (unsigned char)((value>>24)&0xFF)};
-  m_f.write((const char *)allValue, 4);
+  int32_t value=static_cast<int32_t>(val);
+  unsigned char const allValue[]= {static_cast<unsigned char>(value&0xFF), static_cast<unsigned char>((value>>8)&0xFF), static_cast<unsigned char>((value>>16)&0xFF), static_cast<unsigned char>((value>>24)&0xFF)};
+  m_f.write(reinterpret_cast<const char *>(allValue), 4);
 }
 
 void STOFFPropertyHandlerEncoder::writeProperty(const char *key, const librevenge::RVNGProperty &prop)
@@ -123,7 +123,7 @@ void STOFFPropertyHandlerEncoder::writePropertyList(const librevenge::RVNGProper
 
 void STOFFPropertyHandlerEncoder::writePropertyListVector(const librevenge::RVNGPropertyListVector &vect)
 {
-  writeLong((long)vect.count());
+  writeLong(long(vect.count()));
   for (unsigned long i=0; i < vect.count(); i++)
     writePropertyList(vect[i]);
 }
@@ -133,7 +133,7 @@ bool STOFFPropertyHandlerEncoder::getData(librevenge::RVNGBinaryData &data)
   data.clear();
   std::string d=m_f.str();
   if (d.length() == 0) return false;
-  data.append((const unsigned char *)d.c_str(), d.length());
+  data.append(reinterpret_cast<const unsigned char *>(d.c_str()), d.length());
   return true;
 }
 
@@ -293,7 +293,7 @@ protected:
         break;
       }
       default:
-        STOFF_DEBUG_MSG(("STOFFPropertyHandlerDecoder:readPropertyList find unknown type %c for child %ld\n", (char) *c, i));
+        STOFF_DEBUG_MSG(("STOFFPropertyHandlerDecoder:readPropertyList find unknown type %c for child %ld\n", char(*c), i));
         return false;
       }
     }
@@ -328,12 +328,12 @@ protected:
       return true;
     }
     unsigned long numRead;
-    const unsigned char *dt = input.read((unsigned long)numC, numRead);
-    if (dt == 0L || numRead != (unsigned long) numC) {
+    const unsigned char *dt = input.read(static_cast<unsigned long>(numC), numRead);
+    if (dt == 0L || numRead != static_cast<unsigned long>(numC)) {
       STOFF_DEBUG_MSG(("STOFFPropertyHandlerDecoder::readString: can not read a string\n"));
       return false;
     }
-    s = librevenge::RVNGString((const char *)dt);
+    s = librevenge::RVNGString(reinterpret_cast<const char *>(dt));
     return true;
   }
 

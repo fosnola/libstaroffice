@@ -60,10 +60,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
     return false;
   }
   if (pos>=src.size()) return false;
-  int c=(int) src[pos++], c2=0;
+  int c=int(src[pos++]), c2=0;
   if (c>=0x80&&c<=0xfe) {
     if (pos>=src.size()) return false;
-    c2=(int) src[pos++];
+    c2=int(src[pos++]);
   }
   uint32_t unicode=uint32_t(c);
   switch (c) {
@@ -83,10 +83,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0xffff,0x01DC,0x00FC,0xF344,0x1EBF,0xF346,0x1EC1,0x00EA,0x0261,0xF34A,
         0xF34B
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x89:
     if (c2>=0x40 && c2<=0xfe) {
@@ -112,10 +112,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x5493,0x54A3,0x54B4,0x54B9,0x54D0,0x54EF,0x5518,0x5523,0x5528,0x3598,
         0x553F,0x35A5,0x35BF,0x55D7,0x35C5,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8a:
     if (c2>=0x40 && c2<=0xfe) {
@@ -141,10 +141,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x3F93,0xF4CC,0xF4CD,0xF4CE,0xF4CF,0xffff,0xF4D1,0xF4D2,0xF4D3,0xF4D4,
         0xF4D5,0x3FF9,0xF4D7,0x6432,0xF4D9,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8b:
     if (c2>=0x40 && c2<=0xfd) {
@@ -170,10 +170,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x98CE,0x98DE,0x9963,0xF56B,0x9C7C,0x9E1F,0x9EC4,0x6B6F,0xF907,0x4E37,
         0xF572,0x961D,0x6237,0x94A2,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8c:
     if (c2>=0x40 && c2<=0xdc) {
@@ -196,10 +196,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x4C81,0xF5E8,0x5D7B,0xF5EA,0xF5EB,0xF5EC,0xF5ED,0x5B96,0xF5EF,0xffff,
         0x7E5B,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8d:
     if (c2>=0x60 && c2<=0xfe) {
@@ -222,10 +222,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x3D75,0x71B7,0x5C99,0x3D8A,0x702C,0x3D91,0x7050,0x7054,0x706F,0x707F,
         0x7089,0xF6AD,0x43C1,0x35F1,0xF6B0,
       };
-      unicode=(uint32_t) val[c2-0x60];
+      unicode=static_cast<uint32_t>(val[c2-0x60]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8e:
     if (c2>=0x40 && c2<=0xfe) {
@@ -251,10 +251,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0xE39F,0xE3A0,0x4FF9,0xE3A2,0x84E2,0x8362,0xE3A5,0xE3A6,0xE3A7,0xE3A8,
         0xE3A9,0x82AA,0x691B,0xE3AC,0x41DB,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8f:
     if (c2>=0x40 && c2<=0xfe) {
@@ -280,10 +280,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0xE43C,0x3725,0xE43E,0x8CD6,0xE440,0xE441,0x8D12,0x8D03,0xE444,0x8CDB,
         0x705C,0x8D11,0xE448,0x3ED0,0x8D77,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x90:
     if (c2>=0x40 && c2<=0xfe) {
@@ -309,10 +309,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0xE4D9,0x97FF,0x97F5,0xE4DC,0xE4DD,0x4AD1,0x9834,0x9833,0x984B,0x9866,
         0x3B0E,0xE4E4,0x3D51,0xE4E6,0xE4E7,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x91:
     if (c2>=0x40 && c2<=0xfe) {
@@ -338,10 +338,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0xE576,0xE577,0x3722,0xE579,0xE57A,0x36E1,0xE57C,0xE57D,0xE57E,0x3723,
         0xE580,0x575B,0xE582,0xE583,0xE584,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x92:
     if (c2>=0x40 && c2<=0xfe) {
@@ -367,10 +367,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x5A2C,0x59B8,0x928F,0x5A7E,0x5ACF,0x5A12,0xE619,0xE61A,0xE61B,0xE61C,
         0x36F5,0x6D05,0x7443,0x5A21,0xE621,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x93:
     if (c2>=0x40 && c2<=0xfe) {
@@ -396,10 +396,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x6AC9,0x6B05,0xE6B2,0x6511,0x6898,0x6A4C,0x3BD7,0x6A7A,0x6B57,0xE6B9,
         0xE6BA,0x93A0,0x92F2,0xE6BD,0xE6BE,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x94:
     if (c2>=0x40 && c2<=0xfe) {
@@ -425,10 +425,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0xE74D,0xE74E,0xE74F,0x7CCD,0xE751,0xE752,0x7C8E,0x7C7C,0x7CAE,0x6AB2,
         0x7DDC,0x7E07,0x7DD3,0x7F4E,0xE75B,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x95:
     if (c2>=0x40 && c2<=0xfe) {
@@ -454,10 +454,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x3EE7,0xE7EB,0x968F,0xE7ED,0xE7EE,0xE7EF,0x3ECC,0xE7F1,0xE7F2,0xE7F3,
         0x7412,0x746B,0x3EFC,0x9741,0xE7F8,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x96:
     if (c2>=0x40 && c2<=0xfe) {
@@ -483,10 +483,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0xE887,0x57BB,0x58F3,0x578A,0x9D16,0x57D7,0x7134,0x34AF,0xE88F,0x71EB,
         0xE891,0xE892,0x5B28,0xE894,0xE895,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x97:
     if (c2>=0x40 && c2<=0xfe) {
@@ -512,10 +512,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x6967,0xE925,0xE926,0xE927,0xE928,0xE929,0xE92A,0xE92B,0xE92C,0x6A1A,
         0xE92E,0xE92F,0x843E,0x44DF,0x44CE,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x98:
     if (c2>=0x40 && c2<=0xfe) {
@@ -541,10 +541,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x58F2,0x7818,0x70B9,0x781C,0x40A8,0x7839,0x7847,0x7851,0x7866,0x8448,
         0xE9CB,0x7933,0x6803,0x7932,0x4103,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x99:
     if (c2>=0x40 && c2<=0xfe) {
@@ -570,10 +570,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x8FC1,0x8FCA,0x8FCC,0x9033,0x99C4,0x48AD,0x98E0,0x9213,0x491E,0x9228,
         0x9258,0x926B,0x92B1,0x92AE,0x92BF,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9a:
     if (c2>=0x40 && c2<=0xfe) {
@@ -599,10 +599,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0xEAFB,0x5364,0x84AD,0xEAFE,0xEAFF,0xEB00,0x8B81,0xEB02,0xEB03,0xEB04,
         0xEB05,0x4E78,0x70BB,0xEB08,0xEB09,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9b:
     if (c2>=0x40 && c2<=0xfe) {
@@ -628,10 +628,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0xEB98,0xEB99,0xEB9A,0xEB9B,0x57A1,0x7151,0x6FB6,0xEB9F,0xEBA0,0x9056,
         0xEBA2,0xEBA3,0x8B62,0xEBA5,0xEBA6,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9c:
     if (c2>=0x40 && c2<=0xfe) {
@@ -657,10 +657,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0xEC35,0x5DAB,0xEC37,0x65BE,0x69D5,0x53D2,0xEC3B,0xEC3C,0x3C11,0x6736,
         0xEC3F,0xEC40,0xEC41,0xEC42,0xEC43,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9d:
     if (c2>=0x40 && c2<=0xfe) {
@@ -686,10 +686,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x55F1,0x66F1,0xECD4,0x362D,0x7534,0x55F0,0x55BA,0x5497,0x5572,0xECDB,
         0xECDC,0x5ED0,0xECDE,0xECDF,0xECE0,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9e:
     if (c2>=0x40 && c2<=0xfe) {
@@ -715,10 +715,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x37FB,0x6119,0xED71,0xED72,0xffff,0x565D,0xED75,0x57A7,0xED77,0xED78,
         0x5234,0xED7A,0x35AD,0x6C4A,0x9D7C,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9f:
     if (c2>=0x40 && c2<=0xfe) {
@@ -744,10 +744,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x8DD4,0x8E4F,0x9E1C,0x8E01,0x6282,0xEE11,0x8E28,0x8E75,0x7AD3,0xEE15,
         0x7A3E,0x78D8,0x6CEA,0x8A67,0x7607,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa0:
     if (c2>=0x40 && c2<=0xfe) {
@@ -773,10 +773,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0xEEA9,0xEEAA,0x5CC1,0xEEAC,0xEEAD,0xEEAE,0xEEAF,0xEEB0,0xEEB1,0x4562,
         0x5B1F,0xEEB4,0x9F50,0x9EA6,0xEEB7,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc6:
     if (c2>=0xa1 && c2<=0xfe) {
@@ -792,10 +792,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x304A,0x304B,0x304C,0x304D,0x304E,0x304F,0x3050,0x3051,0x3052,0x3053,
         0x3054,0x3055,0x3056,0x3057,0x3058,
       };
-      unicode=(uint32_t) val[c2-0xa1];
+      unicode=static_cast<uint32_t>(val[c2-0xa1]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc7:
     if (c2>=0x40 && c2<=0xfe) {
@@ -821,10 +821,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x30F4,0x30F5,0x30F6,0x0410,0x0411,0x0412,0x0413,0x0414,0x0415,0x0401,
         0x0416,0x0417,0x0418,0x0419,0x041A,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc8:
     if (c2>=0x40 && c2<=0xfe) {
@@ -850,10 +850,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x2EDE,0x2EE3,0xffff,0xffff,0xffff,0x0283,0x0250,0x025B,0x0254,0x0275,
         0x0153,0x00F8,0x014B,0x028A,0x026A,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf9:
     if (c2>=0xd6 && c2<=0xfe) {
@@ -864,10 +864,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x2565,0x2556,0x255F,0x256B,0x2562,0x2559,0x2568,0x255C,0x2551,0x2550,
         0x256D,0x256E,0x2570,0x256F,0xFFED,
       };
-      unicode=(uint32_t) val[c2-0xd6];
+      unicode=static_cast<uint32_t>(val[c2-0xd6]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xfa:
     if (c2>=0x40 && c2<=0xfe) {
@@ -893,10 +893,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x7079,0x552B,0x6657,0x6D5B,0x546D,0xE093,0xE094,0x555D,0x548F,0x54A4,
         0x47A6,0xE099,0xE09A,0x3DB4,0xE09C,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xfb:
     if (c2>=0x40 && c2<=0xfe) {
@@ -922,10 +922,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x3BC2,0x5E2E,0x6A8A,0x5E75,0x5E7A,0xE130,0xE131,0x53A6,0x4EB7,0x5ED0,
         0x53A8,0xE136,0x5E09,0x5EF4,0xE139,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xfc:
     if (c2>=0x40 && c2<=0xfe) {
@@ -951,10 +951,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0xE1C8,0x675E,0x6767,0x6762,0xE1CC,0xE1CD,0x67D7,0x44E9,0x6822,0x6E50,
         0x923C,0x6801,0xE1D4,0xE1D5,0x685D,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xfd:
     if (c2>=0x40 && c2<=0xfe) {
@@ -980,10 +980,10 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x714A,0x716E,0x5C9C,0xE268,0x714F,0x9362,0xE26B,0x712C,0xE26D,0xE26E,
         0xE26F,0x71BA,0xE271,0x70BD,0x720E,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xfe:
     if (c2>=0x40 && c2<=0xfe) {
@@ -1009,18 +1009,18 @@ bool StarEncodingOtherKorean::readKoreanBig5
         0x7986,0x8900,0x6902,0x7980,0xE306,0x799D,0xE308,0x793C,0x79A9,0x6E2A,
         0xE30C,0x3EA8,0x79C6,0xE30F,0x79D4,
       };
-      unicode=(uint32_t) val[c2-0x40];
+      unicode=static_cast<uint32_t>(val[c2-0x40]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   default:
     if (c>=0x80 && c<=0xfe)
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   }
   if (!unicode) {
-    STOFF_DEBUG_MSG(("StarEncodingOtherKorean::readKoreanBig5: unknown caracter %x\n", (unsigned int)c));
+    STOFF_DEBUG_MSG(("StarEncodingOtherKorean::readKoreanBig5: unknown caracter %x\n", static_cast<unsigned int>(c)));
   }
   dest.push_back(unicode);
   return true;
@@ -1034,10 +1034,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
     return false;
   }
   if (pos>=src.size()) return false;
-  int c=(int) src[pos++], c2=0;
+  int c=int(src[pos++]), c2=0;
   if ((c>=0x84&&c<=0xd3)||(c>=0xd8&&c<=0xf9)) {
     if (pos>=src.size()) return false;
-    c2=(int) src[pos++];
+    c2=int(src[pos++]);
   }
   uint32_t unicode=uint32_t(c);
   switch (c) {
@@ -1066,10 +1066,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, /* 0xD0 */
         0, 0x3153													/* 0xE0 */
       };
-      unicode=(uint32_t) val[c2-0x45];
+      unicode=static_cast<uint32_t>(val[c2-0x45]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x85:
     if (c2>=0x41 && c2<=0xe1) {
@@ -1096,10 +1096,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, /* 0xD0 */
         0, 0x3159													/* 0xE0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x86:
     if (c2>=0x41 && c2<=0xe1) {
@@ -1126,10 +1126,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, /* 0xD0 */
         0, 0x315F													/* 0xE0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x87:
     if (c2>=0x41 && c2<=0xa1) {
@@ -1148,10 +1148,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, 	 0, /* 0x90 */
         0, 0x3163													/* 0xA0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x88:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1181,10 +1181,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xAC7F, 0xAC80, 	 0, 0xAC81, 0xAC82, 0xAC83, 0xAC84, 0xAC85, /* 0xF0 */
         0xAC86, 0xAC87, 0xAC88, 0xAC89, 0xAC8A, 0xAC8B					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x89:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1214,10 +1214,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xAD27, 0xAD28, 	 0, 0xAD29, 0xAD2A, 0xAD2B, 0xAD2C, 0xAD2D, /* 0xF0 */
         0xAD2E, 0xAD2F, 0xAD30, 0xAD31, 0xAD32, 0xAD33					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8a:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1247,10 +1247,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xADCF, 0xADD0, 	 0, 0xADD1, 0xADD2, 0xADD3, 0xADD4, 0xADD5, /* 0xF0 */
         0xADD6, 0xADD7, 0xADD8, 0xADD9, 0xADDA, 0xADDB					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8b:
     if (c2>=0x41 && c2<=0xbc) {
@@ -1272,10 +1272,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xAE3F, 0xAE40, 	 0, 0xAE41, 0xAE42, 0xAE43, 0xAE44, 0xAE45, /* 0xB0 */
         0xAE46, 0xAE47, 0xAE48, 0xAE49, 0xAE4A, 0xAE4B					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8c:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1305,10 +1305,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xAECB, 0xAECC, 	 0, 0xAECD, 0xAECE, 0xAECF, 0xAED0, 0xAED1, /* 0xF0 */
         0xAED2, 0xAED3, 0xAED4, 0xAED5, 0xAED6, 0xAED7					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8d:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1338,10 +1338,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xAF73, 0xAF74, 	 0, 0xAF75, 0xAF76, 0xAF77, 0xAF78, 0xAF79, /* 0xF0 */
         0xAF7A, 0xAF7B, 0xAF7C, 0xAF7D, 0xAF7E, 0xAF7F					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8e:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1371,10 +1371,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB01B, 0xB01C, 	 0, 0xB01D, 0xB01E, 0xB01F, 0xB020, 0xB021, /* 0xF0 */
         0xB022, 0xB023, 0xB024, 0xB025, 0xB026, 0xB027					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x8f:
     if (c2>=0x41 && c2<=0xbd) {
@@ -1396,10 +1396,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB08B, 0xB08C, 	 0, 0xB08D, 0xB08E, 0xB08F, 0xB090, 0xB091, /* 0xB0 */
         0xB092, 0xB093, 0xB094, 0xB095, 0xB096, 0xB097					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x90:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1429,10 +1429,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB117, 0xB118, 	 0, 0xB119, 0xB11A, 0xB11B, 0xB11C, 0xB11D, /* 0xF0 */
         0xB11E, 0xB11F, 0xB120, 0xB121, 0xB122, 0xB123					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x91:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1462,10 +1462,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB1BF, 0xB1C0, 	 0, 0xB1C1, 0xB1C2, 0xB1C3, 0xB1C4, 0xB1C5, /* 0xF0 */
         0xB1C6, 0xB1C7, 0xB1C8, 0xB1C9, 0xB1CA, 0xB1CB					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x92:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1495,10 +1495,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB267, 0xB268, 	 0, 0xB269, 0xB26A, 0xB26B, 0xB26C, 0xB26D, /* 0xF0 */
         0xB26E, 0xB26F, 0xB270, 0xB271, 0xB272, 0xB273					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x93:
     if (c2>=0x41 && c2<=0xbd) {
@@ -1520,10 +1520,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB2D7, 0xB2D8, 	 0, 0xB2D9, 0xB2DA, 0xB2DB, 0xB2DC, 0xB2DD, /* 0xB0 */
         0xB2DE, 0xB2DF, 0xB2E0, 0xB2E1, 0xB2E2, 0xB2E3					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x94:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1553,10 +1553,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB363, 0xB364, 	 0, 0xB365, 0xB366, 0xB367, 0xB368, 0xB369, /* 0xF0 */
         0xB36A, 0xB36B, 0xB36C, 0xB36D, 0xB36E, 0xB36F					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x95:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1586,10 +1586,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB40B, 0xB40C, 	 0, 0xB40D, 0xB40E, 0xB40F, 0xB410, 0xB411, /* 0xF0 */
         0xB412, 0xB413, 0xB414, 0xB415, 0xB416, 0xB417					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x96:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1619,10 +1619,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB4B3, 0xB4B4, 	 0, 0xB4B5, 0xB4B6, 0xB4B7, 0xB4B8, 0xB4B9, /* 0xF0 */
         0xB4BA, 0xB4BB, 0xB4BC, 0xB4BD, 0xB4BE, 0xB4BF					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x97:
     if (c2>=0x41 && c2<=0xbd) {
@@ -1644,10 +1644,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB523, 0xB524, 	 0, 0xB525, 0xB526, 0xB527, 0xB528, 0xB529, /* 0xB0 */
         0xB52A, 0xB52B, 0xB52C, 0xB52D, 0xB52E, 0xB52F					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x98:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1677,10 +1677,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB5AF, 0xB5B0, 	 0, 0xB5B1, 0xB5B2, 0xB5B3, 0xB5B4, 0xB5B5, /* 0xF0 */
         0xB5B6, 0xB5B7, 0xB5B8, 0xB5B9, 0xB5BA, 0xB5BB					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x99:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1710,10 +1710,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB657, 0xB658, 	 0, 0xB659, 0xB65A, 0xB65B, 0xB65C, 0xB65D, /* 0xF0 */
         0xB65E, 0xB65F, 0xB660, 0xB661, 0xB662, 0xB663					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9a:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1743,10 +1743,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB6FF, 0xB700, 	 0, 0xB701, 0xB702, 0xB703, 0xB704, 0xB705, /* 0xF0 */
         0xB706, 0xB707, 0xB708, 0xB709, 0xB70A, 0xB70B					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9b:
     if (c2>=0x41 && c2<=0xbd) {
@@ -1768,10 +1768,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB76F, 0xB770, 	 0, 0xB771, 0xB772, 0xB773, 0xB774, 0xB775, /* 0xB0 */
         0xB776, 0xB777, 0xB778, 0xB779, 0xB77A, 0xB77B					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9c:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1801,10 +1801,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB7FB, 0xB7FC, 	 0, 0xB7FD, 0xB7FE, 0xB7FF, 0xB800, 0xB801, /* 0xF0 */
         0xB802, 0xB803, 0xB804, 0xB805, 0xB806, 0xB807					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9d:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1834,10 +1834,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB8A3, 0xB8A4, 	 0, 0xB8A5, 0xB8A6, 0xB8A7, 0xB8A8, 0xB8A9, /* 0xF0 */
         0xB8AA, 0xB8AB, 0xB8AC, 0xB8AD, 0xB8AE, 0xB8AF					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9e:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1867,10 +1867,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB94B, 0xB94C, 	 0, 0xB94D, 0xB94E, 0xB94F, 0xB950, 0xB951, /* 0xF0 */
         0xB952, 0xB953, 0xB954, 0xB955, 0xB956, 0xB957					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0x9f:
     if (c2>=0x41 && c2<=0xbd) {
@@ -1892,10 +1892,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xB9BB, 0xB9BC, 	 0, 0xB9BD, 0xB9BE, 0xB9BF, 0xB9C0, 0xB9C1, /* 0xB0 */
         0xB9C2, 0xB9C3, 0xB9C4, 0xB9C5, 0xB9C6, 0xB9C7					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa0:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1925,10 +1925,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xBA47, 0xBA48, 	 0, 0xBA49, 0xBA4A, 0xBA4B, 0xBA4C, 0xBA4D, /* 0xF0 */
         0xBA4E, 0xBA4F, 0xBA50, 0xBA51, 0xBA52, 0xBA53					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa1:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1958,10 +1958,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xBAEF, 0xBAF0, 	 0, 0xBAF1, 0xBAF2, 0xBAF3, 0xBAF4, 0xBAF5, /* 0xF0 */
         0xBAF6, 0xBAF7, 0xBAF8, 0xBAF9, 0xBAFA, 0xBAFB					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa2:
     if (c2>=0x41 && c2<=0xfd) {
@@ -1991,10 +1991,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xBB97, 0xBB98, 	 0, 0xBB99, 0xBB9A, 0xBB9B, 0xBB9C, 0xBB9D, /* 0xF0 */
         0xBB9E, 0xBB9F, 0xBBA0, 0xBBA1, 0xBBA2, 0xBBA3					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa3:
     if (c2>=0x41 && c2<=0xbd) {
@@ -2016,10 +2016,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xBC07, 0xBC08, 	 0, 0xBC09, 0xBC0A, 0xBC0B, 0xBC0C, 0xBC0D, /* 0xB0 */
         0xBC0E, 0xBC0F, 0xBC10, 0xBC11, 0xBC12, 0xBC13					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa4:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2049,10 +2049,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xBC93, 0xBC94, 	 0, 0xBC95, 0xBC96, 0xBC97, 0xBC98, 0xBC99, /* 0xF0 */
         0xBC9A, 0xBC9B, 0xBC9C, 0xBC9D, 0xBC9E, 0xBC9F					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa5:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2082,10 +2082,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xBD3B, 0xBD3C, 	 0, 0xBD3D, 0xBD3E, 0xBD3F, 0xBD40, 0xBD41, /* 0xF0 */
         0xBD42, 0xBD43, 0xBD44, 0xBD45, 0xBD46, 0xBD47					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa6:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2115,10 +2115,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xBDE3, 0xBDE4, 	 0, 0xBDE5, 0xBDE6, 0xBDE7, 0xBDE8, 0xBDE9, /* 0xF0 */
         0xBDEA, 0xBDEB, 0xBDEC, 0xBDED, 0xBDEE, 0xBDEF					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa7:
     if (c2>=0x41 && c2<=0xbd) {
@@ -2140,10 +2140,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xBE53, 0xBE54, 	 0, 0xBE55, 0xBE56, 0xBE57, 0xBE58, 0xBE59, /* 0xB0 */
         0xBE5A, 0xBE5B, 0xBE5C, 0xBE5D, 0xBE5E, 0xBE5F					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa8:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2173,10 +2173,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xBEDF, 0xBEE0, 	 0, 0xBEE1, 0xBEE2, 0xBEE3, 0xBEE4, 0xBEE5, /* 0xF0 */
         0xBEE6, 0xBEE7, 0xBEE8, 0xBEE9, 0xBEEA, 0xBEEB					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xa9:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2206,10 +2206,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xBF87, 0xBF88, 	 0, 0xBF89, 0xBF8A, 0xBF8B, 0xBF8C, 0xBF8D, /* 0xF0 */
         0xBF8E, 0xBF8F, 0xBF90, 0xBF91, 0xBF92, 0xBF93					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xaa:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2239,10 +2239,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC02F, 0xC030, 	 0, 0xC031, 0xC032, 0xC033, 0xC034, 0xC035, /* 0xF0 */
         0xC036, 0xC037, 0xC038, 0xC039, 0xC03A, 0xC03B					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xab:
     if (c2>=0x41 && c2<=0xbd) {
@@ -2264,10 +2264,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC09F, 0xC0A0, 	 0, 0xC0A1, 0xC0A2, 0xC0A3, 0xC0A4, 0xC0A5, /* 0xB0 */
         0xC0A6, 0xC0A7, 0xC0A8, 0xC0A9, 0xC0AA, 0xC0AB					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xac:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2297,10 +2297,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC12B, 0xC12C, 	 0, 0xC12D, 0xC12E, 0xC12F, 0xC130, 0xC131, /* 0xF0 */
         0xC132, 0xC133, 0xC134, 0xC135, 0xC136, 0xC137					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xad:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2330,10 +2330,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC1D3, 0xC1D4, 	 0, 0xC1D5, 0xC1D6, 0xC1D7, 0xC1D8, 0xC1D9, /* 0xF0 */
         0xC1DA, 0xC1DB, 0xC1DC, 0xC1DD, 0xC1DE, 0xC1DF					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xae:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2363,10 +2363,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC27B, 0xC27C, 	 0, 0xC27D, 0xC27E, 0xC27F, 0xC280, 0xC281, /* 0xF0 */
         0xC282, 0xC283, 0xC284, 0xC285, 0xC286, 0xC287					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xaf:
     if (c2>=0x41 && c2<=0xbd) {
@@ -2388,10 +2388,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC2EB, 0xC2EC, 	 0, 0xC2ED, 0xC2EE, 0xC2EF, 0xC2F0, 0xC2F1, /* 0xB0 */
         0xC2F2, 0xC2F3, 0xC2F4, 0xC2F5, 0xC2F6, 0xC2F7					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb0:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2421,10 +2421,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC377, 0xC378, 	 0, 0xC379, 0xC37A, 0xC37B, 0xC37C, 0xC37D, /* 0xF0 */
         0xC37E, 0xC37F, 0xC380, 0xC381, 0xC382, 0xC383					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb1:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2454,10 +2454,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC41F, 0xC420, 	 0, 0xC421, 0xC422, 0xC423, 0xC424, 0xC425, /* 0xF0 */
         0xC426, 0xC427, 0xC428, 0xC429, 0xC42A, 0xC42B					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb2:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2487,10 +2487,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC4C7, 0xC4C8, 	 0, 0xC4C9, 0xC4CA, 0xC4CB, 0xC4CC, 0xC4CD, /* 0xF0 */
         0xC4CE, 0xC4CF, 0xC4D0, 0xC4D1, 0xC4D2, 0xC4D3					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb3:
     if (c2>=0x41 && c2<=0xbd) {
@@ -2512,10 +2512,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC537, 0xC538, 	 0, 0xC539, 0xC53A, 0xC53B, 0xC53C, 0xC53D, /* 0xB0 */
         0xC53E, 0xC53F, 0xC540, 0xC541, 0xC542, 0xC543					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb4:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2545,10 +2545,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC5C3, 0xC5C4, 	 0, 0xC5C5, 0xC5C6, 0xC5C7, 0xC5C8, 0xC5C9, /* 0xF0 */
         0xC5CA, 0xC5CB, 0xC5CC, 0xC5CD, 0xC5CE, 0xC5CF					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb5:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2578,10 +2578,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC66B, 0xC66C, 	 0, 0xC66D, 0xC66E, 0xC66F, 0xC670, 0xC671, /* 0xF0 */
         0xC672, 0xC673, 0xC674, 0xC675, 0xC676, 0xC677					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb6:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2611,10 +2611,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC713, 0xC714, 	 0, 0xC715, 0xC716, 0xC717, 0xC718, 0xC719, /* 0xF0 */
         0xC71A, 0xC71B, 0xC71C, 0xC71D, 0xC71E, 0xC71F					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb7:
     if (c2>=0x41 && c2<=0xbd) {
@@ -2636,10 +2636,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC783, 0xC784, 	 0, 0xC785, 0xC786, 0xC787, 0xC788, 0xC789, /* 0xB0 */
         0xC78A, 0xC78B, 0xC78C, 0xC78D, 0xC78E, 0xC78F					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb8:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2669,10 +2669,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC80F, 0xC810, 	 0, 0xC811, 0xC812, 0xC813, 0xC814, 0xC815, /* 0xF0 */
         0xC816, 0xC817, 0xC818, 0xC819, 0xC81A, 0xC81B					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xb9:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2702,10 +2702,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC8B7, 0xC8B8, 	 0, 0xC8B9, 0xC8BA, 0xC8BB, 0xC8BC, 0xC8BD, /* 0xF0 */
         0xC8BE, 0xC8BF, 0xC8C0, 0xC8C1, 0xC8C2, 0xC8C3					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xba:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2735,10 +2735,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC95F, 0xC960, 	 0, 0xC961, 0xC962, 0xC963, 0xC964, 0xC965, /* 0xF0 */
         0xC966, 0xC967, 0xC968, 0xC969, 0xC96A, 0xC96B					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xbb:
     if (c2>=0x41 && c2<=0xbd) {
@@ -2760,10 +2760,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xC9CF, 0xC9D0, 	 0, 0xC9D1, 0xC9D2, 0xC9D3, 0xC9D4, 0xC9D5, /* 0xB0 */
         0xC9D6, 0xC9D7, 0xC9D8, 0xC9D9, 0xC9DA, 0xC9DB					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xbc:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2793,10 +2793,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xCA5B, 0xCA5C, 	 0, 0xCA5D, 0xCA5E, 0xCA5F, 0xCA60, 0xCA61, /* 0xF0 */
         0xCA62, 0xCA63, 0xCA64, 0xCA65, 0xCA66, 0xCA67					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xbd:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2826,10 +2826,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xCB03, 0xCB04, 	 0, 0xCB05, 0xCB06, 0xCB07, 0xCB08, 0xCB09, /* 0xF0 */
         0xCB0A, 0xCB0B, 0xCB0C, 0xCB0D, 0xCB0E, 0xCB0F					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xbe:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2859,10 +2859,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xCBAB, 0xCBAC, 	 0, 0xCBAD, 0xCBAE, 0xCBAF, 0xCBB0, 0xCBB1, /* 0xF0 */
         0xCBB2, 0xCBB3, 0xCBB4, 0xCBB5, 0xCBB6, 0xCBB7					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xbf:
     if (c2>=0x41 && c2<=0xbd) {
@@ -2884,10 +2884,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xCC1B, 0xCC1C, 	 0, 0xCC1D, 0xCC1E, 0xCC1F, 0xCC20, 0xCC21, /* 0xB0 */
         0xCC22, 0xCC23, 0xCC24, 0xCC25, 0xCC26, 0xCC27					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc0:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2917,10 +2917,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xCCA7, 0xCCA8, 	 0, 0xCCA9, 0xCCAA, 0xCCAB, 0xCCAC, 0xCCAD, /* 0xF0 */
         0xCCAE, 0xCCAF, 0xCCB0, 0xCCB1, 0xCCB2, 0xCCB3					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc1:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2950,10 +2950,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xCD4F, 0xCD50, 	 0, 0xCD51, 0xCD52, 0xCD53, 0xCD54, 0xCD55, /* 0xF0 */
         0xCD56, 0xCD57, 0xCD58, 0xCD59, 0xCD5A, 0xCD5B					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc2:
     if (c2>=0x41 && c2<=0xfd) {
@@ -2983,10 +2983,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xCDF7, 0xCDF8, 	 0, 0xCDF9, 0xCDFA, 0xCDFB, 0xCDFC, 0xCDFD, /* 0xF0 */
         0xCDFE, 0xCDFF, 0xCE00, 0xCE01, 0xCE02, 0xCE03					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc3:
     if (c2>=0x41 && c2<=0xbd) {
@@ -3008,10 +3008,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xCE67, 0xCE68, 	 0, 0xCE69, 0xCE6A, 0xCE6B, 0xCE6C, 0xCE6D, /* 0xB0 */
         0xCE6E, 0xCE6F, 0xCE70, 0xCE71, 0xCE72, 0xCE73					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc4:
     if (c2>=0x41 && c2<=0xfd) {
@@ -3041,10 +3041,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xCEF3, 0xCEF4, 	 0, 0xCEF5, 0xCEF6, 0xCEF7, 0xCEF8, 0xCEF9, /* 0xF0 */
         0xCEFA, 0xCEFB, 0xCEFC, 0xCEFD, 0xCEFE, 0xCEFF					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc5:
     if (c2>=0x41 && c2<=0xfd) {
@@ -3074,10 +3074,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xCF9B, 0xCF9C, 	 0, 0xCF9D, 0xCF9E, 0xCF9F, 0xCFA0, 0xCFA1, /* 0xF0 */
         0xCFA2, 0xCFA3, 0xCFA4, 0xCFA5, 0xCFA6, 0xCFA7					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc6:
     if (c2>=0x41 && c2<=0xfd) {
@@ -3107,10 +3107,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xD043, 0xD044, 	 0, 0xD045, 0xD046, 0xD047, 0xD048, 0xD049, /* 0xF0 */
         0xD04A, 0xD04B, 0xD04C, 0xD04D, 0xD04E, 0xD04F					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc7:
     if (c2>=0x41 && c2<=0xbd) {
@@ -3132,10 +3132,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xD0B3, 0xD0B4, 	 0, 0xD0B5, 0xD0B6, 0xD0B7, 0xD0B8, 0xD0B9, /* 0xB0 */
         0xD0BA, 0xD0BB, 0xD0BC, 0xD0BD, 0xD0BE, 0xD0BF					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc8:
     if (c2>=0x41 && c2<=0xfd) {
@@ -3165,10 +3165,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xD13F, 0xD140, 	 0, 0xD141, 0xD142, 0xD143, 0xD144, 0xD145, /* 0xF0 */
         0xD146, 0xD147, 0xD148, 0xD149, 0xD14A, 0xD14B					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xc9:
     if (c2>=0x41 && c2<=0xfd) {
@@ -3198,10 +3198,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xD1E7, 0xD1E8, 	 0, 0xD1E9, 0xD1EA, 0xD1EB, 0xD1EC, 0xD1ED, /* 0xF0 */
         0xD1EE, 0xD1EF, 0xD1F0, 0xD1F1, 0xD1F2, 0xD1F3					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xca:
     if (c2>=0x41 && c2<=0xfd) {
@@ -3231,10 +3231,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xD28F, 0xD290, 	 0, 0xD291, 0xD292, 0xD293, 0xD294, 0xD295, /* 0xF0 */
         0xD296, 0xD297, 0xD298, 0xD299, 0xD29A, 0xD29B					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xcb:
     if (c2>=0x41 && c2<=0xbd) {
@@ -3256,10 +3256,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xD2FF, 0xD300, 	 0, 0xD301, 0xD302, 0xD303, 0xD304, 0xD305, /* 0xB0 */
         0xD306, 0xD307, 0xD308, 0xD309, 0xD30A, 0xD30B					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xcc:
     if (c2>=0x41 && c2<=0xfd) {
@@ -3289,10 +3289,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xD38B, 0xD38C, 	 0, 0xD38D, 0xD38E, 0xD38F, 0xD390, 0xD391, /* 0xF0 */
         0xD392, 0xD393, 0xD394, 0xD395, 0xD396, 0xD397					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xcd:
     if (c2>=0x41 && c2<=0xfd) {
@@ -3322,10 +3322,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xD433, 0xD434, 	 0, 0xD435, 0xD436, 0xD437, 0xD438, 0xD439, /* 0xF0 */
         0xD43A, 0xD43B, 0xD43C, 0xD43D, 0xD43E, 0xD43F					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xce:
     if (c2>=0x41 && c2<=0xfd) {
@@ -3355,10 +3355,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xD4DB, 0xD4DC, 	 0, 0xD4DD, 0xD4DE, 0xD4DF, 0xD4E0, 0xD4E1, /* 0xF0 */
         0xD4E2, 0xD4E3, 0xD4E4, 0xD4E5, 0xD4E6, 0xD4E7					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xcf:
     if (c2>=0x41 && c2<=0xbd) {
@@ -3380,10 +3380,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xD54B, 0xD54C, 	 0, 0xD54D, 0xD54E, 0xD54F, 0xD550, 0xD551, /* 0xB0 */
         0xD552, 0xD553, 0xD554, 0xD555, 0xD556, 0xD557					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd0:
     if (c2>=0x41 && c2<=0xfd) {
@@ -3413,10 +3413,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xD5D7, 0xD5D8, 	 0, 0xD5D9, 0xD5DA, 0xD5DB, 0xD5DC, 0xD5DD, /* 0xF0 */
         0xD5DE, 0xD5DF, 0xD5E0, 0xD5E1, 0xD5E2, 0xD5E3					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd1:
     if (c2>=0x41 && c2<=0xfd) {
@@ -3446,10 +3446,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xD67F, 0xD680, 	 0, 0xD681, 0xD682, 0xD683, 0xD684, 0xD685, /* 0xF0 */
         0xD686, 0xD687, 0xD688, 0xD689, 0xD68A, 0xD68B					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd2:
     if (c2>=0x41 && c2<=0xfd) {
@@ -3479,10 +3479,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xD727, 0xD728, 	 0, 0xD729, 0xD72A, 0xD72B, 0xD72C, 0xD72D, /* 0xF0 */
         0xD72E, 0xD72F, 0xD730, 0xD731, 0xD732, 0xD733					/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd3:
     if (c2>=0x41 && c2<=0xbd) {
@@ -3504,10 +3504,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xD797, 0xD798, 	 0, 0xD799, 0xD79A, 0xD79B, 0xD79C, 0xD79D, /* 0xB0 */
         0xD79E, 0xD79F, 0xD7A0, 0xD7A1, 0xD7A2, 0xD7A3					/* 0xB0 */
       };
-      unicode=(uint32_t) val[c2-0x41];
+      unicode=static_cast<uint32_t>(val[c2-0x41]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xd9:
     if (c2>=0x31 && c2<=0xe5) {
@@ -3536,10 +3536,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x2196, 0x2198, 0x266D, 0x2669, 0x266A, 0x266C, 0x327F, 0x321C, /* 0xD0 */
         0x2116, 0x33C7, 0x2122, 0x33C2, 0x33D8, 0x2121					/* 0xE0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xda:
     if (c2>=0x31 && c2<=0xfe) {
@@ -3571,10 +3571,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x3180, 0x3181, 0x3182, 0x3183, 0x3184, 0x3185, 0x3186, 0x3187, /* 0xF0 */
         0x3188, 0x3189, 0x318A, 0x318B, 0x318C, 0x318D, 0x318E			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xdb:
     if (c2>=0x31 && c2<=0xe4) {
@@ -3603,10 +3603,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x253A, 0x253D, 0x253E, 0x2540, 0x2541, 0x2543, 0x2544, 0x2545, /* 0xD0 */
         0x2546, 0x2547, 0x2548, 0x2549, 0x254A							/* 0xE0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xdc:
     if (c2>=0x31 && c2<=0xfe) {
@@ -3638,10 +3638,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x2469, 0x246A, 0x246B, 0x246C, 0x246D, 0x246E, 0x00BD, 0x2153, /* 0xF0 */
         0x2154, 0x00BC, 0x00BE, 0x215B, 0x215C, 0x215D, 0x215E			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xdd:
     if (c2>=0x31 && c2<=0xf3) {
@@ -3672,10 +3672,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x3088, 0x3089, 0x308A, 0x308B, 0x308C, 0x308D, 0x308E, 0x308F, /* 0xE0 */
         0x3090, 0x3091, 0x3092, 0x3093									/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xde:
     if (c2>=0x31 && c2<=0xf1) {
@@ -3706,10 +3706,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x0446, 0x0447, 0x0448, 0x0449, 0x044A, 0x044B, 0x044C, 0x044D, /* 0xE0 */
         0x044E, 0x044F													/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe0:
     if (c2>=0x31 && c2<=0xfe) {
@@ -3741,10 +3741,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x6106, 0x6957, 0x8171, 0x8654, 0x8E47, 0x9375, 0x9A2B, 0x4E5E, /* 0xF0 */
         0x5091, 0x6770, 0x6840, 0x5109, 0x528D, 0x5292, 0x6AA2			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe1:
     if (c2>=0x31 && c2<=0xfe) {
@@ -3776,10 +3776,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x6050, 0x606D, 0x62F1, 0x63A7, 0x653B, 0x73D9, 0x7A7A, 0x86A3, /* 0xF0 */
         0x8CA2, 0x978F, 0x4E32, 0x5BE1, 0x6208, 0x679C, 0x74DC			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe2:
     if (c2>=0x31 && c2<=0xfe) {
@@ -3811,10 +3811,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x53A5, 0x7357, 0x8568, 0x8E76, 0x95D5, 0x673A, 0x6AC3, 0x6F70, /* 0xF0 */
         0x8A6D, 0x8ECC, 0x994B, 0xF906, 0x6677, 0x6B78, 0x8CB4			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe3:
     if (c2>=0x31 && c2<=0xfe) {
@@ -3846,10 +3846,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0xF91F, 0x96E3, 0xF920, 0x634F, 0x637A, 0x5357, 0xF921, 0x678F, /* 0xF0 */
         0x6960, 0x6E73, 0xF922, 0x7537, 0xF923, 0xF924, 0xF925			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe4:
     if (c2>=0x31 && c2<=0xfe) {
@@ -3881,10 +3881,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x5230, 0x5716, 0x5835, 0x5857, 0x5C0E, 0x5C60, 0x5CF6, 0x5D8B, /* 0xF0 */
         0x5EA6, 0x5F92, 0x60BC, 0x6311, 0x6389, 0x6417, 0x6843			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe5:
     if (c2>=0x31 && c2<=0xfe) {
@@ -3916,10 +3916,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x9A62, 0x9A6A, 0x9E97, 0x9ECE, 0x529B, 0x66C6, 0x6B77, 0x701D, /* 0xF0 */
         0x792B, 0x8F62, 0x9742, 0x6190, 0x6200, 0x6523, 0x6F23			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe6:
     if (c2>=0x31 && c2<=0xfe) {
@@ -3951,10 +3951,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x541D, 0x6F7E, 0x71D0, 0x7498, 0x85FA, 0x8EAA, 0x96A3, 0x9C57, /* 0xF0 */
         0x9E9F, 0x6797, 0x6DCB, 0x7433, 0x81E8, 0x9716, 0x782C			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe7:
     if (c2>=0x31 && c2<=0xfe) {
@@ -3986,10 +3986,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x7E46, 0x821E, 0x8302, 0x856A, 0x8AA3, 0x8CBF, 0x9727, 0x9D61, /* 0xF0 */
         0x58A8, 0x9ED8, 0x5011, 0x520E, 0x543B, 0x554F, 0x6587			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe8:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4021,10 +4021,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x6C3E, 0x6C4E, 0x6CDB, 0x72AF, 0x7BC4, 0x8303, 0x6CD5, 0x743A, /* 0xF0 */
         0x50FB, 0x5288, 0x58C1, 0x64D8, 0x6A97, 0x74A7, 0x7656			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xe9:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4056,10 +4056,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x6BD6, 0x6BD7, 0x6BD8, 0x6CB8, 0xF968, 0x7435, 0x75FA, 0x7812, /* 0xF0 */
         0x7891, 0x79D5, 0x79D8, 0x7C83, 0x7DCB, 0x7FE1, 0x80A5			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xea:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4091,10 +4091,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x6055, 0x6292, 0x637F, 0x654D, 0x6691, 0x66D9, 0x66F8, 0x6816, /* 0xF0 */
         0x68F2, 0x7280, 0x745E, 0x7B6E, 0x7D6E, 0x7DD6, 0x7F72			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xeb:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4126,10 +4126,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x9396, 0x8870, 0x91D7, 0x4FEE, 0x53D7, 0x55FD, 0x56DA, 0x5782, /* 0xF0 */
         0x58FD, 0x5AC2, 0x5B88, 0x5CAB, 0x5CC0, 0x5E25, 0x6101			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xec:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4161,10 +4161,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x85CE, 0x8703, 0x8A0A, 0x8EAB, 0x8F9B, 0xF971, 0x8FC5, 0x5931, /* 0xF0 */
         0x5BA4, 0x5BE6, 0x6089, 0x5BE9, 0x5C0B, 0x5FC3, 0x6C81			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xed:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4196,10 +4196,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x513C, 0x56B4, 0x5944, 0x63A9, 0x6DF9, 0x5DAA, 0x696D, 0x5186, /* 0xF0 */
         0x4E88, 0x4F59, 0xF97F, 0xF980, 0xF981, 0x5982, 0xF982			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xee:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4231,10 +4231,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x55DA, 0x5862, 0x58BA, 0x5967, 0x5A1B, 0x5BE4, 0x609F, 0xF9B9, /* 0xF0 */
         0x61CA, 0x6556, 0x65FF, 0x6664, 0x68A7, 0x6C5A, 0x6FB3			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xef:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4266,10 +4266,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x6631, 0x682F, 0x715C, 0x7A36, 0x90C1, 0x980A, 0x4E91, 0xF9C5, /* 0xF0 */
         0x6A52, 0x6B9E, 0x6F90, 0x7189, 0x8018, 0x82B8, 0x8553			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf0:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4301,10 +4301,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x5100, 0x5B9C, 0x610F, 0x61FF, 0x64EC, 0x6905, 0x6BC5, 0x7591, /* 0xF0 */
         0x77E3, 0x7FA9, 0x8264, 0x858F, 0x87FB, 0x8863, 0x8ABC			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf1:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4336,10 +4336,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x748B, 0x7AE0, 0x7CA7, 0x8178, 0x81DF, 0x81E7, 0x838A, 0x846C, /* 0xF0 */
         0x8523, 0x8594, 0x85CF, 0x88DD, 0x8D13, 0x91AC, 0x9577			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf2:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4371,10 +4371,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x7A7D, 0x7CBE, 0x7D8E, 0x8247, 0x8A02, 0x8AEA, 0x8C9E, 0x912D, /* 0xF0 */
         0x914A, 0x91D8, 0x9266, 0x92CC, 0x9320, 0x9706, 0x9756			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf3:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4406,10 +4406,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x6C41, 0x847A, 0x589E, 0x618E, 0x66FE, 0x62EF, 0x70DD, 0x7511, /* 0xF0 */
         0x75C7, 0x7E52, 0x84B8, 0x8B49, 0x8D08, 0x4E4B, 0x53EA			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf4:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4441,10 +4441,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x50B5, 0x57F0, 0x5BC0, 0x5BE8, 0x5F69, 0x63A1, 0x7826, 0x7DB5, /* 0xF0 */
         0x83DC, 0x8521, 0x91C7, 0x91F5, 0x518A, 0x67F5, 0x7B56			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf5:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4476,10 +4476,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x6625, 0x693F, 0x7443, 0x51FA, 0x672E, 0x9EDC, 0x5145, 0x5FE0, /* 0xF0 */
         0x6C96, 0x87F2, 0x885D, 0x8877, 0x60B4, 0x81B5, 0x8403			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf6:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4511,10 +4511,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x722C, 0x7436, 0x7834, 0x7F77, 0x82AD, 0x8DDB, 0x9817, 0x5224, /* 0xF0 */
         0x5742, 0x677F, 0x7248, 0x74E3, 0x8CA9, 0x8FA6, 0x9211			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf7:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4546,10 +4546,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x965C, 0x4EA2, 0x4F09, 0x59EE, 0x5AE6, 0x5DF7, 0x6052, 0x6297, /* 0xF0 */
         0x676D, 0x6841, 0x6C86, 0x6E2F, 0x7F38, 0x809B, 0x822A			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf8:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4581,10 +4581,10 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x5F18, 0x6C5E, 0x6CD3, 0x6D2A, 0x70D8, 0x7D05, 0x8679, 0x8A0C, /* 0xF0 */
         0x9D3B, 0x5316, 0x548C, 0x5B05, 0x6A3A, 0x706B, 0x7575			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   case 0xf9:
     if (c2>=0x31 && c2<=0xfe) {
@@ -4616,20 +4616,20 @@ bool StarEncodingOtherKorean::readKoreanMS1361
         0x5B09, 0x5E0C, 0x6199, 0x6198, 0x6231, 0x665E, 0x66E6, 0x7199, /* 0xF0 */
         0x71B9, 0x71BA, 0x72A7, 0x79A7, 0x7A00, 0x7FB2, 0x8A70			/* 0xF0 */
       };
-      unicode=(uint32_t) val[c2-0x31];
+      unicode=static_cast<uint32_t>(val[c2-0x31]);
     }
     else
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
     break;
   default:
     if (c==0xd8 || c==0xdf) {
-      unicode=uint32_t((unicode<<8)+(uint32_t) c2);
+      unicode=uint32_t((unicode<<8)+static_cast<uint32_t>(c2));
       break;
     }
     break;
   }
   if (!unicode) {
-    STOFF_DEBUG_MSG(("StarEncodingOtherKorean::readKoreanMS1361: unknown caracter %x\n", (unsigned int)c));
+    STOFF_DEBUG_MSG(("StarEncodingOtherKorean::readKoreanMS1361: unknown caracter %x\n", static_cast<unsigned int>(c)));
   }
   dest.push_back(unicode);
   return true;

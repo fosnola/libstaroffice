@@ -277,7 +277,7 @@ bool StarObject::readPersistElements(STOFFInputStreamPtr input, std::string cons
     ascii.addNote(f.str().c_str());
     return true;
   }
-  int hasElt=(int) input->readLong(1);
+  int hasElt=int(input->readLong(1));
   if (hasElt==1) {
     if (input->size()<29) {
       STOFF_DEBUG_MSG(("StarObject::readPersistElements: flag hasData, but zone seems too short\n"));
@@ -295,10 +295,10 @@ bool StarObject::readPersistElements(STOFFInputStreamPtr input, std::string cons
   int N=0;
   long endDataPos=0;
   if (hasElt) {
-    val=(int) input->readULong(1); // always 80?
+    val=int(input->readULong(1)); // always 80?
     if (val!=0x80) f << "#f0=" << std::hex << val << std::dec << ",";
-    long dSz=(int) input->readULong(4);
-    N=(int) input->readULong(4);
+    long dSz=long(input->readULong(4));
+    N=int(input->readULong(4));
     f << "dSz=" << dSz << ",N=" << N << ",";
     if (!dSz || 7+dSz+18>input->size()) {
       STOFF_DEBUG_MSG(("StarObject::readPersistElements: data size seems bad\n"));
@@ -328,9 +328,9 @@ bool StarObject::readPersistElements(STOFFInputStreamPtr input, std::string cons
   f.str("");
   f << "Persists-B:";
   int dim[4];
-  for (int i=0; i<4; ++i) dim[i]=(int) input->readLong(4);
+  for (int i=0; i<4; ++i) dim[i]=int(input->readLong(4));
   f << "dim=" << STOFFBox2i(STOFFVec2i(dim[0],dim[1]), STOFFVec2i(dim[2],dim[3])) << ",";
-  val=(int) input->readLong(2); // 0|9
+  val=int(input->readLong(2)); // 0|9
   if (val) f << "f0=" << val << ",";
   ascii.addPos(pos);
   ascii.addNote(f.str().c_str());
@@ -471,7 +471,7 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
   f << "Entries(SfxDocInfo):";
 
   // see sfx2_docinf.cxx
-  int sSz=(int) input->readULong(2);
+  int sSz=int(input->readULong(2));
   if (2+sSz>input->size()) {
     STOFF_DEBUG_MSG(("StarObject::readSfxDocumentInformation: header seems bad\n"));
     f << "###sSz=" << sSz << ",";
@@ -480,7 +480,7 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
     return true;
   }
   std::string text("");
-  for (int i=0; i<sSz; ++i) text+=(char) input->readULong(1);
+  for (int i=0; i<sSz; ++i) text+=char(input->readULong(1));
   if (text!="SfxDocumentInfo") {
     STOFF_DEBUG_MSG(("StarObject::readSfxDocumentInformation: header seems bad\n"));
     f << "###text=" << text << ",";
@@ -505,7 +505,7 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
     long pos=input->tell();
     f.str("");
     f << "SfxDocInfo-A" << i << ":";
-    int dSz=(int) input->readULong(2);
+    int dSz=int(input->readULong(2));
     int expectedSz= i < 3 ? 33 : i < 5 ? 65 : i==5 ? 257 : i==6 ? 129 : i<15 ? 21 : 2;
     static char const *(wh[])= {
       "time[creation]","time[mod]","time[print]","title","subject","comment","keyword",
@@ -527,7 +527,7 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
       return true;
     }
     std::vector<uint8_t> string;
-    for (int c=0; c<dSz; ++c) string.push_back((uint8_t) input->readULong(1));
+    for (int c=0; c<dSz; ++c) string.push_back(static_cast<uint8_t>(input->readULong(1)));
     std::vector<uint32_t> finalString;
     if (StarEncoding::convert(string, encoding, finalString)) {
       librevenge::RVNGString attrib=libstoff::getString(finalString);
@@ -579,10 +579,10 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
     if (nMailAdr && nMailAdr<20 && input->tell()+4*nMailAdr<input->tell()) {
       f << "mailAdr=[";
       for (int i=0; i<int(nMailAdr); ++i) {
-        sSz=(int) input->readULong(2);
+        sSz=int(input->readULong(2));
         if (input->tell()+sSz+2>input->size())
           break;
-        for (int c=0; c<sSz; ++c) text+=(char) input->readULong(1);
+        for (int c=0; c<sSz; ++c) text+=char(input->readULong(1));
         f << text.c_str() << ",";
         input->seek(2, librevenge::RVNG_SEEK_CUR); // flag dummy
       }
@@ -622,7 +622,7 @@ bool StarObject::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const
     if (pool && pool->read(zone)) {
       if (extraPool) {
         STOFF_DEBUG_MSG(("StarObject::readSfxStyleSheets: create extra pool for %d of type %d\n",
-                         (int) getDocumentKind(), (int) pool->getType()));
+                         int(getDocumentKind()), int(pool->getType())));
       }
       if (!mainPool) mainPool=pool;
       pool.reset();
@@ -652,7 +652,7 @@ bool StarObject::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libstoff
   f << "Entries(StarFrameworkConfig):";
   // see sfx2_cfgimex SfxConfigManagerImExport_Impl::Import
   std::string header("");
-  for (int i=0; i<26; ++i) header+=(char) input->readULong(1);
+  for (int i=0; i<26; ++i) header+=char(input->readULong(1));
   if (!input->checkPosition(33)||header!="Star Framework Config File") {
     STOFF_DEBUG_MSG(("StarObject::readStarFrameworkConfigFile: the header seems bad\n"));
     f << "###" << header;
@@ -712,14 +712,14 @@ bool StarObject::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libstoff
       }
       if (lLength) f << "len=" << lLength << ",";
     }
-    int strSz=(int) input->readULong(2);
+    int strSz=int(input->readULong(2));
     if (!input->checkPosition(input->tell()+strSz)) {
       STOFF_DEBUG_MSG(("StarObject::readStarFrameworkConfigFile: a item seems bad\n"));
       f << "###item,";
       break;
     }
     std::string name("");
-    for (int c=0; c<strSz; ++c) name+=(char) input->readULong(1);
+    for (int c=0; c<strSz; ++c) name+=char(input->readULong(1));
     f << name << ",";
     f << "],";
   }
@@ -765,7 +765,7 @@ bool StarObject::readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugFile &
     long pos=input->tell();
     if (!input->checkPosition(pos+2))
       break;
-    int dSz=(int) input->readULong(2);
+    int dSz=int(input->readULong(2));
     if (!input->checkPosition(pos+2+dSz)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
@@ -773,7 +773,7 @@ bool StarObject::readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugFile &
     f.str("");
     f << "SfWindows:";
     std::string text("");
-    for (int i=0; i<dSz; ++i) text+=(char) input->readULong(1);
+    for (int i=0; i<dSz; ++i) text+=char(input->readULong(1));
     f << text;
     ascii.addPos(pos);
     ascii.addNote(f.str().c_str());
