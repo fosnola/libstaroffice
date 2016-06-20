@@ -46,7 +46,7 @@ public:
   //! constructor
   STOFFPropertyHandler() {}
   //! destructor
-  virtual ~STOFFPropertyHandler() {}
+  virtual ~STOFFPropertyHandler();
 
   //! inserts a simple element
   virtual void insertElement(const char *psName) = 0;

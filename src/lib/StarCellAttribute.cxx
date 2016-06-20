@@ -37,7 +37,6 @@
 
 #include "StarAttribute.hxx"
 #include "StarItemPool.hxx"
-#include "StarLanguage.hxx"
 #include "StarObject.hxx"
 #include "StarObjectSmallText.hxx"
 #include "StarZone.hxx"
@@ -78,6 +77,8 @@ public:
   StarCAttributeColor(Type type, std::string const &debugName, STOFFColor const &value) : StarAttributeColor(type, debugName, value)
   {
   }
+  //! destructor
+  ~StarCAttributeColor();
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -92,6 +93,9 @@ protected:
   }
 };
 
+StarCAttributeColor::~StarCAttributeColor()
+{
+}
 //! a character integer attribute
 class StarCAttributeInt : public StarAttributeInt
 {
@@ -146,6 +150,8 @@ public:
   StarCAttributeVoid(Type type, std::string const &debugName) : StarAttributeVoid(type, debugName)
   {
   }
+  //! destructor
+  ~StarCAttributeVoid();
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -159,6 +165,10 @@ protected:
   {
   }
 };
+
+StarCAttributeVoid::~StarCAttributeVoid()
+{
+}
 
 void StarCAttributeBool::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
@@ -375,6 +385,8 @@ public:
   {
     m_limits.push_back(STOFFVec2i(100,148));
   }
+  //! destructor
+  ~StarCAttributePattern();
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -427,6 +439,10 @@ protected:
   librevenge::RVNGString m_style;
 };
 
+StarCAttributePattern::~StarCAttributePattern()
+{
+}
+
 //! a protection attribute
 class StarCAttributeProtection : public StarAttribute
 {
@@ -477,7 +493,7 @@ void StarCAttributeMargins::addTo(STOFFCellStyle &cell, StarItemPool const */*po
     return;
   for (int i=0; i<4; ++i) {
     char const *(wh[])= {"top", "left", "right", "bottom"};
-    cell.m_propertyList.insert((std::string("fo:padding-")+wh[i]).c_str(), float(m_margins[i])/20.f, librevenge::RVNG_POINT);
+    cell.m_propertyList.insert((std::string("fo:padding-")+wh[i]).c_str(), double(m_margins[i])/20., librevenge::RVNG_POINT);
   }
 }
 

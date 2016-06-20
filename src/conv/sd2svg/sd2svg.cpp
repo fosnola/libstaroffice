@@ -58,7 +58,7 @@
 
 #define TOOLNAME "sd2svg"
 
-int printUsage()
+static int printUsage()
 {
   printf("`" TOOLNAME "' converts StarOffice graphic documents and presentations to SVG.\n");
   printf("\n");
@@ -75,7 +75,7 @@ int printUsage()
   return -1;
 }
 
-int printVersion()
+static int printVersion()
 {
   printf("%s %s\n", TOOLNAME, VERSION);
   return 0;

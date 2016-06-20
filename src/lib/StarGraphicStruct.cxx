@@ -636,29 +636,29 @@ void StarPolygon::addToPath(librevenge::RVNGPropertyListVector &path, bool isClo
   librevenge::RVNGPropertyList element;
   for (size_t i=0; i<m_points.size(); ++i) {
     if (m_points[i].m_flags==2 && i+2<m_points.size() && m_points[i].m_flags==2) {
-      element.insert("svg:x1",float(m_points[i].m_point[0])/20.f, librevenge::RVNG_POINT);
-      element.insert("svg:y1",float(m_points[i].m_point[1])/20.f, librevenge::RVNG_POINT);
-      element.insert("svg:x2",float(m_points[++i].m_point[0])/20.f, librevenge::RVNG_POINT);
-      element.insert("svg:y2",float(m_points[i].m_point[1])/20.f, librevenge::RVNG_POINT);
-      element.insert("svg:x",float(m_points[++i].m_point[0])/20.f, librevenge::RVNG_POINT);
-      element.insert("svg:y",float(m_points[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+      element.insert("svg:x1",double(m_points[i].m_point[0])/20., librevenge::RVNG_POINT);
+      element.insert("svg:y1",double(m_points[i].m_point[1])/20., librevenge::RVNG_POINT);
+      element.insert("svg:x2",double(m_points[++i].m_point[0])/20., librevenge::RVNG_POINT);
+      element.insert("svg:y2",double(m_points[i].m_point[1])/20., librevenge::RVNG_POINT);
+      element.insert("svg:x",double(m_points[++i].m_point[0])/20., librevenge::RVNG_POINT);
+      element.insert("svg:y",double(m_points[i].m_point[1])/20., librevenge::RVNG_POINT);
       element.insert("librevenge:path-action", "C");
     }
     else if (m_points[i].m_flags==2 && i+1<m_points.size()) {
       /* unsure, let asume that this means the previous point is symetric,
          but maybe we can also have a Bezier patch */
-      element.insert("svg:x1",float(m_points[i].m_point[0])/20.f, librevenge::RVNG_POINT);
-      element.insert("svg:y1",float(m_points[i].m_point[1])/20.f, librevenge::RVNG_POINT);
-      element.insert("svg:x",float(m_points[++i].m_point[0])/20.f, librevenge::RVNG_POINT);
-      element.insert("svg:y",float(m_points[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+      element.insert("svg:x1",double(m_points[i].m_point[0])/20., librevenge::RVNG_POINT);
+      element.insert("svg:y1",double(m_points[i].m_point[1])/20., librevenge::RVNG_POINT);
+      element.insert("svg:x",double(m_points[++i].m_point[0])/20., librevenge::RVNG_POINT);
+      element.insert("svg:y",double(m_points[i].m_point[1])/20., librevenge::RVNG_POINT);
       element.insert("librevenge:path-action", "S");
     }
     else {
       if (m_points[i].m_flags==2) {
         STOFF_DEBUG_MSG(("StarGraphicStruct::StarPolygon::addToPath: find unexpected flags\n"));
       }
-      element.insert("svg:x",float(m_points[i].m_point[0])/20.f, librevenge::RVNG_POINT);
-      element.insert("svg:y",float(m_points[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+      element.insert("svg:x",double(m_points[i].m_point[0])/20., librevenge::RVNG_POINT);
+      element.insert("svg:y",double(m_points[i].m_point[1])/20., librevenge::RVNG_POINT);
       element.insert("librevenge:path-action", (i==0 ? "M" : "L"));
     }
     path.append(element);

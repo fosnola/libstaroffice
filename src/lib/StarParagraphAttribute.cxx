@@ -36,7 +36,6 @@
 
 #include "StarAttribute.hxx"
 #include "StarItemPool.hxx"
-#include "StarLanguage.hxx"
 #include "StarObject.hxx"
 #include "StarZone.hxx"
 
@@ -53,6 +52,8 @@ public:
     StarAttributeBool(type, debugName, value)
   {
   }
+  //! destructor
+  ~StarPAttributeBool();
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -68,6 +69,10 @@ protected:
   }
 };
 
+StarPAttributeBool::~StarPAttributeBool()
+{
+}
+
 //! a character color attribute
 class StarPAttributeColor : public StarAttributeColor
 {
@@ -76,6 +81,8 @@ public:
   StarPAttributeColor(Type type, std::string const &debugName, STOFFColor const &value) : StarAttributeColor(type, debugName, value)
   {
   }
+  //! destructor
+  ~StarPAttributeColor();
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -90,6 +97,9 @@ protected:
   }
 };
 
+StarPAttributeColor::~StarPAttributeColor()
+{
+}
 //! a character integer attribute
 class StarPAttributeInt : public StarAttributeInt
 {
@@ -99,6 +109,8 @@ public:
     StarAttributeInt(type, debugName, intSize, value)
   {
   }
+  //! destructor
+  ~StarPAttributeInt();
   //! add to a para
   // virtual void addTo(STOFFParagraph &para, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
@@ -113,6 +125,10 @@ protected:
   }
 };
 
+StarPAttributeInt::~StarPAttributeInt()
+{
+}
+
 //! a character unsigned integer attribute
 class StarPAttributeUInt : public StarAttributeUInt
 {
@@ -122,6 +138,8 @@ public:
     StarAttributeUInt(type, debugName, intSize, value)
   {
   }
+  //! destructor
+  ~StarPAttributeUInt();
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -136,6 +154,9 @@ protected:
   }
 };
 
+StarPAttributeUInt::~StarPAttributeUInt()
+{
+}
 //! a void attribute
 class StarPAttributeVoid : public StarAttributeVoid
 {
@@ -144,6 +165,8 @@ public:
   StarPAttributeVoid(Type type, std::string const &debugName) : StarAttributeVoid(type, debugName)
   {
   }
+  //! destructor
+  ~StarPAttributeVoid();
   //! add to a para
   // virtual void addTo(STOFFParagraph &para, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
@@ -157,6 +180,10 @@ protected:
   {
   }
 };
+
+StarPAttributeVoid::~StarPAttributeVoid()
+{
+}
 
 //! add a bool attribute
 inline void addAttributeBool(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)

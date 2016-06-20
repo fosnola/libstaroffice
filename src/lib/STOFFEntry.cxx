@@ -30,41 +30,10 @@
 * in which case the provisions of the LGPLv2+ are applicable
 * instead of those above.
 */
-#ifndef STOFF_GRAPHIC_SHAPE
-#  define STOFF_GRAPHIC_SHAPE
-#  include <ostream>
-#  include <string>
-#  include <vector>
 
-#  include "librevenge/librevenge.h"
-#  include "libstaroffice_internal.hxx"
+#include "STOFFEntry.hxx"
 
-class STOFFGraphicStyle;
-
-/** a structure used to define a picture shape */
-class STOFFGraphicShape
+STOFFEntry::~STOFFEntry()
 {
-public:
-  //! an enum used to define the interface command
-  enum Command { C_Ellipse, C_Polyline, C_Rectangle, C_Path, C_Polygon, C_Unknown };
-  //! constructor
-  STOFFGraphicShape() : m_command(C_Unknown), m_bdbox(), m_propertyList(), m_extra("")
-  {
-  }
-  //! virtual destructor
-  virtual ~STOFFGraphicShape();
-  //! add shape to property list
-  void addTo(librevenge::RVNGPropertyList &list) const;
-  //! a print operator
-  friend std::ostream &operator<<(std::ostream &o, STOFFGraphicShape const &sh);
-  //! the command
-  Command m_command;
-  //! the shape bdbox in twip
-  STOFFBox2f m_bdbox;
-  //! the property
-  librevenge::RVNGPropertyList m_propertyList;
-  //! extra data
-  std::string m_extra;
-};
-#endif
+}
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

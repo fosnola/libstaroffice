@@ -46,7 +46,7 @@ public:
   /** constructor */
   STOFFFont() : m_propertyList(), m_shadowColor(STOFFColor::black()), m_hyphen(false), m_softHyphen(false), m_lineBreak(false)
   {
-  };
+  }
   //! add to the propList
   void addTo(librevenge::RVNGPropertyList &propList) const;
 

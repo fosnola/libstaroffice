@@ -53,6 +53,10 @@
 ////////////////////////////////////////////////////////////
 // STOFFGraphicShape
 ////////////////////////////////////////////////////////////
+STOFFGraphicShape::~STOFFGraphicShape()
+{
+}
+
 void STOFFGraphicShape::addTo(librevenge::RVNGPropertyList &pList) const
 {
   if (m_bdbox.size()[0]>0) {

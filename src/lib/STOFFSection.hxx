@@ -51,9 +51,7 @@ public:
   {
   }
   //! destructor
-  virtual ~STOFFSection()
-  {
-  }
+  virtual ~STOFFSection();
   /** a function which sets n uniform columns
 
   \note: this erases previous columns and border if there are some

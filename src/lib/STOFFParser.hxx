@@ -190,6 +190,8 @@ protected:
   STOFFTextParser(STOFFInputStreamPtr input, STOFFHeader *header) : STOFFParser(STOFFParserState::Text, input, header) {}
   //! constructor using a state
   explicit STOFFTextParser(STOFFParserStatePtr state) : STOFFParser(state) {}
+  //! destructor
+  virtual ~STOFFTextParser();
 };
 
 /** virtual class which defines the ancestor of all graphic zone parser */
@@ -203,6 +205,8 @@ protected:
   STOFFGraphicParser(STOFFInputStreamPtr input, STOFFHeader *header) : STOFFParser(STOFFParserState::Graphic, input, header) {}
   //! constructor using a state
   explicit STOFFGraphicParser(STOFFParserStatePtr state) : STOFFParser(state) {}
+  //! destructor
+  virtual ~STOFFGraphicParser();
 };
 
 /** virtual class which defines the ancestor of all spreadsheet zone parser */
@@ -216,6 +220,8 @@ protected:
   STOFFSpreadsheetParser(STOFFInputStreamPtr input, STOFFHeader *header) : STOFFParser(STOFFParserState::Spreadsheet, input, header) {}
   //! constructor using a state
   explicit STOFFSpreadsheetParser(STOFFParserStatePtr state) : STOFFParser(state) {}
+  //! destructor
+  virtual ~STOFFSpreadsheetParser();
 };
 
 #endif /* STOFFPARSER_H */

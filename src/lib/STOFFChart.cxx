@@ -117,7 +117,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
 STOFFChart::STOFFChart(librevenge::RVNGString const &sheetName, STOFFVec2f const &dim) :
   m_sheetName(sheetName), m_dim(dim), m_type(STOFFChart::Series::S_Bar), m_dataStacked(false), m_legend(), m_seriesList(), m_textZoneMap()
 {
-  for (int i=0; i<3; ++i) m_axis[i]=Axis();
+  for (int i=0; i<4; ++i) m_axis[i]=Axis();
 }
 
 STOFFChart::~STOFFChart()
@@ -137,8 +137,7 @@ STOFFChart::Axis const &STOFFChart::getAxis(int coord) const
 {
   if (coord<0 || coord>2) {
     STOFF_DEBUG_MSG(("STOFFChart::getAxis: called with bad coord\n"));
-    static Axis const badAxis;
-    return badAxis;
+    return m_axis[3];
   }
   return m_axis[coord];
 }
@@ -190,8 +189,8 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
   interface->defineChartStyle(style);
 
   librevenge::RVNGPropertyList chart;
-  chart.insert("svg:width", m_dim[0], librevenge::RVNG_POINT);
-  chart.insert("svg:height", m_dim[1], librevenge::RVNG_POINT);
+  chart.insert("svg:width", double(m_dim[0]), librevenge::RVNG_POINT);
+  chart.insert("svg:height", double(m_dim[1]), librevenge::RVNG_POINT);
   if (!m_seriesList.empty())
     chart.insert("chart:class", Series::getSeriesTypeName(m_seriesList[0].m_type).cstr());
   else
@@ -246,11 +245,11 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
   librevenge::RVNGPropertyList plotArea;
   if (m_dim[0]>80) {
     plotArea.insert("svg:x", 20, librevenge::RVNG_POINT);
-    plotArea.insert("svg:width", m_dim[0]-40, librevenge::RVNG_POINT);
+    plotArea.insert("svg:width", double(m_dim[0]-40), librevenge::RVNG_POINT);
   }
   if (m_dim[1]>80) {
     plotArea.insert("svg:y", 20, librevenge::RVNG_POINT);
-    plotArea.insert("svg:height", m_dim[1]-40, librevenge::RVNG_POINT);
+    plotArea.insert("svg:height", double(m_dim[1]-40), librevenge::RVNG_POINT);
   }
   plotArea.insert("librevenge:chart-id", styleId++);
 
@@ -408,8 +407,8 @@ std::ostream &operator<<(std::ostream &o, STOFFChart::Axis const &axis)
 ////////////////////////////////////////////////////////////
 void STOFFChart::Legend::addContentTo(librevenge::RVNGPropertyList &propList) const
 {
-  propList.insert("svg:x", m_position[0], librevenge::RVNG_POINT);
-  propList.insert("svg:y", m_position[1], librevenge::RVNG_POINT);
+  propList.insert("svg:x", double(m_position[0]), librevenge::RVNG_POINT);
+  propList.insert("svg:y", double(m_position[1]), librevenge::RVNG_POINT);
   if (!m_autoPosition || !m_relativePosition)
     return;
   std::stringstream s;
@@ -565,8 +564,8 @@ STOFFChart::TextZone::~TextZone()
 void STOFFChart::TextZone::addContentTo(librevenge::RVNGString const &sheetName, librevenge::RVNGPropertyList &propList) const
 {
   if (m_position[0]>=0 && m_position[1]>=0) {
-    propList.insert("svg:x", m_position[0], librevenge::RVNG_POINT);
-    propList.insert("svg:y", m_position[1], librevenge::RVNG_POINT);
+    propList.insert("svg:x", double(m_position[0]), librevenge::RVNG_POINT);
+    propList.insert("svg:y", double(m_position[1]), librevenge::RVNG_POINT);
   }
   switch (m_type) {
   case T_Title:

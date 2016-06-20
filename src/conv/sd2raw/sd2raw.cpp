@@ -54,7 +54,7 @@
 
 #define TOOLNAME "sd2raw"
 
-int printUsage()
+static int printUsage()
 {
   printf("`" TOOLNAME "' is used to test " PACKAGE ".\n");
   printf("\n");
@@ -70,7 +70,7 @@ int printUsage()
   return 0;
 }
 
-int printVersion()
+static int printVersion()
 {
   printf("%s %s\n", TOOLNAME, VERSION);
   return 0;

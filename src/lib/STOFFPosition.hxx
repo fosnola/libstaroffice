@@ -54,7 +54,7 @@ public:
   //! constructor
   STOFFPosition() : m_anchorTo(Unknown), m_propertyList() {}
   //! destructor
-  virtual ~STOFFPosition() {}
+  virtual ~STOFFPosition();
   //! add to the propList
   void addTo(librevenge::RVNGPropertyList &propList) const
   {
@@ -71,20 +71,20 @@ public:
   //! utility function to set a origin
   void setOrigin(STOFFVec2f const &origin, librevenge::RVNGUnit unit)
   {
-    m_propertyList.insert("svg:x",origin[0], unit);
-    m_propertyList.insert("svg:y",origin[1], unit);
+    m_propertyList.insert("svg:x",double(origin[0]), unit);
+    m_propertyList.insert("svg:y",double(origin[1]), unit);
   }
   //! utility function to set a size
   void setSize(STOFFVec2f const &size, librevenge::RVNGUnit unit)
   {
     if (size.x()>0)
-      m_propertyList.insert("svg:width",size.x(), unit);
+      m_propertyList.insert("svg:width",double(size.x()), unit);
     else if (size.x()<0)
-      m_propertyList.insert("fo:min-width",-size.x(), unit);
+      m_propertyList.insert("fo:min-width",double(-size.x()), unit);
     if (size.y()>0)
-      m_propertyList.insert("svg:height",size.y(), unit);
+      m_propertyList.insert("svg:height",double(size.y()), unit);
     else if (size.y()<0)
-      m_propertyList.insert("fo:min-height",-size.y(), unit);
+      m_propertyList.insert("fo:min-height",double(-size.y()), unit);
   }
   //! operator<<
   friend  std::ostream &operator<<(std::ostream &o, STOFFPosition const &pos)

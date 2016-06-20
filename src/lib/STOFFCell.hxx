@@ -64,7 +64,7 @@ public:
     {
     }
     //! destructor
-    virtual ~Format() {}
+    virtual ~Format();
     //! returns true if this is a basic format style
     bool hasBasicFormat() const
     {

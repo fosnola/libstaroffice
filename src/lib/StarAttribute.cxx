@@ -70,6 +70,8 @@ public:
   StarAttributeXML(Type type, std::string const &debugName) : StarAttributeVoid(type, debugName)
   {
   }
+  //! destructor
+  ~StarAttributeXML();
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -77,6 +79,9 @@ public:
   }
 };
 
+StarAttributeXML::~StarAttributeXML()
+{
+}
 ////////////////////////////////////////
 //! Internal: the state of a StarAttribute
 struct State {
@@ -543,6 +548,10 @@ void State::initAttributeMap()
 ////////////////////////////////////////////////////////////
 // basic attribute function
 ////////////////////////////////////////////////////////////
+StarAttribute::~StarAttribute()
+{
+}
+
 void StarAttributeItemSet::addTo(STOFFCellStyle &cell, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
 {
   if (done.find(this)!=done.end()) {

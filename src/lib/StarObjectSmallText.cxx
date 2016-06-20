@@ -214,7 +214,7 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
     }
     f << "attrib=[";
     for (int j=0; j<int(nAttr); ++j) { // checkme, probably bad
-      uint16_t which, start, end, surrogate;
+      uint16_t which, start, end, surrogate=0;
       *input >> which;
       if (nWhich==0x22) *input >> surrogate;
       *input >> start >> end;

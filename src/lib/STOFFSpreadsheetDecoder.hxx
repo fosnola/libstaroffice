@@ -33,8 +33,8 @@
 * instead of those above.
 */
 
-#ifndef __STOFF_SPREADSHEET_DECODER_HXX__
-#define __STOFF_SPREADSHEET_DECODER_HXX__
+#ifndef STOFF_SPREADSHEET_DECODER_HXX
+#define STOFF_SPREADSHEET_DECODER_HXX
 
 #include <librevenge/librevenge.h>
 #include <libstaroffice_internal.hxx>
@@ -51,7 +51,7 @@ public:
   /** constructor */
   explicit STOFFSpreadsheetDecoder(librevenge::RVNGSpreadsheetInterface *output) : STOFFPropertyHandler(), m_output(output) { }
   /** destructor */
-  ~STOFFSpreadsheetDecoder() {};
+  ~STOFFSpreadsheetDecoder() {}
 
   /** insert an element */
   void insertElement(const char *psName);

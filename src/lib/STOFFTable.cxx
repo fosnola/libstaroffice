@@ -124,14 +124,14 @@ void STOFFTable::addTablePropertiesTo(librevenge::RVNGPropertyList &propList) co
     break;
   case Left:
     propList.insert("table:align", "left");
-    propList.insert("fo:margin-left", m_leftMargin, librevenge::RVNG_POINT);
+    propList.insert("fo:margin-left", double(m_leftMargin), librevenge::RVNG_POINT);
     break;
   case Center:
     propList.insert("table:align", "center");
     break;
   case Right:
     propList.insert("table:align", "right");
-    propList.insert("fo:margin-right", m_rightMargin, librevenge::RVNG_POINT);
+    propList.insert("fo:margin-right", double(m_rightMargin), librevenge::RVNG_POINT);
     break;
   default:
     break;
@@ -144,11 +144,11 @@ void STOFFTable::addTablePropertiesTo(librevenge::RVNGPropertyList &propList) co
   librevenge::RVNGPropertyListVector columns;
   for (size_t c = 0; c < nCols; ++c) {
     librevenge::RVNGPropertyList column;
-    column.insert("style:column-width", m_colsSize[c], librevenge::RVNG_POINT);
+    column.insert("style:column-width", double(m_colsSize[c]), librevenge::RVNG_POINT);
     columns.append(column);
     tableWidth += m_colsSize[c];
   }
-  propList.insert("style:width", tableWidth, librevenge::RVNG_POINT);
+  propList.insert("style:width", double(tableWidth), librevenge::RVNG_POINT);
   propList.insert("librevenge:table-columns", columns);
 }
 
@@ -184,10 +184,10 @@ bool STOFFTable::buildStructures()
       if (actCell < 0 || pos > maxPosiblePos) {
         actCell++;
         positions.push_back(pos);
-        maxPosiblePos = float(pos+2.0); // 2 pixel ok
+        maxPosiblePos = float(pos+2.0f); // 2 pixel ok
       }
-      if (it->m_which == 0 && it->getPos(dim)-2.0 < maxPosiblePos)
-        maxPosiblePos = float((it->getPos(dim)+pos)/2.);
+      if (it->m_which == 0 && it->getPos(dim)-2.0f < maxPosiblePos)
+        maxPosiblePos = float((it->getPos(dim)+pos)/2.f);
     }
     listPositions[dim] = positions;
   }

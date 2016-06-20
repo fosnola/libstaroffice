@@ -36,7 +36,6 @@
 
 #include "StarAttribute.hxx"
 #include "StarItemPool.hxx"
-#include "StarLanguage.hxx"
 #include "StarObject.hxx"
 #include "StarObjectSmallText.hxx"
 #include "StarZone.hxx"
@@ -77,6 +76,8 @@ public:
   StarPAttributeColor(Type type, std::string const &debugName, STOFFColor const &value) : StarAttributeColor(type, debugName, value)
   {
   }
+  //! destructor
+  ~StarPAttributeColor();
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -91,6 +92,9 @@ protected:
   }
 };
 
+StarPAttributeColor::~StarPAttributeColor()
+{
+}
 //! a character integer attribute
 class StarPAttributeInt : public StarAttributeInt
 {
@@ -100,6 +104,8 @@ public:
     StarAttributeInt(type, debugName, intSize, value)
   {
   }
+  //! destructor
+  ~StarPAttributeInt();
   //! add to a page
   // virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
@@ -113,6 +119,10 @@ protected:
   {
   }
 };
+
+StarPAttributeInt::~StarPAttributeInt()
+{
+}
 
 //! a character unsigned integer attribute
 class StarPAttributeUInt : public StarAttributeUInt
@@ -145,6 +155,8 @@ public:
   StarPAttributeVoid(Type type, std::string const &debugName) : StarAttributeVoid(type, debugName)
   {
   }
+  //! destructor
+  ~StarPAttributeVoid();
   //! add to a page
   // virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
@@ -158,6 +170,10 @@ protected:
   {
   }
 };
+
+StarPAttributeVoid::~StarPAttributeVoid()
+{
+}
 
 //! a list of item attribute of StarAttributeInternal
 class StarPAttributeItemSet : public StarAttributeItemSet

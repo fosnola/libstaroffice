@@ -357,7 +357,7 @@ void StarCAttributeUInt::addTo(STOFFFont &font, StarItemPool const */*pool*/, st
     }
   }
   else if (m_type==ATTR_CHR_PROPORTIONALFONTSIZE && m_value!=100) // checkme: maybe font-size with %
-    font.m_propertyList.insert("style:text-scale", float(m_value)/100.f, librevenge::RVNG_PERCENT);
+    font.m_propertyList.insert("style:text-scale", double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==ATTR_CHR_EMPHASIS_MARK) {
     if (m_value && ((m_value&0xC000)==0 || (m_value&0x3000)==0x3000 || (m_value&0xFFF)>4 || (m_value&0xFFF)==0)) {
       font.m_propertyList.insert("style:text-emphasize", "none");
@@ -688,40 +688,40 @@ void StarCAttributeFontSize::addTo(STOFFFont &font, StarItemPool const */*pool*/
   // TODO: use m_proportion?
   switch (m_unit) {
   case 0:
-    font.m_propertyList.insert(wh.c_str(), float(m_size)*0.02756f, librevenge::RVNG_POINT);
+    font.m_propertyList.insert(wh.c_str(), double(m_size)*0.02756, librevenge::RVNG_POINT);
     break;
   case 1:
-    font.m_propertyList.insert(wh.c_str(), float(m_size)*0.2756f, librevenge::RVNG_POINT);
+    font.m_propertyList.insert(wh.c_str(), double(m_size)*0.2756, librevenge::RVNG_POINT);
     break;
   case 2:
-    font.m_propertyList.insert(wh.c_str(), float(m_size)*2.756f, librevenge::RVNG_POINT);
+    font.m_propertyList.insert(wh.c_str(), double(m_size)*2.756, librevenge::RVNG_POINT);
     break;
   case 3:
-    font.m_propertyList.insert(wh.c_str(), float(m_size)*27.56f, librevenge::RVNG_POINT);
+    font.m_propertyList.insert(wh.c_str(), double(m_size)*27.56, librevenge::RVNG_POINT);
     break;
   case 4:
-    font.m_propertyList.insert(wh.c_str(), float(m_size)/1000.f, librevenge::RVNG_INCH);
+    font.m_propertyList.insert(wh.c_str(), double(m_size)/1000., librevenge::RVNG_INCH);
     break;
   case 5:
-    font.m_propertyList.insert(wh.c_str(), float(m_size)/100.f, librevenge::RVNG_INCH);
+    font.m_propertyList.insert(wh.c_str(), double(m_size)/100., librevenge::RVNG_INCH);
     break;
   case 6:
-    font.m_propertyList.insert(wh.c_str(), float(m_size)/10.f, librevenge::RVNG_INCH);
+    font.m_propertyList.insert(wh.c_str(), double(m_size)/10., librevenge::RVNG_INCH);
     break;
   case 7:
-    font.m_propertyList.insert(wh.c_str(), float(m_size), librevenge::RVNG_INCH);
+    font.m_propertyList.insert(wh.c_str(), double(m_size), librevenge::RVNG_INCH);
     break;
   case 8:
-    font.m_propertyList.insert(wh.c_str(), float(m_size), librevenge::RVNG_POINT);
+    font.m_propertyList.insert(wh.c_str(), double(m_size), librevenge::RVNG_POINT);
     break;
   case 9: // TWIP
-    font.m_propertyList.insert(wh.c_str(), float(m_size)/20., librevenge::RVNG_POINT);
+    font.m_propertyList.insert(wh.c_str(), double(m_size)/20., librevenge::RVNG_POINT);
     break;
   case 10: // pixel
-    font.m_propertyList.insert(wh.c_str(), float(m_size), librevenge::RVNG_POINT);
+    font.m_propertyList.insert(wh.c_str(), double(m_size), librevenge::RVNG_POINT);
     break;
   default: // checkme
-    font.m_propertyList.insert(wh.c_str(), float(m_size)/20., librevenge::RVNG_POINT);
+    font.m_propertyList.insert(wh.c_str(), double(m_size)/20., librevenge::RVNG_POINT);
     break;
   }
 }

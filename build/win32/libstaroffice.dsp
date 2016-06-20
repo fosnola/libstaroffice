@@ -123,6 +123,10 @@ SOURCE=..\..\src\lib\STOFFDocument.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFEntry.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFFont.cxx
 # End Source File
 # Begin Source File
@@ -155,6 +159,10 @@ SOURCE=..\..\src\lib\STOFFList.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFListener.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFOLEParser.cxx
 # End Source File
 # Begin Source File
@@ -168,6 +176,10 @@ SOURCE=..\..\src\lib\STOFFParagraph.cxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFParser.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFPosition.cxx
 # End Source File
 # Begin Source File
 

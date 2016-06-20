@@ -56,7 +56,7 @@
 
 #define TOOLNAME "sdc2csv"
 
-int printUsage()
+static int printUsage()
 {
   printf("`" TOOLNAME "' converts StarOffice spreadsheets to CSV.\n");
   printf("\n");
@@ -85,7 +85,7 @@ int printUsage()
   return 0;
 }
 
-int printVersion()
+static int printVersion()
 {
   printf("%s %s\n", TOOLNAME, VERSION);
   return 0;

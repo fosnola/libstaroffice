@@ -30,6 +30,7 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFDebug.hxx				\
 	STOFFDocument.cxx			\
 	STOFFEntry.hxx				\
+	STOFFEntry.cxx				\
 	STOFFFont.cxx				\
 	STOFFFont.hxx				\
 	STOFFGraphicDecoder.cxx			\
@@ -47,6 +48,7 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFList.cxx				\
 	STOFFList.hxx				\
 	STOFFListener.hxx			\
+	STOFFListener.cxx			\
 	STOFFOLEParser.cxx			\
 	STOFFOLEParser.hxx			\
 	STOFFPageSpan.cxx			\
@@ -56,6 +58,7 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFParser.cxx				\
 	STOFFParser.hxx				\
 	STOFFPosition.hxx			\
+	STOFFPosition.cxx			\
 	STOFFPropertyHandler.cxx		\
 	STOFFPropertyHandler.hxx		\
 	STOFFSection.cxx			\

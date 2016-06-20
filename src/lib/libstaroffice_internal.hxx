@@ -418,9 +418,7 @@ struct STOFFEmbeddedObject {
     add(binaryData, type);
   }
   //! destructor
-  virtual ~STOFFEmbeddedObject()
-  {
-  }
+  virtual ~STOFFEmbeddedObject();
   //! return true if the picture contains no data
   bool isEmpty() const
   {
@@ -990,7 +988,8 @@ public:
   //! the box center
   STOFFVec2<T> center() const
   {
-    return 0.5*(m_pt[0]+m_pt[1]);
+    return STOFFVec2<T>((m_pt[0].x()+m_pt[1].x())/2,
+                        (m_pt[0].y()+m_pt[1].y())/2);
   }
 
   //! resets the data to minimum \a x and maximum \a y

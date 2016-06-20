@@ -59,7 +59,7 @@ bool STOFFSection::Column::addTo(librevenge::RVNGPropertyList &propList) const
   switch (m_widthUnit) {
   case librevenge::RVNG_POINT:
   case librevenge::RVNG_INCH:
-    factor = libstoff::getScaleFactor(m_widthUnit, librevenge::RVNG_TWIP);
+    factor = double(libstoff::getScaleFactor(m_widthUnit, librevenge::RVNG_TWIP));
   case librevenge::RVNG_TWIP:
     break;
   case librevenge::RVNG_PERCENT:
@@ -83,6 +83,10 @@ bool STOFFSection::Column::addTo(librevenge::RVNGPropertyList &propList) const
 ////////////////////////////////////////////////////////////
 // Section
 ////////////////////////////////////////////////////////////
+STOFFSection::~STOFFSection()
+{
+}
+
 std::ostream &operator<<(std::ostream &o, STOFFSection const &sec)
 {
   if (sec.m_width>0)

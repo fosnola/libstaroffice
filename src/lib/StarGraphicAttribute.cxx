@@ -41,7 +41,6 @@
 #include "StarBitmap.hxx"
 #include "StarGraphicStruct.hxx"
 #include "StarItemPool.hxx"
-#include "StarLanguage.hxx"
 #include "StarObject.hxx"
 #include "StarZone.hxx"
 
@@ -81,6 +80,8 @@ public:
   StarGAttributeColor(Type type, std::string const &debugName, STOFFColor const &value) : StarAttributeColor(type, debugName, value)
   {
   }
+  //! destructor
+  ~StarGAttributeColor();
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -95,6 +96,9 @@ protected:
   }
 };
 
+StarGAttributeColor::~StarGAttributeColor()
+{
+}
 //! a character integer attribute
 class StarGAttributeInt : public StarAttributeInt
 {
@@ -149,6 +153,8 @@ public:
   StarGAttributeVoid(Type type, std::string const &debugName) : StarAttributeVoid(type, debugName)
   {
   }
+  //! destructor
+  ~StarGAttributeVoid();
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -163,6 +169,10 @@ protected:
   }
 };
 
+StarGAttributeVoid::~StarGAttributeVoid()
+{
+}
+
 //! a list of item attribute of StarAttributeInternal
 class StarGAttributeItemSet : public StarAttributeItemSet
 {
@@ -172,6 +182,8 @@ public:
     StarAttributeItemSet(type, debugName, limits)
   {
   }
+  //! destructor
+  ~StarGAttributeItemSet();
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -184,6 +196,10 @@ protected:
   {
   }
 };
+
+StarGAttributeItemSet::~StarGAttributeItemSet()
+{
+}
 
 void StarGAttributeBool::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
@@ -814,7 +830,7 @@ void StarGAttributeBorder::addTo(STOFFGraphicStyle &graphic, StarItemPool const 
         m_borders[i].addTo(graphic.m_propertyList, wh[i]);
     }
     for (int i=0; i<4; ++i)
-      graphic.m_propertyList.insert((std::string("padding-")+wh[i]).c_str(), float(m_distances[i])/20.f, librevenge::RVNG_POINT);
+      graphic.m_propertyList.insert((std::string("padding-")+wh[i]).c_str(), double(m_distances[i])/20., librevenge::RVNG_POINT);
   }
 }
 
@@ -1040,7 +1056,7 @@ void StarGAttributeShadow::addTo(STOFFGraphicStyle &graphic, StarItemPool const 
   }
   graphic.m_propertyList.insert("draw:shadow", "visible");
   graphic.m_propertyList.insert("draw:shadow-color", m_color.str().c_str());
-  graphic.m_propertyList.insert("draw:shadow-opacity", 1.f-float(m_transparency)/255.f, librevenge::RVNG_PERCENT);
+  graphic.m_propertyList.insert("draw:shadow-opacity", 1.-double(m_transparency)/255., librevenge::RVNG_PERCENT);
   graphic.m_propertyList.insert("draw:shadow-offset-x", ((m_location%2)?-1:1)*double(m_width)/20., librevenge::RVNG_POINT);
   graphic.m_propertyList.insert("draw:shadow-offset-y", (m_location<=2?-1:1)*double(m_width)/20., librevenge::RVNG_POINT);
 }

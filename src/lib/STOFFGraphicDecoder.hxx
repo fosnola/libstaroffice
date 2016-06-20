@@ -33,8 +33,8 @@
 * instead of those above.
 */
 
-#ifndef __STOFF_GRAPHIC_DECODER_HXX__
-#define __STOFF_GRAPHIC_DECODER_HXX__
+#ifndef STOFF_GRAPHIC_DECODER_HXX
+#define STOFF_GRAPHIC_DECODER_HXX
 
 #include <librevenge/librevenge.h>
 #include <libstaroffice_internal.hxx>
@@ -51,7 +51,7 @@ public:
   /** constructor */
   explicit STOFFGraphicDecoder(librevenge::RVNGDrawingInterface *output) : STOFFPropertyHandler(), m_output(output) { }
   /** destructor */
-  ~STOFFGraphicDecoder() {};
+  ~STOFFGraphicDecoder() {}
 
   /** insert an element */
   void insertElement(const char *psName);

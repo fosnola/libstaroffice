@@ -69,7 +69,7 @@ struct GraphicState {
     m_pageList(pageList), m_metaData(),
     m_isDocumentStarted(false), m_isPageSpanOpened(false), m_isMasterPageSpanOpened(false), m_isAtLeastOnePageOpened(false),
     m_isHeaderFooterOpened(false), m_isHeaderFooterRegionOpened(false), m_pageSpan(), m_sentListMarkers(), m_subDocuments(),
-    m_definedGraphicStyleSet()
+    m_definedGraphicStyleSet(), m_section()
   {
   }
   //! destructor
@@ -99,6 +99,8 @@ struct GraphicState {
   std::vector<STOFFSubDocumentPtr> m_subDocuments;
   //! the set of defined graphic style
   std::set<librevenge::RVNGString> m_definedGraphicStyleSet;
+  //! am empty section
+  STOFFSection m_section;
 };
 
 /** the state of a STOFFGraphicListener */
@@ -484,8 +486,8 @@ void STOFFGraphicListener::_openPageSpan(bool sendHeaderFooters)
   currentPage.getPageProperty(propList);
   propList.insert("librevenge:is-last-page-span", ++it == m_ds->m_pageList.end());
   // now add data for embedded graph
-  propList.insert("svg:x",m_ps->m_origin.x(), librevenge::RVNG_POINT);
-  propList.insert("svg:y",m_ps->m_origin.y(), librevenge::RVNG_POINT);
+  propList.insert("svg:x",double(m_ps->m_origin.x()), librevenge::RVNG_POINT);
+  propList.insert("svg:y",double(m_ps->m_origin.y()), librevenge::RVNG_POINT);
   propList.insert("librevenge:enforce-frame",true);
 
   if (!m_ds->m_isPageSpanOpened)
@@ -883,8 +885,7 @@ bool STOFFGraphicListener::closeFooter()
 STOFFSection const &STOFFGraphicListener::getSection() const
 {
   STOFF_DEBUG_MSG(("STOFFGraphicListener::getSection: must not be called\n"));
-  static STOFFSection s_section;
-  return s_section;
+  return m_ds->m_section;
 }
 
 bool STOFFGraphicListener::openSection(STOFFSection const &)
@@ -1157,9 +1158,9 @@ void STOFFGraphicListener::openTableRow(float h, librevenge::RVNGUnit unit, bool
   propList.insert("librevenge:is-header-row", headerRow);
 
   if (h > 0)
-    propList.insert("style:row-height", h, unit);
+    propList.insert("style:row-height", double(h), unit);
   else if (h < 0)
-    propList.insert("style:min-row-height", -h, unit);
+    propList.insert("style:min-row-height", double(-h), unit);
   m_documentInterface->openTableRow(propList);
   m_ps->m_isTableRowOpened = true;
 }

@@ -239,8 +239,8 @@ protected:
   Series::Type m_type;
   //! a flag to know if the data are stacked or not
   bool m_dataStacked;
-  //! the x,y,z axis
-  Axis m_axis[3];
+  //! the x,y,z axis and a bad axis
+  Axis m_axis[4];
   //! the legend
   Legend m_legend;
   //! the list of series

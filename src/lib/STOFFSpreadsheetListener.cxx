@@ -81,7 +81,7 @@ struct DocumentState {
     m_pageList(pageList), m_pageSpan(), m_metaData(), m_footNoteNumber(0), m_smallPictureNumber(0),
     m_isDocumentStarted(false), m_isSheetOpened(false), m_isSheetRowOpened(false),
     m_sentListMarkers(), m_numberingIdMap(),
-    m_subDocuments(), m_definedGraphicStyleSet()
+    m_subDocuments(), m_definedGraphicStyleSet(), m_section()
   {
   }
   //! destructor
@@ -109,7 +109,8 @@ struct DocumentState {
   std::vector<STOFFSubDocumentPtr> m_subDocuments; /** list of document actually open */
   //! the set of defined graphic style
   std::set<librevenge::RVNGString> m_definedGraphicStyleSet;
-
+  //! an empty section
+  STOFFSection m_section;
 private:
   DocumentState(const DocumentState &);
   DocumentState &operator=(const DocumentState &);
@@ -656,8 +657,7 @@ bool STOFFSpreadsheetListener::closeFooter()
 STOFFSection const &STOFFSpreadsheetListener::getSection() const
 {
   STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::getSection: make no sense\n"));
-  static STOFFSection const badSection;
-  return badSection;
+  return m_ds->m_section;
 }
 
 bool STOFFSpreadsheetListener::openSection(STOFFSection const &)
@@ -1293,7 +1293,7 @@ void STOFFSpreadsheetListener::openSheet(std::vector<float> const &colWidth, lib
   }
   for (size_t c = 0; c < nCols; c++) {
     librevenge::RVNGPropertyList column;
-    column.insert("style:column-width", colWidth[c], unit);
+    column.insert("style:column-width", double(colWidth[c]), unit);
     if (useRepeated && repeatColWidthNumber[c]>1)
       column.insert("table:number-columns-repeated", repeatColWidthNumber[c]);
     columns.append(column);
@@ -1330,9 +1330,9 @@ void STOFFSpreadsheetListener::openSheetRow(float h, librevenge::RVNGUnit unit, 
   }
   librevenge::RVNGPropertyList propList;
   if (h > 0)
-    propList.insert("style:row-height", h, unit);
+    propList.insert("style:row-height", double(h), unit);
   else if (h < 0)
-    propList.insert("style:min-row-height", -h, unit);
+    propList.insert("style:min-row-height", double(-h), unit);
   if (numRepeated>1)
     propList.insert("table:number-rows-repeated", numRepeated);
   m_documentInterface->openSheetRow(propList);
@@ -1576,9 +1576,9 @@ void STOFFSpreadsheetListener::openTableRow(float h, librevenge::RVNGUnit unit, 
   propList.insert("librevenge:is-header-row", headerRow);
 
   if (h > 0)
-    propList.insert("style:row-height", h, unit);
+    propList.insert("style:row-height", double(h), unit);
   else if (h < 0)
-    propList.insert("style:min-row-height", -h, unit);
+    propList.insert("style:min-row-height", double(-h), unit);
   m_documentInterface->openTableRow(propList);
   m_ps->m_isTableRowOpened = true;
 }

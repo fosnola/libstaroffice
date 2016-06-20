@@ -87,4 +87,15 @@ void STOFFParser::resetSpreadsheetListener()
   m_parserState->m_spreadsheetListener.reset();
 }
 
+STOFFGraphicParser::~STOFFGraphicParser()
+{
+}
+
+STOFFSpreadsheetParser::~STOFFSpreadsheetParser()
+{
+}
+
+STOFFTextParser::~STOFFTextParser()
+{
+}
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

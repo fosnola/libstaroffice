@@ -737,9 +737,7 @@ public:
   };
 
   //! destructor
-  virtual ~StarAttribute()
-  {
-  }
+  virtual ~StarAttribute();
   //! returns the attribute type
   Type getType() const
   {

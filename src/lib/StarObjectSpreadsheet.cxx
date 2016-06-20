@@ -254,6 +254,8 @@ public:
   {
     setPosition(pos);
   }
+  //! destructor
+  ~Cell();
   //! the cell content
   STOFFCellContent m_content;
   //! the text zone(if set)
@@ -264,6 +266,9 @@ public:
   librevenge::RVNGString m_notes[3];
 };
 
+Cell::~Cell()
+{
+}
 ////////////////////////////////////////
 //! Internal: structure used to store a row of a StarObjectSpreadsheet
 class RowContent
@@ -309,9 +314,11 @@ class Table : public STOFFTable
 {
 public:
   //! constructor
-  Table(int loadingVers, int maxRow) : m_loadingVersion(loadingVers), m_name(""), m_pageStyle(""), m_maxRow(maxRow), m_colWidthList(), m_rowHeightMap(), m_rowToRowContentMap()
+  Table(int loadingVers, int maxRow) : m_loadingVersion(loadingVers), m_name(""), m_pageStyle(""), m_maxRow(maxRow), m_colWidthList(), m_rowHeightMap(), m_rowToRowContentMap(), m_badCell()
   {
   }
+  //! destructor
+  ~Table();
   //! returns the load version
   int getLoadingVersion() const
   {
@@ -410,8 +417,7 @@ public:
   {
     if (pos[1]<0 || pos[1]>getMaxRows() || pos[0]<0 || pos[0]>getMaxCols()) {
       STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::Table::getCell: the position is bad (%d,%d)\n", pos[0], pos[1]));
-      static Cell badCell;
-      return badCell;
+      return m_badCell;
     }
     updateRowsBlocks(STOFFVec2i(pos[1],pos[1]));
     RowContent *row=getRow(pos[1]);
@@ -437,7 +443,13 @@ public:
   std::map<STOFFVec2i, int> m_rowHeightMap;
   //! map (min row, max row) -> rowContent
   std::map<STOFFVec2i, RowContent> m_rowToRowContentMap;
+  //! a cell uses to return an empty cell
+  Cell m_badCell;
 };
+
+Table::~Table()
+{
+}
 
 ////////////////////////////////////////
 //! Internal: the state of a StarObjectSpreadsheet

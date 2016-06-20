@@ -50,7 +50,7 @@ class STOFFListener
 {
 public:
   //! destructor
-  virtual ~STOFFListener() {}
+  virtual ~STOFFListener();
 
   //! the listener type
   enum Type { Graphic, Presentation, Spreadsheet, Text };

@@ -363,6 +363,10 @@ protected:
 // STOFFPropertyHandler
 //
 ////////////////////////////////////////////////////
+STOFFPropertyHandler::~STOFFPropertyHandler()
+{
+}
+
 bool STOFFPropertyHandler::checkData(librevenge::RVNGBinaryData const &encoded)
 {
   STOFFPropertyHandlerDecoder decod;

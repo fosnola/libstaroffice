@@ -46,7 +46,7 @@ public:
   /** constructor */
   STOFFCellStyle() : m_propertyList(), m_numberCellSpanned(1,1), m_format(0)
   {
-  };
+  }
   //! add to the propList
   void addTo(librevenge::RVNGPropertyList &propList) const;
 

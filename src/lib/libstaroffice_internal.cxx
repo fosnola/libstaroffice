@@ -186,7 +186,6 @@ std::string numberingValueToString(NumberingType type, int value)
   }
   case NONE:
     return "";
-    break;
   case BULLET:
   default:
     STOFF_DEBUG_MSG(("libstoff::numberingValueToString: must not be called with type %d\n", int(type)));
@@ -234,7 +233,6 @@ std::string STOFFColor::str() const
 bool STOFFField::addTo(librevenge::RVNGPropertyList &propList) const
 {
   switch (m_type) {
-    break;
   case PageCount:
     propList.insert("librevenge:field-type", "text:page-count");
     propList.insert("style:num-format", numberingTypeToString(m_numberingType).c_str());
@@ -341,6 +339,10 @@ std::ostream &operator<< (std::ostream &o, STOFFBorderLine const &border)
 }
 
 // picture function
+STOFFEmbeddedObject::~STOFFEmbeddedObject()
+{
+}
+
 bool STOFFEmbeddedObject::addAsFillImageTo(librevenge::RVNGPropertyList &propList) const
 {
   for (size_t i=0; i<m_dataList.size(); ++i) {

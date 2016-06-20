@@ -51,7 +51,7 @@
 
 #define TOOLNAME "sdw2html"
 
-int printUsage()
+static int printUsage()
 {
   printf("`" TOOLNAME "' converts StarOffice documents to HTML.\n");
   printf("\n");
@@ -66,7 +66,7 @@ int printUsage()
   return 0;
 }
 
-int printVersion()
+static int printVersion()
 {
   printf("%s %s\n", TOOLNAME, VERSION);
   return 0;

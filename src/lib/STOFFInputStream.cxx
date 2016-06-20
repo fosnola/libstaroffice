@@ -527,7 +527,7 @@ std::string STOFFInputStream::subStreamName(unsigned id)
 
 shared_ptr<STOFFInputStream> STOFFInputStream::getSubStreamByName(std::string const &name)
 {
-  static shared_ptr<STOFFInputStream> empty;
+  shared_ptr<STOFFInputStream> empty;
   if (!m_stream || !m_stream->isStructured() || name.empty()) {
     STOFF_DEBUG_MSG(("STOFFInputStream::getSubStreamByName: called on unstructured file\n"));
     return empty;
@@ -547,7 +547,7 @@ shared_ptr<STOFFInputStream> STOFFInputStream::getSubStreamByName(std::string co
 
 shared_ptr<STOFFInputStream> STOFFInputStream::getSubStreamById(unsigned id)
 {
-  static shared_ptr<STOFFInputStream> empty;
+  shared_ptr<STOFFInputStream> empty;
   if (!m_stream || !m_stream->isStructured()) {
     STOFF_DEBUG_MSG(("STOFFInputStream::getSubStreamById: called on unstructured file\n"));
     return empty;

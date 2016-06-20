@@ -67,6 +67,10 @@ StarEncryption::StarEncryption(std::string const &password) : m_password()
   m_password=data;
 }
 
+StarEncryption::~StarEncryption()
+{
+}
+
 bool StarEncryption::decode(std::vector<uint8_t> &data, std::vector<uint8_t> const &cryptPasswd)
 {
   if (cryptPasswd.empty() || data.empty()) return true;

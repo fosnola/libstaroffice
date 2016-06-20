@@ -232,9 +232,7 @@ public:
   {
   }
   //! destructor
-  virtual ~Graphic()
-  {
-  }
+  virtual ~Graphic();
   //! basic print function
   virtual std::string print() const
   {
@@ -257,6 +255,9 @@ public:
   int m_identifier;
 };
 
+Graphic::~Graphic()
+{
+}
 ////////////////////////////////////////
 //! Internal: virtual class to store a SCHU graphic
 class SCHUGraphic : public Graphic
@@ -266,6 +267,8 @@ public:
   explicit SCHUGraphic(int id) : Graphic(id), m_id(0), m_adjust(0), m_orientation(0), m_column(0), m_row(0), m_factor(0)
   {
   }
+  //! destructor
+  ~SCHUGraphic();
   //! return the object name
   std::string getName() const
   {
@@ -329,6 +332,10 @@ public:
   double m_factor;
 };
 
+SCHUGraphic::~SCHUGraphic()
+{
+}
+
 ////////////////////////////////////////
 //! Internal: virtual class to store a SDUD graphic
 class SDUDGraphic : public Graphic
@@ -338,6 +345,8 @@ public:
   explicit SDUDGraphic(int id) : Graphic(id)
   {
   }
+  //! destructor
+  ~SDUDGraphic();
   //! return the object name
   std::string getName() const
   {
@@ -364,6 +373,10 @@ public:
   }
 };
 
+SDUDGraphic::~SDUDGraphic()
+{
+}
+
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic
 class SdrGraphic : public Graphic
@@ -374,6 +387,8 @@ public:
   {
     for (int i=0; i<6; ++i) m_flags[i]=false;
   }
+  //! destructor
+  ~SdrGraphic();
   //! return the object name
   std::string getName() const
   {
@@ -444,6 +459,9 @@ public:
   //TODO: store the user data
 };
 
+SdrGraphic::~SdrGraphic()
+{
+}
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic attribute
 class SdrGraphicAttribute : public SdrGraphic
@@ -453,6 +471,8 @@ public:
   explicit SdrGraphicAttribute(int id) : SdrGraphic(id), m_itemList(), m_sheetStyle("")
   {
   }
+  //! destructor
+  ~SdrGraphicAttribute();
   //! basic print function
   virtual std::string print() const
   {
@@ -496,6 +516,11 @@ public:
   //! the sheet style name
   librevenge::RVNGString m_sheetStyle;
 };
+
+SdrGraphicAttribute::~SdrGraphicAttribute()
+{
+}
+
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic group
 class SdrGraphicGroup : public SdrGraphic
@@ -505,6 +530,8 @@ public:
   explicit SdrGraphicGroup(int id) : SdrGraphic(id), m_groupName(), m_child(), m_refPoint(), m_hasRefPoint(false), m_groupDrehWink(0), m_groupShearWink(0)
   {
   }
+  //! destructor
+  ~SdrGraphicGroup();
   //! basic print function
   virtual std::string print() const
   {
@@ -551,6 +578,11 @@ public:
   //! the shear wink
   int m_groupShearWink;
 };
+
+SdrGraphicGroup::~SdrGraphicGroup()
+{
+}
+
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic text
 class SdrGraphicText : public SdrGraphicAttribute
@@ -561,6 +593,8 @@ public:
     m_textDrehWink(0), m_textShearWink(0), m_outlinerParaObject(), m_textBound()
   {
   }
+  //! destructor
+  ~SdrGraphicText();
   //! try to update the transformation
   void updateTransformProperties(librevenge::RVNGPropertyList &list) const
   {
@@ -568,13 +602,13 @@ public:
       // rotation around the first point, let do that by hand
       librevenge::RVNGString transform;
       if (m_textRectangle[0]==STOFFVec2i(0,0))
-        transform.sprintf("rotate(%f)", float(m_textDrehWink)/100.f*M_PI/180.f);
+        transform.sprintf("rotate(%f)", m_textDrehWink/100.*M_PI/180.);
       else {
         STOFFVec2f center=STOFFVec2f(m_textRectangle[0]);
         transform.sprintf("translate(%fpt %fpt) rotate(%f) translate(%fpt %fpt)",
-                          -center[0]/20.f,-center[1]/20.f,
-                          float(m_textDrehWink)/100.f*M_PI/180.f, // gradient
-                          center[0]/20.f,center[1]/20.f);
+                          -double(center[0])/20.,-double(center[1])/20.,
+                          m_textDrehWink/100.*M_PI/180., // gradient
+                          double(center[0])/20.,double(center[1])/20.);
       }
       list.insert("draw:transform", transform);
     }
@@ -630,6 +664,11 @@ public:
   //! the text bound
   STOFFBox2i m_textBound;
 };
+
+SdrGraphicText::~SdrGraphicText()
+{
+}
+
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic rectangle
 class SdrGraphicRect : public SdrGraphicText
@@ -639,6 +678,8 @@ public:
   explicit SdrGraphicRect(int id) : SdrGraphicText(id), m_eckRag(0)
   {
   }
+  //! destructor
+  ~SdrGraphicRect();
   //! try to send the graphic to the listener
   bool send(STOFFListenerPtr listener, StarObject &object)
   {
@@ -679,6 +720,11 @@ public:
   //! the eckRag?
   int m_eckRag;
 };
+
+SdrGraphicRect::~SdrGraphicRect()
+{
+}
+
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic caption
 class SdrGraphicCaption : public SdrGraphicRect
@@ -688,6 +734,8 @@ public:
   SdrGraphicCaption() : SdrGraphicRect(25), m_captionPolygon(), m_captionItem()
   {
   }
+  //! destructor
+  ~SdrGraphicCaption();
   //! basic print function
   virtual std::string print() const
   {
@@ -717,6 +765,10 @@ public:
   //! the caption attributes
   shared_ptr<StarItem> m_captionItem;
 };
+
+SdrGraphicCaption::~SdrGraphicCaption()
+{
+}
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic circle
 class SdrGraphicCircle : public SdrGraphicRect
@@ -727,6 +779,8 @@ public:
   {
     m_angles[0]=m_angles[1]=0;
   }
+  //! destructor
+  ~SdrGraphicCircle();
   //! basic print function
   virtual std::string print() const
   {
@@ -744,14 +798,14 @@ public:
     STOFFGraphicShape shape;
     shape.m_command=STOFFGraphicShape::C_Ellipse;
     STOFFVec2f center=0.5f*STOFFVec2f(m_textRectangle[0]+m_textRectangle[1]);
-    shape.m_propertyList.insert("svg:cx",center.x(), librevenge::RVNG_TWIP);
-    shape.m_propertyList.insert("svg:cy",center.y(), librevenge::RVNG_TWIP);
-    STOFFVec2f radius=0.5*STOFFVec2f(m_textRectangle[1]-m_textRectangle[0]);
-    shape.m_propertyList.insert("svg:rx",radius.x(), librevenge::RVNG_TWIP);
-    shape.m_propertyList.insert("svg:ry",radius.y(), librevenge::RVNG_TWIP);
+    shape.m_propertyList.insert("svg:cx",double(center.x()), librevenge::RVNG_TWIP);
+    shape.m_propertyList.insert("svg:cy",double(center.y()), librevenge::RVNG_TWIP);
+    STOFFVec2f radius=0.5f*STOFFVec2f(m_textRectangle[1]-m_textRectangle[0]);
+    shape.m_propertyList.insert("svg:rx",double(radius.x()), librevenge::RVNG_TWIP);
+    shape.m_propertyList.insert("svg:ry",double(radius.y()), librevenge::RVNG_TWIP);
     if (m_identifier!=4) {
-      shape.m_propertyList.insert("draw:start-angle", m_angles[0], librevenge::RVNG_GENERIC);
-      shape.m_propertyList.insert("draw:end-angle", m_angles[1], librevenge::RVNG_GENERIC);
+      shape.m_propertyList.insert("draw:start-angle", double(m_angles[0]), librevenge::RVNG_GENERIC);
+      shape.m_propertyList.insert("draw:end-angle", double(m_angles[1]), librevenge::RVNG_GENERIC);
     }
     if (m_identifier>=4 && m_identifier<=7) {
       char const *(wh[])= {"full", "section", "arc", "cut"};
@@ -793,6 +847,10 @@ public:
   //! the circle attributes
   shared_ptr<StarItem> m_circleItem;
 };
+
+SdrGraphicCircle::~SdrGraphicCircle()
+{
+}
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic edge
 class SdrGraphicEdge : public SdrGraphicText
@@ -832,6 +890,8 @@ public:
   SdrGraphicEdge() : SdrGraphicText(24), m_edgePolygon(), m_edgePolygonFlags(), m_edgeItem(), m_info()
   {
   }
+  //! destructor
+  ~SdrGraphicEdge();
   //! basic print function
   virtual std::string print() const
   {
@@ -872,6 +932,10 @@ public:
   //! the information record
   Information m_info;
 };
+
+SdrGraphicEdge::~SdrGraphicEdge()
+{
+}
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic graph
 class SdrGraphicGraph : public SdrGraphicRect
@@ -881,6 +945,8 @@ public:
   SdrGraphicGraph() : SdrGraphicRect(22), m_graphic(), m_graphRectangle(), m_mirrored(false), m_hasGraphicLink(false), m_graphItem()
   {
   }
+  //! destructor
+  ~SdrGraphicGraph();
   //! basic print function
   virtual std::string print() const
   {
@@ -959,6 +1025,11 @@ public:
   //! the graph attributes
   shared_ptr<StarItem> m_graphItem;
 };
+
+SdrGraphicGraph::~SdrGraphicGraph()
+{
+}
+
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic edge
 class SdrGraphicMeasure : public SdrGraphicText
@@ -968,6 +1039,8 @@ public:
   SdrGraphicMeasure() : SdrGraphicText(29), m_overwritten(false), m_measureItem()
   {
   }
+  //! destructor
+  ~SdrGraphicMeasure();
   //! basic print function
   virtual std::string print() const
   {
@@ -985,8 +1058,8 @@ public:
     shape.m_command=STOFFGraphicShape::C_Polyline;
     librevenge::RVNGPropertyList list;
     for (int i=0; i<2; ++i) {
-      list.insert("svg:x",float(m_measurePoints[i][0])/20.f, librevenge::RVNG_POINT);
-      list.insert("svg:y",float(m_measurePoints[i][1])/20.f, librevenge::RVNG_POINT);
+      list.insert("svg:x",double(m_measurePoints[i][0])/20., librevenge::RVNG_POINT);
+      list.insert("svg:y",double(m_measurePoints[i][1])/20., librevenge::RVNG_POINT);
       vect.append(list);
     }
     shape.m_propertyList.insert("svg:points", vect);
@@ -1026,6 +1099,10 @@ public:
   //! the measure attributes
   shared_ptr<StarItem> m_measureItem;
 };
+
+SdrGraphicMeasure::~SdrGraphicMeasure()
+{
+}
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic OLE
 class SdrGraphicOLE : public SdrGraphicRect
@@ -1035,6 +1112,8 @@ public:
   explicit SdrGraphicOLE(int id) : SdrGraphicRect(id), m_graphic()
   {
   }
+  //! destructor
+  ~SdrGraphicOLE();
   //! basic print function
   virtual std::string print() const
   {
@@ -1088,6 +1167,10 @@ public:
   //! the graphic
   shared_ptr<StarGraphicStruct::StarGraphic> m_graphic;
 };
+
+SdrGraphicOLE::~SdrGraphicOLE()
+{
+}
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic page
 class SdrGraphicPage : public SdrGraphic
@@ -1097,6 +1180,8 @@ public:
   SdrGraphicPage() : SdrGraphic(28), m_page(0)
   {
   }
+  //! destructor
+  ~SdrGraphicPage();
   //! basic print function
   virtual std::string print() const
   {
@@ -1119,6 +1204,10 @@ public:
   //! the page
   int m_page;
 };
+
+SdrGraphicPage::~SdrGraphicPage()
+{
+}
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic path
 class SdrGraphicPath : public SdrGraphicText
@@ -1179,8 +1268,8 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object)
       shape.m_command=STOFFGraphicShape::C_Polyline;
       for (size_t i=0; i<2; ++i) {
         librevenge::RVNGPropertyList list;
-        list.insert("svg:x",float(m_pathPolygons[i].m_points[0].m_point[0])/20.f, librevenge::RVNG_POINT);
-        list.insert("svg:y",float(m_pathPolygons[i].m_points[0].m_point[1])/20.f, librevenge::RVNG_POINT);
+        list.insert("svg:x",double(m_pathPolygons[i].m_points[0].m_point[0])/20., librevenge::RVNG_POINT);
+        list.insert("svg:y",double(m_pathPolygons[i].m_points[0].m_point[1])/20., librevenge::RVNG_POINT);
         vect.append(list);
       }
       shape.m_propertyList.insert("svg:points", vect);
@@ -1226,8 +1315,8 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object)
     shape.m_command=isClosed ? STOFFGraphicShape::C_Polygon : STOFFGraphicShape::C_Polyline;
     librevenge::RVNGPropertyList list;
     for (size_t i=0; i<m_pathPolygons[0].size(); ++i) {
-      list.insert("svg:x",float(m_pathPolygons[0].m_points[i].m_point[0])/20.f, librevenge::RVNG_POINT);
-      list.insert("svg:y",float(m_pathPolygons[0].m_points[i].m_point[1])/20.f, librevenge::RVNG_POINT);
+      list.insert("svg:x",double(m_pathPolygons[0].m_points[i].m_point[0])/20., librevenge::RVNG_POINT);
+      list.insert("svg:y",double(m_pathPolygons[0].m_points[i].m_point[1])/20., librevenge::RVNG_POINT);
       vect.append(list);
     }
     shape.m_propertyList.insert("svg:points", vect);
@@ -1257,6 +1346,8 @@ public:
   SdrGraphicUno() : SdrGraphicRect(32), m_unoName()
   {
   }
+  //! destructor
+  ~SdrGraphicUno();
   //! basic print function
   virtual std::string print() const
   {
@@ -1274,6 +1365,11 @@ public:
   //! the uno name
   librevenge::RVNGString m_unoName;
 };
+
+SdrGraphicUno::~SdrGraphicUno()
+{
+}
+
 ////////////////////////////////////////
 //! Internal: virtual class to store a SDUD graphic animation
 class SDUDGraphicAnimation : public SDUDGraphic
@@ -1287,6 +1383,8 @@ public:
     for (int i=0; i<3; ++i) m_flags[i]=false;
     for (int i=0; i<5; ++i) m_booleans[i]=false;
   }
+  //! destructor
+  ~SDUDGraphicAnimation();
   //! basic print function
   virtual std::string print() const
   {
@@ -1354,6 +1452,9 @@ public:
   // TODO add surrogate
 };
 
+SDUDGraphicAnimation::~SDUDGraphicAnimation()
+{
+}
 ////////////////////////////////////////
 //! Internal: the state of a StarObjectSmallGraphic
 struct State {
