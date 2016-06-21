@@ -135,6 +135,10 @@ SOURCE=..\..\src\lib\STOFFGraphicDecoder.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFGraphicEncoder.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFGraphicListener.cxx
 # End Source File
 # Begin Source File
@@ -192,6 +196,10 @@ SOURCE=..\..\src\lib\STOFFSection.cxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFSpreadsheetDecoder.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFSpreadsheetEncoder.cxx
 # End Source File
 # Begin Source File
 
@@ -395,6 +403,10 @@ SOURCE=..\..\src\lib\STOFFGraphicDecoder.hxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFGraphicEncoder.hxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFGraphicListener.hxx
 # End Source File
 # Begin Source File
@@ -452,6 +464,10 @@ SOURCE=..\..\src\lib\STOFFSection.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFSpreadsheetDecoder.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFSpreadsheetEncoder.hxx
 # End Source File
 # Begin Source File
 

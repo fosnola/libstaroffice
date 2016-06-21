@@ -150,6 +150,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\..\src\lib\STOFFGraphicEncoder.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\src\lib\STOFFGraphicListener.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -207,6 +211,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\src\lib\STOFFSpreadsheetDecoder.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\STOFFSpreadsheetEncoder.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -367,6 +375,7 @@
     <ClInclude Include="..\..\src\lib\STOFFEntry.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFFont.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFGraphicDecoder.hxx" />
+    <ClInclude Include="..\..\src\lib\STOFFGraphicEncoder.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFGraphicListener.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFGraphicShape.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFGraphicStyle.hxx" />
@@ -382,6 +391,7 @@
     <ClInclude Include="..\..\src\lib\STOFFPropertyHandler.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFSection.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFSpreadsheetDecoder.hxx" />
+    <ClInclude Include="..\..\src\lib\STOFFSpreadsheetEncoder.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFSpreadsheetListener.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFStringStream.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFSubDocument.hxx" />

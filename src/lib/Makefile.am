@@ -35,6 +35,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFFont.hxx				\
 	STOFFGraphicDecoder.cxx			\
 	STOFFGraphicDecoder.hxx			\
+	STOFFGraphicEncoder.cxx			\
+	STOFFGraphicEncoder.hxx			\
 	STOFFGraphicListener.hxx		\
 	STOFFGraphicListener.cxx		\
 	STOFFGraphicShape.hxx			\
@@ -65,6 +67,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFSection.hxx			\
 	STOFFSpreadsheetDecoder.cxx		\
 	STOFFSpreadsheetDecoder.hxx		\
+	STOFFSpreadsheetEncoder.cxx		\
+	STOFFSpreadsheetEncoder.hxx		\
 	STOFFSpreadsheetListener.cxx		\
 	STOFFSpreadsheetListener.hxx		\
 	STOFFStringStream.cxx			\
