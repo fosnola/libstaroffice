@@ -1123,8 +1123,19 @@ typedef STOFFBox2<long> STOFFBox2l;
 
 namespace libstoff
 {
-// some date function
-
+// some conversion function
+//! convert 1/100th millimeter to point
+template <class T>
+double convertMiniMToPoint(T const &value)
+{
+  return 0.028346*double(value);
+}
+//! convert 1/100th millimeter vector to point
+template <class T>
+STOFFVec2f convertMiniMToPointVect(T const &value)
+{
+  return 0.028346f*STOFFVec2f(value);
+}
 //! convert a date/time in a date time format
 bool convertToDateTime(uint32_t date, uint32_t time, std::string &dateTime);
 

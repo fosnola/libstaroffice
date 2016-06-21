@@ -636,29 +636,29 @@ void StarPolygon::addToPath(librevenge::RVNGPropertyListVector &path, bool isClo
   librevenge::RVNGPropertyList element;
   for (size_t i=0; i<m_points.size(); ++i) {
     if (m_points[i].m_flags==2 && i+2<m_points.size() && m_points[i].m_flags==2) {
-      element.insert("svg:x1",double(m_points[i].m_point[0])/20., librevenge::RVNG_POINT);
-      element.insert("svg:y1",double(m_points[i].m_point[1])/20., librevenge::RVNG_POINT);
-      element.insert("svg:x2",double(m_points[++i].m_point[0])/20., librevenge::RVNG_POINT);
-      element.insert("svg:y2",double(m_points[i].m_point[1])/20., librevenge::RVNG_POINT);
-      element.insert("svg:x",double(m_points[++i].m_point[0])/20., librevenge::RVNG_POINT);
-      element.insert("svg:y",double(m_points[i].m_point[1])/20., librevenge::RVNG_POINT);
+      element.insert("svg:x1",libstoff::convertMiniMToPoint(m_points[i].m_point[0]), librevenge::RVNG_POINT);
+      element.insert("svg:y1",libstoff::convertMiniMToPoint(m_points[i].m_point[1]), librevenge::RVNG_POINT);
+      element.insert("svg:x2",libstoff::convertMiniMToPoint(m_points[++i].m_point[0]), librevenge::RVNG_POINT);
+      element.insert("svg:y2",libstoff::convertMiniMToPoint(m_points[i].m_point[1]), librevenge::RVNG_POINT);
+      element.insert("svg:x",libstoff::convertMiniMToPoint(m_points[++i].m_point[0]), librevenge::RVNG_POINT);
+      element.insert("svg:y",libstoff::convertMiniMToPoint(m_points[i].m_point[1]), librevenge::RVNG_POINT);
       element.insert("librevenge:path-action", "C");
     }
     else if (m_points[i].m_flags==2 && i+1<m_points.size()) {
       /* unsure, let asume that this means the previous point is symetric,
          but maybe we can also have a Bezier patch */
-      element.insert("svg:x1",double(m_points[i].m_point[0])/20., librevenge::RVNG_POINT);
-      element.insert("svg:y1",double(m_points[i].m_point[1])/20., librevenge::RVNG_POINT);
-      element.insert("svg:x",double(m_points[++i].m_point[0])/20., librevenge::RVNG_POINT);
-      element.insert("svg:y",double(m_points[i].m_point[1])/20., librevenge::RVNG_POINT);
+      element.insert("svg:x1",libstoff::convertMiniMToPoint(m_points[i].m_point[0]), librevenge::RVNG_POINT);
+      element.insert("svg:y1",libstoff::convertMiniMToPoint(m_points[i].m_point[1]), librevenge::RVNG_POINT);
+      element.insert("svg:x",libstoff::convertMiniMToPoint(m_points[++i].m_point[0]), librevenge::RVNG_POINT);
+      element.insert("svg:y",libstoff::convertMiniMToPoint(m_points[i].m_point[1]), librevenge::RVNG_POINT);
       element.insert("librevenge:path-action", "S");
     }
     else {
       if (m_points[i].m_flags==2) {
         STOFF_DEBUG_MSG(("StarGraphicStruct::StarPolygon::addToPath: find unexpected flags\n"));
       }
-      element.insert("svg:x",double(m_points[i].m_point[0])/20., librevenge::RVNG_POINT);
-      element.insert("svg:y",double(m_points[i].m_point[1])/20., librevenge::RVNG_POINT);
+      element.insert("svg:x",libstoff::convertMiniMToPoint(m_points[i].m_point[0]), librevenge::RVNG_POINT);
+      element.insert("svg:y",libstoff::convertMiniMToPoint(m_points[i].m_point[1]), librevenge::RVNG_POINT);
       element.insert("librevenge:path-action", (i==0 ? "M" : "L"));
     }
     path.append(element);
@@ -678,7 +678,7 @@ bool StarPolygon::convert(librevenge::RVNGString &path, librevenge::RVNGString &
   if (path.empty() || !getPathBBox(pathVect, bounds[0], bounds[1], bounds[2], bounds[3]))
     return false;
   std::stringstream s;
-  s << long(bounds[0]*2540) << " " << long(bounds[1]*2540) << " " << long(bounds[2]*2540) << " " << long(bounds[3]*2540);
+  s << long(bounds[0]*1440) << " " << long(bounds[1]*1440) << " " << long(bounds[2]*1440) << " " << long(bounds[3]*1440);
   viewbox=s.str().c_str();
 
   return true;

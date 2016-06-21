@@ -155,7 +155,7 @@ public:
     std::vector<bool> m_layerList;
   };
   //! constructor
-  Page() : m_masterPage(false), m_size(0,0), m_masterPageDescList(), m_layer(), m_layerSet(), m_objectList(), m_background()
+  Page() : m_masterPage(false), m_name(""), m_size(0,0), m_masterPageDescList(), m_layer(), m_layerSet(), m_objectList(), m_background()
   {
     for (int i=0; i<4; ++i) m_borders[i]=0;
   }
@@ -169,14 +169,14 @@ public:
   void updatePageSpan(STOFFPageSpan &page) const
   {
     if (m_size[0]>0 && m_size[0]!=0x7fffffff)
-      page.m_propertiesList[0].insert("fo:page-width", double(m_size[0])/1440., librevenge::RVNG_INCH);
+      page.m_propertiesList[0].insert("fo:page-width", libstoff::convertMiniMToPoint(m_size[0]), librevenge::RVNG_POINT);
     if (m_size[1]>0 && m_size[1]!=0x7fffffff)
-      page.m_propertiesList[0].insert("fo:page-height", double(m_size[1])/1440., librevenge::RVNG_INCH);
+      page.m_propertiesList[0].insert("fo:page-height", libstoff::convertMiniMToPoint(m_size[1]), librevenge::RVNG_POINT);
     for (int i=0; i<4; ++i) {
       if (m_borders[i]<0 || m_borders[i]==0x7fffffff) continue;
       char const *(wh[])= {"left", "top", "right", "bottom"};
       page.m_propertiesList[page.m_actualZone].insert((std::string("fo:margin-")+wh[i]).c_str(),
-          double(m_borders[i])/1440., librevenge::RVNG_INCH);
+          libstoff::convertMiniMToPoint(m_borders[i]), librevenge::RVNG_POINT);
     }
     if (m_background) {
       STOFF_DEBUG_MSG(("StarObjectModelInternal::Page::updatePageSpan: sorry sending background object is not implemented\n"));
@@ -186,6 +186,7 @@ public:
   friend std::ostream &operator<<(std::ostream &o, Page const &page)
   {
     if (page.m_masterPage) o << "master,";
+    if (!page.m_name.empty()) o << "name=" << page.m_name.cstr() << ",";
     o << "sz=" << page.m_size << ",";
     o << "borders=[";
     for (int i=0; i<4; ++i) o << page.m_borders[i] << ",";
@@ -212,6 +213,8 @@ public:
   }
   //! a flag to know if the page is a master page
   bool m_masterPage;
+  //! the page name
+  librevenge::RVNGString m_name;
   //! the page size
   STOFFVec2i m_size;
   //! the border size: left, up, right, bottom
@@ -388,6 +391,24 @@ bool StarObjectModel::sendMasterPages(STOFFGraphicListenerPtr listener)
     listener->openMasterPage(ps);
     sendPage(id, listener, true);
     listener->closeMasterPage();
+  }
+  return true;
+}
+
+bool StarObjectModel::sendPage(librevenge::RVNGString const &pageName, STOFFListenerPtr listener)
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarObjectModel::sendPage: can not find the listener\n"));
+    return false;
+  }
+  if (pageName.empty()) {
+    STOFF_DEBUG_MSG(("StarObjectModel::sendPage: the page name is empty\n"));
+    return false;
+  }
+  for (size_t i=0; i<m_modelState->m_pageList.size(); ++i) {
+    if (!m_modelState->m_pageList[i] || m_modelState->m_pageList[i]->m_name!=pageName)
+      continue;
+    sendPage(int(i), listener, false);
   }
   return true;
 }
@@ -1042,8 +1063,11 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
           STOFF_DEBUG_MSG(("StarObjectModel::readSdrPage: can not find read a string\n"));
           f << "###string";
         }
-        else // Controls
-          f << libstoff::getString(string).cstr() << ",";
+        else {
+          // Controls or sheet name
+          page->m_name=libstoff::getString(string);
+          f << page->m_name.cstr() << ",";
+        }
         // then if vers>={13|14|15|16}  671905111105671901000800000000000000
       }
       else if (n==2 && pos+12==zone.getRecordLastPosition()) {

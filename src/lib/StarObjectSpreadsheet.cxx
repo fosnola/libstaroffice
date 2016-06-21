@@ -625,6 +625,8 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
       sendRow(int(t), row, listener);
       listener->closeSheetRow();
     }
+    if (m_spreadsheetState->m_model && !sheet.m_name.empty())
+      m_spreadsheetState->m_model->sendPage(sheet.m_name, listener);
     listener->closeSheet();
   }
 

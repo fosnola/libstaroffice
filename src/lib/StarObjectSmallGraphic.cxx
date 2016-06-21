@@ -250,7 +250,6 @@ public:
     }
     return false;
   }
-
   //! the type
   int m_identifier;
 };
@@ -606,9 +605,9 @@ public:
       else {
         STOFFVec2f center=STOFFVec2f(m_textRectangle[0]);
         transform.sprintf("translate(%fpt %fpt) rotate(%f) translate(%fpt %fpt)",
-                          -double(center[0])/20.,-double(center[1])/20.,
+                          -libstoff::convertMiniMToPoint(center[0]),-libstoff::convertMiniMToPoint(center[1]),
                           m_textDrehWink/100.*M_PI/180., // gradient
-                          double(center[0])/20.,double(center[1])/20.);
+                          libstoff::convertMiniMToPoint(center[0]),libstoff::convertMiniMToPoint(center[1]));
       }
       list.insert("draw:transform", transform);
     }
@@ -628,8 +627,8 @@ public:
       return false;
     }
     STOFFPosition position;
-    position.setOrigin(1.f/20.f*STOFFVec2f(m_bdbox[0]), librevenge::RVNG_POINT);
-    position.setSize(1.f/20.f*STOFFVec2f(m_bdbox.size()), librevenge::RVNG_POINT);
+    position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
+    position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
     position.m_propertyList.insert("text:anchor-type", "page");
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
@@ -690,7 +689,7 @@ public:
     if (m_identifier!=16 && m_identifier!=17 && m_identifier!=20 && m_identifier!=21) { // basic rect
       STOFFGraphicShape shape;
       shape.m_command=STOFFGraphicShape::C_Rectangle;
-      shape.m_bdbox=m_textRectangle;
+      shape.m_bdbox=STOFFBox2f(libstoff::convertMiniMToPointVect(m_textRectangle[0]), libstoff::convertMiniMToPointVect(m_textRectangle[1]));
       updateTransformProperties(shape.m_propertyList);
       shape.m_propertyList.insert("text:anchor-type", "page");
       STOFFGraphicStyle style;
@@ -798,11 +797,11 @@ public:
     STOFFGraphicShape shape;
     shape.m_command=STOFFGraphicShape::C_Ellipse;
     STOFFVec2f center=0.5f*STOFFVec2f(m_textRectangle[0]+m_textRectangle[1]);
-    shape.m_propertyList.insert("svg:cx",double(center.x()), librevenge::RVNG_TWIP);
-    shape.m_propertyList.insert("svg:cy",double(center.y()), librevenge::RVNG_TWIP);
+    shape.m_propertyList.insert("svg:cx",20*libstoff::convertMiniMToPoint(center.x()), librevenge::RVNG_TWIP);
+    shape.m_propertyList.insert("svg:cy",20*libstoff::convertMiniMToPoint(center.y()), librevenge::RVNG_TWIP);
     STOFFVec2f radius=0.5f*STOFFVec2f(m_textRectangle[1]-m_textRectangle[0]);
-    shape.m_propertyList.insert("svg:rx",double(radius.x()), librevenge::RVNG_TWIP);
-    shape.m_propertyList.insert("svg:ry",double(radius.y()), librevenge::RVNG_TWIP);
+    shape.m_propertyList.insert("svg:rx",20*libstoff::convertMiniMToPoint(radius.x()), librevenge::RVNG_TWIP);
+    shape.m_propertyList.insert("svg:ry",20*libstoff::convertMiniMToPoint(radius.y()), librevenge::RVNG_TWIP);
     if (m_identifier!=4) {
       shape.m_propertyList.insert("draw:start-angle", double(m_angles[0]), librevenge::RVNG_GENERIC);
       shape.m_propertyList.insert("draw:end-angle", double(m_angles[1]), librevenge::RVNG_GENERIC);
@@ -970,8 +969,8 @@ public:
       return SdrGraphicRect::send(listener, object);
     }
     STOFFPosition position;
-    position.setOrigin(1.f/20.f*STOFFVec2f(m_bdbox[0]), librevenge::RVNG_POINT);
-    position.setSize(1.f/20.f*STOFFVec2f(m_bdbox.size()), librevenge::RVNG_POINT);
+    position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
+    position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
     position.m_propertyList.insert("text:anchor-type", "page");
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
@@ -1058,8 +1057,8 @@ public:
     shape.m_command=STOFFGraphicShape::C_Polyline;
     librevenge::RVNGPropertyList list;
     for (int i=0; i<2; ++i) {
-      list.insert("svg:x",double(m_measurePoints[i][0])/20., librevenge::RVNG_POINT);
-      list.insert("svg:y",double(m_measurePoints[i][1])/20., librevenge::RVNG_POINT);
+      list.insert("svg:x",libstoff::convertMiniMToPoint(m_measurePoints[i][0]), librevenge::RVNG_POINT);
+      list.insert("svg:y",libstoff::convertMiniMToPoint(m_measurePoints[i][1]), librevenge::RVNG_POINT);
       vect.append(list);
     }
     shape.m_propertyList.insert("svg:points", vect);
@@ -1137,8 +1136,8 @@ public:
       return SdrGraphicRect::send(listener, object);
     }
     STOFFPosition position;
-    position.setOrigin(1.f/20.f*STOFFVec2f(m_bdbox[0]), librevenge::RVNG_POINT);
-    position.setSize(1.f/20.f*STOFFVec2f(m_bdbox.size()), librevenge::RVNG_POINT);
+    position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
+    position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
     position.m_propertyList.insert("text:anchor-type", "page");
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
@@ -1268,8 +1267,8 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object)
       shape.m_command=STOFFGraphicShape::C_Polyline;
       for (size_t i=0; i<2; ++i) {
         librevenge::RVNGPropertyList list;
-        list.insert("svg:x",double(m_pathPolygons[i].m_points[0].m_point[0])/20., librevenge::RVNG_POINT);
-        list.insert("svg:y",double(m_pathPolygons[i].m_points[0].m_point[1])/20., librevenge::RVNG_POINT);
+        list.insert("svg:x",libstoff::convertMiniMToPoint(m_pathPolygons[i].m_points[0].m_point[0]), librevenge::RVNG_POINT);
+        list.insert("svg:y",libstoff::convertMiniMToPoint(m_pathPolygons[i].m_points[0].m_point[1]), librevenge::RVNG_POINT);
         vect.append(list);
       }
       shape.m_propertyList.insert("svg:points", vect);
@@ -1315,8 +1314,8 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object)
     shape.m_command=isClosed ? STOFFGraphicShape::C_Polygon : STOFFGraphicShape::C_Polyline;
     librevenge::RVNGPropertyList list;
     for (size_t i=0; i<m_pathPolygons[0].size(); ++i) {
-      list.insert("svg:x",double(m_pathPolygons[0].m_points[i].m_point[0])/20., librevenge::RVNG_POINT);
-      list.insert("svg:y",double(m_pathPolygons[0].m_points[i].m_point[1])/20., librevenge::RVNG_POINT);
+      list.insert("svg:x",libstoff::convertMiniMToPoint(m_pathPolygons[0].m_points[i].m_point[0]), librevenge::RVNG_POINT);
+      list.insert("svg:y",libstoff::convertMiniMToPoint(m_pathPolygons[0].m_points[i].m_point[1]), librevenge::RVNG_POINT);
       vect.append(list);
     }
     shape.m_propertyList.insert("svg:points", vect);

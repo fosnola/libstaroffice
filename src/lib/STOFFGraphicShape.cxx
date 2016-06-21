@@ -60,12 +60,12 @@ STOFFGraphicShape::~STOFFGraphicShape()
 void STOFFGraphicShape::addTo(librevenge::RVNGPropertyList &pList) const
 {
   if (m_bdbox.size()[0]>0) {
-    pList.insert("svg:x",double(m_bdbox[0][0])/20., librevenge::RVNG_POINT);
-    pList.insert("svg:width",double(m_bdbox.size()[0])/20., librevenge::RVNG_POINT);
+    pList.insert("svg:x",double(m_bdbox[0][0]), librevenge::RVNG_POINT);
+    pList.insert("svg:width",double(m_bdbox.size()[0]), librevenge::RVNG_POINT);
   }
   if (m_bdbox.size()[1]>0) {
-    pList.insert("svg:y",double(m_bdbox[0][1])/20., librevenge::RVNG_POINT);
-    pList.insert("svg:height",double(m_bdbox.size()[1])/20., librevenge::RVNG_POINT);
+    pList.insert("svg:y",double(m_bdbox[0][1]), librevenge::RVNG_POINT);
+    pList.insert("svg:height",double(m_bdbox.size()[1]), librevenge::RVNG_POINT);
   }
 
   librevenge::RVNGPropertyList::Iter i(m_propertyList);

@@ -75,6 +75,8 @@ public:
   bool sendMasterPages(STOFFGraphicListenerPtr listener);
   //! try to send the different page
   bool sendPages(STOFFListenerPtr listener);
+  //! try to send the content of a page
+  bool sendPage(librevenge::RVNGString const &pageName, STOFFListenerPtr listener);
   //! small operator<< to print the content of the model
   friend std::ostream &operator<<(std::ostream &o, StarObjectModel const &model);
 protected:

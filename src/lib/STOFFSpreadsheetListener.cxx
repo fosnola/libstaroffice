@@ -1168,9 +1168,9 @@ void STOFFSpreadsheetListener::closeFrame()
 }
 
 void STOFFSpreadsheetListener::_handleFrameParameters
-(librevenge::RVNGPropertyList &/*propList*/, STOFFPosition const &/*pos*/)
+(librevenge::RVNGPropertyList &propList, STOFFPosition const &pos)
 {
-  // todo
+  pos.addTo(propList);
 }
 
 ///////////////////
