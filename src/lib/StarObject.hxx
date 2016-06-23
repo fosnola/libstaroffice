@@ -65,7 +65,7 @@ class StarObject
 {
 public:
   //! constructor
-  StarObject(char const *passwd, shared_ptr<STOFFOLEParser::OleDirectory> directory);
+  StarObject(char const *passwd, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory);
   //! destructor
   virtual ~StarObject();
 
@@ -136,6 +136,8 @@ protected:
   StarObject(StarObject const &orig, bool duplicateState);
   //! the document password
   char const *m_password;
+  //! the ole parser
+  shared_ptr<STOFFOLEParser> m_oleParser;
   //! the directory
   shared_ptr<STOFFOLEParser::OleDirectory> m_directory;
 

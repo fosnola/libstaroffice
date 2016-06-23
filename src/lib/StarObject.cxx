@@ -74,12 +74,12 @@ private:
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObject::StarObject(char const *passwd, shared_ptr<STOFFOLEParser::OleDirectory> directory) :
-  m_password(passwd), m_directory(directory), m_state(new StarObjectInternal::State()), m_metaData()
+StarObject::StarObject(char const *passwd, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory) :
+  m_password(passwd), m_oleParser(oleParser), m_directory(directory), m_state(new StarObjectInternal::State()), m_metaData()
 {
 }
 
-StarObject::StarObject(StarObject const &orig, bool duplicateState) : m_password(orig.m_password), m_directory(orig.m_directory), m_state(), m_metaData(orig.m_metaData)
+StarObject::StarObject(StarObject const &orig, bool duplicateState) : m_password(orig.m_password), m_oleParser(orig.m_oleParser), m_directory(orig.m_directory), m_state(), m_metaData(orig.m_metaData)
 {
   if (duplicateState)
     m_state.reset(new StarObjectInternal::State(*orig.m_state));

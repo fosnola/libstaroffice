@@ -210,10 +210,12 @@ State::State() :
 }
 }
 
-STOFFSpreadsheetListener::STOFFSpreadsheetListener(STOFFParserState &parserState, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface) : STOFFListener(),
+STOFFSpreadsheetListener::STOFFSpreadsheetListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface) : STOFFListener(),
   m_ds(new STOFFSpreadsheetListenerInternal::DocumentState(pageList)), m_ps(new STOFFSpreadsheetListenerInternal::State), m_psStack(),
-  m_parserState(parserState), m_documentInterface(documentInterface)
+  m_listManager(listManager), m_documentInterface(documentInterface)
 {
+  if (!listManager)
+    m_listManager.reset(new STOFFListManager);
 }
 
 STOFFSpreadsheetListener::~STOFFSpreadsheetListener()
@@ -770,7 +772,7 @@ int STOFFSpreadsheetListener::_getListId() const
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::_getListId: the list id is not set, try to find a new one\n"));
     first = false;
   }
-  shared_ptr<STOFFList> list=m_parserState.m_listManager->getNewList
+  shared_ptr<STOFFList> list=m_listManager->getNewList
                              (m_ps->m_list, int(newLevel), m_ps->m_paragraph.m_listLevel);
   if (!list) return -1;
   return list->getId();
@@ -800,13 +802,13 @@ void STOFFSpreadsheetListener::_changeList()
   if (newLevel) {
     shared_ptr<STOFFList> theList;
 
-    theList=m_parserState.m_listManager->getList(newListId);
+    theList=m_listManager->getList(newListId);
     if (!theList) {
       STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::_changeList: can not find any list\n"));
       m_ps->m_listOrderedLevels.resize(actualLevel);
       return;
     }
-    m_parserState.m_listManager->needToSend(newListId, m_ds->m_sentListMarkers);
+    m_listManager->needToSend(newListId, m_ds->m_sentListMarkers);
     m_ps->m_list = theList;
     m_ps->m_list->setLevel(int(newLevel));
   }
@@ -1140,6 +1142,16 @@ bool STOFFSpreadsheetListener::openFrame(STOFFPosition const &pos, STOFFGraphicS
       else
         _openParagraph();
       fPos.m_anchorTo=STOFFPosition::Paragraph;
+    }
+    break;
+  case STOFFPosition::Cell:
+    if (!m_ps->m_isSheetCellOpened) {
+      STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame: called with Cell position not in a sheet cell\n"));
+      return false;
+    }
+    if (!pos.m_propertyList["table:end-cell-address"]) {
+      STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame: can not find the cell name\n"));
+      return false;
     }
     break;
   default:

@@ -65,7 +65,7 @@ class STOFFSpreadsheetListener : public STOFFListener
 {
 public:
   /** constructor */
-  STOFFSpreadsheetListener(STOFFParserState &parserState, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface);
+  STOFFSpreadsheetListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface);
   /** destructor */
   virtual ~STOFFSpreadsheetListener();
 
@@ -290,8 +290,8 @@ protected:
   shared_ptr<STOFFSpreadsheetListenerInternal::State> m_ps;
   //! stack of local state
   std::vector<shared_ptr<STOFFSpreadsheetListenerInternal::State> > m_psStack;
-  //! the parser state
-  STOFFParserState &m_parserState;
+  //! the list manager
+  STOFFListManagerPtr m_listManager;
   //! the document interface
   librevenge::RVNGSpreadsheetInterface *m_documentInterface;
 

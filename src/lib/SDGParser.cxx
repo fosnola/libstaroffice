@@ -156,7 +156,7 @@ void SDGParser::parse(librevenge::RVNGDrawingInterface *docInterface)
       STOFFListenerPtr listener=getGraphicListener();
       if (listener) {
         STOFFPosition position;
-        position.m_propertyList.insert("text:anchor-type", "page");
+        position.setAnchor(STOFFPosition::Page);
         STOFFGraphicStyle style;
         style.m_propertyList.insert("draw:stroke", "none");
         style.m_propertyList.insert("draw:fill", "none");
@@ -225,7 +225,7 @@ void SDGParser::createDocument(librevenge::RVNGDrawingInterface *documentInterfa
   STOFFPageSpan ps(getPageSpan());
   ps.m_pageSpan=numImages ? numImages : 1;
   pageList.push_back(ps);
-  STOFFGraphicListenerPtr listen(new STOFFGraphicListener(*getParserState(), pageList, documentInterface));
+  STOFFGraphicListenerPtr listen(new STOFFGraphicListener(getParserState()->m_listManager, pageList, documentInterface));
   setGraphicListener(listen);
 
   listen->startDocument();

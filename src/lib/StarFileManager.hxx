@@ -43,6 +43,7 @@
 #include "STOFFDebug.hxx"
 #include "STOFFEntry.hxx"
 #include "STOFFInputStream.hxx"
+#include "STOFFOLEParser.hxx"
 
 namespace StarFileManagerInternal
 {
@@ -66,6 +67,9 @@ public:
   virtual ~StarFileManager();
 
   //! low level
+
+  //! try to read a Ole directory
+  static bool readOLEDirectory(shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> ole, STOFFEmbeddedObject &image);
 
   //! try to read a image zone: "StarImageDocument" or "StarImageDocument 4.0
   static bool readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName);

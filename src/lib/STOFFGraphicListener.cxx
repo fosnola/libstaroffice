@@ -50,8 +50,8 @@
 #include "STOFFGraphicShape.hxx"
 #include "STOFFInputStream.hxx"
 #include "STOFFList.hxx"
+#include "STOFFPageSpan.hxx"
 #include "STOFFParagraph.hxx"
-#include "STOFFParser.hxx"
 #include "STOFFPosition.hxx"
 #include "STOFFSection.hxx"
 #include "STOFFSubDocument.hxx"
@@ -179,10 +179,12 @@ State::State() : m_origin(0,0),
 }
 }
 
-STOFFGraphicListener::STOFFGraphicListener(STOFFParserState &parserState, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGDrawingInterface *documentInterface) : STOFFListener(),
+STOFFGraphicListener::STOFFGraphicListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGDrawingInterface *documentInterface) : STOFFListener(),
   m_ds(new STOFFGraphicListenerInternal::GraphicState(pageList)), m_ps(new STOFFGraphicListenerInternal::State),
-  m_psStack(), m_parserState(parserState), m_documentInterface(documentInterface)
+  m_psStack(), m_listManager(listManager), m_documentInterface(documentInterface)
 {
+  if (!listManager)
+    m_listManager.reset(new STOFFListManager);
 }
 
 STOFFGraphicListener::~STOFFGraphicListener()
@@ -642,7 +644,7 @@ int STOFFGraphicListener::_getListId() const
     STOFF_DEBUG_MSG(("STOFFGraphicListener::_getListId: the list id is not set, try to find a new one\n"));
     first = false;
   }
-  shared_ptr<STOFFList> list=m_parserState.m_listManager->getNewList
+  shared_ptr<STOFFList> list=m_listManager->getNewList
                              (m_ps->m_list, int(newLevel), m_ps->m_paragraph.m_listLevel);
   if (!list) return -1;
   return list->getId();
@@ -673,13 +675,13 @@ void STOFFGraphicListener::_changeList()
   if (newLevel) {
     shared_ptr<STOFFList> theList;
 
-    theList=m_parserState.m_listManager->getList(newListId);
+    theList=m_listManager->getList(newListId);
     if (!theList) {
       STOFF_DEBUG_MSG(("STOFFGraphicListener::_changeList: can not find any list\n"));
       m_ps->m_listOrderedLevels.resize(actualLevel);
       return;
     }
-    m_parserState.m_listManager->needToSend(newListId, m_ds->m_sentListMarkers);
+    m_listManager->needToSend(newListId, m_ds->m_sentListMarkers);
     m_ps->m_list = theList;
     m_ps->m_list->setLevel(int(newLevel));
   }

@@ -60,7 +60,7 @@ class STOFFGraphicListener : public STOFFListener
 {
 public:
   /** constructor */
-  STOFFGraphicListener(STOFFParserState &parserState, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGDrawingInterface *documentInterface);
+  STOFFGraphicListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGDrawingInterface *documentInterface);
   /** destructor */
   virtual ~STOFFGraphicListener();
 
@@ -290,8 +290,8 @@ protected:
   shared_ptr<STOFFGraphicListenerInternal::State> m_ps;
   //! stack of local state
   std::vector<shared_ptr<STOFFGraphicListenerInternal::State> > m_psStack;
-  //! the parser state
-  STOFFParserState &m_parserState;
+  //! the list manager
+  STOFFListManagerPtr m_listManager;
   //! the document interface
   librevenge::RVNGDrawingInterface *m_documentInterface;
 

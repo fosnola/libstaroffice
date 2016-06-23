@@ -46,6 +46,7 @@
 
 #include "StarAttribute.hxx"
 #include "StarBitmap.hxx"
+#include "StarFileManager.hxx"
 #include "StarGraphicStruct.hxx"
 #include "StarObject.hxx"
 #include "StarObjectSmallText.hxx"
@@ -629,7 +630,7 @@ public:
     STOFFPosition position;
     position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
-    position.m_propertyList.insert("text:anchor-type", "page");
+    position.setAnchor(STOFFPosition::Page);
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
     if (!style.m_hasBackground) style.m_propertyList.insert("draw:fill", "none");
@@ -971,7 +972,7 @@ public:
     STOFFPosition position;
     position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
-    position.m_propertyList.insert("text:anchor-type", "page");
+    position.setAnchor(STOFFPosition::Page);
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
     listener->insertPicture(position, m_graphic->m_object, style);
@@ -1108,7 +1109,7 @@ class SdrGraphicOLE : public SdrGraphicRect
 {
 public:
   //! constructor
-  explicit SdrGraphicOLE(int id) : SdrGraphicRect(id), m_graphic()
+  explicit SdrGraphicOLE(int id) : SdrGraphicRect(id), m_graphic(), m_oleParser()
   {
   }
   //! destructor
@@ -1127,21 +1128,32 @@ public:
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: can not send a shape\n"));
       return false;
     }
-    if (!m_graphic || m_graphic->m_object.isEmpty()) {
-      static bool first=true;
-      if (first) {
-        first=false;
+    STOFFEmbeddedObject const *picturePtr=0;
+    STOFFEmbeddedObject localPicture;
+    if (m_graphic && !m_graphic->m_object.isEmpty())
+      picturePtr=&m_graphic->m_object;
+    else {
+      if (!m_oleNames[0].empty() && m_oleParser) {
+        shared_ptr<STOFFOLEParser::OleDirectory> dir=m_oleParser->getDirectory(m_oleNames[0].cstr());
+        if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture) || localPicture.isEmpty()) {
+          STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: sorry, can not find object %s\n", m_oleNames[0].cstr()));
+        }
+        else
+          picturePtr = &localPicture;
+      }
+      else {
         STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: sorry, can not find some graphic representation\n"));
       }
-      return SdrGraphicRect::send(listener, object);
     }
+    if (!picturePtr)
+      return SdrGraphicRect::send(listener, object);
     STOFFPosition position;
     position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
-    position.m_propertyList.insert("text:anchor-type", "page");
+    position.setAnchor(STOFFPosition::Page);
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
-    listener->insertPicture(position, m_graphic->m_object, style);
+    listener->insertPicture(position, *picturePtr, style);
 
     return true;
   }
@@ -1165,6 +1177,8 @@ public:
   librevenge::RVNGString m_oleNames[2];
   //! the graphic
   shared_ptr<StarGraphicStruct::StarGraphic> m_graphic;
+  //! the ole parser
+  shared_ptr<STOFFOLEParser> m_oleParser;
 };
 
 SdrGraphicOLE::~SdrGraphicOLE()
@@ -2454,6 +2468,7 @@ bool StarObjectSmallGraphic::readSVDRObjectOLE(StarZone &zone, StarObjectSmallGr
       graphic.m_oleNames[i]=libstoff::getString(string);
   }
   if (ok) {
+    graphic.m_oleParser=m_oleParser;
     bool objValid, hasGraphic;
     *input >> objValid >> hasGraphic;
     if (objValid) f << "obj[refValid],";

@@ -48,7 +48,7 @@ class STOFFPosition
 {
 public:
   //! a list of enum used to defined the anchor
-  enum AnchorTo { Char, CharBaseLine, Frame, Paragraph, Page, Unknown };
+  enum AnchorTo { Cell, Char, CharBaseLine, Frame, Paragraph, Page, Unknown };
 
 public:
   //! constructor
@@ -59,6 +59,30 @@ public:
   void addTo(librevenge::RVNGPropertyList &propList) const
   {
     librevenge::RVNGPropertyList::Iter i(m_propertyList);
+    switch (m_anchorTo) {
+    case Cell:
+      propList.insert("text:anchor-type", "cell");
+      break;
+    case Char:
+      propList.insert("text:anchor-type", "char");
+      break;
+    case CharBaseLine:
+      propList.insert("text:anchor-type", "as-char");
+      break;
+    case Frame:
+      propList.insert("text:anchor-type", "frame");
+      break;
+    case Paragraph:
+      propList.insert("text:anchor-type", "paragraph");
+      break;
+    case Page:
+      propList.insert("text:anchor-type", "page");
+      break;
+    case Unknown:
+    default:
+      STOFF_DEBUG_MSG(("STOFFPosition::addTo: unknown anchor\n"));
+      break;
+    }
     for (i.rewind(); i.next();) {
       if (i.child()) {
         STOFF_DEBUG_MSG(("STOFFPosition::addTo: find unexpected property child\n"));
@@ -85,6 +109,11 @@ public:
       m_propertyList.insert("svg:height",double(size.y()), unit);
     else if (size.y()<0)
       m_propertyList.insert("fo:min-height",double(-size.y()), unit);
+  }
+  //! set the anchor
+  void setAnchor(AnchorTo anchor)
+  {
+    m_anchorTo=anchor;
   }
   //! operator<<
   friend  std::ostream &operator<<(std::ostream &o, STOFFPosition const &pos)

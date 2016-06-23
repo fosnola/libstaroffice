@@ -123,8 +123,9 @@ bool SDWParser::createZones()
   // send the final data
   std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > listDir=m_oleParser->getDirectoryList();
   for (size_t d=0; d<listDir.size(); ++d) {
-    if (!listDir[d]) continue;
-    StarObject object(m_password, listDir[d]);
+    if (!listDir[d] || listDir[d]->m_parsed) continue;
+    listDir[d]->m_parsed=true;
+    StarObject object(m_password, m_oleParser, listDir[d]);
     if (object.getDocumentKind()==STOFFDocument::STOFF_K_CHART) {
       StarObjectChart chart(object, false);
       chart.parse();

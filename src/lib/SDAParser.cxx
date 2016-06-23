@@ -99,6 +99,9 @@ void SDAParser::parse(librevenge::RVNGDrawingInterface *docInterface)
       createDocument(docInterface);
       if (m_state->m_mainGraphic)
         m_state->m_mainGraphic->sendPages(getGraphicListener());
+#ifdef DEBUG
+      checkUnparsed();
+#endif
     }
     ascii().reset();
   }
@@ -117,22 +120,37 @@ bool SDAParser::createZones()
   m_oleParser.reset(new STOFFOLEParser);
   m_oleParser->parse(getInput());
 
-  // send the final data
+  shared_ptr<STOFFOLEParser::OleDirectory> mainOle=m_oleParser->getDirectory("/");
+  if (!mainOle) {
+    STOFF_DEBUG_MSG(("SDAParser::parse: can not find the main ole\n"));
+    return false;
+  }
+  mainOle->m_parsed=true;
+  StarObject mainObject(m_password, m_oleParser, mainOle);
+  if (mainObject.getDocumentKind()!=STOFFDocument::STOFF_K_DRAW) {
+    STOFF_DEBUG_MSG(("SDAParser::createZones: can not find the main graphic\n"));
+    return false;
+  }
+  m_state->m_mainGraphic.reset(new StarObjectDraw(mainObject, false));
+  return m_state->m_mainGraphic->parse();
+}
+
+void SDAParser::checkUnparsed()
+{
   std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > listDir=m_oleParser->getDirectoryList();
+  // send the final data
   for (size_t d=0; d<listDir.size(); ++d) {
-    if (!listDir[d]) continue;
-    StarObject object(m_password, listDir[d]);
+    if (!listDir[d] || listDir[d]->m_parsed) continue;
+    listDir[d]->m_parsed=true;
+    StarObject object(m_password, m_oleParser, listDir[d]);
     if (object.getDocumentKind()==STOFFDocument::STOFF_K_CHART) {
       StarObjectChart chart(object, false);
       chart.parse();
       continue;
     }
     if (object.getDocumentKind()==STOFFDocument::STOFF_K_DRAW) {
-      shared_ptr<StarObjectDraw> draw(new StarObjectDraw(object, false));
-      if (listDir[d]->m_dir.empty())
-        m_state->m_mainGraphic=draw;
-      else
-        draw->parse();
+      StarObjectDraw draw(object, false);
+      draw.parse();
       continue;
     }
     if (object.getDocumentKind()==STOFFDocument::STOFF_K_SPREADSHEET) {
@@ -155,7 +173,7 @@ bool SDAParser::createZones()
       std::string const &name = unparsedOLEs[i];
       STOFFInputStreamPtr ole = getInput()->getSubStreamByName(name.c_str());
       if (!ole.get()) {
-        STOFF_DEBUG_MSG(("SDAParser::createZones: error: can not find OLE part: \"%s\"\n", name.c_str()));
+        STOFF_DEBUG_MSG(("SDAParser::checkUnparsed: error: can not find OLE part: \"%s\"\n", name.c_str()));
         continue;
       }
 
@@ -208,11 +226,6 @@ bool SDAParser::createZones()
       asciiFile.reset();
     }
   }
-  if (!m_state->m_mainGraphic) {
-    STOFF_DEBUG_MSG(("SDAParser::createZones: error: can not find the main element\n"));
-    return false;
-  }
-  return m_state->m_mainGraphic->parse();
 }
 
 ////////////////////////////////////////////////////////////
@@ -229,7 +242,7 @@ void SDAParser::createDocument(librevenge::RVNGDrawingInterface *documentInterfa
     pageList.push_back(ps);
     m_state->m_numPages = 1;
   }
-  STOFFGraphicListenerPtr listen(new STOFFGraphicListener(*getParserState(), pageList, documentInterface));
+  STOFFGraphicListenerPtr listen(new STOFFGraphicListener(getParserState()->m_listManager, pageList, documentInterface));
   setGraphicListener(listen);
   if (m_state->m_mainGraphic)
     listen->setDocumentMetaData(m_state->m_mainGraphic->getMetaData());

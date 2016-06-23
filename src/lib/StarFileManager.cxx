@@ -44,7 +44,14 @@
 #include "StarAttribute.hxx"
 #include "StarBitmap.hxx"
 #include "StarObject.hxx"
+#include "StarObjectDraw.hxx"
+#include "StarObjectSpreadsheet.hxx"
 #include "StarItemPool.hxx"
+#include "STOFFGraphicEncoder.hxx"
+#include "STOFFGraphicListener.hxx"
+#include "STOFFPageSpan.hxx"
+#include "STOFFSpreadsheetEncoder.hxx"
+#include "STOFFSpreadsheetListener.hxx"
 
 #include "StarFileManager.hxx"
 
@@ -273,6 +280,123 @@ StarFileManager::StarFileManager() : m_state(new StarFileManagerInternal::State)
 
 StarFileManager::~StarFileManager()
 {
+}
+
+bool StarFileManager::readOLEDirectory(shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> ole, STOFFEmbeddedObject &image)
+{
+  image=STOFFEmbeddedObject();
+  if (!oleParser || !ole || ole->m_inUse) {
+    STOFF_DEBUG_MSG(("StarFileManager::readOLEDirectory: can not read an ole\n"));
+    return false;
+  }
+  ole->m_inUse=true;
+  StarObject object(0, oleParser, ole); // do we need password here ?
+  if (object.getDocumentKind()==STOFFDocument::STOFF_K_DRAW) {
+    StarObjectDraw draw(object, false);
+    ole->m_parsed=true;
+    if (draw.parse()) {
+      STOFFGraphicEncoder graphicEncoder;
+      std::vector<STOFFPageSpan> pageList;
+      int numPages;
+      if (!draw.updatePageSpans(pageList, numPages)) {
+        STOFFPageSpan ps;
+        ps.m_pageSpan=1;
+        pageList.push_back(ps);
+      }
+      STOFFGraphicListenerPtr graphicListener(new STOFFGraphicListener(STOFFListManagerPtr(), pageList, &graphicEncoder));
+      graphicListener->startDocument();
+      draw.sendPages(graphicListener);
+      graphicListener->endDocument();
+      graphicEncoder.getBinaryResult(image);
+    }
+  }
+  else if (object.getDocumentKind()==STOFFDocument::STOFF_K_SPREADSHEET) {
+    StarObjectSpreadsheet spreadsheet(object, false);
+    ole->m_parsed=true;
+    if (spreadsheet.parse()) {
+      STOFFSpreadsheetEncoder spreadsheetEncoder;
+      std::vector<STOFFPageSpan> pageList;
+      int numPages;
+      if (!spreadsheet.updatePageSpans(pageList, numPages)) {
+        STOFFPageSpan ps;
+        ps.m_pageSpan=1;
+        pageList.push_back(ps);
+      }
+      STOFFSpreadsheetListenerPtr spreadsheetListener(new STOFFSpreadsheetListener(STOFFListManagerPtr(), pageList, &spreadsheetEncoder));
+      spreadsheetListener->startDocument();
+      spreadsheet.send(spreadsheetListener);
+      spreadsheetListener->endDocument();
+      spreadsheetEncoder.getBinaryResult(image);
+    }
+  }
+  else {
+    ole->m_parsed=true;
+    // Ole-Object has persist elements, so...
+    if (ole->m_hasCompObj) object.parse();
+    STOFFOLEParser::OleDirectory &direct=*ole;
+    std::vector<std::string> unparsedOLEs=direct.getUnparsedOles();
+    size_t numUnparsed = unparsedOLEs.size();
+    for (size_t i = 0; i < numUnparsed; i++) {
+      std::string const &name = unparsedOLEs[i];
+      STOFFInputStreamPtr stream = ole->m_input->getSubStreamByName(name.c_str());
+      if (!stream.get()) {
+        STOFF_DEBUG_MSG(("StarFileManager::readOLEDirectory: error: can not find OLE part: \"%s\"\n", name.c_str()));
+        continue;
+      }
+
+      std::string::size_type pos = name.find_last_of('/');
+      std::string base;
+      if (pos == std::string::npos) base = name;
+      else
+        base = name.substr(pos+1);
+      stream->setReadInverted(true);
+      if (base=="SfxStyleSheets") {
+        object.readSfxStyleSheets(stream,name);
+        continue;
+      }
+
+      if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
+        librevenge::RVNGBinaryData data;
+        if (readImageDocument(stream,data,name) && !data.empty())
+          image.add(data);
+        continue;
+      }
+      if (base=="StarMathDocument") {
+        readMathDocument(stream,name,object);
+        continue;
+      }
+      // other
+      if (base=="Ole-Object") {
+        readOleObject(stream,name);
+        continue;
+      }
+      libstoff::DebugFile asciiFile(stream);
+      asciiFile.open(name);
+
+      bool ok=false;
+      if (base=="OutPlace Object")
+        ok=readOutPlaceObject(stream, asciiFile);
+      if (!ok) {
+        libstoff::DebugStream f;
+        if (base=="Standard") // can be Standard or STANDARD
+          f << "Entries(STANDARD):";
+        else
+          f << "Entries(" << base << "):";
+        asciiFile.addPos(0);
+        asciiFile.addNote(f.str().c_str());
+      }
+      asciiFile.reset();
+    }
+  }
+  // finally look if some content have image
+  for (size_t i=0; i<ole->m_contentList.size(); ++i) {
+    librevenge::RVNGBinaryData data;
+    std::string type;
+    if (ole->m_contentList[i].getImageData(data,type))
+      image.add(data, type);
+  }
+  ole->m_inUse=false;
+  return !image.isEmpty();
 }
 
 bool StarFileManager::readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName)

@@ -178,7 +178,7 @@ public:
   struct OleDirectory {
     //! constructor
     OleDirectory(STOFFInputStreamPtr input, std::string const &dir) : m_input(input), m_dir(dir), m_contentList(), m_kind(STOFFDocument::STOFF_K_UNKNOWN),
-      m_hasCompObj(false), m_clsName(""), m_clipName("") { }
+      m_hasCompObj(false), m_clsName(""), m_clipName(""), m_parsed(false), m_inUse(false) { }
     //! add a new base file
     void addNewBase(std::string const &base)
     {
@@ -211,6 +211,10 @@ public:
     std::string m_clsName;
     /** the compobj clipname */
     std::string m_clipName;
+    /** a flag to know if the directory is parsed or not */
+    bool m_parsed;
+    /** a flag to know if the directory is currently used */
+    mutable bool m_inUse;
   };
 
 protected:

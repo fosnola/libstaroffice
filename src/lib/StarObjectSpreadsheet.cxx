@@ -595,6 +595,8 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
     std::vector<int> repeated;
     std::vector<float> widths=sheet.getColumnWidths(repeated);
     listener->openSheet(widths, librevenge::RVNG_INCH, repeated, sheet.m_name);
+    if (m_spreadsheetState->m_model && !sheet.m_name.empty())
+      m_spreadsheetState->m_model->sendPage(sheet.m_name, listener);
 
     /* create a set to know which row needed to be send, each value of
        the set corresponding to a position where the rows change
@@ -625,8 +627,6 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
       sendRow(int(t), row, listener);
       listener->closeSheetRow();
     }
-    if (m_spreadsheetState->m_model && !sheet.m_name.empty())
-      m_spreadsheetState->m_model->sendPage(sheet.m_name, listener);
     listener->closeSheet();
   }
 
