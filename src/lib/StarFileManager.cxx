@@ -44,8 +44,10 @@
 #include "StarAttribute.hxx"
 #include "StarBitmap.hxx"
 #include "StarObject.hxx"
+#include "StarObjectChart.hxx"
 #include "StarObjectDraw.hxx"
 #include "StarObjectSpreadsheet.hxx"
+#include "StarObjectText.hxx"
 #include "StarItemPool.hxx"
 #include "STOFFGraphicEncoder.hxx"
 #include "STOFFGraphicListener.hxx"
@@ -291,7 +293,12 @@ bool StarFileManager::readOLEDirectory(shared_ptr<STOFFOLEParser> oleParser, sha
   }
   ole->m_inUse=true;
   StarObject object(0, oleParser, ole); // do we need password here ?
-  if (object.getDocumentKind()==STOFFDocument::STOFF_K_DRAW) {
+  if (object.getDocumentKind()==STOFFDocument::STOFF_K_CHART) {
+    // TODO: retrieve content
+    StarObjectChart chart(object, false);
+    chart.parse();
+  }
+  else if (object.getDocumentKind()==STOFFDocument::STOFF_K_DRAW) {
     StarObjectDraw draw(object, false);
     ole->m_parsed=true;
     if (draw.parse()) {
@@ -328,6 +335,11 @@ bool StarFileManager::readOLEDirectory(shared_ptr<STOFFOLEParser> oleParser, sha
       spreadsheetListener->endDocument();
       spreadsheetEncoder.getBinaryResult(image);
     }
+  }
+  else if (object.getDocumentKind()==STOFFDocument::STOFF_K_TEXT) {
+    // TODO: retrieve content
+    StarObjectText text(object, false);
+    text.parse();
   }
   else {
     ole->m_parsed=true;

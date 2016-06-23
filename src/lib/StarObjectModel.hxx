@@ -75,13 +75,11 @@ public:
   bool sendMasterPages(STOFFGraphicListenerPtr listener);
   //! try to send the different page
   bool sendPages(STOFFListenerPtr listener);
-  //! try to send the content of a page
-  bool sendPage(librevenge::RVNGString const &pageName, STOFFListenerPtr listener);
+  //! try to send a page content
+  bool sendPage(int pageId, STOFFListenerPtr listener, bool masterPage=false);
   //! small operator<< to print the content of the model
   friend std::ostream &operator<<(std::ostream &o, StarObjectModel const &model);
 protected:
-  //! try to send a page content
-  bool sendPage(int pageId, STOFFListenerPtr listener, bool masterPage=false);
   //
   // low level
   //

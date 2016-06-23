@@ -395,24 +395,6 @@ bool StarObjectModel::sendMasterPages(STOFFGraphicListenerPtr listener)
   return true;
 }
 
-bool StarObjectModel::sendPage(librevenge::RVNGString const &pageName, STOFFListenerPtr listener)
-{
-  if (!listener) {
-    STOFF_DEBUG_MSG(("StarObjectModel::sendPage: can not find the listener\n"));
-    return false;
-  }
-  if (pageName.empty()) {
-    STOFF_DEBUG_MSG(("StarObjectModel::sendPage: the page name is empty\n"));
-    return false;
-  }
-  for (size_t i=0; i<m_modelState->m_pageList.size(); ++i) {
-    if (!m_modelState->m_pageList[i] || m_modelState->m_pageList[i]->m_name!=pageName)
-      continue;
-    sendPage(int(i), listener, false);
-  }
-  return true;
-}
-
 bool StarObjectModel::sendPage(int pageId, STOFFListenerPtr listener, bool masterPage)
 {
   if (!listener) {
@@ -421,10 +403,12 @@ bool StarObjectModel::sendPage(int pageId, STOFFListenerPtr listener, bool maste
   }
   std::vector<shared_ptr<StarObjectModelInternal::Page> > const &pageList=
     masterPage ? m_modelState->m_masterPageList : m_modelState->m_pageList;
-  if (pageId<0 || pageId>=int(pageList.size()) || !pageList[size_t(pageId)]) {
+  if (pageId<0) {
     STOFF_DEBUG_MSG(("StarObjectModel::sendPage: can not find page %d\n", pageId));
     return false;
   }
+  if (pageId>=int(pageList.size()) || !pageList[size_t(pageId)])
+    return false;
   StarObjectModelInternal::Page &page=*pageList[size_t(pageId)];
   for (size_t i=0; i<page.m_objectList.size(); ++i) {
     if (page.m_objectList[i])
