@@ -415,7 +415,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     if (!m_name.empty()) o << m_name.cstr();
@@ -467,7 +467,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=*,";
   }
@@ -498,7 +498,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     for (size_t i=0; i<m_tableList.size(); ++i)
@@ -532,7 +532,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     o << "range=" << m_range << ",";
@@ -584,7 +584,7 @@ public:
     return StarAttributeUInt::read(zone, vers, endPos, object);
   }
   //! print data
-  void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName;
     switch (m_value) {
@@ -679,7 +679,7 @@ bool StarPAttributePage::read(StarZone &zone, int /*vers*/, long endPos, StarObj
   m_pageType=int(input->readULong(1));
   *input >> m_landscape;
   m_used=int(input->readULong(2));
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -703,7 +703,7 @@ bool StarPAttributePageHF::read(StarZone &zone, int /*vers*/, long endPos, StarO
     }
     m_zones[i]=smallText;
   }
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return ok && input->tell()<=endPos;
@@ -726,7 +726,7 @@ bool StarPAttributePrint::read(StarZone &zone, int /*vers*/, long endPos, StarOb
   }
   for (int i=0; i<int(n); ++i)
     m_tableList.push_back(int(input->readULong(2)));
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return ok && input->tell()<=endPos;
@@ -754,7 +754,7 @@ bool StarPAttributeRangeItem::read(StarZone &zone, int vers, long endPos, StarOb
     }
   }
   m_range=STOFFBox2i(STOFFVec2i(dim[0],dim[1]),STOFFVec2i(dim[2],dim[3]));
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;

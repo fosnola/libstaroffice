@@ -321,7 +321,7 @@ public:
   //! add to a cell style
   virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     for (int i=0; i<4; ++i) {
@@ -359,7 +359,7 @@ public:
   //! add to a cell style
   virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName;
     if (m_span!=STOFFVec2i(1,1)) o << "=" << m_span;
@@ -462,7 +462,7 @@ public:
   //! add to a cell style
   virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     if (m_protected) o << "protected,";
@@ -536,7 +536,7 @@ bool StarCAttributeMargins::read(StarZone &zone, int /*vers*/, long endPos, Star
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   for (int i=0; i<4; ++i)
     m_margins[i]=int(input->readLong(2));
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -554,7 +554,7 @@ bool StarCAttributeMerge::read(StarZone &zone, int /*vers*/, long endPos, StarOb
   for (int i=0; i<2; ++i)
     span[i]=int(input->readLong(2));
   m_span=STOFFVec2i(span[0], span[1]);
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -571,7 +571,7 @@ bool StarCAttributeProtection::read(StarZone &zone, int /*vers*/, long endPos, S
   *input >> m_hiddenFormula;
   *input >> m_hiddenCell;
   *input >> m_doNotPrint;
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;

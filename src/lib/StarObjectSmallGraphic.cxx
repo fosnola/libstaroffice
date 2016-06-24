@@ -505,7 +505,7 @@ public:
     for (size_t i=0; i<graph.m_itemList.size(); ++i) {
       if (!graph.m_itemList[i] || !graph.m_itemList[i]->m_attribute) continue;
       libstoff::DebugStream f;
-      graph.m_itemList[i]->m_attribute->print(f);
+      graph.m_itemList[i]->m_attribute->printData(f);
       o << "[" << f.str() << "],";
     }
     if (!graph.m_sheetStyle.empty()) o << "sheetStyle[name]=" << graph.m_sheetStyle.cstr() << ",";
@@ -755,7 +755,7 @@ public:
     }
     if (graph.m_captionItem && graph.m_captionItem->m_attribute) {
       libstoff::DebugStream f;
-      graph.m_captionItem->m_attribute->print(f);
+      graph.m_captionItem->m_attribute->printData(f);
       o << "[" << f.str() << "],";
     }
     return o;
@@ -837,7 +837,7 @@ public:
       o << "angles=" << graph.m_angles[0] << "x" << graph.m_angles[1] << ",";
     if (graph.m_circleItem && graph.m_circleItem->m_attribute) {
       libstoff::DebugStream f;
-      graph.m_circleItem->m_attribute->print(f);
+      graph.m_circleItem->m_attribute->printData(f);
       o << "[" << f.str() << "],";
     }
     return o;
@@ -917,7 +917,7 @@ public:
     }
     if (graph.m_edgeItem && graph.m_edgeItem->m_attribute) {
       libstoff::DebugStream f;
-      graph.m_edgeItem->m_attribute->print(f);
+      graph.m_edgeItem->m_attribute->printData(f);
       o << "[" << f.str() << "],";
     }
     return o;
@@ -1007,7 +1007,7 @@ public:
     if (graph.m_hasGraphicLink) o << "hasGraphicLink,";
     if (graph.m_graphItem && graph.m_graphItem->m_attribute) {
       libstoff::DebugStream f;
-      graph.m_graphItem->m_attribute->print(f);
+      graph.m_graphItem->m_attribute->printData(f);
       o << "[" << f.str() << "],";
     }
     return o;
@@ -1087,7 +1087,7 @@ public:
     o << "],";
     if (graph.m_measureItem && graph.m_measureItem->m_attribute) {
       libstoff::DebugStream f;
-      graph.m_measureItem->m_attribute->print(f);
+      graph.m_measureItem->m_attribute->printData(f);
       o << "[" << f.str() << "],";
     }
     return o;
@@ -1128,32 +1128,35 @@ public:
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: can not send a shape\n"));
       return false;
     }
-    STOFFEmbeddedObject const *picturePtr=0;
     STOFFEmbeddedObject localPicture;
-    if (m_graphic && !m_graphic->m_object.isEmpty())
-      picturePtr=&m_graphic->m_object;
-    else {
-      if (!m_oleNames[0].empty() && m_oleParser) {
-        shared_ptr<STOFFOLEParser::OleDirectory> dir=m_oleParser->getDirectory(m_oleNames[0].cstr());
-        if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture) || localPicture.isEmpty()) {
-          STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: sorry, can not find object %s\n", m_oleNames[0].cstr()));
-        }
-        else
-          picturePtr = &localPicture;
-      }
-      else {
-        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: sorry, can not find some graphic representation\n"));
+    if (!m_oleNames[0].empty() && m_oleParser) {
+      shared_ptr<STOFFOLEParser::OleDirectory> dir=m_oleParser->getDirectory(m_oleNames[0].cstr());
+      if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture) || localPicture.isEmpty()) {
+        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: sorry, can not find object %s\n", m_oleNames[0].cstr()));
       }
     }
-    if (!picturePtr)
+    if (m_graphic && !m_graphic->m_object.isEmpty()) {
+      size_t numTypes=m_graphic->m_object.m_typeList.size();
+      for (size_t i=0; i<m_graphic->m_object.m_dataList.size(); ++i) {
+        if (m_graphic->m_object.m_dataList[i].empty())
+          continue;
+        if (i<numTypes)
+          localPicture.add(m_graphic->m_object.m_dataList[i], m_graphic->m_object.m_typeList[i]);
+        else
+          localPicture.add(m_graphic->m_object.m_dataList[i]);
+      }
+    }
+    if (localPicture.isEmpty()) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: sorry, can not find some graphic representation\n"));
       return SdrGraphicRect::send(listener, object);
+    }
     STOFFPosition position;
     position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
     position.setAnchor(STOFFPosition::Page);
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
-    listener->insertPicture(position, *picturePtr, style);
+    listener->insertPicture(position, localPicture, style);
 
     return true;
   }
@@ -2028,7 +2031,7 @@ bool StarObjectSmallGraphic::readSVDRObjectEdge(StarZone &zone, StarObjectSmallG
     else {
       graphic.m_edgeItem=item;
       if (item->m_attribute)
-        item->m_attribute->print(f);
+        item->m_attribute->printData(f);
     }
   }
   if (ok && input->tell()<lastPos) {

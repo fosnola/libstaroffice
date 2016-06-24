@@ -402,7 +402,7 @@ public:
   //! add to a font
   virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     if (m_delta) o << "decal=" << m_delta << "%,";
@@ -439,7 +439,7 @@ public:
   //! add to a font
   virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     if (!m_name.empty()) o << "name=" << m_name.cstr() << ",";
@@ -542,7 +542,7 @@ bool StarCAttributeEscapement::read(StarZone &zone, int /*vers*/, long endPos, S
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   m_scale=int(input->readULong(1));
   m_delta=int(input->readLong(2));
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -562,7 +562,7 @@ bool StarCAttributeFont::read(StarZone &zone, int /*vers*/, long endPos, StarObj
   std::vector<uint32_t> fName, string;
   if (!zone.readString(fName)) {
     STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeFont::read: can not find the name\n"));
-    StarAttribute::print(f);
+    printData(f);
     f << "###aName,";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -571,7 +571,7 @@ bool StarCAttributeFont::read(StarZone &zone, int /*vers*/, long endPos, StarObj
   m_name=libstoff::getString(fName);
   if (!zone.readString(string)) {
     STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeFont::read: can not find the style\n"));
-    StarAttribute::print(f);
+    printData(f);
     f << "###aStyle,";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -583,7 +583,7 @@ bool StarCAttributeFont::read(StarZone &zone, int /*vers*/, long endPos, StarObj
       // reread data in unicode
       if (!zone.readString(fName)) {
         STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeFont::read: can not find the name\n"));
-        StarAttribute::print(f);
+        printData(f);
         f << "###aName,";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -593,7 +593,7 @@ bool StarCAttributeFont::read(StarZone &zone, int /*vers*/, long endPos, StarObj
         f << "aNameUni=" << libstoff::getString(fName).cstr() << ",";
       if (!zone.readString(string)) {
         STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeFont::read: can not find the style\n"));
-        StarAttribute::print(f);
+        printData(f);
         f << "###aStyle,";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
@@ -605,7 +605,7 @@ bool StarCAttributeFont::read(StarZone &zone, int /*vers*/, long endPos, StarObj
     else input->seek(-3, librevenge::RVNG_SEEK_CUR);
   }
 
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -630,7 +630,7 @@ public:
   //! add to a font
   virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     if (m_size!=240) o << "sz=" << m_size << ",";
@@ -671,7 +671,7 @@ bool StarCAttributeFontSize::read(StarZone &zone, int nVers, long endPos, StarOb
   m_size=int(input->readULong(2));
   m_proportion=int(input->readULong((nVers>=1) ? 2 : 1));
   if (nVers>=2) m_unit=int(input->readULong(2));
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;

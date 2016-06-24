@@ -234,7 +234,7 @@ public:
   //! add to a font
   virtual void addTo(STOFFParagraph &para, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     if (m_adjust) o << "adjust=" << m_adjust << ",";
@@ -274,7 +274,7 @@ public:
   //! add to a page
   virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     for (int i=0; i<3; ++i) {
@@ -330,7 +330,7 @@ public:
   //! add to a page
   virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     for (int i=0; i<2; ++i) {
@@ -402,7 +402,7 @@ bool StarPAttributeAdjust::read(StarZone &zone, int vers, long endPos, StarObjec
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  StarAttribute::print(f);
+  printData(f);
   m_adjust=int(input->readULong(1));
   if (vers>=1) m_flags=int(input->readULong(1));
   ascFile.addPos(pos);
@@ -444,7 +444,7 @@ bool StarPAttributeLRSpace::read(StarZone &zone, int vers, long endPos, StarObje
     *input >> nMargin;
     m_margins[1]=nMargin;
   }
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -461,7 +461,7 @@ bool StarPAttributeULSpace::read(StarZone &zone, int vers, long endPos, StarObje
     m_margins[i]=int(input->readULong(2));
     m_propMargins[i]=int(input->readULong(vers>=1 ? 2 : 1));
   }
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;

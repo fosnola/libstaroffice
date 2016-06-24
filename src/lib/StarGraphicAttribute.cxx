@@ -219,15 +219,15 @@ void StarGAttributeBool::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
 void StarGAttributeInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==XATTR_LINEWIDTH)
-    graphic.m_propertyList.insert("svg:stroke-width", double(m_value)/2540.,librevenge::RVNG_INCH);
+    graphic.m_propertyList.insert("svg:stroke-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==XATTR_LINESTARTWIDTH)
-    graphic.m_propertyList.insert("draw:marker-start-width", double(m_value)/2540.,librevenge::RVNG_INCH);
+    graphic.m_propertyList.insert("draw:marker-start-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==XATTR_LINEENDWIDTH)
-    graphic.m_propertyList.insert("draw:marker-end-width", double(m_value)/2540.,librevenge::RVNG_INCH);
+    graphic.m_propertyList.insert("draw:marker-end-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==XATTR_FILLBMP_SIZEX)
-    graphic.m_propertyList.insert("draw:fill-image-width", double(m_value)/2540.,librevenge::RVNG_INCH);
+    graphic.m_propertyList.insert("draw:fill-image-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==XATTR_FILLBMP_SIZEY)
-    graphic.m_propertyList.insert("draw:fill-image-height", double(m_value)/2540.,librevenge::RVNG_INCH);
+    graphic.m_propertyList.insert("draw:fill-image-height", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
 }
 
 void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
@@ -339,7 +339,7 @@ public:
   //! add to a graphic style
   virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     if (m_distance) o << "dist=" << m_distance << ",";
@@ -397,7 +397,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     if (m_distance) o << "dist=" << m_distance << ",";
@@ -446,7 +446,7 @@ public:
   //! add to a graphic style
   virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[" << m_brush << "],";
   }
@@ -471,7 +471,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     if (!m_named.empty())
@@ -510,9 +510,9 @@ public:
   //! add to a graphic style
   virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
-    StarGAttributeNamed::print(o, done);
+    StarGAttributeNamed::printData(o);
     o << ":[" << m_polygon << "],";
   }
 
@@ -544,9 +544,9 @@ public:
   //! add to a graphic style
   virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
-    StarGAttributeNamed::print(o, done);
+    StarGAttributeNamed::printData(o);
     if (m_bitmap.isEmpty()) o << "empty";
     o << ",";
   }
@@ -581,9 +581,9 @@ public:
   //! add to a graphic style
   virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
-    StarGAttributeNamed::print(o, done);
+    StarGAttributeNamed::printData(o);
     o << ":[" << m_color << "],";
   }
 
@@ -617,9 +617,9 @@ public:
   //! add to a graphic style
   virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
-    StarGAttributeNamed::print(o, done);
+    StarGAttributeNamed::printData(o);
     o << ":[";
     o << "style=" << m_dashStyle << ",";
     for (int i=0; i<2; ++i) {
@@ -669,9 +669,9 @@ public:
   //! add to a graphic style
   virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
-    StarGAttributeNamed::print(o, done);
+    StarGAttributeNamed::printData(o);
     o << ":[";
     o << "type=" << m_gradientType << ",";
     if (m_angle) o << "angle=" << m_angle << ",";
@@ -730,9 +730,9 @@ public:
   //! add to a graphic style
   virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
-    StarGAttributeNamed::print(o, done);
+    StarGAttributeNamed::printData(o);
     o << ":[";
     o << "type=" << m_hatchType << ",";
     o << m_color << ",";
@@ -777,7 +777,7 @@ public:
   //! add to a graphic style
   virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
     if (m_location) o << "loc=" << m_location << ",";
@@ -830,7 +830,7 @@ void StarGAttributeBorder::addTo(STOFFGraphicStyle &graphic, StarItemPool const 
         m_borders[i].addTo(graphic.m_propertyList, wh[i]);
     }
     for (int i=0; i<4; ++i)
-      graphic.m_propertyList.insert((std::string("padding-")+wh[i]).c_str(), double(m_distances[i])/20., librevenge::RVNG_POINT);
+      graphic.m_propertyList.insert((std::string("padding-")+wh[i]).c_str(), libstoff::convertMiniMToPoint(m_distances[i]), librevenge::RVNG_POINT);
   }
 }
 
@@ -987,10 +987,10 @@ void StarGAttributeNamedDash::addTo(STOFFGraphicStyle &graphic, StarItemPool con
 {
   if (m_type==XATTR_LINEDASH) {
     graphic.m_propertyList.insert("draw:dots1", m_numbers[0]);
-    graphic.m_propertyList.insert("draw:dots1-length", double(m_lengths[0])/2540., librevenge::RVNG_INCH);
+    graphic.m_propertyList.insert("draw:dots1-length", libstoff::convertMiniMToPoint(m_lengths[0]), librevenge::RVNG_POINT);
     graphic.m_propertyList.insert("draw:dots2", m_numbers[1]);
-    graphic.m_propertyList.insert("draw:dots2-length", double(m_lengths[1])/2540., librevenge::RVNG_INCH);
-    graphic.m_propertyList.insert("draw:distance", double(m_distance)/2540., librevenge::RVNG_INCH);;
+    graphic.m_propertyList.insert("draw:dots2-length", libstoff::convertMiniMToPoint(m_lengths[1]), librevenge::RVNG_POINT);
+    graphic.m_propertyList.insert("draw:distance", libstoff::convertMiniMToPoint(m_distance), librevenge::RVNG_POINT);
   }
 }
 
@@ -1021,7 +1021,7 @@ void StarGAttributeNamedGradient::addTo(STOFFGraphicStyle &graphic, StarItemPool
 
 void StarGAttributeNamedHatch::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
-  if (m_type==XATTR_FILLHATCH) {
+  if (m_type==XATTR_FILLHATCH && m_distance>0) {
     if (m_hatchType>=0 && m_hatchType<3) {
       char const *(wh[])= {"single", "double", "triple"};
       graphic.m_propertyList.insert("draw:style", wh[m_hatchType]);
@@ -1030,7 +1030,7 @@ void StarGAttributeNamedHatch::addTo(STOFFGraphicStyle &graphic, StarItemPool co
       STOFF_DEBUG_MSG(("StarGAttributeNamedHatch::addTo: unknown hash type %d\n", m_hatchType));
     }
     graphic.m_propertyList.insert("draw:color", m_color.str().c_str());
-    graphic.m_propertyList.insert("draw:distance", double(m_distance)/2540.,librevenge::RVNG_INCH);
+    graphic.m_propertyList.insert("draw:distance", libstoff::convertMiniMToPoint(m_distance),librevenge::RVNG_POINT);
     if (m_angle) graphic.m_propertyList.insert("draw:rotation", double(m_angle)/10, librevenge::RVNG_GENERIC);
   }
 }
@@ -1057,8 +1057,8 @@ void StarGAttributeShadow::addTo(STOFFGraphicStyle &graphic, StarItemPool const 
   graphic.m_propertyList.insert("draw:shadow", "visible");
   graphic.m_propertyList.insert("draw:shadow-color", m_color.str().c_str());
   graphic.m_propertyList.insert("draw:shadow-opacity", 1.-double(m_transparency)/255., librevenge::RVNG_PERCENT);
-  graphic.m_propertyList.insert("draw:shadow-offset-x", ((m_location%2)?-1:1)*double(m_width)/20., librevenge::RVNG_POINT);
-  graphic.m_propertyList.insert("draw:shadow-offset-y", (m_location<=2?-1:1)*double(m_width)/20., librevenge::RVNG_POINT);
+  graphic.m_propertyList.insert("draw:shadow-offset-x", ((m_location%2)?-1:1)*libstoff::convertMiniMToPoint(m_width), librevenge::RVNG_POINT);
+  graphic.m_propertyList.insert("draw:shadow-offset-y", (m_location<=2?-1:1)*libstoff::convertMiniMToPoint(m_width), librevenge::RVNG_POINT);
 }
 
 
@@ -1096,7 +1096,7 @@ bool StarGAttributeBorder::read(StarZone &zone, int nVers, long endPos, StarObje
       for (int i=0; i<4; ++i) m_distances[i]=int(input->readULong(2));
     }
   }
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return ok && input->tell()<=endPos;
@@ -1128,7 +1128,7 @@ bool StarGAttributeBoxInfo::read(StarZone &zone, int /*nVers*/, long endPos, Sta
     border.m_distance=int(input->readULong(2));
     m_borderList.push_back(border);
   }
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return ok && input->tell()<=endPos;
@@ -1148,7 +1148,7 @@ bool StarGAttributeBrush::read(StarZone &zone, int nVers, long endPos, StarObjec
     f << "###brush,";
   if (transparent)
     m_brush.m_transparency=255;
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return ok && input->tell()<=endPos;
@@ -1201,7 +1201,7 @@ bool StarGAttributeNamedArrow::read(StarZone &zone, int nVers, long endPos, Star
     }
     f << "],";
   }
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return ok && input->tell()<=endPos;
@@ -1268,7 +1268,7 @@ bool StarGAttributeNamedBitmap::read(StarZone &zone, int nVers, long endPos, Sta
         ok=false;
       }
       if (type!=0 || !ok) {
-        StarAttribute::print(f);
+        printData(f);
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
         return ok && input->tell()<=endPos;
@@ -1282,7 +1282,7 @@ bool StarGAttributeNamedBitmap::read(StarZone &zone, int nVers, long endPos, Sta
     else
       ok=false;
   }
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return ok && input->tell()<=endPos;
@@ -1310,7 +1310,7 @@ bool StarGAttributeNamedColor::read(StarZone &zone, int nVers, long endPos, Star
       ok=false;
     }
   }
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return ok && input->tell()<=endPos;
@@ -1338,7 +1338,7 @@ bool StarGAttributeNamedDash::read(StarZone &zone, int nVers, long endPos, StarO
     }
     m_distance=int(input->readULong(4));
   }
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -1371,7 +1371,7 @@ bool StarGAttributeNamedGradient::read(StarZone &zone, int nVers, long endPos, S
     if (nVers>=1) m_step=int(input->readULong(2));
     if (m_type==XATTR_FILLFLOATTRANSPARENCE) *input >> m_enable;
   }
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -1399,7 +1399,7 @@ bool StarGAttributeNamedHatch::read(StarZone &zone, int nVers, long endPos, Star
     m_distance=int(input->readLong(4));
     m_angle=int(input->readLong(4));
   }
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
@@ -1428,7 +1428,7 @@ bool StarGAttributeShadow::read(StarZone &zone, int /*vers*/, long endPos, StarO
   }
   if (ok) m_style=int(input->readULong(1));
 
-  StarAttribute::print(f);
+  printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return ok && input->tell()<=endPos;

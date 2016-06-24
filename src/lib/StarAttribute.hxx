@@ -803,12 +803,17 @@ public:
     return m_debugName;
   }
   //! debug function to print the data
-  void print(libstoff::DebugStream &o) const
+  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const
   {
-    o << m_debugName << ",";
+    if (done.find(this)!=done.end()) {
+      o << m_debugName << ",";
+      return;
+    }
+    done.insert(this);
+    printData(o);
   }
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << ",";
   }
@@ -851,7 +856,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int ver, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName;
     if (m_value) o << "=true";
@@ -882,7 +887,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "[col=" << m_value << "],";
   }
@@ -914,7 +919,7 @@ public:
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
 
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName;
     if (m_value<0 || m_value>0) o << "=" << m_value;
@@ -949,7 +954,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName;
     if (m_value) o << "=" << m_value;
@@ -987,7 +992,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName;
     if (m_value) o << "=" << m_value;
@@ -1024,7 +1029,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &/*done*/) const
+  virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName;
     if (m_value!=STOFFVec2i(0,0)) o << "=" << m_value;

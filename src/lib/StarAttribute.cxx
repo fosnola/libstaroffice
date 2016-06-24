@@ -311,6 +311,8 @@ void State::initAttributeMap()
   }
 
   // ---- sdr ---- svx_svdattr.cxx
+
+  // TODO:  MOVE IN GRAPHIC
   addAttributeBool(StarAttribute::SDRATTR_SHADOW,"shadow", false); // onOff
   addAttributeInt(StarAttribute::SDRATTR_SHADOWXDIST, "shadow[xDist]",4, 0); // metric
   addAttributeInt(StarAttribute::SDRATTR_SHADOWYDIST, "shadow[yDist]",4, 0); // metric
@@ -343,6 +345,7 @@ void State::initAttributeMap()
   addAttributeInt(StarAttribute::SDRATTR_TEXT_MINFRAMEHEIGHT, "text[min,frameHeight]",4, 0); // metric
   addAttributeBool(StarAttribute::SDRATTR_TEXT_AUTOGROWHEIGHT,"text[autoGrow,height]", true); // onOff
   addAttributeUInt(StarAttribute::SDRATTR_TEXT_FITTOSIZE, "text[fitToSize]",2,0); // none
+  // TODO:  MOVE IN GRAPHIC
   addAttributeInt(StarAttribute::SDRATTR_TEXT_LEFTDIST, "text[left,dist]",4, 0); // metric
   addAttributeInt(StarAttribute::SDRATTR_TEXT_RIGHTDIST, "text[right,dist]",4, 0); // metric
   addAttributeInt(StarAttribute::SDRATTR_TEXT_UPPERDIST, "text[upper,dist]",4, 0); // metric

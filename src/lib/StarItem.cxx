@@ -60,7 +60,7 @@ std::string StarItemSet::printChild() const
       o << "_,";
       continue;
     }
-    it->second->m_attribute->print(o);
+    it->second->m_attribute->printData(o);
     o << ",";
   }
   o << "],";
