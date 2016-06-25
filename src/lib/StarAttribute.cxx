@@ -312,19 +312,6 @@ void State::initAttributeMap()
 
   // ---- sdr ---- svx_svdattr.cxx
 
-  // TODO:  MOVE IN GRAPHIC
-  addAttributeBool(StarAttribute::SDRATTR_SHADOW,"shadow", false); // onOff
-  addAttributeInt(StarAttribute::SDRATTR_SHADOWXDIST, "shadow[xDist]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_SHADOWYDIST, "shadow[yDist]",4, 0); // metric
-  addAttributeUInt(StarAttribute::SDRATTR_SHADOWTRANSPARENCE, "shadow[transparence]",2,0); // percent item
-  addAttributeVoid(StarAttribute::SDRATTR_SHADOW3D, "shadow[3d]");
-  addAttributeVoid(StarAttribute::SDRATTR_SHADOWPERSP, "shadow[persp]");
-  for (int type=StarAttribute::SDRATTR_SHADOWRESERVE1; type<=StarAttribute::SDRATTR_SHADOWRESERVE5; ++type) {
-    s.str("");
-    s << "shadow[reserved" << type-StarAttribute::SDRATTR_SHADOWRESERVE1+1 << "]";
-    addAttributeVoid(StarAttribute::Type(type), s.str());
-  }
-
   addAttributeUInt(StarAttribute::SDRATTR_CAPTIONTYPE, "caption[type]",2,2); // type3
   addAttributeBool(StarAttribute::SDRATTR_CAPTIONFIXEDANGLE,"caption[fixedAngle]", true); // onOff
   addAttributeInt(StarAttribute::SDRATTR_CAPTIONANGLE, "caption[angle]",4, 0); // angle
@@ -342,20 +329,6 @@ void State::initAttributeMap()
   }
 
   addAttributeInt(StarAttribute::SDRATTR_ECKENRADIUS, "radius[ecken]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_TEXT_MINFRAMEHEIGHT, "text[min,frameHeight]",4, 0); // metric
-  addAttributeBool(StarAttribute::SDRATTR_TEXT_AUTOGROWHEIGHT,"text[autoGrow,height]", true); // onOff
-  addAttributeUInt(StarAttribute::SDRATTR_TEXT_FITTOSIZE, "text[fitToSize]",2,0); // none
-  // TODO:  MOVE IN GRAPHIC
-  addAttributeInt(StarAttribute::SDRATTR_TEXT_LEFTDIST, "text[left,dist]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_TEXT_RIGHTDIST, "text[right,dist]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_TEXT_UPPERDIST, "text[upper,dist]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_TEXT_LOWERDIST, "text[lower,dist]",4, 0); // metric
-  addAttributeUInt(StarAttribute::SDRATTR_TEXT_VERTADJUST, "text[vert,adjust]",2,0); // top
-  addAttributeInt(StarAttribute::SDRATTR_TEXT_MAXFRAMEHEIGHT, "text[max,frameHeight]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_TEXT_MINFRAMEWIDTH, "text[min,frameWidth]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_TEXT_MAXFRAMEWIDTH, "text[max,frameWidth]",4, 0); // metric
-  addAttributeBool(StarAttribute::SDRATTR_TEXT_AUTOGROWWIDTH,"text[autoGrow,width]", false); // onOff
-  addAttributeUInt(StarAttribute::SDRATTR_TEXT_HORZADJUST, "text[horz,adjust]",2,3); // block
   addAttributeUInt(StarAttribute::SDRATTR_TEXT_ANIKIND, "text[ani,kind]",2,0); // none
   addAttributeUInt(StarAttribute::SDRATTR_TEXT_ANIDIRECTION, "text[ani,direction]",2,0); // left
   addAttributeBool(StarAttribute::SDRATTR_TEXT_ANISTARTINSIDE,"text[ani,startInside]", false); // yesNo

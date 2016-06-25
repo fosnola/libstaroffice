@@ -161,7 +161,7 @@ public:
     return shared_ptr<StarAttribute>(new StarGAttributeVoid(*this));
   }
   //! add to a graphic style
-  //virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   StarGAttributeVoid(StarGAttributeVoid const &orig) : StarAttributeVoid(orig)
@@ -213,6 +213,12 @@ void StarGAttributeBool::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
     graphic.m_propertyList.insert("style:repeat", "stretch");
   else if (m_type==XATTR_FILLBACKGROUND)
     graphic.m_hasBackground=m_value;
+  else if (m_type==StarAttribute::SDRATTR_SHADOW)
+    graphic.m_propertyList.insert("draw:shadow", m_value ? "visible" : "hidden");
+  else if (m_type==SDRATTR_TEXT_AUTOGROWHEIGHT)
+    graphic.m_propertyList.insert("draw:auto-grow-height", m_value);
+  else if (m_type==SDRATTR_TEXT_AUTOGROWWIDTH)
+    graphic.m_propertyList.insert("draw:auto-grow-width", m_value);
   // TODO: XATTR_FILLBMP_SIZELOG
 }
 
@@ -228,6 +234,18 @@ void StarGAttributeInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*
     graphic.m_propertyList.insert("draw:fill-image-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==XATTR_FILLBMP_SIZEY)
     graphic.m_propertyList.insert("draw:fill-image-height", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
+  else if (m_type==SDRATTR_SHADOWXDIST)
+    graphic.m_propertyList.insert("draw:shadow-offset-x", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+  else if (m_type==SDRATTR_SHADOWYDIST)
+    graphic.m_propertyList.insert("draw:shadow-offset-y", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+  else if (m_type==SDRATTR_TEXT_MAXFRAMEHEIGHT)
+    graphic.m_propertyList.insert("fo:max-height", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+  else if (m_type==SDRATTR_TEXT_MINFRAMEHEIGHT) // checkme
+    graphic.m_propertyList.insert("fo:min-height", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+  else if (m_type==SDRATTR_TEXT_MAXFRAMEWIDTH)
+    graphic.m_propertyList.insert("fo:max-width", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+  else if (m_type==SDRATTR_TEXT_MINFRAMEWIDTH) // checkme
+    graphic.m_propertyList.insert("fo:min-width", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
 }
 
 void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
@@ -284,6 +302,41 @@ void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
     s << m_value << "% " << (m_type==XATTR_FILLBMP_TILEOFFSETX ? "horizontal" : "vertical");
     graphic.m_propertyList.insert("draw:tile-repeat-offset", s.str().c_str());
   }
+  else if (m_type==SDRATTR_SHADOWTRANSPARENCE)
+    graphic.m_propertyList.insert("draw:shadow-opacity", 1.0-double(m_value)/255., librevenge::RVNG_PERCENT);
+  else if (m_type==SDRATTR_TEXT_LEFTDIST || m_type==SDRATTR_TEXT_RIGHTDIST ||
+           m_type==SDRATTR_TEXT_UPPERDIST || m_type==SDRATTR_TEXT_LOWERDIST) {
+    char const * (wh[])= {"left", "right", "top", "bottom"};
+    graphic.m_propertyList.insert((std::string("padding-")+wh[(m_type-SDRATTR_TEXT_LEFTDIST)]).c_str(), libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+  }
+  else if (m_type==SDRATTR_TEXT_FITTOSIZE)
+    // TODO: 0: none, 1: proportional, allline, autofit
+    graphic.m_propertyList.insert("draw:fit-to-size", m_value!=0);
+  else if (m_type==SDRATTR_TEXT_HORZADJUST) {
+    if (m_value<4) {
+      char const *(wh[])= {"left", "center", "right", "justify"};
+      graphic.m_propertyList.insert("draw:textarea-horizontal-align", wh[m_value]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown text horizontal position %d\n", int(m_value)));
+    }
+  }
+  else if (m_type==SDRATTR_TEXT_VERTADJUST) {
+    if (m_value<4) {
+      char const *(wh[])= {"top", "middle", "bottom", "justify"};
+      graphic.m_propertyList.insert("draw:textarea-vertical-align", wh[m_value]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown text vertical position %d\n", int(m_value)));
+    }
+  }
+}
+
+void StarGAttributeVoid::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+{
+  if (m_type==StarAttribute::SDRATTR_SHADOW3D)
+    graphic.m_propertyList.insert("dr3d:shadow", "visible");
+  // also SDRATTR_SHADOWPERSP, ok to ignore ?
 }
 
 //! add a bool attribute
@@ -1463,6 +1516,26 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeBool(map, StarAttribute::XATTR_FILLBACKGROUND,"fill[background]", false);
   addAttributeUInt(map, StarAttribute::XATTR_GRADIENTSTEPCOUNT,"gradient[stepCount]",2,0);
 
+  addAttributeBool(map, StarAttribute::SDRATTR_SHADOW,"shadow", false); // onOff
+  addAttributeInt(map, StarAttribute::SDRATTR_SHADOWXDIST, "shadow[xDist]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_SHADOWYDIST, "shadow[yDist]",4, 0); // metric
+  addAttributeUInt(map, StarAttribute::SDRATTR_SHADOWTRANSPARENCE, "shadow[transparence]",2,0);
+  addAttributeVoid(map, StarAttribute::SDRATTR_SHADOW3D, "shadow[3d]");
+  addAttributeVoid(map, StarAttribute::SDRATTR_SHADOWPERSP, "shadow[persp]"); // useme
+  addAttributeInt(map, StarAttribute::SDRATTR_TEXT_LEFTDIST, "text[left,dist]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_TEXT_RIGHTDIST, "text[right,dist]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_TEXT_UPPERDIST, "text[upper,dist]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_TEXT_LOWERDIST, "text[lower,dist]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_TEXT_MINFRAMEHEIGHT, "text[min,frameHeight]",4, 0); // metric
+  addAttributeBool(map, StarAttribute::SDRATTR_TEXT_AUTOGROWHEIGHT,"text[autoGrow,height]", true); // onOff
+  addAttributeUInt(map, StarAttribute::SDRATTR_TEXT_FITTOSIZE, "text[fitToSize]",2,0); // none
+  addAttributeUInt(map, StarAttribute::SDRATTR_TEXT_VERTADJUST, "text[vert,adjust]",2,0); // top
+  addAttributeInt(map, StarAttribute::SDRATTR_TEXT_MAXFRAMEHEIGHT, "text[max,frameHeight]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_TEXT_MINFRAMEWIDTH, "text[min,frameWidth]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_TEXT_MAXFRAMEWIDTH, "text[max,frameWidth]",4, 0); // metric
+  addAttributeBool(map, StarAttribute::SDRATTR_TEXT_AUTOGROWWIDTH,"text[autoGrow,width]", false); // onOff
+  addAttributeUInt(map, StarAttribute::SDRATTR_TEXT_HORZADJUST, "text[horz,adjust]",2,3); // block
+
   map[StarAttribute::XATTR_LINECOLOR]=shared_ptr<StarAttribute>
                                       (new StarGAttributeNamedColor(StarAttribute::XATTR_LINECOLOR,"line[color]",STOFFColor::black()));
   map[StarAttribute::XATTR_LINESTART]=shared_ptr<StarAttribute>
@@ -1500,6 +1573,11 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   for (int type=StarAttribute::XATTR_FILLRESERVED2; type<=StarAttribute::XATTR_FILLRESERVED_LAST; ++type) {
     std::stringstream s;
     s << "fill[reserved" << type-StarAttribute::XATTR_FILLRESERVED2+2 << "]";
+    addAttributeVoid(map, StarAttribute::Type(type), s.str());
+  }
+  for (int type=StarAttribute::SDRATTR_SHADOWRESERVE1; type<=StarAttribute::SDRATTR_SHADOWRESERVE5; ++type) {
+    std::stringstream s;
+    s << "shadow[reserved" << type-StarAttribute::SDRATTR_SHADOWRESERVE1+1 << "]";
     addAttributeVoid(map, StarAttribute::Type(type), s.str());
   }
 
