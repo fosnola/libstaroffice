@@ -219,6 +219,12 @@ void StarGAttributeBool::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
     graphic.m_propertyList.insert("draw:auto-grow-height", m_value);
   else if (m_type==SDRATTR_TEXT_AUTOGROWWIDTH)
     graphic.m_propertyList.insert("draw:auto-grow-width", m_value);
+  else if (m_type==SDRATTR_TEXT_ANISTARTINSIDE)
+    graphic.m_propertyList.insert("text:animation-start-inside", m_value);
+  else if (m_type==SDRATTR_TEXT_ANISTOPINSIDE)
+    graphic.m_propertyList.insert("text:animation-stop-inside", m_value);
+  else if (m_type==SDRATTR_TEXT_CONTOURFRAME) // checkme
+    graphic.m_propertyList.insert("style:wrap-contour", m_value);
   // TODO: XATTR_FILLBMP_SIZELOG
 }
 
@@ -246,6 +252,10 @@ void StarGAttributeInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*
     graphic.m_propertyList.insert("fo:max-width", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_TEXT_MINFRAMEWIDTH) // checkme
     graphic.m_propertyList.insert("fo:min-width", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+  else if (m_type==SDRATTR_CIRCSTARTANGLE)
+    graphic.m_propertyList.insert("draw:start-angle", double(m_value)/100.,  librevenge::RVNG_GENERIC);
+  else if (m_type==SDRATTR_CIRCENDANGLE)
+    graphic.m_propertyList.insert("draw:end-angle", double(m_value)/100.,  librevenge::RVNG_GENERIC);
 }
 
 void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
@@ -328,6 +338,42 @@ void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
     }
     else {
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown text vertical position %d\n", int(m_value)));
+    }
+  }
+  else if (m_type==SDRATTR_TEXT_ANIAMOUNT) // unsure
+    graphic.m_propertyList.insert("text:animation-steps", double(m_value)/100., librevenge::RVNG_PERCENT);
+  else if (m_type==SDRATTR_TEXT_ANICOUNT)
+    graphic.m_propertyList.insert("text:animation-repeat", int(m_value));
+  else if (m_type==SDRATTR_TEXT_ANIDELAY) { // check unit
+    librevenge::RVNGString delay;
+    delay.sprintf("PT%fS", double(m_value));
+    graphic.m_propertyList.insert("text:animation-delay", delay);
+  }
+  else if (m_type==SDRATTR_TEXT_ANIDIRECTION) {
+    if (m_value<4) {
+      char const *(wh[])= {"left", "right", "up", "down"};
+      graphic.m_propertyList.insert("text:animation-direction", wh[m_value]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown animation direction %d\n", int(m_value)));
+    }
+  }
+  else if (m_type==SDRATTR_TEXT_ANIKIND) {
+    if (m_value<5) {
+      char const *(wh[])= {"none", "none" /*blink*/, "scroll", "alternate", "slide"};
+      graphic.m_propertyList.insert("text:animation", wh[m_value]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown animation direction %d\n", int(m_value)));
+    }
+  }
+  else if (m_type==SDRATTR_CIRCKIND) {
+    if (m_value<4) {
+      char const *(wh[])= {"full", "section", "cut", "arc"};
+      graphic.m_propertyList.insert("draw:kind", wh[m_value]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown circle kind %d\n", int(m_value)));
     }
   }
 }
@@ -1535,6 +1581,19 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeInt(map, StarAttribute::SDRATTR_TEXT_MAXFRAMEWIDTH, "text[max,frameWidth]",4, 0); // metric
   addAttributeBool(map, StarAttribute::SDRATTR_TEXT_AUTOGROWWIDTH,"text[autoGrow,width]", false); // onOff
   addAttributeUInt(map, StarAttribute::SDRATTR_TEXT_HORZADJUST, "text[horz,adjust]",2,3); // block
+  addAttributeUInt(map, StarAttribute::SDRATTR_TEXT_ANIKIND, "text[ani,kind]",2,0); // none
+  addAttributeUInt(map, StarAttribute::SDRATTR_TEXT_ANIDIRECTION, "text[ani,direction]",2,0); // left
+  addAttributeBool(map, StarAttribute::SDRATTR_TEXT_ANISTARTINSIDE,"text[ani,startInside]", false); // yesNo
+  addAttributeBool(map, StarAttribute::SDRATTR_TEXT_ANISTOPINSIDE,"text[ani,stopInside]", false); // yesNo
+  addAttributeUInt(map, StarAttribute::SDRATTR_TEXT_ANICOUNT, "text[ani,count]",2,0);
+  addAttributeUInt(map, StarAttribute::SDRATTR_TEXT_ANIDELAY, "text[ani,delay]",2,0);
+  addAttributeInt(map, StarAttribute::SDRATTR_TEXT_ANIAMOUNT, "text[ani,amount]",2, 0);
+  addAttributeBool(map, StarAttribute::SDRATTR_TEXT_CONTOURFRAME,"text[contourFrame]", false); // onOff
+  addAttributeVoid(map, StarAttribute::SDRATTR_XMLATTRIBUTES,"sdr[xmlAttrib]");
+  addAttributeUInt(map, StarAttribute::SDRATTR_CIRCKIND, "circle[kind]",2,0); // full
+  addAttributeInt(map, StarAttribute::SDRATTR_CIRCSTARTANGLE, "circle[angle,start]",4, 0); // sdrAngle
+  addAttributeInt(map, StarAttribute::SDRATTR_CIRCENDANGLE, "circle[angle,end]",4, 36000); // sdrAngle
+
 
   map[StarAttribute::XATTR_LINECOLOR]=shared_ptr<StarAttribute>
                                       (new StarGAttributeNamedColor(StarAttribute::XATTR_LINECOLOR,"line[color]",STOFFColor::black()));
@@ -1564,6 +1623,8 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   map[StarAttribute::XATTR_SET_FILL]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::XATTR_SET_FILL,"setFill",limits));
   limits[0]=STOFFVec2i(1048,1064);
   map[StarAttribute::XATTR_SET_TEXT]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::XATTR_SET_TEXT,"setText",limits));
+  limits[0]=STOFFVec2i(1067,1078);
+  map[StarAttribute::SDRATTR_SET_SHADOW]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_SHADOW,"setShadow",limits));
 
   for (int type=StarAttribute::XATTR_LINERESERVED2; type<=StarAttribute::XATTR_LINERESERVED_LAST; ++type) {
     std::stringstream s;
@@ -1580,8 +1641,42 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
     s << "shadow[reserved" << type-StarAttribute::SDRATTR_SHADOWRESERVE1+1 << "]";
     addAttributeVoid(map, StarAttribute::Type(type), s.str());
   }
+  for (int type=StarAttribute::SDRATTR_RESERVE15; type<=StarAttribute::SDRATTR_RESERVE19; ++type) {
+    std::stringstream s;
+    s << "sdr[reserved" << type-StarAttribute::SDRATTR_RESERVE15+15 << "]";
+    addAttributeVoid(map, StarAttribute::Type(type), s.str());
+  }
+  for (int type=StarAttribute::SDRATTR_CIRCRESERVE0; type<=StarAttribute::SDRATTR_CIRCRESERVE3; ++type) {
+    std::stringstream s;
+    s << "circle[reserved" << type-StarAttribute::SDRATTR_CIRCRESERVE0 << "]";
+    addAttributeVoid(map, StarAttribute::Type(type), s.str());
+  }
+  for (int type=StarAttribute::SDRATTR_MEASURERESERVE05; type<=StarAttribute::SDRATTR_MEASURERESERVE07; ++type) {
+    std::stringstream s;
+    s << "measure[reserved" << type-StarAttribute::SDRATTR_MEASURERESERVE05+5 << "]";
+    addAttributeVoid(map, StarAttribute::Type(type), s.str());
+  }
 
   // to do
+  addAttributeUInt(map, StarAttribute::SDRATTR_MEASUREKIND, "measure[kind]",2,0); // standard
+  addAttributeUInt(map, StarAttribute::SDRATTR_MEASURETEXTHPOS, "measure[text,hpos]",2,0); // auto
+  addAttributeUInt(map, StarAttribute::SDRATTR_MEASURETEXTVPOS, "measure[text,vpos]",2,0); // auto
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASURELINEDIST, "measure[line,dist]",4, 800); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREHELPLINEOVERHANG, "measure[help,line,overhang]",4, 200); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREHELPLINEDIST, "measure[help,line,dist]",4, 100); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREHELPLINE1LEN, "measure[help,line1,len]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREHELPLINE2LEN, "measure[help,line2,len]",4, 0); // metric
+  addAttributeBool(map, StarAttribute::SDRATTR_MEASUREBELOWREFEDGE,"measure[belowRefEdge]", false); // yesNo
+  addAttributeBool(map, StarAttribute::SDRATTR_MEASURETEXTROTA90,"measure[textRot90]", false); // yesNo
+  addAttributeBool(map, StarAttribute::SDRATTR_MEASURETEXTUPSIDEDOWN,"measure[textUpsideDown]", false); // yesNo
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREOVERHANG, "measure[overHang]",4, 600); // metric
+  addAttributeUInt(map, StarAttribute::SDRATTR_MEASUREUNIT, "measure[unit]",2,0); // NONE
+  addAttributeBool(map, StarAttribute::SDRATTR_MEASURESHOWUNIT,"measure[showUnit]", false); // yesNo
+  addAttributeBool(map, StarAttribute::SDRATTR_MEASURETEXTAUTOANGLE,"measure[text,isAutoAngle]", true); // yesNo
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASURETEXTAUTOANGLEVIEW,"measure[text,autoAngle]", 4,31500); // angle
+  addAttributeBool(map, StarAttribute::SDRATTR_MEASURETEXTISFIXEDANGLE,"measure[text,isFixedAngle]", false); // yesNo
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASURETEXTFIXEDANGLE,"measure[text,fixedAngle]", 4,0); // angle
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREDECIMALPLACES,"measure[decimal,place]", 2,2);
   addAttributeBool(map, StarAttribute::XATTR_FILLBMP_SIZELOG,"fill[bmp,sizeLog]", true);
   map[StarAttribute::XATTR_FILLFLOATTRANSPARENCE]=shared_ptr<StarAttribute>
       (new StarGAttributeNamedGradient(StarAttribute::XATTR_FILLFLOATTRANSPARENCE,"gradient[trans,fill]"));

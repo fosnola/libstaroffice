@@ -329,20 +329,6 @@ void State::initAttributeMap()
   }
 
   addAttributeInt(StarAttribute::SDRATTR_ECKENRADIUS, "radius[ecken]",4, 0); // metric
-  addAttributeUInt(StarAttribute::SDRATTR_TEXT_ANIKIND, "text[ani,kind]",2,0); // none
-  addAttributeUInt(StarAttribute::SDRATTR_TEXT_ANIDIRECTION, "text[ani,direction]",2,0); // left
-  addAttributeBool(StarAttribute::SDRATTR_TEXT_ANISTARTINSIDE,"text[ani,startInside]", false); // yesNo
-  addAttributeBool(StarAttribute::SDRATTR_TEXT_ANISTOPINSIDE,"text[ani,stopInside]", false); // yesNo
-  addAttributeUInt(StarAttribute::SDRATTR_TEXT_ANICOUNT, "text[ani,count]",2,0);
-  addAttributeUInt(StarAttribute::SDRATTR_TEXT_ANIDELAY, "text[ani,delay]",2,0);
-  addAttributeInt(StarAttribute::SDRATTR_TEXT_ANIAMOUNT, "text[ani,amount]",2, 0);
-  addAttributeBool(StarAttribute::SDRATTR_TEXT_CONTOURFRAME,"text[contourFrame]", false); // onOff
-  addAttributeVoid(StarAttribute::SDRATTR_XMLATTRIBUTES,"sdr[xmlAttrib]");
-  for (int type=StarAttribute::SDRATTR_RESERVE15; type<=StarAttribute::SDRATTR_RESERVE19; ++type) {
-    s.str("");
-    s << "sdr[reserved" << type-StarAttribute::SDRATTR_RESERVE15+15 << "]";
-    addAttributeVoid(StarAttribute::Type(type), s.str());
-  }
 
   addAttributeUInt(StarAttribute::SDRATTR_EDGEKIND, "edge[kind]",2,0); // ortholine
   addAttributeInt(StarAttribute::SDRATTR_EDGENODE1HORZDIST, "edge[node1,hori,dist]",4, 500); // metric
@@ -361,39 +347,6 @@ void State::initAttributeMap()
     addAttributeVoid(StarAttribute::Type(type), s.str());
   }
 
-  addAttributeUInt(StarAttribute::SDRATTR_MEASUREKIND, "measure[kind]",2,0); // standard
-  addAttributeUInt(StarAttribute::SDRATTR_MEASURETEXTHPOS, "measure[text,hpos]",2,0); // auto
-  addAttributeUInt(StarAttribute::SDRATTR_MEASURETEXTVPOS, "measure[text,vpos]",2,0); // auto
-  addAttributeInt(StarAttribute::SDRATTR_MEASURELINEDIST, "measure[line,dist]",4, 800); // metric
-  addAttributeInt(StarAttribute::SDRATTR_MEASUREHELPLINEOVERHANG, "measure[help,line,overhang]",4, 200); // metric
-  addAttributeInt(StarAttribute::SDRATTR_MEASUREHELPLINEDIST, "measure[help,line,dist]",4, 100); // metric
-  addAttributeInt(StarAttribute::SDRATTR_MEASUREHELPLINE1LEN, "measure[help,line1,len]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_MEASUREHELPLINE2LEN, "measure[help,line2,len]",4, 0); // metric
-  addAttributeBool(StarAttribute::SDRATTR_MEASUREBELOWREFEDGE,"measure[belowRefEdge]", false); // yesNo
-  addAttributeBool(StarAttribute::SDRATTR_MEASURETEXTROTA90,"measure[textRot90]", false); // yesNo
-  addAttributeBool(StarAttribute::SDRATTR_MEASURETEXTUPSIDEDOWN,"measure[textUpsideDown]", false); // yesNo
-  addAttributeInt(StarAttribute::SDRATTR_MEASUREOVERHANG, "measure[overHang]",4, 600); // metric
-  addAttributeUInt(StarAttribute::SDRATTR_MEASUREUNIT, "measure[unit]",2,0); // NONE
-  addAttributeBool(StarAttribute::SDRATTR_MEASURESHOWUNIT,"measure[showUnit]", false); // yesNo
-  addAttributeBool(StarAttribute::SDRATTR_MEASURETEXTAUTOANGLE,"measure[text,isAutoAngle]", true); // yesNo
-  addAttributeInt(StarAttribute::SDRATTR_MEASURETEXTAUTOANGLEVIEW,"measure[text,autoAngle]", 4,31500); // angle
-  addAttributeBool(StarAttribute::SDRATTR_MEASURETEXTISFIXEDANGLE,"measure[text,isFixedAngle]", false); // yesNo
-  addAttributeInt(StarAttribute::SDRATTR_MEASURETEXTFIXEDANGLE,"measure[text,fixedAngle]", 4,0); // angle
-  addAttributeInt(StarAttribute::SDRATTR_MEASUREDECIMALPLACES,"measure[decimal,place]", 2,2);
-  for (int type=StarAttribute::SDRATTR_MEASURERESERVE05; type<=StarAttribute::SDRATTR_MEASURERESERVE07; ++type) {
-    s.str("");
-    s << "measure[reserved" << type-StarAttribute::SDRATTR_MEASURERESERVE05+5 << "]";
-    addAttributeVoid(StarAttribute::Type(type), s.str());
-  }
-
-  addAttributeUInt(StarAttribute::SDRATTR_CIRCKIND, "circle[kind]",2,0); // full
-  addAttributeInt(StarAttribute::SDRATTR_CIRCSTARTANGLE, "circle[angle,start]",4, 0); // sdrAngle
-  addAttributeInt(StarAttribute::SDRATTR_CIRCENDANGLE, "circle[angle,end]",4, 36000); // sdrAngle
-  for (int type=StarAttribute::SDRATTR_CIRCRESERVE0; type<=StarAttribute::SDRATTR_CIRCRESERVE3; ++type) {
-    s.str("");
-    s << "circle[reserved" << type-StarAttribute::SDRATTR_CIRCRESERVE0 << "]";
-    addAttributeVoid(StarAttribute::Type(type), s.str());
-  }
 
   addAttributeBool(StarAttribute::SDRATTR_OBJMOVEPROTECT,"obj[move,protect]", false); // yesNo
   addAttributeBool(StarAttribute::SDRATTR_OBJSIZEPROTECT,"obj[size,protect]", false); // yesNo
@@ -501,8 +454,6 @@ void State::initAttributeMap()
 
   std::vector<STOFFVec2i> limits;
   limits.resize(1);
-  limits[0]=STOFFVec2i(1067,1078);
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_SHADOW,"setShadow",limits);
   limits[0]=STOFFVec2i(1080,1094);
   addAttributeItemSet(StarAttribute::SDRATTR_SET_CAPTION,"setCaption",limits);
   limits[0]=STOFFVec2i(3989,4037);  // EE_ITEMS_START, EE_ITEMS_END
