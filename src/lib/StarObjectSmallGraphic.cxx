@@ -760,6 +760,29 @@ public:
     }
     return o;
   }
+  //! try to send the graphic to the listener
+  bool send(STOFFListenerPtr listener, StarObject &object)
+  {
+    if (!listener || m_captionPolygon.empty()) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicCaption::send: can not send a shape\n"));
+      return false;
+    }
+    // checkme never seen
+    STOFFGraphicShape shape;
+    shape.m_command=STOFFGraphicShape::C_Polyline;
+    StarGraphicStruct::StarPolygon polygon;
+    for (size_t p=0; p<m_captionPolygon.size(); ++p)
+      polygon.m_points.push_back(StarGraphicStruct::StarPolygon::Point(m_captionPolygon[p], 0));
+    librevenge::RVNGPropertyListVector path;
+    polygon.addToPath(path, false);
+    shape.m_propertyList.insert("svg:d", path);
+    updateTransformProperties(shape.m_propertyList);
+    shape.m_propertyList.insert("text:anchor-type", "page");
+    STOFFGraphicStyle style;
+    updateStyle(style, object, listener);
+    listener->insertShape(shape, style);
+    return true;
+  }
   //! a polygon
   std::vector<STOFFVec2i> m_captionPolygon;
   //! the caption attributes
@@ -931,14 +954,12 @@ public:
     }
     STOFFGraphicShape shape;
     shape.m_command=STOFFGraphicShape::C_Connector;
+    size_t numFlags=m_edgePolygonFlags.size();
+    StarGraphicStruct::StarPolygon polygon;
+    for (size_t p=0; p<m_edgePolygon.size(); ++p)
+      polygon.m_points.push_back(StarGraphicStruct::StarPolygon::Point(m_edgePolygon[p], p<numFlags ? m_edgePolygonFlags[p] : 0));
     librevenge::RVNGPropertyListVector path;
-    librevenge::RVNGPropertyList element;
-    for (size_t p=0; p<m_edgePolygon.size(); ++p) {
-      element.insert("svg:x",libstoff::convertMiniMToPoint(m_edgePolygon[p][0]), librevenge::RVNG_POINT);
-      element.insert("svg:y",libstoff::convertMiniMToPoint(m_edgePolygon[p][1]), librevenge::RVNG_POINT);
-      element.insert("librevenge:path-action", (p==0 ? "M" : "L"));
-      path.append(element);
-    }
+    polygon.addToPath(path, false);
     shape.m_propertyList.insert("svg:d", path);
     updateTransformProperties(shape.m_propertyList);
     shape.m_propertyList.insert("text:anchor-type", "page");
@@ -987,6 +1008,7 @@ public:
       return false;
     }
     if (!m_graphic || m_graphic->m_object.isEmpty()) {
+      // TODO: add link if file[name] exists
       static bool first=true;
       if (first) {
         first=false;
@@ -1081,6 +1103,7 @@ public:
     updateStyle(style, object, listener);
     librevenge::RVNGPropertyListVector vect;
     shape.m_command=STOFFGraphicShape::C_Polyline;
+    shape.m_propertyList.insert("draw:show-unit", true);
     librevenge::RVNGPropertyList list;
     for (int i=0; i<2; ++i) {
       list.insert("svg:x",libstoff::convertMiniMToPoint(m_measurePoints[i][0]), librevenge::RVNG_POINT);

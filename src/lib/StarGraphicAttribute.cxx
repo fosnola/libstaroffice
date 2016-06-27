@@ -231,6 +231,10 @@ void StarGAttributeBool::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
     graphic.m_protections[1]=m_value;
   else if (m_type==SDRATTR_OBJPRINTABLE)
     graphic.m_protections[2]=!m_value;
+  else if (m_type==SDRATTR_MEASUREBELOWREFEDGE)
+    graphic.m_propertyList.insert("draw:placing", m_value ? "below" : "above");
+  else if (m_type==SDRATTR_MEASURESHOWUNIT)
+    graphic.m_propertyList.insert("draw:show-unit", m_value);
   // TODO: XATTR_FILLBMP_SIZELOG
 }
 
@@ -262,6 +266,10 @@ void StarGAttributeInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*
     graphic.m_propertyList.insert("draw:start-angle", double(m_value)/100.,  librevenge::RVNG_GENERIC);
   else if (m_type==SDRATTR_CIRCENDANGLE)
     graphic.m_propertyList.insert("draw:end-angle", double(m_value)/100.,  librevenge::RVNG_GENERIC);
+  else if (m_type==SDRATTR_MEASURELINEDIST)
+    graphic.m_propertyList.insert("draw:line-distance", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+  else if (m_type==SDRATTR_MEASUREOVERHANG)
+    graphic.m_propertyList.insert("draw:guide-overhang", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
 }
 
 void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
@@ -1600,6 +1608,10 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeInt(map, StarAttribute::SDRATTR_CIRCSTARTANGLE, "circle[angle,start]",4, 0); // sdrAngle
   addAttributeInt(map, StarAttribute::SDRATTR_CIRCENDANGLE, "circle[angle,end]",4, 36000); // sdrAngle
 
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASURELINEDIST, "measure[line,dist]",4, 800); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREOVERHANG, "measure[overHang]",4, 600); // metric
+  addAttributeBool(map, StarAttribute::SDRATTR_MEASUREBELOWREFEDGE,"measure[belowRefEdge]", false); // yesNo
+  addAttributeBool(map, StarAttribute::SDRATTR_MEASURESHOWUNIT,"measure[showUnit]", false); // yesNo
   addAttributeBool(map, StarAttribute::SDRATTR_OBJMOVEPROTECT,"obj[move,protect]", false); // yesNo
   addAttributeBool(map, StarAttribute::SDRATTR_OBJSIZEPROTECT,"obj[size,protect]", false); // yesNo
   addAttributeBool(map, StarAttribute::SDRATTR_OBJPRINTABLE,"obj[printable]", false); // yesNo
@@ -1635,6 +1647,58 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   map[StarAttribute::XATTR_SET_TEXT]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::XATTR_SET_TEXT,"setText",limits));
   limits[0]=STOFFVec2i(1067,1078);
   map[StarAttribute::SDRATTR_SET_SHADOW]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_SHADOW,"setShadow",limits));
+  limits[0]=STOFFVec2i(1080,1094);
+  map[StarAttribute::SDRATTR_SET_CAPTION]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_CAPTION,"setCaption",limits));
+  limits[0]=STOFFVec2i(1097,1125);
+  map[StarAttribute::SDRATTR_SET_MISC]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_MISC,"setMisc",limits));
+  limits[0]=STOFFVec2i(1127,1145);
+  map[StarAttribute::SDRATTR_SET_EDGE]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_EDGE,"setEdge",limits));
+  limits[0]=STOFFVec2i(1147,1170);
+  map[StarAttribute::SDRATTR_SET_MEASURE]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_MEASURE,"setMeasure",limits));
+  limits[0]=STOFFVec2i(1172,1178);
+  map[StarAttribute::SDRATTR_SET_CIRC]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_CIRC,"setCircle",limits));
+  limits[0]=STOFFVec2i(1180,1242);
+  map[StarAttribute::SDRATTR_SET_GRAF]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_GRAF,"setGraf",limits));
+
+  // probably ok to ignore as we have the path
+  addAttributeUInt(map, StarAttribute::SDRATTR_EDGEKIND, "edge[kind]",2,0); // ortholine
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE1HORZDIST, "edge[node1,hori,dist]",4, 500); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE1VERTDIST, "edge[node1,vert,dist]",4, 500); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE2HORZDIST, "edge[node2,hori,dist]",4, 500); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE2VERTDIST, "edge[node2,vert,dist]",4, 500); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE1GLUEDIST, "edge[node1,glue,dist]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE2GLUEDIST, "edge[node2,glue,dist]",4, 0); // metric
+  addAttributeUInt(map, StarAttribute::SDRATTR_EDGELINEDELTAANZ, "edge[line,deltaAnz]",2,0);
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGELINE1DELTA, "edge[delta,line1]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGELINE2DELTA, "edge[delta,line2]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGELINE3DELTA, "edge[delta,line3]",4, 0); // metric
+  // can we retrieve these properties ?
+  addAttributeUInt(map, StarAttribute::SDRATTR_MEASUREKIND, "measure[kind]",2,0); // standard
+  addAttributeUInt(map, StarAttribute::SDRATTR_MEASURETEXTHPOS, "measure[text,hpos]",2,0); // auto
+  addAttributeUInt(map, StarAttribute::SDRATTR_MEASURETEXTVPOS, "measure[text,vpos]",2,0); // auto
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREHELPLINEOVERHANG, "measure[help,line,overhang]",4, 200); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREHELPLINEDIST, "measure[help,line,dist]",4, 100); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREHELPLINE1LEN, "measure[help,line1,len]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREHELPLINE2LEN, "measure[help,line2,len]",4, 0); // metric
+  addAttributeBool(map, StarAttribute::SDRATTR_MEASURETEXTROTA90,"measure[textRot90]", false); // yesNo
+  addAttributeBool(map, StarAttribute::SDRATTR_MEASURETEXTUPSIDEDOWN,"measure[textUpsideDown]", false); // yesNo
+  addAttributeUInt(map, StarAttribute::SDRATTR_MEASUREUNIT, "measure[unit]",2,0); // NONE
+  addAttributeBool(map, StarAttribute::SDRATTR_MEASURETEXTAUTOANGLE,"measure[text,isAutoAngle]", true); // yesNo
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASURETEXTAUTOANGLEVIEW,"measure[text,autoAngle]", 4,31500); // angle
+  addAttributeBool(map, StarAttribute::SDRATTR_MEASURETEXTISFIXEDANGLE,"measure[text,isFixedAngle]", false); // yesNo
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASURETEXTFIXEDANGLE,"measure[text,fixedAngle]", 4,0); // angle
+  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREDECIMALPLACES,"measure[decimal,place]", 2,2);
+  // can we retrieve these properties ?
+  addAttributeUInt(map, StarAttribute::SDRATTR_CAPTIONTYPE, "caption[type]",2,2); // type3
+  addAttributeBool(map, StarAttribute::SDRATTR_CAPTIONFIXEDANGLE,"caption[fixedAngle]", true); // onOff
+  addAttributeInt(map, StarAttribute::SDRATTR_CAPTIONANGLE, "caption[angle]",4, 0); // angle
+  addAttributeInt(map, StarAttribute::SDRATTR_CAPTIONGAP, "caption[gap]",4, 0); // metric
+  addAttributeUInt(map, StarAttribute::SDRATTR_CAPTIONESCDIR, "caption[esc,dir]",2,0); // horizontal
+  addAttributeBool(map, StarAttribute::SDRATTR_CAPTIONESCISREL,"caption[esc,isRel]", true); // yesNo
+  addAttributeInt(map, StarAttribute::SDRATTR_CAPTIONESCREL, "caption[esc,rel]",4, 5000);
+  addAttributeInt(map, StarAttribute::SDRATTR_CAPTIONESCABS, "caption[esc,abs]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_CAPTIONLINELEN, "caption[line,len]",4, 0); // metric
+  addAttributeBool(map, StarAttribute::SDRATTR_CAPTIONFITLINELEN,"caption[fit,lineLen]", true); // yesNo
 
   for (int type=StarAttribute::XATTR_LINERESERVED2; type<=StarAttribute::XATTR_LINERESERVED_LAST; ++type) {
     std::stringstream s;
@@ -1671,39 +1735,13 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
     s << "measure[reserved" << type-StarAttribute::SDRATTR_MEASURERESERVE05+5 << "]";
     addAttributeVoid(map, StarAttribute::Type(type), s.str());
   }
+  for (int type=StarAttribute::SDRATTR_CAPTIONRESERVE1; type<=StarAttribute::SDRATTR_CAPTIONRESERVE5; ++type) {
+    std::stringstream s;
+    s << "caption[reserved" << type-StarAttribute::SDRATTR_CAPTIONRESERVE1+1 << "]";
+    addAttributeVoid(map, StarAttribute::Type(type), s.str());
+  }
 
   // to do
-  addAttributeUInt(map, StarAttribute::SDRATTR_EDGEKIND, "edge[kind]",2,0); // ortholine
-  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE1HORZDIST, "edge[node1,hori,dist]",4, 500); // metric
-  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE1VERTDIST, "edge[node1,vert,dist]",4, 500); // metric
-  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE2HORZDIST, "edge[node2,hori,dist]",4, 500); // metric
-  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE2VERTDIST, "edge[node2,vert,dist]",4, 500); // metric
-  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE1GLUEDIST, "edge[node1,glue,dist]",4, 0); // metric
-  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE2GLUEDIST, "edge[node2,glue,dist]",4, 0); // metric
-  addAttributeUInt(map, StarAttribute::SDRATTR_EDGELINEDELTAANZ, "edge[line,deltaAnz]",2,0);
-  addAttributeInt(map, StarAttribute::SDRATTR_EDGELINE1DELTA, "edge[delta,line1]",4, 0); // metric
-  addAttributeInt(map, StarAttribute::SDRATTR_EDGELINE2DELTA, "edge[delta,line2]",4, 0); // metric
-  addAttributeInt(map, StarAttribute::SDRATTR_EDGELINE3DELTA, "edge[delta,line3]",4, 0); // metric
-
-  addAttributeUInt(map, StarAttribute::SDRATTR_MEASUREKIND, "measure[kind]",2,0); // standard
-  addAttributeUInt(map, StarAttribute::SDRATTR_MEASURETEXTHPOS, "measure[text,hpos]",2,0); // auto
-  addAttributeUInt(map, StarAttribute::SDRATTR_MEASURETEXTVPOS, "measure[text,vpos]",2,0); // auto
-  addAttributeInt(map, StarAttribute::SDRATTR_MEASURELINEDIST, "measure[line,dist]",4, 800); // metric
-  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREHELPLINEOVERHANG, "measure[help,line,overhang]",4, 200); // metric
-  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREHELPLINEDIST, "measure[help,line,dist]",4, 100); // metric
-  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREHELPLINE1LEN, "measure[help,line1,len]",4, 0); // metric
-  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREHELPLINE2LEN, "measure[help,line2,len]",4, 0); // metric
-  addAttributeBool(map, StarAttribute::SDRATTR_MEASUREBELOWREFEDGE,"measure[belowRefEdge]", false); // yesNo
-  addAttributeBool(map, StarAttribute::SDRATTR_MEASURETEXTROTA90,"measure[textRot90]", false); // yesNo
-  addAttributeBool(map, StarAttribute::SDRATTR_MEASURETEXTUPSIDEDOWN,"measure[textUpsideDown]", false); // yesNo
-  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREOVERHANG, "measure[overHang]",4, 600); // metric
-  addAttributeUInt(map, StarAttribute::SDRATTR_MEASUREUNIT, "measure[unit]",2,0); // NONE
-  addAttributeBool(map, StarAttribute::SDRATTR_MEASURESHOWUNIT,"measure[showUnit]", false); // yesNo
-  addAttributeBool(map, StarAttribute::SDRATTR_MEASURETEXTAUTOANGLE,"measure[text,isAutoAngle]", true); // yesNo
-  addAttributeInt(map, StarAttribute::SDRATTR_MEASURETEXTAUTOANGLEVIEW,"measure[text,autoAngle]", 4,31500); // angle
-  addAttributeBool(map, StarAttribute::SDRATTR_MEASURETEXTISFIXEDANGLE,"measure[text,isFixedAngle]", false); // yesNo
-  addAttributeInt(map, StarAttribute::SDRATTR_MEASURETEXTFIXEDANGLE,"measure[text,fixedAngle]", 4,0); // angle
-  addAttributeInt(map, StarAttribute::SDRATTR_MEASUREDECIMALPLACES,"measure[decimal,place]", 2,2);
   addAttributeBool(map, StarAttribute::XATTR_FILLBMP_SIZELOG,"fill[bmp,sizeLog]", true);
 
   map[StarAttribute::XATTR_FILLFLOATTRANSPARENCE]=shared_ptr<StarAttribute>

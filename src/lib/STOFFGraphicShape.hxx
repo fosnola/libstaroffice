@@ -46,7 +46,7 @@ class STOFFGraphicShape
 {
 public:
   //! an enum used to define the interface command
-  enum Command { C_Connector, C_Ellipse, C_Polyline, C_Rectangle, C_Path, C_Polygon, C_Unknown };
+  enum Command { C_Connector, C_Ellipse, C_Path, C_Polygon, C_Polyline, C_Rectangle, C_Unknown };
   //! constructor
   STOFFGraphicShape() : m_command(C_Unknown), m_bdbox(), m_propertyList(), m_extra("")
   {

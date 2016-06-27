@@ -312,22 +312,6 @@ void State::initAttributeMap()
 
   // ---- sdr ---- svx_svdattr.cxx
 
-  addAttributeUInt(StarAttribute::SDRATTR_CAPTIONTYPE, "caption[type]",2,2); // type3
-  addAttributeBool(StarAttribute::SDRATTR_CAPTIONFIXEDANGLE,"caption[fixedAngle]", true); // onOff
-  addAttributeInt(StarAttribute::SDRATTR_CAPTIONANGLE, "caption[angle]",4, 0); // angle
-  addAttributeInt(StarAttribute::SDRATTR_CAPTIONGAP, "caption[gap]",4, 0); // metric
-  addAttributeUInt(StarAttribute::SDRATTR_CAPTIONESCDIR, "caption[esc,dir]",2,0); // horizontal
-  addAttributeBool(StarAttribute::SDRATTR_CAPTIONESCISREL,"caption[esc,isRel]", true); // yesNo
-  addAttributeInt(StarAttribute::SDRATTR_CAPTIONESCREL, "caption[esc,rel]",4, 5000);
-  addAttributeInt(StarAttribute::SDRATTR_CAPTIONESCABS, "caption[esc,abs]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_CAPTIONLINELEN, "caption[line,len]",4, 0); // metric
-  addAttributeBool(StarAttribute::SDRATTR_CAPTIONFITLINELEN,"caption[fit,lineLen]", true); // yesNo
-  for (int type=StarAttribute::SDRATTR_CAPTIONRESERVE1; type<=StarAttribute::SDRATTR_CAPTIONRESERVE5; ++type) {
-    s.str("");
-    s << "caption[reserved" << type-StarAttribute::SDRATTR_CAPTIONRESERVE1+1 << "]";
-    addAttributeVoid(StarAttribute::Type(type), s.str());
-  }
-
   addAttributeInt(StarAttribute::SDRATTR_ECKENRADIUS, "radius[ecken]",4, 0); // metric
 
   addAttributeUInt(StarAttribute::SDRATTR_LAYERID, "layer[id]",2,0);
@@ -432,20 +416,8 @@ void State::initAttributeMap()
 
   std::vector<STOFFVec2i> limits;
   limits.resize(1);
-  limits[0]=STOFFVec2i(1080,1094);
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_CAPTION,"setCaption",limits);
   limits[0]=STOFFVec2i(3989,4037);  // EE_ITEMS_START, EE_ITEMS_END
   addAttributeItemSet(StarAttribute::SDRATTR_SET_OUTLINER,"setOutliner",limits);
-  limits[0]=STOFFVec2i(1097,1125);
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_MISC,"setMisc",limits);
-  limits[0]=STOFFVec2i(1127,1145);
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_EDGE,"setEdge",limits);
-  limits[0]=STOFFVec2i(1147,1170);
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_MEASURE,"setMeasure",limits);
-  limits[0]=STOFFVec2i(1172,1178);
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_CIRC,"setCircle",limits);
-  limits[0]=STOFFVec2i(1180,1242);
-  addAttributeItemSet(StarAttribute::SDRATTR_SET_GRAF,"setGraf",limits);
 }
 
 }

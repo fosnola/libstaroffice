@@ -88,12 +88,6 @@ std::ostream &operator<<(std::ostream &o, STOFFGraphicShape const &sh)
   case STOFFGraphicShape::C_Ellipse:
     o << "ellipse,";
     break;
-  case STOFFGraphicShape::C_Polyline:
-    o << "polyline,";
-    break;
-  case STOFFGraphicShape::C_Rectangle:
-    o << "rect,";
-    break;
   case STOFFGraphicShape::C_Path:
     o << "path,";
     break;
@@ -101,6 +95,12 @@ std::ostream &operator<<(std::ostream &o, STOFFGraphicShape const &sh)
     o << "polygons,";
     break;
   default:
+  case STOFFGraphicShape::C_Polyline:
+    o << "polyline,";
+    break;
+  case STOFFGraphicShape::C_Rectangle:
+    o << "rect,";
+    break;
   case STOFFGraphicShape::C_Unknown:
     o << "undef,";
     break;

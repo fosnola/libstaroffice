@@ -1059,29 +1059,24 @@ void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFF
   shape.addTo(shapeProp);
   style.addTo(styleProp);
 
+  m_documentInterface->defineGraphicStyle(styleProp);
   switch (shape.m_command) {
   case STOFFGraphicShape::C_Connector:
-    m_documentInterface->defineGraphicStyle(styleProp);
     m_documentInterface->drawConnector(shapeProp);
     break;
   case STOFFGraphicShape::C_Ellipse:
-    m_documentInterface->defineGraphicStyle(styleProp);
     m_documentInterface->drawEllipse(shapeProp);
     break;
   case STOFFGraphicShape::C_Path:
-    m_documentInterface->defineGraphicStyle(styleProp);
     m_documentInterface->drawPath(shapeProp);
     break;
   case STOFFGraphicShape::C_Polyline:
-    m_documentInterface->defineGraphicStyle(styleProp);
     m_documentInterface->drawPolyline(shapeProp);
     break;
   case STOFFGraphicShape::C_Polygon:
-    m_documentInterface->defineGraphicStyle(styleProp);
     m_documentInterface->drawPolygon(shapeProp);
     break;
   case STOFFGraphicShape::C_Rectangle:
-    m_documentInterface->defineGraphicStyle(styleProp);
     m_documentInterface->drawRectangle(shapeProp);
     break;
   case STOFFGraphicShape::C_Unknown:
