@@ -62,6 +62,8 @@ public:
   librevenge::RVNGPropertyList m_propertyList;
   //! true if background attribute is set
   bool m_hasBackground;
+  //! the proctection: move, size, printable
+  bool m_protections[3];
 };
 
 

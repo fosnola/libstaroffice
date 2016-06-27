@@ -1014,6 +1014,9 @@ void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGrap
   style.addTo(styleProp);
   m_documentInterface->setStyle(styleProp);
   switch (shape.m_command) {
+  case STOFFGraphicShape::C_Connector:
+    m_documentInterface->drawConnector(shapeProp);
+    break;
   case STOFFGraphicShape::C_Ellipse:
     m_documentInterface->drawEllipse(shapeProp);
     break;

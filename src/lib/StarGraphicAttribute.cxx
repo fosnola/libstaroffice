@@ -225,6 +225,12 @@ void StarGAttributeBool::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
     graphic.m_propertyList.insert("text:animation-stop-inside", m_value);
   else if (m_type==SDRATTR_TEXT_CONTOURFRAME) // checkme
     graphic.m_propertyList.insert("style:wrap-contour", m_value);
+  else if (m_type==SDRATTR_OBJMOVEPROTECT)
+    graphic.m_protections[0]=m_value;
+  else if (m_type==SDRATTR_OBJSIZEPROTECT)
+    graphic.m_protections[1]=m_value;
+  else if (m_type==SDRATTR_OBJPRINTABLE)
+    graphic.m_protections[2]=!m_value;
   // TODO: XATTR_FILLBMP_SIZELOG
 }
 
@@ -1594,6 +1600,10 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeInt(map, StarAttribute::SDRATTR_CIRCSTARTANGLE, "circle[angle,start]",4, 0); // sdrAngle
   addAttributeInt(map, StarAttribute::SDRATTR_CIRCENDANGLE, "circle[angle,end]",4, 36000); // sdrAngle
 
+  addAttributeBool(map, StarAttribute::SDRATTR_OBJMOVEPROTECT,"obj[move,protect]", false); // yesNo
+  addAttributeBool(map, StarAttribute::SDRATTR_OBJSIZEPROTECT,"obj[size,protect]", false); // yesNo
+  addAttributeBool(map, StarAttribute::SDRATTR_OBJPRINTABLE,"obj[printable]", false); // yesNo
+
 
   map[StarAttribute::XATTR_LINECOLOR]=shared_ptr<StarAttribute>
                                       (new StarGAttributeNamedColor(StarAttribute::XATTR_LINECOLOR,"line[color]",STOFFColor::black()));
@@ -1651,6 +1661,11 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
     s << "circle[reserved" << type-StarAttribute::SDRATTR_CIRCRESERVE0 << "]";
     addAttributeVoid(map, StarAttribute::Type(type), s.str());
   }
+  for (int type=StarAttribute::SDRATTR_EDGERESERVE02; type<=StarAttribute::SDRATTR_EDGERESERVE09; ++type) {
+    std::stringstream s;
+    s << "edge[reserved" << type-StarAttribute::SDRATTR_EDGERESERVE02+2 << "]";
+    addAttributeVoid(map, StarAttribute::Type(type), s.str());
+  }
   for (int type=StarAttribute::SDRATTR_MEASURERESERVE05; type<=StarAttribute::SDRATTR_MEASURERESERVE07; ++type) {
     std::stringstream s;
     s << "measure[reserved" << type-StarAttribute::SDRATTR_MEASURERESERVE05+5 << "]";
@@ -1658,6 +1673,18 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   }
 
   // to do
+  addAttributeUInt(map, StarAttribute::SDRATTR_EDGEKIND, "edge[kind]",2,0); // ortholine
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE1HORZDIST, "edge[node1,hori,dist]",4, 500); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE1VERTDIST, "edge[node1,vert,dist]",4, 500); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE2HORZDIST, "edge[node2,hori,dist]",4, 500); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE2VERTDIST, "edge[node2,vert,dist]",4, 500); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE1GLUEDIST, "edge[node1,glue,dist]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGENODE2GLUEDIST, "edge[node2,glue,dist]",4, 0); // metric
+  addAttributeUInt(map, StarAttribute::SDRATTR_EDGELINEDELTAANZ, "edge[line,deltaAnz]",2,0);
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGELINE1DELTA, "edge[delta,line1]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGELINE2DELTA, "edge[delta,line2]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_EDGELINE3DELTA, "edge[delta,line3]",4, 0); // metric
+
   addAttributeUInt(map, StarAttribute::SDRATTR_MEASUREKIND, "measure[kind]",2,0); // standard
   addAttributeUInt(map, StarAttribute::SDRATTR_MEASURETEXTHPOS, "measure[text,hpos]",2,0); // auto
   addAttributeUInt(map, StarAttribute::SDRATTR_MEASURETEXTVPOS, "measure[text,vpos]",2,0); // auto
@@ -1678,6 +1705,7 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeInt(map, StarAttribute::SDRATTR_MEASURETEXTFIXEDANGLE,"measure[text,fixedAngle]", 4,0); // angle
   addAttributeInt(map, StarAttribute::SDRATTR_MEASUREDECIMALPLACES,"measure[decimal,place]", 2,2);
   addAttributeBool(map, StarAttribute::XATTR_FILLBMP_SIZELOG,"fill[bmp,sizeLog]", true);
+
   map[StarAttribute::XATTR_FILLFLOATTRANSPARENCE]=shared_ptr<StarAttribute>
       (new StarGAttributeNamedGradient(StarAttribute::XATTR_FILLFLOATTRANSPARENCE,"gradient[trans,fill]"));
 

@@ -922,6 +922,31 @@ public:
     }
     return o;
   }
+  //! try to send the graphic to the listener
+  bool send(STOFFListenerPtr listener, StarObject &object)
+  {
+    if (!listener || m_edgePolygon.empty()) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicEdge::send: can not send a shape\n"));
+      return false;
+    }
+    STOFFGraphicShape shape;
+    shape.m_command=STOFFGraphicShape::C_Connector;
+    librevenge::RVNGPropertyListVector path;
+    librevenge::RVNGPropertyList element;
+    for (size_t p=0; p<m_edgePolygon.size(); ++p) {
+      element.insert("svg:x",libstoff::convertMiniMToPoint(m_edgePolygon[p][0]), librevenge::RVNG_POINT);
+      element.insert("svg:y",libstoff::convertMiniMToPoint(m_edgePolygon[p][1]), librevenge::RVNG_POINT);
+      element.insert("librevenge:path-action", (p==0 ? "M" : "L"));
+      path.append(element);
+    }
+    shape.m_propertyList.insert("svg:d", path);
+    updateTransformProperties(shape.m_propertyList);
+    shape.m_propertyList.insert("text:anchor-type", "page");
+    STOFFGraphicStyle style;
+    updateStyle(style, object, listener);
+    listener->insertShape(shape, style);
+    return true;
+  }
   //! the edge polygon
   std::vector<STOFFVec2i> m_edgePolygon;
   //! the edge polygon flags
@@ -1340,7 +1365,6 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object)
   else {
     shape.m_command=STOFFGraphicShape::C_Path;
     librevenge::RVNGPropertyListVector path;
-    librevenge::RVNGPropertyList element;
     for (size_t p=0; p<m_pathPolygons.size(); ++p)
       m_pathPolygons[p].addToPath(path, isClosed);
     shape.m_propertyList.insert("svg:d", path);

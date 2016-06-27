@@ -82,6 +82,9 @@ std::ostream &operator<<(std::ostream &o, STOFFGraphicShape const &sh)
 {
   o << "box=" << sh.m_bdbox << ",";
   switch (sh.m_command) {
+  case STOFFGraphicShape::C_Connector:
+    o << "connector,";
+    break;
   case STOFFGraphicShape::C_Ellipse:
     o << "ellipse,";
     break;

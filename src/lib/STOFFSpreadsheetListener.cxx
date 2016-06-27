@@ -1060,6 +1060,10 @@ void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFF
   style.addTo(styleProp);
 
   switch (shape.m_command) {
+  case STOFFGraphicShape::C_Connector:
+    m_documentInterface->defineGraphicStyle(styleProp);
+    m_documentInterface->drawConnector(shapeProp);
+    break;
   case STOFFGraphicShape::C_Ellipse:
     m_documentInterface->defineGraphicStyle(styleProp);
     m_documentInterface->drawEllipse(shapeProp);

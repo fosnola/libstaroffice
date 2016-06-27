@@ -46,6 +46,7 @@
 
 STOFFGraphicStyle::STOFFGraphicStyle() : m_propertyList(), m_hasBackground(false)
 {
+  for (int i=0; i<3; ++i) m_protections[i]=false;
 }
 
 std::ostream &operator<<(std::ostream &o, STOFFGraphicStyle const &graphicStyle)
