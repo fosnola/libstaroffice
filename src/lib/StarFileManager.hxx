@@ -82,7 +82,7 @@ public:
   // other
 
   //! try to read a "Ole-Object" zone
-  static bool readOleObject(STOFFInputStreamPtr input, std::string const &fileName);
+  static bool readOleObject(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName);
   //! try to read the "OutPlace Object"
   static bool readOutPlaceObject(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
 

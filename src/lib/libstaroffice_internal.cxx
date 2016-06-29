@@ -373,6 +373,17 @@ bool STOFFEmbeddedObject::addTo(librevenge::RVNGPropertyList &propList) const
     auxiList.insert("office:binary-data", m_dataList[i]);
     auxiliarVector.append(auxiList);
   }
+  if (!m_filenameLink.empty()) {
+    if (!firstSet) {
+      propList.insert("librevenge:xlink", m_filenameLink);
+      firstSet=true;
+    }
+    else {
+      librevenge::RVNGPropertyList auxiList;
+      auxiList.insert("librevenge:xlink", m_filenameLink);
+      auxiliarVector.append(auxiList);
+    }
+  }
   if (!auxiliarVector.empty())
     propList.insert("librevenge:replacement-objects", auxiliarVector);
   if (!firstSet) {

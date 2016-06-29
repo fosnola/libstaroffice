@@ -99,6 +99,57 @@ protected:
 StarGAttributeColor::~StarGAttributeColor()
 {
 }
+
+//! an integer attribute
+class StarGAttributeFraction : public StarAttribute
+{
+public:
+  //! constructor
+  StarGAttributeFraction(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_numerator(0), m_denominator(1)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarGAttributeFraction(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! debug function to print the data
+  virtual void printData(libstoff::DebugStream &o) const
+  {
+    o << m_debugName;
+    if (m_numerator) o << "=" << m_numerator << "/" << m_denominator;
+    o << ",";
+  }
+
+protected:
+  //! copy constructor
+  StarGAttributeFraction(StarGAttributeFraction const &orig) : StarAttribute(orig), m_numerator(orig.m_numerator), m_denominator(orig.m_denominator)
+  {
+  }
+  // numerator
+  int m_numerator;
+  // denominator
+  int m_denominator;
+};
+
+bool StarGAttributeFraction::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName;
+  m_numerator=int(input->readLong(4));
+  m_denominator=int(input->readLong(4));
+
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return pos+8<=endPos;
+}
+
 //! a character integer attribute
 class StarGAttributeInt : public StarAttributeInt
 {
@@ -235,6 +286,8 @@ void StarGAttributeBool::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
     graphic.m_propertyList.insert("draw:placing", m_value ? "below" : "above");
   else if (m_type==SDRATTR_MEASURESHOWUNIT)
     graphic.m_propertyList.insert("draw:show-unit", m_value);
+  else if (m_type==SDRATTR_GRAFINVERT)
+    graphic.m_propertyList.insert("draw:color-inversion", m_value);
   // TODO: XATTR_FILLBMP_SIZELOG
 }
 
@@ -270,6 +323,18 @@ void StarGAttributeInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*
     graphic.m_propertyList.insert("draw:line-distance", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_MEASUREOVERHANG)
     graphic.m_propertyList.insert("draw:guide-overhang", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+  else if (m_type==SDRATTR_GRAFRED)
+    graphic.m_propertyList.insert("draw:red", double(m_value)/100., librevenge::RVNG_PERCENT);
+  else if (m_type==SDRATTR_GRAFGREEN)
+    graphic.m_propertyList.insert("draw:green", double(m_value)/100., librevenge::RVNG_PERCENT);
+  else if (m_type==SDRATTR_GRAFBLUE)
+    graphic.m_propertyList.insert("draw:blue", double(m_value)/100., librevenge::RVNG_PERCENT);
+  else if (m_type==SDRATTR_GRAFLUMINANCE)
+    graphic.m_propertyList.insert("draw:luminance", double(m_value)/100., librevenge::RVNG_PERCENT);
+  else if (m_type==SDRATTR_GRAFCONTRAST)
+    graphic.m_propertyList.insert("draw:contrast", double(m_value)/100., librevenge::RVNG_PERCENT);
+  else if (m_type==SDRATTR_ECKENRADIUS)
+    graphic.m_propertyList.insert("draw:corner-radius", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
 }
 
 void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
@@ -390,6 +455,19 @@ void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown circle kind %d\n", int(m_value)));
     }
   }
+  else if (m_type==SDRATTR_GRAFGAMMA)
+    graphic.m_propertyList.insert("draw:gamma", double(m_value)/100., librevenge::RVNG_PERCENT);
+  else if (m_type==SDRATTR_GRAFTRANSPARENCE)
+    graphic.m_propertyList.insert("draw:opacity", 1.0-double(m_value)/100., librevenge::RVNG_PERCENT);
+  else if (m_type==SDRATTR_GRAFMODE) {
+    if (m_value<4) {
+      char const *(wh[])= {"standard", "greyscale", "mono", "watermark"};
+      graphic.m_propertyList.insert("draw:color-mode", wh[m_value]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown graf color mode %d\n", int(m_value)));
+    }
+  }
 }
 
 void StarGAttributeVoid::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
@@ -408,6 +486,11 @@ inline void addAttributeBool(std::map<int, shared_ptr<StarAttribute> > &map, Sta
 inline void addAttributeColor(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, STOFFColor const &defValue)
 {
   map[type]=shared_ptr<StarAttribute>(new StarGAttributeColor(type,debugName, defValue));
+}
+//! add a fraction attribute
+inline void addAttributeFraction(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
+{
+  map[type]=shared_ptr<StarAttribute>(new StarGAttributeFraction(type,debugName));
 }
 //! add a int attribute
 inline void addAttributeInt(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
@@ -571,6 +654,40 @@ protected:
   }
   //! the brush
   StarGraphicStruct::StarBrush m_brush;
+};
+
+//! a crop attribute
+class StarGAttributeCrop : public StarAttribute
+{
+public:
+  //! constructor
+  StarGAttributeCrop(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_leftTop(0,0), m_rightBottom(0,0)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarGAttributeCrop(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a graphic style
+  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! debug function to print the data
+  virtual void printData(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[" << m_leftTop << "<->" << m_rightBottom << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarGAttributeCrop(StarGAttributeCrop const &orig) : StarAttribute(orig), m_leftTop(orig.m_leftTop), m_rightBottom(orig.m_rightBottom)
+  {
+  }
+  //! the cropping left/top
+  STOFFVec2i m_leftTop;
+  //! the cropping right/bottom
+  STOFFVec2i m_rightBottom;
 };
 
 //! a named attribute
@@ -1050,6 +1167,20 @@ void StarGAttributeBrush::addTo(STOFFGraphicStyle &graphic, StarItemPool const *
     graphic.m_propertyList.insert("draw:fill", "none");
 }
 
+void StarGAttributeCrop::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+{
+  if (m_type==SDRATTR_GRAFCROP) {
+    if (m_leftTop==STOFFVec2i(0,0) && m_rightBottom==STOFFVec2i(0,0))
+      graphic.m_propertyList.insert("fo:clip", "auto");
+    else {
+      librevenge::RVNGString clip;
+      clip.sprintf("rect(%fpt,%ftt,%fpt,%fpt)", libstoff::convertMiniMToPoint(m_leftTop[1]), libstoff::convertMiniMToPoint(m_rightBottom[0]),
+                   libstoff::convertMiniMToPoint(m_rightBottom[1]), libstoff::convertMiniMToPoint(m_leftTop[0]));
+      graphic.m_propertyList.insert("fo:clip", clip);
+    }
+  }
+}
+
 void StarGAttributeNamedArrow::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==XATTR_LINESTART || m_type==XATTR_LINEEND) {
@@ -1265,6 +1396,25 @@ bool StarGAttributeBrush::read(StarZone &zone, int nVers, long endPos, StarObjec
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return ok && input->tell()<=endPos;
+}
+
+bool StarGAttributeCrop::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName;
+  if (vers!=0) {
+    int dim[4]; // TLRB
+    for (int i=0; i<4; ++i) dim[i]=int(input->readLong(4));
+    m_leftTop=STOFFVec2i(dim[1],dim[0]);
+    m_rightBottom=STOFFVec2i(dim[2],dim[3]);
+  }
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return pos+8<=endPos;
 }
 
 bool StarGAttributeNamed::read(StarZone &zone, int /*nVers*/, long endPos, StarObject &/*object*/)
@@ -1576,6 +1726,7 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeBool(map, StarAttribute::XATTR_FILLBACKGROUND,"fill[background]", false);
   addAttributeUInt(map, StarAttribute::XATTR_GRADIENTSTEPCOUNT,"gradient[stepCount]",2,0);
 
+  addAttributeInt(map, StarAttribute::SDRATTR_ECKENRADIUS, "radius[ecken]",4, 0); // metric
   addAttributeBool(map, StarAttribute::SDRATTR_SHADOW,"shadow", false); // onOff
   addAttributeInt(map, StarAttribute::SDRATTR_SHADOWXDIST, "shadow[xDist]",4, 0); // metric
   addAttributeInt(map, StarAttribute::SDRATTR_SHADOWYDIST, "shadow[yDist]",4, 0); // metric
@@ -1616,6 +1767,15 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeBool(map, StarAttribute::SDRATTR_OBJSIZEPROTECT,"obj[size,protect]", false); // yesNo
   addAttributeBool(map, StarAttribute::SDRATTR_OBJPRINTABLE,"obj[printable]", false); // yesNo
 
+  addAttributeInt(map, StarAttribute::SDRATTR_GRAFRED, "graf[red]",2, 0); // signed percent
+  addAttributeInt(map, StarAttribute::SDRATTR_GRAFGREEN, "graf[green]",2, 0); // signed percent
+  addAttributeInt(map, StarAttribute::SDRATTR_GRAFBLUE, "graf[blue]",2, 0); // signed percent
+  addAttributeInt(map, StarAttribute::SDRATTR_GRAFLUMINANCE, "graf[luminance]",2, 0); // signed percent
+  addAttributeInt(map, StarAttribute::SDRATTR_GRAFCONTRAST, "graf[contrast]",2, 0); // signed percent
+  addAttributeUInt(map, StarAttribute::SDRATTR_GRAFGAMMA, "graf[gamma]",4,100);
+  addAttributeUInt(map, StarAttribute::SDRATTR_GRAFTRANSPARENCE, "graf[transparence]",2,0);
+  addAttributeBool(map, StarAttribute::SDRATTR_GRAFINVERT,"graf[invert]", false); // onOff
+  addAttributeUInt(map, StarAttribute::SDRATTR_GRAFMODE, "graf[mode]",2,0);  // standard
 
   map[StarAttribute::XATTR_LINECOLOR]=shared_ptr<StarAttribute>
                                       (new StarGAttributeNamedColor(StarAttribute::XATTR_LINECOLOR,"line[color]",STOFFColor::black()));
@@ -1637,6 +1797,9 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
       (new StarGAttributeNamedColor(StarAttribute::XATTR_FORMTXTSHDWCOLOR,"shadow[form,color]",STOFFColor::black()));
   map[StarAttribute::SDRATTR_SHADOWCOLOR]=shared_ptr<StarAttribute>
                                           (new StarGAttributeNamedColor(StarAttribute::SDRATTR_SHADOWCOLOR,"sdrShadow[color]",STOFFColor::black()));
+  map[StarAttribute::SDRATTR_GRAFCROP]=shared_ptr<StarAttribute>
+                                       (new StarGAttributeCrop(StarAttribute::SDRATTR_GRAFCROP, "graf[crop],"));
+
   std::vector<STOFFVec2i> limits;
   limits.resize(1);
   limits[0]=STOFFVec2i(1000,1016);
@@ -1688,6 +1851,7 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeBool(map, StarAttribute::SDRATTR_MEASURETEXTISFIXEDANGLE,"measure[text,isFixedAngle]", false); // yesNo
   addAttributeInt(map, StarAttribute::SDRATTR_MEASURETEXTFIXEDANGLE,"measure[text,fixedAngle]", 4,0); // angle
   addAttributeInt(map, StarAttribute::SDRATTR_MEASUREDECIMALPLACES,"measure[decimal,place]", 2,2);
+  addAttributeFraction(map, StarAttribute::SDRATTR_MEASURESCALE, "measure[scale,mult]");
   // can we retrieve these properties ?
   addAttributeUInt(map, StarAttribute::SDRATTR_CAPTIONTYPE, "caption[type]",2,2); // type3
   addAttributeBool(map, StarAttribute::SDRATTR_CAPTIONFIXEDANGLE,"caption[fixedAngle]", true); // onOff
@@ -1740,8 +1904,49 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
     s << "caption[reserved" << type-StarAttribute::SDRATTR_CAPTIONRESERVE1+1 << "]";
     addAttributeVoid(map, StarAttribute::Type(type), s.str());
   }
+  for (int type=StarAttribute::SDRATTR_GRAFRESERVE3; type<=StarAttribute::SDRATTR_GRAFRESERVE6; ++type) {
+    std::stringstream s;
+    s << "graf[reserved" << type-StarAttribute::SDRATTR_GRAFRESERVE3+3 << "]";
+    addAttributeVoid(map, StarAttribute::Type(type), s.str());
+  }
+  for (int type=StarAttribute::SDRATTR_NOTPERSISTRESERVE2; type<=StarAttribute::SDRATTR_NOTPERSISTRESERVE15; ++type) {
+    std::stringstream s;
+    s << "notpersist[reserved" << type-StarAttribute::SDRATTR_NOTPERSISTRESERVE2+2 << "]";
+    addAttributeVoid(map, StarAttribute::Type(type), s.str());
+  }
 
   // to do
+  addAttributeUInt(map, StarAttribute::SDRATTR_LAYERID, "layer[id]",2,0);
+  addAttributeInt(map, StarAttribute::SDRATTR_ALLPOSITIONX, "positionX[all]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_ALLPOSITIONY, "positionY[all]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_ALLSIZEWIDTH, "size[all,width]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_ALLSIZEHEIGHT, "size[all,height]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_ONEPOSITIONX, "poitionX[one]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_ONEPOSITIONY, "poitionY[one]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_ONESIZEWIDTH, "size[one,width]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_ONESIZEHEIGHT, "size[one,height]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_LOGICSIZEWIDTH, "size[logic,width]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_LOGICSIZEHEIGHT, "size[logic,height]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_ROTATEANGLE, "rotate[angle]",4, 0); // sdrAngle
+  addAttributeInt(map, StarAttribute::SDRATTR_SHEARANGLE, "shear[angle]",4, 0); // sdrAngle
+  addAttributeInt(map, StarAttribute::SDRATTR_MOVEX, "moveX",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_MOVEY, "moveY",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_ROTATEONE, "rotate[one]",4, 0); // sdrAngle
+  addAttributeInt(map, StarAttribute::SDRATTR_HORZSHEARONE, "shear[horzOne]",4, 0); // sdrAngle
+  addAttributeInt(map, StarAttribute::SDRATTR_VERTSHEARONE, "shear[vertOne]",4, 0); // sdrAngle
+  addAttributeInt(map, StarAttribute::SDRATTR_ROTATEALL, "rotate[all]",4, 0); // sdrAngle
+  addAttributeInt(map, StarAttribute::SDRATTR_HORZSHEARALL, "shear[horzAll]",4, 0); // sdrAngle
+  addAttributeInt(map, StarAttribute::SDRATTR_VERTSHEARALL, "shear[vertAll]",4, 0); // sdrAngle
+  addAttributeInt(map, StarAttribute::SDRATTR_TRANSFORMREF1X, "transform[ref1X]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_TRANSFORMREF1Y, "transform[ref1Y]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_TRANSFORMREF2X, "transform[ref2X]",4, 0); // metric
+  addAttributeInt(map, StarAttribute::SDRATTR_TRANSFORMREF2Y, "transform[ref2Y]",4, 0); // metric
+  addAttributeUInt(map, StarAttribute::SDRATTR_TEXTDIRECTION, "text[direction]",2,0); // LRTB
+  addAttributeFraction(map, StarAttribute::SDRATTR_RESIZEXONE, "sdrResizeX[one]");
+  addAttributeFraction(map, StarAttribute::SDRATTR_RESIZEYONE, "sdrResizeY[one]");
+  addAttributeFraction(map, StarAttribute::SDRATTR_RESIZEXALL, "sdrResizeX[all]");
+  addAttributeFraction(map, StarAttribute::SDRATTR_RESIZEYALL, "sdrResizeY[all]");
+
   addAttributeBool(map, StarAttribute::XATTR_FILLBMP_SIZELOG,"fill[bmp,sizeLog]", true);
 
   map[StarAttribute::XATTR_FILLFLOATTRANSPARENCE]=shared_ptr<StarAttribute>

@@ -413,7 +413,7 @@ struct STOFFEmbeddedObject {
   }
   //! constructor
   STOFFEmbeddedObject(librevenge::RVNGBinaryData const &binaryData,
-                      std::string type="image/pict") : m_dataList(), m_typeList()
+                      std::string type="image/pict") : m_dataList(), m_typeList(), m_filenameLink("")
   {
     add(binaryData, type);
   }
@@ -422,6 +422,8 @@ struct STOFFEmbeddedObject {
   //! return true if the picture contains no data
   bool isEmpty() const
   {
+    if (!m_filenameLink.empty())
+      return false;
     for (size_t i=0; i<m_dataList.size(); ++i) {
       if (!m_dataList[i].empty())
         return false;
@@ -451,6 +453,8 @@ struct STOFFEmbeddedObject {
   std::vector<librevenge::RVNGBinaryData> m_dataList;
   //! the picture type: one type by representation
   std::vector<std::string> m_typeList;
+  //! a picture link
+  librevenge::RVNGString m_filenameLink;
 };
 
 // forward declarations of basic classes and smart pointers

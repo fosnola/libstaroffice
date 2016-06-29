@@ -379,7 +379,9 @@ bool StarFileManager::readOLEDirectory(shared_ptr<STOFFOLEParser> oleParser, sha
       }
       // other
       if (base=="Ole-Object") {
-        readOleObject(stream,name);
+        librevenge::RVNGBinaryData data;
+        if (readOleObject(stream,data,name))
+          image.add(data,"object/ole");
         continue;
       }
       libstoff::DebugFile asciiFile(stream);
@@ -538,20 +540,20 @@ catch (...)
   return false;
 }
 
-bool StarFileManager::readOleObject(STOFFInputStreamPtr input, std::string const &fileName)
+bool StarFileManager::readOleObject(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName)
 {
   // see this Ole only once with PaintBrush data ?
   libstoff::DebugFile ascii(input);
   ascii.open(fileName);
   ascii.skipZone(0, input->size());
 
-#ifdef DEBUG_WITH_FILES
   input->seek(0, librevenge::RVNG_SEEK_SET);
-  librevenge::RVNGBinaryData data;
   if (!input->readEndDataBlock(data)) {
     STOFF_DEBUG_MSG(("StarFileManager::readOleObject: can not read image content\n"));
+    data.clear();
     return false;
   }
+#ifdef DEBUG_WITH_FILES
   libstoff::Debug::dumpFile(data, (fileName+".ole").c_str());
 #endif
   return true;

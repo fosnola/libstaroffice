@@ -187,7 +187,8 @@ bool SDWParser::createZones()
       }
       // other
       if (base=="Ole-Object") {
-        fileManager.readOleObject(ole,name);
+        librevenge::RVNGBinaryData data;
+        fileManager.readOleObject(ole,data,name);
         continue;
       }
       libstoff::DebugFile asciiFile(ole);

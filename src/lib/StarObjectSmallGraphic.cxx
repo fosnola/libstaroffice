@@ -1007,8 +1007,7 @@ public:
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicGraph::send: can not send a shape\n"));
       return false;
     }
-    if (!m_graphic || m_graphic->m_object.isEmpty()) {
-      // TODO: add link if file[name] exists
+    if ((!m_graphic || m_graphic->m_object.isEmpty()) && m_graphNames[1].empty()) {
       static bool first=true;
       if (first) {
         first=false;
@@ -1022,7 +1021,14 @@ public:
     position.setAnchor(STOFFPosition::Page);
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
-    listener->insertPicture(position, m_graphic->m_object, style);
+    if (!m_graphic || m_graphic->m_object.isEmpty()) {
+      // CHECKME: we need probably correct the filename, transform ":" in "/", ...
+      STOFFEmbeddedObject link;
+      link.m_filenameLink=m_graphNames[1];
+      listener->insertPicture(position, link, style);
+    }
+    else
+      listener->insertPicture(position, m_graphic->m_object, style);
 
     return true;
   }

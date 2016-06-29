@@ -312,55 +312,6 @@ void State::initAttributeMap()
 
   // ---- sdr ---- svx_svdattr.cxx
 
-  addAttributeInt(StarAttribute::SDRATTR_ECKENRADIUS, "radius[ecken]",4, 0); // metric
-
-  addAttributeUInt(StarAttribute::SDRATTR_LAYERID, "layer[id]",2,0);
-  addAttributeInt(StarAttribute::SDRATTR_ALLPOSITIONX, "positionX[all]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_ALLPOSITIONY, "positionY[all]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_ALLSIZEWIDTH, "size[all,width]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_ALLSIZEHEIGHT, "size[all,height]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_ONEPOSITIONX, "poitionX[one]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_ONEPOSITIONY, "poitionY[one]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_ONESIZEWIDTH, "size[one,width]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_ONESIZEHEIGHT, "size[one,height]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_LOGICSIZEWIDTH, "size[logic,width]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_LOGICSIZEHEIGHT, "size[logic,height]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_ROTATEANGLE, "rotate[angle]",4, 0); // sdrAngle
-  addAttributeInt(StarAttribute::SDRATTR_SHEARANGLE, "shear[angle]",4, 0); // sdrAngle
-  addAttributeInt(StarAttribute::SDRATTR_MOVEX, "moveX",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_MOVEY, "moveY",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_ROTATEONE, "rotate[one]",4, 0); // sdrAngle
-  addAttributeInt(StarAttribute::SDRATTR_HORZSHEARONE, "shear[horzOne]",4, 0); // sdrAngle
-  addAttributeInt(StarAttribute::SDRATTR_VERTSHEARONE, "shear[vertOne]",4, 0); // sdrAngle
-  addAttributeInt(StarAttribute::SDRATTR_ROTATEALL, "rotate[all]",4, 0); // sdrAngle
-  addAttributeInt(StarAttribute::SDRATTR_HORZSHEARALL, "shear[horzAll]",4, 0); // sdrAngle
-  addAttributeInt(StarAttribute::SDRATTR_VERTSHEARALL, "shear[vertAll]",4, 0); // sdrAngle
-  addAttributeInt(StarAttribute::SDRATTR_TRANSFORMREF1X, "transform[ref1X]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_TRANSFORMREF1Y, "transform[ref1Y]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_TRANSFORMREF2X, "transform[ref2X]",4, 0); // metric
-  addAttributeInt(StarAttribute::SDRATTR_TRANSFORMREF2Y, "transform[ref2Y]",4, 0); // metric
-  addAttributeUInt(StarAttribute::SDRATTR_TEXTDIRECTION, "text[direction]",2,0); // LRTB
-  for (int type=StarAttribute::SDRATTR_NOTPERSISTRESERVE2; type<=StarAttribute::SDRATTR_NOTPERSISTRESERVE15; ++type) {
-    s.str("");
-    s << "notpersist[reserved" << type-StarAttribute::SDRATTR_NOTPERSISTRESERVE2+2 << "]";
-    addAttributeVoid(StarAttribute::Type(type), s.str());
-  }
-
-  addAttributeInt(StarAttribute::SDRATTR_GRAFRED, "graf[red]",2, 0); // signed percent
-  addAttributeInt(StarAttribute::SDRATTR_GRAFGREEN, "graf[green]",2, 0); // signed percent
-  addAttributeInt(StarAttribute::SDRATTR_GRAFBLUE, "graf[blue]",2, 0); // signed percent
-  addAttributeInt(StarAttribute::SDRATTR_GRAFLUMINANCE, "graf[luminance]",2, 0); // signed percent
-  addAttributeInt(StarAttribute::SDRATTR_GRAFCONTRAST, "graf[contrast]",2, 0); // signed percent
-  addAttributeUInt(StarAttribute::SDRATTR_GRAFGAMMA, "graf[gamma]",4,100);
-  addAttributeUInt(StarAttribute::SDRATTR_GRAFTRANSPARENCE, "graf[transparence]",2,0);
-  addAttributeBool(StarAttribute::SDRATTR_GRAFINVERT,"graf[invert]", false); // onOff
-  addAttributeUInt(StarAttribute::SDRATTR_GRAFMODE, "graf[mode]",2,0);  // standard
-  for (int type=StarAttribute::SDRATTR_GRAFRESERVE3; type<=StarAttribute::SDRATTR_GRAFRESERVE6; ++type) {
-    s.str("");
-    s << "graf[reserved" << type-StarAttribute::SDRATTR_GRAFRESERVE3+3 << "]";
-    addAttributeVoid(StarAttribute::Type(type), s.str());
-  }
-
   addAttributeUInt(StarAttribute::SDRATTR_3DOBJ_PERCENT_DIAGONAL, "obj3d[percent,diagonal]",2,10);
   addAttributeUInt(StarAttribute::SDRATTR_3DOBJ_BACKSCALE, "obj3d[backscale]",2,100);
   addAttributeUInt(StarAttribute::SDRATTR_3DOBJ_DEPTH, "obj3d[depth]",4,1000);
@@ -1435,9 +1386,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     }
     break;
 
-  case StarAttribute::SDRATTR_MEASURESCALE: //  // sdrFraction
-    f << "measure[scale],mult=" << input->readLong(4) << ",div=" << input->readLong(4) << ",";
-    break;
   case StarAttribute::SDRATTR_MEASUREFORMATSTRING: { // string
     f << "measure[formatString]=";
     std::vector<uint32_t> format;
@@ -1460,25 +1408,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
       break;
     }
     f << libstoff::getString(name).cstr() << ",";
-    break;
-  }
-  case StarAttribute::SDRATTR_RESIZEXONE: // sdrFraction
-  case StarAttribute::SDRATTR_RESIZEYONE:
-    f << (nWhich==StarAttribute::SDRATTR_RESIZEXONE ? "sdrResizeX[one]" : "sdrResizeY[one]") << ","
-      << "mult=" << input->readLong(4) << ",div=" << input->readLong(4) << ",";
-    break;
-  case StarAttribute::SDRATTR_RESIZEXALL: // sdrFraction
-  case StarAttribute::SDRATTR_RESIZEYALL:
-    f << (nWhich==StarAttribute::SDRATTR_RESIZEXALL ? "sdrResizeX[all]" : "sdrResizeY[all]") << ","
-      << "mult=" << input->readLong(4) << ",div=" << input->readLong(4) << ",";
-    break;
-
-  case StarAttribute::SDRATTR_GRAFCROP: {
-    f << "graf[crop],";
-    if (nVers==0) break; // clone(0)
-    int32_t top, left, right, bottom;
-    *input >> top >> left >> right >> bottom;
-    f << "crop=" << left << "x" << top << "<->" << right << "x" << bottom << ",";
     break;
   }
 
