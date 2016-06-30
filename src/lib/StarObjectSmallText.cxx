@@ -41,7 +41,7 @@
 
 #include "STOFFFont.hxx"
 #include "STOFFListener.hxx"
-#include "STOFFOLEParser.hxx"
+#include "STOFFParagraph.hxx"
 
 #include "StarAttribute.hxx"
 #include "StarObject.hxx"
@@ -57,27 +57,62 @@ namespace StarObjectSmallTextInternal
 //! Internal: a paragraph of StarObjectSmallText
 struct Paragraph {
   //! constructor
-  Paragraph() : m_text(), m_textSourcePosition(), m_charItemList(), m_charLimitList()
+  Paragraph() : m_text(), m_textSourcePosition(), m_styleName(), m_family(0), m_itemSet(), m_charItemList(), m_charLimitList()
   {
   }
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr &listener, StarItemPool const *pool) const;
+  bool send(STOFFListenerPtr &listener, StarItemPool const *mainPool, StarItemPool const *editPool) const;
   //! the text
   std::vector<uint32_t> m_text;
   //! the text initial position
   std::vector<size_t> m_textSourcePosition;
+  //! the style name
+  librevenge::RVNGString m_styleName;
+  //! the family
+  int m_family;
+  //! the main item list
+  StarItemSet m_itemSet;
   //! the character item list
   std::vector<shared_ptr<StarItem> > m_charItemList;
   //! the character limit
   std::vector<STOFFVec2i> m_charLimitList;
 };
 
-bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *pool) const
+bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *mainPool, StarItemPool const *editPool) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("StarObjectSmallTextInternal::Paragraph::send: call without listener\n"));
     return false;
   }
+
+  std::map<int, shared_ptr<StarItem> >::const_iterator it;
+  STOFFFont mainFont;
+  mainFont.m_relativeFontUnit=0.028346;
+  STOFFParagraph para;
+  if (mainPool && !m_styleName.empty()) { // checkme
+    StarItemStyle const *style=mainPool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
+    if (style) {
+      for (it=style->m_itemSet.m_whichToItemMap.begin(); it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
+        if (it->second && it->second->m_attribute) {
+          it->second->m_attribute->addTo(mainFont, mainPool);
+          it->second->m_attribute->addTo(para, mainPool);
+        }
+      }
+#if 0
+      std::cerr << "Para:" << style->m_itemSet.printChild() << "\n";
+#endif
+    }
+  }
+  for (it=m_itemSet.m_whichToItemMap.begin(); it!=m_itemSet.m_whichToItemMap.end(); ++it) {
+    if (!it->second || !it->second->m_attribute) continue;
+    it->second->m_attribute->addTo(para, editPool);
+#if 0
+    std::cerr << "ItemSet:" << m_itemSet.printChild() << "\n";
+#endif
+  }
+  listener->setFont(mainFont);
+  listener->setParagraph(para);
+
   std::set<size_t> modPosSet;
   size_t numFonts=m_charItemList.size();
   if (m_charLimitList.size()!=numFonts) {
@@ -98,14 +133,14 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *pool) const
       fontChange=true;
     }
     if (fontChange) {
-      STOFFFont font;
+      STOFFFont font(mainFont);
       font.m_relativeFontUnit=0.028346;
       for (size_t f=0; f<numFonts; ++f) {
         if (m_charLimitList[f][0]>int(srcPos) || m_charLimitList[f][1]<=int(srcPos))
           continue;
         if (!m_charItemList[f] || !m_charItemList[f]->m_attribute)
           continue;
-        m_charItemList[f]->m_attribute->addTo(font, pool);
+        m_charItemList[f]->m_attribute->addTo(font, editPool);
       }
       listener->setFont(font);
     }
@@ -145,9 +180,11 @@ bool StarObjectSmallText::send(shared_ptr<STOFFListener> listener)
     STOFF_DEBUG_MSG(("StarObjectSmallText::send: call without listener\n"));
     return false;
   }
-  shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_EditEnginePool, false);
+  shared_ptr<StarItemPool> editPool=findItemPool(StarItemPool::T_EditEnginePool, false);
+  // fixme: this works for drawing, but not for spreadsheet
+  shared_ptr<StarItemPool> mainPool=findItemPool(StarItemPool::T_XOutdevPool, false);
   for (size_t p=0; p<m_textState->m_paragraphList.size(); ++p) {
-    m_textState->m_paragraphList[p].send(listener, pool.get());
+    m_textState->m_paragraphList[p].send(listener, mainPool.get(), editPool.get());
     if (p+1!=m_textState->m_paragraphList.size())
       listener->insertEOL();
   }
@@ -227,6 +264,7 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
 
   m_textState->m_paragraphList.resize(size_t(nPara));
   for (size_t i=0; i<size_t(nPara); ++i) {
+    StarObjectSmallTextInternal::Paragraph &para=m_textState->m_paragraphList[i];
     pos=input->tell();
     f.str("");
     f << "EditTextObject[para" << i << "]:";
@@ -242,19 +280,21 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
         return true;
       }
       else if (!text.empty())
-        f << (j==0 ? "name" : "style") << "=" << libstoff::getString(text).cstr() << ",";
+        f << (j==0 ? "text" : "style") << "=" << libstoff::getString(text).cstr() << ",";
       if (j==0) {
-        m_textState->m_paragraphList[i].m_text=text;
-        m_textState->m_paragraphList[i].m_textSourcePosition=positions;
+        para.m_text=text;
+        para.m_textSourcePosition=positions;
       }
+      else
+        para.m_styleName=libstoff::getString(text);
     }
     uint16_t styleFamily;
     *input >> styleFamily;
     if (styleFamily) f << "styleFam=" << styleFamily << ",";
+    para.m_family=int(styleFamily);
     std::vector<STOFFVec2i> limits;
     limits.push_back(STOFFVec2i(3989, 4033)); // EE_PARA_START 4033: EE_CHAR_END
-    StarItemSet itemSet;
-    if (!readItemSet(zone, limits, lastPos, itemSet, pool.get(), false) || input->tell()>lastPos) {
+    if (!readItemSet(zone, limits, lastPos, para.m_itemSet, pool.get(), false) || input->tell()>lastPos) {
       STOFF_DEBUG_MSG(("StarObjectSmallText::read: can not read item list\n"));
       f << "###item list,";
       ascFile.addPos(pos);
@@ -300,8 +340,8 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
       *input >> start >> end;
       f << "wh=" << which << ":";
       f << "pos=" << start << "x" << end;
-      m_textState->m_paragraphList[i].m_charItemList.push_back(item);
-      m_textState->m_paragraphList[i].m_charLimitList.push_back(STOFFVec2i(int(start), int(end)));
+      para.m_charItemList.push_back(item);
+      para.m_charLimitList.push_back(STOFFVec2i(int(start), int(end)));
       if (nWhich==0x31 && which==4036) // checkme: we must not convert this character...
         f << "notConv,";
       else if (item->m_attribute) {
