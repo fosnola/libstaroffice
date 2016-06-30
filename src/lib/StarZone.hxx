@@ -217,7 +217,13 @@ public:
   }
 
   //! try to read an unicode string
-  bool readString(std::vector<uint32_t> &string, int encoding=-1) const;
+  bool readString(std::vector<uint32_t> &string, int encoding=-1) const
+  {
+    std::vector<size_t> srcPositions;
+    return readString(string, srcPositions, encoding);
+  }
+  //! try to read an unicode string
+  bool readString(std::vector<uint32_t> &string, std::vector<size_t> &srcPositions, int encoding=-1) const;
   //! try to read a pool of strings
   bool readStringsPool();
   //! try to return a pool name

@@ -529,7 +529,8 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
     std::vector<uint8_t> string;
     for (int c=0; c<dSz; ++c) string.push_back(static_cast<uint8_t>(input->readULong(1)));
     std::vector<uint32_t> finalString;
-    if (StarEncoding::convert(string, encoding, finalString)) {
+    std::vector<size_t> srcPositions;
+    if (StarEncoding::convert(string, encoding, finalString, srcPositions)) {
       librevenge::RVNGString attrib=libstoff::getString(finalString);
       f << attrib.cstr() << ",";
       static char const *(attribNames[]) = {

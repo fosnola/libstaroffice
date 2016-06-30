@@ -727,6 +727,8 @@ void STOFFGraphicListener::_openSpan()
   }
 
   librevenge::RVNGPropertyList propList;
+  m_ps->m_font.addTo(propList);
+
   m_documentInterface->openSpan(propList);
 
   m_ps->m_isSpanOpened = true;

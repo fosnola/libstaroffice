@@ -58,13 +58,14 @@ StarEncoding::~StarEncoding()
 {
 }
 
-bool StarEncoding::convert(std::vector<uint8_t> const &src, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest)
+bool StarEncoding::convert(std::vector<uint8_t> const &src, StarEncoding::Encoding encoding, std::vector<uint32_t> &dest, std::vector<size_t> &srcPositions)
 {
   size_t pos=0;
   while (pos<src.size()) {
     size_t actPos=pos;
     if (!read(src, pos, encoding, dest) && actPos>=pos)
       break;
+    srcPositions.resize(dest.size(), actPos);
   }
   return !dest.empty() || src.empty();
 }

@@ -80,7 +80,7 @@ public:
   //! return an encoding corresponding to an id
   static Encoding getEncodingForId(int id);
   //! try to convert a list of character and transforms it a unicode's list
-  static bool convert(std::vector<uint8_t> const &src, Encoding encoding, std::vector<uint32_t> &dest);
+  static bool convert(std::vector<uint8_t> const &src, Encoding encoding, std::vector<uint32_t> &dest, std::vector<size_t> &srcPositions);
 
 protected:
   /** try to read a character and add it to string

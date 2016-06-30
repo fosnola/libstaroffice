@@ -608,7 +608,8 @@ bool StarCellFormula::readSCToken(StarZone &zone, StarCellFormulaInternal::Token
     std::vector<uint8_t> text;
     for (int i=0; i<int(nBytes); ++i) text.push_back(static_cast<uint8_t>(input->readULong(1)));
     std::vector<uint32_t> string;
-    StarEncoding::convert(text, zone.getEncoding(), string);
+    std::vector<size_t> srcPositions;
+    StarEncoding::convert(text, zone.getEncoding(), string, srcPositions);
     token.m_textValue=libstoff::getString(string);
     break;
   }

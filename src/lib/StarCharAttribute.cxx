@@ -720,6 +720,9 @@ void StarCAttributeFontSize::addTo(STOFFFont &font, StarItemPool const */*pool*/
   case 10: // pixel
     font.m_propertyList.insert(wh.c_str(), double(m_size), librevenge::RVNG_POINT);
     break;
+  case 13: // rel, checkme
+    font.m_propertyList.insert(wh.c_str(), double(m_size)*font.m_relativeFontUnit, librevenge::RVNG_POINT);
+    break;
   default: // checkme
     font.m_propertyList.insert(wh.c_str(), double(m_size)/20., librevenge::RVNG_POINT);
     break;

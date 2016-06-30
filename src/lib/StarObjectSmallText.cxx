@@ -39,6 +39,7 @@
 
 #include <librevenge/librevenge.h>
 
+#include "STOFFFont.hxx"
 #include "STOFFListener.hxx"
 #include "STOFFOLEParser.hxx"
 
@@ -53,15 +54,76 @@
 namespace StarObjectSmallTextInternal
 {
 ////////////////////////////////////////
+//! Internal: a paragraph of StarObjectSmallText
+struct Paragraph {
+  //! constructor
+  Paragraph() : m_text(), m_textSourcePosition(), m_charItemList(), m_charLimitList()
+  {
+  }
+  //! try to send the data to a listener
+  bool send(STOFFListenerPtr &listener, StarItemPool const *pool) const;
+  //! the text
+  std::vector<uint32_t> m_text;
+  //! the text initial position
+  std::vector<size_t> m_textSourcePosition;
+  //! the character item list
+  std::vector<shared_ptr<StarItem> > m_charItemList;
+  //! the character limit
+  std::vector<STOFFVec2i> m_charLimitList;
+};
+
+bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *pool) const
+{
+  if (!listener || !listener->canWriteText()) {
+    STOFF_DEBUG_MSG(("StarObjectSmallTextInternal::Paragraph::send: call without listener\n"));
+    return false;
+  }
+  std::set<size_t> modPosSet;
+  size_t numFonts=m_charItemList.size();
+  if (m_charLimitList.size()!=numFonts) {
+    STOFF_DEBUG_MSG(("StarObjectSmallTextInternal::Paragraph::send: the number of fonts seems bad\n"));
+    if (m_charLimitList.size()<numFonts)
+      numFonts=m_charLimitList.size();
+  }
+  for (size_t i=0; i<numFonts; ++i) {
+    modPosSet.insert(size_t(m_charLimitList[i][0]));
+    modPosSet.insert(size_t(m_charLimitList[i][1]));
+  }
+  std::set<size_t>::const_iterator posSetIt=modPosSet.begin();
+  for (size_t c=0; c<m_text.size(); ++c) {
+    bool fontChange=false;
+    size_t srcPos=c<m_textSourcePosition.size() ? m_textSourcePosition[c] : 10000;
+    while (posSetIt!=modPosSet.end() && *posSetIt <= srcPos) {
+      ++posSetIt;
+      fontChange=true;
+    }
+    if (fontChange) {
+      STOFFFont font;
+      font.m_relativeFontUnit=0.028346;
+      for (size_t f=0; f<numFonts; ++f) {
+        if (m_charLimitList[f][0]>int(srcPos) || m_charLimitList[f][1]<=int(srcPos))
+          continue;
+        if (!m_charItemList[f] || !m_charItemList[f]->m_attribute)
+          continue;
+        m_charItemList[f]->m_attribute->addTo(font, pool);
+      }
+      listener->setFont(font);
+    }
+    listener->insertUnicode(m_text[c]);
+  }
+  return true;
+}
+
+////////////////////////////////////////
 //! Internal: the state of a StarObjectSmallText
 struct State {
   //! constructor
-  State() : m_text()
+  State() : m_paragraphList()
   {
   }
 
-  //! the text
-  std::vector<uint32_t> m_text;
+  //! the paragraphs
+  std::vector<Paragraph> m_paragraphList;
 };
 
 }
@@ -83,7 +145,12 @@ bool StarObjectSmallText::send(shared_ptr<STOFFListener> listener)
     STOFF_DEBUG_MSG(("StarObjectSmallText::send: call without listener\n"));
     return false;
   }
-  listener->insertUnicodeList(m_textState->m_text);
+  shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_EditEnginePool, false);
+  for (size_t p=0; p<m_textState->m_paragraphList.size(); ++p) {
+    m_textState->m_paragraphList[p].send(listener, pool.get());
+    if (p+1!=m_textState->m_paragraphList.size())
+      listener->insertEOL();
+  }
   return true;
 }
 
@@ -118,6 +185,7 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
   bool ownPool=true;
   if (nWhich==0x31) {
     *input>>version >> ownPool;
+    if (!ownPool) f << "mainPool,";
     if (version) f << "vers=" << version << ",";
   }
   ascFile.addPos(pos);
@@ -125,7 +193,13 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
 
   pos=input->tell();
   shared_ptr<StarItemPool> pool;
-  if (!ownPool) pool=findItemPool(StarItemPool::T_EditEnginePool, true); // checkme
+  if (!ownPool) {
+    pool=findItemPool(StarItemPool::T_EditEnginePool, false);
+    if (!pool) {
+      f << "###noPool,";
+      STOFF_DEBUG_MSG(("StarObjectSmallText::read: can not find the main pool\n"));
+    }
+  }
   if (!pool) pool=getNewItemPool(StarItemPool::T_EditEnginePool);
   if (ownPool && !pool->read(zone)) {
     STOFF_DEBUG_MSG(("StarObjectSmallText::read: can not read a pool\n"));
@@ -151,13 +225,15 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  for (int i=0; i<int(nPara); ++i) {
+  m_textState->m_paragraphList.resize(size_t(nPara));
+  for (size_t i=0; i<size_t(nPara); ++i) {
     pos=input->tell();
     f.str("");
     f << "EditTextObject[para" << i << "]:";
     for (int j=0; j<2; ++j) {
       std::vector<uint32_t> text;
-      if (!zone.readString(text, int(charSet)) || input->tell()>lastPos) {
+      std::vector<size_t> positions;
+      if (!zone.readString(text, positions, int(charSet)) || input->tell()>lastPos) {
         STOFF_DEBUG_MSG(("StarObjectSmallText::read: can not read a strings\n"));
         f << "###strings,";
         ascFile.addPos(pos);
@@ -168,12 +244,8 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
       else if (!text.empty())
         f << (j==0 ? "name" : "style") << "=" << libstoff::getString(text).cstr() << ",";
       if (j==0) {
-        if (i==0)
-          m_textState->m_text=text;
-        else {
-          m_textState->m_text.push_back(0xd);
-          m_textState->m_text.insert(m_textState->m_text.end(), text.begin(), text.end());
-        }
+        m_textState->m_paragraphList[i].m_text=text;
+        m_textState->m_paragraphList[i].m_textSourcePosition=positions;
       }
     }
     uint16_t styleFamily;
@@ -214,14 +286,30 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
     }
     f << "attrib=[";
     for (int j=0; j<int(nAttr); ++j) { // checkme, probably bad
-      uint16_t which, start, end, surrogate=0;
+      uint16_t which, start, end;
       *input >> which;
-      if (nWhich==0x22) *input >> surrogate;
+      shared_ptr<StarItem> item=pool->loadSurrogate(zone, which, true, f);
+      if (!item) {
+        STOFF_DEBUG_MSG(("StarObjectSmallText::read: can not find an item\n"));
+        f << "###attrib,";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+        return true;
+      }
       *input >> start >> end;
-      if (nWhich!=0x22) *input >> surrogate;
       f << "wh=" << which << ":";
-      f << "pos=" << start << "x" << end << ",";
-      f << "surrogate=" << surrogate << ",";
+      f << "pos=" << start << "x" << end;
+      m_textState->m_paragraphList[i].m_charItemList.push_back(item);
+      m_textState->m_paragraphList[i].m_charLimitList.push_back(STOFFVec2i(int(start), int(end)));
+      if (nWhich==0x31 && which==4036) // checkme: we must not convert this character...
+        f << "notConv,";
+      else if (item->m_attribute) {
+        f << "[";
+        item->m_attribute->printData(f);
+        f << "]";
+      }
+      f << ",";
     }
     f << "],";
     ascFile.addPos(pos);

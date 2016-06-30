@@ -66,10 +66,11 @@ void StarZone::setInput(STOFFInputStreamPtr ip)
   m_ascii.setStream(ip);
 }
 
-bool StarZone::readString(std::vector<uint32_t> &string, int encoding) const
+bool StarZone::readString(std::vector<uint32_t> &string, std::vector<size_t> &srcPositions, int encoding) const
 {
   int sSz=int(m_input->readULong(2));
   string.clear();
+  srcPositions.clear();
   if (!sSz) return true;
   unsigned long numRead;
   uint8_t const *data=m_input->read(size_t(sSz), numRead);
@@ -84,7 +85,7 @@ bool StarZone::readString(std::vector<uint32_t> &string, int encoding) const
   StarEncoding::Encoding encod=m_encoding;
   if (encoding>=1) encod=StarEncoding::getEncodingForId(encoding);
   // fixme check encryption
-  return StarEncoding::convert(buffer, encod, string);
+  return StarEncoding::convert(buffer, encod, string, srcPositions);
 }
 
 bool StarZone::readStringsPool()

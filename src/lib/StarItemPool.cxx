@@ -1176,7 +1176,7 @@ shared_ptr<StarItem> StarItemPool::loadSurrogate(StarZone &zone, uint16_t &nWhic
       // ok, we must wait that the pool is read
       return createItem(int(nWhich), int(nSurrog), localId);
     }
-    STOFF_DEBUG_MSG(("StarItemPool::loadSurrogate: can not find the attribute array for %d\n", aWhich));
+    STOFF_DEBUG_MSG(("StarItemPool::loadSurrogate: can not find the attribute array for %d[%d]\n", aWhich, int(nSurrog)));
     f << "###notFind,";
     res->m_attribute=m_state->getDefaultAttribute(aWhich);
     return res;
@@ -1485,6 +1485,8 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
     m_state->m_loadingVersion=int(nLoadingVersion);
     if (nLoadingVersion) f << "vers[loading]=" << nLoadingVersion << ",";
   }
+  else
+    m_state->m_loadingVersion=0;
   std::vector<uint32_t> string;
   if (!zone.readString(string)) {
     STOFF_DEBUG_MSG(("StarItemPool::readV1: can not read the name\n"));
@@ -1697,7 +1699,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
         long debAttPos=(step==0 ? input->tell() : pos);
         pos=input->tell();
         f.str("");
-        f << "StarAttribute:inPool,wh=" <<  which << ",";
+        f << "StarAttribute:inPool,wh=" <<  which << "->" << aWhich << "[id=" << i << "],";
         if (n >= sizeAttr.size() || debAttPos+long(sizeAttr[n])>endDataPos ||
             input->tell()>debAttPos+long(sizeAttr[n])) {
           ok=false;
