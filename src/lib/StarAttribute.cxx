@@ -178,12 +178,6 @@ void State::initAttributeMap()
   // --- ee --- svx_editdoc.cxx and svx_eerdll.cxx
   addAttributeVoid(StarAttribute::ATTR_EE_CHR_RUBI_DUMMY, "chr[rubi,dummy]");
   addAttributeXML(StarAttribute::ATTR_EE_CHR_XMLATTRIBS, "chr[xmlAttrib]");
-  addAttributeUInt(StarAttribute::ATTR_EE_PARA_BULLETSTATE,"para[bullet,state]",2,0);
-  addAttributeUInt(StarAttribute::ATTR_EE_PARA_OUTLLEVEL,"para[outlevel]",2,0);
-  addAttributeBool(StarAttribute::ATTR_EE_PARA_ASIANCJKSPACING,"para[asianCJKSpacing]",false);
-  addAttributeXML(StarAttribute::ATTR_EE_PARA_XMLATTRIBS, "para[xmlAttrib]");
-  addAttributeVoid(StarAttribute::ATTR_EE_FEATURE_TAB, "feature[tab]");
-  addAttributeVoid(StarAttribute::ATTR_EE_FEATURE_LINEBR, "feature[linebr]");
   // --- sch --- sch_itempool.cxx
   addAttributeBool(StarAttribute::ATTR_SCH_DATADESCR_SHOW_SYM,"dataDescr[showSym]", false);
   addAttributeUInt(StarAttribute::ATTR_SCH_DATADESCR_DESCR,"dataDescr[descr]",2,0); // none

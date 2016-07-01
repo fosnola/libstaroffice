@@ -87,7 +87,7 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *mainPool, S
 
   std::map<int, shared_ptr<StarItem> >::const_iterator it;
   STOFFFont mainFont;
-  mainFont.m_relativeFontUnit=0.028346;
+  mainFont.m_relativeFontUnit=0.028346457;
   STOFFParagraph para;
   if (mainPool && !m_styleName.empty()) { // checkme
     StarItemStyle const *style=mainPool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
@@ -105,6 +105,7 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *mainPool, S
   }
   for (it=m_itemSet.m_whichToItemMap.begin(); it!=m_itemSet.m_whichToItemMap.end(); ++it) {
     if (!it->second || !it->second->m_attribute) continue;
+    it->second->m_attribute->addTo(mainFont, mainPool);
     it->second->m_attribute->addTo(para, editPool);
 #if 0
     std::cerr << "ItemSet:" << m_itemSet.printChild() << "\n";
@@ -134,7 +135,7 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *mainPool, S
     }
     if (fontChange) {
       STOFFFont font(mainFont);
-      font.m_relativeFontUnit=0.028346;
+      font.m_relativeFontUnit=0.028346457;
       for (size_t f=0; f<numFonts; ++f) {
         if (m_charLimitList[f][0]>int(srcPos) || m_charLimitList[f][1]<=int(srcPos))
           continue;
@@ -180,8 +181,8 @@ bool StarObjectSmallText::send(shared_ptr<STOFFListener> listener)
     STOFF_DEBUG_MSG(("StarObjectSmallText::send: call without listener\n"));
     return false;
   }
+  // fixme: this works almost alway, but ...
   shared_ptr<StarItemPool> editPool=findItemPool(StarItemPool::T_EditEnginePool, false);
-  // fixme: this works for drawing, but not for spreadsheet
   shared_ptr<StarItemPool> mainPool=findItemPool(StarItemPool::T_XOutdevPool, false);
   for (size_t p=0; p<m_textState->m_paragraphList.size(); ++p) {
     m_textState->m_paragraphList[p].send(listener, mainPool.get(), editPool.get());
