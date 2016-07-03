@@ -932,67 +932,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     if (nVers>=1)
       f << "char=" << char(input->readULong(1)) << ",";
     break;
-
-  // paragraph attribute
-  case StarAttribute::ATTR_PARA_LINESPACING:
-    f << "parAtrLineSpacing,";
-    f << "nPropSpace=" << input->readLong(1) << ",";
-    f << "nInterSpace=" << input->readLong(2) << ",";
-    f << "nHeight=" << input->readULong(2) << ",";
-    f << "nRule=" << input->readULong(1) << ",";
-    f << "nInterRule=" << input->readULong(1) << ",";
-    break;
-  case StarAttribute::ATTR_PARA_TABSTOP: {
-    f << "parAtrTabStop,";
-    int N=int(input->readULong(1));
-    if (input->tell()+7*N>lastPos) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: N is too big\n"));
-      f << "###N=" << N << ",";
-      N=int(lastPos-input->tell())/7;
-    }
-    f << "tabs=[";
-    for (int i=0; i<N; ++i) {
-      int nPos=int(input->readLong(4));
-      f << nPos << "->" << input->readLong(1) << ":" << input->readLong(1) << ":" << input->readLong(1) << ",";
-    }
-    f << "],";
-    break;
-  }
-  case StarAttribute::ATTR_PARA_HYPHENZONE:
-    f << "parAtrHyphenZone=" << input->readLong(1) << ",";
-    f << "bHyphenPageEnd=" << input->readLong(1) << ",";
-    f << "nMinLead=" << input->readLong(1) << ",";
-    f << "nMinTail=" << input->readLong(1) << ",";
-    f << "nMaxHyphen=" << input->readLong(1) << ",";
-    break;
-  case StarAttribute::ATTR_PARA_DROP:
-    f << "parAtrDrop,";
-    f << "nFmt=" << input->readULong(2) << ",";
-    f << "nLines1=" << input->readULong(2) << ",";
-    f << "nChars1=" << input->readULong(2) << ",";
-    f << "nDistance1=" << input->readULong(2) << ",";
-    if (nVers>=1)
-      f << "bWhole=" << input->readULong(1) << ",";
-    else {
-      f << "nX=" << input->readULong(2) << ",";
-      f << "nY=" << input->readULong(2) << ",";
-    }
-    break;
-  case StarAttribute::ATTR_PARA_NUMRULE: {
-    f << "parAtrNumRule,";
-    std::vector<uint32_t> string;
-    if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the sTmp\n"));
-      f << "###sTmp,";
-      break;
-    }
-    if (!string.empty())
-      f << "sTmp=" << libstoff::getString(string).cstr() << ",";
-    if (nVers>0)
-      f << "nPoolId=" << input->readULong(2) << ",";
-    break;
-  }
-
   // frame parameter
   case StarAttribute::ATTR_FRM_FRM_SIZE:
     f << "frmSize,";

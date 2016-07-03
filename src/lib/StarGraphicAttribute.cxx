@@ -36,6 +36,7 @@
 #include "STOFFCellStyle.hxx"
 #include "STOFFFont.hxx"
 #include "STOFFGraphicStyle.hxx"
+#include "STOFFParagraph.hxx"
 
 #include "StarAttribute.hxx"
 #include "StarBitmap.hxx"
@@ -534,6 +535,8 @@ public:
   virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! add to a graphic style
   virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! add to a paragraph style
+  virtual void addTo(STOFFParagraph &para, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -1061,6 +1064,16 @@ void StarGAttributeBorder::addTo(STOFFGraphicStyle &graphic, StarItemPool const 
     }
     for (int i=0; i<4; ++i)
       graphic.m_propertyList.insert((std::string("padding-")+wh[i]).c_str(), libstoff::convertMiniMToPoint(m_distances[i]), librevenge::RVNG_POINT);
+  }
+}
+
+void StarGAttributeBorder::addTo(STOFFParagraph &para, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+{
+  if (m_type==ATTR_FRM_BOX) { // checkme
+    // checkme what is m_distance?
+    char const * (wh[])= {"top", "left", "right", "bottom"};
+    for (int i=0; i<4; ++i)
+      m_borders[i].addTo(para.m_propertyList, wh[i]);
   }
 }
 

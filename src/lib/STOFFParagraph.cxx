@@ -54,7 +54,9 @@ void STOFFParagraph::addTo(librevenge::RVNGPropertyList &pList) const
   librevenge::RVNGPropertyList::Iter i(m_propertyList);
   for (i.rewind(); i.next();) {
     if (i.child()) {
-      STOFF_DEBUG_MSG(("STOFFParagraph::addTo: find unexpected property child\n"));
+      if (strcmp(i.key(), "style:drop-cap")!=0 && strcmp(i.key(), "style:tab-stops")!=0) {
+        STOFF_DEBUG_MSG(("STOFFParagraph::addTo: find unexpected property child\n"));
+      }
       pList.insert(i.key(), *i.child());
       continue;
     }
