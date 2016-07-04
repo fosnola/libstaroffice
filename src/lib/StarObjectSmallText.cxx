@@ -92,10 +92,17 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *mainPool, S
   if (mainPool && !m_styleName.empty()) { // checkme
     StarItemStyle const *style=mainPool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
     if (style) {
+      bool done=false;
+      if (!style->m_names[0].empty()) {
+        if (listener) mainPool->defineParagraphStyle(listener, style->m_names[0]);
+        para.m_propertyList.insert("librevenge:parent-display-name", style->m_names[0]);
+        done=true;
+      }
       for (it=style->m_itemSet.m_whichToItemMap.begin(); it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
         if (it->second && it->second->m_attribute) {
           it->second->m_attribute->addTo(mainFont, mainPool);
-          it->second->m_attribute->addTo(para, mainPool);
+          if (!done)
+            it->second->m_attribute->addTo(para, mainPool);
         }
       }
 #if 0

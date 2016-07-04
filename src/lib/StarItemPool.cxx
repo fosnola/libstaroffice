@@ -46,6 +46,7 @@
 #include "StarZone.hxx"
 #include "STOFFGraphicStyle.hxx"
 #include "STOFFListener.hxx"
+#include "STOFFParagraph.hxx"
 
 #include "StarItemPool.hxx"
 
@@ -2100,20 +2101,39 @@ void StarItemPool::defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVN
   listener->defineStyle(gStyle);
 }
 
-void StarItemPool::defineGraphicStyles(STOFFListenerPtr listener) const
+void StarItemPool::defineParagraphStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName, std::set<librevenge::RVNGString> &done) const
 {
+  if (styleName.empty() || done.find(styleName)!=done.end())
+    return;
+  done.insert(styleName);
+  if (listener->isParagraphStyleDefined(styleName))
+    return;
   if (!listener) {
-    STOFF_DEBUG_MSG(("StarItemPool::defineGraphicStyles: can not find the listener"));
+    STOFF_DEBUG_MSG(("StarItemPool::defineParagraphStyle: can not find the listener"));
     return;
   }
-  std::map<StarItemPoolInternal::StyleId,StarItemStyle>::const_iterator sIt;
-  for (sIt=m_state->m_styleIdToStyleMap.begin(); sIt!=m_state->m_styleIdToStyleMap.end(); ++sIt) {
-    StarItemPoolInternal::StyleId const &id=sIt->first;
-    if (id.m_name.empty() || !(id.m_family&StarItemStyle::F_Paragraph))
-      continue;
-    std::set<librevenge::RVNGString> done;
-    defineGraphicStyle(listener, id.m_name, done);
+  StarItemStyle const *style=findStyleWithFamily(styleName, StarItemStyle::F_Paragraph);
+  if (!style) {
+    STOFF_DEBUG_MSG(("StarItemPool::defineParagraphStyle: can not find paragraph style with name %s", styleName.cstr()));
+    return;
   }
+  STOFFParagraph pStyle;
+  pStyle.m_propertyList.insert("style:display-name", styleName);
+  if (!style->m_names[1].empty()) {
+    if (done.find(style->m_names[1])!=done.end()) {
+      STOFF_DEBUG_MSG(("StarItemPool::defineParagraphStyle: oops find a look with %s", style->m_names[1].cstr()));
+    }
+    else {
+      defineParagraphStyle(listener, style->m_names[1], done);
+      pStyle.m_propertyList.insert("librevenge:parent-display-name", style->m_names[1]);
+    }
+  }
+  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
+       it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
+    if (it->second && it->second->m_attribute)
+      it->second->m_attribute->addTo(pStyle, this);
+  }
+  listener->defineStyle(pStyle);
 }
 
 void StarItemPool::updateUsingStyles(StarItemSet &itemSet) const

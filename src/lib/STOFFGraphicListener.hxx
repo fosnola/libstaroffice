@@ -168,6 +168,10 @@ public:
   void defineStyle(STOFFGraphicStyle const &style);
   /** check if a graphic style with a display name is already defined */
   bool isGraphicStyleDefined(librevenge::RVNGString const &name) const;
+  /** defines a paragraph styles, return the paragraph id */
+  void defineStyle(STOFFParagraph const &style);
+  /** check if a paragraph style with a display name is already defined */
+  bool isParagraphStyleDefined(librevenge::RVNGString const &name) const;
 
   // ------- fields ----------------
   //! adds a field type

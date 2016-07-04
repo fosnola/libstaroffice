@@ -491,6 +491,13 @@ public:
         if (listener) pool->defineGraphicStyle(listener, mStyle->m_names[0]);
         style.m_propertyList.insert("librevenge:parent-display-name", mStyle->m_names[0]);
       }
+      else {
+        std::map<int, shared_ptr<StarItem> >::const_iterator it;
+        for (it=mStyle->m_itemSet.m_whichToItemMap.begin(); it!=mStyle->m_itemSet.m_whichToItemMap.end(); ++it) {
+          if (it->second && it->second->m_attribute)
+            it->second->m_attribute->addTo(style, pool.get());
+        }
+      }
     }
 
     for (size_t i=0; i<m_itemList.size(); ++i) {
