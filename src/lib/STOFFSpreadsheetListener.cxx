@@ -1044,23 +1044,20 @@ void STOFFSpreadsheetListener::insertPicture(STOFFPosition const &pos, STOFFEmbe
   closeFrame();
 }
 
-void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style)
+void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition::AnchorTo anchor)
 {
   if (!m_ds->m_isSheetOpened) {
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertShape insert a picture outside a sheet is not implemented\n"));
     return;
   }
   // now check that the anchor is coherent with the actual state
-  librevenge::RVNGString anchor;
-  if (shape.m_propertyList["text:anchor-type"])
-    anchor=shape.m_propertyList["text:anchor-type"]->getStr();
-  if (anchor=="paragraph") {
+  if (anchor==STOFFPosition::Paragraph) {
     if (m_ps->m_isParagraphOpened)
       _flushText();
     else
       _openParagraph();
   }
-  else if (anchor=="char" || anchor=="as-char") {
+  else if (anchor==STOFFPosition::Char || anchor==STOFFPosition::CharBaseLine) {
     if (m_ps->m_isSpanOpened)
       _flushText();
     else
@@ -1071,6 +1068,9 @@ void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFF
   }
 
   librevenge::RVNGPropertyList shapeProp, styleProp;
+  STOFFPosition pos;
+  pos.m_anchorTo=anchor;
+  pos.addTo(shapeProp);
   shape.addTo(shapeProp);
   style.addTo(styleProp);
 
@@ -1104,7 +1104,7 @@ void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFF
 ///////////////////
 // frame
 ///////////////////
-bool STOFFSpreadsheetListener::openGroup()
+bool STOFFSpreadsheetListener::openGroup(STOFFPosition::AnchorTo /*anchor*/)
 {
   STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openGroup is not implemented\n"));
   return false;

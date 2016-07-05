@@ -103,6 +103,10 @@ SOURCE=..\..\src\lib\SDWParser.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\SDXParser.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFCell.cxx
 # End Source File
 # Begin Source File
@@ -216,6 +220,10 @@ SOURCE=..\..\src\lib\STOFFSubDocument.cxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFTable.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFTextListener.cxx
 # End Source File
 # Begin Source File
 
@@ -375,6 +383,10 @@ SOURCE=..\..\src\lib\SDWParser.hxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\SDXParser.hxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFCell.hxx
 # End Source File
 # Begin Source File
@@ -484,6 +496,10 @@ SOURCE=..\..\src\lib\STOFFSubDocument.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFTable.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFTextListener.hxx
 # End Source File
 # Begin Source File
 

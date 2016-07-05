@@ -39,11 +39,10 @@
 
 #include <librevenge/librevenge.h>
 
-#include "STOFFTextListener.hxx"
 #include "STOFFOLEParser.hxx"
 
-#include "SWFieldManager.hxx"
 #include "StarAttribute.hxx"
+#include "SWFieldManager.hxx"
 #include "StarObject.hxx"
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
@@ -53,22 +52,20 @@
 #include "StarObjectText.hxx"
 #include "StarZone.hxx"
 
-#include "SDWParser.hxx"
+#include "SDXParser.hxx"
 
-/** Internal: the structures of a SDWParser */
-namespace SDWParserInternal
+/** Internal: the structures of a SDXParser */
+namespace SDXParserInternal
 {
 ////////////////////////////////////////
-//! Internal: the state of a SDWParser
+//! Internal: the state of a SDXParser
 struct State {
   //! constructor
-  State() : m_actPage(0), m_numPages(0), m_mainText()
+  State() : m_actPage(0), m_numPages(0)
   {
   }
 
   int m_actPage /** the actual page */, m_numPages /** the number of page of the final document */;
-  //! the main graphic document
-  shared_ptr<StarObjectText> m_mainText;
 };
 
 }
@@ -76,19 +73,27 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SDWParser::SDWParser(STOFFInputStreamPtr input, STOFFHeader *header) :
-  STOFFTextParser(input, header), m_password(0), m_oleParser(), m_state(new SDWParserInternal::State)
+SDXParser::SDXParser(STOFFInputStreamPtr input, STOFFHeader *header) :
+  STOFFTextParser(input, header), m_password(0), m_oleParser(), m_state()
+{
+  init();
+}
+
+SDXParser::~SDXParser()
 {
 }
 
-SDWParser::~SDWParser()
+void SDXParser::init()
 {
+  setAsciiName("main-1");
+
+  m_state.reset(new SDXParserInternal::State);
 }
 
 ////////////////////////////////////////////////////////////
 // the parser
 ////////////////////////////////////////////////////////////
-void SDWParser::parse(librevenge::RVNGTextInterface *docInterface)
+void SDXParser::parse(librevenge::RVNGTextInterface *docInterface)
 {
   if (!getInput().get() || !checkHeader(0L))  throw(libstoff::ParseException());
   bool ok = true;
@@ -98,14 +103,11 @@ void SDWParser::parse(librevenge::RVNGTextInterface *docInterface)
     ok = createZones();
     if (ok) {
       createDocument(docInterface);
-#ifdef DEBUG
-      checkUnparsed();
-#endif
     }
     ascii().reset();
   }
   catch (...) {
-    STOFF_DEBUG_MSG(("SDWParser::parse: exception catched when parsing\n"));
+    STOFF_DEBUG_MSG(("SDXParser::parse: exception catched when parsing\n"));
     ok = false;
   }
 
@@ -113,31 +115,11 @@ void SDWParser::parse(librevenge::RVNGTextInterface *docInterface)
 }
 
 
-bool SDWParser::createZones()
+bool SDXParser::createZones()
 {
   m_oleParser.reset(new STOFFOLEParser);
   m_oleParser->parse(getInput());
-  shared_ptr<STOFFOLEParser::OleDirectory> mainOle=m_oleParser->getDirectory("/");
-  if (!mainOle) {
-    STOFF_DEBUG_MSG(("SDWParser::parse: can not find the main ole\n"));
-    return false;
-  }
-  mainOle->m_parsed=true;
-  StarObject mainObject(m_password, m_oleParser, mainOle);
-  if (mainObject.getDocumentKind()!=STOFFDocument::STOFF_K_TEXT) {
-    STOFF_DEBUG_MSG(("SDWParser::createZones: can not find the main graphic\n"));
-    return false;
-  }
-#ifndef DEBUG
-  return false;
-#else
-  m_state->m_mainText.reset(new StarObjectText(mainObject, false));
-  return m_state->m_mainText->parse();
-#endif
-}
 
-void SDWParser::checkUnparsed()
-{
   // send the final data
   std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > listDir=m_oleParser->getDirectoryList();
   for (size_t d=0; d<listDir.size(); ++d) {
@@ -174,7 +156,7 @@ void SDWParser::checkUnparsed()
       std::string const &name = unparsedOLEs[i];
       STOFFInputStreamPtr ole = getInput()->getSubStreamByName(name.c_str());
       if (!ole.get()) {
-        STOFF_DEBUG_MSG(("SDWParser::createZones: error: can not find OLE part: \"%s\"\n", name.c_str()));
+        STOFF_DEBUG_MSG(("SDXParser::createZones: error: can not find OLE part: \"%s\"\n", name.c_str()));
         continue;
       }
 
@@ -227,15 +209,16 @@ void SDWParser::checkUnparsed()
       asciiFile.reset();
     }
   }
+  return false;
 }
 
 ////////////////////////////////////////////////////////////
 // create the document
 ////////////////////////////////////////////////////////////
-void SDWParser::createDocument(librevenge::RVNGTextInterface *documentInterface)
+void SDXParser::createDocument(librevenge::RVNGTextInterface *documentInterface)
 {
   if (!documentInterface) return;
-  STOFF_DEBUG_MSG(("SDWParser::createDocument: not implemented, exit\n"));
+  STOFF_DEBUG_MSG(("SDXParser::createDocument: not implemented, exit\n"));
   return;
 }
 
@@ -255,25 +238,20 @@ void SDWParser::createDocument(librevenge::RVNGTextInterface *documentInterface)
 ////////////////////////////////////////////////////////////
 // read the header
 ////////////////////////////////////////////////////////////
-bool SDWParser::checkHeader(STOFFHeader *header, bool /*strict*/)
+bool SDXParser::checkHeader(STOFFHeader *header, bool /*strict*/)
 {
-  *m_state = SDWParserInternal::State();
+  *m_state = SDXParserInternal::State();
 
   STOFFInputStreamPtr input = getInput();
   if (!input || !input->hasDataFork() || !input->isStructured())
     return false;
-  STOFFInputStreamPtr textInput=input->getSubStreamByName("StarWriterDocument");
-  if (!textInput)
-    return false;
-  if (header) {
+  if (header)
     header->reset(1);
-    textInput->seek(0, librevenge::RVNG_SEEK_SET);
-    if (textInput->readULong(2)==0x5753)
-      textInput->setReadInverted(!textInput->readInverted());
-    textInput->seek(0, librevenge::RVNG_SEEK_SET);
-    header->setEncrypted((input->readULong(4)&0xFFFFF0FF)!=0x53573048); // SW[n]H
-  }
+#ifndef DEBUG
+  return false;
+#else
   return true;
+#endif
 }
 
 

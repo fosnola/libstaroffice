@@ -94,7 +94,7 @@ public:
   /** close a frame */
   void closeFrame();
   /** open a group */
-  bool openGroup();
+  bool openGroup(STOFFPosition::AnchorTo anchor);
   /** close a group */
   void closeGroup();
   /** open a layer */
@@ -185,7 +185,7 @@ public:
 
   // ------- subdocument -----------------
   /** adds a shape picture in given position */
-  void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style);
+  void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition::AnchorTo anchor);
   /** adds a textbox in given position */
   void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &style=STOFFGraphicStyle());
   /** adds a picture with potential various representationin given position */

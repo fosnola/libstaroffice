@@ -39,6 +39,7 @@
 #include "SDCParser.hxx"
 #include "SDGParser.hxx"
 #include "SDWParser.hxx"
+#include "SDXParser.hxx"
 
 #include "STOFFHeader.hxx"
 #include "STOFFGraphicDecoder.hxx"
@@ -340,20 +341,26 @@ shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, 
   shared_ptr<STOFFTextParser> parser;
   if (!header)
     return parser;
-#ifndef DEBUG
-  if (header->getKind()!=STOFFDocument::STOFF_K_TEXT)
-    return parser;
-#else
+  if (header->getKind()==STOFFDocument::STOFF_K_TEXT) {
+    try {
+      SDWParser *sdwParser=new SDWParser(input, header);
+      parser.reset(sdwParser);
+      if (passwd) sdwParser->setDocumentPassword(passwd);
+    }
+    catch (...) {
+    }
+  }
+#ifdef DEBUG
   if (header->getKind()==STOFFDocument::STOFF_K_SPREADSHEET || header->getKind()==STOFFDocument::STOFF_K_DRAW || header->getKind()==STOFFDocument::STOFF_K_GRAPHIC)
     return parser;
-#endif
   try {
-    SDWParser *sdwParser=new SDWParser(input, header);
-    parser.reset(sdwParser);
-    if (passwd) sdwParser->setDocumentPassword(passwd);
+    SDXParser *sdxParser=new SDXParser(input, header);
+    parser.reset(sdxParser);
+    if (passwd) sdxParser->setDocumentPassword(passwd);
   }
   catch (...) {
   }
+#endif
   return parser;
 }
 

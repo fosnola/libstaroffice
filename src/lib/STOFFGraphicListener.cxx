@@ -1000,7 +1000,7 @@ void STOFFGraphicListener::insertPicture(STOFFPosition const &pos, STOFFEmbedded
     m_documentInterface->drawGraphicObject(list);
 }
 
-void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style)
+void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition::AnchorTo anchor)
 {
   if (!m_ds->m_isDocumentStarted) {
     STOFF_DEBUG_MSG(("STOFFGraphicListener::insertShape: the document is not started\n"));
@@ -1009,23 +1009,23 @@ void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGrap
   if (!m_ds->m_isPageSpanOpened)
     _openPageSpan();
   // now check that the anchor is coherent with the actual state
-  librevenge::RVNGString anchor;
-  if (shape.m_propertyList["text:anchor-type"])
-    anchor=shape.m_propertyList["text:anchor-type"]->getStr();
-  if (anchor=="paragraph") {
+  if (anchor==STOFFPosition::Paragraph) {
     if (m_ps->m_isParagraphOpened)
       _flushText();
     else
       _openParagraph();
   }
-  else if (anchor=="char" || anchor=="as-char") {
+  else if (anchor==STOFFPosition::Char || anchor==STOFFPosition::CharBaseLine) {
     if (m_ps->m_isSpanOpened)
       _flushText();
     else
       _openSpan();
   }
 
+  STOFFPosition pos;
+  pos.m_anchorTo=anchor;
   librevenge::RVNGPropertyList shapeProp, styleProp;
+  pos.addTo(shapeProp);
   shape.addTo(shapeProp);
   style.addTo(styleProp);
   m_documentInterface->setStyle(styleProp);
@@ -1281,7 +1281,7 @@ void STOFFGraphicListener::closeFrame()
   m_ps->m_isFrameOpened = false;
 }
 
-bool  STOFFGraphicListener::openGroup()
+bool  STOFFGraphicListener::openGroup(STOFFPosition::AnchorTo anchor)
 {
   if (!m_ds->m_isDocumentStarted) {
     STOFF_DEBUG_MSG(("STOFFGraphicListener::openGroup: the document is not started\n"));
@@ -1294,11 +1294,14 @@ bool  STOFFGraphicListener::openGroup()
   if (!m_ds->m_isPageSpanOpened)
     _openPageSpan();
 
-  librevenge::RVNGPropertyList propList;
   _pushParsingState();
   _startSubDocument();
   m_ps->m_isGroupOpened = true;
 
+  librevenge::RVNGPropertyList propList;
+  STOFFPosition pos;
+  pos.m_anchorTo=anchor;
+  pos.addTo(propList);
   m_documentInterface->openGroup(propList);
 
   return true;

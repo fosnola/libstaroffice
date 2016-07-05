@@ -201,6 +201,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\SDXParser.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\STOFFCell.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -426,6 +434,14 @@
 				</FileConfiguration>
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFTable.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File RelativePath="..\..\src\lib\STOFFTextListener.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
 				</FileConfiguration>
@@ -699,6 +715,8 @@
 			</File>
 			<File RelativePath="..\..\src\lib\SDWParser.hxx">
 			</File>
+			<File RelativePath="..\..\src\lib\SDXParser.hxx">
+			</File>
 			<File RelativePath="..\..\src\lib\STOFFCell.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFCellStyle.hxx">
@@ -754,6 +772,8 @@
 			<File RelativePath="..\..\src\lib\STOFFSubDocument.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\STOFFTable.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\STOFFTextListener.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarAttribute.hxx">
 			</File>

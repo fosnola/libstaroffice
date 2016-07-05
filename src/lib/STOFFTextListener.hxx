@@ -1,6 +1,6 @@
 /* -*- Mode: C++; c-default-style: "k&r"; indent-tabs-mode: nil; tab-width: 2; c-basic-offset: 2 -*- */
 
-/* libstaroffice
+/* libstoff
 * Version: MPL 2.0 / LGPLv2+
 *
 * The contents of this file are subject to the Mozilla Public License Version
@@ -31,14 +31,8 @@
 * instead of those above.
 */
 
-/** \file STOFFSpreadsheetListener.hxx
- * Defines STOFFSpreadsheetListener: the libstaroffice spreadsheet processor listener
- *
- * \note this class is the only class which does the interface with
- * the librevenge::RVNGSpreadsheetInterface
- */
-#ifndef STOFF_SPREADSHEET_LISTENER_H
-#define STOFF_SPREADSHEET_LISTENER_H
+#ifndef STOFF_TEXT_LISTENER_H
+#define STOFF_TEXT_LISTENER_H
 
 #include <vector>
 
@@ -46,64 +40,79 @@
 
 #include "libstaroffice_internal.hxx"
 
+#include "STOFFGraphicStyle.hxx"
+
 #include "STOFFListener.hxx"
 
-class STOFFCell;
-class STOFFCellContent;
-class STOFFChart;
-class STOFFGraphicStyle;
-class STOFFTable;
+class STOFFTextShape;
 
-namespace STOFFSpreadsheetListenerInternal
+namespace STOFFTextListenerInternal
 {
-struct DocumentState;
+struct TextState;
 struct State;
 }
 
-/** This class contents the main functions needed to create a spreadsheet processing Document */
-class STOFFSpreadsheetListener : public STOFFListener
+/** This class contains the code needed to create Text document.
+
+    \note All units are specified in librevenge::RVNG_POINT
+ */
+class STOFFTextListener : public STOFFListener
 {
 public:
   /** constructor */
-  STOFFSpreadsheetListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface);
+  STOFFTextListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGTextInterface *documentInterface);
   /** destructor */
-  virtual ~STOFFSpreadsheetListener();
+  virtual ~STOFFTextListener();
 
   /** returns the listener type */
   Type getType() const
   {
-    return Spreadsheet;
+    return Text;
   }
 
-  /** sets the document language */
+  /** sets the documents language */
   void setDocumentLanguage(std::string locale);
   /** sets the document meta data */
   void setDocumentMetaData(const librevenge::RVNGPropertyList &list);
-
-  /** starts the document */
+  /** starts a new document */
   void startDocument();
-  /** ends the document */
+  /** ends the actual document */
   void endDocument(bool sendDelayedSubDoc=true);
+
+  // ------ general information --------
+  /** returns true if a text zone is opened */
+  bool canWriteText() const
+  {
+    return STOFFTextListener::isDocumentStarted();
+  }
+
   /** returns true if a document is opened */
   bool isDocumentStarted() const;
 
-  /** function called to add a subdocument */
+  /** function called to add a subdocument and modify the origin*/
   void handleSubDocument(STOFFSubDocumentPtr subDocument, libstoff::SubDocumentType subDocumentType);
   /** returns try if a subdocument is open  */
   bool isSubDocumentOpened(libstoff::SubDocumentType &subdocType) const;
-  /** tries to open a frame */
+  /** store the position and the style (which will be needed further to insert a textbox or a table with openTable) */
   bool openFrame(STOFFPosition const &pos, STOFFGraphicStyle const &style=STOFFGraphicStyle());
-  /** tries to close a frame */
+  /** close a frame */
   void closeFrame();
-  /** open a group (not implemented) */
+  /** open a group */
   bool openGroup(STOFFPosition::AnchorTo anchor);
-  /** close a group (not implemented) */
+  /** close a group */
   void closeGroup();
-
-  /** returns true if we can add text data */
-  bool canWriteText() const;
+  /** open a layer */
+  bool openLayer(librevenge::RVNGString const &name);
+  /** close a layer */
+  void closeLayer();
 
   // ------ page --------
+  /** opens a master page */
+  bool openMasterPage(STOFFPageSpan &/*masterPage*/);
+  /** close a master page */
+  void closeMasterPage()
+  {
+  }
   /** returns true if a page is opened */
   bool isPageSpanOpened() const;
   /** returns the current page span
@@ -127,29 +136,11 @@ public:
   /** returns true if the header/footer is open */
   bool isHeaderFooterOpened() const;
 
-  // ------- sheet -----------------
-  /** open a sheet*/
-  void openSheet(std::vector<float> const &colWidth, librevenge::RVNGUnit unit,
-                 std::vector<int> const &repeatColWidthNumber=std::vector<int>(), librevenge::RVNGString const &name="");
-  /** closes this sheet */
-  void closeSheet();
-  /** open a row with given height ( if h < 0.0, set min-row-height = -h )*/
-  void openSheetRow(float h, librevenge::RVNGUnit unit, int numRepeated=1);
-  /** closes this row */
-  void closeSheetRow();
-  /** open a cell */
-  void openSheetCell(STOFFCell const &cell, STOFFCellContent const &content, int numRepeated=1);
-  /** close a cell */
-  void closeSheetCell();
-
-  // ------- chart -----------------
-  /** adds a chart in given position */
-  void insertChart(STOFFPosition const &pos, STOFFChart &chart, STOFFGraphicStyle const &style=STOFFGraphicStyle());
-
   // ------ text data -----------
-
   //! adds a basic character, ..
   void insertChar(uint8_t character);
+  /** insert a character using the font converter to find the utf8
+      character */
   /** adds an unicode character.
    *  By convention if \a character=0xfffd(undef), no character is added */
   void insertUnicode(uint32_t character);
@@ -176,7 +167,7 @@ public:
   STOFFParagraph const &getParagraph() const;
 
   // ------ style definition -----------
-  /** defines a graphic styles */
+  /** defines a graphic styles, returns the style id */
   void defineStyle(STOFFGraphicStyle const &style);
   /** check if a graphic style with a display name is already defined */
   bool isGraphicStyleDefined(librevenge::RVNGString const &name) const;
@@ -196,24 +187,26 @@ public:
   void closeLink();
 
   // ------- subdocument -----------------
+  /** adds a shape picture in given position */
+  void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition::AnchorTo anchor);
+  /** adds a textbox in given position */
+  void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &style=STOFFGraphicStyle());
+  /** adds a picture with potential various representationin given position */
+  void insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture,
+                     STOFFGraphicStyle const &style=STOFFGraphicStyle());
   /** insert a note */
   void insertNote(STOFFNote const &note, STOFFSubDocumentPtr &subDocument);
   /** adds comment */
   void insertComment(STOFFSubDocumentPtr &subDocument, librevenge::RVNGString const &creator="", librevenge::RVNGString const &date="");
 
-  /** adds a picture with potential various representationin given position */
-  void insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture,
-                     STOFFGraphicStyle const &style=STOFFGraphicStyle());
-  /** adds a shape picture in given position */
-  void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition::AnchorTo anchor);
-  /** adds a textbox in given position */
-  void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument,
-                     STOFFGraphicStyle const &frameStyle=STOFFGraphicStyle());
   // ------- table -----------------
+
   /** adds a table in given position */
   void insertTable(STOFFPosition const &pos, STOFFTable &table, STOFFGraphicStyle const &style=STOFFGraphicStyle());
-  /** open a table */
+  /** open a table (using the last parameters of openFrame for the position ) */
   void openTable(STOFFTable const &table);
+  /** open a table in a given position */
+  void openTable(STOFFPosition const &pos, STOFFTable const &table);
   /** closes this table */
   void closeTable();
   /** open a row with given height ( if h < 0.0, set min-row-height = -h )*/
@@ -228,16 +221,11 @@ public:
   void addEmptyTableCell(STOFFVec2i const &pos, STOFFVec2i span=STOFFVec2i(1,1));
 
   // ------- section ---------------
+
   /** returns true if we can add open a section, add page break, ... */
-  bool canOpenSectionAddBreak() const
-  {
-    return false;
-  }
+  bool canOpenSectionAddBreak() const;
   //! returns true if a section is opened
-  bool isSectionOpened() const
-  {
-    return false;
-  }
+  bool isSectionOpened() const;
   //! returns the actual section
   STOFFSection const &getSection() const;
   //! open a section if possible
@@ -248,6 +236,10 @@ public:
   void insertBreak(BreakType breakType);
 
 protected:
+  //! does open a section (low level)
+  void _openSection();
+  //! does close a section (low level)
+  void _closeSection();
   //! does open a new page (low level)
   void _openPageSpan(bool sendHeaderFooters=true);
   //! does close a page (low level)
@@ -256,10 +248,14 @@ protected:
   void _startSubDocument();
   void _endSubDocument();
 
-  void _handleFrameParameters(librevenge::RVNGPropertyList &propList, STOFFPosition const &pos);
+  /** adds in propList the frame parameters.
+
+   \note if there is some gradient, first draw a rectangle to print the gradient and them update propList */
+  void _handleFrameParameters(librevenge::RVNGPropertyList &propList, STOFFPosition const &pos, STOFFGraphicStyle const &style);
 
   void _openParagraph();
   void _closeParagraph();
+  void _appendParagraphProperties(librevenge::RVNGPropertyList &propList, const bool isListElement=false);
   void _resetParagraphState(const bool isListElement=false);
 
   /** open a list level */
@@ -274,36 +270,40 @@ protected:
   */
   int _getListId() const;
 
+  /** low level: the function which opens a new span property */
   void _openSpan();
+  /** low level: the function which closes the last opened span property */
   void _closeSpan();
 
+  /** low level: flush the deferred text */
   void _flushText();
+  /** low level: flush the deferred tabs */
   void _flushDeferredTabs();
+
+  void _insertBreakIfNecessary(librevenge::RVNGPropertyList &propList);
 
   /** creates a new parsing state (copy of the actual state)
    *
    * \return the old one */
-  shared_ptr<STOFFSpreadsheetListenerInternal::State> _pushParsingState();
+  shared_ptr<STOFFTextListenerInternal::State> _pushParsingState();
   //! resets the previous parsing state
   void _popParsingState();
 
 protected:
-  //! the main parse state
-  shared_ptr<STOFFSpreadsheetListenerInternal::DocumentState> m_ds;
+  //! the actual global state
+  shared_ptr<STOFFTextListenerInternal::TextState> m_ds;
   //! the actual local parse state
-  shared_ptr<STOFFSpreadsheetListenerInternal::State> m_ps;
+  shared_ptr<STOFFTextListenerInternal::State> m_ps;
   //! stack of local state
-  std::vector<shared_ptr<STOFFSpreadsheetListenerInternal::State> > m_psStack;
+  std::vector<shared_ptr<STOFFTextListenerInternal::State> > m_psStack;
   //! the list manager
   STOFFListManagerPtr m_listManager;
   //! the document interface
-  librevenge::RVNGSpreadsheetInterface *m_documentInterface;
+  librevenge::RVNGTextInterface *m_documentInterface;
 
 private:
-  //! copy constructor (unimplemented)
-  STOFFSpreadsheetListener(const STOFFSpreadsheetListener &);
-  //! operator= (unimplemented)
-  STOFFSpreadsheetListener &operator=(const STOFFSpreadsheetListener &);
+  STOFFTextListener(const STOFFTextListener &);
+  STOFFTextListener &operator=(const STOFFTextListener &);
 };
 
 #endif

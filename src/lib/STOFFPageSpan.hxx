@@ -107,6 +107,8 @@ public:
   std::map<std::string, STOFFHeaderFooter> m_occurrenceHFMap[2];
   //! the actual zone type
   ZoneType m_actualZone;
+  //! the page number ( or -1)
+  int m_pageNumber;
 };
 
 #endif

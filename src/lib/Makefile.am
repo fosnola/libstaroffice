@@ -20,6 +20,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	SDGParser.hxx				\
 	SDWParser.cxx				\
 	SDWParser.hxx				\
+	SDXParser.cxx				\
+	SDXParser.hxx				\
 	STOFFCell.cxx				\
 	STOFFCell.hxx				\
 	STOFFCellStyle.cxx			\
@@ -77,6 +79,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFSubDocument.hxx			\
 	STOFFTable.cxx				\
 	STOFFTable.hxx				\
+	STOFFTextListener.cxx			\
+	STOFFTextListener.hxx			\
 	StarAttribute.cxx			\
 	StarAttribute.hxx			\
 	StarBitmap.cxx				\

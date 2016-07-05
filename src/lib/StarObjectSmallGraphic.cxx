@@ -553,7 +553,7 @@ public:
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicGroup::send: unexpected listener\n"));
       return false;
     }
-    listener->openGroup();
+    listener->openGroup(STOFFPosition::Page);
     for (size_t c=0; c<m_child.size(); ++c) {
       if (m_child[c])
         m_child[c]->send(listener, object, inMasterPage);
@@ -701,10 +701,9 @@ public:
       shape.m_command=STOFFGraphicShape::C_Rectangle;
       shape.m_bdbox=STOFFBox2f(libstoff::convertMiniMToPointVect(m_textRectangle[0]), libstoff::convertMiniMToPointVect(m_textRectangle[1]));
       updateTransformProperties(shape.m_propertyList);
-      shape.m_propertyList.insert("text:anchor-type", "page");
       STOFFGraphicStyle style;
       updateStyle(style, object, listener);
-      listener->insertShape(shape, style);
+      listener->insertShape(shape, style, STOFFPosition::Page);
       if (m_outlinerParaObject)
         sendTextZone(listener, object);
     }
@@ -786,10 +785,9 @@ public:
     polygon.addToPath(path, false);
     shape.m_propertyList.insert("svg:d", path);
     updateTransformProperties(shape.m_propertyList);
-    shape.m_propertyList.insert("text:anchor-type", "page");
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
-    listener->insertShape(shape, style);
+    listener->insertShape(shape, style, STOFFPosition::Page);
     return true;
   }
   //! a polygon
@@ -844,10 +842,9 @@ public:
       shape.m_propertyList.insert("draw:kind", wh[m_identifier-4]);
     }
     updateTransformProperties(shape.m_propertyList);
-    shape.m_propertyList.insert("text:anchor-type", "page");
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
-    listener->insertShape(shape, style);
+    listener->insertShape(shape, style, STOFFPosition::Page);
     if (m_outlinerParaObject)
       sendTextZone(listener, object);
     return true;
@@ -971,10 +968,9 @@ public:
     polygon.addToPath(path, false);
     shape.m_propertyList.insert("svg:d", path);
     updateTransformProperties(shape.m_propertyList);
-    shape.m_propertyList.insert("text:anchor-type", "page");
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
-    listener->insertShape(shape, style);
+    listener->insertShape(shape, style, STOFFPosition::Page);
     return true;
   }
   //! the edge polygon
@@ -1127,8 +1123,7 @@ public:
     }
     shape.m_propertyList.insert("svg:points", vect);
     updateTransformProperties(shape.m_propertyList);
-    shape.m_propertyList.insert("text:anchor-type", "page");
-    listener->insertShape(shape, style);
+    listener->insertShape(shape, style, STOFFPosition::Page);
     return true;
   }
   //! try to update the style
@@ -1353,8 +1348,7 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object, bool in
       }
       shape.m_propertyList.insert("svg:points", vect);
       updateTransformProperties(shape.m_propertyList);
-      shape.m_propertyList.insert("text:anchor-type", "page");
-      listener->insertShape(shape, style);
+      listener->insertShape(shape, style, STOFFPosition::Page);
       if (m_outlinerParaObject)
         sendTextZone(listener, object);
       return true;
@@ -1408,8 +1402,7 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object, bool in
     shape.m_propertyList.insert("svg:d", path);
   }
   updateTransformProperties(shape.m_propertyList);
-  shape.m_propertyList.insert("text:anchor-type", "page");
-  listener->insertShape(shape, style);
+  listener->insertShape(shape, style, STOFFPosition::Page);
   if (m_outlinerParaObject)
     sendTextZone(listener, object);
   return true;

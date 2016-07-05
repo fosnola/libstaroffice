@@ -32,11 +32,11 @@
 */
 
 /*
- * Parser to convert sdw StarOffice document
+ * Parser to convert sdX StarOffice document
  *
  */
-#ifndef SDW_PARSER
-#  define SDW_PARSER
+#ifndef SDX_PARSER
+#  define SDX_PARSER
 
 #include <vector>
 
@@ -46,7 +46,7 @@
 
 #include "STOFFParser.hxx"
 
-namespace SDWParserInternal
+namespace SDXParserInternal
 {
 struct State;
 }
@@ -56,18 +56,18 @@ class StarObject;
 class StarZone;
 class STOFFOLEParser;
 class StarFormatManager;
-/** \brief the main class to read a StarOffice sdw file
+/** \brief the main class to read a StarOffice sdX file
  *
  *
  *
  */
-class SDWParser : public STOFFTextParser
+class SDXParser : public STOFFTextParser
 {
 public:
   //! constructor
-  SDWParser(STOFFInputStreamPtr input, STOFFHeader *header);
+  SDXParser(STOFFInputStreamPtr input, STOFFHeader *header);
   //! destructor
-  virtual ~SDWParser();
+  virtual ~SDXParser();
   //! set the document password
   void setDocumentPassword(char const *passwd)
   {
@@ -80,14 +80,14 @@ public:
   void parse(librevenge::RVNGTextInterface *documentInterface);
 
 protected:
+  //! inits all internal variables
+  void init();
+
   //! creates the listener which will be associated to the document
   void createDocument(librevenge::RVNGTextInterface *documentInterface);
 
   //! parses the different OLE, ...
   bool createZones();
-
-  //! check for unparsed zone
-  void checkUnparsed();
 
   //
   // low level
@@ -102,10 +102,10 @@ protected:
   //! the ole parser
   shared_ptr<STOFFOLEParser> m_oleParser;
   //! the state
-  shared_ptr<SDWParserInternal::State> m_state;
+  shared_ptr<SDXParserInternal::State> m_state;
 private:
-  SDWParser(SDWParser const &orig);
-  SDWParser &operator=(SDWParser const &orig);
+  SDXParser(SDXParser const &orig);
+  SDXParser &operator=(SDXParser const &orig);
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
