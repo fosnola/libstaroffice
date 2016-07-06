@@ -68,6 +68,9 @@ public:
 
   //! low level
 
+  //! check for unparsed zone
+  static void checkUnparsed(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, char const *password);
+
   //! try to read a Ole directory
   static bool readOLEDirectory(shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> ole, STOFFEmbeddedObject &image);
 

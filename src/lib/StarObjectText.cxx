@@ -40,9 +40,12 @@
 #include <librevenge/librevenge.h>
 
 #include "STOFFOLEParser.hxx"
+#include "STOFFPageSpan.hxx"
+#include "STOFFTextListener.hxx"
+
+#include "SWFieldManager.hxx"
 
 #include "StarAttribute.hxx"
-#include "SWFieldManager.hxx"
 #include "StarFormatManager.hxx"
 #include "StarObject.hxx"
 #include "StarFileManager.hxx"
@@ -61,9 +64,11 @@ namespace StarObjectTextInternal
 //! Internal: the state of a StarObjectText
 struct State {
   //! constructor
-  State()
+  State() : m_numPages(0)
   {
   }
+  //! the number of pages
+  int m_numPages;
 };
 
 }
@@ -81,6 +86,31 @@ StarObjectText::~StarObjectText()
 }
 
 ////////////////////////////////////////////////////////////
+// send the data
+////////////////////////////////////////////////////////////
+bool StarObjectText::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const
+{
+  STOFF_DEBUG_MSG(("StarObjectText::updatePageSpans: not implemented\n"));
+  numPages=1;
+  STOFFPageSpan ps;
+  ps.m_pageSpan=numPages;
+  pageSpan.clear();
+  pageSpan.push_back(ps);
+  m_textState->m_numPages=numPages;
+  return numPages>0;
+}
+
+bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarObjectText::sendPages: can not find the listener\n"));
+    return false;
+  }
+  STOFF_DEBUG_MSG(("StarObjectText::sendPages: not implemented\n"));
+  return true;
+}
+
+////////////////////////////////////////////////////////////
 // the parser
 ////////////////////////////////////////////////////////////
 bool StarObjectText::parse()
@@ -95,6 +125,8 @@ bool StarObjectText::parse()
   size_t numUnparsed = unparsedOLEs.size();
   STOFFInputStreamPtr input=directory.m_input;
   StarFileManager fileManager;
+  STOFFInputStreamPtr mainOle; // let store the StarWriterDocument to read it in last position
+  std::string mainName;
   for (size_t i = 0; i < numUnparsed; i++) {
     std::string const &name = unparsedOLEs[i];
     STOFFInputStreamPtr ole = input->getSubStreamByName(name.c_str());
@@ -128,7 +160,8 @@ bool StarObjectText::parse()
       continue;
     }
     if (base=="StarWriterDocument") {
-      readWriterDocument(ole,name);
+      mainOle=ole;
+      mainName=name;
       continue;
     }
     if (base!="BasicManager2") {
@@ -143,6 +176,12 @@ bool StarObjectText::parse()
     asciiFile.addNote(f.str().c_str());
     asciiFile.reset();
   }
+  if (!mainOle) {
+    STOFF_DEBUG_MSG(("StarObjectText::parser: can not find the main writer document\n"));
+    return false;
+  }
+  else
+    readWriterDocument(mainOle,mainName);
   return true;
 }
 

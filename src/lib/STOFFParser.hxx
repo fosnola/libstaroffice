@@ -74,6 +74,8 @@ public:
   STOFFGraphicListenerPtr m_graphicListener;
   //! the spreadsheet listener
   STOFFSpreadsheetListenerPtr m_spreadsheetListener;
+  //! the text listener
+  STOFFTextListenerPtr m_textListener;
 
   //! the debug file
   libstoff::DebugFile m_asciiFile;
@@ -132,6 +134,11 @@ public:
   {
     return m_parserState->m_spreadsheetListener;
   }
+  //! returns the text listener
+  STOFFTextListenerPtr &getTextListener()
+  {
+    return m_parserState->m_textListener;
+  }
   //! a DebugFile used to write what we recognize when we parse the document
   libstoff::DebugFile &ascii()
   {
@@ -150,12 +157,16 @@ protected:
   }
   //! sets the graphic listener
   void setGraphicListener(STOFFGraphicListenerPtr &listener);
-  //! resets the listener
+  //! resets the graphic listener
   void resetGraphicListener();
   //! sets the spreadsheet listener
   void setSpreadsheetListener(STOFFSpreadsheetListenerPtr &listener);
-  //! resets the listener
+  //! resets the spreadsheet listener
   void resetSpreadsheetListener();
+  //! sets the text listener
+  void setTextListener(STOFFTextListenerPtr &listener);
+  //! resets the text listener
+  void resetTextListener();
   //! Debugging: change the default ascii file
   void setAsciiName(char const *name)
   {

@@ -89,9 +89,6 @@ protected:
   //! try to send the spreadsheet
   bool sendSpreadsheet();
 
-  //! check for unparsed zone
-  void checkUnparsed();
-
   //
   // low level
   //

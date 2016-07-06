@@ -478,6 +478,7 @@ class STOFFListManager;
 class STOFFParserState;
 class STOFFSpreadsheetListener;
 class STOFFSubDocument;
+class STOFFTextListener;
 //! a smart pointer of STOFFGraphicListener
 typedef shared_ptr<STOFFGraphicListener> STOFFGraphicListenerPtr;
 //! a smart pointer of STOFFInputStream
@@ -492,6 +493,8 @@ typedef shared_ptr<STOFFParserState> STOFFParserStatePtr;
 typedef shared_ptr<STOFFSpreadsheetListener> STOFFSpreadsheetListenerPtr;
 //! a smart pointer of STOFFSubDocument
 typedef shared_ptr<STOFFSubDocument> STOFFSubDocumentPtr;
+//! a smart pointer of STOFFTextListener
+typedef shared_ptr<STOFFTextListener> STOFFTextListenerPtr;
 
 /** a generic variable template: value + flag to know if the variable is set
 

@@ -36,12 +36,13 @@
 #include "STOFFList.hxx"
 #include "STOFFGraphicListener.hxx"
 #include "STOFFSpreadsheetListener.hxx"
+#include "STOFFTextListener.hxx"
 
 #include "STOFFParser.hxx"
 
 STOFFParserState::STOFFParserState(STOFFParserState::Type type, STOFFInputStreamPtr input, STOFFHeader *header) :
   m_type(type), m_kind(STOFFDocument::STOFF_K_TEXT), m_version(0), m_input(input), m_header(header),
-  m_pageSpan(), m_listManager(), m_graphicListener(), m_spreadsheetListener(),
+  m_pageSpan(), m_listManager(), m_graphicListener(), m_spreadsheetListener(), m_textListener(),
   m_asciiFile(input)
 {
   if (header) {
@@ -85,6 +86,17 @@ void STOFFParser::resetSpreadsheetListener()
 {
   if (getSpreadsheetListener()) getSpreadsheetListener()->endDocument();
   m_parserState->m_spreadsheetListener.reset();
+}
+
+void STOFFParser::setTextListener(STOFFTextListenerPtr &listener)
+{
+  m_parserState->m_textListener=listener;
+}
+
+void STOFFParser::resetTextListener()
+{
+  if (getTextListener()) getTextListener()->endDocument();
+  m_parserState->m_textListener.reset();
 }
 
 STOFFGraphicParser::~STOFFGraphicParser()

@@ -66,6 +66,11 @@ public:
   // try to parse all zone
   bool parse();
 
+  /** try to update the page span (to create draw document)*/
+  bool updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const;
+  //! try to send the different page
+  bool sendPages(STOFFTextListenerPtr listener);
+
   //! try to read a image map zone : 'X'
   static bool readSWImageMap(StarZone &zone);
   //! try to read a attribute list: 'S'

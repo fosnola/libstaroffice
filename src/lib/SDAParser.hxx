@@ -86,9 +86,6 @@ protected:
   //! parses the different OLE, ...
   bool createZones();
 
-  //! check for unparsed zone
-  void checkUnparsed();
-
   //
   // low level
   //

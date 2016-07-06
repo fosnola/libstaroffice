@@ -346,6 +346,7 @@ shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, 
       SDWParser *sdwParser=new SDWParser(input, header);
       parser.reset(sdwParser);
       if (passwd) sdwParser->setDocumentPassword(passwd);
+      return parser;
     }
     catch (...) {
     }

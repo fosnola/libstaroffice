@@ -413,6 +413,101 @@ bool StarFileManager::readOLEDirectory(shared_ptr<STOFFOLEParser> oleParser, sha
   return !image.isEmpty();
 }
 
+void StarFileManager::checkUnparsed(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, char const *password)
+{
+  if (!input || !oleParser) {
+    STOFF_DEBUG_MSG(("StarFileManager::readOLEDirectory: can not find the input/ole parser\n"));
+    return;
+  }
+  std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > listDir=oleParser->getDirectoryList();
+  for (size_t d=0; d<listDir.size(); ++d) {
+    if (!listDir[d] || listDir[d]->m_parsed) continue;
+    listDir[d]->m_parsed=true;
+    StarObject object(password, oleParser, listDir[d]);
+    if (object.getDocumentKind()==STOFFDocument::STOFF_K_CHART) {
+      StarObjectChart chart(object, false);
+      chart.parse();
+      continue;
+    }
+    if (object.getDocumentKind()==STOFFDocument::STOFF_K_DRAW) {
+      StarObjectDraw draw(object, false);
+      draw.parse();
+      continue;
+    }
+    if (object.getDocumentKind()==STOFFDocument::STOFF_K_SPREADSHEET) {
+      StarObjectSpreadsheet spreadsheet(object, false);
+      spreadsheet.parse();
+      continue;
+    }
+    if (object.getDocumentKind()==STOFFDocument::STOFF_K_TEXT) {
+      StarObjectText text(object, false);
+      text.parse();
+      continue;
+    }
+    // Ole-Object has persist elements, so...
+    if (listDir[d]->m_hasCompObj) object.parse();
+    STOFFOLEParser::OleDirectory &direct=*listDir[d];
+    std::vector<std::string> unparsedOLEs=direct.getUnparsedOles();
+    size_t numUnparsed = unparsedOLEs.size();
+    for (size_t i = 0; i < numUnparsed; i++) {
+      std::string const &name = unparsedOLEs[i];
+      STOFFInputStreamPtr ole = input->getSubStreamByName(name.c_str());
+      if (!ole.get()) {
+        STOFF_DEBUG_MSG(("SDWParser::createZones: error: can not find OLE part: \"%s\"\n", name.c_str()));
+        continue;
+      }
+
+      std::string::size_type pos = name.find_last_of('/');
+      std::string base;
+      if (pos == std::string::npos) base = name;
+      else base = name.substr(pos+1);
+      ole->setReadInverted(true);
+      if (base=="SfxStyleSheets") {
+        object.readSfxStyleSheets(ole,name);
+        continue;
+      }
+
+      if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
+        librevenge::RVNGBinaryData data;
+        readImageDocument(ole,data,name);
+        continue;
+      }
+      if (base=="StarMathDocument") {
+        readMathDocument(ole,name,object);
+        continue;
+      }
+      if (base.compare(0,3,"Pic")==0) {
+        librevenge::RVNGBinaryData data;
+        std::string type;
+        readEmbeddedPicture(ole,data,type,name,object);
+        continue;
+      }
+      // other
+      if (base=="Ole-Object") {
+        librevenge::RVNGBinaryData data;
+        readOleObject(ole,data,name);
+        continue;
+      }
+      libstoff::DebugFile asciiFile(ole);
+      asciiFile.open(name);
+
+      bool ok=false;
+      if (base=="OutPlace Object")
+        ok=readOutPlaceObject(ole, asciiFile);
+      if (!ok) {
+        libstoff::DebugStream f;
+        if (base=="Standard") // can be Standard or STANDARD
+          f << "Entries(STANDARD):";
+        else
+          f << "Entries(" << base << "):";
+        asciiFile.addPos(0);
+        asciiFile.addNote(f.str().c_str());
+      }
+      asciiFile.reset();
+    }
+  }
+}
+
 bool StarFileManager::readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName)
 {
   // see this Ole with classic bitmap format
