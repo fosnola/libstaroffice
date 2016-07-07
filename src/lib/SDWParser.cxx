@@ -124,12 +124,8 @@ bool SDWParser::createZones()
     STOFF_DEBUG_MSG(("SDWParser::createZones: can not find the main graphic\n"));
     return false;
   }
-#ifndef DEBUG
-  return false;
-#else
   m_state->m_mainText.reset(new StarObjectText(mainObject, false));
   return m_state->m_mainText->parse();
-#endif
 }
 
 ////////////////////////////////////////////////////////////

@@ -87,8 +87,8 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *mainPool, S
 
   std::map<int, shared_ptr<StarItem> >::const_iterator it;
   STOFFFont mainFont;
-  mainFont.m_relativeFontUnit=0.028346457;
   STOFFParagraph para;
+  para.m_relativeUnit=mainFont.m_relativeUnit=0.028346457;
   if (mainPool && !m_styleName.empty()) { // checkme
     StarItemStyle const *style=mainPool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
     if (style) {
@@ -146,7 +146,7 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *mainPool, S
     }
     if (fontChange) {
       STOFFFont font(mainFont);
-      font.m_relativeFontUnit=0.028346457;
+      font.m_relativeUnit=0.028346457;
       for (size_t f=0; f<numFonts; ++f) {
         if (m_charLimitList[f][0]>int(srcPos) || m_charLimitList[f][1]<=int(srcPos))
           continue;
@@ -156,7 +156,12 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *mainPool, S
       }
       listener->setFont(font);
     }
-    listener->insertUnicode(m_text[c]);
+    if (m_text[c]==0x9)
+      listener->insertTab();
+    else if (m_text[c]==0xa)
+      listener->insertEOL(true);
+    else
+      listener->insertUnicode(m_text[c]);
   }
   return true;
 }

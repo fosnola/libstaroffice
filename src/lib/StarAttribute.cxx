@@ -627,6 +627,21 @@ bool StarAttributeVoid::read(StarZone &zone, int /*vers*/, long /*endPos*/, Star
   return true;
 }
 
+bool StarAttributeItemSet::send(STOFFListenerPtr listener, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
+{
+  if (done.find(this)!=done.end()) {
+    STOFF_DEBUG_MSG(("StarAttributeItemSet::send: find a cycle\n"));
+    return false;
+  }
+  done.insert(this);
+  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
+       it!=m_itemSet.m_whichToItemMap.end(); ++it) {
+    if (it->second && it->second->m_attribute)
+      it->second->m_attribute->send(listener, pool, done);
+  }
+  return true;
+}
+
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
@@ -896,37 +911,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
       object.getFormatManager()->readSWFormatDef(zone,'l', object);
     break;
   }
-  case StarAttribute::ATTR_TXT_FTN: {
-    f << "textAtrFtn,";
-    // sw_sw3npool.cxx SwFmtFtn::Create
-    f << "number1=" << input->readULong(2) << ",";
-    std::vector<uint32_t> string;
-    if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the aNumber\n"));
-      f << "###aNumber,";
-      break;
-    }
-    if (!string.empty())
-      f << "aNumber=" << libstoff::getString(string).cstr() << ",";
-    // no sure, find this attribute once with a content here, so ...
-    StarObjectText text(object, false); // checkme
-    if (!text.readSWContent(zone)) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the content\n"));
-      f << "###aContent,";
-      break;
-    }
-    if (nVers>=1) {
-      uint16_t nSeqNo;
-      *input >> nSeqNo;
-      if (nSeqNo) f << "nSeqNo=" << nSeqNo << ",";
-    }
-    if (nVers>=1) {
-      uint8_t nFlags;
-      *input >> nFlags;
-      if (nFlags) f << "nFlags=" << nFlags << ",";
-    }
-    break;
-  }
   case StarAttribute::ATTR_TXT_HARDBLANK: // ok no data
     f << "textAtrHardBlank,";
     if (nVers>=1)
@@ -972,7 +956,8 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
         break;
       }
       StarObjectText text(object, false); // checkme
-      if (!text.readSWContent(zone) || input->tell()<=actPos) {
+      shared_ptr<StarObjectTextInternal::Content> content;
+      if (!text.readSWContent(zone, content) || input->tell()<=actPos) {
         STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: find unknown pageCntnt child\n"));
         f << "###child";
         break;

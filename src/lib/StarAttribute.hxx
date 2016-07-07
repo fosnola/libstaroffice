@@ -777,6 +777,12 @@ public:
     std::set<StarAttribute const *> done;
     addTo(para, pool, done);
   }
+  //! add to send the zone data
+  bool send(STOFFListenerPtr listener, StarItemPool const *pool) const
+  {
+    std::set<StarAttribute const *> done;
+    return send(listener, pool, done);
+  }
   //! add to a cell style(internal)
   virtual void addTo(STOFFCellStyle &/*cell*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
   {
@@ -796,6 +802,11 @@ public:
   //! add to a paragraph(internal)
   virtual void addTo(STOFFParagraph &/*para*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
   {
+  }
+  //! try to send the child zone(internal)
+  virtual bool send(STOFFListenerPtr /*listener*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+  {
+    return false;
   }
   //! returns the debug name
   std::string const &getDebugName() const
@@ -1077,6 +1088,8 @@ protected:
   virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
   //! add to a paragraph
   virtual void addTo(STOFFParagraph &para, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
+  //! try to send the sone data
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
 
   //! copy constructor
   StarAttributeItemSet(StarAttributeItemSet const &orig) : StarAttribute(orig), m_limits(orig.m_limits), m_itemSet()

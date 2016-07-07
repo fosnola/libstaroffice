@@ -45,6 +45,36 @@
 
 namespace StarObjectTextInternal
 {
+//! Internal: a basic sone of StarObjectTextInternal
+struct Zone {
+  //! constructor
+  Zone()
+  {
+  }
+  //! destructor
+  virtual ~Zone();
+  //! try to send the data to a listener
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool) const=0;
+};
+
+//! Internal: a set of zone
+struct Content {
+  //! constructor
+  Content() : m_zoneList()
+  {
+  }
+  //! destructor
+  ~Content();
+  //! try to send the data to a listener
+  bool send(STOFFListenerPtr listener, StarItemPool const *pool) const;
+  //! the list of text zone
+  std::vector<shared_ptr<Zone> > m_zoneList;
+};
+
+struct Table;
+struct TableBox;
+struct TableLine;
+struct TextZone;
 struct State;
 }
 
@@ -78,7 +108,7 @@ public:
                                   std::vector<shared_ptr<StarAttribute> > &attributeList, std::vector<STOFFVec2i> &limitsList);
 
   //! try to read some content : 'N'
-  bool readSWContent(StarZone &zone);
+  bool readSWContent(StarZone &zone, shared_ptr<StarObjectTextInternal::Content> &content);
 protected:
   //
   // low level
@@ -132,13 +162,13 @@ protected:
   //! try to read a section : 'I'
   bool readSWSection(StarZone &zone);
   //! try to read a table : 'E'
-  bool readSWTable(StarZone &zone);
+  bool readSWTable(StarZone &zone, shared_ptr<StarObjectTextInternal::Table> &table);
   //! try to read a table box : 't'
-  bool readSWTableBox(StarZone &zone);
+  bool readSWTableBox(StarZone &zone, shared_ptr<StarObjectTextInternal::TableBox> &box);
   //! try to read a table line : 'L'
-  bool readSWTableLine(StarZone &zone);
+  bool readSWTableLine(StarZone &zone, shared_ptr<StarObjectTextInternal::TableLine> &line);
   //! try to read some content : 'T'
-  bool readSWTextZone(StarZone &zone);
+  bool readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInternal::TextZone> &textZone);
   //! try to read a list of TOX : 'u' ( list of 'x')
   bool readSWTOXList(StarZone &zone);
   //! try to read a list of TOX51 : 'y' ( list of 'x')

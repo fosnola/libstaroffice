@@ -659,7 +659,7 @@ void StarPAttributeDrop::addTo(STOFFParagraph &para, StarItemPool const */*pool*
 {
   if (m_type==ATTR_PARA_DROP) {
     librevenge::RVNGPropertyList cap;
-    cap.insert("style:distance", libstoff::convertMiniMToPoint(m_numDistances), librevenge::RVNG_POINT);
+    cap.insert("style:distance", para.m_relativeUnit*double(m_numDistances), librevenge::RVNG_POINT);
     cap.insert("style:length", m_numChars);
     cap.insert("style:lines", m_numLines);
     librevenge::RVNGPropertyListVector capVector;
@@ -681,10 +681,10 @@ void StarPAttributeLineSpacing::addTo(STOFFParagraph &para, StarItemPool const *
     case 0:
       break;
     case 1:
-      para.m_propertyList.insert("fo:line-height", libstoff::convertMiniMToPoint(m_height), librevenge::RVNG_POINT);
+      para.m_propertyList.insert("fo:line-height", para.m_relativeUnit*double(m_height), librevenge::RVNG_POINT);
       break;
     case 2:
-      para.m_propertyList.insert("fo:line-height-at-least", libstoff::convertMiniMToPoint(m_height), librevenge::RVNG_POINT);
+      para.m_propertyList.insert("fo:line-height-at-least", para.m_relativeUnit*double(m_height), librevenge::RVNG_POINT);
       break;
     default:
       STOFF_DEBUG_MSG(("StarPAttributeLineSpacing::addTo: unknown rule %d\n", int(m_lineSpaceRule)));
@@ -697,7 +697,7 @@ void StarPAttributeLineSpacing::addTo(STOFFParagraph &para, StarItemPool const *
         para.m_propertyList.insert("style:line-spacing", double(m_lineSpace<50 ? 50 : m_lineSpace)/100., librevenge::RVNG_PERCENT);
       break;
     case 2: // Fix
-      para.m_propertyList.insert("style:line-spacing", libstoff::convertMiniMToPoint(m_lineSpace), librevenge::RVNG_POINT);
+      para.m_propertyList.insert("style:line-spacing", para.m_relativeUnit*double(m_lineSpace), librevenge::RVNG_POINT);
       break;
     default:
       STOFF_DEBUG_MSG(("StarPAttributeLineSpacing::addTo: unknown inter linse spacing rule %d\n", int(m_interLineSpaceRule)));
@@ -709,16 +709,16 @@ void StarPAttributeLRSpace::addTo(STOFFParagraph &para, StarItemPool const */*po
 {
   if (m_type==ATTR_FRM_LR_SPACE || m_type==ATTR_EE_PARA_OUTLLR_SPACE) {
     if (m_propMargins[0]==100)
-      para.m_propertyList.insert("fo:margin-left", libstoff::convertMiniMToPoint(m_margins[0]), librevenge::RVNG_POINT);
+      para.m_propertyList.insert("fo:margin-left", para.m_relativeUnit*double(m_margins[0]), librevenge::RVNG_POINT);
     else
       para.m_propertyList.insert("fo:margin-left", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
 
     if (m_propMargins[1]==100)
-      para.m_propertyList.insert("fo:margin-right", libstoff::convertMiniMToPoint(m_margins[1]), librevenge::RVNG_POINT);
+      para.m_propertyList.insert("fo:margin-right", para.m_relativeUnit*double(m_margins[1]), librevenge::RVNG_POINT);
     else
       para.m_propertyList.insert("fo:margin-right", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
     if (m_propMargins[2]==100)
-      para.m_propertyList.insert("fo:text-indent", libstoff::convertMiniMToPoint(m_margins[2]), librevenge::RVNG_POINT);
+      para.m_propertyList.insert("fo:text-indent", para.m_relativeUnit*double(m_margins[2]), librevenge::RVNG_POINT);
     else
       para.m_propertyList.insert("fo:text-indent", double(m_propMargins[2])/100., librevenge::RVNG_PERCENT);
     // m_textLeft: ok to ignore ?
@@ -781,7 +781,7 @@ void StarPAttributeTabStop::addTo(STOFFParagraph &para, StarItemPool const */*po
       tab.insert("style:leader-text", sFill);
       tab.insert("style:leader-style", "solid");
     }
-    tab.insert("style:position", libstoff::convertMiniMToPoint(tabStop.m_pos), librevenge::RVNG_POINT);
+    tab.insert("style:position", para.m_relativeUnit*double(tabStop.m_pos), librevenge::RVNG_POINT);
     tabs.append(tab);
   }
   para.m_propertyList.insert("style:tab-stops", tabs);
@@ -791,12 +791,12 @@ void StarPAttributeULSpace::addTo(STOFFParagraph &para, StarItemPool const */*po
 {
   if (m_type==ATTR_FRM_UL_SPACE) {
     if (m_propMargins[0]==100)
-      para.m_propertyList.insert("fo:margin-top", libstoff::convertMiniMToPoint(m_margins[0]), librevenge::RVNG_POINT);
+      para.m_propertyList.insert("fo:margin-top", para.m_relativeUnit*double(m_margins[0]), librevenge::RVNG_POINT);
     else
       para.m_propertyList.insert("fo:margin-top", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
 
     if (m_propMargins[1]==100)
-      para.m_propertyList.insert("fo:margin-bottom", libstoff::convertMiniMToPoint(m_margins[1]), librevenge::RVNG_POINT);
+      para.m_propertyList.insert("fo:margin-bottom", para.m_relativeUnit*double(m_margins[1]), librevenge::RVNG_POINT);
     else
       para.m_propertyList.insert("fo:margin-bottom", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
   }

@@ -32,11 +32,14 @@
 */
 
 #include "STOFFFont.hxx"
+#include "STOFFListener.hxx"
+#include "STOFFSubDocument.hxx"
 
 #include "StarAttribute.hxx"
 #include "StarItemPool.hxx"
 #include "StarLanguage.hxx"
 #include "StarObject.hxx"
+#include "StarObjectText.hxx"
 #include "StarZone.hxx"
 
 #include "StarCharAttribute.hxx"
@@ -383,6 +386,53 @@ void StarCAttributeVoid::addTo(STOFFFont &font, StarItemPool const */*pool*/, st
 namespace StarCharAttribute
 {
 // ------------------------------------------------------------
+////////////////////////////////////////
+//! Internal: the subdocument of a StarObjectSpreadsheet
+class SubDocument : public STOFFSubDocument
+{
+public:
+  explicit SubDocument(shared_ptr<StarObjectTextInternal::Content> content, StarItemPool const *pool) :
+    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_content(content), m_pool(pool) {}
+
+  //! destructor
+  virtual ~SubDocument() {}
+
+  //! operator!=
+  virtual bool operator!=(STOFFSubDocument const &doc) const
+  {
+    if (STOFFSubDocument::operator!=(doc)) return true;
+    SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
+    if (!sDoc) return true;
+    if (m_content.get() != sDoc->m_content.get()) return true;
+    if (m_pool != sDoc->m_pool) return true;
+    return false;
+  }
+
+  //! operator!==
+  virtual bool operator==(STOFFSubDocument const &doc) const
+  {
+    return !operator!=(doc);
+  }
+
+  //! the parser function
+  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type);
+
+protected:
+  //! the content
+  shared_ptr<StarObjectTextInternal::Content> m_content;
+  //! the pool
+  StarItemPool const *m_pool;
+};
+
+void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*type*/)
+{
+  if (!listener.get()) {
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::SubDocument::parse: no listener\n"));
+    return;
+  }
+  if (m_content)
+    m_content->send(listener, m_pool);
+}
 
 //! a escapement attribute
 class StarCAttributeEscapement : public StarAttribute
@@ -505,6 +555,104 @@ protected:
   int m_pitch;
 };
 
+
+//! a font size attribute
+class StarCAttributeFontSize : public StarAttribute
+{
+public:
+  //! constructor
+  StarCAttributeFontSize(Type type, std::string const &debugName) :
+    StarAttribute(type, debugName), m_size(240), m_proportion(100), m_unit(13)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarCAttributeFontSize(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a font
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! debug function to print the data
+  virtual void printData(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    if (m_size!=240) o << "sz=" << m_size << ",";
+    if (m_proportion!=100) o << "prop=" << m_proportion << ",";
+    if (m_unit>=0 && m_unit<=14) {
+      char const *(wh[])= {"mm/100", "mm/10", "mm", "cm", "in/1000", "in/100", "in/10", "in",
+                           "pt", "twip", "pixel", "sys[font]", "app[font]", "rel", "abs"
+                          };
+      o << wh[m_unit] << ",";
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeFontSize::print: unknown font unit\n"));
+      o << "#unit=" << m_unit << ",";
+    }
+    o << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarCAttributeFontSize(StarCAttributeFontSize const &orig) : StarAttribute(orig), m_size(orig.m_size), m_proportion(orig.m_proportion), m_unit(orig.m_unit)
+  {
+  }
+  //! the font size
+  int m_size;
+  //! the font proportion
+  int m_proportion;
+  //! the font unit
+  int m_unit;
+};
+
+//! a footnote attribute
+class StarCAttributeFootnote : public StarAttribute
+{
+public:
+  //! constructor
+  StarCAttributeFootnote(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_number(0), m_label(""), m_content(), m_numSeq(0), m_flags(0)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarCAttributeFootnote(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a font
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! debug function to print the data
+  virtual void printData(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    if (m_number) o << "number=" << m_number << ",";
+    if (!m_label.empty()) o << "label=" << m_label.cstr() << ",";
+    if (!m_content) o << "empty,";
+    if (m_numSeq) o << "numSeq=" << m_numSeq << ",";
+    if (m_flags) o << "flags=" << std::hex << m_flags << std::dec << ",";
+    o << "],";
+  }
+  //! add to send the zone data
+  bool send(STOFFListenerPtr listener, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
+protected:
+  //! copy constructor
+  StarCAttributeFootnote(StarCAttributeFootnote const &orig) : StarAttribute(orig), m_number(orig.m_number), m_label(orig.m_label), m_content(orig.m_content), m_numSeq(orig.m_numSeq), m_flags(orig.m_flags)
+  {
+  }
+  //! the numbering
+  int m_number;
+  //! the label
+  librevenge::RVNGString m_label;
+  //! the content
+  shared_ptr<StarObjectTextInternal::Content> m_content;
+  //! the sequential number
+  int m_numSeq;
+  //! the flags
+  int m_flags;
+};
+
 void StarCAttributeEscapement::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   std::stringstream s;
@@ -531,6 +679,63 @@ void StarCAttributeFont::addTo(STOFFFont &font, StarItemPool const */*pool*/, st
       font.m_propertyList.insert("style:font-pitch-complex", m_pitch==1 ? "fixed" : "variable");
   }
   // TODO m_style, m_family
+}
+
+void StarCAttributeFontSize::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+{
+  std::string wh(m_type==ATTR_CHR_FONTSIZE ? "fo:font-size" :
+                 m_type==ATTR_CHR_CJK_FONTSIZE ? "style:font-size-asian" :
+                 m_type==ATTR_CHR_CTL_FONTSIZE ? "style:font-size-complex" :
+                 "");
+  if (wh.empty())
+    return;
+  // TODO: use m_proportion?
+  switch (m_unit) {
+  case 0:
+    font.m_propertyList.insert(wh.c_str(), double(m_size)*0.02756, librevenge::RVNG_POINT);
+    break;
+  case 1:
+    font.m_propertyList.insert(wh.c_str(), double(m_size)*0.2756, librevenge::RVNG_POINT);
+    break;
+  case 2:
+    font.m_propertyList.insert(wh.c_str(), double(m_size)*2.756, librevenge::RVNG_POINT);
+    break;
+  case 3:
+    font.m_propertyList.insert(wh.c_str(), double(m_size)*27.56, librevenge::RVNG_POINT);
+    break;
+  case 4:
+    font.m_propertyList.insert(wh.c_str(), double(m_size)/1000., librevenge::RVNG_INCH);
+    break;
+  case 5:
+    font.m_propertyList.insert(wh.c_str(), double(m_size)/100., librevenge::RVNG_INCH);
+    break;
+  case 6:
+    font.m_propertyList.insert(wh.c_str(), double(m_size)/10., librevenge::RVNG_INCH);
+    break;
+  case 7:
+    font.m_propertyList.insert(wh.c_str(), double(m_size), librevenge::RVNG_INCH);
+    break;
+  case 8:
+    font.m_propertyList.insert(wh.c_str(), double(m_size), librevenge::RVNG_POINT);
+    break;
+  case 9: // TWIP
+    font.m_propertyList.insert(wh.c_str(), double(m_size)/20., librevenge::RVNG_POINT);
+    break;
+  case 10: // pixel
+    font.m_propertyList.insert(wh.c_str(), double(m_size), librevenge::RVNG_POINT);
+    break;
+  case 13: // rel, checkme
+    font.m_propertyList.insert(wh.c_str(), double(m_size)*font.m_relativeUnit, librevenge::RVNG_POINT);
+    break;
+  default: // checkme
+    font.m_propertyList.insert(wh.c_str(), double(m_size)/20., librevenge::RVNG_POINT);
+    break;
+  }
+}
+
+void StarCAttributeFootnote::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+{
+  font.m_footnote=true;
 }
 
 bool StarCAttributeEscapement::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
@@ -611,56 +816,6 @@ bool StarCAttributeFont::read(StarZone &zone, int /*vers*/, long endPos, StarObj
   return input->tell()<=endPos;
 }
 
-//! a font size attribute
-class StarCAttributeFontSize : public StarAttribute
-{
-public:
-  //! constructor
-  StarCAttributeFontSize(Type type, std::string const &debugName) :
-    StarAttribute(type, debugName), m_size(240), m_proportion(100), m_unit(13)
-  {
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarCAttributeFontSize(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  //! add to a font
-  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
-  //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
-  {
-    o << m_debugName << "=[";
-    if (m_size!=240) o << "sz=" << m_size << ",";
-    if (m_proportion!=100) o << "prop=" << m_proportion << ",";
-    if (m_unit>=0 && m_unit<=14) {
-      char const *(wh[])= {"mm/100", "mm/10", "mm", "cm", "in/1000", "in/100", "in/10", "in",
-                           "pt", "twip", "pixel", "sys[font]", "app[font]", "rel", "abs"
-                          };
-      o << wh[m_unit] << ",";
-    }
-    else {
-      STOFF_DEBUG_MSG(("StarCharAttribute::StarCAttributeFontSize::print: unknown font unit\n"));
-      o << "#unit=" << m_unit << ",";
-    }
-    o << "],";
-  }
-
-protected:
-  //! copy constructor
-  StarCAttributeFontSize(StarCAttributeFontSize const &orig) : StarAttribute(orig), m_size(orig.m_size), m_proportion(orig.m_proportion), m_unit(orig.m_unit)
-  {
-  }
-  //! the font size
-  int m_size;
-  //! the font proportion
-  int m_proportion;
-  //! the font unit
-  int m_unit;
-};
-
 bool StarCAttributeFontSize::read(StarZone &zone, int nVers, long endPos, StarObject &/*object*/)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -677,57 +832,67 @@ bool StarCAttributeFontSize::read(StarZone &zone, int nVers, long endPos, StarOb
   return input->tell()<=endPos;
 }
 
-void StarCAttributeFontSize::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+bool StarCAttributeFootnote::read(StarZone &zone, int nVers, long endPos, StarObject &object)
 {
-  std::string wh(m_type==ATTR_CHR_FONTSIZE ? "fo:font-size" :
-                 m_type==ATTR_CHR_CJK_FONTSIZE ? "style:font-size-asian" :
-                 m_type==ATTR_CHR_CTL_FONTSIZE ? "style:font-size-complex" :
-                 "");
-  if (wh.empty())
-    return;
-  // TODO: use m_proportion?
-  switch (m_unit) {
-  case 0:
-    font.m_propertyList.insert(wh.c_str(), double(m_size)*0.02756, librevenge::RVNG_POINT);
-    break;
-  case 1:
-    font.m_propertyList.insert(wh.c_str(), double(m_size)*0.2756, librevenge::RVNG_POINT);
-    break;
-  case 2:
-    font.m_propertyList.insert(wh.c_str(), double(m_size)*2.756, librevenge::RVNG_POINT);
-    break;
-  case 3:
-    font.m_propertyList.insert(wh.c_str(), double(m_size)*27.56, librevenge::RVNG_POINT);
-    break;
-  case 4:
-    font.m_propertyList.insert(wh.c_str(), double(m_size)/1000., librevenge::RVNG_INCH);
-    break;
-  case 5:
-    font.m_propertyList.insert(wh.c_str(), double(m_size)/100., librevenge::RVNG_INCH);
-    break;
-  case 6:
-    font.m_propertyList.insert(wh.c_str(), double(m_size)/10., librevenge::RVNG_INCH);
-    break;
-  case 7:
-    font.m_propertyList.insert(wh.c_str(), double(m_size), librevenge::RVNG_INCH);
-    break;
-  case 8:
-    font.m_propertyList.insert(wh.c_str(), double(m_size), librevenge::RVNG_POINT);
-    break;
-  case 9: // TWIP
-    font.m_propertyList.insert(wh.c_str(), double(m_size)/20., librevenge::RVNG_POINT);
-    break;
-  case 10: // pixel
-    font.m_propertyList.insert(wh.c_str(), double(m_size), librevenge::RVNG_POINT);
-    break;
-  case 13: // rel, checkme
-    font.m_propertyList.insert(wh.c_str(), double(m_size)*font.m_relativeFontUnit, librevenge::RVNG_POINT);
-    break;
-  default: // checkme
-    font.m_propertyList.insert(wh.c_str(), double(m_size)/20., librevenge::RVNG_POINT);
-    break;
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  // sw_sw3npool.cxx SwFmtFtn::Create
+  m_number=int(input->readULong(2));
+  std::vector<uint32_t> string;
+  if (!zone.readString(string)) {
+    STOFF_DEBUG_MSG(("StarCAttributeFootnote::read: can not find the aNumber\n"));
+    printData(f);
+    f << "###aNumber,";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
   }
+  if (!string.empty())
+    m_label=libstoff::getString(string).cstr();
+  // no sure, find this attribute once with a content here, so ...
+  StarObjectText text(object, false); // checkme
+  if (!text.readSWContent(zone, m_content)) {
+    STOFF_DEBUG_MSG(("StarCAttributeFootnote::read: can not find the content\n"));
+    f << "###aContent,";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  if (nVers>=1) {
+    m_numSeq=int(input->readULong(2));
+    m_flags=int(input->readULong(1));
+  }
+
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
 }
+
+bool StarCAttributeFootnote::send(STOFFListenerPtr listener, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
+{
+  if (done.find(this)!=done.end()) {
+    STOFF_DEBUG_MSG(("StarCAttributeFootnote::read: find a loop\n"));
+    return false;
+  }
+  done.insert(this);
+  if (!listener || !listener->canWriteText()) {
+    STOFF_DEBUG_MSG(("StarCAttributeFootnote::read: can not find the listener\n"));
+    return false;
+  }
+  STOFFSubDocumentPtr subDocument(new SubDocument(m_content, pool));
+  STOFFNote note(STOFFNote::FootNote);
+  if (m_label.empty())
+    note.m_label=m_label;
+  else
+    note.m_number=m_number;
+  listener->insertNote(note, subDocument);
+  return true;
+}
+
 }
 
 namespace StarCharAttribute
@@ -772,6 +937,7 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
 
   addAttributeBool(map,StarAttribute::ATTR_CHR_NOHYPHEN,"char[noHyphen]",true);
   addAttributeVoid(map,StarAttribute::ATTR_TXT_SOFTHYPH,"text[softHyphen]");
+  map[StarAttribute::ATTR_TXT_FTN]=shared_ptr<StarAttribute>(new StarCAttributeFootnote(StarAttribute::ATTR_TXT_FTN,"textAtrFtn"));
   addAttributeBool(map,StarAttribute::ATTR_CHR_NOLINEBREAK,"char[nolineBreak]",true);
   addAttributeBool(map,StarAttribute::ATTR_SC_HYPHENATE,"hyphenate", false);
 

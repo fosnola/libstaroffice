@@ -44,7 +44,7 @@ class STOFFFont
 {
 public:
   /** constructor */
-  STOFFFont() : m_propertyList(), m_shadowColor(STOFFColor::black()), m_hyphen(false), m_softHyphen(false), m_lineBreak(false), m_relativeFontUnit(0.05)
+  STOFFFont() : m_propertyList(), m_shadowColor(STOFFColor::black()), m_hyphen(false), m_softHyphen(false), m_lineBreak(false), m_footnote(false), m_relativeUnit(0.05)
   {
   }
   //! add to the propList
@@ -69,8 +69,10 @@ public:
   bool m_softHyphen;
   /** line break */
   bool m_lineBreak;
+  /// the footnote id
+  bool m_footnote;
   /** the relative unit uses to transform rel font height in point, default 1/20 */
-  double m_relativeFontUnit;
+  double m_relativeUnit;
 };
 
 

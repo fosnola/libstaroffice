@@ -48,7 +48,7 @@ class STOFFParagraph
 {
 public:
   //! constructor
-  STOFFParagraph() : m_propertyList(), m_bulletVisible(false), m_listLevelIndex(0), m_listId(-1), m_listStartValue(-1), m_listLevel()
+  STOFFParagraph() : m_propertyList(), m_bulletVisible(false), m_listLevelIndex(0), m_listId(-1), m_listStartValue(-1), m_listLevel(), m_relativeUnit(0.05)
   {
   }
   //! add to the propList
@@ -74,6 +74,8 @@ public:
   int m_listStartValue;
   /** the actual level */
   STOFFListLevel m_listLevel;
+  /** the relative unit uses to transform rel pararagraph height in point, default 1/20 */
+  double m_relativeUnit;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
