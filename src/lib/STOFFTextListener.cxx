@@ -256,6 +256,13 @@ void STOFFTextListener::insertUnicode(uint32_t val)
 {
   // undef character, we skip it
   if (val == 0xfffd) return;
+  if (val<0x20 && val!=0x9 && val!=0xa && val!=0xd) {
+    static int numErrors=0;
+    if (++numErrors<10) {
+      STOFF_DEBUG_MSG(("STOFFTextListener::insertUnicode: find odd char %x\n", static_cast<unsigned int>(val)));
+    }
+    return;
+  }
 
   _flushDeferredTabs();
   if (!m_ps->m_isSpanOpened) _openSpan();

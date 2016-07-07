@@ -238,15 +238,15 @@ void SDXParser::createDocument(librevenge::RVNGTextInterface *documentInterface)
 ////////////////////////////////////////////////////////////
 // read the header
 ////////////////////////////////////////////////////////////
-bool SDXParser::checkHeader(STOFFHeader *header, bool /*strict*/)
+bool SDXParser::checkHeader(STOFFHeader */*header*/, bool /*strict*/)
 {
   *m_state = SDXParserInternal::State();
 
   STOFFInputStreamPtr input = getInput();
   if (!input || !input->hasDataFork() || !input->isStructured())
     return false;
-  if (header)
-    header->reset(1);
+  //if (header)
+  //header->reset(1);
 #ifndef DEBUG
   return false;
 #else

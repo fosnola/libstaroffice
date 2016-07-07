@@ -40,18 +40,11 @@
 #include <librevenge/librevenge.h>
 
 #include "STOFFOLEParser.hxx"
-
-#include "SWFieldManager.hxx"
-#include "StarAttribute.hxx"
-#include "StarObject.hxx"
-#include "StarFileManager.hxx"
-#include "StarItemPool.hxx"
-#include "StarObjectChart.hxx"
-#include "StarObjectDraw.hxx"
-#include "StarObjectSpreadsheet.hxx"
-#include "StarObjectText.hxx"
-#include "StarZone.hxx"
 #include "STOFFSpreadsheetListener.hxx"
+
+#include "StarFileManager.hxx"
+#include "StarObjectSpreadsheet.hxx"
+#include "StarZone.hxx"
 
 #include "SDCParser.hxx"
 

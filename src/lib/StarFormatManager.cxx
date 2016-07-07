@@ -570,7 +570,9 @@ bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &d
   while (input->tell()<lastPos) {
     pos=long(input->tell());
     int rType=input->peek();
-    if (rType=='S' && StarObjectText::readSWAttributeList(zone, doc))
+    std::vector<shared_ptr<StarAttribute> > attributeList;
+    std::vector<STOFFVec2i> limitsList;
+    if (rType=='S' && StarObjectText::readSWAttributeList(zone, doc, attributeList, limitsList))
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);

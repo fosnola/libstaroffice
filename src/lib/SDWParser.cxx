@@ -39,17 +39,10 @@
 
 #include <librevenge/librevenge.h>
 
-#include "STOFFTextListener.hxx"
 #include "STOFFOLEParser.hxx"
+#include "STOFFTextListener.hxx"
 
-#include "SWFieldManager.hxx"
-#include "StarAttribute.hxx"
-#include "StarObject.hxx"
 #include "StarFileManager.hxx"
-#include "StarItemPool.hxx"
-#include "StarObjectChart.hxx"
-#include "StarObjectDraw.hxx"
-#include "StarObjectSpreadsheet.hxx"
 #include "StarObjectText.hxx"
 #include "StarZone.hxx"
 
@@ -189,10 +182,10 @@ bool SDWParser::checkHeader(STOFFHeader *header, bool /*strict*/)
   if (header) {
     header->reset(1);
     textInput->seek(0, librevenge::RVNG_SEEK_SET);
-    if (textInput->readULong(2)==0x5753)
+    if (textInput->readULong(2)==0x5357)
       textInput->setReadInverted(!textInput->readInverted());
-    textInput->seek(0, librevenge::RVNG_SEEK_SET);
-    header->setEncrypted((input->readULong(4)&0xFFFFF0FF)!=0x53573048); // SW[n]H
+    textInput->seek(10, librevenge::RVNG_SEEK_SET);
+    header->setEncrypted((input->readULong(2)&8)!=0);
   }
   return true;
 }

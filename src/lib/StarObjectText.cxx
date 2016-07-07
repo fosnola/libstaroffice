@@ -41,6 +41,7 @@
 
 #include "STOFFOLEParser.hxx"
 #include "STOFFPageSpan.hxx"
+#include "STOFFParagraph.hxx"
 #include "STOFFTextListener.hxx"
 
 #include "SWFieldManager.hxx"
@@ -61,14 +62,85 @@
 namespace StarObjectTextInternal
 {
 ////////////////////////////////////////
+//! Internal: a textZone of StarObjectText
+struct TextZone {
+  //! constructor
+  TextZone() : m_text(), m_textSourcePosition(), m_charAttributeList(), m_charLimitList()
+  {
+  }
+  //! try to send the data to a listener
+  bool send(STOFFListenerPtr listener, StarItemPool const *pool) const;
+  //! the text
+  std::vector<uint32_t> m_text;
+  //! the text initial position
+  std::vector<size_t> m_textSourcePosition;
+  //! the character item list
+  std::vector<shared_ptr<StarAttribute> > m_charAttributeList;
+  //! the character limit
+  std::vector<STOFFVec2i> m_charLimitList;
+};
+
+bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool) const
+{
+  if (!listener || !listener->canWriteText()) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: call without listener\n"));
+    return false;
+  }
+
+  std::map<int, shared_ptr<StarItem> >::const_iterator it;
+  std::set<size_t> modPosSet;
+  size_t numFonts=m_charAttributeList.size();
+  if (m_charLimitList.size()!=numFonts) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: the number of fonts seems bad\n"));
+    if (m_charLimitList.size()<numFonts)
+      numFonts=m_charLimitList.size();
+  }
+  for (size_t i=0; i<numFonts; ++i) {
+    modPosSet.insert(size_t(m_charLimitList[i][0]));
+    modPosSet.insert(size_t(m_charLimitList[i][1]));
+  }
+  std::set<size_t>::const_iterator posSetIt=modPosSet.begin();
+  for (size_t c=0; c<m_text.size(); ++c) {
+    bool fontChange=false;
+    size_t srcPos=c<m_textSourcePosition.size() ? m_textSourcePosition[c] : 10000;
+    while (posSetIt!=modPosSet.end() && *posSetIt <= srcPos) {
+      ++posSetIt;
+      fontChange=true;
+    }
+    if (fontChange) {
+      STOFFFont font;
+      font.m_relativeFontUnit=0.028346457;
+      STOFFParagraph para;
+      for (size_t f=0; f<numFonts; ++f) {
+        if ((m_charLimitList[f][0]>=0 && m_charLimitList[f][0]>int(srcPos)) ||
+            (m_charLimitList[f][1]>=0 && m_charLimitList[f][1]<=int(srcPos)))
+          continue;
+        if (!m_charAttributeList[f])
+          continue;
+        m_charAttributeList[f]->addTo(font, pool);
+        if (c==0)
+          m_charAttributeList[f]->addTo(para, pool);
+      }
+      listener->setFont(font);
+      if (c==0)
+        listener->setParagraph(para);
+    }
+    listener->insertUnicode(m_text[c]);
+  }
+  return true;
+}
+
+////////////////////////////////////////
 //! Internal: the state of a StarObjectText
 struct State {
   //! constructor
-  State() : m_numPages(0)
+  State() : m_numPages(0), m_textZoneList()
   {
   }
   //! the number of pages
   int m_numPages;
+  //! the list of text zone
+  std::vector<shared_ptr<TextZone> > m_textZoneList;
 };
 
 }
@@ -106,7 +178,13 @@ bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
     STOFF_DEBUG_MSG(("StarObjectText::sendPages: can not find the listener\n"));
     return false;
   }
-  STOFF_DEBUG_MSG(("StarObjectText::sendPages: not implemented\n"));
+  shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
+  for (size_t t=0; t<m_textState->m_textZoneList.size(); ++t) {
+    if (m_textState->m_textZoneList[t])
+      m_textState->m_textZoneList[t]->send(listener, pool.get());
+    if (t+1!=m_textState->m_textZoneList.size())
+      listener->insertEOL();
+  }
   return true;
 }
 
@@ -430,7 +508,9 @@ bool StarObjectText::readSWPageDef(StarZone &zone)
   while (input->tell() < lastPos) {
     pos=input->tell();
     int rType=input->peek();
-    if (rType=='S' && readSWAttributeList(zone, *this))
+    std::vector<shared_ptr<StarAttribute> > attributeList;
+    std::vector<STOFFVec2i> limitsList;
+    if (rType=='S' && readSWAttributeList(zone, *this, attributeList, limitsList))
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -477,8 +557,10 @@ bool StarObjectText::readSWPageDef(StarZone &zone)
   return true;
 }
 
-bool StarObjectText::readSWAttribute(StarZone &zone, StarObject &doc)
+bool StarObjectText::readSWAttribute(StarZone &zone, StarObject &doc, shared_ptr<StarAttribute> &attribute, STOFFVec2i &limits)
 {
+  attribute.reset();
+  limits=STOFFVec2i(-1,-1);
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
@@ -513,12 +595,18 @@ bool StarObjectText::readSWAttribute(StarZone &zone, StarObject &doc)
   }
   f << "wh=" << which << "[" << std::hex << nWhich << std::dec << "],";
   if (nVers) f << "nVers=" << nVers << ",";
-  if (nBegin!=0xFFFF) f << "nBgin=" << nBegin << ",";
-  if (nEnd!=0xFFFF) f << "nEnd=" << nEnd << ",";
+  if (nBegin!=0xFFFF) {
+    limits[0]=int(nBegin);
+    f << "nBgin=" << nBegin << ",";
+  }
+  if (nEnd!=0xFFFF) {
+    limits[1]=int(nEnd);
+    f << "nEnd=" << nEnd << ",";
+  }
   zone.closeFlagZone();
 
   if (which<=0 || !doc.getAttributeManager() ||
-      !doc.getAttributeManager()->readAttribute(zone, which, int(nVers), zone.getRecordLastPosition(), doc))
+      !(attribute=doc.getAttributeManager()->readAttribute(zone, which, int(nVers), zone.getRecordLastPosition(), doc)))
     f << "###";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -526,7 +614,8 @@ bool StarObjectText::readSWAttribute(StarZone &zone, StarObject &doc)
   return true;
 }
 
-bool StarObjectText::readSWAttributeList(StarZone &zone, StarObject &doc)
+bool StarObjectText::readSWAttributeList
+(StarZone &zone, StarObject &doc, std::vector<shared_ptr<StarAttribute> > &attributeList, std::vector<STOFFVec2i> &limitsList)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -543,7 +632,15 @@ bool StarObjectText::readSWAttributeList(StarZone &zone, StarObject &doc)
 
   while (input->tell() < zone.getRecordLastPosition()) { // normally only 2
     pos=input->tell();
-    if (readSWAttribute(zone, doc) && input->tell()>pos) continue;
+    shared_ptr<StarAttribute> attribute;
+    STOFFVec2i limit;
+    if (readSWAttribute(zone, doc, attribute, limit) && input->tell()>pos) {
+      if (attribute) {
+        attributeList.push_back(attribute);
+        limitsList.push_back(limit);
+      }
+      continue;
+    }
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
@@ -1016,9 +1113,12 @@ bool StarObjectText::readSWGraphNode(StarZone &zone)
     int rType=input->peek();
 
     switch (rType) {
-    case 'S':
-      done=readSWAttributeList(zone, *this);
+    case 'S': {
+      std::vector<shared_ptr<StarAttribute> > attributeList;
+      std::vector<STOFFVec2i> limitsList;
+      done=readSWAttributeList(zone, *this, attributeList, limitsList);
       break;
+    }
     case 'X':
       done=readSWImageMap(zone);
       break;
@@ -1725,6 +1825,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone)
   // sw_sw3nodes.cxx: InTxtNode
   libstoff::DebugStream f;
   f << "Entries(SWText)[" << zone.getRecordLevel() << "]:";
+  shared_ptr<StarObjectTextInternal::TextZone> textZone(new StarObjectTextInternal::TextZone);
   int fl=zone.openFlagZone();
   f << "nColl=" << input->readULong(2) << ",";
   if (fl&0x10 && !zone.isCompatibleWith(0x201)) {
@@ -1738,8 +1839,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone)
     f << "nCondColl=" << input->readULong(2) << ",";
   zone.closeFlagZone();
 
-  std::vector<uint32_t> text;
-  if (!zone.readString(text)) {
+  if (!zone.readString(textZone->m_text, textZone->m_textSourcePosition, -1, true)) {
     STOFF_DEBUG_MSG(("StarObjectText::readSWTextZone: can not read main text\n"));
     f << "###text";
     ascFile.addPos(pos);
@@ -1747,13 +1847,15 @@ bool StarObjectText::readSWTextZone(StarZone &zone)
     zone.closeSWRecord('T', "SWText");
     return true;
   }
-  else if (!text.empty())
-    f << libstoff::getString(text).cstr();
+  else if (!textZone->m_text.empty())
+    f << libstoff::getString(textZone->m_text).cstr();
 
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
   long lastPos=zone.getRecordLastPosition();
+  std::vector<shared_ptr<StarAttribute> > attributeList;
+  std::vector<STOFFVec2i> limitsList;
   while (input->tell()<lastPos) {
     pos=input->tell();
 
@@ -1761,14 +1863,21 @@ bool StarObjectText::readSWTextZone(StarZone &zone)
     int rType=input->peek();
 
     switch (rType) {
-    case 'A':
-      done=readSWAttribute(zone, *this);
+    case 'A': {
+      shared_ptr<StarAttribute> attribute;
+      STOFFVec2i limit;
+      done=readSWAttribute(zone, *this, attribute, limit);
+      if (done && attribute) {
+        textZone->m_charAttributeList.push_back(attribute);
+        textZone->m_charLimitList.push_back(limit);
+      }
       break;
+    }
     case 'R':
       done=readSWNumRule(zone,'R');
       break;
     case 'S':
-      done=readSWAttributeList(zone, *this);
+      done=readSWAttributeList(zone, *this, textZone->m_charAttributeList, textZone->m_charLimitList);
       break;
     case 'l': // related to link
     case 'o': // format: safe to ignore
@@ -1843,6 +1952,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone)
     zone.closeSWRecord(type, "SWText");
   }
   zone.closeSWRecord('T', "SWText");
+  m_textState->m_textZoneList.push_back(textZone);
   return true;
 }
 

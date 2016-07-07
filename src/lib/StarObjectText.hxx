@@ -74,7 +74,8 @@ public:
   //! try to read a image map zone : 'X'
   static bool readSWImageMap(StarZone &zone);
   //! try to read a attribute list: 'S'
-  static bool readSWAttributeList(StarZone &zone, StarObject &doc);
+  static bool readSWAttributeList(StarZone &zone, StarObject &doc,
+                                  std::vector<shared_ptr<StarAttribute> > &attributeList, std::vector<STOFFVec2i> &limitsList);
 
   //! try to read some content : 'N'
   bool readSWContent(StarZone &zone);
@@ -97,7 +98,7 @@ protected:
 
 protected:
   //! try to read an attribute: 'A'
-  static bool readSWAttribute(StarZone &zone, StarObject &doc);
+  static bool readSWAttribute(StarZone &zone, StarObject &doc, shared_ptr<StarAttribute> &attribute, STOFFVec2i &limits);
   //! try a list of bookmark field : 'a'
   bool readSWBookmarkList(StarZone &zone);
   //! try to read a DBName zone : 'D'
