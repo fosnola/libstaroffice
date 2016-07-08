@@ -39,9 +39,11 @@
 
 #include <librevenge/librevenge.h>
 
+#include "STOFFCell.hxx"
 #include "STOFFOLEParser.hxx"
 #include "STOFFPageSpan.hxx"
 #include "STOFFParagraph.hxx"
+#include "STOFFTable.hxx"
 #include "STOFFTextListener.hxx"
 
 #include "SWFieldManager.hxx"
@@ -71,7 +73,7 @@ Content::~Content()
 {
 }
 
-bool Content::send(STOFFListenerPtr listener, StarItemPool const *pool) const
+bool Content::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::Content::send: call without listener\n"));
@@ -79,7 +81,7 @@ bool Content::send(STOFFListenerPtr listener, StarItemPool const *pool) const
   }
   for (size_t t=0; t<m_zoneList.size(); ++t) {
     if (m_zoneList[t])
-      m_zoneList[t]->send(listener, pool);
+      m_zoneList[t]->send(listener, pool, object);
     if (t+1!=m_zoneList.size())
       listener->insertEOL();
   }
@@ -94,7 +96,7 @@ struct TextZone : public Zone {
   {
   }
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool) const;
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
   //! the text
   std::vector<uint32_t> m_text;
   //! the text initial position
@@ -107,7 +109,7 @@ struct TextZone : public Zone {
   std::vector<STOFFVec2i> m_charLimitList;
 };
 
-bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool) const
+bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: call without listener\n"));
@@ -187,7 +189,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool) const
         listener->setParagraph(para);
     }
     if (footnote)
-      footnote->send(listener, pool);
+      footnote->send(listener, pool, object);
     else if (m_text[c]==0x9)
       listener->insertTab();
     else if (m_text[c]==0xa)
@@ -205,7 +207,9 @@ struct TableBox {
   TableBox() : m_formatId(0), m_numLines(0), m_content(), m_lineList()
   {
   }
-  //! the format id
+  //! try to send the data to a listener
+  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  //! the format
   int m_formatId;
   //! the number of lines
   int m_numLines;
@@ -215,18 +219,61 @@ struct TableBox {
   std::vector<shared_ptr<TableLine> > m_lineList;
 };
 
+bool TableBox::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::TableBox::send: call without listener\n"));
+    return false;
+  }
+  if (!m_lineList.empty()) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::TableBox::send: sending box with line list is not implemented\n"));
+  }
+  if (m_content)
+    m_content->send(listener, pool, object);
+  return true;
+}
+
+//! small structure used to store a table line
 struct TableLine {
   //! constructor
   TableLine() : m_formatId(0), m_numBoxes(0), m_boxList()
   {
   }
-  //! the format id
+  //! try to send the data to a listener
+  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, int row) const;
+  //! the format
   int m_formatId;
   //! the number of boxes
   int m_numBoxes;
   //! a list of box
   std::vector<shared_ptr<TableBox> > m_boxList;
 };
+
+bool TableLine::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, int row) const
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::TableLine::send: call without listener\n"));
+    return false;
+  }
+  listener->openTableRow(0, librevenge::RVNG_POINT);
+  for (size_t i=0; i<m_boxList.size(); ++i) {
+    STOFFVec2i pos(int(i), row);
+    if (!m_boxList[i])
+      listener->addEmptyTableCell(pos);
+
+    STOFFCellStyle cellStyle;
+    cellStyle.m_format=unsigned(m_boxList[i]->m_formatId);
+    STOFFCell cell;
+    cell.setPosition(pos);
+    cell.setCellStyle(cellStyle);
+    object.getFormatManager()->updateNumberingProperties(cell);
+    listener->openTableCell(cell);
+    m_boxList[i]->send(listener, pool, object);
+    listener->closeTableCell();
+  }
+  listener->closeTableRow();
+  return true;
+}
 
 //! Internal: a table of StarObjectTextInteral
 struct Table : public Zone {
@@ -235,7 +282,7 @@ struct Table : public Zone {
   {
   }
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool) const;
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
 
   //! flag to know if the header is repeated
   bool m_headerRepeated;
@@ -247,13 +294,25 @@ struct Table : public Zone {
   std::vector<shared_ptr<TableLine> > m_lineList;
 };
 
-bool Table::send(STOFFListenerPtr listener, StarItemPool const */*pool*/) const
+bool Table::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::Table::send: call without listener\n"));
     return false;
   }
-  STOFF_DEBUG_MSG(("StarObjectTextInternal::Table::send: not implemented\n"));
+  STOFFTable table;
+  // first find the number of columns
+  size_t numCol=0;
+  for (size_t i=0; i<m_lineList.size(); ++i) {
+    if (m_lineList[i] && m_lineList[i]->m_boxList.size()>numCol)
+      numCol=m_lineList[i]->m_boxList.size();
+  }
+  table.setColsSize(std::vector<float>(numCol,40)); // changeme
+  listener->openTable(table);
+  for (size_t i=0; i<m_lineList.size(); ++i) {
+    if (m_lineList[i])
+      m_lineList[i]->send(listener, pool, object, int(i));
+  }
   return false;
 }
 
@@ -310,7 +369,7 @@ bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
     return true;
   }
   shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
-  m_textState->m_mainContent->send(listener, pool.get());
+  m_textState->m_mainContent->send(listener, pool.get(), *this);
   return true;
 }
 
@@ -1911,8 +1970,11 @@ bool StarObjectText::readSWTableBox(StarZone &zone, shared_ptr<StarObjectTextInt
   int fl=zone.openFlagZone();
   if (fl&0x20 || !zone.isCompatibleWith(0x201)) {
     box->m_formatId=int(input->readULong(2));
-    if (box->m_formatId)
-      f << "fmtId=" << box->m_formatId << ",";
+    librevenge::RVNGString format;
+    if (!zone.getPoolName(box->m_formatId, format))
+      f << "###format=" << box->m_formatId << ",";
+    else
+      f << format.cstr() << ",";
   }
   if (fl&0x10) {
     box->m_numLines=int(input->readULong(2));
@@ -1959,8 +2021,11 @@ bool StarObjectText::readSWTableLine(StarZone &zone, shared_ptr<StarObjectTextIn
   int fl=zone.openFlagZone();
   if (fl&0x20 || !zone.isCompatibleWith(0x201)) {
     line->m_formatId=int(input->readULong(2));
-    if (line->m_formatId)
-      f << "fmtId=" << line->m_formatId << ",";
+    librevenge::RVNGString format;
+    if (!zone.getPoolName(line->m_formatId, format))
+      f << "###format=" << line->m_formatId << ",";
+    else
+      f << format.cstr() << ",";
   }
   line->m_numBoxes=int(input->readULong(2));
   if (line->m_numBoxes)

@@ -54,7 +54,7 @@ struct Zone {
   //! destructor
   virtual ~Zone();
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool) const=0;
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const=0;
 };
 
 //! Internal: a set of zone
@@ -66,7 +66,7 @@ struct Content {
   //! destructor
   ~Content();
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarItemPool const *pool) const;
+  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
   //! the list of text zone
   std::vector<shared_ptr<Zone> > m_zoneList;
 };

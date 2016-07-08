@@ -391,8 +391,8 @@ namespace StarCharAttribute
 class SubDocument : public STOFFSubDocument
 {
 public:
-  explicit SubDocument(shared_ptr<StarObjectTextInternal::Content> content, StarItemPool const *pool) :
-    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_content(content), m_pool(pool) {}
+  explicit SubDocument(shared_ptr<StarObjectTextInternal::Content> content, StarItemPool const *pool, StarObject &object) :
+    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_content(content), m_pool(pool), m_object(object) {}
 
   //! destructor
   virtual ~SubDocument() {}
@@ -405,6 +405,7 @@ public:
     if (!sDoc) return true;
     if (m_content.get() != sDoc->m_content.get()) return true;
     if (m_pool != sDoc->m_pool) return true;
+    if (&m_object != &sDoc->m_object) return true;
     return false;
   }
 
@@ -422,6 +423,8 @@ protected:
   shared_ptr<StarObjectTextInternal::Content> m_content;
   //! the pool
   StarItemPool const *m_pool;
+  //! the object
+  StarObject &m_object;
 };
 
 void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*type*/)
@@ -431,7 +434,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
     return;
   }
   if (m_content)
-    m_content->send(listener, m_pool);
+    m_content->send(listener, m_pool, m_object);
 }
 
 //! a escapement attribute
@@ -635,7 +638,7 @@ public:
     o << "],";
   }
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
+  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, std::set<StarAttribute const *> &done) const;
 protected:
   //! copy constructor
   StarCAttributeFootnote(StarCAttributeFootnote const &orig) : StarAttribute(orig), m_number(orig.m_number), m_label(orig.m_label), m_content(orig.m_content), m_numSeq(orig.m_numSeq), m_flags(orig.m_flags)
@@ -872,7 +875,7 @@ bool StarCAttributeFootnote::read(StarZone &zone, int nVers, long endPos, StarOb
   return input->tell()<=endPos;
 }
 
-bool StarCAttributeFootnote::send(STOFFListenerPtr listener, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
+bool StarCAttributeFootnote::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, std::set<StarAttribute const *> &done) const
 {
   if (done.find(this)!=done.end()) {
     STOFF_DEBUG_MSG(("StarCAttributeFootnote::read: find a loop\n"));
@@ -883,7 +886,7 @@ bool StarCAttributeFootnote::send(STOFFListenerPtr listener, StarItemPool const 
     STOFF_DEBUG_MSG(("StarCAttributeFootnote::read: can not find the listener\n"));
     return false;
   }
-  STOFFSubDocumentPtr subDocument(new SubDocument(m_content, pool));
+  STOFFSubDocumentPtr subDocument(new SubDocument(m_content, pool, object));
   STOFFNote note(STOFFNote::FootNote);
   if (m_label.empty())
     note.m_label=m_label;

@@ -778,10 +778,10 @@ public:
     addTo(para, pool, done);
   }
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarItemPool const *pool) const
+  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
   {
     std::set<StarAttribute const *> done;
-    return send(listener, pool, done);
+    return send(listener, pool, object, done);
   }
   //! add to a cell style(internal)
   virtual void addTo(STOFFCellStyle &/*cell*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
@@ -804,7 +804,7 @@ public:
   {
   }
   //! try to send the child zone(internal)
-  virtual bool send(STOFFListenerPtr /*listener*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+  virtual bool send(STOFFListenerPtr /*listener*/, StarItemPool const */*pool*/, StarObject &/*object*/, std::set<StarAttribute const *> &/*done*/) const
   {
     return false;
   }
@@ -1089,7 +1089,7 @@ protected:
   //! add to a paragraph
   virtual void addTo(STOFFParagraph &para, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
   //! try to send the sone data
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, std::set<StarAttribute const *> &done) const;
 
   //! copy constructor
   StarAttributeItemSet(StarAttributeItemSet const &orig) : StarAttribute(orig), m_limits(orig.m_limits), m_itemSet()

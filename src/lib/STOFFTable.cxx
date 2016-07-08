@@ -148,8 +148,9 @@ void STOFFTable::addTablePropertiesTo(librevenge::RVNGPropertyList &propList) co
     columns.append(column);
     tableWidth += m_colsSize[c];
   }
-  propList.insert("style:width", double(tableWidth), librevenge::RVNG_POINT);
   propList.insert("librevenge:table-columns", columns);
+  if (tableWidth>0)
+    propList.insert("style:width", double(tableWidth), librevenge::RVNG_POINT);
 }
 
 ////////////////////////////////////////////////////////////

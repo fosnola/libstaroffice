@@ -627,7 +627,7 @@ bool StarAttributeVoid::read(StarZone &zone, int /*vers*/, long /*endPos*/, Star
   return true;
 }
 
-bool StarAttributeItemSet::send(STOFFListenerPtr listener, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
+bool StarAttributeItemSet::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, std::set<StarAttribute const *> &done) const
 {
   if (done.find(this)!=done.end()) {
     STOFF_DEBUG_MSG(("StarAttributeItemSet::send: find a cycle\n"));
@@ -637,7 +637,7 @@ bool StarAttributeItemSet::send(STOFFListenerPtr listener, StarItemPool const *p
   for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
        it!=m_itemSet.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
-      it->second->m_attribute->send(listener, pool, done);
+      it->second->m_attribute->send(listener, pool, object, done);
   }
   return true;
 }
