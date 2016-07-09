@@ -1119,11 +1119,15 @@ void STOFFTextListener::insertTextBox
   closeFrame();
 }
 
-void STOFFTextListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition::AnchorTo anchor)
+void STOFFTextListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos)
 {
+  if (!m_ps->m_isPageSpanOpened)
+    _openPageSpan();
   // now check that the anchor is coherent with the actual state
-  switch (anchor) {
+  switch (pos.m_anchorTo) {
   case STOFFPosition::Page:
+    if (m_ps->m_isParagraphOpened)
+      _closeParagraph();
     break;
   case STOFFPosition::Paragraph:
     if (m_ps->m_isParagraphOpened)
@@ -1149,8 +1153,6 @@ void STOFFTextListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphic
     break;
   }
 
-  STOFFPosition pos;
-  pos.m_anchorTo=anchor;
   librevenge::RVNGPropertyList shapeProp, styleProp;
   pos.addTo(shapeProp);
   shape.addTo(shapeProp);
@@ -1278,7 +1280,7 @@ void STOFFTextListener::closeFrame()
   m_ps->m_isFrameOpened = false;
 }
 
-bool STOFFTextListener::openGroup(STOFFPosition::AnchorTo anchor)
+bool STOFFTextListener::openGroup(STOFFPosition const &pos)
 {
   if (!m_ds->m_isDocumentStarted) {
     STOFF_DEBUG_MSG(("STOFFTextListener::openGroup: the document is not started\n"));
@@ -1290,7 +1292,7 @@ bool STOFFTextListener::openGroup(STOFFPosition::AnchorTo anchor)
   }
 
   // now check that the anchor is coherent with the actual state
-  switch (anchor) {
+  switch (pos.m_anchorTo) {
   case STOFFPosition::Page:
     break;
   case STOFFPosition::Paragraph:
@@ -1322,8 +1324,6 @@ bool STOFFTextListener::openGroup(STOFFPosition::AnchorTo anchor)
   m_ps->m_isGroupOpened = true;
 
   librevenge::RVNGPropertyList propList;
-  STOFFPosition pos;
-  pos.m_anchorTo=anchor;
   pos.addTo(propList);
   m_documentInterface->openGroup(propList);
 

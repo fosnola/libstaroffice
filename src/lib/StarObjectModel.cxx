@@ -410,9 +410,12 @@ bool StarObjectModel::sendPage(int pageId, STOFFListenerPtr listener, bool maste
   if (pageId>=int(pageList.size()) || !pageList[size_t(pageId)])
     return false;
   StarObjectModelInternal::Page &page=*pageList[size_t(pageId)];
+  STOFFPosition pos;
+  pos.m_anchorTo=STOFFPosition::Page;
+  if (!masterPage) pos.m_propertyList.insert("text:anchor-page-number", pageId+1);
   for (size_t i=0; i<page.m_objectList.size(); ++i) {
     if (page.m_objectList[i])
-      page.m_objectList[i]->send(listener, *this, masterPage);
+      page.m_objectList[i]->send(listener, pos, *this, masterPage);
   }
   return true;
 }

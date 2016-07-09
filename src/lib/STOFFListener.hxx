@@ -199,7 +199,7 @@ public:
   virtual void insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture,
                              STOFFGraphicStyle const &style=STOFFGraphicStyle())=0;
   /** adds a shape picture in given position */
-  virtual void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition::AnchorTo anchor) = 0;
+  virtual void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos) = 0;
   /** adds a textbox in given position */
   virtual void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument,
                              STOFFGraphicStyle const &frameStyle=STOFFGraphicStyle()) = 0;
@@ -222,7 +222,7 @@ public:
   /** low level: tries to close the last opened frame */
   virtual void closeFrame() = 0;
   /** low level: tries to open a group */
-  virtual bool openGroup(STOFFPosition::AnchorTo anchor) = 0;
+  virtual bool openGroup(STOFFPosition const &pos) = 0;
   /** low level: tries to close the last opened group */
   virtual void closeGroup() = 0;
   /** low level: function called to add a subdocument */

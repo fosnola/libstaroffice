@@ -242,7 +242,7 @@ public:
   //! return the object name
   virtual std::string getName() const = 0;
   //! try to send the graphic to the listener
-  virtual bool send(STOFFListenerPtr /*listener*/, StarObject &/*object*/, bool /*inMasterPage*/)
+  virtual bool send(STOFFListenerPtr /*listener*/, STOFFPosition const &/*pos*/, StarObject &/*object*/, bool /*inMasterPage*/)
   {
     static bool first=true;
     if (first) {
@@ -547,16 +547,16 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, StarObject &object, bool inMasterPage)
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage)
   {
     if (!listener) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicGroup::send: unexpected listener\n"));
       return false;
     }
-    listener->openGroup(STOFFPosition::Page);
+    listener->openGroup(pos);
     for (size_t c=0; c<m_child.size(); ++c) {
       if (m_child[c])
-        m_child[c]->send(listener, object, inMasterPage);
+        m_child[c]->send(listener, pos, object, inMasterPage);
     }
     listener->closeGroup();
     return true;
@@ -688,7 +688,7 @@ public:
   //! destructor
   ~SdrGraphicRect();
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, StarObject &object, bool inMasterPage)
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage)
   {
     if (!listener || m_textRectangle.size()[0]<=0 || m_textRectangle.size()[1]<=0) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicText::send: can not send a shape\n"));
@@ -703,7 +703,7 @@ public:
       updateTransformProperties(shape.m_propertyList);
       STOFFGraphicStyle style;
       updateStyle(style, object, listener);
-      listener->insertShape(shape, style, STOFFPosition::Page);
+      listener->insertShape(shape, style, pos);
       if (m_outlinerParaObject)
         sendTextZone(listener, object);
     }
@@ -769,7 +769,7 @@ public:
     return o;
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, StarObject &object, bool /*inMasterPage*/)
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/)
   {
     if (!listener || m_captionPolygon.empty()) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicCaption::send: can not send a shape\n"));
@@ -787,7 +787,7 @@ public:
     updateTransformProperties(shape.m_propertyList);
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
-    listener->insertShape(shape, style, STOFFPosition::Page);
+    listener->insertShape(shape, style, pos);
     return true;
   }
   //! a polygon
@@ -819,7 +819,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, StarObject &object, bool /*inMasterPage*/)
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/)
   {
     if (!listener || m_textRectangle.size()[0]<=0 || m_textRectangle.size()[1]<=0) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicCircle::send: can not send a shape\n"));
@@ -844,7 +844,7 @@ public:
     updateTransformProperties(shape.m_propertyList);
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
-    listener->insertShape(shape, style, STOFFPosition::Page);
+    listener->insertShape(shape, style, pos);
     if (m_outlinerParaObject)
       sendTextZone(listener, object);
     return true;
@@ -952,7 +952,7 @@ public:
     return o;
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, StarObject &object, bool /*inMasterPage*/)
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/)
   {
     if (!listener || m_edgePolygon.empty()) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicEdge::send: can not send a shape\n"));
@@ -970,7 +970,7 @@ public:
     updateTransformProperties(shape.m_propertyList);
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
-    listener->insertShape(shape, style, STOFFPosition::Page);
+    listener->insertShape(shape, style, pos);
     return true;
   }
   //! the edge polygon
@@ -1006,7 +1006,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, StarObject &object, bool inMasterPage)
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage)
   {
     if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicGraph::send: can not send a shape\n"));
@@ -1018,12 +1018,12 @@ public:
         first=false;
         STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicGraph::send: sorry, can not find some graphic representation\n"));
       }
-      return SdrGraphicRect::send(listener, object, inMasterPage);
+      return SdrGraphicRect::send(listener, pos, object, inMasterPage);
     }
     STOFFPosition position;
     position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
-    position.setAnchor(STOFFPosition::Page);
+    position.setAnchor(pos.m_anchorTo);
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
     if (!m_graphic || m_graphic->m_object.isEmpty()) {
@@ -1107,7 +1107,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, StarObject &object, bool /*inMasterPage*/)
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/)
   {
     STOFFGraphicShape shape;
     STOFFGraphicStyle style;
@@ -1123,7 +1123,7 @@ public:
     }
     shape.m_propertyList.insert("svg:points", vect);
     updateTransformProperties(shape.m_propertyList);
-    listener->insertShape(shape, style, STOFFPosition::Page);
+    listener->insertShape(shape, style, pos);
     return true;
   }
   //! try to update the style
@@ -1180,7 +1180,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, StarObject &object, bool inMasterPage)
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage)
   {
     if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: can not send a shape\n"));
@@ -1206,12 +1206,12 @@ public:
     }
     if (localPicture.isEmpty()) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: sorry, can not find some graphic representation\n"));
-      return SdrGraphicRect::send(listener, object, inMasterPage);
+      return SdrGraphicRect::send(listener, pos, object, inMasterPage);
     }
     STOFFPosition position;
     position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
-    position.setAnchor(STOFFPosition::Page);
+    position.setAnchor(pos.m_anchorTo);
     STOFFGraphicStyle style;
     updateStyle(style, object, listener);
     listener->insertPicture(position, localPicture, style);
@@ -1264,7 +1264,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr /*listener*/, StarObject &/*object*/, bool /*inMasterPage*/)
+  bool send(STOFFListenerPtr /*listener*/, STOFFPosition const &/*pos*/, StarObject &/*object*/, bool /*inMasterPage*/)
   {
     STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPage::send: unexpected call\n"));
     return false;
@@ -1292,7 +1292,7 @@ public:
   {
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, StarObject &object, bool /*inMasterPage*/);
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/);
   //! basic print function
   virtual std::string print() const
   {
@@ -1314,7 +1314,7 @@ public:
   std::vector<StarGraphicStruct::StarPolygon> m_pathPolygons;
 };
 
-bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object, bool inMasterPage)
+bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage)
 {
   if (!listener || m_pathPolygons.empty() || m_pathPolygons[0].empty()) {
     STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::send: can not send a shape\n"));
@@ -1348,7 +1348,7 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object, bool in
       }
       shape.m_propertyList.insert("svg:points", vect);
       updateTransformProperties(shape.m_propertyList);
-      listener->insertShape(shape, style, STOFFPosition::Page);
+      listener->insertShape(shape, style, pos);
       if (m_outlinerParaObject)
         sendTextZone(listener, object);
       return true;
@@ -1373,7 +1373,7 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object, bool in
     break;
   default:
     STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::send: find unexpected identifier %d\n", m_identifier));
-    return SdrGraphicText::send(listener, object, inMasterPage);
+    return SdrGraphicText::send(listener, pos, object, inMasterPage);
   }
 
   // first check if we have some spline, bezier flags
@@ -1402,7 +1402,7 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, StarObject &object, bool in
     shape.m_propertyList.insert("svg:d", path);
   }
   updateTransformProperties(shape.m_propertyList);
-  listener->insertShape(shape, style, STOFFPosition::Page);
+  listener->insertShape(shape, style, pos);
   if (m_outlinerParaObject)
     sendTextZone(listener, object);
   return true;
@@ -1557,7 +1557,7 @@ std::ostream &operator<<(std::ostream &o, StarObjectSmallGraphic const &graphic)
   return o;
 }
 
-bool StarObjectSmallGraphic::send(STOFFListenerPtr listener, StarObject &object, bool inMasterPage)
+bool StarObjectSmallGraphic::send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage)
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectSmallGraphic::send: can not find the listener\n"));
@@ -1571,7 +1571,7 @@ bool StarObjectSmallGraphic::send(STOFFListenerPtr listener, StarObject &object,
     }
     return false;
   }
-  return m_graphicState->m_graphic->send(listener, object, inMasterPage);
+  return m_graphicState->m_graphic->send(listener, pos, object, inMasterPage);
 }
 
 ////////////////////////////////////////////////////////////

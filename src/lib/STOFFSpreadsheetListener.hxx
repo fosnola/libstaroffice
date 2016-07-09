@@ -96,7 +96,7 @@ public:
   /** tries to close a frame */
   void closeFrame();
   /** open a group (not implemented) */
-  bool openGroup(STOFFPosition::AnchorTo anchor);
+  bool openGroup(STOFFPosition const &pos);
   /** close a group (not implemented) */
   void closeGroup();
 
@@ -205,7 +205,7 @@ public:
   void insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture,
                      STOFFGraphicStyle const &style=STOFFGraphicStyle());
   /** adds a shape picture in given position */
-  void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition::AnchorTo anchor);
+  void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos);
   /** adds a textbox in given position */
   void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument,
                      STOFFGraphicStyle const &frameStyle=STOFFGraphicStyle());

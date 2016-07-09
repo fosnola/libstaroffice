@@ -1006,7 +1006,7 @@ void STOFFGraphicListener::insertPicture(STOFFPosition const &pos, STOFFEmbedded
     m_documentInterface->drawGraphicObject(list);
 }
 
-void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition::AnchorTo anchor)
+void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos)
 {
   if (!m_ds->m_isDocumentStarted) {
     STOFF_DEBUG_MSG(("STOFFGraphicListener::insertShape: the document is not started\n"));
@@ -1015,21 +1015,19 @@ void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGrap
   if (!m_ds->m_isPageSpanOpened)
     _openPageSpan();
   // now check that the anchor is coherent with the actual state
-  if (anchor==STOFFPosition::Paragraph) {
+  if (pos.m_anchorTo==STOFFPosition::Paragraph) {
     if (m_ps->m_isParagraphOpened)
       _flushText();
     else
       _openParagraph();
   }
-  else if (anchor==STOFFPosition::Char || anchor==STOFFPosition::CharBaseLine) {
+  else if (pos.m_anchorTo==STOFFPosition::Char || pos.m_anchorTo==STOFFPosition::CharBaseLine) {
     if (m_ps->m_isSpanOpened)
       _flushText();
     else
       _openSpan();
   }
 
-  STOFFPosition pos;
-  pos.m_anchorTo=anchor;
   librevenge::RVNGPropertyList shapeProp, styleProp;
   pos.addTo(shapeProp);
   shape.addTo(shapeProp);
@@ -1287,7 +1285,7 @@ void STOFFGraphicListener::closeFrame()
   m_ps->m_isFrameOpened = false;
 }
 
-bool  STOFFGraphicListener::openGroup(STOFFPosition::AnchorTo anchor)
+bool  STOFFGraphicListener::openGroup(STOFFPosition const &pos)
 {
   if (!m_ds->m_isDocumentStarted) {
     STOFF_DEBUG_MSG(("STOFFGraphicListener::openGroup: the document is not started\n"));
@@ -1305,8 +1303,6 @@ bool  STOFFGraphicListener::openGroup(STOFFPosition::AnchorTo anchor)
   m_ps->m_isGroupOpened = true;
 
   librevenge::RVNGPropertyList propList;
-  STOFFPosition pos;
-  pos.m_anchorTo=anchor;
   pos.addTo(propList);
   m_documentInterface->openGroup(propList);
 

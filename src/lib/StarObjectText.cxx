@@ -313,20 +313,23 @@ bool Table::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject
     if (m_lineList[i])
       m_lineList[i]->send(listener, pool, object, int(i));
   }
-  return false;
+  listener->closeTable();
+  return true;
 }
 
 ////////////////////////////////////////
 //! Internal: the state of a StarObjectText
 struct State {
   //! constructor
-  State() : m_numPages(0), m_mainContent()
+  State() : m_numPages(0), m_mainContent(), m_model()
   {
   }
   //! the number of pages
   int m_numPages;
   //! the main content
   shared_ptr<Content> m_mainContent;
+  //! the drawing model
+  shared_ptr<StarObjectModel> m_model;
 };
 
 }
@@ -349,7 +352,13 @@ StarObjectText::~StarObjectText()
 bool StarObjectText::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const
 {
   STOFF_DEBUG_MSG(("StarObjectText::updatePageSpans: not implemented\n"));
-  numPages=1;
+  numPages=0;
+  if (m_textState->m_model) {
+    std::vector<STOFFPageSpan> modelPageSpan;
+    m_textState->m_model->updatePageSpans(modelPageSpan, numPages);
+  }
+  if (numPages<=0)
+    numPages=1;
   STOFFPageSpan ps;
   ps.m_pageSpan=numPages;
   pageSpan.clear();
@@ -367,6 +376,10 @@ bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
   if (!m_textState->m_mainContent) {
     STOFF_DEBUG_MSG(("StarObjectText::sendPages: can not find any content\n"));
     return true;
+  }
+  if (m_textState->m_model) {
+    for (int i=0; i<m_textState->m_numPages; ++i)
+      m_textState->m_model->sendPage(i, listener);
   }
   shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
   m_textState->m_mainContent->send(listener, pool.get(), *this);
@@ -2484,12 +2497,17 @@ try
   long pos=input->tell();
   shared_ptr<StarObjectModel> model(new StarObjectModel(*this, true));
   if (!model->read(zone)) {
-    STOFF_DEBUG_MSG(("StarObjectText::readDrawingLayer: can not find the drawing model\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readDrawingLayer: can not read the drawing model\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     ascFile.addPos(input->tell());
     ascFile.addNote("Entries(DrawingLayer):###extra");
     return true;
   }
+  if (m_textState->m_model) {
+    STOFF_DEBUG_MSG(("StarObjectText::readDrawingLayer: oops the drawing model is already defined\n"));
+  }
+  else
+    m_textState->m_model=model;
   if (input->isEnd()) return true;
   pos=input->tell();
   uint16_t nSign;
