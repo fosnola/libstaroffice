@@ -905,10 +905,11 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
   }
   case StarAttribute::ATTR_TXT_FLYCNT: {
     f << "textAtrFlycnt,";
+    shared_ptr<StarFormatManagerInternal::FormatDef> format;
     if (input->peek()=='o')
-      object.getFormatManager()->readSWFormatDef(zone,'o', object);
+      object.getFormatManager()->readSWFormatDef(zone,'o', format, object);
     else
-      object.getFormatManager()->readSWFormatDef(zone,'l', object);
+      object.getFormatManager()->readSWFormatDef(zone,'l', format, object);
     break;
   }
   case StarAttribute::ATTR_TXT_HARDBLANK: // ok no data
@@ -946,24 +947,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     f << "pageBreak=" << input->readULong(1) << ",";
     if (nVers<1) input->seek(1, librevenge::RVNG_SEEK_CUR); // dummy
     break;
-  case StarAttribute::ATTR_FRM_CNTNT: // checkme
-    f << "pageCntnt,";
-    while (input->tell()<lastPos) {
-      long actPos=input->tell();
-      if (input->peek()!='N') {
-        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: find unknown pageCntnt child\n"));
-        f << "###child";
-        break;
-      }
-      StarObjectText text(object, false); // checkme
-      shared_ptr<StarObjectTextInternal::Content> content;
-      if (!text.readSWContent(zone, content) || input->tell()<=actPos) {
-        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: find unknown pageCntnt child\n"));
-        f << "###child";
-        break;
-      }
-    }
-    break;
   case StarAttribute::ATTR_FRM_HEADER:
   case StarAttribute::ATTR_FRM_FOOTER: {
     f << (nWhich==StarAttribute::ATTR_FRM_HEADER ? "header" : "footer") << ",";
@@ -971,7 +954,8 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     long actPos=input->tell();
     if (actPos==lastPos)
       break;
-    object.getFormatManager()->readSWFormatDef(zone,'r',object);
+    shared_ptr<StarFormatManagerInternal::FormatDef> format;
+    object.getFormatManager()->readSWFormatDef(zone,'r',format, object);
     break;
   }
   case StarAttribute::ATTR_FRM_PROTECT:

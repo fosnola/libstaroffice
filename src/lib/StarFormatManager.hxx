@@ -44,8 +44,34 @@
 #include "STOFFEntry.hxx"
 #include "STOFFInputStream.hxx"
 
+class StarAttribute;
+class StarItemPool;
+class StarObject;
+
 namespace StarFormatManagerInternal
 {
+struct FormatDef {
+  //! constructor
+  FormatDef() : m_attributeList(), m_limitList()
+  {
+    for (int i=0; i<3; ++i) m_values[i]=0;
+  }
+  //! destructor
+  ~FormatDef();
+  //! try to send the data to a listener
+  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  //! debug function to print the data
+  void printData(libstoff::DebugStream &o) const;
+  //! the pool name, the read name
+  librevenge::RVNGString m_names[2];
+  //! the attributes list
+  std::vector<shared_ptr<StarAttribute> > m_attributeList;
+  //! the attributes limit
+  std::vector<STOFFVec2i> m_limitList;
+  //! nDerived, nPoolId, nObjRef
+  int m_values[3];
+};
+
 struct State;
 }
 
@@ -68,7 +94,7 @@ public:
   virtual ~StarFormatManager();
 
   //! try to read a format zone : 'f' or 'l' or 'o' or 'r' or 's'(in TOCX)
-  bool readSWFormatDef(StarZone &zone, char kind, StarObject &doc);
+  bool readSWFormatDef(StarZone &zone, char kind, shared_ptr<StarFormatManagerInternal::FormatDef> &format, StarObject &doc);
   //! try to read a number format zone : 'n'
   bool readSWNumberFormat(StarZone &zone);
   //! try to read a number formatter type : 'q'

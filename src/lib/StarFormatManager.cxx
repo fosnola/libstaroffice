@@ -42,6 +42,8 @@
 #include "STOFFCell.hxx"
 #include "STOFFCellStyle.hxx"
 
+
+#include "StarAttribute.hxx"
 #include "StarFileManager.hxx"
 #include "StarGraphicStruct.hxx"
 #include "StarLanguage.hxx"
@@ -54,6 +56,47 @@
 /** Internal: the structures of a StarFormatManager */
 namespace StarFormatManagerInternal
 {
+//------------------------------------------------------------
+// implements formatDef function
+//------------------------------------------------------------
+FormatDef::~FormatDef()
+{
+}
+
+bool FormatDef::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarFormatManagerInternal::FormatDef::send: call without listener\n"));
+    return false;
+  }
+  bool done=false;
+  for (size_t i=0; i<m_attributeList.size(); ++i) {
+    if (!m_attributeList[i])
+      continue;
+    STOFFFont font;
+    m_attributeList[i]->addTo(font, pool);
+    if (!font.m_content) continue;
+    done=true;
+    m_attributeList[i]->send(listener, pool, object);
+  }
+  if (!done) {
+    STOFF_DEBUG_MSG(("StarFormatManagerInternal::FormatDef::send: can not find and data to send\n"));
+  }
+  return true;
+}
+
+void FormatDef::printData(libstoff::DebugStream &o) const
+{
+  for (int i=0; i<2; ++i) {
+    if (!m_names[i].empty())
+      o << (i==0 ? "poolName" : "readName") << "=" << m_names[i].cstr() << ",";
+  }
+  if (m_values[0]) o << "derived=" << m_values[0] << ",";
+  if (m_values[1]!=0xFFFF) o << "poolId=" << m_values[1] << ",";
+  if (m_values[2]) o << "objRef=" << m_values[2] << ",";
+}
+
+//------------------------------------------------------------
 //! a struct use to store number formatter of a StarFormatManager
 struct NumberFormatter {
   //! struct use to store small format item
@@ -506,7 +549,7 @@ StarFormatManager::~StarFormatManager()
 {
 }
 
-bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &doc)
+bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, shared_ptr<StarFormatManagerInternal::FormatDef> &format, StarObject &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -518,10 +561,10 @@ bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &d
   }
   // sw_sw3fmts.cxx InFormat
   libstoff::DebugStream f;
-  f << "Entries(SWFormatDef)[" << zone.getRecordLevel() << "]:";
+  f << "Entries(SWFormatDef)[" << kind << "-" << zone.getRecordLevel() << "]:";
+  format.reset(new StarFormatManagerInternal::FormatDef);
   int flags=zone.openFlagZone();
-  f << "nDerived=" << input->readULong(2) << ",";
-  f << "nPoolId=" << input->readULong(2) << ",";
+  for (int i=0; i<2; ++i) format->m_values[i]=int(input->readULong(2));
   int stringId=0xFFFF;
   if (flags&0x10) {
     stringId=int(input->readULong(2));
@@ -529,7 +572,7 @@ bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &d
       f << "nStringId=" << stringId << ",";
   }
   if (flags&0x20)
-    f << "nObjRef=" << input->readULong(4) << ",";
+    format->m_values[2]=int(input->readULong(4));
   int moreFlags=0;
   if (flags&(zone.isCompatibleWith(0x201) ? 0x80:0x40)) {
     moreFlags=int(input->readULong(1));
@@ -553,16 +596,15 @@ bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &d
       zone.closeSWRecord(kind, "SWFormatDef");
       return true;
     }
-    else if (!string.empty())
-      f << libstoff::getString(string).cstr() << ",";
+    else if (!string.empty()) {
+      format->m_names[1]=libstoff::getString(string);
+    }
   }
   else if (stringId!=0xffff) {
-    librevenge::RVNGString poolName;
-    if (!zone.getPoolName(stringId, poolName))
+    if (!zone.getPoolName(stringId, format->m_names[0]))
       f << "###nPoolId=" << stringId << ",";
-    else if (!poolName.empty())
-      f << poolName.cstr() << ",";
   }
+  format->printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
@@ -570,9 +612,7 @@ bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, StarObject &d
   while (input->tell()<lastPos) {
     pos=long(input->tell());
     int rType=input->peek();
-    std::vector<shared_ptr<StarAttribute> > attributeList;
-    std::vector<STOFFVec2i> limitsList;
-    if (rType=='S' && StarObjectText::readSWAttributeList(zone, doc, attributeList, limitsList))
+    if (rType=='S' && StarObjectText::readSWAttributeList(zone, doc, format->m_attributeList, format->m_limitList))
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1006,7 +1046,8 @@ bool StarFormatManager::readSWFlyFrameList(StarZone &zone, StarObject &doc)
   while (input->tell()<lastPos) {
     pos=input->tell();
     int rType=input->peek();
-    if ((rType=='o' || rType=='l') && readSWFormatDef(zone, char(rType), doc))
+    shared_ptr<StarFormatManagerInternal::FormatDef> format;
+    if ((rType=='o' || rType=='l') && readSWFormatDef(zone, char(rType), format, doc))
       continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;

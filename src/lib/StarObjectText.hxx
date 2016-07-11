@@ -71,6 +71,7 @@ struct Content {
   std::vector<shared_ptr<Zone> > m_zoneList;
 };
 
+struct GraphZone;
 struct Table;
 struct TableBox;
 struct TableLine;
@@ -140,7 +141,7 @@ protected:
   //! try to read a footnode node : '1'
   bool readSWFootNoteInfo(StarZone &zone);
   //! try to read a OLE node : 'g'
-  bool readSWGraphNode(StarZone &zone);
+  bool readSWGraphNode(StarZone &zone, shared_ptr<StarObjectTextInternal::GraphZone> &graphZone);
   //! try to read a SW zone setup : 'J'
   bool readSWJobSetUp(StarZone &zone);
   //! try to read a layout information zone : 'Y'

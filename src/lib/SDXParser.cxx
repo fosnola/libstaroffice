@@ -182,7 +182,7 @@ bool SDXParser::createZones()
       if (base.compare(0,3,"Pic")==0) {
         librevenge::RVNGBinaryData data;
         std::string type;
-        fileManager.readEmbeddedPicture(ole,data,type,name,object);
+        fileManager.readEmbeddedPicture(ole,data,type,name);
         continue;
       }
       // other

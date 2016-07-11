@@ -609,6 +609,41 @@ protected:
   int m_unit;
 };
 
+//! a content attribute
+class StarCAttributeContent : public StarAttribute
+{
+public:
+  //! constructor
+  StarCAttributeContent(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_content()
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarCAttributeContent(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a font
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! debug function to print the data
+  virtual void printData(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    if (!m_content) o << "empty,";
+    o << "],";
+  }
+  //! add to send the zone data
+  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, std::set<StarAttribute const *> &done) const;
+protected:
+  //! copy constructor
+  StarCAttributeContent(StarCAttributeContent const &orig) : StarAttribute(orig), m_content(orig.m_content)
+  {
+  }
+  //! the content
+  shared_ptr<StarObjectTextInternal::Content> m_content;
+};
+
 //! a footnote attribute
 class StarCAttributeFootnote : public StarAttribute
 {
@@ -736,6 +771,11 @@ void StarCAttributeFontSize::addTo(STOFFFont &font, StarItemPool const */*pool*/
   }
 }
 
+void StarCAttributeContent::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+{
+  font.m_content=true;
+}
+
 void StarCAttributeFootnote::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   font.m_footnote=true;
@@ -835,6 +875,27 @@ bool StarCAttributeFontSize::read(StarZone &zone, int nVers, long endPos, StarOb
   return input->tell()<=endPos;
 }
 
+bool StarCAttributeContent::read(StarZone &zone, int /*nVers*/, long endPos, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  StarObjectText text(object, false); // checkme
+  if (!text.readSWContent(zone, m_content)) {
+    STOFF_DEBUG_MSG(("StarCAttributeContent::read: can not find the content\n"));
+    f << "###aContent,";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
 bool StarCAttributeFootnote::read(StarZone &zone, int nVers, long endPos, StarObject &object)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -873,6 +934,22 @@ bool StarCAttributeFootnote::read(StarZone &zone, int nVers, long endPos, StarOb
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
+}
+
+bool StarCAttributeContent::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, std::set<StarAttribute const *> &done) const
+{
+  if (done.find(this)!=done.end()) {
+    STOFF_DEBUG_MSG(("StarCAttributeContent::read: find a loop\n"));
+    return false;
+  }
+  done.insert(this);
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarCAttributeContent::read: can not find the listener\n"));
+    return false;
+  }
+  if (m_content) // checkme zone time, we need probably to create a frame
+    m_content->send(listener, pool, object);
+  return true;
 }
 
 bool StarCAttributeFootnote::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, std::set<StarAttribute const *> &done) const
@@ -952,6 +1029,8 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeBool(map,StarAttribute::ATTR_TXT_DUMMY6,"text[dummy6]",false);
   addAttributeBool(map,StarAttribute::ATTR_TXT_DUMMY7,"text[dummy7]",false);
   addAttributeVoid(map,StarAttribute::ATTR_TXT_UNKNOWN_CONTAINER, "text[unknContainer]"); // XML attrib
+
+  map[StarAttribute::ATTR_FRM_CNTNT]=shared_ptr<StarAttribute>(new StarCAttributeContent(StarAttribute::ATTR_FRM_CNTNT,"pageCntnt"));
 
   // do we need to retrieve these attribute
   addAttributeVoid(map, StarAttribute::ATTR_EE_FEATURE_TAB, "feature[tab]"); // feature tab ?

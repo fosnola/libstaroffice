@@ -52,6 +52,7 @@
 #include "StarFormatManager.hxx"
 #include "StarObject.hxx"
 #include "StarFileManager.hxx"
+#include "StarGraphicStruct.hxx"
 #include "StarItemPool.hxx"
 #include "StarObjectChart.hxx"
 #include "StarObjectModel.hxx"
@@ -89,10 +90,82 @@ bool Content::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObje
 }
 
 ////////////////////////////////////////
+//! Internal: a formatZone of StarObjectTextInteral
+struct FormatZone : public Zone {
+  //! constructor
+  FormatZone(shared_ptr<StarFormatManagerInternal::FormatDef> format) : Zone(), m_format(format)
+  {
+  }
+  //! try to send the data to a listener
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  //! the format
+  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+};
+
+bool FormatZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::FormatZone::send: call without listener\n"));
+    return false;
+  }
+  if (!m_format) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::FormatZone::send: can not find the format\n"));
+    return false;
+  }
+  return m_format->send(listener, pool, object);
+}
+
+////////////////////////////////////////
+//! Internal: a graphZone of StarObjectTextInteral
+struct GraphZone : public Zone {
+  //! constructor
+  GraphZone(shared_ptr<STOFFOLEParser> oleParser) : Zone(), m_oleParser(oleParser), m_attributeList(), m_limitList(), m_contour()
+  {
+  }
+  //! try to send the data to a listener
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const */*pool*/, StarObject &object) const;
+  //! the ole parser
+  shared_ptr<STOFFOLEParser> m_oleParser;
+  //! the graph name, the fltName, the replace text
+  librevenge::RVNGString m_names[3];
+  //! the attributes list
+  std::vector<shared_ptr<StarAttribute> > m_attributeList;
+  //! the attributes limit
+  std::vector<STOFFVec2i> m_limitList;
+  //! the contour
+  StarGraphicStruct::StarPolygon m_contour;
+};
+
+bool GraphZone::send(STOFFListenerPtr listener, StarItemPool const */*pool*/, StarObject &/*object*/) const
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::GraphZone::send: call without listener\n"));
+    return false;
+  }
+  if (m_names[0].empty()) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::GraphZone::send: can not find the graph name\n"));
+    return false;
+  }
+  STOFFEmbeddedObject localPicture;
+  if (!m_oleParser || !StarFileManager::readEmbeddedPicture(m_oleParser, m_names[0].cstr(), localPicture) || localPicture.isEmpty()) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal: sorry, can not find object %s\n", m_names[0].cstr()));
+    return false;
+  }
+  STOFFPosition position;
+  position.setAnchor(STOFFPosition::Paragraph);
+  //position.setOrigin(STOFFVec2i(0,0), librevenge::RVNG_POINT);
+  position.setSize(STOFFVec2i(100,100), librevenge::RVNG_POINT);
+  STOFFGraphicStyle style;
+  //updateStyle(style, object, listener);
+  listener->insertPicture(position, localPicture, style);
+  return true;
+}
+
+////////////////////////////////////////
 //! Internal: a textZone of StarObjectTextInteral
 struct TextZone : public Zone {
   //! constructor
-  TextZone() : Zone(), m_text(), m_textSourcePosition(), m_styleName(""), m_charAttributeList(), m_charLimitList()
+  TextZone() : Zone(), m_text(), m_textSourcePosition(), m_styleName(""), m_charAttributeList(), m_charLimitList(), m_format()
   {
   }
   //! try to send the data to a listener
@@ -107,6 +180,8 @@ struct TextZone : public Zone {
   std::vector<shared_ptr<StarAttribute> > m_charAttributeList;
   //! the character limit
   std::vector<STOFFVec2i> m_charLimitList;
+  //! the format
+  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
 };
 
 bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
@@ -146,6 +221,8 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
   }
   listener->setFont(mainFont);
   listener->setParagraph(para);
+  if (m_format)
+    m_format->send(listener, pool, object);
 
   std::set<size_t> modPosSet;
   size_t numFonts=m_charAttributeList.size();
@@ -204,7 +281,7 @@ struct TableLine;
 //! small structure used to store a table box
 struct TableBox {
   //! constructor
-  TableBox() : m_formatId(0), m_numLines(0), m_content(), m_lineList()
+  TableBox() : m_formatId(0), m_numLines(0), m_content(), m_lineList(), m_format()
   {
   }
   //! try to send the data to a listener
@@ -217,6 +294,8 @@ struct TableBox {
   shared_ptr<Content> m_content;
   //! a list of line
   std::vector<shared_ptr<TableLine> > m_lineList;
+  //! the format
+  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
 };
 
 bool TableBox::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
@@ -236,7 +315,7 @@ bool TableBox::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
 //! small structure used to store a table line
 struct TableLine {
   //! constructor
-  TableLine() : m_formatId(0), m_numBoxes(0), m_boxList()
+  TableLine() : m_formatId(0), m_numBoxes(0), m_boxList(), m_format()
   {
   }
   //! try to send the data to a listener
@@ -247,6 +326,8 @@ struct TableLine {
   int m_numBoxes;
   //! a list of box
   std::vector<shared_ptr<TableBox> > m_boxList;
+  //! the format
+  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
 };
 
 bool TableLine::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, int row) const
@@ -966,9 +1047,13 @@ bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInte
         content->m_zoneList.push_back(table);
       break;
     }
-    case 'G':
-      done=readSWGraphNode(zone);
+    case 'G': {
+      shared_ptr<StarObjectTextInternal::GraphZone> graph;
+      done=readSWGraphNode(zone, graph);
+      if (done && graph)
+        content->m_zoneList.push_back(graph);
       break;
+    }
     case 'I':
       done=readSWSection(zone);
       break;
@@ -983,9 +1068,16 @@ bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInte
       break;
     }
     case 'l': // related to link
-    case 'o': // format: safe to ignore
-      done=getFormatManager()->readSWFormatDef(zone,char(cType),*this);
+    case 'o': { // format: safe to ignore
+      shared_ptr<StarFormatManagerInternal::FormatDef> format;
+      done=getFormatManager()->readSWFormatDef(zone,char(cType),format, *this);
+      if (done && format) {
+        shared_ptr<StarObjectTextInternal::FormatZone> formatZone;
+        formatZone.reset(new StarObjectTextInternal::FormatZone(format));
+        content->m_zoneList.push_back(formatZone);
+      }
       break;
+    }
     case 'v':
       done=readSWNodeRedline(zone);
       break;
@@ -1271,7 +1363,7 @@ bool StarObjectText::readSWFootNoteInfo(StarZone &zone)
   return true;
 }
 
-bool StarObjectText::readSWGraphNode(StarZone &zone)
+bool StarObjectText::readSWGraphNode(StarZone &zone, shared_ptr<StarObjectTextInternal::GraphZone> &graphZone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1284,7 +1376,7 @@ bool StarObjectText::readSWGraphNode(StarZone &zone)
   // sw_sw3nodes.cxx: InGrfNode
   libstoff::DebugStream f;
   f << "Entries(SWGraphNode)[" << zone.getRecordLevel() << "]:";
-
+  graphZone.reset(new StarObjectTextInternal::GraphZone(m_oleParser));
   std::vector<uint32_t> text;
   int fl=zone.openFlagZone();
   if (fl&0x10) f << "link,";
@@ -1300,8 +1392,10 @@ bool StarObjectText::readSWGraphNode(StarZone &zone)
       zone.closeSWRecord('G', "SWGraphNode");
       return true;
     }
-    if (!text.empty())
-      f << (i==0 ? "grfName" : "fltName") << "=" << libstoff::getString(text).cstr() << ",";
+    if (!text.empty()) {
+      graphZone->m_names[i]=libstoff::getString(text);
+      f << (i==0 ? "grfName" : "fltName") << "=" << graphZone->m_names[i].cstr() << ",";
+    }
   }
   if (zone.isCompatibleWith(0x101)) {
     if (!zone.readString(text)) {
@@ -1312,8 +1406,10 @@ bool StarObjectText::readSWGraphNode(StarZone &zone)
       zone.closeSWRecord('G', "SWGraphNode");
       return true;
     }
-    if (!text.empty())
-      f << "textRepl=" << libstoff::getString(text).cstr() << ",";
+    if (!text.empty()) {
+      graphZone->m_names[2]=libstoff::getString(text);
+      f << "textRepl=" << graphZone->m_names[2].cstr() << ",";
+    }
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -1324,13 +1420,10 @@ bool StarObjectText::readSWGraphNode(StarZone &zone)
     int rType=input->peek();
 
     switch (rType) {
-    case 'S': {
-      std::vector<shared_ptr<StarAttribute> > attributeList;
-      std::vector<STOFFVec2i> limitsList;
-      done=readSWAttributeList(zone, *this, attributeList, limitsList);
+    case 'S':
+      done=readSWAttributeList(zone, *this, graphZone->m_attributeList, graphZone->m_limitList);
       break;
-    }
-    case 'X':
+    case 'X': // store me
       done=readSWImageMap(zone);
       break;
     default:
@@ -1362,8 +1455,12 @@ bool StarObjectText::readSWGraphNode(StarZone &zone)
             f << "###poly";
             break;
           }
-          for (int p=0; p<numPoints; ++p)
-            f << input->readLong(4) << "x" << input->readLong(4) << ",";
+          for (int p=0; p<numPoints; ++p) {
+            int dim[2];
+            for (int j=0; j<2; ++j) dim[j]=int(input->readLong(4));
+            graphZone->m_contour.m_points.push_back(StarGraphicStruct::StarPolygon::Point(STOFFVec2i(dim[0],dim[1])));
+            f << STOFFVec2i(dim[0],dim[1]) << ",";
+          }
           f << "],";
         }
       }
@@ -1934,7 +2031,8 @@ bool StarObjectText::readSWTable(StarZone &zone, shared_ptr<StarObjectTextIntern
 
   long lastPos=zone.getRecordLastPosition();
   // TODO storeme
-  if (input->peek()=='f') getFormatManager()->readSWFormatDef(zone, 'f', *this);
+  shared_ptr<StarFormatManagerInternal::FormatDef> format;
+  if (input->peek()=='f') getFormatManager()->readSWFormatDef(zone, 'f', format, *this);
   if (input->peek()=='Y') {
     SWFieldManager fieldManager;
     fieldManager.readField(zone,'Y');
@@ -1998,8 +2096,8 @@ bool StarObjectText::readSWTableBox(StarZone &zone, shared_ptr<StarObjectTextInt
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  if (input->peek()=='f') // TODO storeme
-    getFormatManager()->readSWFormatDef(zone,'f',*this);
+  if (input->peek()=='f')
+    getFormatManager()->readSWFormatDef(zone,'f', box->m_format, *this);
   if (input->peek()=='N')
     readSWContent(zone, box->m_content);
   long lastPos=zone.getRecordLastPosition();
@@ -2047,7 +2145,7 @@ bool StarObjectText::readSWTableLine(StarZone &zone, shared_ptr<StarObjectTextIn
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   if (input->peek()=='f')
-    getFormatManager()->readSWFormatDef(zone,'f',*this);
+    getFormatManager()->readSWFormatDef(zone,'f',line->m_format, *this);
 
   long lastPos=zone.getRecordLastPosition();
   while (input->tell()<lastPos) {
@@ -2137,9 +2235,13 @@ bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInt
       done=readSWAttributeList(zone, *this, textZone->m_charAttributeList, textZone->m_charLimitList);
       break;
     case 'l': // related to link
-    case 'o': // format: safe to ignore
-      done=getFormatManager()->readSWFormatDef(zone,char(rType), *this);
+      done=getFormatManager()->readSWFormatDef(zone,'l', textZone->m_format, *this);
       break;
+    case 'o': { // format: safe to ignore
+      shared_ptr<StarFormatManagerInternal::FormatDef> format;
+      done=getFormatManager()->readSWFormatDef(zone,'o', format, *this);
+      break;
+    }
     case 'v':
       done=readSWNodeRedline(zone);
       break;
@@ -2346,7 +2448,8 @@ bool StarObjectText::readSWTOXList(StarZone &zone)
 
     if ((fl&0x10)) {
       while (input->tell()<zone.getRecordLastPosition() && input->peek()=='s') {
-        if (!getFormatManager()->readSWFormatDef(zone,'s', *this)) {
+        shared_ptr<StarFormatManagerInternal::FormatDef> format;
+        if (!getFormatManager()->readSWFormatDef(zone,'s', format, *this)) {
           STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read some format\n"));
           f << "###format,";
           break;

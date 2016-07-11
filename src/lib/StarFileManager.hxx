@@ -80,7 +80,9 @@ public:
   static bool readMathDocument(STOFFInputStreamPtr input, std::string const &fileName, StarObject &doc);
 
   //! try to read a embedded picture file: Embedded/PicXXXXXX
-  static bool readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string &dataType, std::string const &fileName, StarObject &doc);
+  static bool readEmbeddedPicture(shared_ptr<STOFFOLEParser> oleParser, std::string const &fileName, STOFFEmbeddedObject &image);
+  //! try to read a embedded picture file: Embedded/PicXXXXXX
+  static bool readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string &dataType, std::string const &fileName);
 
   // other
 

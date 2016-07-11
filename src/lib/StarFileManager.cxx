@@ -479,7 +479,7 @@ void StarFileManager::checkUnparsed(STOFFInputStreamPtr input, shared_ptr<STOFFO
       if (base.compare(0,3,"Pic")==0) {
         librevenge::RVNGBinaryData data;
         std::string type;
-        readEmbeddedPicture(ole,data,type,name,object);
+        readEmbeddedPicture(ole,data,type,name);
         continue;
       }
       // other
@@ -527,11 +527,37 @@ bool StarFileManager::readImageDocument(STOFFInputStreamPtr input, librevenge::R
   return true;
 }
 
-bool StarFileManager::readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string &dataType, std::string const &fileName, StarObject &doc)
+bool StarFileManager::readEmbeddedPicture(shared_ptr<STOFFOLEParser> oleParser, std::string const &fileName, STOFFEmbeddedObject &image)
+{
+  if (!oleParser) {
+    STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: called without OLE parser\n"));
+    return false;
+  }
+  shared_ptr<STOFFOLEParser::OleDirectory> dir=oleParser->getDirectory("EmbeddedPictures");
+  if (!dir || !dir->m_input || !dir->m_input->isStructured()) {
+    STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: can not find the embedded picture directory\n"));
+    return false;
+  }
+  std::string name("EmbeddedPictures/");
+  name+=fileName;
+  STOFFInputStreamPtr ole= dir->m_input->getSubStreamByName(name.c_str());
+  if (!ole) {
+    STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: can not find the picture %s\n", name.c_str()));
+    return false;
+  }
+  librevenge::RVNGBinaryData data;
+  std::string type;
+  if (!readEmbeddedPicture(ole,data,type,name))
+    return false;
+  image.add(data, type);
+  return true;
+}
+
+bool StarFileManager::readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string &dataType, std::string const &fileName)
 try
 {
   // see this Ole with classic bitmap format
-  StarZone zone(input, fileName, "EmbeddedPicture", doc.getPassword());
+  StarZone zone(input, fileName, "EmbeddedPicture", 0);
 
   libstoff::DebugFile &ascii=zone.ascii();
   ascii.open(fileName);
