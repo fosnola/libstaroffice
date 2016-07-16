@@ -896,13 +896,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     f << "textAtrCJKRuby=" << input->readULong(1) << ",";
     break;
 
-  // field...
-  case StarAttribute::ATTR_TXT_FIELD: {
-    f << "textAtrField,";
-    SWFieldManager fieldManager;
-    fieldManager.readField(zone);
-    break;
-  }
   case StarAttribute::ATTR_TXT_FLYCNT: {
     f << "textAtrFlycnt,";
     shared_ptr<StarFormatManagerInternal::FormatDef> format;

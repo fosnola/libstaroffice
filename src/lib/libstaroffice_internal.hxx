@@ -351,25 +351,14 @@ struct STOFFBorderLine {
 
 //! a field
 struct STOFFField {
-  /** Defines some basic type for field */
-  enum Type { None, PageCount, PageNumber, Date, Time, Title, Database };
-
   /** basic constructor */
-  explicit STOFFField(Type type) : m_type(type), m_DTFormat(""), m_numberingType(libstoff::ARABIC), m_data("")
+  STOFFField() : m_propertyList()
   {
   }
   /** add the link property to proplist (if possible) */
-  bool addTo(librevenge::RVNGPropertyList &propList) const;
-  //! returns a string corresponding to the field (if possible) */
-  librevenge::RVNGString getString() const;
-  //! the type
-  Type m_type;
-  //! the date/time format using strftime format if defined
-  std::string m_DTFormat;
-  //! the number type ( for number field )
-  libstoff::NumberingType m_numberingType;
-  //! the database/link field ( if defined )
-  std::string m_data;
+  void addTo(librevenge::RVNGPropertyList &propList) const;
+  //! the property list
+  librevenge::RVNGPropertyList m_propertyList;
 };
 
 //! a link

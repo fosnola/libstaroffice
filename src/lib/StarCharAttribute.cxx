@@ -31,6 +31,8 @@
 * instead of those above.
 */
 
+#include "StarCharAttribute.hxx"
+
 #include "STOFFFont.hxx"
 #include "STOFFListener.hxx"
 #include "STOFFSubDocument.hxx"
@@ -42,7 +44,7 @@
 #include "StarObjectText.hxx"
 #include "StarZone.hxx"
 
-#include "StarCharAttribute.hxx"
+#include "SWFieldManager.hxx"
 
 namespace StarCharAttribute
 {
@@ -644,6 +646,32 @@ protected:
   shared_ptr<StarObjectTextInternal::Content> m_content;
 };
 
+//! a field attribute
+class StarCAttributeField : public StarAttribute
+{
+public:
+  //! constructor
+  StarCAttributeField(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_field()
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarCAttributeField(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a font
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+protected:
+  //! copy constructor
+  StarCAttributeField(StarCAttributeField const &orig) : StarAttribute(orig), m_field(orig.m_field)
+  {
+  }
+  //! the field
+  shared_ptr<SWFieldManagerInternal::Field> m_field;
+};
+
 //! a footnote attribute
 class StarCAttributeFootnote : public StarAttribute
 {
@@ -776,6 +804,11 @@ void StarCAttributeContent::addTo(STOFFFont &font, StarItemPool const */*pool*/,
   font.m_content=true;
 }
 
+void StarCAttributeField::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+{
+  font.m_field=m_field;
+}
+
 void StarCAttributeFootnote::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   font.m_footnote=true;
@@ -894,6 +927,29 @@ bool StarCAttributeContent::read(StarZone &zone, int /*nVers*/, long endPos, Sta
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
+}
+
+bool StarCAttributeField::read(StarZone &zone, int /*nVers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  SWFieldManager fieldManager;
+  m_field=fieldManager.readField(zone);
+  if (!m_field || input->tell()>endPos) {
+    STOFF_DEBUG_MSG(("StarCAttributeField::read: can not find the field\n"));
+    printData(f);
+    f << "###field,";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return m_field && input->tell()<=endPos;
 }
 
 bool StarCAttributeFootnote::read(StarZone &zone, int nVers, long endPos, StarObject &object)
@@ -1018,6 +1074,7 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeBool(map,StarAttribute::ATTR_CHR_NOHYPHEN,"char[noHyphen]",true);
   addAttributeVoid(map,StarAttribute::ATTR_TXT_SOFTHYPH,"text[softHyphen]");
   map[StarAttribute::ATTR_TXT_FTN]=shared_ptr<StarAttribute>(new StarCAttributeFootnote(StarAttribute::ATTR_TXT_FTN,"textAtrFtn"));
+  map[StarAttribute::ATTR_TXT_FIELD]=shared_ptr<StarAttribute>(new StarCAttributeField(StarAttribute::ATTR_TXT_FIELD,"textAtrField"));
   addAttributeBool(map,StarAttribute::ATTR_CHR_NOLINEBREAK,"char[nolineBreak]",true);
   addAttributeBool(map,StarAttribute::ATTR_SC_HYPHENATE,"hyphenate", false);
 

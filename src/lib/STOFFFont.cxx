@@ -39,7 +39,12 @@
 
 #include "STOFFFont.hxx"
 
+#include "SWFieldManager.hxx"
+
 // font function
+STOFFFont::~STOFFFont()
+{
+}
 
 std::ostream &operator<<(std::ostream &o, STOFFFont const &font)
 {

@@ -223,7 +223,14 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
   listener->setParagraph(para);
   if (m_format)
     m_format->send(listener, pool, object);
-
+  if (mainFont.m_footnote) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a footnote in mainFont\n"));
+    mainFont.m_footnote=false;
+  }
+  if (mainFont.m_field) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a field in mainFont\n"));
+    mainFont.m_field.reset();
+  }
   std::set<size_t> modPosSet;
   size_t numFonts=m_charAttributeList.size();
   if (m_charLimitList.size()!=numFonts) {
@@ -247,6 +254,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
       fontChange=true;
     }
     shared_ptr<StarAttribute> footnote;
+    shared_ptr<SWFieldManagerInternal::Field> field;
     if (fontChange) {
       STOFFFont font(mainFont);
       for (size_t f=0; f<numFonts; ++f) {
@@ -260,13 +268,25 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
           footnote=m_charAttributeList[f];
         if (c==0)
           m_charAttributeList[f]->addTo(para, pool);
+        if (font.m_field) {
+          if (int(srcPos)==m_charLimitList[f][0])
+            field=font.m_field;
+          font.m_field.reset();
+        }
       }
       listener->setFont(font);
       if (c==0)
         listener->setParagraph(para);
+      static bool first=true;
+      if (font.m_content) {
+        first=false;
+        STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find unexpected content zone\n"));
+      }
     }
     if (footnote)
       footnote->send(listener, pool, object);
+    else if (field)
+      field->send(listener, pool, object);
     else if (m_text[c]==0x9)
       listener->insertTab();
     else if (m_text[c]==0xa)

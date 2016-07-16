@@ -230,68 +230,18 @@ std::string STOFFColor::str() const
 }
 
 // field function
-bool STOFFField::addTo(librevenge::RVNGPropertyList &propList) const
+void STOFFField::addTo(librevenge::RVNGPropertyList &pList) const
 {
-  switch (m_type) {
-  case PageCount:
-    propList.insert("librevenge:field-type", "text:page-count");
-    propList.insert("style:num-format", numberingTypeToString(m_numberingType).c_str());
-    break;
-  case PageNumber:
-    propList.insert("librevenge:field-type", "text:page-number");
-    propList.insert("style:num-format", numberingTypeToString(m_numberingType).c_str());
-    break;
-  case Title:
-    propList.insert("librevenge:field-type", "text:title");
-    break;
-  case Database:
-  case Date:
-  case Time:
-  case None:
-  default:
-    return false;
+  librevenge::RVNGPropertyList::Iter i(m_propertyList);
+  for (i.rewind(); i.next();) {
+    if (i.child()) {
+      pList.insert(i.key(), *i.child());
+      continue;
+    }
+    pList.insert(i.key(), i()->clone());
   }
-  return true;
 }
 
-librevenge::RVNGString STOFFField::getString() const
-{
-  librevenge::RVNGString res;
-  switch (m_type) {
-  case Database:
-    if (m_data.length())
-      res=librevenge::RVNGString(m_data.c_str());
-    else
-      res=librevenge::RVNGString("#DATAFIELD#");
-    break;
-  case Date:
-  case Time: {
-    std::string format(m_DTFormat);
-    if (format.length()==0) {
-      if (m_type==Date)
-        format="%m/%d/%y";
-      else
-        format="%I:%M:%S %p";
-    }
-    time_t now = time(0L);
-    struct tm timeinfo;
-    if (localtime_r(&now, &timeinfo)) {
-      char buf[256];
-      strftime(buf, 256, format.c_str(), &timeinfo);
-      res=librevenge::RVNGString(buf);
-    }
-    break;
-  }
-  case PageCount:
-  case PageNumber:
-  case Title:
-  case None:
-  default:
-    break;
-  }
-
-  return res;
-}
 // link function
 bool STOFFLink::addTo(librevenge::RVNGPropertyList &propList) const
 {

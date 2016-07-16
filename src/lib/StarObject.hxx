@@ -96,7 +96,8 @@ public:
   {
     return m_metaData;
   }
-
+  //! returns the ith user meta data
+  librevenge::RVNGString getUserNameMetaData(int i) const;
   // the document pool
   //! clean each pool
   void cleanPools();

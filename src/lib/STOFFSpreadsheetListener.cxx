@@ -406,19 +406,11 @@ void STOFFSpreadsheetListener::insertField(STOFFField const &field)
   }
 
   librevenge::RVNGPropertyList propList;
-  if (field.addTo(propList)) {
-    _flushDeferredTabs();
-    _flushText();
-    _openSpan();
-    m_documentInterface->insertField(propList);
-    return;
-  }
-  librevenge::RVNGString text=field.getString();
-  if (!text.empty())
-    STOFFSpreadsheetListener::insertUnicodeString(text);
-  else {
-    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertField: must not be called with type=%d\n", int(field.m_type)));
-  }
+  field.addTo(propList);
+  _flushDeferredTabs();
+  _flushText();
+  _openSpan();
+  m_documentInterface->insertField(propList);
 }
 
 void STOFFSpreadsheetListener::openLink(STOFFLink const &link)

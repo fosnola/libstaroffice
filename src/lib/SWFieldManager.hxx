@@ -44,8 +44,54 @@
 #include "STOFFEntry.hxx"
 #include "STOFFInputStream.hxx"
 
+class StarItemPool;
+class StarObject;
+
 namespace SWFieldManagerInternal
 {
+////////////////////////////////////////
+//! Internal: a field
+struct Field {
+  //! constructor
+  Field() : m_type(-1), m_subType(-1), m_format(-1), m_name(""), m_content(""), m_textValue(""), m_doubleValue(0), m_level(0)
+  {
+  }
+  //! destructor
+  virtual ~Field();
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, Field const &field)
+  {
+    field.print(o);
+    return o;
+  }
+  //! add to send the zone data
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  //! print a field
+  virtual void print(std::ostream &o) const;
+  //! the field type
+  int m_type;
+  //! the subtype
+  int m_subType;
+  //! the field format
+  int m_format;
+  //! the name
+  librevenge::RVNGString m_name;
+  //! the content
+  librevenge::RVNGString m_content;
+  //! the value text
+  librevenge::RVNGString m_textValue;
+  //! double
+  double m_doubleValue;
+  //! the chapter level
+  int m_level;
+protected:
+  //! copy constructor
+  Field(const Field &orig) : m_type(orig.m_type), m_subType(orig.m_subType), m_format(orig.m_format),
+    m_name(orig.m_name), m_content(orig.m_content), m_textValue(orig.m_textValue), m_doubleValue(orig.m_doubleValue), m_level(orig.m_level)
+  {
+  }
+};
+
 struct State;
 }
 
@@ -66,7 +112,7 @@ public:
 
 
   //! try to read a field type
-  bool readField(StarZone &zone, char cKind='_');
+  shared_ptr<SWFieldManagerInternal::Field> readField(StarZone &zone, char cKind='_');
 
   //
   // data

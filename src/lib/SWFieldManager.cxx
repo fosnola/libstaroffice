@@ -39,53 +39,48 @@
 
 #include <librevenge/librevenge.h>
 
-#include "StarZone.hxx"
-
 #include "SWFieldManager.hxx"
+
+#include "StarObject.hxx"
+#include "StarZone.hxx"
+#include "STOFFListener.hxx"
 
 /** Internal: the structures of a SWFieldManager */
 namespace SWFieldManagerInternal
 {
-////////////////////////////////////////
-//! Internal: a field
-struct Field {
-  //! constructor
-  Field() : m_type(-1), m_subType(-1), m_format(-1), m_name(""), m_content(""), m_textValue(""), m_doubleValue(0), m_level(0)
-  {
+static void splitString(librevenge::RVNGString const &name, librevenge::RVNGString const &delim,
+                        librevenge::RVNGString &string1, librevenge::RVNGString &string2)
+{
+  std::string fName(name.cstr());
+  std::string fDelim(delim.cstr());
+  size_t pos=fName.find(fDelim);
+  if (pos!=std::string::npos) {
+    if (pos+fDelim.length()<fName.length())
+      string2=librevenge::RVNGString(fName.substr(pos+fDelim.length()).c_str());
+    if (pos>0)
+      string1=librevenge::RVNGString(fName.substr(0,pos).c_str());
   }
-  //! destructor
-  virtual ~Field();
-  //! operator<<
-  friend std::ostream &operator<<(std::ostream &o, Field const &field)
-  {
-    field.print(o);
-    return o;
+  else
+    string1=name;
+}
+
+static void updateDatabaseName(librevenge::RVNGString const &name, librevenge::RVNGPropertyList &pList)
+{
+  librevenge::RVNGString delim, dbName, tableName;
+  libstoff::appendUnicode(0xff, delim);
+  splitString(name,delim, dbName, tableName);
+  if (tableName.empty()) {
+    if (!dbName.empty())
+      pList.insert("text:table-name", dbName);
   }
-  //! print a field
-  virtual void print(std::ostream &o) const;
-  //! the field type
-  int m_type;
-  //! the subtype
-  int m_subType;
-  //! the field format
-  int m_format;
-  //! the name
-  librevenge::RVNGString m_name;
-  //! the content
-  librevenge::RVNGString m_content;
-  //! the value text
-  librevenge::RVNGString m_textValue;
-  //! double
-  double m_doubleValue;
-  //! the chapter level
-  int m_level;
-protected:
-  //! copy constructor
-  Field(const Field &orig) : m_type(orig.m_type), m_subType(orig.m_subType), m_format(orig.m_format),
-    m_name(orig.m_name), m_content(orig.m_content), m_textValue(orig.m_textValue), m_doubleValue(orig.m_doubleValue), m_level(orig.m_level)
-  {
+  else {
+    pList.insert("text:table-name", tableName);
+    if (!dbName.empty())
+      pList.insert("text:database-name", dbName);
   }
-};
+  // checkme: always table or is it a function of subtype
+  pList.insert("text:table-type", "table");
+}
 
 Field::~Field()
 {
@@ -125,6 +120,213 @@ void Field::print(std::ostream &o) const
     o << "level=" << m_level << ",";
 }
 
+bool Field::send(STOFFListenerPtr listener, StarItemPool const */*pool*/, StarObject &object) const
+{
+  if (!listener || !listener->canWriteText()) {
+    STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: can not find the listener\n"));
+    return false;
+  }
+  STOFFField field;
+  if (m_type==1) {
+    if (m_name.empty()) {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: can not find the user name\n"));
+      return false;
+    }
+    field.m_propertyList.insert("librevenge:field-type", "text:user-defined");
+    field.m_propertyList.insert("text:name", m_name);
+    if (!m_content.empty())
+      field.m_propertyList.insert("office:string-value", m_content);
+    else if (!m_textValue.empty())
+      field.m_propertyList.insert("office:string-value", m_textValue);
+    else if (m_doubleValue<0 || m_doubleValue>0)
+      field.m_propertyList.insert("office:value", m_doubleValue, librevenge::RVNG_GENERIC);
+  }
+  else if (m_type==2) {
+    field.m_propertyList.insert("librevenge:field-type", "text:file-name");
+    if (m_format>=0 && m_format<=5) {
+      char const *(wh[])= {"name-and-extension", "full", "path", "name", "name"/*uiname*/, "area" /* range*/ };
+      field.m_propertyList.insert("text:display", wh[m_format]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: unknown filename type=%d\n", m_format));
+    }
+  }
+  else if (m_type==3) {
+    if (m_name.empty()) {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: can not find the dbName\n"));
+      return false;
+    }
+    field.m_propertyList.insert("librevenge:field-type", "text:database-name");
+    updateDatabaseName(m_name, field.m_propertyList);
+    field.m_propertyList.insert("librevenge:field-content", m_name);
+  }
+  else if (m_type==7)
+    field.m_propertyList.insert("librevenge:field-type", "text:author-name");
+  else if (m_type==8) {
+    field.m_propertyList.insert("librevenge:field-type", "text:chapter");
+    if (m_format>=0 && m_format<=2) {
+      char const *(wh[])= {"number", "name", "number-and-name"};
+      field.m_propertyList.insert("text:display", wh[m_format]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: unknown chapter type=%d\n", m_format));
+    }
+    if (m_level>=0)
+      field.m_propertyList.insert("text:outline-level", m_level+1);
+  }
+  else if (m_type==9) {
+    if (m_subType>=0 && m_subType<=6) {
+      char const *(wh[])= {
+        "text:page-count", "text:paragraph-count", "text:word-count", "text:character-count", "text:table-count",
+        "text:image-count","text:object-count"
+      };
+      field.m_propertyList.insert("librevenge:field-type", wh[m_subType]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: unknown doc type=%d\n", m_subType));
+      return false;
+    }
+  }
+  else if (m_type==10) {
+    if (m_name.empty() || m_content.empty()) {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: can not find the expression values\n"));
+      return false;
+    }
+    if (m_subType&0x10) {
+      field.m_propertyList.insert("librevenge:field-type", "text:expression");
+      field.m_propertyList.insert("text:formula", m_name);
+      field.m_propertyList.insert("office:string-value", m_content);
+    }
+    else {
+      field.m_propertyList.insert("librevenge:field-type", "text:variable-get");
+      field.m_propertyList.insert("text:name", m_name);
+    }
+    if (!m_content.empty())
+      field.m_propertyList.insert("librevenge:field-content", m_content);
+  }
+  else if (m_type==12) {
+    if (m_name.empty()) {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: can not find the getRef values\n"));
+      return false;
+    }
+    field.m_propertyList.insert("librevenge:field-type", "text:reference-ref");
+    field.m_propertyList.insert("text:ref-name", m_name);
+    if (m_format>=0 && m_format<=10) {
+      char const *(wh[])= {"page", "chapter", "text", "direction",
+                           "text"/* as page style*/, "category-and-value", "caption", "number",
+                           "number"/* new ref*/, "number"/*no context*/, "number"/*full context*/
+                          };
+      field.m_propertyList.insert("text:reference-format",wh[m_format]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: unknown getRef format=%d\n", m_format));
+    }
+    if (!m_content.empty())
+      field.m_propertyList.insert("librevenge:field-content", m_content);
+  }
+  else if (m_type==23) {
+    // checkme, look like formula and value
+    if (m_name.empty() || m_content.empty()) {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: can not find the expression values\n"));
+      return false;
+    }
+    field.m_propertyList.insert("librevenge:field-type", "text:expression");
+    field.m_propertyList.insert("text:formula", m_name);
+    if (!m_content.empty()) {
+      field.m_propertyList.insert("office:string-value", m_content);
+      field.m_propertyList.insert("librevenge:field-content", m_content);
+    }
+  }
+  else if (m_type==25) {
+    int subType=m_subType&0x7FF;
+    if (subType>=4 && subType<8) {
+      field.m_propertyList.insert("librevenge:field-type", "text:user-defined");
+      field.m_propertyList.insert("text:name", object.getUserNameMetaData(subType-4));
+    }
+    else if (subType==9) {
+      if (m_format>=0 && m_format<=2) {
+        char const *(wh[])= {
+          "text:creator", "text:modification-time", "text:modification-date"
+        };
+        field.m_propertyList.insert("librevenge:field-type", wh[m_format]);
+      }
+      else {
+        STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: sending custom type %d is not implemented\n", m_format));
+      }
+    }
+    else if (subType==10) {
+      if (m_format>=0 && m_format<=2) {
+        char const *(wh[])= {
+          "text:printed-by", "text:print-time", "text:print-date"
+        };
+        field.m_propertyList.insert("librevenge:field-type", wh[m_format]);
+      }
+      else {
+        STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: sending custom type %d is not implemented\n", m_format));
+      }
+    }
+    else if (subType>=0 && subType<=12) {
+      char const *(wh[])= {
+        "text:title", "text:subject", "text:keywords", "text:description",
+        "text:Info1", "text:Info2", "text:Info3", "text:Info4",
+        "text:editing-cycles", "", "",  "text:editing-cycles",
+        "text:editing-duration"
+      };
+      field.m_propertyList.insert("librevenge:field-type", wh[subType]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: sending docInfo %d is not implemented\n", subType));
+      return false;
+    }
+  }
+  else if (m_type==20) {
+    field.m_propertyList.insert("librevenge:field-type", "text:text-input");
+    field.m_propertyList.insert("text:description", m_name);
+    field.m_propertyList.insert("librevenge:field-content", m_content);
+  }
+  else if (m_type==21) {
+    static bool first=true;
+    if (first) {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: sending macros is not implemented\n"));
+      first=false;
+    }
+    return true;
+  }
+  else if (m_type==26) {
+    int subType=m_format&0x7FF;
+    if (subType>=0 && subType<=5) {
+      char const *(wh[])= {"name-and-extension", "full", "path", "name", "title"/*uiname*/, "area" /* range*/ };
+      field.m_propertyList.insert("librevenge:field-type", "text:template-name");
+      field.m_propertyList.insert("text:display", wh[subType]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: unknown template type=%d\n", m_format));
+      return false;
+    }
+  }
+  else if (m_type==30) {
+    if (m_subType>=0 && m_subType<=16) {
+      char const *(wh[])= {
+        "text:sender-company", "text:sender-firstname", "text:send-lastname", "text:sender-initials", "text:sender-street",
+        "text:sender-country", "text:sender-postal-code", "text:sender-city", "text:sender-title", "text:sender-position",
+        "text:sender-phone-private", "text:sender-phone-work", "text:sender-fax", "text:sender-email", "text:sender-state-or-province",
+        "text:sender-lastname" /*father name*/, "text:sender-street" /* appartement*/
+      };
+      field.m_propertyList.insert("librevenge:field-type", wh[m_subType]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: unknown extUser type=%d\n", m_subType));
+      return false;
+    }
+  }
+  else {
+    STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: sending type=%d is not implemented\n", m_type));
+    return false;
+  }
+  listener->insertField(field);
+  return true;
+}
+
 //! Internal: a fixed date time field
 struct FieldDateTime : public Field {
   //! constructor
@@ -137,6 +339,8 @@ struct FieldDateTime : public Field {
   }
   //! destructor
   virtual ~FieldDateTime();
+  //! add to send the zone data
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -154,6 +358,45 @@ FieldDateTime::~FieldDateTime()
 {
 }
 
+bool FieldDateTime::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+{
+  if (!listener || !listener->canWriteText()) {
+    STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldDateTime::send: can not find the listener\n"));
+    return false;
+  }
+  STOFFField field;
+
+  if (m_type==4 || m_type==36)
+    field.m_propertyList.insert("librevenge:field-type", "text:date");
+  else if (m_type==5)
+    field.m_propertyList.insert("librevenge:field-type", "text:time");
+  else if (m_type==15) {
+    // FIXME: does not works because libodfgen does not regenerate the text zone...
+    field.m_propertyList.insert("librevenge:field-type", "text:date");
+    field.m_propertyList.insert("text:fixed", true);
+    if (m_dateTime) {
+      field.m_propertyList.insert("librevenge:year", int(m_dateTime/10000));
+      field.m_propertyList.insert("librevenge:month", int((m_dateTime/100)%100));
+      field.m_propertyList.insert("librevenge:day", int(m_dateTime%100));
+    }
+  }
+  else if (m_type==16) {
+    // FIXME: does not works because libodfgen does not regenerate the text zone...
+    field.m_propertyList.insert("librevenge:field-type", "text:time");
+    field.m_propertyList.insert("text:fixed", true);
+    if (m_dateTime) {
+      field.m_propertyList.insert("librevenge:hours", int(m_dateTime/1000000));
+      field.m_propertyList.insert("librevenge:minutes", int((m_dateTime/10000)%100));
+      field.m_propertyList.insert("librevenge:seconds", int((m_dateTime/100)%100));
+    }
+  }
+  else
+    return Field::send(listener, pool, object);
+  //TODO: set the format
+  listener->insertField(field);
+  return true;
+}
+
 //! Internal: a DB field field
 struct FieldDBField : public Field {
   //! constructor
@@ -166,6 +409,8 @@ struct FieldDBField : public Field {
   }
   //! destructor
   virtual ~FieldDBField();
+  //! add to send the zone data
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -186,6 +431,31 @@ FieldDBField::~FieldDBField()
 {
 }
 
+bool FieldDBField::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+{
+  if (!listener || !listener->canWriteText()) {
+    STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldDBField::send: can not find the listener\n"));
+    return false;
+  }
+  STOFFField field;
+
+  if (m_type==0) {
+    if (m_colName.empty()) {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldDBField::send: can not find the col value\n"));
+      return false;
+    }
+    field.m_propertyList.insert("librevenge:field-type", "text:database-display");
+    if (!m_dbName.empty())
+      updateDatabaseName(m_dbName, field.m_propertyList);
+    field.m_propertyList.insert("text:column-name", m_colName);
+  }
+  else
+    return Field::send(listener, pool, object);
+  //TODO: set the format
+  listener->insertField(field);
+  return true;
+}
+
 //! Internal: a hidden text/para field
 struct FieldHiddenText : public Field {
   //! constructor
@@ -198,6 +468,8 @@ struct FieldHiddenText : public Field {
   }
   //! destructor
   virtual ~FieldHiddenText();
+  //! add to send the zone data
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -213,6 +485,45 @@ struct FieldHiddenText : public Field {
 
 FieldHiddenText::~FieldHiddenText()
 {
+}
+
+bool FieldHiddenText::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+{
+  if (!listener || !listener->canWriteText()) {
+    STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldHiddenText::send: can not find the listener\n"));
+    return false;
+  }
+  STOFFField field;
+  if (m_type==13) {
+    if (m_condition.empty()) {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldHiddenText::send: can not find the condition\n"));
+      return false;
+    }
+    field.m_propertyList.insert("librevenge:field-type", "text:conditional-text");
+    field.m_propertyList.insert("text:condition", m_condition);
+    if (!m_content.empty()) {
+      librevenge::RVNGString trueValue, falseValue;
+      splitString(m_content, "|", trueValue, falseValue);
+      if (!trueValue.empty())
+        field.m_propertyList.insert("text:string-value-if-true", trueValue);
+      if (!falseValue.empty())
+        field.m_propertyList.insert("text:string-value-if-false", falseValue);
+    }
+  }
+  else if (m_type==24) {
+    if (m_condition.empty()) {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldHiddenText::send: can not find the condition\n"));
+      return false;
+    }
+    field.m_propertyList.insert("librevenge:field-type", "text:hidden-paragraph");
+    field.m_propertyList.insert("text:condition", m_condition);
+    field.m_propertyList.insert("text:is-hidden", m_hidden);
+  }
+  else // also ....
+    return Field::send(listener, pool, object);
+  //TODO: set the format
+  listener->insertField(field);
+  return true;
 }
 
 //! Internal: a set field field
@@ -264,6 +575,8 @@ struct FieldJumpEdit : public Field {
   }
   //! destructor
   virtual ~FieldJumpEdit();
+  //! add to send the zone data
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -278,6 +591,32 @@ FieldJumpEdit::~FieldJumpEdit()
 {
 }
 
+bool FieldJumpEdit::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+{
+  if (!listener || !listener->canWriteText()) {
+    STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldJumpEdit::send: can not find the listener\n"));
+    return false;
+  }
+  STOFFField field;
+  if (m_type==34) {
+    field.m_propertyList.insert("librevenge:field-type", "text:placeholder");
+    field.m_propertyList.insert("librevenge:field-content", m_content);
+    if (m_format>=0 && m_format<=4) {
+      char const *(wh[])= {"text", "table", "text-box", "image", "object"};
+      field.m_propertyList.insert("text:placeholder-type",wh[m_format]);
+    }
+    else {
+      STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldJumpEdit::send: unknown format=%d\n", m_format));
+    }
+    if (!m_help.empty())
+      field.m_propertyList.insert("text:description", m_help);
+  }
+  else
+    return Field::send(listener, pool, object);
+  listener->insertField(field);
+  return true;
+}
+
 //! Internal: a pageNumber field
 struct FieldPageNumber : public Field {
   //! constructor
@@ -290,6 +629,8 @@ struct FieldPageNumber : public Field {
   }
   //! destructor
   virtual ~FieldPageNumber();
+  //! add to send the zone data
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -309,6 +650,25 @@ struct FieldPageNumber : public Field {
 
 FieldPageNumber::~FieldPageNumber()
 {
+}
+
+bool FieldPageNumber::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+{
+  if (!listener || !listener->canWriteText()) {
+    STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldPageNumber::send: can not find the listener\n"));
+    return false;
+  }
+  if (m_type!=6) // also 31 which is setPageRef
+    return Field::send(listener, pool, object);
+  //TODO: set the format
+  STOFFField field;
+  field.m_propertyList.insert("librevenge:field-type", "text:page-number");
+  if (m_offset<0)
+    field.m_propertyList.insert("text:select-page", "previous");
+  else if (m_offset>0)
+    field.m_propertyList.insert("text:select-page", "next");
+  listener->insertField(field);
+  return true;
 }
 
 //! Internal: a postit field
@@ -381,6 +741,8 @@ struct FieldSetExp : public Field {
   }
   //! destructor
   virtual ~FieldSetExp();
+  //! add to send the zone data
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -410,6 +772,36 @@ FieldSetExp::~FieldSetExp()
 {
 }
 
+bool FieldSetExp::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+{
+  if (!listener || !listener->canWriteText()) {
+    STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldSetExp::send: can not find the listener\n"));
+    return false;
+  }
+  //TODO: set the format
+  STOFFField field;
+  if (m_type==11) {
+    if (m_format&8) // we must also set text:ref-name
+      field.m_propertyList.insert("librevenge:field-type", "text:sequence");
+    else
+      field.m_propertyList.insert("librevenge:field-type", "text:variable-set");
+    if (!m_name.empty())
+      field.m_propertyList.insert("text:name", m_name);
+    if (!m_formula.empty()) {
+      if (m_format&8)
+        field.m_propertyList.insert("text:formula", m_formula);
+      else
+        field.m_propertyList.insert("office:string-value", m_formula);
+    }
+    if (!m_content.empty())
+      field.m_propertyList.insert("librevenge:field-content", m_content);
+  }
+  else
+    return Field::send(listener, pool, object);
+  listener->insertField(field);
+  return true;
+}
+
 //! Internal: a set field field
 struct FieldSetField : public Field {
   //! constructor
@@ -422,6 +814,8 @@ struct FieldSetField : public Field {
   }
   //! destructor
   virtual ~FieldSetField();
+  //! add to send the zone data
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -444,6 +838,32 @@ struct FieldSetField : public Field {
 FieldSetField::~FieldSetField()
 {
 }
+
+bool FieldSetField::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+{
+  if (!listener || !listener->canWriteText()) {
+    STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldSetField::send: can not find the listener\n"));
+    return false;
+  }
+  //TODO: set the format
+  STOFFField field;
+  if (m_type==28) {
+    field.m_propertyList.insert("librevenge:field-type", "text:database-row-select");
+    updateDatabaseName(m_dbName, field.m_propertyList);
+    if (!m_condition.empty())
+      field.m_propertyList.insert("text:condition", m_condition);
+    if (!m_textNumber.empty())
+      field.m_propertyList.insert("text:row-number", m_textNumber);
+    else
+      field.m_propertyList.insert("text:row-number", int(m_longNumber));
+    // CHECKME: we need to set also text:table-type
+  }
+  else // also 27,29...
+    return Field::send(listener, pool, object);
+  listener->insertField(field);
+  return true;
+}
+
 ////////////////////////////////////////
 //! Internal: the state of a SWFieldManager
 struct State {
@@ -466,19 +886,20 @@ SWFieldManager::~SWFieldManager()
 {
 }
 
-bool SWFieldManager::readField(StarZone &zone, char cKind)
+shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zone, char cKind)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
+  shared_ptr<SWFieldManagerInternal::Field> field;
   if (cKind!='_' && (input->peek()!=cKind || !zone.openSWRecord(type))) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
+    return field;
   }
 
   // sw_sw3field.cxx inFieldType('Y') or inField('y' or '_')
-  shared_ptr<SWFieldManagerInternal::Field> field(new SWFieldManagerInternal::Field);
+  field.reset(new SWFieldManagerInternal::Field);
   libstoff::DebugStream f;
   if (cKind!='_')
     f << "Entries(SWFieldType)[" << cKind << "-" << zone.getRecordLevel() << "]:";
@@ -511,11 +932,11 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
           break;
         }
         else
-          field->m_textValue=libstoff::getString(name); // text
+          dBField->m_colName=libstoff::getString(name);
       }
       else {
         val=int(input->readULong(2));
-        if (!zone.getPoolName(val, field->m_textValue)) // text
+        if (!zone.getPoolName(val, dBField->m_colName))
           f << "###nPoolId=" << val << ",";
       }
       if (cKind=='Y') {
@@ -637,10 +1058,10 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
     }
     break;
   case 4:
-    // lcl_sw3io_InDateField40
-    break;
+  // lcl_sw3io_InDateField40
   case 5:
     // lcl_sw3io_InTimeField40
+    field.reset(new SWFieldManagerInternal::FieldDateTime(*field));
     break;
   case 6: {
     shared_ptr<SWFieldManagerInternal::FieldPageNumber> pageNumber(new SWFieldManagerInternal::FieldPageNumber(*field));
@@ -709,8 +1130,9 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
       break;
     }
     field->m_content=libstoff::getString(name).cstr();
-    if (!zone.isCompatibleWith(0x202))
+    if (!zone.isCompatibleWith(0x202)) {
       field->m_subType=int(input->readULong(2));
+    }
     break;
   case 11: { // setexpfield: ckind=y call lcl_sw3io_InSetExpFieldType
     shared_ptr<SWFieldManagerInternal::FieldSetExp> setExp(new SWFieldManagerInternal::FieldSetExp(*field));
@@ -1255,7 +1677,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
     break;
   }
   case 37: { // cKind==Y call lcl_sw3io_InAuthorityFieldType
-    f << "authority,";
+    // TODO: store me
     if (cKind!='Y' && zone.isCompatibleWith(0x202)) {
       // lcl_sw3io_InAuthorityField
       zone.openFlagZone();
@@ -1336,7 +1758,7 @@ bool SWFieldManager::readField(StarZone &zone, char cKind)
 
   if (cKind!='_')
     zone.closeSWRecord(cKind, "SWFieldType");
-  return true;
+  return field;
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

@@ -39,14 +39,21 @@
 
 #include "libstaroffice_internal.hxx"
 
+namespace SWFieldManagerInternal
+{
+struct Field;
+}
+
 //! Class to store font
 class STOFFFont
 {
 public:
   /** constructor */
-  STOFFFont() : m_propertyList(), m_shadowColor(STOFFColor::black()), m_hyphen(false), m_softHyphen(false), m_lineBreak(false), m_content(false), m_footnote(false), m_relativeUnit(0.05)
+  STOFFFont() : m_propertyList(), m_shadowColor(STOFFColor::black()), m_hyphen(false), m_softHyphen(false), m_lineBreak(false), m_content(false), m_footnote(false), m_relativeUnit(0.05), m_field()
   {
   }
+  /** destructor */
+  ~STOFFFont();
   //! add to the propList
   void addTo(librevenge::RVNGPropertyList &propList) const;
 
@@ -75,6 +82,8 @@ public:
   bool m_footnote;
   /** the relative unit uses to transform rel font height in point, default 1/20 */
   double m_relativeUnit;
+  /** the field */
+  shared_ptr<SWFieldManagerInternal::Field> m_field;
 };
 
 

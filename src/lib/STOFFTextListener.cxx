@@ -407,19 +407,11 @@ STOFFParagraph const &STOFFTextListener::getParagraph() const
 void STOFFTextListener::insertField(STOFFField const &field)
 {
   librevenge::RVNGPropertyList propList;
-  if (field.addTo(propList)) {
-    _flushDeferredTabs();
-    _flushText();
-    _openSpan();
-    m_documentInterface->insertField(propList);
-    return;
-  }
-  librevenge::RVNGString text=field.getString();
-  if (!text.empty())
-    STOFFTextListener::insertUnicodeString(text);
-  else {
-    STOFF_DEBUG_MSG(("STOFFTextListener::insertField: must not be called with type=%d\n", int(field.m_type)));
-  }
+  field.addTo(propList);
+  _flushDeferredTabs();
+  _flushText();
+  _openSpan();
+  m_documentInterface->insertField(propList);
 }
 
 void STOFFTextListener::openLink(STOFFLink const &link)

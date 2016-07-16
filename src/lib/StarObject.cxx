@@ -59,6 +59,8 @@ struct State {
   //! copy constructor
   State(State const &orig) : m_poolList(orig.m_poolList), m_attributeManager(orig.m_attributeManager), m_formatManager(orig.m_formatManager)
   {
+    for (int i=0; i<4; ++i)
+      m_userMetaNames[i]=orig.m_userMetaNames[i];
   }
   //! the list of pool
   std::vector<shared_ptr<StarItemPool> > m_poolList;
@@ -66,6 +68,8 @@ struct State {
   shared_ptr<StarAttributeManager> m_attributeManager;
   //! the format manager
   shared_ptr<StarFormatManager> m_formatManager;
+  //! the list of user name
+  librevenge::RVNGString m_userMetaNames[4];
 private:
   State operator=(State const &orig);
 };
@@ -113,6 +117,18 @@ shared_ptr<StarAttributeManager> StarObject::getAttributeManager()
 shared_ptr<StarFormatManager> StarObject::getFormatManager()
 {
   return m_state->m_formatManager;
+}
+
+librevenge::RVNGString StarObject::getUserNameMetaData(int i) const
+{
+  if (i>=0 && i<=3) {
+    if (!m_state->m_userMetaNames[i].empty())
+      return m_state->m_userMetaNames[i];
+  }
+  STOFF_DEBUG_MSG(("StarObject::parse: can not find user meta data %d\n", i));
+  librevenge::RVNGString res;
+  res.sprintf("Info%d", i);
+  return res;
 }
 
 shared_ptr<StarItemPool> StarObject::getNewItemPool(StarItemPool::Type type)
@@ -501,6 +517,7 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
   ascii.addPos(0);
   ascii.addNote(f.str().c_str());
 
+  librevenge::RVNGString prevAttrib;
   for (int i=0; i<17; ++i) {
     long pos=input->tell();
     f.str("");
@@ -535,15 +552,27 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
       f << attrib.cstr() << ",";
       static char const *(attribNames[]) = {
         "meta:initial-creator", "dc:creator", "", "dc:title", "dc:subject", "dc:description"/*comment*/, "meta:keywords",
-        "", "librevenge:Info0", "", "librevenge:Info1", "", "librevenge:Info2", "", "librevenge:Info3",
+        "", "user", "", "user", "", "user", "", "user",
         "librevenge:template-name", "librevenge:template-filename"
       };
-      if (!attrib.empty() && !std::string(attribNames[i]).empty())
+      if ((i%2)==1 && i>=7 && i<=13)
+        m_state->m_userMetaNames[(i-7)/2]=attrib;
+      if (attrib.empty() || std::string(attribNames[i]).empty())
+        prevAttrib=attrib;
+      else if (std::string(attribNames[i])=="user") {
+        if (!prevAttrib.empty()) {
+          librevenge::RVNGString userMeta("librevenge:");
+          userMeta.append(prevAttrib);
+          m_metaData.insert(userMeta.cstr(), attrib);
+        }
+      }
+      else
         m_metaData.insert(attribNames[i], attrib);
     }
     else {
       STOFF_DEBUG_MSG(("StarObject::readSfxDocumentInformation: can not convert a string\n"));
       f << "###string,";
+      prevAttrib.clear();
     }
     input->seek(pos+expectedSz, librevenge::RVNG_SEEK_SET);
     if (i<3) {
