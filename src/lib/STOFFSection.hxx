@@ -47,97 +47,25 @@ class STOFFSection
 public:
   struct Column;
   //! constructor
-  STOFFSection() : m_columns(), m_width(0), m_balanceText(false), m_backgroundColor(STOFFColor::white())
+  STOFFSection() : m_propertyList()
   {
   }
   //! destructor
   virtual ~STOFFSection();
-  /** a function which sets n uniform columns
-
-  \note: this erases previous columns and border if there are some
-   */
-  void setColumns(int num, double width, librevenge::RVNGUnit widthUnit, double colSep=0);
   //! returns the number of columns
-  int numColumns() const
-  {
-    return m_columns.size() <= 1 ? 1 : int(m_columns.size());
-  }
-  //! returns the true if the section has only one columns
-  bool hasSingleColumns() const
-  {
-    return m_columns.size() <= 1;
-  }
+  int numColumns() const;
   //! add to the propList
   void addTo(librevenge::RVNGPropertyList &propList) const;
-  //! add tabs to the propList
-  void addColumnsTo(librevenge::RVNGPropertyListVector &propList) const;
-  //! operator <<
-  friend std::ostream &operator<<(std::ostream &o, STOFFSection const &sec);
   //! operator!=
-  bool operator!=(STOFFSection const &sec) const
-  {
-    if (m_columns.size()!=sec.m_columns.size())
-      return true;
-    for (size_t c=0; c < m_columns.size(); c++) {
-      if (m_columns[c] != sec.m_columns[c])
-        return true;
-    }
-    if (m_balanceText!=sec.m_balanceText || m_backgroundColor!=sec.m_backgroundColor)
-      return true;
-    return false;
-  }
+  bool operator!=(STOFFSection const &sec) const;
   //! operator==
   bool operator==(STOFFSection const &sec) const
   {
     return !operator!=(sec);
   }
 
-  //! the different column
-  std::vector<Column> m_columns;
-  //! the total section width ( if set )
-  double m_width;
-  //! true if the text is balanced between different columns
-  bool m_balanceText;
-  //! the background color
-  STOFFColor m_backgroundColor;
-
-public:
-  /** struct to store the columns properties */
-  struct Column {
-    //! constructor
-    Column() : m_width(0), m_widthUnit(librevenge::RVNG_INCH)
-    {
-      for (int i = 0; i < 4; i++)
-        m_margins[i]=0;
-    }
-    //! add a column to the propList
-    bool addTo(librevenge::RVNGPropertyList &propList) const;
-    //! operator <<
-    friend std::ostream &operator<<(std::ostream &o, Column const &column);
-    //! operator!=
-    bool operator!=(Column const &col) const
-    {
-      if (m_width<col.m_width || m_width>col.m_width || m_widthUnit!=col.m_widthUnit)
-        return true;
-      for (int i = 0; i < 4; i++) {
-        if (m_margins[i]<col.m_margins[i] || m_margins[i]>col.m_margins[i])
-          return true;
-      }
-      return false;
-    }
-    //! operator==
-    bool operator==(Column const &col) const
-    {
-      return !operator!=(col);
-    }
-
-    //! the columns width
-    double m_width;
-    /** the width unit (default inches) */
-    librevenge::RVNGUnit m_widthUnit;
-    //! the margins in inches using libstoff::Position orders
-    double m_margins[4];
-  };
+  //! the propertyList
+  librevenge::RVNGPropertyList m_propertyList;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

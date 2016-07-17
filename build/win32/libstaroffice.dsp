@@ -303,6 +303,10 @@ SOURCE=..\..\src\lib\StarLanguage.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarMark.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarObject.cxx
 # End Source File
 # Begin Source File
@@ -576,6 +580,10 @@ SOURCE=..\..\src\lib\StarItemPool.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarLanguage.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarMark.hxx
 # End Source File
 # Begin Source File
 

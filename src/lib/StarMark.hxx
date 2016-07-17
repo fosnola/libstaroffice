@@ -31,43 +31,67 @@
 * instead of those above.
 */
 
-#include <librevenge/librevenge.h>
+/*
+ * StarMark to read/parse some basic mark in StarOffice documents
+ *
+ */
+#ifndef STAR_MARK
+#  define STAR_MARK
+
+#include <ostream>
+#include <vector>
 
 #include "libstaroffice_internal.hxx"
-#include "STOFFPosition.hxx"
 
-#include "STOFFSection.hxx"
-
-////////////////////////////////////////////////////////////
-// Section
-////////////////////////////////////////////////////////////
-STOFFSection::~STOFFSection()
+class StarZone;
+/** \brief class to store a mark in a text zone
+ */
+class StarMark
 {
-}
-
-bool STOFFSection::operator!=(STOFFSection const &sec) const
-{
-  return m_propertyList.getPropString()!=sec.m_propertyList.getPropString();
-}
-
-void STOFFSection::addTo(librevenge::RVNGPropertyList &pList) const
-{
-  librevenge::RVNGPropertyList::Iter i(m_propertyList);
-  for (i.rewind(); i.next();) {
-    if (i.child()) {
-      if (std::string("style:columns") != i.key()) {
-        STOFF_DEBUG_MSG(("STOFFSection::addTo: find unexpected property child\n"));
-      }
-      pList.insert(i.key(), *i.child());
-      continue;
-    }
-    pList.insert(i.key(), i()->clone());
+public:
+  //! constructor
+  StarMark() : m_type(-1), m_id(-1), m_offset(-1)
+  {
   }
-}
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, StarMark const &mark);
+  //! try to read a mark
+  bool read(StarZone &zone);
+  //! the type:  2: bookmark-start, 3:bookmark-end
+  int m_type;
+  //! the id
+  int m_id;
+  //! the offset
+  int m_offset;
+};
 
-int STOFFSection::numColumns() const
+/** \brief class to store a bookmark
+ */
+class StarBookmark
 {
-  librevenge::RVNGPropertyListVector const *columns=m_propertyList.child("style:columns");
-  return (!columns || columns->count()<=0) ? 1 : int(columns->count());
-}
+public:
+  //! the constructor
+  StarBookmark() : m_shortName(""), m_name(""), m_offset(0), m_key(0), m_modifier(0)
+  {
+  }
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, StarBookmark const &mark);
+  //! try to read a mark
+  bool read(StarZone &zone);
+  //! try to read a list of bookmark
+  static bool readList(StarZone &zone, std::vector<StarBookmark> &markList);
+  //! the shortname
+  librevenge::RVNGString m_shortName;
+  //! the name
+  librevenge::RVNGString m_name;
+  //! the offset
+  int m_offset;
+  //! the key
+  int m_key;
+  //! the modifier
+  int m_modifier;
+  //! the macros names
+  librevenge::RVNGString m_macroNames[4];
+};
+#endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

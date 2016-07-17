@@ -681,7 +681,6 @@ bool STOFFTextListener::openSection(STOFFSection const &section)
     STOFF_DEBUG_MSG(("STOFFTextListener::openSection: impossible to open a section\n"));
     return false;
   }
-
   m_ps->m_section=section;
   _openSection();
   return true;
@@ -714,11 +713,6 @@ void STOFFTextListener::_openSection()
 
   librevenge::RVNGPropertyList propList;
   m_ps->m_section.addTo(propList);
-
-  librevenge::RVNGPropertyListVector columns;
-  m_ps->m_section.addColumnsTo(columns);
-  if (columns.count())
-    propList.insert("style:columns", columns);
   m_documentInterface->openSection(propList);
 
   m_ps->m_sectionAttributesChanged = false;

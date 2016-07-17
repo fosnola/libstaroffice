@@ -72,6 +72,7 @@ struct Content {
 };
 
 struct GraphZone;
+struct SectionZone;
 struct Table;
 struct TableBox;
 struct TableLine;
@@ -130,8 +131,6 @@ protected:
 protected:
   //! try to read an attribute: 'A'
   static bool readSWAttribute(StarZone &zone, StarObject &doc, shared_ptr<StarAttribute> &attribute, STOFFVec2i &limits);
-  //! try a list of bookmark field : 'a'
-  bool readSWBookmarkList(StarZone &zone);
   //! try to read a DBName zone : 'D'
   bool readSWDBName(StarZone &zone);
   //! try to read a dictionary table : 'j'
@@ -161,7 +160,7 @@ protected:
   //! try to read a list of redline : 'V' (list of 'R' list of 'D')
   bool readSWRedlineList(StarZone &zone);
   //! try to read a section : 'I'
-  bool readSWSection(StarZone &zone);
+  bool readSWSection(StarZone &zone, shared_ptr<StarObjectTextInternal::SectionZone> &section);
   //! try to read a table : 'E'
   bool readSWTable(StarZone &zone, shared_ptr<StarObjectTextInternal::Table> &table);
   //! try to read a table box : 't'
