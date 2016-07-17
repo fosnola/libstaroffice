@@ -1134,7 +1134,9 @@ STOFFVec2f convertMiniMToPointVect(T const &value)
 }
 //! convert a date/time in a date time format
 bool convertToDateTime(uint32_t date, uint32_t time, std::string &dateTime);
-
+//! split a string in two. If the delimiter is not present, string1=string
+void splitString(librevenge::RVNGString const &string, librevenge::RVNGString const &delim,
+                 librevenge::RVNGString &string1, librevenge::RVNGString &string2);
 // some geometrical function
 //! factor to convert from one unit to other
 float getScaleFactor(librevenge::RVNGUnit orig, librevenge::RVNGUnit dest);

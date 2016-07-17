@@ -43,32 +43,18 @@
 
 #include "StarObject.hxx"
 #include "StarZone.hxx"
+
 #include "STOFFListener.hxx"
+#include "STOFFSubDocument.hxx"
 
 /** Internal: the structures of a SWFieldManager */
 namespace SWFieldManagerInternal
 {
-static void splitString(librevenge::RVNGString const &name, librevenge::RVNGString const &delim,
-                        librevenge::RVNGString &string1, librevenge::RVNGString &string2)
-{
-  std::string fName(name.cstr());
-  std::string fDelim(delim.cstr());
-  size_t pos=fName.find(fDelim);
-  if (pos!=std::string::npos) {
-    if (pos+fDelim.length()<fName.length())
-      string2=librevenge::RVNGString(fName.substr(pos+fDelim.length()).c_str());
-    if (pos>0)
-      string1=librevenge::RVNGString(fName.substr(0,pos).c_str());
-  }
-  else
-    string1=name;
-}
-
 static void updateDatabaseName(librevenge::RVNGString const &name, librevenge::RVNGPropertyList &pList)
 {
   librevenge::RVNGString delim, dbName, tableName;
   libstoff::appendUnicode(0xff, delim);
-  splitString(name,delim, dbName, tableName);
+  libstoff::splitString(name,delim, dbName, tableName);
   if (tableName.empty()) {
     if (!dbName.empty())
       pList.insert("text:table-name", dbName);
@@ -93,12 +79,12 @@ void Field::print(std::ostream &o) const
                          "inDate40", "inTime40", "pageNumber", "author",
                          "chapter", "docStat", "getExp", "setExp",
                          "getRef", "hiddenText", "postIt", "fixDate",
-                         "fixTime", "reg", "varReg", "setRef",
+                         "fixTime", "reg", "varReg", "setRef", // checkme: 17-19
                          "input", "macro", "dde", "tbl",
-                         "hiddenPara", "docInfo", "templName", "dbNextSet",
-                         "dbNumSet", "dbSetNumber", "extUser", "pageSet",
-                         "pageGet", "INet", "jumpEdit", "script",
-                         "dateTime", "authority", "combinedChar", "dropDown"
+                         "hiddenPara", "docInfo", "templName", "dbNextSet", // checkme: 27
+                         "dbNumSet", "dbSetNumber", "extUser", "pageSet", // checkme: 29,31
+                         "pageGet", "INet", "jumpEdit", "script", // checkme: 32-33,35
+                         "dateTime", "authority", "combinedChar", "dropDown" // checkme: 36-39
                         };
     o << wh[m_type];
     if (m_subType>=0) o << "[" << m_subType << "]";
@@ -225,8 +211,7 @@ bool Field::send(STOFFListenerPtr listener, StarItemPool const */*pool*/, StarOb
       field.m_propertyList.insert("librevenge:field-content", m_content);
   }
   else if (m_type==23) {
-    // checkme, look like formula and value
-    if (m_name.empty() || m_content.empty()) {
+    if (m_name.empty()) {
       STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: can not find the expression values\n"));
       return false;
     }
@@ -503,7 +488,7 @@ bool FieldHiddenText::send(STOFFListenerPtr listener, StarItemPool const *pool, 
     field.m_propertyList.insert("text:condition", m_condition);
     if (!m_content.empty()) {
       librevenge::RVNGString trueValue, falseValue;
-      splitString(m_content, "|", trueValue, falseValue);
+      libstoff::splitString(m_content, "|", trueValue, falseValue);
       if (!trueValue.empty())
         field.m_propertyList.insert("text:string-value-if-true", trueValue);
       if (!falseValue.empty())
@@ -555,7 +540,7 @@ struct FieldINet : public Field {
   librevenge::RVNGString m_url;
   //! the target
   librevenge::RVNGString m_target;
-  //! the number as text
+  //! the lib names
   std::vector<librevenge::RVNGString> m_libNames;
 };
 
@@ -658,15 +643,17 @@ bool FieldPageNumber::send(STOFFListenerPtr listener, StarItemPool const *pool, 
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldPageNumber::send: can not find the listener\n"));
     return false;
   }
-  if (m_type!=6) // also 31 which is setPageRef
+  STOFFField field;
+  if (m_type==6) {
+    field.m_propertyList.insert("librevenge:field-type", "text:page-number");
+    if (m_offset<0)
+      field.m_propertyList.insert("text:select-page", "previous");
+    else if (m_offset>0)
+      field.m_propertyList.insert("text:select-page", "next");
+  }
+  else // also 31 which is setPageRef
     return Field::send(listener, pool, object);
   //TODO: set the format
-  STOFFField field;
-  field.m_propertyList.insert("librevenge:field-type", "text:page-number");
-  if (m_offset<0)
-    field.m_propertyList.insert("text:select-page", "previous");
-  else if (m_offset>0)
-    field.m_propertyList.insert("text:select-page", "next");
   listener->insertField(field);
   return true;
 }
@@ -683,6 +670,8 @@ struct FieldPostIt : public Field {
   }
   //! destructor
   virtual ~FieldPostIt();
+  //! add to send the zone data
+  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -872,6 +861,70 @@ struct State {
   {
   }
 };
+
+////////////////////////////////////////
+//! Internal: the subdocument of a SWFieldManger
+class SubDocument : public STOFFSubDocument
+{
+public:
+  explicit SubDocument(librevenge::RVNGString const &text) :
+    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_text(text) {}
+
+  //! destructor
+  virtual ~SubDocument() {}
+
+  //! operator!=
+  virtual bool operator!=(STOFFSubDocument const &doc) const
+  {
+    if (STOFFSubDocument::operator!=(doc)) return true;
+    SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
+    if (!sDoc) return true;
+    if (m_text != sDoc->m_text) return true;
+    return false;
+  }
+
+  //! operator!==
+  virtual bool operator==(STOFFSubDocument const &doc) const
+  {
+    return !operator!=(doc);
+  }
+
+  //! the parser function
+  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type);
+
+protected:
+  //! the text
+  librevenge::RVNGString m_text;
+};
+
+void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*type*/)
+{
+  if (!listener.get()) {
+    STOFF_DEBUG_MSG(("SWFielManagerInternal::SubDocument::parse: no listener\n"));
+    return;
+  }
+  if (m_text.empty())
+    listener->insertChar(' ');
+  else
+    listener->insertUnicodeString(m_text);
+}
+
+bool FieldPostIt::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+{
+  if (!listener || !listener->canWriteText()) {
+    STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldPostIt::send: can not find the listener\n"));
+    return false;
+  }
+  if (m_type==14) {
+    shared_ptr<STOFFSubDocument> doc(new SubDocument(m_content));
+    librevenge::RVNGString date;
+    if (m_date)
+      date.sprintf("%d/%d/%d", int((m_date/100)%100), int(m_date%100), int(m_date/10000));
+    listener->insertComment(doc, m_author, date);
+    return true;
+  }
+  return Field::send(listener, pool, object);
+}
 
 }
 

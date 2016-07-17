@@ -231,6 +231,14 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a field in mainFont\n"));
     mainFont.m_field.reset();
   }
+  if (!mainFont.m_link.empty()) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a link in mainFont\n"));
+    mainFont.m_link.clear();
+  }
+  if (!mainFont.m_refMark.empty()) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a refMark in mainFont\n"));
+    mainFont.m_refMark.clear();
+  }
   std::set<size_t> modPosSet;
   size_t numFonts=m_charAttributeList.size();
   if (m_charLimitList.size()!=numFonts) {
@@ -246,6 +254,8 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
       modPosSet.insert(size_t(m_charLimitList[i][1]));
   }
   std::set<size_t>::const_iterator posSetIt=modPosSet.begin();
+  int endLinkPos=-1, endRefMarkPos=-1;
+  librevenge::RVNGString refMarkString;
   for (size_t c=0; c<m_text.size(); ++c) {
     bool fontChange=false;
     size_t srcPos=c<m_textSourcePosition.size() ? m_textSourcePosition[c] : 10000;
@@ -255,10 +265,14 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
     }
     shared_ptr<StarAttribute> footnote;
     shared_ptr<SWFieldManagerInternal::Field> field;
+    librevenge::RVNGString linkString;
+    bool startRefMark=false;
+
     if (fontChange) {
       STOFFFont font(mainFont);
       for (size_t f=0; f<numFonts; ++f) {
-        if ((m_charLimitList[f][0]>=0 && m_charLimitList[f][0]>int(srcPos)) ||
+        if ((m_charLimitList[f][1]<0 && m_charLimitList[f][0]>=0 && m_charLimitList[f][0]!=int(srcPos)) ||
+            (m_charLimitList[f][0]>=0 && m_charLimitList[f][0]>int(srcPos)) ||
             (m_charLimitList[f][1]>=0 && m_charLimitList[f][1]<=int(srcPos)))
           continue;
         if (!m_charAttributeList[f])
@@ -273,6 +287,24 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
             field=font.m_field;
           font.m_field.reset();
         }
+        if (!font.m_link.empty()) {
+          if (endLinkPos<0) {
+            linkString=font.m_link;
+            endLinkPos=int(m_charLimitList[f][1]<0 ? m_charLimitList[f][0] : m_charLimitList[f][1]);
+          }
+          font.m_link.clear();
+        }
+        if (!font.m_refMark.empty()) {
+          if (endRefMarkPos<0) {
+            refMarkString=font.m_refMark;
+            endRefMarkPos=int(m_charLimitList[f][1]<0 ? m_charLimitList[f][0] : m_charLimitList[f][1]);
+            startRefMark=true;
+          }
+          else {
+            STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: multiple refmark is not implemented\n"));
+          }
+          font.m_refMark.clear();
+        }
       }
       listener->setFont(font);
       if (c==0)
@@ -282,6 +314,28 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
         first=false;
         STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find unexpected content zone\n"));
       }
+    }
+    if (!linkString.empty()) {
+      STOFFLink link;
+      link.m_HRef=linkString.cstr();
+      listener->openLink(link);
+    }
+    if (!refMarkString.empty() && startRefMark) {
+      STOFFField cField;
+      cField.m_propertyList.insert("librevenge:field-type", "text:reference-mark-start");
+      cField.m_propertyList.insert("text:name", refMarkString);
+      listener->insertField(cField);
+    }
+    if (endLinkPos>=0 && int(c)==endLinkPos) {
+      listener->closeLink();
+      endLinkPos=-1;
+    }
+    if (endRefMarkPos>=0 && int(c)==endRefMarkPos) {
+      STOFFField cField;
+      cField.m_propertyList.insert("librevenge:field-type", "text:reference-mark-end");
+      cField.m_propertyList.insert("text:name", refMarkString);
+      listener->insertField(cField);
+      endRefMarkPos=-1;
     }
     if (footnote)
       footnote->send(listener, pool, object);
@@ -293,6 +347,14 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
       listener->insertEOL(true);
     else
       listener->insertUnicode(m_text[c]);
+  }
+  if (endLinkPos>=0) // check that not link is opened
+    listener->closeLink();
+  if (endRefMarkPos>=0) { // check that not refMark is opened
+    STOFFField cField;
+    cField.m_propertyList.insert("librevenge:field-type", "text:reference-mark-end");
+    cField.m_propertyList.insert("text:name", refMarkString);
+    listener->insertField(cField);
   }
   return true;
 }

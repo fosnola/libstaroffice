@@ -155,8 +155,8 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *mainPool, S
         m_charItemList[f]->m_attribute->addTo(font, editPool);
       }
       static bool first=true;
-      if (first && (font.m_content || font.m_footnote || font.m_field)) {
-        STOFF_DEBUG_MSG(("StarObjectSmallTextInternal::Paragraph::send: sorry, sending content/field/footnote is not implemented\n"));
+      if (first && (font.m_content || font.m_footnote || font.m_field || !font.m_link.empty() || !font.m_refMark.empty())) {
+        STOFF_DEBUG_MSG(("StarObjectSmallTextInternal::Paragraph::send: sorry, sending content/field/footnote/refMark/link is not implemented\n"));
         first=false;
       }
       listener->setFont(font);

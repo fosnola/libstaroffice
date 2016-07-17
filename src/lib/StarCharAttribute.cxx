@@ -719,6 +719,94 @@ protected:
   int m_flags;
 };
 
+//! a INetFmt attribute: ie. a link, ...
+class StarCAttributeINetFmt : public StarAttribute
+{
+public:
+  //! constructor
+  StarCAttributeINetFmt(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_url(""), m_target(""), m_name(""), m_libNames()
+  {
+    for (int i=0; i<2; ++i) m_indices[i]=0xFFFF;
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarCAttributeINetFmt(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a font
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! debug function to print the data
+  virtual void printData(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    if (!m_url.empty()) o << "url=" << m_url.cstr() << ",";
+    if (!m_target.empty()) o << "target=" << m_target.cstr() << ",";
+    if (!m_name.empty()) o << "name=" << m_name.cstr() << ",";
+    for (int i=0; i<2; ++i) {
+      if (m_indices[i]!=0xFFFF) o << "index" << i << "=" << m_indices[i] << ",";
+    }
+    if (!m_libNames.empty()) {
+      o << "libNames=[";
+      for (size_t i=0; i+1<m_libNames.size(); i+=2)
+        o << m_libNames[i].cstr() << ":" <<  m_libNames[i+1].cstr() << ",";
+      o << "],";
+    }
+    o << "],";
+  }
+protected:
+  //! copy constructor
+  StarCAttributeINetFmt(StarCAttributeINetFmt const &orig) : StarAttribute(orig), m_url(orig.m_url), m_target(orig.m_target), m_name(orig.m_name), m_libNames(orig.m_libNames)
+  {
+    for (int i=0; i<2; ++i) m_indices[i]=orig.m_indices[i];
+  }
+  //! the url
+  librevenge::RVNGString m_url;
+  //! the target
+  librevenge::RVNGString m_target;
+  //! the name
+  librevenge::RVNGString m_name;
+  //! two indices
+  int m_indices[2];
+  //! the lib names
+  std::vector<librevenge::RVNGString> m_libNames;
+  // also a list of key, name1, name2, scriptType
+};
+
+//! a refMark attribute
+class StarCAttributeRefMark : public StarAttribute
+{
+public:
+  //! constructor
+  StarCAttributeRefMark(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_name("")
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarCAttributeRefMark(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a font
+  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! debug function to print the data
+  virtual void printData(libstoff::DebugStream &o) const
+  {
+    o << m_debugName;
+    if (!m_name.empty()) o << "=" << m_name.cstr();
+    o << ",";
+  }
+protected:
+  //! copy constructor
+  StarCAttributeRefMark(StarCAttributeRefMark const &orig) : StarAttribute(orig),  m_name(orig.m_name)
+  {
+  }
+  //! the name
+  librevenge::RVNGString m_name;
+};
+
 void StarCAttributeEscapement::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   std::stringstream s;
@@ -812,6 +900,20 @@ void StarCAttributeField::addTo(STOFFFont &font, StarItemPool const */*pool*/, s
 void StarCAttributeFootnote::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   font.m_footnote=true;
+}
+
+void StarCAttributeINetFmt::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+{
+  if (m_url.empty()) {
+    STOFF_DEBUG_MSG(("StarCAttributeINetFmt::addTo: can not find the url\n"));
+    return;
+  }
+  font.m_link=m_url;
+}
+
+void StarCAttributeRefMark::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+{
+  font.m_refMark=m_name;
 }
 
 bool StarCAttributeEscapement::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
@@ -992,15 +1094,116 @@ bool StarCAttributeFootnote::read(StarZone &zone, int nVers, long endPos, StarOb
   return input->tell()<=endPos;
 }
 
+bool StarCAttributeINetFmt::read(StarZone &zone, int nVers, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  // SwFmtINetFmt::Create
+  std::vector<uint32_t> string;
+  for (int i=0; i<2; ++i) {
+    if (!zone.readString(string)) {
+      STOFF_DEBUG_MSG(("StarCAttributeINetFmt::read: can not find string\n"));
+      f << "###" << (i==0 ? "url" : "target") << ",";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+    if (i==0)
+      m_url=libstoff::getString(string);
+    else
+      m_target=libstoff::getString(string);
+  }
+  for (int i=0; i<2; ++i) m_indices[i]=int(input->readULong(2));
+  int nCnt=int(input->readULong(2));
+  for (int i=0; i<2*nCnt; ++i) {
+    if (!zone.readString(string) || input->tell()>endPos) {
+      STOFF_DEBUG_MSG(("StarCAttributeINetFmt::read: can not read a string\n"));
+      printData(f);
+      f << "###string,";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+    m_libNames.push_back(libstoff::getString(string));
+  }
+  if (nVers>=1) {
+    if (!zone.readString(string)) {
+      STOFF_DEBUG_MSG(("StarCAttributeINetFmt::read: can not find string\n"));
+      printData(f);
+      f << "###aName1,";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+    m_name=libstoff::getString(string);
+  }
+  if (nVers>=2) {
+    nCnt=int(input->readULong(2));
+    f << "libMac2=[";
+    for (int i=0; i<nCnt; ++i) {
+      f << "nCurKey=" << input->readULong(2) << ",";
+      if (!zone.readString(string) || input->tell()>endPos) {
+        STOFF_DEBUG_MSG(("StarCAttributeINetFmt::read: can not read a string\n"));
+        f << "###aName1,";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        return false;
+      }
+      else if (!string.empty())
+        f << libstoff::getString(string).cstr() << ":";
+      if (!zone.readString(string)|| input->tell()>endPos) {
+        STOFF_DEBUG_MSG(("StarCAttributeINetFmt::read: can not read a string\n"));
+        f << "###aName1,";
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        return false;
+      }
+      else if (!string.empty())
+        f << libstoff::getString(string).cstr();
+      f << "nScriptType=" << input->readULong(2) << ",";
+    }
+    f << "],";
+  }
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
+bool StarCAttributeRefMark::read(StarZone &zone, int /*nVers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  std::vector<uint32_t> string;
+  if (!zone.readString(string)) {
+    STOFF_DEBUG_MSG(("StarCAttributeRefMark::read: can not find the name\n"));
+    f << "###name,";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  m_name=libstoff::getString(string);
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
 bool StarCAttributeContent::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, std::set<StarAttribute const *> &done) const
 {
   if (done.find(this)!=done.end()) {
-    STOFF_DEBUG_MSG(("StarCAttributeContent::read: find a loop\n"));
+    STOFF_DEBUG_MSG(("StarCAttributeContent::send: find a loop\n"));
     return false;
   }
   done.insert(this);
   if (!listener) {
-    STOFF_DEBUG_MSG(("StarCAttributeContent::read: can not find the listener\n"));
+    STOFF_DEBUG_MSG(("StarCAttributeContent::send: can not find the listener\n"));
     return false;
   }
   if (m_content) // checkme zone time, we need probably to create a frame
@@ -1011,12 +1214,12 @@ bool StarCAttributeContent::send(STOFFListenerPtr listener, StarItemPool const *
 bool StarCAttributeFootnote::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, std::set<StarAttribute const *> &done) const
 {
   if (done.find(this)!=done.end()) {
-    STOFF_DEBUG_MSG(("StarCAttributeFootnote::read: find a loop\n"));
+    STOFF_DEBUG_MSG(("StarCAttributeFootnote::send: find a loop\n"));
     return false;
   }
   done.insert(this);
   if (!listener || !listener->canWriteText()) {
-    STOFF_DEBUG_MSG(("StarCAttributeFootnote::read: can not find the listener\n"));
+    STOFF_DEBUG_MSG(("StarCAttributeFootnote::send: can not find the listener\n"));
     return false;
   }
   STOFFSubDocumentPtr subDocument(new SubDocument(m_content, pool, object));
@@ -1075,6 +1278,8 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeVoid(map,StarAttribute::ATTR_TXT_SOFTHYPH,"text[softHyphen]");
   map[StarAttribute::ATTR_TXT_FTN]=shared_ptr<StarAttribute>(new StarCAttributeFootnote(StarAttribute::ATTR_TXT_FTN,"textAtrFtn"));
   map[StarAttribute::ATTR_TXT_FIELD]=shared_ptr<StarAttribute>(new StarCAttributeField(StarAttribute::ATTR_TXT_FIELD,"textAtrField"));
+  map[StarAttribute::ATTR_TXT_INETFMT]=shared_ptr<StarAttribute>(new StarCAttributeINetFmt(StarAttribute::ATTR_TXT_INETFMT,"textAtrInetFmt"));
+  map[StarAttribute::ATTR_TXT_REFMARK]=shared_ptr<StarAttribute>(new StarCAttributeRefMark(StarAttribute::ATTR_TXT_REFMARK,"textAtrRefMark"));
   addAttributeBool(map,StarAttribute::ATTR_CHR_NOLINEBREAK,"char[nolineBreak]",true);
   addAttributeBool(map,StarAttribute::ATTR_SC_HYPHENATE,"hyphenate", false);
 

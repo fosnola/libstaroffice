@@ -1072,7 +1072,7 @@ void STOFFTextListener::insertNote(STOFFNote const &note, STOFFSubDocumentPtr &s
   m_ps->m_isNote = false;
 }
 
-void STOFFTextListener::insertComment(STOFFSubDocumentPtr &subDocument, librevenge::RVNGString const &/*creator*/, librevenge::RVNGString const &/*date*/)
+void STOFFTextListener::insertComment(STOFFSubDocumentPtr &subDocument, librevenge::RVNGString const &creator, librevenge::RVNGString const &date)
 {
   if (m_ps->m_isNote) {
     STOFF_DEBUG_MSG(("STOFFTextListener::insertComment try to insert a note recursively (ignored)\n"));
@@ -1087,6 +1087,8 @@ void STOFFTextListener::insertComment(STOFFSubDocumentPtr &subDocument, libreven
   }
 
   librevenge::RVNGPropertyList propList;
+  if (!creator.empty())  propList.insert("dc:creator", creator);
+  if (!date.empty())  propList.insert("meta:date-string", date);
   m_documentInterface->openComment(propList);
 
   m_ps->m_isNote = true;

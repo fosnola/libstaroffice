@@ -410,6 +410,21 @@ bool convertToDateTime(uint32_t date, uint32_t time, std::string &dateTime)
   return true;
 }
 
+void splitString(librevenge::RVNGString const &string, librevenge::RVNGString const &delim,
+                 librevenge::RVNGString &string1, librevenge::RVNGString &string2)
+{
+  std::string fString(string.cstr());
+  std::string fDelim(delim.cstr());
+  size_t pos=fString.find(fDelim);
+  if (pos!=std::string::npos) {
+    if (pos+fDelim.length()<fString.length())
+      string2=librevenge::RVNGString(fString.substr(pos+fDelim.length()).c_str());
+    if (pos>0)
+      string1=librevenge::RVNGString(fString.substr(0,pos).c_str());
+  }
+  else
+    string1=string;
+}
 // a little geometry
 STOFFVec2f rotatePointAroundCenter(STOFFVec2f const &point, STOFFVec2f const &center, float angle)
 {
