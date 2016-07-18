@@ -73,9 +73,6 @@ struct Content {
 
 struct GraphZone;
 struct SectionZone;
-struct Table;
-struct TableBox;
-struct TableLine;
 struct TextZone;
 struct State;
 }
@@ -147,10 +144,6 @@ protected:
   bool readSWLayoutInfo(StarZone &zone);
   //! try to read a layout subinformation zone : 0xd2 or 0xd7
   bool readSWLayoutSub(StarZone &zone);
-  //! try to read a macro table : 'M' (list of 'm')
-  bool readSWMacroTable(StarZone &zone);
-  //! try to read a node redline : 'v'
-  bool readSWNodeRedline(StarZone &zone);
   //! a simple rule : '0' or 'R'
   bool readSWNumRule(StarZone &zone, char kind);
   //! try to read a OLE node : 'O'
@@ -161,18 +154,8 @@ protected:
   bool readSWRedlineList(StarZone &zone);
   //! try to read a section : 'I'
   bool readSWSection(StarZone &zone, shared_ptr<StarObjectTextInternal::SectionZone> &section);
-  //! try to read a table : 'E'
-  bool readSWTable(StarZone &zone, shared_ptr<StarObjectTextInternal::Table> &table);
-  //! try to read a table box : 't'
-  bool readSWTableBox(StarZone &zone, shared_ptr<StarObjectTextInternal::TableBox> &box);
-  //! try to read a table line : 'L'
-  bool readSWTableLine(StarZone &zone, shared_ptr<StarObjectTextInternal::TableLine> &line);
   //! try to read some content : 'T'
   bool readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInternal::TextZone> &textZone);
-  //! try to read a list of TOX : 'u' ( list of 'x')
-  bool readSWTOXList(StarZone &zone);
-  //! try to read a list of TOX51 : 'y' ( list of 'x')
-  bool readSWTOX51List(StarZone &zone);
   //
   // data
   //

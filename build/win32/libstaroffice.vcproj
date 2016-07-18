@@ -601,14 +601,6 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
-			<File RelativePath="..\..\src\lib\StarMark.cxx">
-				<FileConfiguration Name="Release|Win32">
-					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
-				</FileConfiguration>
-				<FileConfiguration Name="Debug|Win32">
-					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
 			<File RelativePath="..\..\src\lib\StarObject.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -682,6 +674,22 @@
 				</FileConfiguration>
 			</File>
 			<File RelativePath="..\..\src\lib\StarParagraphAttribute.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File RelativePath="..\..\src\lib\StarTable.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File RelativePath="..\..\src\lib\StarWriterStruct.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
 				</FileConfiguration>
@@ -821,8 +829,6 @@
 			</File>
 			<File RelativePath="..\..\src\lib\StarLanguage.hxx">
 			</File>
-			<File RelativePath="..\..\src\lib\StarMark.hxx">
-			</File>
 			<File RelativePath="..\..\src\lib\StarObject.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarObjectChart.hxx">
@@ -842,6 +848,10 @@
 			<File RelativePath="..\..\src\lib\StarPageAttribute.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarParagraphAttribute.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\StarTable.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\StarWriterStruct.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarZone.hxx">
 			</File>

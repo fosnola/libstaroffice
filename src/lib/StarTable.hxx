@@ -32,66 +32,50 @@
 */
 
 /*
- * StarMark to read/parse some basic mark in StarOffice documents
+ * StarTable to read/parse table in sdw file
  *
  */
-#ifndef STAR_MARK
-#  define STAR_MARK
+#ifndef STAR_TABLE
+#  define STAR_TABLE
 
 #include <ostream>
 #include <vector>
 
 #include "libstaroffice_internal.hxx"
 
+class StarItemPool;
+class StarObject;
+class StarObjectText;
 class StarZone;
-/** \brief class to store a mark in a text zone
- */
-class StarMark
+namespace StarTableInternal
 {
-public:
-  //! constructor
-  StarMark() : m_type(-1), m_id(-1), m_offset(-1)
-  {
-  }
-  //! operator<<
-  friend std::ostream &operator<<(std::ostream &o, StarMark const &mark);
-  //! try to read a mark
-  bool read(StarZone &zone);
-  //! the type:  2: bookmark-start, 3:bookmark-end
-  int m_type;
-  //! the id
-  int m_id;
-  //! the offset
-  int m_offset;
-};
+struct TableLine;
+}
 
-/** \brief class to store a bookmark
+/** \brief class to store a table in a sdw file
  */
-class StarBookmark
+class StarTable
 {
 public:
   //! the constructor
-  StarBookmark() : m_shortName(""), m_name(""), m_offset(0), m_key(0), m_modifier(0)
+  StarTable() : m_headerRepeated(false), m_numBoxes(0), m_chgMode(0), m_lineList()
   {
   }
-  //! operator<<
-  friend std::ostream &operator<<(std::ostream &o, StarBookmark const &mark);
-  //! try to read a mark
-  bool read(StarZone &zone);
-  //! try to read a list of bookmark
-  static bool readList(StarZone &zone, std::vector<StarBookmark> &markList);
-  //! the shortname
-  librevenge::RVNGString m_shortName;
-  //! the name
-  librevenge::RVNGString m_name;
-  //! the offset
-  int m_offset;
-  //! the key
-  int m_key;
-  //! the modifier
-  int m_modifier;
-  //! the macros names
-  librevenge::RVNGString m_macroNames[4];
+  //! the destructor
+  ~StarTable();
+  //! try to read the data
+  bool read(StarZone &zone, StarObjectText &object);
+  //! try to send the data to a listener
+  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+
+  //! flag to know if the header is repeated
+  bool m_headerRepeated;
+  //! the number of boxes
+  int m_numBoxes;
+  //! the change mode
+  int m_chgMode;
+  //! the list of line
+  std::vector<shared_ptr<StarTableInternal::TableLine> > m_lineList;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

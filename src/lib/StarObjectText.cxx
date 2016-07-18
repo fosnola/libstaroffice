@@ -39,12 +39,10 @@
 
 #include <librevenge/librevenge.h>
 
-#include "STOFFCell.hxx"
 #include "STOFFOLEParser.hxx"
 #include "STOFFPageSpan.hxx"
 #include "STOFFParagraph.hxx"
 #include "STOFFSection.hxx"
-#include "STOFFTable.hxx"
 #include "STOFFTextListener.hxx"
 
 #include "SWFieldManager.hxx"
@@ -55,10 +53,11 @@
 #include "StarFileManager.hxx"
 #include "StarGraphicStruct.hxx"
 #include "StarItemPool.hxx"
-#include "StarMark.hxx"
 #include "StarObjectChart.hxx"
 #include "StarObjectModel.hxx"
 #include "StarObjectSpreadsheet.hxx"
+#include "StarTable.hxx"
+#include "StarWriterStruct.hxx"
 #include "StarZone.hxx"
 
 #include "StarObjectText.hxx"
@@ -231,7 +230,7 @@ struct TextZone : public Zone {
   //! the format
   shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
   //! the mark
-  std::vector<StarMark> m_markList;
+  std::vector<StarWriterStruct::Mark> m_markList;
 };
 
 bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
@@ -416,102 +415,16 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
   return true;
 }
 
-struct TableLine;
-//! small structure used to store a table box
-struct TableBox {
-  //! constructor
-  TableBox() : m_formatId(0), m_numLines(0), m_content(), m_lineList(), m_format()
-  {
-  }
-  //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
-  //! the format
-  int m_formatId;
-  //! the number of lines
-  int m_numLines;
-  //! the content
-  shared_ptr<Content> m_content;
-  //! a list of line
-  std::vector<shared_ptr<TableLine> > m_lineList;
-  //! the format
-  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
-};
-
-bool TableBox::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
-{
-  if (!listener) {
-    STOFF_DEBUG_MSG(("StarObjectTextInternal::TableBox::send: call without listener\n"));
-    return false;
-  }
-  if (!m_lineList.empty()) {
-    STOFF_DEBUG_MSG(("StarObjectTextInternal::TableBox::send: sending box with line list is not implemented\n"));
-  }
-  if (m_content)
-    m_content->send(listener, pool, object);
-  return true;
-}
-
-//! small structure used to store a table line
-struct TableLine {
-  //! constructor
-  TableLine() : m_formatId(0), m_numBoxes(0), m_boxList(), m_format()
-  {
-  }
-  //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, int row) const;
-  //! the format
-  int m_formatId;
-  //! the number of boxes
-  int m_numBoxes;
-  //! a list of box
-  std::vector<shared_ptr<TableBox> > m_boxList;
-  //! the format
-  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
-};
-
-bool TableLine::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, int row) const
-{
-  if (!listener) {
-    STOFF_DEBUG_MSG(("StarObjectTextInternal::TableLine::send: call without listener\n"));
-    return false;
-  }
-  listener->openTableRow(0, librevenge::RVNG_POINT);
-  for (size_t i=0; i<m_boxList.size(); ++i) {
-    STOFFVec2i pos(int(i), row);
-    if (!m_boxList[i])
-      listener->addEmptyTableCell(pos);
-
-    STOFFCellStyle cellStyle;
-    cellStyle.m_format=unsigned(m_boxList[i]->m_formatId);
-    STOFFCell cell;
-    cell.setPosition(pos);
-    cell.setCellStyle(cellStyle);
-    object.getFormatManager()->updateNumberingProperties(cell);
-    listener->openTableCell(cell);
-    m_boxList[i]->send(listener, pool, object);
-    listener->closeTableCell();
-  }
-  listener->closeTableRow();
-  return true;
-}
-
 //! Internal: a table of StarObjectTextInteral
 struct Table : public Zone {
   //! constructor
-  Table() : Zone(), m_headerRepeated(false), m_numBoxes(0), m_chgMode(0), m_lineList()
+  Table() : Zone(), m_table()
   {
   }
   //! try to send the data to a listener
   virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
-
-  //! flag to know if the header is repeated
-  bool m_headerRepeated;
-  //! the number of boxes
-  int m_numBoxes;
-  //! the change mode
-  int m_chgMode;
-  //! the list of line
-  std::vector<shared_ptr<TableLine> > m_lineList;
+  //! the table
+  shared_ptr<StarTable> m_table;
 };
 
 bool Table::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
@@ -520,21 +433,11 @@ bool Table::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject
     STOFF_DEBUG_MSG(("StarObjectTextInternal::Table::send: call without listener\n"));
     return false;
   }
-  STOFFTable table;
-  // first find the number of columns
-  size_t numCol=0;
-  for (size_t i=0; i<m_lineList.size(); ++i) {
-    if (m_lineList[i] && m_lineList[i]->m_boxList.size()>numCol)
-      numCol=m_lineList[i]->m_boxList.size();
+  if (!m_table) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::Table::send: can not find the table\n"));
+    return false;
   }
-  table.setColsSize(std::vector<float>(numCol,40)); // changeme
-  listener->openTable(table);
-  for (size_t i=0; i<m_lineList.size(); ++i) {
-    if (m_lineList[i])
-      m_lineList[i]->send(listener, pool, object, int(i));
-  }
-  listener->closeTable();
-  return true;
+  return m_table->send(listener, pool, object);
 }
 
 ////////////////////////////////////////
@@ -823,8 +726,8 @@ try
   SWFieldManager fieldManager;
   while (fieldManager.readField(zone,'Y'))
     ;
-  std::vector<StarBookmark> markList;
-  StarBookmark::readList(zone, markList);
+  std::vector<StarWriterStruct::Bookmark> markList;
+  StarWriterStruct::Bookmark::readList(zone, markList);
   readSWRedlineList(zone);
   getFormatManager()->readSWNumberFormatterList(zone);
   // sw_sw3page.cxx Sw3IoImp::InPageDesc
@@ -1109,10 +1012,13 @@ bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInte
     bool done=false;
     switch (cType) {
     case 'E': {
-      shared_ptr<StarObjectTextInternal::Table> table;
-      done=readSWTable(zone, table);
-      if (done && table)
-        content->m_zoneList.push_back(table);
+      shared_ptr<StarTable> table(new StarTable);
+      done=table->read(zone, *this);
+      if (done) {
+        shared_ptr<StarObjectTextInternal::Table> tableZone(new StarObjectTextInternal::Table);
+        tableZone->m_table=table;
+        content->m_zoneList.push_back(tableZone);
+      }
       break;
     }
     case 'G': {
@@ -1150,9 +1056,11 @@ bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInte
       }
       break;
     }
-    case 'v':
-      done=readSWNodeRedline(zone);
+    case 'v': {
+      StarWriterStruct::NodeRedline redline;
+      done=redline.read(zone);
       break;
+    }
     default:
       break;
     }
@@ -1763,77 +1671,6 @@ bool StarObjectText::readSWLayoutSub(StarZone &zone)
   return true;
 }
 
-bool StarObjectText::readSWMacroTable(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='M' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3misc.cxx: InMacroTable
-  libstoff::DebugStream f;
-  f << "Entries(SWMacroTable)[" << zone.getRecordLevel() << "]:";
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  long lastPos=zone.getRecordLastPosition();
-  std::vector<uint32_t> string;
-  while (input->tell()<lastPos) {
-    pos=input->tell();
-    if (input->peek()!='m' || !zone.openSWRecord(type)) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    f << "SWMacroTable:";
-    f << "key=" << input->readULong(2) << ",";
-    bool ok=true;
-    for (int i=0; i<2; ++i) {
-      if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSWMacroTable: can not read a string\n"));
-        f << "###,";
-        ok=false;
-        break;
-      }
-      if (!string.empty())
-        f << libstoff::getString(string).cstr() << ",";
-    }
-    if (ok && zone.isCompatibleWith(0x102))
-      f << "scriptType=" << input->readULong(2) << ",";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    zone.closeSWRecord(type, "SWMacroTable");
-  }
-  zone.closeSWRecord('M', "SWMacroTable");
-  return true;
-}
-
-bool StarObjectText::readSWNodeRedline(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='v' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3redln.cxx InNodeRedLine
-  libstoff::DebugStream f;
-  f << "Entries(SWNodeRedline)[" << zone.getRecordLevel() << "]:";
-  int cFlag=zone.openFlagZone();
-  if (cFlag&0xf0) f << "flag=" << (cFlag>>4) << ",";
-  f << "nId=" << input->readULong(2) << ",";
-  f << "nNodeOf=" << input->readULong(2) << ",";
-  zone.closeFlagZone();
-
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  zone.closeSWRecord('v', "SWNodeRedline");
-  return true;
-}
-
 bool StarObjectText::readSWNumRule(StarZone &zone, char cKind)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -2095,172 +1932,6 @@ bool StarObjectText::readSWSection(StarZone &zone, shared_ptr<StarObjectTextInte
   return true;
 }
 
-bool StarObjectText::readSWTable(StarZone &zone, shared_ptr<StarObjectTextInternal::Table> &table)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='E' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3table.cxx: InTable
-  libstoff::DebugStream f;
-  f << "Entries(SWTableDef)[" << zone.getRecordLevel() << "]:";
-  table.reset(new StarObjectTextInternal::Table);
-  int fl=zone.openFlagZone();
-  if (fl&0x20) {
-    table->m_headerRepeated=true;
-    f << "headerRepeat,";
-  }
-  table->m_numBoxes=int(input->readULong(2));
-  if (table->m_numBoxes)
-    f << "nBoxes=" << table->m_numBoxes << ",";
-  if (zone.isCompatibleWith(0x5,0x201))
-    f << "nTblIdDummy=" << input->readULong(2) << ",";
-  if (zone.isCompatibleWith(0x103)) {
-    table->m_chgMode=int(input->readULong(1));
-    if (table->m_chgMode)
-      f << "cChgMode=" << table->m_chgMode << ",";
-  }
-  zone.closeFlagZone();
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-
-  long lastPos=zone.getRecordLastPosition();
-  // TODO storeme
-  shared_ptr<StarFormatManagerInternal::FormatDef> format;
-  if (input->peek()=='f') getFormatManager()->readSWFormatDef(zone, 'f', format, *this);
-  if (input->peek()=='Y') {
-    SWFieldManager fieldManager;
-    fieldManager.readField(zone,'Y');
-  }
-  while (input->tell()<lastPos && input->peek()=='v') {
-    pos=input->tell();
-    // TODO storeme
-    if (readSWNodeRedline(zone))
-      continue;
-    STOFF_DEBUG_MSG(("StarObjectText::readSWTable: can not read a red line\n"));
-    ascFile.addPos(pos);
-    ascFile.addNote("SWTableDef:###redline");
-    zone.closeSWRecord('E',"SWTableDef");
-    return true;
-  }
-
-  while (input->tell()<lastPos && input->peek()=='L') {
-    pos=input->tell();
-    shared_ptr<StarObjectTextInternal::TableLine> line;
-    if (readSWTableLine(zone, line)) {
-      table->m_lineList.push_back(line);
-      continue;
-    }
-    STOFF_DEBUG_MSG(("StarObjectText::readSWTable: can not read a table line\n"));
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    break;
-  }
-  zone.closeSWRecord('E',"SWTableDef");
-  return true;
-}
-
-bool StarObjectText::readSWTableBox(StarZone &zone, shared_ptr<StarObjectTextInternal::TableBox> &box)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='t' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3table.cxx: InTableBox
-  libstoff::DebugStream f;
-  f << "Entries(SWTableBox)[" << zone.getRecordLevel() << "]:";
-  box.reset(new StarObjectTextInternal::TableBox);
-  int fl=zone.openFlagZone();
-  if (fl&0x20 || !zone.isCompatibleWith(0x201)) {
-    box->m_formatId=int(input->readULong(2));
-    librevenge::RVNGString format;
-    if (!zone.getPoolName(box->m_formatId, format))
-      f << "###format=" << box->m_formatId << ",";
-    else
-      f << format.cstr() << ",";
-  }
-  if (fl&0x10) {
-    box->m_numLines=int(input->readULong(2));
-    if (box->m_numLines)
-      f << "numLines=" << box->m_numLines << ",";
-  }
-  zone.closeFlagZone();
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-
-  if (input->peek()=='f')
-    getFormatManager()->readSWFormatDef(zone,'f', box->m_format, *this);
-  if (input->peek()=='N')
-    readSWContent(zone, box->m_content);
-  long lastPos=zone.getRecordLastPosition();
-  while (input->tell()<lastPos) {
-    pos=input->tell();
-    shared_ptr<StarObjectTextInternal::TableLine> line;
-    if (readSWTableLine(zone, line) && input->tell()<=lastPos) {
-      box->m_lineList.push_back(line);
-      continue;
-    }
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    break;
-  }
-  zone.closeSWRecord('t', "SWTableBox");
-  return true;
-}
-
-bool StarObjectText::readSWTableLine(StarZone &zone, shared_ptr<StarObjectTextInternal::TableLine> &line)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='L' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3table.cxx: InTableLine
-  line.reset(new StarObjectTextInternal::TableLine);
-  libstoff::DebugStream f;
-  f << "Entries(SWTableLine)[" << zone.getRecordLevel() << "]:";
-  int fl=zone.openFlagZone();
-  if (fl&0x20 || !zone.isCompatibleWith(0x201)) {
-    line->m_formatId=int(input->readULong(2));
-    librevenge::RVNGString format;
-    if (!zone.getPoolName(line->m_formatId, format))
-      f << "###format=" << line->m_formatId << ",";
-    else
-      f << format.cstr() << ",";
-  }
-  line->m_numBoxes=int(input->readULong(2));
-  if (line->m_numBoxes)
-    f << "nBoxes=" << line->m_numBoxes << ",";
-  zone.closeFlagZone();
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  if (input->peek()=='f')
-    getFormatManager()->readSWFormatDef(zone,'f',line->m_format, *this);
-
-  long lastPos=zone.getRecordLastPosition();
-  while (input->tell()<lastPos) {
-    pos=input->tell();
-    shared_ptr<StarObjectTextInternal::TableBox> box;
-    if (readSWTableBox(zone, box) && input->tell()<=lastPos) {
-      line->m_boxList.push_back(box);
-      continue;
-    }
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    break;
-  }
-  zone.closeSWRecord('L', "SWTableLine");
-  return true;
-}
-
 bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInternal::TextZone> &textZone)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -2328,7 +1999,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInt
       break;
     }
     case 'K': {
-      StarMark mark;
+      StarWriterStruct::Mark mark;
       done=mark.read(zone);
       if (done) textZone->m_markList.push_back(mark);
       break;
@@ -2347,9 +2018,11 @@ bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInt
       done=getFormatManager()->readSWFormatDef(zone,'o', format, *this);
       break;
     }
-    case 'v':
-      done=readSWNodeRedline(zone);
+    case 'v': {
+      StarWriterStruct::NodeRedline redline;
+      done=redline.read(zone);
       break;
+    }
     default:
       break;
     }
@@ -2409,254 +2082,6 @@ bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInt
     zone.closeSWRecord(type, "SWText");
   }
   zone.closeSWRecord('T', "SWText");
-  return true;
-}
-
-bool StarObjectText::readSWTOXList(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='u' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3misc.cxx: InTOXs
-  libstoff::DebugStream f;
-  f << "Entries(SWTOXList)[" << zone.getRecordLevel() << "]:";
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  long lastPos=zone.getRecordLastPosition();
-  std::vector<uint32_t> string;
-  while (input->tell()<lastPos) {
-    pos=input->tell();
-    int rType=input->peek();
-    if (rType!='x' || !zone.openSWRecord(type)) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    long lastRecordPos=zone.getRecordLastPosition();
-    f << "SWTOXList:";
-    int fl=zone.openFlagZone();
-    if (fl&0xf0)
-      f << "fl=" << (fl>>4) << ",";
-    f << "nType=" << input->readULong(2) << ",";
-    f << "nCreateType=" << input->readULong(2) << ",";
-    f << "nCaptionDisplay=" << input->readULong(2) << ",";
-    f << "nStrIdx=" << input->readULong(2) << ",";
-    f << "nSeqStrIdx=" << input->readULong(2) << ",";
-    f << "nData=" << input->readULong(2) << ",";
-    f << "cFormFlags=" << input->readULong(1) << ",";
-    zone.closeFlagZone();
-    if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read aName\n"));
-      f << "###aName";
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      zone.closeSWRecord(type, "SWTOXList");
-      continue;
-    }
-    if (!string.empty())
-      f << "aName=" << libstoff::getString(string).cstr() << ",";
-    if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read aTitle\n"));
-      f << "###aTitle";
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      zone.closeSWRecord(type, "SWTOXList");
-      continue;
-    }
-    if (!string.empty())
-      f << "aTitle=" << libstoff::getString(string).cstr() << ",";
-    if (zone.isCompatibleWith(0x215)) {
-      f << "nOLEOptions=" << input->readULong(2) << ",";
-      f << "nMainStyleIdx=" << input->readULong(2) << ",";
-    }
-    else {
-      if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read aDummy\n"));
-        f << "###aDummy";
-        ascFile.addPos(pos);
-        ascFile.addNote(f.str().c_str());
-        zone.closeSWRecord(type, "SWTOXList");
-        continue;
-      }
-      if (!string.empty())
-        f << "aDummy=" << libstoff::getString(string).cstr() << ",";
-    }
-
-    int N=int(input->readULong(1));
-    f << "nPatterns=" << N << ",";
-    bool ok=true;
-    for (int i=0; i<N; ++i) {
-      if (getFormatManager()->readSWPatternLCL(zone))
-        continue;
-      ok=false;
-      f << "###pat";
-      break;
-    }
-    if (!ok) {
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      zone.closeSWRecord(type, "SWTOXList");
-      continue;
-    }
-    N=int(input->readULong(1));
-    f << "nTmpl=" << N << ",";
-    f << "tmpl[strId]=[";
-    for (int i=0; i<N; ++i)
-      f << input->readULong(2) << ",";
-    f << "],";
-    N=int(input->readULong(1));
-    f << "nStyle=" << N << ",";
-    f << "style=[";
-    for (int i=0; i<N; ++i) {
-      f << "[";
-      f << "level=" << input->readULong(1) << ",";
-      int nCount=int(input->readULong(2));
-      f << "nCount=" << nCount << ",";
-      if (input->tell()+2*nCount>lastRecordPos) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read some string id\n"));
-        f << "###styleId";
-        ok=false;
-        break;
-      }
-      librevenge::RVNGString poolName;
-      for (int j=0; j<nCount; ++j) {
-        int val=int(input->readULong(2));
-        if (!zone.getPoolName(val, poolName))
-          f << "###nPoolId=" << val << ",";
-        else
-          f << poolName.cstr() << ",";
-      }
-      f << "],";
-    }
-    f << "],";
-    if (!ok) {
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      zone.closeSWRecord(type, "SWTOXList");
-      continue;
-    }
-    fl=zone.openFlagZone();
-    f << "nSectStrIdx=" << input->readULong(2) << ",";
-    if (fl&0x10) f << "nTitleLen=" << input->readULong(4) << ",";
-    zone.closeFlagZone();
-
-    if ((fl&0x10)) {
-      while (input->tell()<zone.getRecordLastPosition() && input->peek()=='s') {
-        shared_ptr<StarFormatManagerInternal::FormatDef> format;
-        if (!getFormatManager()->readSWFormatDef(zone,'s', format, *this)) {
-          STOFF_DEBUG_MSG(("StarObjectText::readSWTOXList: can not read some format\n"));
-          f << "###format,";
-          break;
-        }
-      }
-    }
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    zone.closeSWRecord(type, "SWTOXList");
-  }
-  zone.closeSWRecord('u', "SWTOXList");
-  return true;
-}
-
-bool StarObjectText::readSWTOX51List(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='y' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3misc.cxx: InTOX51s
-  libstoff::DebugStream f;
-  f << "Entries(SWTOX51List)[" << zone.getRecordLevel() << "]:";
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  long lastPos=zone.getRecordLastPosition();
-  std::vector<uint32_t> string;
-  while (input->tell()<lastPos) {
-    pos=input->tell();
-    if (input->peek()!='x' || !zone.openSWRecord(type)) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    f << "SWTOX51List:";
-    if (zone.isCompatibleWith(0x201)) {
-      int strId=int(input->readULong(2));
-      librevenge::RVNGString poolName;
-      if (strId!=0xFFFF && !zone.getPoolName(strId, poolName))
-        f << "###nPoolId=" << strId << ",";
-      else if (strId!=0xFFFF && !poolName.empty())
-        f << poolName.cstr() << ",";
-    }
-    else {
-      if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSWTOX51List: can not read typeName\n"));
-        f << "###typeName";
-        ascFile.addPos(pos);
-        ascFile.addNote(f.str().c_str());
-        zone.closeSWRecord(type, "SWTOX51List");
-        continue;
-      }
-      if (!string.empty())
-        f << "typeName=" << libstoff::getString(string).cstr() << ",";
-    }
-    if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarObjectText::readSWTOX51List: can not read aTitle\n"));
-      f << "###aTitle";
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      zone.closeSWRecord(type, "SWTOX51List");
-      continue;
-    }
-    if (!string.empty())
-      f << "aTitle=" << libstoff::getString(string).cstr() << ",";
-    int fl=zone.openFlagZone();
-    f << "nCreateType=" << input->readLong(2) << ",";
-    f << "nType=" << input->readULong(1) << ",";
-    if (zone.isCompatibleWith(0x213) && (fl&0x10))
-      f << "firstTabPos=" << input->readULong(2) << ",";
-
-    int N=int(input->readULong(1));
-    f << "nPat=" << N << ",";
-    f << "pat=[";
-    bool ok=true;
-    for (int i=0; i<N; ++i) {
-      if (!zone.readString(string)) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSWTOX51List: can not read a pattern name\n"));
-        f << "###pat";
-        ok=false;
-        break;
-      }
-      if (!string.empty())
-        f << libstoff::getString(string).cstr() << ",";
-    }
-    f << "],";
-    if (!ok) {
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      zone.closeSWRecord(type, "SWTOX51List");
-      continue;
-    }
-    N=int(input->readULong(1));
-    f << "nTmpl=" << N << ",";
-    f << "tmpl[strId]=[";
-    for (int i=0; i<N; ++i)
-      f << input->readULong(2) << ",";
-    f << "],";
-
-    f << "nInf=" << input->readULong(2) << ",";
-
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    zone.closeSWRecord(type, "SWTOX51List");
-  }
-  zone.closeSWRecord('y', "SWTOX51List");
   return true;
 }
 
@@ -2789,9 +2214,11 @@ try
     case 'J':
       done=readSWJobSetUp(zone);
       break;
-    case 'M':
-      done=readSWMacroTable(zone);
+    case 'M': {
+      std::vector<StarWriterStruct::Macro> macroList;
+      done=StarWriterStruct::Macro::readList(zone, macroList);
       break;
+    }
     case 'N':
       done=readSWContent(zone, m_textState->m_mainContent);
       break;
@@ -2805,8 +2232,8 @@ try
       done=fieldManager.readField(zone,'Y');
       break;
     case 'a': {
-      std::vector<StarBookmark> markList;
-      done=StarBookmark::readList(zone, markList);
+      std::vector<StarWriterStruct::Bookmark> markList;
+      done=StarWriterStruct::Bookmark::readList(zone, markList);
       break;
     }
     case 'j':
@@ -2815,12 +2242,16 @@ try
     case 'q':
       done=getFormatManager()->readSWNumberFormatterList(zone);
       break;
-    case 'u':
-      done=readSWTOXList(zone);
+    case 'u': {
+      std::vector<StarWriterStruct::TOX> toxList;
+      done=StarWriterStruct::TOX::readList(zone, toxList, *this);
       break;
-    case 'y':
-      done=readSWTOX51List(zone);
+    }
+    case 'y': {
+      std::vector<StarWriterStruct::TOX51> toxList;
+      done=StarWriterStruct::TOX51::readList(zone, toxList, *this);
       break;
+    }
     default:
       break;
     }

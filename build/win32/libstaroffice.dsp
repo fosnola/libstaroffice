@@ -303,10 +303,6 @@ SOURCE=..\..\src\lib\StarLanguage.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\StarMark.cxx
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\src\lib\StarObject.cxx
 # End Source File
 # Begin Source File
@@ -344,6 +340,14 @@ SOURCE=..\..\src\lib\StarPageAttribute.cxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarParagraphAttribute.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarTable.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarWriterStruct.cxx
 # End Source File
 # Begin Source File
 
@@ -583,10 +587,6 @@ SOURCE=..\..\src\lib\StarLanguage.hxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\lib\StarMark.hxx
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\src\lib\StarObject.hxx
 # End Source File
 # Begin Source File
@@ -624,6 +624,14 @@ SOURCE=..\..\src\lib\StarPageAttribute.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarParagraphAttribute.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarTable.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarWriterStruct.hxx
 # End Source File
 # Begin Source File
 
