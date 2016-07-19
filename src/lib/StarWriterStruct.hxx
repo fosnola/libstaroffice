@@ -82,6 +82,27 @@ public:
   librevenge::RVNGString m_macroNames[4];
 };
 
+/** \brief structure to store a layout in a text zone
+ */
+struct Layout {
+public:
+  //! constructor
+  Layout() : m_version(0)
+  {
+  }
+  //! try to read a layout: 'U'
+  bool read(StarZone &zone, StarObject &object);
+protected:
+  //! try to read a sub zone: 'd0'
+  bool readD0(StarZone &zone, StarObject &object);
+  //! try to read a sub zone: 'd2'
+  bool readD2(StarZone &zone, StarObject &object);
+  //! try to read a sub zone: 'd2'
+  bool readD7(StarZone &zone, StarObject &object);
+  //! the version
+  uint16_t m_version;
+};
+
 /** \brief structure to store a macro in a text zone
  */
 struct Macro {
@@ -142,6 +163,63 @@ public:
   int m_offset;
   //! the flags
   int m_flags;
+};
+
+/** \brief structure to store a endnoteInfo or a footnoteInfo in a text zone
+ */
+struct NoteInfo {
+public:
+  //! constructor
+  explicit NoteInfo(bool isFootnote) : m_isFootnote(isFootnote), m_type(0), m_ftnOffset(0), m_posType(0), m_numType(0)
+  {
+    for (int i=0; i<4; ++i) m_idx[i]=0xFFFF;
+  }
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, NoteInfo const &noteInfo);
+  //! try to read a noteInfo
+  bool read(StarZone &zone);
+  //! a flag to know if this corresponds to a footnote or a endnote
+  bool m_isFootnote;
+  //! the type
+  int m_type;
+  //! the list of idx: the page, the coll, the char and the anchorChar
+  int m_idx[4];
+  //! the ftnOffset
+  int m_ftnOffset;
+  //! the strings: prefix, suffix, quoValis, ergoSum
+  librevenge::RVNGString m_strings[4];
+  //! the posType
+  int m_posType;
+  //! the numType
+  int m_numType;
+};
+
+/** \brief structure to store a redline in a text zone
+ */
+struct Redline {
+public:
+  //! constructor
+  Redline() : m_type(0), m_stringId(0), m_date(0), m_time(0), m_comment()
+  {
+  }
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, Redline const &redline);
+  //! try to read a redline : D
+  bool read(StarZone &zone);
+  //! try to read a list of redline : R
+  static bool readList(StarZone &zone, std::vector<Redline> &redlineList);
+  //! try to read a list of list of redline : V
+  static bool readListList(StarZone &zone, std::vector<std::vector<Redline> > &redlineListList);
+  //! the type
+  int m_type;
+  //! the stringId
+  int m_stringId;
+  //! the date
+  long m_date;
+  //! the time
+  long m_time;
+  //! the comment
+  librevenge::RVNGString m_comment;
 };
 
 /** \brief structure to store a TOX in a text zone

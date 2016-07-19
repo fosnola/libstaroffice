@@ -728,7 +728,8 @@ try
     ;
   std::vector<StarWriterStruct::Bookmark> markList;
   StarWriterStruct::Bookmark::readList(zone, markList);
-  readSWRedlineList(zone);
+  std::vector<std::vector<StarWriterStruct::Redline> > redlineListList;
+  StarWriterStruct::Redline::readListList(zone, redlineListList);
   getFormatManager()->readSWNumberFormatterList(zone);
   // sw_sw3page.cxx Sw3IoImp::InPageDesc
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1205,144 +1206,6 @@ bool StarObjectText::readSWDictionary(StarZone &zone)
   return true;
 }
 
-bool StarObjectText::readSWEndNoteInfo(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='4' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3num.cxx: InEndNoteInfo
-  libstoff::DebugStream f;
-  f << "Entries(SWEndNoteInfo)[" << zone.getRecordLevel() << "]:";
-  int fl=zone.openFlagZone();
-  f << "eType=" << input->readULong(1) << ",";
-  f << "nPageId=" << input->readULong(2) << ",";
-  f << "nCollIdx=" << input->readULong(2) << ",";
-  if (zone.isCompatibleWith(0xc))
-    f << "nFtnOffset=" << input->readULong(2) << ",";
-  if (zone.isCompatibleWith(0x203))
-    f << "nChrIdx=" << input->readULong(2) << ",";
-  if (zone.isCompatibleWith(0x216) && (fl&0x10))
-    f << "nAnchorChrIdx=" << input->readULong(2) << ",";
-  zone.closeFlagZone();
-
-  if (zone.isCompatibleWith(0x203)) {
-    std::vector<uint32_t> text;
-    for (int i=0; i<2; ++i) {
-      if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSWEndNoteInfo: can not read a string\n"));
-        f << "###string";
-        ascFile.addPos(pos);
-        ascFile.addNote(f.str().c_str());
-        zone.closeSWRecord('4', "SWEndNoteInfo");
-        return true;
-      }
-      if (!text.empty())
-        f << (i==0 ? "prefix":"suffix") << "=" << libstoff::getString(text).cstr() << ",";
-    }
-  }
-  if (input->tell()<zone.getRecordLastPosition()) {
-    STOFF_DEBUG_MSG(("StarObjectText::readSWEndNoteInfo: find extra data\n"));
-    f << "###";
-  }
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  zone.closeSWRecord('4', "SWEndNoteInfo");
-  return true;
-}
-
-bool StarObjectText::readSWFootNoteInfo(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='1' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3num.cxx: InFtnInfo and InFntInfo40
-  libstoff::DebugStream f;
-  f << "Entries(SWFootNoteInfo)[" << zone.getRecordLevel() << "]:";
-  bool old=!zone.isCompatibleWith(0x201);
-  std::vector<uint32_t> text;
-  if (old) {
-    for (int i=0; i<2; ++i) {
-      if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSWFootNoteInfo: can not read a string\n"));
-        f << "###string";
-        ascFile.addPos(pos);
-        ascFile.addNote(f.str().c_str());
-        zone.closeSWRecord('1', "SWFootNoteInfo");
-      }
-      if (!text.empty())
-        f << (i==0 ? "quoVadis":"ergoSum") << "=" << libstoff::getString(text).cstr() << ",";
-    }
-  }
-  int fl=zone.openFlagZone();
-
-  if (old) {
-    f << "ePos=" << input->readULong(1) << ",";
-    f << "eNum=" << input->readULong(1) << ",";
-  }
-  f << "eType=" << input->readULong(1) << ",";
-  f << "nPageId=" << input->readULong(2) << ",";
-  f << "nCollIdx=" << input->readULong(2) << ",";
-  if (zone.isCompatibleWith(0xc))
-    f << "nFtnOffset=" << input->readULong(2) << ",";
-  if (zone.isCompatibleWith(0x203))
-    f << "nChrIdx=" << input->readULong(2) << ",";
-  if (zone.isCompatibleWith(0x216) && (fl&0x10))
-    f << "nAnchorChrIdx=" << input->readULong(2) << ",";
-  zone.closeFlagZone();
-
-  if (zone.isCompatibleWith(0x203)) {
-    for (int i=0; i<2; ++i) {
-      if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSWFootNoteInfo: can not read a string\n"));
-        f << "###string";
-        ascFile.addPos(pos);
-        ascFile.addNote(f.str().c_str());
-        zone.closeSWRecord('1', "SWFootNoteInfo");
-        return true;
-      }
-      if (!text.empty())
-        f << (i==0 ? "prefix":"suffix") << "=" << libstoff::getString(text).cstr() << ",";
-    }
-  }
-
-  if (!old) {
-    zone.openFlagZone();
-    f << "ePos=" << input->readULong(1) << ",";
-    f << "eNum=" << input->readULong(1) << ",";
-    zone.closeFlagZone();
-    for (int i=0; i<2; ++i) {
-      if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSWFootNoteInfo: can not read a string\n"));
-        f << "###string";
-        ascFile.addPos(pos);
-        ascFile.addNote(f.str().c_str());
-        zone.closeSWRecord('1', "SWFootNoteInfo");
-        return true;
-      }
-      if (!text.empty())
-        f << (i==0 ? "quoVadis":"ergoSum") << "=" << libstoff::getString(text).cstr() << ",";
-    }
-  }
-  if (input->tell()<zone.getRecordLastPosition()) {
-    STOFF_DEBUG_MSG(("StarObjectText::readSWFootNoteInfo: find extra data\n"));
-    f << "###";
-  }
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  zone.closeSWRecord('1', "SWFootNoteInfo");
-  return true;
-}
-
 bool StarObjectText::readSWGraphNode(StarZone &zone, shared_ptr<StarObjectTextInternal::GraphZone> &graphZone)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -1571,106 +1434,6 @@ bool StarObjectText::readSWJobSetUp(StarZone &zone)
   zone.closeSWRecord(type, "JobSetUp[container]");
   return true;
 }
-
-bool StarObjectText::readSWLayoutInfo(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='U' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // find no code, let improvise
-  libstoff::DebugStream f;
-  f << "Entries(SWLayoutInfo)[" << zone.getRecordLevel() << "]:";
-  int fl=zone.openFlagZone();
-  if (fl&0xf0) f << "fl=" << (fl>>4) << ",";
-  f << "f0=" << input->readULong(2) << ",";
-  if (input->tell()!=zone.getFlagLastPosition()) // maybe
-    f << "f1=" << input->readULong(2) << ",";
-  zone.closeFlagZone();
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-
-  long lastPos=zone.getRecordLastPosition();
-  while (input->tell()<lastPos) {
-    pos=input->tell();
-    if (readSWLayoutSub(zone)) continue;
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    if (!zone.openSWRecord(type)) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    f.str("");
-    f << "SWLayoutInfo[" << std::hex << int(static_cast<unsigned char>(type)) << std::dec << "]:";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    zone.closeSWRecord(type, "SWLayoutInfo");
-    break;
-  }
-
-  zone.closeSWRecord('U', "SWLayoutInfo");
-  return true;
-}
-
-bool StarObjectText::readSWLayoutSub(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  int rType=input->peek();
-  if ((rType!=0xd2&&rType!=0xd7) || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-
-  // find no code, let improvise
-  libstoff::DebugStream f;
-  f << "Entries(SWLayoutSub)[" << std::hex << rType << std::dec << "-" << zone.getRecordLevel() << "]:";
-  int const expectedSz=rType==0xd2 ? 11 : 9;
-  long lastPos=zone.getRecordLastPosition();
-  int val=int(input->readULong(1));
-  if (val!=0x11) f << "f0=" << val << ",";
-  val=int(input->readULong(1));
-  if (val!=0xaf) f << "f1=" << val << ",";
-  val=int(input->readULong(1)); // small value 1-1f
-  if (val) f << "f2=" << val << ",";
-  val=int(input->readULong(1));
-  if (val) f << "f3=" << std::hex << val << std::dec << ",";
-  if (input->tell()+(val&0xf)+expectedSz>lastPos) {
-    STOFF_DEBUG_MSG(("StarObjectText::readSWLayoutSub: the zone seems too short\n"));
-    f << "###";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    zone.closeSWRecord(char(0xd2), "SWLayoutSub");
-    return true;
-  }
-  ascFile.addDelimiter(input->tell(),'|');
-  input->seek(input->tell()+(val&0xf)+expectedSz, librevenge::RVNG_SEEK_SET);
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-
-  while (input->tell()<lastPos) {
-    pos=input->tell();
-    if (!zone.openSWRecord(type)) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    f.str("");
-    f << "SWLayoutSub[" << std::hex << int(static_cast<unsigned char>(type)) << std::dec << "]:";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
-    zone.closeSWRecord(type, "SWLayoutSub");
-  }
-
-  zone.closeSWRecord(char(rType), "SWLayoutSub");
-  return true;
-}
-
 bool StarObjectText::readSWNumRule(StarZone &zone, char cKind)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -1778,78 +1541,6 @@ bool StarObjectText::readSWOLENode(StarZone &zone)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   zone.closeSWRecord('O', "SWOLENode");
-  return true;
-}
-
-bool StarObjectText::readSWRedlineList(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='V' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3redline.cxx inRedlines
-  libstoff::DebugStream f;
-  f << "Entries(SWRedline)[" << zone.getRecordLevel() << "]:";
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-
-  while (input->tell()<zone.getRecordLastPosition()) {
-    pos=input->tell();
-    f.str("");
-    f << "SWRedline:";
-    if (input->peek()!='R' || !zone.openSWRecord(type)) {
-      STOFF_DEBUG_MSG(("StarObjectText::readSWRedlineList: find extra data\n"));
-      f << "###";
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      break;
-    }
-    zone.openFlagZone();
-    int N=int(input->readULong(2));
-    zone.closeFlagZone();
-    f << "N=" << N << ",";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-
-    for (int i=0; i<N; ++i) {
-      pos=input->tell();
-      f.str("");
-      f << "SWRedline-" << i << ":";
-      if (input->peek()!='D' || !zone.openSWRecord(type)) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSWRedlineList: can not read a redline\n"));
-        f << "###";
-        ascFile.addPos(pos);
-        ascFile.addNote(f.str().c_str());
-        break;
-      }
-
-      zone.openFlagZone();
-      int val=int(input->readULong(1));
-      if (val) f << "cType=" << val << ",";
-      val=int(input->readULong(2));
-      if (val) f << "stringId=" << val << ",";
-      zone.closeFlagZone();
-
-      f << "date=" << input->readULong(4) << ",";
-      f << "time=" << input->readULong(4) << ",";
-      std::vector<uint32_t> text;
-      if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSWRedlineList: can not read the comment\n"));
-        f << "###comment";
-      }
-      else if (!text.empty())
-        f << libstoff::getString(text).cstr();
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      zone.closeSWRecord('D', "SWRedline");
-    }
-    zone.closeSWRecord('R', "SWRedline");
-  }
-  zone.closeSWRecord('V', "SWRedline");
   return true;
 }
 
@@ -2199,12 +1890,16 @@ try
     case '0': // Outline
       done=readSWNumRule(zone,char(rType));
       break;
-    case '1':
-      done=readSWFootNoteInfo(zone);
+    case '1': {
+      StarWriterStruct::NoteInfo info(true);
+      done=info.read(zone);
       break;
-    case '4':
-      done=readSWEndNoteInfo(zone);
+    }
+    case '4': {
+      StarWriterStruct::NoteInfo info(false);
+      done=info.read(zone);
       break;
+    }
     case 'D':
       done=readSWDBName(zone);
       break;
@@ -2222,12 +1917,16 @@ try
     case 'N':
       done=readSWContent(zone, m_textState->m_mainContent);
       break;
-    case 'U': // layout info, no code, ignored by LibreOffice
-      done=readSWLayoutInfo(zone);
+    case 'U': { // layout info, no code, ignored by LibreOffice
+      StarWriterStruct::Layout layout;
+      done=layout.read(zone, *this);
       break;
-    case 'V':
-      done=readSWRedlineList(zone);
+    }
+    case 'V': {
+      std::vector<std::vector<StarWriterStruct::Redline> > redlineListList;
+      done=StarWriterStruct::Redline::readListList(zone, redlineListList);
       break;
+    }
     case 'Y':
       done=fieldManager.readField(zone,'Y');
       break;

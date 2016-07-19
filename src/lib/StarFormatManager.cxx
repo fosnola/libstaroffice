@@ -559,10 +559,19 @@ bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, shared_ptr<St
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
   }
+  long lastPos=zone.getRecordLastPosition();
+
   // sw_sw3fmts.cxx InFormat
   libstoff::DebugStream f;
   f << "Entries(SWFormatDef)[" << kind << "-" << zone.getRecordLevel() << "]:";
   format.reset(new StarFormatManagerInternal::FormatDef);
+  if (input->tell()==lastPos) { // unsure, but look like it can be empty
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+
+    zone.closeSWRecord(kind, "SWFormatDef");
+    return true;
+  }
   int flags=zone.openFlagZone();
   for (int i=0; i<2; ++i) format->m_values[i]=int(input->readULong(2));
   int stringId=0xFFFF;
@@ -608,7 +617,6 @@ bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, shared_ptr<St
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  long lastPos=zone.getRecordLastPosition();
   while (input->tell()<lastPos) {
     pos=long(input->tell());
     int rType=input->peek();

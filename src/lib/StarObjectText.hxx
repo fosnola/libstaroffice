@@ -132,26 +132,16 @@ protected:
   bool readSWDBName(StarZone &zone);
   //! try to read a dictionary table : 'j'
   bool readSWDictionary(StarZone &zone);
-  //! try to read a endnode node : '4'
-  bool readSWEndNoteInfo(StarZone &zone);
-  //! try to read a footnode node : '1'
-  bool readSWFootNoteInfo(StarZone &zone);
   //! try to read a OLE node : 'g'
   bool readSWGraphNode(StarZone &zone, shared_ptr<StarObjectTextInternal::GraphZone> &graphZone);
   //! try to read a SW zone setup : 'J'
   bool readSWJobSetUp(StarZone &zone);
-  //! try to read a layout information zone : 'Y'
-  bool readSWLayoutInfo(StarZone &zone);
-  //! try to read a layout subinformation zone : 0xd2 or 0xd7
-  bool readSWLayoutSub(StarZone &zone);
   //! a simple rule : '0' or 'R'
   bool readSWNumRule(StarZone &zone, char kind);
   //! try to read a OLE node : 'O'
   bool readSWOLENode(StarZone &zone);
   //! try to read a list of page style : 'p'
   bool readSWPageDef(StarZone &zone);
-  //! try to read a list of redline : 'V' (list of 'R' list of 'D')
-  bool readSWRedlineList(StarZone &zone);
   //! try to read a section : 'I'
   bool readSWSection(StarZone &zone, shared_ptr<StarObjectTextInternal::SectionZone> &section);
   //! try to read some content : 'T'
