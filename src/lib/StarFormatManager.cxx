@@ -48,7 +48,7 @@
 #include "StarGraphicStruct.hxx"
 #include "StarLanguage.hxx"
 #include "StarObject.hxx"
-#include "StarObjectText.hxx"
+#include "StarWriterStruct.hxx"
 #include "StarZone.hxx"
 
 #include "StarFormatManager.hxx"
@@ -71,13 +71,13 @@ bool FormatDef::send(STOFFListenerPtr listener, StarItemPool const *pool, StarOb
   }
   bool done=false;
   for (size_t i=0; i<m_attributeList.size(); ++i) {
-    if (!m_attributeList[i])
+    if (!m_attributeList[i].m_attribute)
       continue;
     STOFFFont font;
-    m_attributeList[i]->addTo(font, pool);
+    m_attributeList[i].m_attribute->addTo(font, pool);
     if (!font.m_content) continue;
     done=true;
-    m_attributeList[i]->send(listener, pool, object);
+    m_attributeList[i].m_attribute->send(listener, pool, object);
   }
   if (!done) {
     STOFF_DEBUG_MSG(("StarFormatManagerInternal::FormatDef::send: can not find and data to send\n"));
@@ -620,7 +620,7 @@ bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, shared_ptr<St
   while (input->tell()<lastPos) {
     pos=long(input->tell());
     int rType=input->peek();
-    if (rType=='S' && StarObjectText::readSWAttributeList(zone, doc, format->m_attributeList, format->m_limitList))
+    if (rType=='S' && StarWriterStruct::Attribute::readList(zone, format->m_attributeList, doc))
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);

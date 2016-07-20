@@ -47,12 +47,35 @@ namespace StarFormatManagerInternal
 {
 struct FormatDef;
 }
+class StarAttribute;
 class StarObject;
 class StarZone;
 
 /** \brief namespace use to keep basic writer structure */
 namespace StarWriterStruct
 {
+/** \brief struct use an attribute and a position
+ */
+struct Attribute {
+public:
+  //! constructor
+  Attribute() : m_attribute(), m_position(-1,-1)
+  {
+  }
+  //! destructor
+  ~Attribute();
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, Attribute const &attribute);
+  //! try to read a attribute: 'A'
+  bool read(StarZone &zone, StarObject &object);
+  //! try to read a list of attribute: 'S'
+  static bool readList(StarZone &zone, std::vector<Attribute> &attributeList, StarObject &object);
+  //! the attribute
+  shared_ptr<StarAttribute> m_attribute;
+  //! the begin/end position
+  STOFFVec2i m_position;
+};
+
 /** \brief structure to store a bookmark
  */
 class Bookmark
@@ -80,6 +103,103 @@ public:
   int m_modifier;
   //! the macros names
   librevenge::RVNGString m_macroNames[4];
+};
+
+/** \brief structure to store a databaseName in a text zone
+ */
+struct DatabaseName {
+public:
+  //! constructor
+  DatabaseName() : m_sql(""), m_dataList()
+  {
+  }
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, DatabaseName const &databaseName);
+  //! try to read a databaseName: 'D'
+  bool read(StarZone &zone);
+  //! a data of a DatabaseName
+  struct Data {
+    //! constructor
+    Data() : m_name(""), m_selection(0,0)
+    {
+    }
+    //! operator<<
+    friend std::ostream &operator<<(std::ostream &o, Data const &data)
+    {
+      o << data.m_name.cstr() << ",";
+      if (data.m_selection!=STOFFVec2i(0,0)) o << "select=" << STOFFVec2i(0,0) << ",";
+      return o;
+    }
+    //! the name
+    librevenge::RVNGString m_name;
+    //! the start/end position
+    STOFFVec2i m_selection;
+  };
+  //! the names: database, table
+  librevenge::RVNGString m_names[2];
+  //! the SQL string
+  librevenge::RVNGString m_sql;
+  //! the list of data
+  std::vector<Data> m_dataList;
+};
+
+/** \brief structure to store a dictionary in a text zone
+ */
+struct Dictionary {
+public:
+  //! constructor
+  Dictionary() : m_dataList()
+  {
+  }
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, Dictionary const &dictionary);
+  //! try to read a dictionary: 'j'
+  bool read(StarZone &zone);
+  //! a data of a Dictionary
+  struct Data {
+    //! constructor
+    Data() : m_name(""), m_language(0), m_id(0), m_spellWrong(true)
+    {
+    }
+    //! operator<<
+    friend std::ostream &operator<<(std::ostream &o, Data const &data)
+    {
+      o << data.m_name.cstr() << ",";
+      if (data.m_language) o << "language=" << data.m_language << ",";
+      if (data.m_id) o << "id=" << data.m_id << ",";
+      if (data.m_spellWrong) o << "spellWrong,";
+      return o;
+    }
+    //! the name
+    librevenge::RVNGString m_name;
+    //! the language
+    int m_language;
+    //! the id
+    int m_id;
+    //! a flag to know if we do spell or not
+    bool m_spellWrong;
+  };
+  //! the list of data
+  std::vector<Data> m_dataList;
+};
+
+/** \brief the doc statistic
+ */
+struct DocStats {
+public:
+  //! constructor
+  DocStats() : m_isModified(false)
+  {
+    for (int i=0; i<7; ++i) m_numbers[i]=0;
+  }
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, DocStats const &docStats);
+  //! try to read a docStats: 'd'
+  bool read(StarZone &zone);
+  //! the list of number: tbl, graf, ole, page, para, word, char
+  long m_numbers[7];
+  //! modified flags
+  bool m_isModified;
 };
 
 /** \brief structure to store a layout in a text zone
@@ -192,6 +312,27 @@ public:
   int m_posType;
   //! the numType
   int m_numType;
+};
+
+/** \brief the doc statistic
+ */
+struct PrintData {
+public:
+  //! constructor
+  PrintData() : m_flags(0), m_colRow(1,1)
+  {
+    for (int i=0; i<6; ++i) m_spacings[i]=0;
+  }
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, PrintData const &printData);
+  //! try to read a printData: '8'
+  bool read(StarZone &zone);
+  //! the flags
+  int m_flags;
+  //! the row, col dim
+  STOFFVec2i m_colRow;
+  //! the spaces: left, right, top, bottom, horizontal, verticals
+  int m_spacings[6];
 };
 
 /** \brief structure to store a redline in a text zone

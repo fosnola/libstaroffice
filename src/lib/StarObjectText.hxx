@@ -102,9 +102,6 @@ public:
 
   //! try to read a image map zone : 'X'
   static bool readSWImageMap(StarZone &zone);
-  //! try to read a attribute list: 'S'
-  static bool readSWAttributeList(StarZone &zone, StarObject &doc,
-                                  std::vector<shared_ptr<StarAttribute> > &attributeList, std::vector<STOFFVec2i> &limitsList);
 
   //! try to read some content : 'N'
   bool readSWContent(StarZone &zone, shared_ptr<StarObjectTextInternal::Content> &content);
@@ -126,12 +123,6 @@ protected:
   bool readDrawingLayer(STOFFInputStreamPtr input, std::string const &fileName);
 
 protected:
-  //! try to read an attribute: 'A'
-  static bool readSWAttribute(StarZone &zone, StarObject &doc, shared_ptr<StarAttribute> &attribute, STOFFVec2i &limits);
-  //! try to read a DBName zone : 'D'
-  bool readSWDBName(StarZone &zone);
-  //! try to read a dictionary table : 'j'
-  bool readSWDictionary(StarZone &zone);
   //! try to read a OLE node : 'g'
   bool readSWGraphNode(StarZone &zone, shared_ptr<StarObjectTextInternal::GraphZone> &graphZone);
   //! try to read a SW zone setup : 'J'

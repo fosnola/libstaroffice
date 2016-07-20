@@ -44,7 +44,8 @@
 #include "STOFFEntry.hxx"
 #include "STOFFInputStream.hxx"
 
-class StarAttribute;
+#include "StarWriterStruct.hxx"
+
 class StarItemPool;
 class StarObject;
 
@@ -52,7 +53,7 @@ namespace StarFormatManagerInternal
 {
 struct FormatDef {
   //! constructor
-  FormatDef() : m_attributeList(), m_limitList()
+  FormatDef() : m_attributeList()
   {
     for (int i=0; i<3; ++i) m_values[i]=0;
   }
@@ -65,9 +66,7 @@ struct FormatDef {
   //! the pool name, the read name
   librevenge::RVNGString m_names[2];
   //! the attributes list
-  std::vector<shared_ptr<StarAttribute> > m_attributeList;
-  //! the attributes limit
-  std::vector<STOFFVec2i> m_limitList;
+  std::vector<StarWriterStruct::Attribute> m_attributeList;
   //! nDerived, nPoolId, nObjRef
   int m_values[3];
 };

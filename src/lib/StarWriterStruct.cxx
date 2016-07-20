@@ -38,6 +38,7 @@
 
 #include "StarWriterStruct.hxx"
 
+#include "StarAttribute.hxx"
 #include "StarFormatManager.hxx"
 #include "StarObject.hxx"
 #include "StarZone.hxx"
@@ -46,6 +47,106 @@
 
 namespace StarWriterStruct
 {
+////////////////////////////////////////////////////////////
+//  Attribute
+////////////////////////////////////////////////////////////
+Attribute::~Attribute()
+{
+}
+
+bool Attribute::read(StarZone &zone, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  long pos=input->tell();
+  char type;
+  if (input->peek()!='A' || !zone.openSWRecord(type)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    STOFF_DEBUG_MSG(("StarWriterStruct::Attribute::read: can not read a attribute\n"));
+    return false;
+  }
+  // sw_sw3fmts.cxx InAttr
+  f << "Entries(StarAttribute)[SW-" << zone.getRecordLevel() << "]:";
+  int fl=zone.openFlagZone();
+  uint16_t nWhich, nVers, nBegin=0xFFFF, nEnd=0xFFFF;
+  *input >> nWhich >> nVers;
+  if (fl&0x10) *input >> nBegin;
+  if (fl&0x20) *input >> nEnd;
+  m_position=STOFFVec2i(nBegin==0xFFFF ? -1 : int(nBegin), nEnd==0xFFFF ? -1 : int(nEnd));
+
+  int which=int(nWhich);
+  if (which>0x6001 && zone.getDocumentVersion()!=0x0219) // bug correction 0x95500
+    which+=15;
+  if (which>=0x1000 && which<=0x1024) which+=-0x1000+int(StarAttribute::ATTR_CHR_CASEMAP);
+  else if (which>=0x2000 && which<=0x2009) which+=-0x2000+int(StarAttribute::ATTR_TXT_INETFMT);
+  else if (which>=0x3000 && which<=0x3006) which+=-0x3000+int(StarAttribute::ATTR_TXT_FIELD);
+  else if (which>=0x4000 && which<=0x4013) which+=-0x4000+int(StarAttribute::ATTR_PARA_LINESPACING);
+  else if (which>=0x5000 && which<=0x5022) which+=-0x5000+int(StarAttribute::ATTR_FRM_FILL_ORDER);
+  else if (which>=0x6000 && which<=0x6013) which+=-0x6000+int(StarAttribute::ATTR_GRF_MIRRORGRF);
+  else {
+    STOFF_DEBUG_MSG(("StarWriterStruct::Attribute::read: find unexpected which value\n"));
+    which=-1;
+    f << "###";
+  }
+  f << "wh=" << which << "[" << std::hex << nWhich << std::dec << "],";
+  if (nVers) f << "nVers=" << nVers << ",";
+  if (nBegin!=0xFFFF) f << "nBgin=" << nBegin << ",";
+  if (nEnd!=0xFFFF) f << "nEnd=" << nEnd << ",";
+  zone.closeFlagZone();
+
+  if (which<=0 || !object.getAttributeManager() ||
+      !(m_attribute=object.getAttributeManager()->readAttribute(zone, which, int(nVers), zone.getRecordLastPosition(), object)))
+    f << "###";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  zone.closeSWRecord(type, "StarAttribute");
+  return true;
+}
+
+bool Attribute::readList(StarZone &zone, std::vector<Attribute> &attribList, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  long pos=input->tell();
+  char type;
+  if (input->peek()!='S') return false;
+  if (!zone.openSWRecord(type)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    STOFF_DEBUG_MSG(("StarWriterStruct::Attribute::readList: can not read a mark\n"));
+    return false;
+  }
+  f << "Entries(StarAttribute)[SWlist-" << zone.getRecordLevel() << "]:";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  while (input->tell()<zone.getRecordLastPosition()) {
+    pos=input->tell();
+    Attribute attrib;
+    if (!attrib.read(zone, object)) {
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+      break;
+    }
+    attribList.push_back(attrib);
+  }
+
+  zone.closeSWRecord(type, "StarAttribute");
+  return true;
+}
+
+std::ostream &operator<<(std::ostream &o, Attribute const &attrib)
+{
+  if (attrib.m_attribute) {
+    libstoff::DebugStream f;
+    attrib.m_attribute->printData(f);
+    o << "attrib=[" << f.str() << "],";
+  }
+  if (attrib.m_position[0]==0xFFFF) o << "pos=_,";
+  else if (attrib.m_position[1]==0xFFFF) o << "pos=" << attrib.m_position[0] << ",";
+  else o << "pos=" << attrib.m_position << ",";
+  return o;
+}
+
 ////////////////////////////////////////////////////////////
 //  Bookmark
 ////////////////////////////////////////////////////////////
@@ -513,6 +614,211 @@ bool Layout::readD7(StarZone &zone, StarObject &object)
 }
 
 ////////////////////////////////////////////////////////////
+//  DatabaseName
+////////////////////////////////////////////////////////////
+bool DatabaseName::read(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  long pos=input->tell();
+  char type;
+  if (input->peek()!='D' || !zone.openSWRecord(type)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    STOFF_DEBUG_MSG(("StarWriterStruct::DatabaseName::read: can not read a databaseName\n"));
+    return false;
+  }
+  // sw_sw3num.cxx: InDBName
+  f << "Entries(StarDatabaseName)[" << zone.getRecordLevel() << "]:";
+  std::vector<uint32_t> text;
+  if (!zone.readString(text)) {
+    STOFF_DEBUG_MSG(("StarWriterStruct::DatabaseName::read: can not read a string\n"));
+    f << "###string";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    zone.closeSWRecord('D', "StarDatabaseName");
+    return true;
+  }
+  librevenge::RVNGString delim, dbName, tableName;
+  libstoff::appendUnicode(0xff, delim);
+  libstoff::splitString(libstoff::getString(text),delim, dbName, tableName);
+  if (tableName.empty()) {
+    if (zone.isCompatibleWith(0x11,0x22))
+      m_names[0]=dbName;
+    else
+      m_names[1]=dbName;
+  }
+  else {
+    m_names[0]=dbName;
+    m_names[1]=tableName;
+  }
+  if (zone.isCompatibleWith(0xf,0x101)) {
+    if (!zone.readString(text)) {
+      STOFF_DEBUG_MSG(("StarWriterStruct::DatabaseName::read: can not read a SQL string\n"));
+      f << *this << "###SQL";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      zone.closeSWRecord('D', "StarDatabaseName");
+      return true;
+    }
+    m_sql=libstoff::getString(text);
+  }
+  if (zone.isCompatibleWith(0x11,0x22)) {
+    if (!zone.readString(text)) {
+      STOFF_DEBUG_MSG(("StarWriterStruct::DatabaseName::read: can not read a table name string\n"));
+      f << "###tableName";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      zone.closeSWRecord('D', "StarDatabaseName");
+      return true;
+    }
+    m_names[1]=libstoff::getString(text);
+  }
+  if (zone.isCompatibleWith(0x12,0x22, 0x101)) {
+    int nCount=int(input->readULong(2));
+    if (nCount>0 && zone.isCompatibleWith(0x28)) {
+      for (int i=0; i<nCount; ++i) {
+        if (input->tell()>=zone.getRecordLastPosition()) {
+          STOFF_DEBUG_MSG(("StarWriterStruct::DatabaseName::read: can not read a DBData\n"));
+          f << "###";
+          break;
+        }
+        Data data;
+        if (!zone.readString(text)) {
+          STOFF_DEBUG_MSG(("StarWriterStruct::DatabaseName::read: can not read a table name string\n"));
+          f << "###dbDataName";
+          break;
+        }
+        data.m_name=libstoff::getString(text);
+        int positions[2];
+        for (int j=0; j<2; ++j) positions[i]=int(input->readULong(4));
+        data.m_selection=STOFFVec2i(positions[0],positions[1]);
+        m_dataList.push_back(data);
+      }
+    }
+  }
+  f << *this;
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  zone.closeSWRecord(type, "StarDatabaseName");
+  return true;
+}
+
+std::ostream &operator<<(std::ostream &o, DatabaseName const &dbase)
+{
+  for (int i=0; i<2; ++i) {
+    if (dbase.m_names[i].empty()) continue;
+    char const *(wh[])= {"name[database]", "name[table]"};
+    o << wh[i] << "=" << dbase.m_names[i].cstr() << ",";
+  }
+  if (!dbase.m_sql.empty()) o << "sql=" << dbase.m_sql.cstr() << ",";
+  if (!dbase.m_dataList.empty()) {
+    o << "data=[";
+    for (size_t i=0; i<dbase.m_dataList.size(); ++i)
+      o << "[" << dbase.m_dataList[i] << "],";
+    o << "],";
+  }
+  return o;
+}
+
+////////////////////////////////////////////////////////////
+//  Dictionary
+////////////////////////////////////////////////////////////
+bool Dictionary::read(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  long pos=input->tell();
+  char type;
+  if (input->peek()!='j' || !zone.openSWRecord(type)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    STOFF_DEBUG_MSG(("StarWriterStruct::Dictionary::read: can not read a dictionary\n"));
+    return false;
+  }
+  // sw_sw3misc.cxx: InDictionary
+  f << "Entries(StarDictionary)[" << zone.getRecordLevel() << "]:";
+  long lastPos=zone.getRecordLastPosition();
+  std::vector<uint32_t> string;
+  while (input->tell()<lastPos) {
+    pos=input->tell();
+    Data data;
+    if (!zone.readString(string)) {
+      STOFF_DEBUG_MSG(("StarObjectText::readSWDictionary: can not read a string\n"));
+      f << "###string,";
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+      break;
+    }
+    data.m_name=libstoff::getString(string);
+    data.m_language=int(input->readULong(2));
+    data.m_id=int(input->readULong(2));
+    *input>>data.m_spellWrong;
+    m_dataList.push_back(data);
+  }
+  f << *this;
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  zone.closeSWRecord(type, "StarDictionary");
+  return true;
+}
+
+std::ostream &operator<<(std::ostream &o, Dictionary const &dbase)
+{
+  if (!dbase.m_dataList.empty()) {
+    o << "data=[";
+    for (size_t i=0; i<dbase.m_dataList.size(); ++i)
+      o << "[" << dbase.m_dataList[i] << "],";
+    o << "],";
+  }
+  return o;
+}
+
+////////////////////////////////////////////////////////////
+//  DocStats
+////////////////////////////////////////////////////////////
+bool DocStats::read(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  long pos=input->tell();
+  char type;
+  if (input->peek()!='d' || !zone.openSWRecord(type)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    STOFF_DEBUG_MSG(("StarWriterStruct::DocStats::read: can not read a docStats\n"));
+    return false;
+  }
+  // sw_sw3misc.cxx: InDocStats
+  f << "Entries(StarDocStats)[" << zone.getRecordLevel() << "]:";
+  for (int i=0; i<3; ++i) m_numbers[i]=long(input->readULong(2));
+  if (zone.isCompatibleWith(0x201)) {
+    m_numbers[3]=long(input->readULong(4));
+    m_numbers[4]=long(input->readULong(4));
+  }
+  else {
+    m_numbers[3]=long(input->readULong(2));
+    m_numbers[4]=long(input->readULong(2));
+  }
+  for (int i=5; i<7; ++i) m_numbers[i]=long(input->readULong(4));
+  *input >> m_isModified;
+  f << *this;
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  zone.closeSWRecord(type, "StarDocStats");
+  return true;
+}
+
+std::ostream &operator<<(std::ostream &o, DocStats const &stats)
+{
+  for (int i=0; i<7; ++i) {
+    if (!stats.m_numbers[i]) continue;
+    char const *(wh[])= {"table", "graph", "ole", "page", "paragraph", "word", "char"};
+    o << "num[" << wh[i] << "]=" << stats.m_numbers[i] << ",";
+  }
+  if (stats.m_isModified) o << "modified,";
+  return o;
+}
+////////////////////////////////////////////////////////////
 //  Macro
 ////////////////////////////////////////////////////////////
 bool Macro::read(StarZone &zone)
@@ -771,6 +1077,47 @@ std::ostream &operator<<(std::ostream &o, NoteInfo const &info)
   return o;
 }
 
+////////////////////////////////////////////////////////////
+//  PrintData
+////////////////////////////////////////////////////////////
+bool PrintData::read(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  long pos=input->tell();
+  char type;
+  if (input->peek()!='8' || !zone.openSWRecord(type)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    STOFF_DEBUG_MSG(("StarWriterStruct::PrintData::read: can not read a printData\n"));
+    return false;
+  }
+  // sw_sw3misc.cxx: InPagePreviewPrintData
+  f << "Entries(StarPrintData)[" << zone.getRecordLevel() << "]:";
+  m_flags=int(input->readULong(1));
+  int dim[2];
+  for (int i=0; i<2; ++i) dim[i]=int(input->readULong(2));
+  m_colRow=STOFFVec2i(dim[1],dim[0]);
+  for (int i=0; i<6; ++i) m_spacings[i]=int(input->readULong(2));
+  f << *this;
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  zone.closeSWRecord(type, "StarPrintData");
+  return true;
+}
+
+std::ostream &operator<<(std::ostream &o, PrintData const &info)
+{
+  if (info.m_flags) o << "flags=" << std::hex << info.m_flags << std::dec;
+  if (info.m_colRow[0]!=1) o << "columns=" << info.m_colRow[0] << ",";
+  if (info.m_colRow[1]!=1) o << "rows=" << info.m_colRow[1] << ",";
+  for (int i=0; i<6; ++i) {
+    if (!info.m_spacings[i]) continue;
+    char const *(wh[])= {"left", "right", "top", "bottom", "horizontal", "vertical"};
+    o << wh[i] << "=" << info.m_spacings[i] << ",";
+  }
+  return o;
+}
 ////////////////////////////////////////////////////////////
 //  Redline
 ////////////////////////////////////////////////////////////

@@ -120,7 +120,7 @@ bool FormatZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarO
 //! Internal: a graphZone of StarObjectTextInteral
 struct GraphZone : public Zone {
   //! constructor
-  GraphZone(shared_ptr<STOFFOLEParser> oleParser) : Zone(), m_oleParser(oleParser), m_attributeList(), m_limitList(), m_contour()
+  GraphZone(shared_ptr<STOFFOLEParser> oleParser) : Zone(), m_oleParser(oleParser), m_attributeList(), m_contour()
   {
   }
   //! try to send the data to a listener
@@ -130,9 +130,7 @@ struct GraphZone : public Zone {
   //! the graph name, the fltName, the replace text
   librevenge::RVNGString m_names[3];
   //! the attributes list
-  std::vector<shared_ptr<StarAttribute> > m_attributeList;
-  //! the attributes limit
-  std::vector<STOFFVec2i> m_limitList;
+  std::vector<StarWriterStruct::Attribute> m_attributeList;
   //! the contour
   StarGraphicStruct::StarPolygon m_contour;
 };
@@ -212,7 +210,7 @@ bool SectionZone::send(STOFFListenerPtr listener, StarItemPool const *pool, Star
 //! Internal: a textZone of StarObjectTextInteral
 struct TextZone : public Zone {
   //! constructor
-  TextZone() : Zone(), m_text(), m_textSourcePosition(), m_styleName(""), m_charAttributeList(), m_charLimitList(), m_format(), m_markList()
+  TextZone() : Zone(), m_text(), m_textSourcePosition(), m_styleName(""), m_charAttributeList(), m_format(), m_markList()
   {
   }
   //! try to send the data to a listener
@@ -224,9 +222,7 @@ struct TextZone : public Zone {
   //! the style name
   librevenge::RVNGString m_styleName;
   //! the character item list
-  std::vector<shared_ptr<StarAttribute> > m_charAttributeList;
-  //! the character limit
-  std::vector<STOFFVec2i> m_charLimitList;
+  std::vector<StarWriterStruct::Attribute> m_charAttributeList;
   //! the format
   shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
   //! the mark
@@ -297,17 +293,12 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
   }
   std::set<size_t> modPosSet;
   size_t numFonts=m_charAttributeList.size();
-  if (m_charLimitList.size()!=numFonts) {
-    STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: the number of fonts seems bad\n"));
-    if (m_charLimitList.size()<numFonts)
-      numFonts=m_charLimitList.size();
-  }
   modPosSet.insert(0);
   for (size_t i=0; i<numFonts; ++i) {
-    if (m_charLimitList[i][0]>0)
-      modPosSet.insert(size_t(m_charLimitList[i][0]));
-    if (m_charLimitList[i][1]>0)
-      modPosSet.insert(size_t(m_charLimitList[i][1]));
+    if (m_charAttributeList[i].m_position[0]>0)
+      modPosSet.insert(size_t(m_charAttributeList[i].m_position[0]));
+    if (m_charAttributeList[i].m_position[1]>0)
+      modPosSet.insert(size_t(m_charAttributeList[i].m_position[1]));
   }
   std::set<size_t>::const_iterator posSetIt=modPosSet.begin();
   int endLinkPos=-1, endRefMarkPos=-1;
@@ -327,33 +318,34 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
     if (fontChange) {
       STOFFFont font(mainFont);
       for (size_t f=0; f<numFonts; ++f) {
-        if ((m_charLimitList[f][1]<0 && m_charLimitList[f][0]>=0 && m_charLimitList[f][0]!=int(srcPos)) ||
-            (m_charLimitList[f][0]>=0 && m_charLimitList[f][0]>int(srcPos)) ||
-            (m_charLimitList[f][1]>=0 && m_charLimitList[f][1]<=int(srcPos)))
+        StarWriterStruct::Attribute const &attrib=m_charAttributeList[f];
+        if ((attrib.m_position[1]<0 && attrib.m_position[0]>=0 && attrib.m_position[0]!=int(srcPos)) ||
+            (attrib.m_position[0]>=0 && attrib.m_position[0]>int(srcPos)) ||
+            (attrib.m_position[1]>=0 && attrib.m_position[1]<=int(srcPos)))
           continue;
-        if (!m_charAttributeList[f])
+        if (!attrib.m_attribute)
           continue;
-        m_charAttributeList[f]->addTo(font, pool);
+        attrib.m_attribute->addTo(font, pool);
         if (!footnote && font.m_footnote)
-          footnote=m_charAttributeList[f];
+          footnote=attrib.m_attribute;
         if (c==0)
-          m_charAttributeList[f]->addTo(para, pool);
+          attrib.m_attribute->addTo(para, pool);
         if (font.m_field) {
-          if (int(srcPos)==m_charLimitList[f][0])
+          if (int(srcPos)==attrib.m_position[0])
             field=font.m_field;
           font.m_field.reset();
         }
         if (!font.m_link.empty()) {
           if (endLinkPos<0) {
             linkString=font.m_link;
-            endLinkPos=int(m_charLimitList[f][1]<0 ? m_charLimitList[f][0] : m_charLimitList[f][1]);
+            endLinkPos=int(attrib.m_position[1]<0 ? attrib.m_position[0] : attrib.m_position[1]);
           }
           font.m_link.clear();
         }
         if (!font.m_refMark.empty()) {
           if (endRefMarkPos<0) {
             refMarkString=font.m_refMark;
-            endRefMarkPos=int(m_charLimitList[f][1]<0 ? m_charLimitList[f][0] : m_charLimitList[f][1]);
+            endRefMarkPos=int(attrib.m_position[1]<0 ? attrib.m_position[0] : attrib.m_position[1]);
             startRefMark=true;
           }
           else {
@@ -831,9 +823,8 @@ bool StarObjectText::readSWPageDef(StarZone &zone)
   while (input->tell() < lastPos) {
     pos=input->tell();
     int rType=input->peek();
-    std::vector<shared_ptr<StarAttribute> > attributeList;
-    std::vector<STOFFVec2i> limitsList;
-    if (rType=='S' && readSWAttributeList(zone, *this, attributeList, limitsList))
+    std::vector<StarWriterStruct::Attribute> attributeList;
+    if (rType=='S' && StarWriterStruct::Attribute::readList(zone, attributeList, *this))
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -877,97 +868,6 @@ bool StarObjectText::readSWPageDef(StarZone &zone)
     zone.closeSWRecord(type, "SWPageDef");
   }
   zone.closeSWRecord('p', "SWPageDef");
-  return true;
-}
-
-bool StarObjectText::readSWAttribute(StarZone &zone, StarObject &doc, shared_ptr<StarAttribute> &attribute, STOFFVec2i &limits)
-{
-  attribute.reset();
-  limits=STOFFVec2i(-1,-1);
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='A' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-
-  // sw_sw3fmts.cxx InAttr
-  libstoff::DebugStream f;
-  f << "Entries(StarAttribute)[SW-" << zone.getRecordLevel() << "]:";
-  int fl=zone.openFlagZone();
-  uint16_t nWhich, nVers, nBegin=0xFFFF, nEnd=0xFFFF;
-  *input >> nWhich >> nVers;
-  if (fl&0x10) *input >> nBegin;
-  if (fl&0x20) *input >> nEnd;
-
-  int which=int(nWhich);
-  if (which>0x6001 && zone.getDocumentVersion()!=0x0219) // bug correction 0x95500
-    which+=15;
-  if (which>=0x1000 && which<=0x1024) which+=-0x1000+int(StarAttribute::ATTR_CHR_CASEMAP);
-  else if (which>=0x2000 && which<=0x2009) which+=-0x2000+int(StarAttribute::ATTR_TXT_INETFMT);
-  else if (which>=0x3000 && which<=0x3006) which+=-0x3000+int(StarAttribute::ATTR_TXT_FIELD);
-  else if (which>=0x4000 && which<=0x4013) which+=-0x4000+int(StarAttribute::ATTR_PARA_LINESPACING);
-  else if (which>=0x5000 && which<=0x5022) which+=-0x5000+int(StarAttribute::ATTR_FRM_FILL_ORDER);
-  else if (which>=0x6000 && which<=0x6013) which+=-0x6000+int(StarAttribute::ATTR_GRF_MIRRORGRF);
-  else {
-    STOFF_DEBUG_MSG(("StarObjectText::readSWAttribute: find unexpected which value\n"));
-    which=-1;
-    f << "###";
-  }
-  f << "wh=" << which << "[" << std::hex << nWhich << std::dec << "],";
-  if (nVers) f << "nVers=" << nVers << ",";
-  if (nBegin!=0xFFFF) {
-    limits[0]=int(nBegin);
-    f << "nBgin=" << nBegin << ",";
-  }
-  if (nEnd!=0xFFFF) {
-    limits[1]=int(nEnd);
-    f << "nEnd=" << nEnd << ",";
-  }
-  zone.closeFlagZone();
-
-  if (which<=0 || !doc.getAttributeManager() ||
-      !(attribute=doc.getAttributeManager()->readAttribute(zone, which, int(nVers), zone.getRecordLastPosition(), doc)))
-    f << "###";
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  zone.closeSWRecord('A', "StarAttribute");
-  return true;
-}
-
-bool StarObjectText::readSWAttributeList
-(StarZone &zone, StarObject &doc, std::vector<shared_ptr<StarAttribute> > &attributeList, std::vector<STOFFVec2i> &limitsList)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='S' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  libstoff::DebugStream f;
-  f << "Entries(StarAttribute)[SWList-" << zone.getRecordLevel() << "]:";
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-
-  while (input->tell() < zone.getRecordLastPosition()) { // normally only 2
-    pos=input->tell();
-    shared_ptr<StarAttribute> attribute;
-    STOFFVec2i limit;
-    if (readSWAttribute(zone, doc, attribute, limit) && input->tell()>pos) {
-      if (attribute) {
-        attributeList.push_back(attribute);
-        limitsList.push_back(limit);
-      }
-      continue;
-    }
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    break;
-  }
-  zone.closeSWRecord('S', "StarAttribute");
   return true;
 }
 
@@ -1091,121 +991,6 @@ bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInte
   return true;
 }
 
-bool StarObjectText::readSWDBName(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='D' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3num.cxx: InDBName
-  libstoff::DebugStream f;
-  f << "Entries(SWDBName)[" << zone.getRecordLevel() << "]:";
-  std::vector<uint32_t> text;
-  if (!zone.readString(text)) {
-    STOFF_DEBUG_MSG(("StarObjectText::readSWDBName: can not read a string\n"));
-    f << "###string";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    zone.closeSWRecord('D', "SWDBName");
-    return true;
-  }
-  if (!text.empty())
-    f << "sStr=" << libstoff::getString(text).cstr() << ",";
-  if (zone.isCompatibleWith(0xf,0x101)) {
-    if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("StarObjectText::readSWDBName: can not read a SQL string\n"));
-      f << "###SQL";
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      zone.closeSWRecord('D', "SWDBName");
-      return true;
-    }
-    if (!text.empty())
-      f << "sSQL=" << libstoff::getString(text).cstr() << ",";
-  }
-  if (zone.isCompatibleWith(0x11,0x22)) {
-    if (!zone.readString(text)) {
-      STOFF_DEBUG_MSG(("StarObjectText::readSWDBName: can not read a table name string\n"));
-      f << "###tableName";
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      zone.closeSWRecord('D', "SWDBName");
-      return true;
-    }
-    if (!text.empty())
-      f << "sTableName=" << libstoff::getString(text).cstr() << ",";
-  }
-  if (zone.isCompatibleWith(0x12,0x22, 0x101)) {
-    int nCount=int(input->readULong(2));
-    f << "nCount=" << nCount << ",";
-    if (nCount>0 && zone.isCompatibleWith(0x28)) {
-      f << "dbData=[";
-      for (int i=0; i<nCount; ++i) {
-        if (input->tell()>=zone.getRecordLastPosition()) {
-          STOFF_DEBUG_MSG(("StarObjectText::readSWDBName: can not read a DBData\n"));
-          f << "###";
-          break;
-        }
-        if (!zone.readString(text)) {
-          STOFF_DEBUG_MSG(("StarObjectText::readSWDBName: can not read a table name string\n"));
-          f << "###dbDataName";
-          break;
-        }
-        f << libstoff::getString(text).cstr() << ":";
-        f << input->readULong(4) << "<->"; // selStart
-        f << input->readULong(4) << ","; // selEnd
-      }
-      f << "],";
-    }
-  }
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  zone.closeSWRecord('D', "SWDBName");
-  return true;
-}
-
-bool StarObjectText::readSWDictionary(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='j' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3misc.cxx: InDictionary
-  libstoff::DebugStream f;
-  f << "Entries(SWDictionary)[" << zone.getRecordLevel() << "]:";
-  long lastPos=zone.getRecordLastPosition();
-  std::vector<uint32_t> string;
-  while (input->tell()<lastPos) {
-    pos=input->tell();
-    f << "[";
-    if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarObjectText::readSWDictionary: can not read a string\n"));
-      f << "###string,";
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    if (!string.empty())
-      f << libstoff::getString(string).cstr() << ",";
-    f << "nLanguage=" << input->readULong(2) << ",";
-    f << "nCount=" << input->readULong(2) << ",";
-    f << "c=" << input->readULong(1) << ",";
-    f << "],";
-  }
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-
-  zone.closeSWRecord('j', "SWDictionary");
-  return true;
-}
-
 bool StarObjectText::readSWGraphNode(StarZone &zone, shared_ptr<StarObjectTextInternal::GraphZone> &graphZone)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -1264,7 +1049,7 @@ bool StarObjectText::readSWGraphNode(StarZone &zone, shared_ptr<StarObjectTextIn
 
     switch (rType) {
     case 'S':
-      done=readSWAttributeList(zone, *this, graphZone->m_attributeList, graphZone->m_limitList);
+      done=StarWriterStruct::Attribute::readList(zone, graphZone->m_attributeList, *this);
       break;
     case 'X': // store me
       done=readSWImageMap(zone);
@@ -1680,13 +1465,10 @@ bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInt
 
     switch (rType) {
     case 'A': {
-      shared_ptr<StarAttribute> attribute;
-      STOFFVec2i limit;
-      done=readSWAttribute(zone, *this, attribute, limit);
-      if (done && attribute) {
-        textZone->m_charAttributeList.push_back(attribute);
-        textZone->m_charLimitList.push_back(limit);
-      }
+      StarWriterStruct::Attribute attrib;
+      done=attrib.read(zone, *this);
+      if (done)
+        textZone->m_charAttributeList.push_back(attrib);
       break;
     }
     case 'K': {
@@ -1699,7 +1481,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInt
       done=readSWNumRule(zone,'R');
       break;
     case 'S':
-      done=readSWAttributeList(zone, *this, textZone->m_charAttributeList, textZone->m_charLimitList);
+      done=StarWriterStruct::Attribute::readList(zone, textZone->m_charAttributeList, *this);
       break;
     case 'l': // related to link
       done=getFormatManager()->readSWFormatDef(zone,'l', textZone->m_format, *this);
@@ -1900,9 +1682,16 @@ try
       done=info.read(zone);
       break;
     }
-    case 'D':
-      done=readSWDBName(zone);
+    case '8': {
+      StarWriterStruct::PrintData info;
+      done=info.read(zone);
       break;
+    }
+    case 'D': {
+      StarWriterStruct::DatabaseName dbase;
+      done=dbase.read(zone);
+      break;
+    }
     case 'F':
       done=getFormatManager()->readSWFlyFrameList(zone, *this);
       break;
@@ -1935,9 +1724,16 @@ try
       done=StarWriterStruct::Bookmark::readList(zone, markList);
       break;
     }
-    case 'j':
-      done=readSWDictionary(zone);
+    case 'd': {
+      StarWriterStruct::DocStats stats;
+      done=stats.read(zone);
       break;
+    }
+    case 'j': {
+      StarWriterStruct::Dictionary dico;
+      done=dico.read(zone);
+      break;
+    }
     case 'q':
       done=getFormatManager()->readSWNumberFormatterList(zone);
       break;
@@ -2034,37 +1830,6 @@ try
       zone.closeFlagZone();
       break;
     }
-    case '8':
-      // sw_sw3misc.cxx InPagePreviewPrintData
-      f << "pagePreviewPrintData,";
-      f << "cFlags=" << input->readULong(1) << ",";
-      f << "nRow=" << input->readULong(2) << ",";
-      f << "nCol=" << input->readULong(2) << ",";
-      f << "nLeftSpace=" << input->readULong(2) << ",";
-      f << "nRightSpace=" << input->readULong(2) << ",";
-      f << "nTopSpace=" << input->readULong(2) << ",";
-      f << "nBottomSpace=" << input->readULong(2) << ",";
-      f << "nHorzSpace=" << input->readULong(2) << ",";
-      f << "nVertSpace=" << input->readULong(2) << ",";
-      break;
-    case 'd':
-      // sw_sw3misc.cxx: InDocStat
-      f << "docStats,";
-      f << "nTbl=" << input->readULong(2) << ",";
-      f << "nGraf=" << input->readULong(2) << ",";
-      f << "nOLE=" << input->readULong(2) << ",";
-      if (zone.isCompatibleWith(0x201)) {
-        f << "nPage=" << input->readULong(4) << ",";
-        f << "nPara=" << input->readULong(4) << ",";
-      }
-      else {
-        f << "nPage=" << input->readULong(2) << ",";
-        f << "nPara=" << input->readULong(2) << ",";
-      }
-      f << "nWord=" << input->readULong(4) << ",";
-      f << "nChar=" << input->readULong(4) << ",";
-      f << "nModified=" << input->readULong(1) << ",";
-      break;
     case 'C': { // ignored by LibreOffice
       std::string comment("");
       while (lastPos && input->tell()<lastPos) comment+=char(input->readULong(1));
