@@ -131,8 +131,6 @@ protected:
   bool readSWNumRule(StarZone &zone, char kind);
   //! try to read a OLE node : 'O'
   bool readSWOLENode(StarZone &zone);
-  //! try to read a list of page style : 'p'
-  bool readSWPageDef(StarZone &zone);
   //! try to read a section : 'I'
   bool readSWSection(StarZone &zone, shared_ptr<StarObjectTextInternal::SectionZone> &section);
   //! try to read some content : 'T'

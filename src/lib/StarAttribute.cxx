@@ -818,6 +818,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
       f << "percent=" << input->readULong(1) << "x"  << input->readULong(1) << ",";
     break;
   case StarAttribute::ATTR_FRM_PAGEDESC:
+    // sw_sw3npool.cxx SwFmtPageDesc::Create
     f << "pageDesc,";
     if (nVers<1)
       f << "bAutor=" << input->readULong(1) << ",";

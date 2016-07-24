@@ -272,6 +272,7 @@ bool STOFFInputStream::readColor(STOFFColor &color)
 
 bool STOFFInputStream::readCompressedULong(unsigned long &res)
 {
+  // sw_sw3imp.cxx Sw3IoImp::InULong
   if (!m_stream)
     return false;
 

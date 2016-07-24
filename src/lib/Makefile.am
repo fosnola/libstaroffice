@@ -119,6 +119,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarItemPool.hxx			\
 	StarLanguage.cxx			\
 	StarLanguage.hxx			\
+	StarLayout.cxx				\
+	StarLayout.hxx				\
 	StarObject.cxx				\
 	StarObject.hxx				\
 	StarObjectChart.cxx			\

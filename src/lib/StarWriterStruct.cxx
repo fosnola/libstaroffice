@@ -250,370 +250,6 @@ std::ostream &operator<<(std::ostream &o, Bookmark const &mark)
 }
 
 ////////////////////////////////////////////////////////////
-//  Layout
-////////////////////////////////////////////////////////////
-bool Layout::read(StarZone &zone, StarObject &object)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-  long pos=input->tell();
-  char type;
-  if (input->peek()!='U' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    STOFF_DEBUG_MSG(("StarWriterStruct::Layout::read: can not read a layout\n"));
-    return false;
-  }
-  long lastPos=zone.getRecordLastPosition();
-  f << "Entries(StarLayout)[" << zone.getRecordLevel() << "]:";
-  int fl=zone.openFlagZone();
-  if (fl&0xf0) f << "fl=" << (fl>>4) << ",";
-  *input>>m_version;
-  f << "vers=" << std::hex << m_version << std::dec << ",";
-  if (input->tell()!=zone.getFlagLastPosition()) // exists when m_version<0x201?
-    f << "f1=" << input->readULong(2) << ",";
-  zone.closeFlagZone();
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-
-  while (input->tell()<lastPos) {
-    pos=input->tell();
-    bool done=false;
-    switch (input->peek()) {
-    case 0xd2:
-      done=readD2(zone, object);
-      break;
-    case 0xd7:
-      done=readD7(zone, object);
-      break;
-    default:
-      break;
-    }
-    if (done && input->tell()!=pos) continue;
-    if (!zone.openSWRecord(type)) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    f.str("");
-    f << "StarLayout[###" << std::hex << int(static_cast<unsigned char>(type)) << std::dec << "]:";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
-    zone.closeSWRecord(type, "StarLayout");
-  }
-
-  pos=input->tell();
-  if (pos!=lastPos) {
-    STOFF_DEBUG_MSG(("StarWriterStruct::Layout::read: find extraData\n"));
-    ascFile.addPos(pos);
-    ascFile.addNote("StarLayout:###");
-    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
-  }
-  zone.closeSWRecord('U', "StarLayout");
-  return true;
-}
-
-bool Layout::readD0(StarZone &zone, StarObject &/*object*/)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-  long pos=input->tell();
-  char type;
-  if (input->peek()!=0xd0 || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    STOFF_DEBUG_MSG(("StarWriterStruct::Layout::readD0: can not read a layout\n"));
-    return false;
-  }
-  long lastPos=zone.getRecordLastPosition();
-  f << "StarLayout[D0-" << zone.getRecordLevel() << "]:";
-  ascFile.addDelimiter(input->tell(),'|');
-  int type1=int(input->readULong(1));
-  if (type1) f << "f0=" << std::hex << type1 << std::dec << ","; // 13|37|3f+1|b7
-  int addSize1=(type1&4) ? 2 : 0;
-  int val=int(input->readULong(2));
-  if (val!=0x8f) f << "f1=" << val << ","; // 8f|af
-  int type2=int(input->readULong(1));
-  f << "f2=" << std::hex << type2 << std::dec << ",";
-  int addSize2=0;
-  bool hasN=true;
-  switch (type2) {
-  case 5:
-    addSize2=21;
-    break;
-  case 0x15:
-    addSize2=23;
-    break;
-  case 0x20:
-    addSize2=11;
-    hasN=false;
-    break;
-  case 0x25:
-    addSize2=24;
-    break;
-  default:
-    STOFF_DEBUG_MSG(("StarWriterStruct::Layout::readD0: unknown type2=%d\n", type2));
-    f << "###";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    zone.closeSWRecord(char(0xd0), "StarLayout");
-    return true;
-  }
-  if (input->tell()+addSize1+addSize2+(hasN ? 1 : 0)>lastPos) {
-    STOFF_DEBUG_MSG(("StarWriterStruct::Layout::readD0: the zone seems too short\n"));
-    f << "###";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    zone.closeSWRecord(char(0xd0), "StarLayout");
-    return true;
-  }
-  if (addSize1+addSize2) {
-    ascFile.addDelimiter(input->tell(),'|');
-    input->seek(addSize1+addSize2, librevenge::RVNG_SEEK_CUR);
-  }
-
-  int N1=0;
-  if (hasN) {
-    ascFile.addDelimiter(input->tell(),'|');
-    // condition seems ok when version<=3 or version>=10, unsure when 3<version<0x10 :-~
-    if (m_version>=0xa) { // SWG_SHORTFIELDS
-      N1=int(input->readULong(1));
-      if (!N1) N1=int(input->readULong(2));
-    }
-    else
-      N1=int(input->readULong(2));
-    f << "N=" << N1 << ",";
-  }
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-
-  bool ok=true;
-  for (int i=0; i<N1; ++i) {
-    pos=input->tell();
-    int cType=input->peek();
-    if ((cType&0xc0)!=0xc0 || !zone.openSWRecord(type)) {
-      STOFF_DEBUG_MSG(("StarWriterStruct::Layout::readD0: oops can not find a A-data\n"));
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      ok=false;
-      break;
-    }
-    // find type c2|c3|c6|c8
-    f.str("");
-    f << "StarLayout[#" << std::hex << int(static_cast<unsigned char>(type)) << std::dec << "]:";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
-    zone.closeSWRecord(type, "StarLayout");
-  }
-
-  pos=input->tell();
-  if (ok && pos+(m_version>=0x201 ? 3:4)<=lastPos) {
-    // vers<=0101 && vers>=201 ok, other?
-    int N2=int(input->readULong(m_version>=0x201 ? 1 : 2));
-    if (input->tell()+5*N2>lastPos)
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-    else {
-      f.str("");
-      f << "StarLayout-B:N=" << N2 << ",";
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      for (int i=0; i<N2; ++i) {
-        pos=input->tell();
-        if (pos+5>lastPos) {
-          STOFF_DEBUG_MSG(("StarWriterStruct::Layout::readD0: oops can not find a B-data\n"));
-          break;
-        }
-        f.str("");
-        f << "StarLayout-B" << i << ":";
-        f << "id=" << input->readULong(2) << ",";
-        int cType=input->peek();
-        if ((cType&0xc0)!=0xc0 || !zone.openSWRecord(type)) {
-          input->seek(pos, librevenge::RVNG_SEEK_SET);
-          STOFF_DEBUG_MSG(("StarWriterStruct::Layout::readD0: oops can not find a B-data\n"));
-          break;
-        }
-        ascFile.addPos(pos);
-        ascFile.addNote(f.str().c_str());
-
-        // find type c1|c4|cc
-        pos=input->tell();
-        f.str("");
-        f << "StarLayout-B[#" << std::hex << int(static_cast<unsigned char>(type)) << std::dec << "]:";
-        ascFile.addPos(pos);
-        ascFile.addNote(f.str().c_str());
-        input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
-        zone.closeSWRecord(type, "StarLayout");
-      }
-    }
-  }
-  pos=input->tell();
-  if (pos!=lastPos) {
-    STOFF_DEBUG_MSG(("StarWriterStruct::Layout::readD0: find extraData\n"));
-    ascFile.addPos(pos);
-    ascFile.addNote("StarLayout[D0]:##extra");
-    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
-  }
-  zone.closeSWRecord(char(0xd0), "StarLayout");
-  return true;
-}
-
-bool Layout::readD2(StarZone &zone, StarObject &object)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-  long pos=input->tell();
-  char type;
-  if (input->peek()!=0xd2 || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    STOFF_DEBUG_MSG(("StarWriterStruct::Layout::readD2: can not read a layout\n"));
-    return false;
-  }
-  long lastPos=zone.getRecordLastPosition();
-  f << "StarLayout[D2-" << zone.getRecordLevel() << "]:";
-  int val=int(input->readULong(2));
-  if (val!=0xaf11) f << "f0=" << std::hex << val << std::dec << ",";
-  val=int(input->readULong(1)); // small value 1-1f
-  if (val) f << "f1=" << val << ",";
-  int fl=zone.openFlagZone();
-  if (fl&0xF0) f << "flag=" << (fl>>4) << ",";
-  if (zone.getFlagLastPosition()!=input->tell()) {
-    ascFile.addDelimiter(input->tell(),'|');
-    input->seek(zone.getFlagLastPosition(), librevenge::RVNG_SEEK_SET);
-  }
-  zone.closeFlagZone();
-
-  if (input->tell()+11>lastPos) {
-    STOFF_DEBUG_MSG(("StarWriterStruct::Layout::readD2: the zone seems too short\n"));
-    f << "###";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    zone.closeSWRecord(char(0xd2), "StarLayout");
-    return true;
-  }
-  ascFile.addDelimiter(input->tell(),'|');
-  input->seek(input->tell()+11, librevenge::RVNG_SEEK_SET);
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-
-  while (input->tell()<lastPos) {
-    pos=input->tell();
-    bool done=false;
-    switch (input->peek()) {
-    case 'l': {
-      shared_ptr<StarFormatManagerInternal::FormatDef> format;
-      done=object.getFormatManager()->readSWFormatDef(zone,'l', format, object);
-      break;
-    }
-    case 0xd0:
-      done=readD0(zone, object);
-      break;
-    default:
-      break;
-    }
-    if (done && input->tell()!=pos) continue;
-    if (!zone.openSWRecord(type)) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    f.str("");
-    f << "StarLayout[###" << std::hex << int(static_cast<unsigned char>(type)) << std::dec << "]:";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
-    zone.closeSWRecord(type, "StarLayout");
-  }
-
-  pos=input->tell();
-  if (pos!=lastPos) {
-    STOFF_DEBUG_MSG(("StarWriterStruct::Layout::readD2: find extraData\n"));
-    ascFile.addPos(pos);
-    ascFile.addNote("StarLayout:###");
-    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
-  }
-  zone.closeSWRecord(char(0xd2), "StarLayout");
-  return true;
-}
-
-bool Layout::readD7(StarZone &zone, StarObject &object)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-  long pos=input->tell();
-  char type;
-  if (input->peek()!=0xd7 || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    STOFF_DEBUG_MSG(("StarWriterStruct::Layout::readD7: can not read a layout\n"));
-    return false;
-  }
-  long lastPos=zone.getRecordLastPosition();
-  f << "StarLayout[D7-" << zone.getRecordLevel() << "]:";
-  int val=int(input->readULong(2));
-  if (val!=0xaf11) f << "f0=" << std::hex << val << std::dec << ",";
-  val=int(input->readULong(1)); // small value 1-1f
-  if (val) f << "f1=" << val << ",";
-  int fl=zone.openFlagZone();
-  if (fl&0xF0) f << "flag=" << (fl>>4) << ",";
-  if (zone.getFlagLastPosition()!=input->tell()) {
-    ascFile.addDelimiter(input->tell(),'|');
-    input->seek(zone.getFlagLastPosition(), librevenge::RVNG_SEEK_SET);
-  }
-  zone.closeFlagZone();
-
-  if (input->tell()+9>lastPos) {
-    STOFF_DEBUG_MSG(("StarWriterStruct::Layout::readD7: the zone seems too short\n"));
-    f << "###";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    zone.closeSWRecord(char(0xd7), "StarLayout");
-    return true;
-  }
-  ascFile.addDelimiter(input->tell(),'|');
-  input->seek(input->tell()+9, librevenge::RVNG_SEEK_SET);
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-
-  while (input->tell()<lastPos) {
-    pos=input->tell();
-    bool done=false;
-    switch (input->peek()) {
-    case 'l': {
-      shared_ptr<StarFormatManagerInternal::FormatDef> format;
-      done=object.getFormatManager()->readSWFormatDef(zone,'l', format, object);
-      break;
-    }
-    case 0xd0:
-      done=readD0(zone, object);
-      break;
-    default:
-      break;
-    }
-    if (done && input->tell()!=pos) continue;
-    if (!zone.openSWRecord(type)) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    f.str("");
-    f << "StarLayout[###" << std::hex << int(static_cast<unsigned char>(type)) << std::dec << "]:";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
-    zone.closeSWRecord(type, "StarLayout");
-  }
-
-  pos=input->tell();
-  if (pos!=lastPos) {
-    STOFF_DEBUG_MSG(("StarWriterStruct::Layout::readD7: find extraData\n"));
-    ascFile.addPos(pos);
-    ascFile.addNote("StarLayout:###");
-    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
-  }
-  zone.closeSWRecord(char(0xd7), "StarLayout");
-  return true;
-}
-
-////////////////////////////////////////////////////////////
 //  DatabaseName
 ////////////////////////////////////////////////////////////
 bool DatabaseName::read(StarZone &zone)
@@ -971,6 +607,61 @@ std::ostream &operator<<(std::ostream &o, NodeRedline const &nodeRedline)
 }
 
 ////////////////////////////////////////////////////////////
+//  NoteDesc
+////////////////////////////////////////////////////////////
+bool NoteDesc::read(StarZone &zone)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  long pos=input->tell();
+  char type;
+  if (input->peek()!=(m_isFootnote ? '1' : '2') || !zone.openSWRecord(type)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    STOFF_DEBUG_MSG(("StarWriterStruct::NoteDesc::read: can not read a noteDesc\n"));
+    return false;
+  }
+  // sw_sw3page.cxx InPageFtnInfo
+  f << "Entries(StarNoteDesc)[" << zone.getRecordLevel() << "]:";
+  for (int i=1; i<4; ++i) m_distances[i]=float(input->readLong(4));
+  m_adjust=int(input->readLong(2));
+  long dim[2];
+  for (int i=0; i<2; ++i) dim[i]=long(input->readLong(4));
+  if (!dim[1]) {
+    STOFF_DEBUG_MSG(("StarObjectText::readSwPageDef: can not find the width deminator\n"));
+  }
+  else
+    m_distances[0]=float(dim[0])/float(dim[1]);
+  m_penWidth=int(input->readLong(2));
+  if (!input->readColor(m_color)) {
+    STOFF_DEBUG_MSG(("StarObjectText::readSwPageDef: can not read a color\n"));
+    f << "###color,";
+  }
+  f << *this;
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  zone.closeSWRecord(type, "StarNoteDesc");
+  return true;
+}
+
+std::ostream &operator<<(std::ostream &o, NoteDesc const &desc)
+{
+  if (desc.m_isFootnote)
+    o << "footnote,";
+  else
+    o << "endnote,";
+  for (int i=0; i<4; ++i) {
+    if (desc.m_distances[i]>=0 && desc.m_distances[i]<=0) continue;
+    char const *(wh[])= {"width", "height", "top[dist]", "bottom[dist]"};
+    o << wh[i] << "=" << desc.m_distances[i] << ",";
+  }
+  if (desc.m_adjust) o << "adjust=" << desc.m_adjust << ",";
+  if (desc.m_penWidth) o << "penWidth=" << desc.m_penWidth << ",";
+  if (!desc.m_color.isBlack()) o << "color=" << desc.m_color << ",";
+  return o;
+}
+
+////////////////////////////////////////////////////////////
 //  NoteInfo
 ////////////////////////////////////////////////////////////
 bool NoteInfo::read(StarZone &zone)
@@ -1074,6 +765,102 @@ std::ostream &operator<<(std::ostream &o, NoteInfo const &info)
   }
   if (info.m_posType) o << "type[pos]=" << info.m_posType << ",";
   if (info.m_numType) o << "type[number]=" << info.m_numType << ",";
+  return o;
+}
+
+////////////////////////////////////////////////////////////
+//  PageDesc
+////////////////////////////////////////////////////////////
+PageDesc::~PageDesc()
+{
+}
+
+bool PageDesc::read(StarZone &zone, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  long pos=input->tell();
+  char type;
+  if (input->peek()!='p' || !zone.openSWRecord(type)) {
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    STOFF_DEBUG_MSG(("StarWriterStruct::PageDesc::read: can not read a pageDesc\n"));
+    return false;
+  }
+  // sw_sw3page.cxx InPageDesc
+  f << "Entries(StarPageDesc)[" << type << "-" << zone.getRecordLevel() << "]:";
+  int fl=zone.openFlagZone();
+  if (fl&0xf0) f << "fl=" << (fl>>4) << ",";
+  int val=int(input->readULong(2));
+  if (!zone.getPoolName(val, m_name)) {
+    STOFF_DEBUG_MSG(("StarWriterStruct::PageDesc::read: can not find a pool name\n"));
+    f << "###nameId=" << val << ",";
+  }
+  m_follow=int(input->readULong(2));
+  m_poolId=int(input->readULong(2));
+  m_numType=int(input->readULong(1));
+  m_usedOn=int(input->readULong(2));
+  if (zone.isCompatibleWith(0x16,0x22, 0x101))
+    m_regCollIdx=int(input->readULong(2));
+  zone.closeFlagZone();
+  f << *this;
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+
+  long lastPos=zone.getRecordLastPosition();
+  int whichAttrib=0;
+  while (input->tell() < lastPos) {
+    pos=input->tell();
+    int rType=input->peek();
+    bool done=false;
+    switch (rType) {
+    case 'S': {
+      std::vector<StarWriterStruct::Attribute> attributeList;
+      done=Attribute::readList(zone, attributeList, object);
+      if (!done) break;
+      if (whichAttrib<2)
+        m_attributes[whichAttrib++]=attributeList;
+      else {
+      }
+      break;
+    }
+    case '1': // foot info
+    case '2': { // page foot info
+      shared_ptr<StarWriterStruct::NoteDesc> desc(new StarWriterStruct::NoteDesc(rType=='1'));
+      done=desc->read(zone);
+      if (done)
+        m_noteDesc[rType=='1' ? 0 : 1]=desc;
+      break;
+    }
+    default:
+      break;
+    }
+    if (done) continue;
+    input->seek(pos, librevenge::RVNG_SEEK_SET);
+    f.str("");
+    if (!zone.openSWRecord(type)) {
+      input->seek(pos, librevenge::RVNG_SEEK_SET);
+      break;
+    }
+    f << "StarPageDesc[" << type << "-" << zone.getRecordLevel() << "]:";
+    STOFF_DEBUG_MSG(("StarWriterStruct::PageDesc::read: find unknown type\n"));
+    f << "###type,";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    zone.closeSWRecord(type, "StarPageDesc");
+  }
+  zone.closeSWRecord('p', "StarPageDesc");
+  return true;
+}
+
+std::ostream &operator<<(std::ostream &o, PageDesc const &desc)
+{
+  o << desc.m_name.cstr() << ",";
+  if (desc.m_follow) o << "follow=" << desc.m_follow << ",";
+  if (desc.m_poolId) o << "poolId=" << desc.m_poolId << ",";
+  if (desc.m_numType) o << "numType=" << desc.m_numType << ",";
+  if (desc.m_usedOn) o << "usedOn=" << desc.m_usedOn << ",";
+  if (desc.m_regCollIdx!=0xFFFF) o << "regCollIdx=" << desc.m_regCollIdx << ",";
   return o;
 }
 

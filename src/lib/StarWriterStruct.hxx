@@ -43,6 +43,8 @@
 
 #include "libstaroffice_internal.hxx"
 
+#include "STOFFDebug.hxx"
+
 namespace StarFormatManagerInternal
 {
 struct FormatDef;
@@ -202,27 +204,6 @@ public:
   bool m_isModified;
 };
 
-/** \brief structure to store a layout in a text zone
- */
-struct Layout {
-public:
-  //! constructor
-  Layout() : m_version(0)
-  {
-  }
-  //! try to read a layout: 'U'
-  bool read(StarZone &zone, StarObject &object);
-protected:
-  //! try to read a sub zone: 'd0'
-  bool readD0(StarZone &zone, StarObject &object);
-  //! try to read a sub zone: 'd2'
-  bool readD2(StarZone &zone, StarObject &object);
-  //! try to read a sub zone: 'd2'
-  bool readD7(StarZone &zone, StarObject &object);
-  //! the version
-  uint16_t m_version;
-};
-
 /** \brief structure to store a macro in a text zone
  */
 struct Macro {
@@ -285,6 +266,31 @@ public:
   int m_flags;
 };
 
+/** \brief structure to store a endnote/footnote page description
+ */
+struct NoteDesc {
+public:
+  //! constructor
+  explicit NoteDesc(bool isFootnote) : m_isFootnote(isFootnote), m_adjust(0), m_penWidth(0), m_color(STOFFColor::black())
+  {
+    for (int i=0; i<4; ++i) m_distances[i]=0;
+  }
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, NoteDesc const &desc);
+  //! try to read a noteDesc: '1' or '2'
+  bool read(StarZone &zone);
+  //! a flag to know if this corresponds to a footnote or a endnote
+  bool m_isFootnote;
+  //! the width/height/topDist/bottomDist
+  float m_distances[4];
+  //! the adjust
+  int m_adjust;
+  //! the pen's width
+  int m_penWidth;
+  //! the color
+  STOFFColor m_color;
+};
+
 /** \brief structure to store a endnoteInfo or a footnoteInfo in a text zone
  */
 struct NoteInfo {
@@ -312,6 +318,38 @@ public:
   int m_posType;
   //! the numType
   int m_numType;
+};
+
+/** \brief structure to store a page description
+ */
+struct PageDesc {
+public:
+  //! constructor
+  explicit PageDesc() : m_name(""), m_follow(0), m_poolId(0), m_numType(0), m_usedOn(0), m_regCollIdx(0xFFFF)
+  {
+  }
+  //! destructor
+  ~PageDesc();
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, PageDesc const &desc);
+  //! try to read a pageDesc: 'p'
+  bool read(StarZone &zone, StarObject &object);
+  //! the name
+  librevenge::RVNGString m_name;
+  //! the follow Id
+  int m_follow;
+  //! the poolId
+  int m_poolId;
+  //! the number's type
+  int m_numType;
+  //! the page where is it used ?
+  int m_usedOn;
+  //! the coll idx
+  int m_regCollIdx;
+  //! the foot and page foot desc
+  shared_ptr<NoteDesc> m_noteDesc[2];
+  //! the master and left attributes lists
+  std::vector<Attribute> m_attributes[2];
 };
 
 /** \brief the doc statistic

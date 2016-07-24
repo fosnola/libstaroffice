@@ -53,6 +53,7 @@
 #include "StarFileManager.hxx"
 #include "StarGraphicStruct.hxx"
 #include "StarItemPool.hxx"
+#include "StarLayout.hxx"
 #include "StarObjectChart.hxx"
 #include "StarObjectModel.hxx"
 #include "StarObjectSpreadsheet.hxx"
@@ -742,8 +743,9 @@ try
       f << "N=" << N << ",";
       zone.closeFlagZone();
       for (int i=0; i<N; ++i) {
-        // readSWPageDef will check that we can read the data, ....
-        if (!readSWPageDef(zone))
+        StarWriterStruct::PageDesc desc;
+        // read will check that we can read the data, ....
+        if (!desc.read(zone, *this))
           break;
       }
       break;
@@ -778,97 +780,6 @@ try
 catch (...)
 {
   return false;
-}
-
-bool StarObjectText::readSWPageDef(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='p' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3page.cxx InPageDesc
-  libstoff::DebugStream f;
-  f << "Entries(SWPageDef)[" << zone.getRecordLevel() << "]:";
-  int fl=zone.openFlagZone();
-  if (fl&0xf0) f << "fl=" << (fl>>4) << ",";
-  int val=int(input->readULong(2));
-  librevenge::RVNGString poolName;
-  if (!zone.getPoolName(val, poolName)) {
-    STOFF_DEBUG_MSG(("StarObjectText::readSwPageDef: can not find a pool name\n"));
-    f << "###nId=" << val << ",";
-  }
-  else if (!poolName.empty())
-    f << poolName.cstr() << ",";
-  val=int(input->readULong(2));
-  if (val) f << "nFollow=" << val << ",";
-  val=int(input->readULong(2));
-  if (val) f << "nPoolId2=" << val << ",";
-  val=int(input->readULong(1));
-  if (val) f << "nNumType=" << val << ",";
-  val=int(input->readULong(2));
-  if (val) f << "nUseOn=" << val << ",";
-  if (zone.isCompatibleWith(0x16,0x22, 0x101)) {
-    val=int(input->readULong(2));
-    if (val!=0xffff) f << "regCollIdx=" << val << ",";
-  }
-  zone.closeFlagZone();
-
-  long lastPos=zone.getRecordLastPosition();
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  while (input->tell() < lastPos) {
-    pos=input->tell();
-    int rType=input->peek();
-    std::vector<StarWriterStruct::Attribute> attributeList;
-    if (rType=='S' && StarWriterStruct::Attribute::readList(zone, attributeList, *this))
-      continue;
-
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    f.str("");
-    if (!zone.openSWRecord(type)) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    f << "SWPageDef[" << type << "-" << zone.getRecordLevel() << "]:";
-    switch (type) {
-    case '1': // foot info
-    case '2': { // page foot info
-      f << (type=='1' ? "footInfo" : "pageFootInfo") << ",";
-      val=int(input->readLong(4));
-      if (val) f << "height=" << val << ",";
-      val=int(input->readLong(4));
-      if (val) f << "topDist=" << val << ",";
-      val=int(input->readLong(4));
-      if (val) f << "bottomDist=" << val << ",";
-      val=int(input->readLong(2));
-      if (val) f << "adjust=" << val << ",";
-      f << "width=" << input->readLong(4) << "/" << input->readLong(4) << ",";
-      val=int(input->readLong(2));
-      if (val) f << "penWidth=" << val << ",";
-      STOFFColor col;
-      if (!input->readColor(col)) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSwPageDef: can not read a color\n"));
-        f << "###color,";
-      }
-      else if (!col.isBlack())
-        f << col << ",";
-      break;
-    }
-    default:
-      STOFF_DEBUG_MSG(("StarObjectText::readSwPageDef: find unknown type\n"));
-      f << "###type,";
-      break;
-    }
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    zone.closeSWRecord(type, "SWPageDef");
-  }
-  zone.closeSWRecord('p', "SWPageDef");
-  return true;
 }
 
 bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInternal::Content> &content)
@@ -1707,7 +1618,7 @@ try
       done=readSWContent(zone, m_textState->m_mainContent);
       break;
     case 'U': { // layout info, no code, ignored by LibreOffice
-      StarWriterStruct::Layout layout;
+      StarLayout layout;
       done=layout.read(zone, *this);
       break;
     }
