@@ -56,6 +56,7 @@
 #include "StarLayout.hxx"
 #include "StarObjectChart.hxx"
 #include "StarObjectModel.hxx"
+#include "StarObjectPageStyle.hxx"
 #include "StarObjectSpreadsheet.hxx"
 #include "StarTable.hxx"
 #include "StarWriterStruct.hxx"
@@ -165,7 +166,7 @@ bool GraphZone::send(STOFFListenerPtr listener, StarItemPool const */*pool*/, St
 //! Internal: a sectionZone of StarObjectTextInteral
 struct SectionZone : public Zone {
   //! constructor
-  SectionZone() : Zone(), m_name(""), m_condition(""), m_linkName(""), m_type(0), m_flags(0), m_format(), m_content()
+  SectionZone(STOFFSection const &defSection) : Zone(), m_name(""), m_condition(""), m_linkName(""), m_type(0), m_flags(0), m_format(), m_content(), m_defaultSection(defSection)
   {
   }
   //! try to send the data to a listener
@@ -184,6 +185,8 @@ struct SectionZone : public Zone {
   shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
   //! the content
   shared_ptr<Content> m_content;
+  //! the default section
+  STOFFSection m_defaultSection;
 };
 
 bool SectionZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
@@ -192,7 +195,7 @@ bool SectionZone::send(STOFFListenerPtr listener, StarItemPool const *pool, Star
     STOFF_DEBUG_MSG(("StarObjectTextInternal::FormatZone::send: call without listener\n"));
     return false;
   }
-  STOFFSection section;
+  STOFFSection section(m_defaultSection);
   if (!m_name.empty())
     section.m_propertyList.insert("text:name", m_name);
   if (listener->isSectionOpened())
@@ -437,15 +440,21 @@ bool Table::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject
 //! Internal: the state of a StarObjectText
 struct State {
   //! constructor
-  State() : m_numPages(0), m_mainContent(), m_model()
+  State() : m_numPages(0), m_numGraphicPages(0), m_mainContent(), m_pageStyle(), m_model(), m_defaultSection()
   {
   }
   //! the number of pages
   int m_numPages;
+  //! the graphic number of pages
+  int m_numGraphicPages;
   //! the main content
   shared_ptr<Content> m_mainContent;
+  //! the page style
+  shared_ptr<StarObjectPageStyle> m_pageStyle;
   //! the drawing model
   shared_ptr<StarObjectModel> m_model;
+  //! the default section
+  STOFFSection m_defaultSection;
 };
 
 }
@@ -467,19 +476,23 @@ StarObjectText::~StarObjectText()
 ////////////////////////////////////////////////////////////
 bool StarObjectText::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const
 {
-  STOFF_DEBUG_MSG(("StarObjectText::updatePageSpans: not implemented\n"));
   numPages=0;
+
+  if (m_textState->m_pageStyle)
+    m_textState->m_pageStyle->updatePageSpans(pageSpan, numPages);
+  else {
+    numPages=1000;
+    STOFFPageSpan ps;
+    ps.m_pageSpan=numPages;
+    pageSpan.clear();
+    pageSpan.push_back(ps);
+  }
+  m_textState->m_numPages=numPages;
+
   if (m_textState->m_model) {
     std::vector<STOFFPageSpan> modelPageSpan;
-    m_textState->m_model->updatePageSpans(modelPageSpan, numPages);
+    m_textState->m_model->updatePageSpans(modelPageSpan, m_textState->m_numGraphicPages);
   }
-  if (numPages<=0)
-    numPages=1;
-  STOFFPageSpan ps;
-  ps.m_pageSpan=numPages;
-  pageSpan.clear();
-  pageSpan.push_back(ps);
-  m_textState->m_numPages=numPages;
   return numPages>0;
 }
 
@@ -494,11 +507,13 @@ bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
     return true;
   }
   if (m_textState->m_model) {
-    for (int i=0; i<m_textState->m_numPages; ++i)
+    for (int i=0; i<=m_textState->m_numGraphicPages; ++i)
       m_textState->m_model->sendPage(i, listener);
   }
   shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
+  listener->openSection(m_textState->m_defaultSection);
   m_textState->m_mainContent->send(listener, pool.get(), *this);
+  listener->closeSection();
   return true;
 }
 
@@ -539,7 +554,16 @@ bool StarObjectText::parse()
       continue;
     }
     if (base=="SwPageStyleSheets") {
-      readSwPageStyleSheets(ole,name);
+      try {
+        StarZone zone(ole, name, "StarPageStyleSheets", getPassword());
+        shared_ptr<StarObjectPageStyle> pageStyle(new StarObjectPageStyle(*this,true));
+        if (pageStyle->read(zone)) {
+          m_textState->m_pageStyle=pageStyle;
+          pageStyle->updateSection(m_textState->m_defaultSection);
+        }
+      }
+      catch (...) {
+      }
       continue;
     }
 
@@ -707,81 +731,6 @@ catch (...)
   return false;
 }
 
-bool StarObjectText::readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &name)
-try
-{
-  StarZone zone(input, name, "SWPageStyleSheets", getPassword());
-  if (!zone.readSWHeader()) {
-    STOFF_DEBUG_MSG(("StarObjectText::readSwPageStyleSheets: can not read the header\n"));
-    return false;
-  }
-  zone.readStringsPool();
-  SWFieldManager fieldManager;
-  while (fieldManager.readField(zone,'Y'))
-    ;
-  std::vector<StarWriterStruct::Bookmark> markList;
-  StarWriterStruct::Bookmark::readList(zone, markList);
-  std::vector<std::vector<StarWriterStruct::Redline> > redlineListList;
-  StarWriterStruct::Redline::readListList(zone, redlineListList);
-  getFormatManager()->readSWNumberFormatterList(zone);
-  // sw_sw3page.cxx Sw3IoImp::InPageDesc
-  libstoff::DebugFile &ascFile=zone.ascii();
-  while (!input->isEnd()) {
-    long pos=input->tell();
-    char type;
-    if (!zone.openSWRecord(type)) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    libstoff::DebugStream f;
-    f << "SWPageStyleSheets[" << type << "]:";
-    bool done=false;
-    switch (type) {
-    case 'P': {
-      zone.openFlagZone();
-      int N=int(input->readULong(2));
-      f << "N=" << N << ",";
-      zone.closeFlagZone();
-      for (int i=0; i<N; ++i) {
-        StarWriterStruct::PageDesc desc;
-        // read will check that we can read the data, ....
-        if (!desc.read(zone, *this))
-          break;
-      }
-      break;
-    }
-    case 'Z':
-      done=true;
-      break;
-    default:
-      STOFF_DEBUG_MSG(("StarObjectText::readSwPageStyleSheets: find unknown data\n"));
-      f << "###";
-      break;
-    }
-    if (!zone.closeSWRecord(type, "SWPageStyleSheets")) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-
-    if (done)
-      break;
-  }
-
-  if (!input->isEnd()) {
-    STOFF_DEBUG_MSG(("StarObjectText::readSwPageStyleSheets: find extra data\n"));
-    ascFile.addPos(input->tell());
-    ascFile.addNote("SWPageStyleSheets:##extra");
-  }
-
-  return true;
-}
-catch (...)
-{
-  return false;
-}
-
 bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInternal::Content> &content)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -806,8 +755,10 @@ bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInte
   if (zone.isCompatibleWith(0x201))
     nNodes=int(input->readULong(4));
   else {
-    if (zone.isCompatibleWith(5))
-      f << "sectId=" << input->readULong(2) << ",";
+    if (zone.isCompatibleWith(5)) {
+      content->m_sectionId=int(input->readULong(2));
+      f << "sectId=" << content->m_sectionId << ",";
+    }
     nNodes=int(input->readULong(2));
   }
   f << "N=" << nNodes << ",";
@@ -1253,7 +1204,7 @@ bool StarObjectText::readSWSection(StarZone &zone, shared_ptr<StarObjectTextInte
   // sw_sw3sectn.cxx: InSection
   libstoff::DebugStream f;
   f << "Entries(SWSection)[" << zone.getRecordLevel() << "]:";
-  section.reset(new StarObjectTextInternal::SectionZone);
+  section.reset(new StarObjectTextInternal::SectionZone(m_textState->m_defaultSection));
   std::vector<uint32_t> text;
   for (int i=0; i<2; ++i) {
     if (!zone.readString(text)) {

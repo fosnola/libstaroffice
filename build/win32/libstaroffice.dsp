@@ -323,6 +323,10 @@ SOURCE=..\..\src\lib\StarObjectModel.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarObjectPageStyle.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarObjectSmallGraphic.cxx
 # End Source File
 # Begin Source File
@@ -608,6 +612,10 @@ SOURCE=..\..\src\lib\StarObjectDraw.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarObjectModel.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarObjectPageStyle.hxx
 # End Source File
 # Begin Source File
 

@@ -731,12 +731,12 @@ void StarPAttributeLRSpace::addTo(STOFFPageSpan &page, StarItemPool const */*poo
   if (m_type!=ATTR_FRM_LR_SPACE) return;
   if (page.m_actualZone>=0 && page.m_actualZone<=2) {
     if (m_propMargins[0]==100)
-      page.m_propertiesList[page.m_actualZone].insert("fo:margin-left", libstoff::convertMiniMToPoint(m_margins[0]), librevenge::RVNG_POINT);
+      page.m_propertiesList[page.m_actualZone].insert("fo:margin-left", double(m_margins[0])*0.05, librevenge::RVNG_POINT);
     else
       page.m_propertiesList[page.m_actualZone].insert("fo:margin-left", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
 
     if (m_propMargins[1]==100)
-      page.m_propertiesList[page.m_actualZone].insert("fo:margin-right", libstoff::convertMiniMToPoint(m_margins[1]), librevenge::RVNG_POINT);
+      page.m_propertiesList[page.m_actualZone].insert("fo:margin-right", double(m_margins[1])*0.05, librevenge::RVNG_POINT);
     else
       page.m_propertiesList[page.m_actualZone].insert("fo:margin-right", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
   }
@@ -807,12 +807,12 @@ void StarPAttributeULSpace::addTo(STOFFPageSpan &page, StarItemPool const */*poo
   if (m_type!=ATTR_FRM_UL_SPACE) return;
   if (page.m_actualZone>=0 && page.m_actualZone<=2) {
     if (m_propMargins[0]==100)
-      page.m_propertiesList[page.m_actualZone].insert("fo:margin-top", libstoff::convertMiniMToPoint(m_margins[0]), librevenge::RVNG_POINT);
+      page.m_propertiesList[page.m_actualZone].insert("fo:margin-top", double(m_margins[0])*0.05, librevenge::RVNG_POINT);
     else
       page.m_propertiesList[page.m_actualZone].insert("fo:margin-top", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
 
     if (m_propMargins[1]==100)
-      page.m_propertiesList[page.m_actualZone].insert("fo:margin-bottom", libstoff::convertMiniMToPoint(m_margins[1]), librevenge::RVNG_POINT);
+      page.m_propertiesList[page.m_actualZone].insert("fo:margin-bottom", double(m_margins[1])*0.05, librevenge::RVNG_POINT);
     else
       page.m_propertiesList[page.m_actualZone].insert("fo:margin-bottom", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
   }

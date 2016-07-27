@@ -36,6 +36,7 @@
 #include "STOFFCellStyle.hxx"
 #include "STOFFFont.hxx"
 #include "STOFFGraphicStyle.hxx"
+#include "STOFFPageSpan.hxx"
 #include "STOFFParagraph.hxx"
 
 #include "StarAttribute.hxx"
@@ -141,7 +142,7 @@ bool StarGAttributeFraction::read(StarZone &zone, int /*vers*/, long endPos, Sta
   long pos=input->tell();
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
-  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   m_numerator=int(input->readLong(4));
   m_denominator=int(input->readLong(4));
 
@@ -693,6 +694,55 @@ protected:
   STOFFVec2i m_rightBottom;
 };
 
+//! a frameSize attribute
+class StarGAttributeFrameSize : public StarAttribute
+{
+public:
+  //! constructor
+  StarGAttributeFrameSize(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_frmType(0), m_width(0), m_height(0), m_percent(0,0)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarGAttributeFrameSize(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  // //! add to a graphic style
+  // virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! add to a page
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! debug function to print the data
+  virtual void printData(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    if (m_frmType) // 0: var, 1:fixed, 2:min
+      o << "type=" << m_frmType << ",";
+    if (m_width)
+      o << "width=" << m_width << ",";
+    if (m_height)
+      o << "height=" << m_height << ",";
+    if (m_percent[0]>0 || m_percent[1]>0)
+      o << "size[%]=" << m_percent << ",";
+    o << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarGAttributeFrameSize(StarGAttributeFrameSize const &orig) : StarAttribute(orig), m_frmType(orig.m_frmType), m_width(orig.m_width), m_height(orig.m_height), m_percent(orig.m_percent)
+  {
+  }
+  //! the type
+  int m_frmType;
+  //! the width
+  long m_width;
+  //! the height
+  long m_height;
+  //! the percent value
+  STOFFVec2i m_percent;
+};
+
 //! a named attribute
 class StarGAttributeNamed : public StarAttribute
 {
@@ -1224,6 +1274,16 @@ void StarGAttributeNamedBitmap::addTo(STOFFGraphicStyle &graphic, StarItemPool c
   }
 }
 
+void StarGAttributeFrameSize::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+{
+  if (m_type==ATTR_FRM_FRM_SIZE) {
+    if (m_width)
+      page.m_propertiesList[0].insert("fo:page-width", double(m_width)*0.05, librevenge::RVNG_POINT);
+    if (m_height)
+      page.m_propertiesList[0].insert("fo:page-height", double(m_height)*0.05, librevenge::RVNG_POINT);
+  }
+}
+
 void StarGAttributeNamedColor::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==XATTR_FORMTXTSHDWCOLOR)
@@ -1428,6 +1488,28 @@ bool StarGAttributeCrop::read(StarZone &zone, int vers, long endPos, StarObject 
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return pos+8<=endPos;
+}
+
+bool StarGAttributeFrameSize::read(StarZone &zone, int nVers, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  // sw_sw3attr.cxx SwFmtFrmSize::Create
+  m_frmType=int(input->readULong(1));
+  m_width=int(input->readULong(4));
+  m_height=int(input->readULong(4));
+  if (nVers>1) {
+    int dim[2];
+    for (int i=0; i<2; ++i) dim[i]=int(input->readULong(1));
+    m_percent=STOFFVec2i(dim[0],dim[1]);
+  }
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
 }
 
 bool StarGAttributeNamed::read(StarZone &zone, int /*nVers*/, long endPos, StarObject &/*object*/)
@@ -1967,6 +2049,7 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
 
 
   map[StarAttribute::ATTR_FRM_BOX]=shared_ptr<StarAttribute>(new StarGAttributeBorder(StarAttribute::ATTR_FRM_BOX,"box"));
+  map[StarAttribute::ATTR_FRM_FRM_SIZE]=shared_ptr<StarAttribute>(new StarGAttributeFrameSize(StarAttribute::ATTR_FRM_FRM_SIZE,"frmSize"));
   map[StarAttribute::ATTR_SC_BORDER]=shared_ptr<StarAttribute>(new StarGAttributeBorder(StarAttribute::ATTR_SC_BORDER,"scBorder"));
   map[StarAttribute::ATTR_CHR_BACKGROUND]=shared_ptr<StarAttribute>(new StarGAttributeBrush(StarAttribute::ATTR_CHR_BACKGROUND,"chrBackground"));
   map[StarAttribute::ATTR_FRM_BACKGROUND]=shared_ptr<StarAttribute>(new StarGAttributeBrush(StarAttribute::ATTR_FRM_BACKGROUND,"frmBackground"));

@@ -62,6 +62,7 @@ class STOFFFont;
 class STOFFGraphicStyle;
 class STOFFPageSpan;
 class STOFFParagraph;
+class STOFFSection;
 
 //! virtual class used to store the different attribute
 class StarAttribute
@@ -777,6 +778,12 @@ public:
     std::set<StarAttribute const *> done;
     addTo(para, pool, done);
   }
+  //! add to a section
+  void addTo(STOFFSection &sect, StarItemPool const *pool) const
+  {
+    std::set<StarAttribute const *> done;
+    addTo(sect, pool, done);
+  }
   //! add to send the zone data
   bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
   {
@@ -801,6 +808,10 @@ public:
   }
   //! add to a paragraph(internal)
   virtual void addTo(STOFFParagraph &/*para*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+  {
+  }
+  //! add to a section(internal)
+  virtual void addTo(STOFFSection &/*sect*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
   {
   }
   //! try to send the child zone(internal)
@@ -1088,6 +1099,8 @@ protected:
   virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
   //! add to a paragraph
   virtual void addTo(STOFFParagraph &para, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
+  //! add to a section
+  virtual void addTo(STOFFSection &sect, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
   //! try to send the sone data
   virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, std::set<StarAttribute const *> &done) const;
 

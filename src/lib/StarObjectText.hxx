@@ -60,13 +60,15 @@ struct Zone {
 //! Internal: a set of zone
 struct Content {
   //! constructor
-  Content() : m_zoneList()
+  Content() : m_sectionId(-1), m_zoneList()
   {
   }
   //! destructor
   ~Content();
   //! try to send the data to a listener
   bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  //! the section id
+  int m_sectionId;
   //! the list of text zone
   std::vector<shared_ptr<Zone> > m_zoneList;
 };
@@ -110,8 +112,6 @@ protected:
   // low level
   //
 
-  //! the page style
-  bool readSwPageStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
   //! try to read a text style zone: SfxStyleSheets
   bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
   //! the rulers?

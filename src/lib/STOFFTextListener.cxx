@@ -587,7 +587,7 @@ bool STOFFTextListener::isHeaderFooterOpened() const
 bool STOFFTextListener::openHeader(librevenge::RVNGPropertyList const &extras)
 {
   if (m_ds->m_isHeaderFooterOpened) {
-    STOFF_DEBUG_MSG(("STOFFTextListener::insertHeader: Oops a header/footer is already opened\n"));
+    STOFF_DEBUG_MSG(("STOFFTextListener::openHeader: Oops a header/footer is already opened\n"));
     return false;
   }
   m_ds->m_isHeaderFooterOpened=true;
@@ -615,13 +615,14 @@ bool STOFFTextListener::closeHeader()
     return false;
   }
   m_documentInterface->closeHeader();
+  m_ds->m_isHeaderFooterOpened=false;
   return true;
 }
 
 bool STOFFTextListener::openFooter(librevenge::RVNGPropertyList const &extras)
 {
   if (m_ds->m_isHeaderFooterOpened) {
-    STOFF_DEBUG_MSG(("STOFFTextListener::insertFooter: Oops a header/footer is already opened\n"));
+    STOFF_DEBUG_MSG(("STOFFTextListener::openFooter: Oops a header/footer is already opened\n"));
     return false;
   }
   m_ds->m_isHeaderFooterOpened=true;
@@ -649,6 +650,7 @@ bool STOFFTextListener::closeFooter()
     return false;
   }
   m_documentInterface->closeFooter();
+  m_ds->m_isHeaderFooterOpened=false;
   return true;
 }
 
@@ -1355,8 +1357,8 @@ void STOFFTextListener::handleSubDocument(STOFFSubDocumentPtr subDocument, libst
     m_ps->m_sectionAttributesChanged = true;
     break;
   case libstoff::DOC_HEADER_FOOTER_REGION:
+    m_ds->m_isHeaderFooterRegionOpened = true;
     m_ps->m_isHeaderFooterWithoutParagraph = true;
-    m_ds->m_isHeaderFooterOpened = true;
     break;
   case libstoff::DOC_NONE:
   case libstoff::DOC_CHART:
@@ -1404,7 +1406,7 @@ void STOFFTextListener::handleSubDocument(STOFFSubDocumentPtr subDocument, libst
     _closeSection();
     break;
   case libstoff::DOC_HEADER_FOOTER_REGION:
-    m_ds->m_isHeaderFooterOpened = false;
+    m_ds->m_isHeaderFooterRegionOpened = false;
   case libstoff::DOC_NONE:
   case libstoff::DOC_CHART:
   case libstoff::DOC_CHART_ZONE:

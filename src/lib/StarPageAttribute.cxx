@@ -32,9 +32,11 @@
 */
 
 #include "STOFFPageSpan.hxx"
+#include "STOFFSection.hxx"
 #include "STOFFSubDocument.hxx"
 
 #include "StarAttribute.hxx"
+#include "StarFormatManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarObject.hxx"
 #include "StarObjectSmallText.hxx"
@@ -356,7 +358,9 @@ class SubDocument : public STOFFSubDocument
 {
 public:
   explicit SubDocument(shared_ptr<StarObjectSmallText> text) :
-    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_smallText(text) {}
+    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_smallText(text), m_format(), m_object(0), m_pool(0) {}
+  SubDocument(shared_ptr<StarFormatManagerInternal::FormatDef> format, StarItemPool const *pool, StarObject *object) :
+    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_smallText(), m_format(format), m_object(object), m_pool(pool) {}
 
   //! destructor
   virtual ~SubDocument() {}
@@ -368,6 +372,9 @@ public:
     SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
     if (!sDoc) return true;
     if (m_smallText.get() != sDoc->m_smallText.get()) return true;
+    if (m_format.get() != sDoc->m_format.get()) return true;
+    if (m_object != sDoc->m_object) return true;
+    if (m_pool != sDoc->m_pool) return true;
     return false;
   }
 
@@ -383,6 +390,12 @@ public:
 protected:
   //! the note text
   shared_ptr<StarObjectSmallText> m_smallText;
+  //! the format
+  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+  //! the original object
+  StarObject *m_object;
+  //! the pool
+  StarItemPool const *m_pool;
 };
 
 void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*type*/)
@@ -393,10 +406,156 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
   }
   if (m_smallText)
     m_smallText->send(listener);
+  else if (m_format && m_object)
+    m_format->send(listener, m_pool, *m_object);
 }
 
+//! a frame + columns
+class StarPAttributeColumns : public StarAttribute
+{
+protected:
+  //! a column
+  struct Column {
+    //! constructor
+    Column() : m_wishWidth(0)
+    {
+      for (int i=0; i<4; ++i) m_margins[i]=0;
+    }
+    //! debug function to print the data
+    void printData(libstoff::DebugStream &o) const
+    {
+      if (m_wishWidth) o << "wish[width]=" << m_wishWidth << ",";
+      for (int i=0; i<4; ++i) {
+        if (!m_margins[i]) continue;
+        char const *(wh[])= {"left", "top", "right", "bottom" };
+        o << wh[i] << "=" << m_margins[i] << ",";
+      }
+    }
+    bool addTo(librevenge::RVNGPropertyList &propList) const
+    {
+      if (m_margins[0])
+        propList.insert("fo:start-indent", double(m_margins[0])*0.05, librevenge::RVNG_POINT);
+      if (m_margins[1])
+        propList.insert("fo:end-indent", double(m_margins[1])*0.05, librevenge::RVNG_POINT);
+      if (m_wishWidth) // must be in twip
+        propList.insert("style:rel-width", double(m_wishWidth)*0.05*20, librevenge::RVNG_TWIP);
+      return true;
+    }
+
+    //! the wish width
+    int m_wishWidth;
+    //! the left, top, right bottom margins
+    int m_margins[4];
+  };
+public:
+  //! constructor
+  StarPAttributeColumns(Type type, std::string const &debugName) :
+    StarAttribute(type, debugName), m_lineAdj(0), m_ortho(true), m_lineHeight(0), m_gutterWidth(0), m_wishWidth(0),
+    m_penStyle(0), m_penWidth(0), m_penColor(STOFFColor::black()), m_columnList()
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarPAttributeColumns(*this));
+  }
+  //! add to a page
+  virtual void addTo(STOFFSection &sect, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! debug function to print the data
+  virtual void printData(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    if (m_lineAdj) o << "line[adj]=" << m_lineAdj << ",";
+    if (!m_ortho) o << "ortho*,";
+    if (m_lineHeight) o << "line[height]=" << m_lineHeight << ",";
+    if (m_gutterWidth) o << "gutter[width]=" << m_gutterWidth << ",";
+    if (m_wishWidth) o << "wish[width]=" << m_wishWidth << ",";
+    if (m_penStyle) o << "pen[style]=" << m_penStyle << ",";
+    if (m_penWidth) o << "pen[width]=" << m_penWidth << ",";
+    if (!m_penColor.isBlack()) o << "pen[color]=" << m_penColor << ",";
+    if (!m_columnList.empty()) {
+      o << "columns=[";
+      for (size_t i=0; i<m_columnList.size(); ++i) {
+        o << "[";
+        m_columnList[i].printData(o);
+        o << "],";
+      }
+      o << "],";
+    }
+    o << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarPAttributeColumns(StarPAttributeColumns const &orig) :
+    StarAttribute(orig), m_lineAdj(orig.m_lineAdj), m_ortho(orig.m_ortho), m_lineHeight(orig.m_lineHeight),
+    m_gutterWidth(orig.m_gutterWidth), m_wishWidth(orig.m_wishWidth), m_penStyle(orig.m_penStyle), m_penWidth(orig.m_penWidth),
+    m_penColor(orig.m_penColor), m_columnList(orig.m_columnList)
+  {
+  }
+
+  //! the lineAdj
+  int m_lineAdj;
+  //! ortho flag
+  bool m_ortho;
+  //! the line height
+  int m_lineHeight;
+  //! the gutter width
+  int m_gutterWidth;
+  //! the wish width
+  int m_wishWidth;
+  //! the pen style
+  int m_penStyle;
+  //! the pen width
+  int m_penWidth;
+  //! the pen color
+  STOFFColor m_penColor;
+  //! the column list
+  std::vector<Column> m_columnList;
+};
+
+//! a frame header/footer attribute (used to define header/footer in a sdw file)
+class StarPAttributeFrameHF : public StarAttribute
+{
+public:
+  //! constructor
+  StarPAttributeFrameHF(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_active(true), m_format(), m_object(0)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarPAttributeFrameHF(*this));
+  }
+  //! add to a page
+  virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! debug function to print the data
+  virtual void printData(libstoff::DebugStream &o) const
+  {
+    o << m_debugName;
+    if (!m_active)
+      o << "*,";
+    o << ",";
+  }
+
+protected:
+  //! copy constructor
+  StarPAttributeFrameHF(StarPAttributeFrameHF const &orig) : StarAttribute(orig), m_active(orig.m_active), m_format(orig.m_format), m_object(orig.m_object)
+  {
+  }
+  //! active flag
+  bool m_active;
+  //! the format
+  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+  //! the original object
+  StarObject *m_object;
+};
+
 // ------------------------------------------------------------
-//! a page header/footer attribute
 //! a page attribute
 class StarPAttributePage : public StarAttribute
 {
@@ -450,6 +609,7 @@ protected:
   int m_used;
 };
 
+//! a page header/footer attribute
 class StarPAttributePageHF : public StarAttribute
 {
 public:
@@ -608,6 +768,21 @@ protected:
   }
 };
 
+void StarPAttributeColumns::addTo(STOFFSection &sect, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+{
+  if (m_type==ATTR_FRM_COL) {
+    if (!m_columnList.empty()) {
+      librevenge::RVNGPropertyListVector columns;
+      for (size_t c=0; c < m_columnList.size(); c++) {
+        librevenge::RVNGPropertyList propList;
+        if (m_columnList[c].addTo(propList))
+          columns.append(propList);
+      }
+      sect.m_propertyList.insert("style:columns", columns);
+    }
+  }
+}
+
 void StarPAttributePage::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type!=ATTR_SC_PAGE || page.m_actualZone!=STOFFPageSpan::Page)
@@ -619,6 +794,24 @@ void StarPAttributePage::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/
   if (m_pageType>=0 && m_pageType<6) {
     char const *(wh[])= {"a", "A", "i", "I", "1", ""};
     page.m_propertiesList[0].insert("style:num-format", wh[m_pageType]);
+  }
+}
+
+void StarPAttributeFrameHF::addTo(STOFFPageSpan &page, StarItemPool const *pool, std::set<StarAttribute const *> &/*done*/) const
+{
+  if (!m_active || !m_format)
+    return;
+  if (!m_object) {
+    STOFF_DEBUG_MSG(("StarPAttributeFrameHF::addTo: can not find the object\n"));
+    return;
+  }
+  if (m_type==ATTR_FRM_HEADER || m_type==ATTR_FRM_FOOTER) {
+    STOFFHeaderFooter hf;
+    hf.m_subDocument[3].reset(new SubDocument(m_format, pool, m_object));
+    page.addHeaderFooter(m_type==ATTR_FRM_HEADER, "all", hf);
+  }
+  else {
+    STOFF_DEBUG_MSG(("StarPAttributeFrameHF::addTo: unknown type\n"));
   }
 }
 
@@ -679,6 +872,65 @@ bool StarPAttributePage::read(StarZone &zone, int /*vers*/, long endPos, StarObj
   m_pageType=int(input->readULong(1));
   *input >> m_landscape;
   m_used=int(input->readULong(2));
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
+bool StarPAttributeColumns::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  // sw_sw3attr.cxx SwFmtCol::Create
+  m_lineAdj=int(input->readULong(1));
+  *input >> m_ortho;
+  m_lineHeight=int(input->readULong(1));
+  m_gutterWidth=int(input->readULong(2));
+  m_wishWidth=int(input->readULong(2));
+  m_penStyle=int(input->readULong(1));
+  m_penWidth=int(input->readULong(2));
+  uint8_t color[3];
+  for (int i=0; i<3; ++i) color[i]=uint8_t(input->readULong(2)>>8);
+  m_penColor=STOFFColor(color[0],color[1],color[2]);
+  int nCol=int(input->readULong(2));
+  f << "N=" << nCol << ",";
+  if (m_wishWidth==0)
+    nCol=0;
+  if (input->tell()+10*nCol>endPos) {
+    STOFF_DEBUG_MSG(("StarPAttributeColumns::read: nCol is bad\n"));
+    f << "###N,";
+    nCol=0;
+  }
+  for (int i=0; i<nCol; ++i) {
+    StarPAttributeColumns::Column col;
+    col.m_wishWidth=int(input->readULong(2));
+    for (int d=0; d<4; ++d) col.m_margins[d]=int(input->readULong(2));
+    m_columnList.push_back(col);
+  }
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
+bool StarPAttributeFrameHF::read(StarZone &zone, int /*vers*/, long endPos, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  m_object=&object;
+  *input >> m_active;
+  if (input->tell()<endPos) {
+    shared_ptr<StarFormatManagerInternal::FormatDef> format;
+    if (object.getFormatManager()->readSWFormatDef(zone,'r',format, object))
+      m_format=format;
+  }
   printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -777,6 +1029,9 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeUInt(map, StarAttribute::ATTR_SC_PAGE_FIRSTPAGENO,"page[first,pageNo]",2,1);
   addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_TOPDOWN,"page[topdown]", true);
 
+  map[StarAttribute::ATTR_FRM_HEADER]=shared_ptr<StarAttribute>(new StarPAttributeFrameHF(StarAttribute::ATTR_FRM_HEADER, "header"));
+  map[StarAttribute::ATTR_FRM_FOOTER]=shared_ptr<StarAttribute>(new StarPAttributeFrameHF(StarAttribute::ATTR_FRM_FOOTER, "footer"));
+  map[StarAttribute::ATTR_FRM_COL]=shared_ptr<StarAttribute>(new StarPAttributeColumns(StarAttribute::ATTR_FRM_COL, "col"));
   map[StarAttribute::ATTR_SC_PAGE_SIZE]=shared_ptr<StarAttribute>(new StarPAttributeVec2i(StarAttribute::ATTR_SC_PAGE_SIZE, "page[size]", 4));
 
   map[StarAttribute::ATTR_SC_PAGE]=shared_ptr<StarAttribute>(new StarPAttributePage(StarAttribute::ATTR_SC_PAGE, "page"));

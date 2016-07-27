@@ -440,6 +440,28 @@ void StarAttributeItemSet::addTo(STOFFGraphicStyle &graphic, StarItemPool const 
   }
 }
 
+void StarAttributeItemSet::addTo(STOFFPageSpan &page, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
+{
+  if (done.find(this)!=done.end()) {
+    STOFF_DEBUG_MSG(("StarAttributeItemSet::addTo: find a cycle\n"));
+    return;
+  }
+  done.insert(this);
+  StarItemSet finalSet;
+  bool newSet=false;
+  if (pool && !m_itemSet.m_style.empty()) {
+    finalSet=m_itemSet;
+    pool->updateUsingStyles(finalSet);
+    newSet=true;
+  }
+  StarItemSet const &set=newSet ? finalSet : m_itemSet;
+  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
+       it!=set.m_whichToItemMap.end(); ++it) {
+    if (it->second && it->second->m_attribute)
+      it->second->m_attribute->addTo(page, pool, done);
+  }
+}
+
 void StarAttributeItemSet::addTo(STOFFParagraph &para, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
 {
   if (done.find(this)!=done.end()) {
@@ -462,7 +484,7 @@ void StarAttributeItemSet::addTo(STOFFParagraph &para, StarItemPool const *pool,
   }
 }
 
-void StarAttributeItemSet::addTo(STOFFPageSpan &page, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
+void StarAttributeItemSet::addTo(STOFFSection &sect, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
 {
   if (done.find(this)!=done.end()) {
     STOFF_DEBUG_MSG(("StarAttributeItemSet::addTo: find a cycle\n"));
@@ -480,7 +502,7 @@ void StarAttributeItemSet::addTo(STOFFPageSpan &page, StarItemPool const *pool, 
   for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
        it!=set.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(page, pool, done);
+      it->second->m_attribute->addTo(sect, pool, done);
   }
 }
 
@@ -809,14 +831,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
       f << "char=" << char(input->readULong(1)) << ",";
     break;
   // frame parameter
-  case StarAttribute::ATTR_FRM_FRM_SIZE:
-    f << "frmSize,";
-    f << "sizeType=" << input->readULong(1) << ",";
-    f << "width=" << input->readULong(4) << ",";
-    f << "height=" << input->readULong(4) << ",";
-    if (nVers>1)
-      f << "percent=" << input->readULong(1) << "x"  << input->readULong(1) << ",";
-    break;
   case StarAttribute::ATTR_FRM_PAGEDESC:
     // sw_sw3npool.cxx SwFmtPageDesc::Create
     f << "pageDesc,";
@@ -839,17 +853,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     f << "pageBreak=" << input->readULong(1) << ",";
     if (nVers<1) input->seek(1, librevenge::RVNG_SEEK_CUR); // dummy
     break;
-  case StarAttribute::ATTR_FRM_HEADER:
-  case StarAttribute::ATTR_FRM_FOOTER: {
-    f << (nWhich==StarAttribute::ATTR_FRM_HEADER ? "header" : "footer") << ",";
-    f << "active=" << input->readULong(1) << ",";
-    long actPos=input->tell();
-    if (actPos==lastPos)
-      break;
-    shared_ptr<StarFormatManagerInternal::FormatDef> format;
-    object.getFormatManager()->readSWFormatDef(zone,'r',format, object);
-    break;
-  }
   case StarAttribute::ATTR_FRM_PROTECT:
     f << "protect,";
     val=int(input->readULong(1));
@@ -919,41 +922,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
         *input>>eType;
         if (eType) f << "eType=" << eType << ",";
       }
-      f << "],";
-    }
-    f << "],";
-    break;
-  }
-  case StarAttribute::ATTR_FRM_COL: {
-    f << "col,";
-    f << "nLineAdj=" << input->readULong(1) << ",";
-    f << "bOrtho=" << input->readULong(1) << ",";
-    f << "nLineHeight=" << input->readULong(1) << ",";
-    f << "nGutterWidth=" << input->readLong(2) << ",";
-    int nWishWidth=int(input->readULong(2));
-    f << "nWishWidth=" << nWishWidth << ",";
-    f << "nPenStyle=" << input->readULong(1) << ",";
-    f << "nPenWidth=" << input->readLong(2) << ",";
-    f << "nPenRed=" << (input->readULong(2)>>8) << ",";
-    f << "nPenGreen=" << (input->readULong(2)>>8) << ",";
-    f << "nPenBlue=" << (input->readULong(2)>>8) << ",";
-    int nCol=int(input->readULong(2));
-    f << "N=" << nCol << ",";
-    if (nWishWidth==0)
-      break;
-    if (input->tell()+10*nCol>lastPos) {
-      STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: nCol is bad\n"));
-      f << "###N,";
-      break;
-    }
-    f << "[";
-    for (int i=0; i<nCol; ++i) {
-      f << "[";
-      f << "nWishWidth=" << input->readULong(2) << ",";
-      f << "nLeft=" << input->readULong(2) << ",";
-      f << "nUpper=" << input->readULong(2) << ",";
-      f << "nRight=" << input->readULong(2) << ",";
-      f << "nBottom=" << input->readULong(2) << ",";
       f << "],";
     }
     f << "],";
