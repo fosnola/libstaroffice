@@ -198,6 +198,7 @@ bool PageDesc::updateSection(STOFFSection &section, StarItemPool const *pool) co
         m_attributes[step][i].m_attribute->addTo(section, pool);
     }
   }
+  return true;
 }
 
 bool PageDesc::read(StarZone &zone, StarObject &object)
@@ -341,6 +342,7 @@ bool StarObjectPageStyle::updateSection(STOFFSection &section)
 {
   if (!m_pageStyleState->m_pageList.empty())
     m_pageStyleState->m_pageList[0].updateSection(section, 0); // checkme: do we need a pool here
+  return true;
 }
 ////////////////////////////////////////////////////////////
 // the parser

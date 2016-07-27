@@ -48,7 +48,7 @@ class STOFFParagraph
 {
 public:
   //! constructor
-  STOFFParagraph() : m_propertyList(), m_bulletVisible(false), m_listLevelIndex(0), m_listId(-1), m_listStartValue(-1), m_listLevel(), m_relativeUnit(0.05)
+  STOFFParagraph() : m_propertyList(), m_break(0), m_bulletVisible(false), m_listLevelIndex(0), m_listId(-1), m_listStartValue(-1), m_listLevel(), m_relativeUnit(0.05)
   {
   }
   //! add to the propList
@@ -64,6 +64,8 @@ public:
   friend std::ostream &operator<<(std::ostream &o, STOFFParagraph const &para);
   //! the properties
   librevenge::RVNGPropertyList m_propertyList;
+  //! a page/column break: 1=columnBefore, 2=columnAfter, 3=columnBoth, 4=pageBefore, 5=pageAfter,n 6=pageBoth
+  int m_break;
   /// flag to know if the bullet is visible
   bool m_bulletVisible;
   /** the actual level index */

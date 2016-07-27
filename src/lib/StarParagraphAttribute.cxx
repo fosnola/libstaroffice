@@ -140,6 +140,24 @@ public:
   }
   //! destructor
   ~StarPAttributeUInt();
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object)
+  {
+    if (m_type==ATTR_FRM_BREAK) {
+      // SvxFmtBreakItem
+      STOFFInputStreamPtr input=zone.input();
+      long pos=input->tell();
+      libstoff::DebugFile &ascFile=zone.ascii();
+      libstoff::DebugStream f;
+      m_value=static_cast<unsigned int>(input->readULong(1));
+      f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
+      if (vers==0) input->seek(1, librevenge::RVNG_SEEK_CUR); // dummy
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return input->tell()<=endPos;
+    }
+    return StarAttributeUInt::read(zone, vers, endPos, object);
+  }
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -218,6 +236,12 @@ void StarPAttributeUInt::addTo(STOFFParagraph &para, StarItemPool const */*pool*
     para.m_bulletVisible=m_value!=0;
   else if (m_type==ATTR_EE_PARA_OUTLLEVEL)
     para.m_propertyList.insert("text:outline-level", int(m_value));
+  else if (m_type==ATTR_FRM_BREAK) {
+    if (m_value>0 && m_value<=6) para.m_break=int(m_value);
+    else if (m_value) {
+      STOFF_DEBUG_MSG(("StarPAttributeUInt::addTo: unknown break value %d\n", int(m_value)));
+    }
+  }
 }
 
 //! add a bool attribute
@@ -1021,6 +1045,7 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeUInt(map, StarAttribute::ATTR_EE_PARA_BULLETSTATE,"para[bullet,state]",2,0);
   addAttributeUInt(map, StarAttribute::ATTR_EE_PARA_OUTLLEVEL,"para[outlevel]",2,0);
   addAttributeBool(map, StarAttribute::ATTR_EE_PARA_ASIANCJKSPACING,"para[asianCJKSpacing]",false);
+  addAttributeUInt(map, StarAttribute::ATTR_FRM_BREAK,"para[break]",1,0);
 
   map[StarAttribute::ATTR_PARA_ADJUST]=shared_ptr<StarAttribute>(new StarPAttributeAdjust(StarAttribute::ATTR_PARA_ADJUST,"parAtrAdjust"));
   map[StarAttribute::ATTR_FRM_LR_SPACE]=shared_ptr<StarAttribute>(new StarPAttributeLRSpace(StarAttribute::ATTR_FRM_LR_SPACE,"lrSpace"));

@@ -279,6 +279,27 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
       first=false;
     }
   }
+  if (para.m_break) {
+    switch (para.m_break) {
+    case 0:
+      break;
+    case 1:
+      listener->insertBreak(STOFFListener::ColumnBreak);
+      break;
+    case 4:
+      listener->insertBreak(STOFFListener::PageBreak);
+      break;
+    default: {
+      static bool first=true;
+      if (first) {
+        first=false;
+        STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: unexpected break\n"));
+      }
+      break;
+    }
+    }
+    para.m_break=0;
+  }
   if (mainFont.m_footnote) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a footnote in mainFont\n"));
     mainFont.m_footnote=false;
@@ -307,7 +328,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
   std::set<size_t>::const_iterator posSetIt=modPosSet.begin();
   int endLinkPos=-1, endRefMarkPos=-1;
   librevenge::RVNGString refMarkString;
-  for (size_t c=0; c<m_text.size(); ++c) {
+  for (size_t c=0; c<= m_text.size(); ++c) {
     bool fontChange=false;
     size_t srcPos=c<m_textSourcePosition.size() ? m_textSourcePosition[c] : 10000;
     while (posSetIt!=modPosSet.end() && *posSetIt <= srcPos) {
@@ -332,8 +353,28 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
         attrib.m_attribute->addTo(font, pool);
         if (!footnote && font.m_footnote)
           footnote=attrib.m_attribute;
-        if (c==0)
+        if (c==0) {
           attrib.m_attribute->addTo(para, pool);
+          switch (para.m_break) {
+          case 0:
+            break;
+          case 1:
+            listener->insertBreak(STOFFListener::ColumnBreak);
+            break;
+          case 4:
+            listener->insertBreak(STOFFListener::PageBreak);
+            break;
+          default: {
+            static bool first=true;
+            if (first) {
+              first=false;
+              STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: unexpected break\n"));
+            }
+            break;
+          }
+          }
+          para.m_break=0;
+        }
         if (font.m_field) {
           if (int(srcPos)==attrib.m_position[0])
             field=font.m_field;
@@ -393,6 +434,8 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
       footnote->send(listener, pool, object);
     else if (field)
       field->send(listener, pool, object);
+    else if (c==m_text.size())
+      break;
     else if (m_text[c]==0x9)
       listener->insertTab();
     else if (m_text[c]==0xa)

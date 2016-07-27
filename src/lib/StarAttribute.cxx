@@ -849,10 +849,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     }
     f << "nIdx=" << input->readULong(2) << ",";
     break;
-  case StarAttribute::ATTR_FRM_BREAK:
-    f << "pageBreak=" << input->readULong(1) << ",";
-    if (nVers<1) input->seek(1, librevenge::RVNG_SEEK_CUR); // dummy
-    break;
   case StarAttribute::ATTR_FRM_PROTECT:
     f << "protect,";
     val=int(input->readULong(1));
