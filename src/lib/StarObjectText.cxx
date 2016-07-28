@@ -254,7 +254,8 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
         done=true;
       }
 #endif
-      for (it=style->m_itemSet.m_whichToItemMap.begin(); it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
+      StarItemSet const &itemSet=style->m_itemSet;
+      for (it=itemSet.m_whichToItemMap.begin(); it!=itemSet.m_whichToItemMap.end(); ++it) {
         if (it->second && it->second->m_attribute) {
           it->second->m_attribute->addTo(mainFont, pool);
 #if 0
@@ -266,6 +267,9 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
 #if 0
       std::cerr << "Para:" << style->m_itemSet.printChild() << "\n";
 #endif
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: can not find style %s\n", m_styleName.cstr()));
     }
   }
   listener->setFont(mainFont);
@@ -686,6 +690,7 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
     STOFF_DEBUG_MSG(("StarObjectText::readSfxStyleSheets: can not read a style pool\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
   }
+  mainPool->updateStyles();
   if (!input->isEnd()) {
     STOFF_DEBUG_MSG(("StarObjectText::readSfxStyleSheets: find extra data\n"));
     ascFile.addPos(input->tell());
@@ -1329,11 +1334,10 @@ bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInt
   textZone.reset(new StarObjectTextInternal::TextZone);
   int fl=zone.openFlagZone();
   int poolId=int(input->readULong(2));
-  librevenge::RVNGString poolName;
-  if (!zone.getPoolName(poolId, poolName))
+  if (!zone.getPoolName(poolId, textZone->m_styleName))
     f << "###nPoolId=" << poolId << ",";
   else
-    f << poolName.cstr() << ",";
+    f << textZone->m_styleName.cstr() << ",";
   if (fl&0x10 && !zone.isCompatibleWith(0x201)) {
     int val=int(input->readULong(1));
     if (val==200 && zone.isCompatibleWith(0xf,0x101) && input->tell() < zone.getFlagLastPosition())

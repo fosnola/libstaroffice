@@ -327,12 +327,13 @@ StarObjectPageStyle::~StarObjectPageStyle()
 ////////////////////////////////////////////////////////////
 // send data
 ////////////////////////////////////////////////////////////
-bool StarObjectPageStyle::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &number) const
+bool StarObjectPageStyle::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &number)
 {
   number=10000; // only one type of page ?
   STOFFPageSpan ps;
+  shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
   if (!m_pageStyleState->m_pageList.empty())
-    m_pageStyleState->m_pageList[0].updatePageSpan(ps, 0); // checkme: do we need a pool here
+    m_pageStyleState->m_pageList[0].updatePageSpan(ps, pool.get());
   ps.m_pageSpan=number;
   pageSpan.push_back(ps);
   return number!=0;
@@ -340,8 +341,9 @@ bool StarObjectPageStyle::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, 
 
 bool StarObjectPageStyle::updateSection(STOFFSection &section)
 {
+  shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
   if (!m_pageStyleState->m_pageList.empty())
-    m_pageStyleState->m_pageList[0].updateSection(section, 0); // checkme: do we need a pool here
+    m_pageStyleState->m_pageList[0].updateSection(section, pool.get());
   return true;
 }
 ////////////////////////////////////////////////////////////

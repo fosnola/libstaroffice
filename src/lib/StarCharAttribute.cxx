@@ -1297,6 +1297,9 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   // do we need to retrieve these attribute
   addAttributeVoid(map, StarAttribute::ATTR_EE_FEATURE_TAB, "feature[tab]"); // feature tab ?
   addAttributeVoid(map, StarAttribute::ATTR_EE_FEATURE_LINEBR, "feature[linebr]"); // feature line break ?
+
+  // todo
+  addAttributeUInt(map,StarAttribute::ATTR_TXT_CHARFMT,"textAtrCharFmt",2,0); // SwFmtCharFmt
 }
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

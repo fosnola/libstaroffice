@@ -732,8 +732,8 @@ void StarPAttributeLineSpacing::addTo(STOFFParagraph &para, StarItemPool const *
 void StarPAttributeLRSpace::addTo(STOFFParagraph &para, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_FRM_LR_SPACE || m_type==ATTR_EE_PARA_OUTLLR_SPACE) {
-    if (m_propMargins[0]==100)
-      para.m_propertyList.insert("fo:margin-left", para.m_relativeUnit*double(m_margins[0]), librevenge::RVNG_POINT);
+    if (m_propMargins[0]==100) // unsure if/when we need to use textLeft/margins[0] here
+      para.m_propertyList.insert("fo:margin-left", para.m_relativeUnit*double(m_textLeft), librevenge::RVNG_POINT);
     else
       para.m_propertyList.insert("fo:margin-left", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
 
@@ -924,6 +924,7 @@ bool StarPAttributeLRSpace::read(StarZone &zone, int vers, long endPos, StarObje
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  // svx_frmitems.cxx: SvxLRSpaceItem::Create
   for (int i=0; i<3; ++i) {
     if (i<2)
       m_margins[i]=int(input->readULong(2));
@@ -940,7 +941,8 @@ bool StarPAttributeLRSpace::read(StarZone &zone, int vers, long endPos, StarObje
     long marker=long(input->readULong(4));
     if (marker==0x599401FE) {
       m_margins[2]=int(input->readLong(2));
-      m_textLeft+=m_margins[2];
+      if (m_margins[2]<0)
+        m_margins[0]+=m_margins[2];
     }
     else
       input->seek(-4, librevenge::RVNG_SEEK_CUR);
@@ -949,10 +951,10 @@ bool StarPAttributeLRSpace::read(StarZone &zone, int vers, long endPos, StarObje
     int32_t nMargin;
     *input >> nMargin;
     m_margins[0]=nMargin;
-    m_textLeft=m_margins[2]>=0 ? nMargin : nMargin-m_margins[2];
     *input >> nMargin;
     m_margins[1]=nMargin;
   }
+  //m_textLeft=(m_margins[2]>=0) ? m_margins[0] : m_margins[0]-m_margins[2];
   printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());

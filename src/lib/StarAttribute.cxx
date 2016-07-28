@@ -809,9 +809,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     }
     break;
   }
-  case StarAttribute::ATTR_TXT_CHARFMT:
-    f << "textAtrCharFmt, id=" << input->readULong(2) << ",";
-    break;
   case StarAttribute::ATTR_TXT_CJK_RUBY: // string("")+bool
     f << "textAtrCJKRuby=" << input->readULong(1) << ",";
     break;
