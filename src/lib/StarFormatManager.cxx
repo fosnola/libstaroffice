@@ -48,6 +48,7 @@
 #include "StarGraphicStruct.hxx"
 #include "StarLanguage.hxx"
 #include "StarObject.hxx"
+#include "StarState.hxx"
 #include "StarWriterStruct.hxx"
 #include "StarZone.hxx"
 
@@ -63,7 +64,7 @@ FormatDef::~FormatDef()
 {
 }
 
-bool FormatDef::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+bool FormatDef::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarFormatManagerInternal::FormatDef::send: call without listener\n"));
@@ -73,11 +74,10 @@ bool FormatDef::send(STOFFListenerPtr listener, StarItemPool const *pool, StarOb
   for (size_t i=0; i<m_attributeList.size(); ++i) {
     if (!m_attributeList[i].m_attribute)
       continue;
-    STOFFFont font;
-    m_attributeList[i].m_attribute->addTo(font, pool);
-    if (!font.m_content) continue;
+    m_attributeList[i].m_attribute->addTo(state);
+    if (!state.m_content) continue;
     done=true;
-    m_attributeList[i].m_attribute->send(listener, pool, object);
+    m_attributeList[i].m_attribute->send(listener, state);
   }
   if (!done) {
     STOFF_DEBUG_MSG(("StarFormatManagerInternal::FormatDef::send: can not find and data to send\n"));

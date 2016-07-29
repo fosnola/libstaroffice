@@ -43,9 +43,9 @@
 
 #include "libstaroffice_internal.hxx"
 
-class StarItemPool;
 class StarObject;
 class StarObjectText;
+class StarState;
 class StarZone;
 namespace StarTableInternal
 {
@@ -66,7 +66,7 @@ public:
   //! try to read the data
   bool read(StarZone &zone, StarObjectText &object);
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const;
 
   //! flag to know if the header is repeated
   bool m_headerRepeated;

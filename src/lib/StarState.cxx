@@ -31,49 +31,35 @@
 * instead of those above.
 */
 
-#ifndef STOFF_PARAGRAPH
-#  define STOFF_PARAGRAPH
-
-#include <iostream>
-#include <vector>
-
 #include <librevenge/librevenge.h>
 
-#include "libstaroffice_internal.hxx"
+#include "StarState.hxx"
 
-#include "STOFFList.hxx"
+#include "SWFieldManager.hxx"
 
-//! class to store the paragraph properties
-class STOFFParagraph
+StarState::StarState(StarState const &orig) :
+  m_pool(orig.m_pool), m_object(orig.m_object), m_styleName(orig.m_styleName),
+  m_page(orig.m_page), m_pageName(orig.m_pageName), m_pageNameList(orig.m_pageNameList), m_pageZone(orig.m_pageZone),
+  m_section(orig.m_section), m_sectionName(orig.m_sectionName),
+  m_break(orig.m_break),
+  m_cell(orig.m_cell),
+  m_graphic(orig.m_graphic), m_paragraph(orig.m_paragraph),
+  m_font(orig.m_font), m_content(orig.m_content), m_footnote(orig.m_footnote), m_link(orig.m_link), m_refMark(orig.m_refMark), m_field(orig.m_field),
+  m_relativeUnit(orig.m_relativeUnit)
 {
-public:
-  //! constructor
-  STOFFParagraph() : m_propertyList(), m_bulletVisible(false), m_listLevelIndex(0), m_listId(-1), m_listStartValue(-1), m_listLevel()
-  {
-  }
-  //! add to the propList
-  void addTo(librevenge::RVNGPropertyList &propList) const;
-  //! operator==
-  bool operator==(STOFFParagraph const &p) const;
-  //! operator!=
-  bool operator!=(STOFFParagraph const &p) const
-  {
-    return !operator==(p);
-  }
-  //! operator<<
-  friend std::ostream &operator<<(std::ostream &o, STOFFParagraph const &para);
-  //! the properties
-  librevenge::RVNGPropertyList m_propertyList;
-  /// flag to know if the bullet is visible
-  bool m_bulletVisible;
-  /** the actual level index */
-  int m_listLevelIndex;
-  /** the list id (if know ) */
-  int m_listId;
-  /** the list start value (if set ) */
-  int m_listStartValue;
-  /** the actual level */
-  STOFFListLevel m_listLevel;
-};
-#endif
+}
+
+StarState::~StarState()
+{
+}
+
+void StarState::reinitializeLineData()
+{
+  m_break=0;
+  m_font=STOFFFont();
+  m_content=m_footnote=false;
+  m_link=m_refMark="";
+  m_field.reset();
+}
+
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

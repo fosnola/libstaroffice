@@ -46,7 +46,7 @@
 
 #include "StarWriterStruct.hxx"
 
-class StarItemPool;
+class StarState;
 class StarObject;
 
 namespace StarFormatManagerInternal
@@ -60,7 +60,7 @@ struct FormatDef {
   //! destructor
   ~FormatDef();
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const;
   //! debug function to print the data
   void printData(libstoff::DebugStream &o) const;
   //! the pool name, the read name

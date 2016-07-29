@@ -44,6 +44,7 @@
 #include "StarGraphicStruct.hxx"
 #include "StarItemPool.hxx"
 #include "StarObject.hxx"
+#include "StarState.hxx"
 #include "StarZone.hxx"
 
 #include "StarGraphicAttribute.hxx"
@@ -65,7 +66,7 @@ public:
     return shared_ptr<StarAttribute>(new StarGAttributeBool(*this));
   }
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
 
 protected:
   //! copy constructor
@@ -90,7 +91,7 @@ public:
     return shared_ptr<StarAttribute>(new StarGAttributeColor(*this));
   }
   //! add to a graphic style
-  //virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   StarGAttributeColor(StarGAttributeColor const &orig) : StarAttributeColor(orig)
@@ -162,7 +163,7 @@ public:
   {
   }
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -190,7 +191,7 @@ public:
     return shared_ptr<StarAttribute>(new StarGAttributeUInt(*this));
   }
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   StarGAttributeUInt(StarGAttributeUInt const &orig) : StarAttributeUInt(orig)
@@ -214,7 +215,7 @@ public:
     return shared_ptr<StarAttribute>(new StarGAttributeVoid(*this));
   }
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   StarGAttributeVoid(StarGAttributeVoid const &orig) : StarAttributeVoid(orig)
@@ -254,97 +255,97 @@ StarGAttributeItemSet::~StarGAttributeItemSet()
 {
 }
 
-void StarGAttributeBool::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarGAttributeBool::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==XATTR_LINESTARTCENTER)
-    graphic.m_propertyList.insert("draw:marker-start-center", m_value);
+    state.m_graphic.m_propertyList.insert("draw:marker-start-center", m_value);
   else if (m_type==XATTR_LINEENDCENTER)
-    graphic.m_propertyList.insert("draw:marker-end-center", m_value);
+    state.m_graphic.m_propertyList.insert("draw:marker-end-center", m_value);
   else if (m_type==XATTR_FILLBMP_TILE && m_value)
-    graphic.m_propertyList.insert("style:repeat", "repeat");
+    state.m_graphic.m_propertyList.insert("style:repeat", "repeat");
   else if (m_type==XATTR_FILLBMP_STRETCH && m_value)
-    graphic.m_propertyList.insert("style:repeat", "stretch");
+    state.m_graphic.m_propertyList.insert("style:repeat", "stretch");
   else if (m_type==XATTR_FILLBACKGROUND)
-    graphic.m_hasBackground=m_value;
+    state.m_graphic.m_hasBackground=m_value;
   else if (m_type==StarAttribute::SDRATTR_SHADOW)
-    graphic.m_propertyList.insert("draw:shadow", m_value ? "visible" : "hidden");
+    state.m_graphic.m_propertyList.insert("draw:shadow", m_value ? "visible" : "hidden");
   else if (m_type==SDRATTR_TEXT_AUTOGROWHEIGHT)
-    graphic.m_propertyList.insert("draw:auto-grow-height", m_value);
+    state.m_graphic.m_propertyList.insert("draw:auto-grow-height", m_value);
   else if (m_type==SDRATTR_TEXT_AUTOGROWWIDTH)
-    graphic.m_propertyList.insert("draw:auto-grow-width", m_value);
+    state.m_graphic.m_propertyList.insert("draw:auto-grow-width", m_value);
   else if (m_type==SDRATTR_TEXT_ANISTARTINSIDE)
-    graphic.m_propertyList.insert("text:animation-start-inside", m_value);
+    state.m_graphic.m_propertyList.insert("text:animation-start-inside", m_value);
   else if (m_type==SDRATTR_TEXT_ANISTOPINSIDE)
-    graphic.m_propertyList.insert("text:animation-stop-inside", m_value);
+    state.m_graphic.m_propertyList.insert("text:animation-stop-inside", m_value);
   else if (m_type==SDRATTR_TEXT_CONTOURFRAME) // checkme
-    graphic.m_propertyList.insert("style:wrap-contour", m_value);
+    state.m_graphic.m_propertyList.insert("style:wrap-contour", m_value);
   else if (m_type==SDRATTR_OBJMOVEPROTECT)
-    graphic.m_protections[0]=m_value;
+    state.m_graphic.m_protections[0]=m_value;
   else if (m_type==SDRATTR_OBJSIZEPROTECT)
-    graphic.m_protections[1]=m_value;
+    state.m_graphic.m_protections[1]=m_value;
   else if (m_type==SDRATTR_OBJPRINTABLE)
-    graphic.m_protections[2]=!m_value;
+    state.m_graphic.m_protections[2]=!m_value;
   else if (m_type==SDRATTR_MEASUREBELOWREFEDGE)
-    graphic.m_propertyList.insert("draw:placing", m_value ? "below" : "above");
+    state.m_graphic.m_propertyList.insert("draw:placing", m_value ? "below" : "above");
   else if (m_type==SDRATTR_MEASURESHOWUNIT)
-    graphic.m_propertyList.insert("draw:show-unit", m_value);
+    state.m_graphic.m_propertyList.insert("draw:show-unit", m_value);
   else if (m_type==SDRATTR_GRAFINVERT)
-    graphic.m_propertyList.insert("draw:color-inversion", m_value);
+    state.m_graphic.m_propertyList.insert("draw:color-inversion", m_value);
   // TODO: XATTR_FILLBMP_SIZELOG
 }
 
-void StarGAttributeInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarGAttributeInt::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==XATTR_LINEWIDTH)
-    graphic.m_propertyList.insert("svg:stroke-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("svg:stroke-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==XATTR_LINESTARTWIDTH)
-    graphic.m_propertyList.insert("draw:marker-start-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:marker-start-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==XATTR_LINEENDWIDTH)
-    graphic.m_propertyList.insert("draw:marker-end-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:marker-end-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==XATTR_FILLBMP_SIZEX)
-    graphic.m_propertyList.insert("draw:fill-image-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:fill-image-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==XATTR_FILLBMP_SIZEY)
-    graphic.m_propertyList.insert("draw:fill-image-height", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:fill-image-height", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_SHADOWXDIST)
-    graphic.m_propertyList.insert("draw:shadow-offset-x", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:shadow-offset-x", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_SHADOWYDIST)
-    graphic.m_propertyList.insert("draw:shadow-offset-y", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:shadow-offset-y", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_TEXT_MAXFRAMEHEIGHT)
-    graphic.m_propertyList.insert("fo:max-height", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("fo:max-height", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_TEXT_MINFRAMEHEIGHT) // checkme
-    graphic.m_propertyList.insert("fo:min-height", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("fo:min-height", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_TEXT_MAXFRAMEWIDTH)
-    graphic.m_propertyList.insert("fo:max-width", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("fo:max-width", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_TEXT_MINFRAMEWIDTH) // checkme
-    graphic.m_propertyList.insert("fo:min-width", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("fo:min-width", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_CIRCSTARTANGLE)
-    graphic.m_propertyList.insert("draw:start-angle", double(m_value)/100.,  librevenge::RVNG_GENERIC);
+    state.m_graphic.m_propertyList.insert("draw:start-angle", double(m_value)/100.,  librevenge::RVNG_GENERIC);
   else if (m_type==SDRATTR_CIRCENDANGLE)
-    graphic.m_propertyList.insert("draw:end-angle", double(m_value)/100.,  librevenge::RVNG_GENERIC);
+    state.m_graphic.m_propertyList.insert("draw:end-angle", double(m_value)/100.,  librevenge::RVNG_GENERIC);
   else if (m_type==SDRATTR_MEASURELINEDIST)
-    graphic.m_propertyList.insert("draw:line-distance", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:line-distance", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_MEASUREOVERHANG)
-    graphic.m_propertyList.insert("draw:guide-overhang", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:guide-overhang", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_GRAFRED)
-    graphic.m_propertyList.insert("draw:red", double(m_value)/100., librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:red", double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==SDRATTR_GRAFGREEN)
-    graphic.m_propertyList.insert("draw:green", double(m_value)/100., librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:green", double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==SDRATTR_GRAFBLUE)
-    graphic.m_propertyList.insert("draw:blue", double(m_value)/100., librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:blue", double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==SDRATTR_GRAFLUMINANCE)
-    graphic.m_propertyList.insert("draw:luminance", double(m_value)/100., librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:luminance", double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==SDRATTR_GRAFCONTRAST)
-    graphic.m_propertyList.insert("draw:contrast", double(m_value)/100., librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:contrast", double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==SDRATTR_ECKENRADIUS)
-    graphic.m_propertyList.insert("draw:corner-radius", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:corner-radius", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
 }
 
-void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==XATTR_LINESTYLE) {
     if (m_value<=2) {
       char const *(wh[])= {"none", "solid", "dash"};
-      graphic.m_propertyList.insert("draw:stroke", wh[m_value]);
+      state.m_graphic.m_propertyList.insert("draw:stroke", wh[m_value]);
     }
     else {
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown line style %d\n", int(m_value)));
@@ -353,20 +354,20 @@ void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
   else if (m_type==XATTR_FILLSTYLE) {
     if (m_value<=4) {
       char const *(wh[])= {"none", "solid", "gradient", "hatch", "bitmap"};
-      graphic.m_propertyList.insert("draw:fill", wh[m_value]);
+      state.m_graphic.m_propertyList.insert("draw:fill", wh[m_value]);
     }
     else {
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown fill style %d\n", int(m_value)));
     }
   }
   else if (m_type==XATTR_LINETRANSPARENCE)
-    graphic.m_propertyList.insert("svg:stroke-opacity", 1-double(m_value)/100., librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("svg:stroke-opacity", 1-double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==XATTR_FILLTRANSPARENCE)
-    graphic.m_propertyList.insert("draw:opacity", 1-double(m_value)/100., librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:opacity", 1-double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==XATTR_LINEJOINT) {
     if (m_value<=4) {
       char const *(wh[])= {"none", "middle", "bevel", "miter", "round"};
-      graphic.m_propertyList.insert("draw:stroke-linejoin", wh[m_value]);
+      state.m_graphic.m_propertyList.insert("draw:stroke-linejoin", wh[m_value]);
     }
     else {
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown line join %d\n", int(m_value)));
@@ -375,7 +376,7 @@ void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
   else if (m_type==XATTR_FILLBMP_POS) {
     if (m_value<9) {
       char const *(wh[])= {"top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right"};
-      graphic.m_propertyList.insert("draw:fill-image-ref-point", wh[m_value]);
+      state.m_graphic.m_propertyList.insert("draw:fill-image-ref-point", wh[m_value]);
     }
     else {
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown bmp position %d\n", int(m_value)));
@@ -383,30 +384,30 @@ void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
   }
   // CHECKME: from here never seen
   else if (m_type==XATTR_GRADIENTSTEPCOUNT)
-    graphic.m_propertyList.insert("draw:gradient-step-count", m_value, librevenge::RVNG_GENERIC);
+    state.m_graphic.m_propertyList.insert("draw:gradient-step-count", m_value, librevenge::RVNG_GENERIC);
   else if (m_type==XATTR_FILLBMP_POSOFFSETX)
-    graphic.m_propertyList.insert("draw:fill-image-ref-point-x", double(m_value)/100, librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:fill-image-ref-point-x", double(m_value)/100, librevenge::RVNG_PERCENT);
   else if (m_type==XATTR_FILLBMP_POSOFFSETY)
-    graphic.m_propertyList.insert("draw:fill-image-ref-point-y", double(m_value)/100, librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:fill-image-ref-point-y", double(m_value)/100, librevenge::RVNG_PERCENT);
   else if (m_type==XATTR_FILLBMP_TILEOFFSETX || m_type==XATTR_FILLBMP_TILEOFFSETY) {
     std::stringstream s;
     s << m_value << "% " << (m_type==XATTR_FILLBMP_TILEOFFSETX ? "horizontal" : "vertical");
-    graphic.m_propertyList.insert("draw:tile-repeat-offset", s.str().c_str());
+    state.m_graphic.m_propertyList.insert("draw:tile-repeat-offset", s.str().c_str());
   }
   else if (m_type==SDRATTR_SHADOWTRANSPARENCE)
-    graphic.m_propertyList.insert("draw:shadow-opacity", 1.0-double(m_value)/255., librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:shadow-opacity", 1.0-double(m_value)/255., librevenge::RVNG_PERCENT);
   else if (m_type==SDRATTR_TEXT_LEFTDIST || m_type==SDRATTR_TEXT_RIGHTDIST ||
            m_type==SDRATTR_TEXT_UPPERDIST || m_type==SDRATTR_TEXT_LOWERDIST) {
     char const * (wh[])= {"left", "right", "top", "bottom"};
-    graphic.m_propertyList.insert((std::string("padding-")+wh[(m_type-SDRATTR_TEXT_LEFTDIST)]).c_str(), libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert((std::string("padding-")+wh[(m_type-SDRATTR_TEXT_LEFTDIST)]).c_str(), libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
   }
   else if (m_type==SDRATTR_TEXT_FITTOSIZE)
     // TODO: 0: none, 1: proportional, allline, autofit
-    graphic.m_propertyList.insert("draw:fit-to-size", m_value!=0);
+    state.m_graphic.m_propertyList.insert("draw:fit-to-size", m_value!=0);
   else if (m_type==SDRATTR_TEXT_HORZADJUST) {
     if (m_value<4) {
       char const *(wh[])= {"left", "center", "right", "justify"};
-      graphic.m_propertyList.insert("draw:textarea-horizontal-align", wh[m_value]);
+      state.m_graphic.m_propertyList.insert("draw:textarea-horizontal-align", wh[m_value]);
     }
     else {
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown text horizontal position %d\n", int(m_value)));
@@ -415,25 +416,25 @@ void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
   else if (m_type==SDRATTR_TEXT_VERTADJUST) {
     if (m_value<4) {
       char const *(wh[])= {"top", "middle", "bottom", "justify"};
-      graphic.m_propertyList.insert("draw:textarea-vertical-align", wh[m_value]);
+      state.m_graphic.m_propertyList.insert("draw:textarea-vertical-align", wh[m_value]);
     }
     else {
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown text vertical position %d\n", int(m_value)));
     }
   }
   else if (m_type==SDRATTR_TEXT_ANIAMOUNT) // unsure
-    graphic.m_propertyList.insert("text:animation-steps", double(m_value)/100., librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("text:animation-steps", double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==SDRATTR_TEXT_ANICOUNT)
-    graphic.m_propertyList.insert("text:animation-repeat", int(m_value));
+    state.m_graphic.m_propertyList.insert("text:animation-repeat", int(m_value));
   else if (m_type==SDRATTR_TEXT_ANIDELAY) { // check unit
     librevenge::RVNGString delay;
     delay.sprintf("PT%fS", double(m_value));
-    graphic.m_propertyList.insert("text:animation-delay", delay);
+    state.m_graphic.m_propertyList.insert("text:animation-delay", delay);
   }
   else if (m_type==SDRATTR_TEXT_ANIDIRECTION) {
     if (m_value<4) {
       char const *(wh[])= {"left", "right", "up", "down"};
-      graphic.m_propertyList.insert("text:animation-direction", wh[m_value]);
+      state.m_graphic.m_propertyList.insert("text:animation-direction", wh[m_value]);
     }
     else {
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown animation direction %d\n", int(m_value)));
@@ -442,7 +443,7 @@ void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
   else if (m_type==SDRATTR_TEXT_ANIKIND) {
     if (m_value<5) {
       char const *(wh[])= {"none", "none" /*blink*/, "scroll", "alternate", "slide"};
-      graphic.m_propertyList.insert("text:animation", wh[m_value]);
+      state.m_graphic.m_propertyList.insert("text:animation", wh[m_value]);
     }
     else {
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown animation direction %d\n", int(m_value)));
@@ -451,20 +452,20 @@ void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
   else if (m_type==SDRATTR_CIRCKIND) {
     if (m_value<4) {
       char const *(wh[])= {"full", "section", "cut", "arc"};
-      graphic.m_propertyList.insert("draw:kind", wh[m_value]);
+      state.m_graphic.m_propertyList.insert("draw:kind", wh[m_value]);
     }
     else {
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown circle kind %d\n", int(m_value)));
     }
   }
   else if (m_type==SDRATTR_GRAFGAMMA)
-    graphic.m_propertyList.insert("draw:gamma", double(m_value)/100., librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:gamma", double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==SDRATTR_GRAFTRANSPARENCE)
-    graphic.m_propertyList.insert("draw:opacity", 1.0-double(m_value)/100., librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:opacity", 1.0-double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==SDRATTR_GRAFMODE) {
     if (m_value<4) {
       char const *(wh[])= {"standard", "greyscale", "mono", "watermark"};
-      graphic.m_propertyList.insert("draw:color-mode", wh[m_value]);
+      state.m_graphic.m_propertyList.insert("draw:color-mode", wh[m_value]);
     }
     else {
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown graf color mode %d\n", int(m_value)));
@@ -472,10 +473,10 @@ void StarGAttributeUInt::addTo(STOFFGraphicStyle &graphic, StarItemPool const */
   }
 }
 
-void StarGAttributeVoid::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarGAttributeVoid::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==StarAttribute::SDRATTR_SHADOW3D)
-    graphic.m_propertyList.insert("dr3d:shadow", "visible");
+    state.m_graphic.m_propertyList.insert("dr3d:shadow", "visible");
   // also SDRATTR_SHADOWPERSP, ok to ignore ?
 }
 
@@ -532,12 +533,8 @@ public:
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
-  //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
-  //! add to a paragraph style
-  virtual void addTo(STOFFParagraph &para, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! add to a cell/graphic/paragraph style
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -639,12 +636,8 @@ public:
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  //! add to a font
-  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
-  //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
-  //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! add to a cell/font/graphic style
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -676,7 +669,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -710,9 +703,9 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   // //! add to a graphic style
-  // virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  // virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! add to a page
-  virtual void addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -791,7 +784,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -825,7 +818,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -859,10 +852,8 @@ public:
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  //! add to a font
-  virtual void addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
-  //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! add to a font/graphic style
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -898,7 +889,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -950,7 +941,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -1011,7 +1002,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -1055,10 +1046,8 @@ public:
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
-  //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //! add to a cell/graphic style
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -1093,225 +1082,208 @@ protected:
   int m_style;
 };
 
-void StarGAttributeBorder::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
-{
-  if (m_type==ATTR_SC_BORDER) {
-    // checkme what is m_distance?
-    char const * (wh[])= {"top", "left", "right", "bottom"};
-    for (int i=0; i<4; ++i)
-      m_borders[i].addTo(cell.m_propertyList, wh[i]);
-  }
-}
-
-void StarGAttributeBorder::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarGAttributeBorder::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_FRM_BOX) {
-    // checkme what is m_distance?
+    // checkme what is m_distance
+
+    // graphic
     char const * (wh[])= {"top", "left", "right", "bottom"};
     for (int i=0; i<4; ++i) {
       if (!m_borders[i].isEmpty())
-        m_borders[i].addTo(graphic.m_propertyList, wh[i]);
+        m_borders[i].addTo(state.m_graphic.m_propertyList, wh[i]);
     }
     for (int i=0; i<4; ++i)
-      graphic.m_propertyList.insert((std::string("padding-")+wh[i]).c_str(), libstoff::convertMiniMToPoint(m_distances[i]), librevenge::RVNG_POINT);
-  }
-}
+      state.m_graphic.m_propertyList.insert((std::string("padding-")+wh[i]).c_str(), libstoff::convertMiniMToPoint(m_distances[i]), librevenge::RVNG_POINT);
 
-void StarGAttributeBorder::addTo(STOFFParagraph &para, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
-{
-  if (m_type==ATTR_FRM_BOX) { // checkme
+    // paragraph
+    for (int i=0; i<4; ++i)
+      m_borders[i].addTo(state.m_paragraph.m_propertyList, wh[i]);
+  }
+  else if (m_type==ATTR_SC_BORDER) {
     // checkme what is m_distance?
     char const * (wh[])= {"top", "left", "right", "bottom"};
     for (int i=0; i<4; ++i)
-      m_borders[i].addTo(para.m_propertyList, wh[i]);
+      m_borders[i].addTo(state.m_cell.m_propertyList, wh[i]);
   }
 }
 
-void StarGAttributeBrush::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarGAttributeBrush::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
-  if (m_type != ATTR_CHR_BACKGROUND)
-    return;
-  if (m_brush.isEmpty()) {
-    font.m_propertyList.insert("fo:background-color", "transparent");
-    return;
-  }
-  STOFFColor color;
-  if (m_brush.getColor(color)) {
-    font.m_propertyList.insert("fo:background-color", color.str().c_str());
-    return;
-  }
-  else {
-    font.m_propertyList.insert("fo:background-color", "transparent");
-    STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a font background\n"));
-  }
-}
-
-void StarGAttributeBrush::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
-{
-  if (m_type != ATTR_SC_BACKGROUND)
-    return;
-  if (m_brush.isEmpty()) {
-    cell.m_propertyList.insert("fo:background-color", "transparent");
-    return;
-  }
-  STOFFColor color;
-#if 1
-  if (m_brush.getColor(color)) {
-    cell.m_propertyList.insert("fo:background-color", color.str().c_str());
-    return;
-  }
-  STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a cell background\n"));
-  cell.m_propertyList.insert("fo:background-color", "transparent");
-#else
-  /* checkme, is it possible to use style:background-image here ?
-     Can not create any working ods file with bitmap cell's background...
-   */
-  if (m_brush.hasUniqueColor() && m_brush.getColor(color)) {
-    cell.m_propertyList.insert("fo:background-color", color.str().c_str());
-    return;
-  }
-  STOFFEmbeddedObject object;
-  STOFFVec2i size;
-  if (m_brush.getPattern(object, size) && object.m_dataList.size()) {
-    librevenge::RVNGPropertyList backgroundList;
-    backgroundList.insert("librevenge:bitmap", object.m_dataList[0].getBase64Data());
-    backgroundList.insert("xlink:type", "simple");
-    backgroundList.insert("xlink:show", "embed");
-    backgroundList.insert("xlink:actuate", "onLoad");
-    backgroundList.insert("style:filter-name", object.m_typeList.empty() ? "image/pict" : object.m_typeList[0].c_str());
-    if (m_brush.m_transparency>0 && m_brush.m_transparency<=255)
-      backgroundList.insert("draw:opacity", 1.-double(m_brush.m_transparency)/255., librevenge::RVNG_PERCENT);
-    if (m_brush.m_position>=1 && m_brush.m_position<=9) {
-      int xPos=(m_brush.m_position-1)%3, yPos=(m_brush.m_position-1)%3;
-      backgroundList.insert("style:position",
-                            (std::string(xPos==0 ? "left " : xPos==1 ? "center " : "right ")+
-                             std::string(yPos==0 ? "top" : yPos==1 ? "center" : "bottom")).c_str());
+  // font
+  if (m_type == ATTR_CHR_BACKGROUND) {
+    if (m_brush.isEmpty())
+      state.m_font.m_propertyList.insert("fo:background-color", "transparent");
+    else {
+      STOFFColor color;
+      if (m_brush.getColor(color))
+        state.m_font.m_propertyList.insert("fo:background-color", color.str().c_str());
+      else {
+        state.m_font.m_propertyList.insert("fo:background-color", "transparent");
+        STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a font background\n"));
+      }
     }
-    librevenge::RVNGPropertyListVector backgroundVector;
-    backgroundVector.append(backgroundList);
-    cell.m_propertyList.insert("librevenge:background-image", backgroundVector);
   }
-  else {
+  // graphic
+  if (m_type==ATTR_FRM_BACKGROUND) {
+    if (m_brush.m_transparency>0 && m_brush.m_transparency<=255)
+      state.m_graphic.m_propertyList.insert("draw:opacity", 1.-double(m_brush.m_transparency)/255., librevenge::RVNG_PERCENT);
+    else
+      state.m_graphic.m_propertyList.insert("draw:opacity",1., librevenge::RVNG_PERCENT);
+    if (m_brush.isEmpty())
+      state.m_graphic.m_propertyList.insert("draw:fill", "none");
+    else {
+      STOFFColor color;
+      if (m_brush.hasUniqueColor() && m_brush.getColor(color)) {
+        state.m_graphic.m_propertyList.insert("draw:fill", "solid");
+        state.m_graphic.m_propertyList.insert("draw:fill-color", color.str().c_str());
+      }
+      else {
+        STOFFEmbeddedObject object;
+        STOFFVec2i size;
+        if (m_brush.getPattern(object, size) && object.m_dataList.size()) {
+          state.m_graphic.m_propertyList.insert("draw:fill", "bitmap");
+          state.m_graphic.m_propertyList.insert("draw:fill-image", object.m_dataList[0].getBase64Data());
+          state.m_graphic.m_propertyList.insert("draw:fill-image-width", size[0], librevenge::RVNG_POINT);
+          state.m_graphic.m_propertyList.insert("draw:fill-image-height", size[1], librevenge::RVNG_POINT);
+          state.m_graphic.m_propertyList.insert("draw:fill-image-ref-point-x",0, librevenge::RVNG_POINT);
+          state.m_graphic.m_propertyList.insert("draw:fill-image-ref-point-y",0, librevenge::RVNG_POINT);
+          state.m_graphic.m_propertyList.insert("librevenge:mime-type", object.m_typeList.empty() ? "image/pict" : object.m_typeList[0].c_str());
+        }
+        else
+          state.m_graphic.m_propertyList.insert("draw:fill", "none");
+      }
+    }
+  }
+  // cell
+  if (m_type == ATTR_SC_BACKGROUND) {
+    if (m_brush.isEmpty()) {
+      state.m_cell.m_propertyList.insert("fo:background-color", "transparent");
+      return;
+    }
+
+    STOFFColor color;
+#if 1
+    if (m_brush.getColor(color)) {
+      state.m_cell.m_propertyList.insert("fo:background-color", color.str().c_str());
+      return;
+    }
     STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a cell background\n"));
-  }
+    state.m_cell.m_propertyList.insert("fo:background-color", "transparent");
+#else
+    /* checkme, is it possible to use style:background-image here ?
+       Can not create any working ods file with bitmap cell's background...
+    */
+    if (m_brush.hasUniqueColor() && m_brush.getColor(color)) {
+      state.m_cell.m_propertyList.insert("fo:background-color", color.str().c_str());
+      return;
+    }
+    STOFFEmbeddedObject object;
+    STOFFVec2i size;
+    if (m_brush.getPattern(object, size) && object.m_dataList.size()) {
+      librevenge::RVNGPropertyList backgroundList;
+      backgroundList.insert("librevenge:bitmap", object.m_dataList[0].getBase64Data());
+      backgroundList.insert("xlink:type", "simple");
+      backgroundList.insert("xlink:show", "embed");
+      backgroundList.insert("xlink:actuate", "onLoad");
+      backgroundList.insert("style:filter-name", object.m_typeList.empty() ? "image/pict" : object.m_typeList[0].c_str());
+      if (m_brush.m_transparency>0 && m_brush.m_transparency<=255)
+        backgroundList.insert("draw:opacity", 1.-double(m_brush.m_transparency)/255., librevenge::RVNG_PERCENT);
+      if (m_brush.m_position>=1 && m_brush.m_position<=9) {
+        int xPos=(m_brush.m_position-1)%3, yPos=(m_brush.m_position-1)%3;
+        backgroundList.insert("style:position",
+                              (std::string(xPos==0 ? "left " : xPos==1 ? "center " : "right ")+
+                               std::string(yPos==0 ? "top" : yPos==1 ? "center" : "bottom")).c_str());
+      }
+      librevenge::RVNGPropertyListVector backgroundVector;
+      backgroundVector.append(backgroundList);
+      state.m_cell.m_propertyList.insert("librevenge:background-image", backgroundVector);
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a cell background\n"));
+    }
 #endif
+  }
 }
 
-void StarGAttributeBrush::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
-{
-  if (m_type!=ATTR_FRM_BACKGROUND)
-    return;
-  if (m_brush.m_transparency>0 && m_brush.m_transparency<=255)
-    graphic.m_propertyList.insert("draw:opacity", 1.-double(m_brush.m_transparency)/255., librevenge::RVNG_PERCENT);
-  else
-    graphic.m_propertyList.insert("draw:opacity",1., librevenge::RVNG_PERCENT);
-  if (m_brush.isEmpty()) {
-    graphic.m_propertyList.insert("draw:fill", "none");
-    return;
-  }
-  STOFFColor color;
-  if (m_brush.hasUniqueColor() && m_brush.getColor(color)) {
-    graphic.m_propertyList.insert("draw:fill", "solid");
-    graphic.m_propertyList.insert("draw:fill-color", color.str().c_str());
-    return;
-  }
-  STOFFEmbeddedObject object;
-  STOFFVec2i size;
-  if (m_brush.getPattern(object, size) && object.m_dataList.size()) {
-    graphic.m_propertyList.insert("draw:fill", "bitmap");
-    graphic.m_propertyList.insert("draw:fill-image", object.m_dataList[0].getBase64Data());
-    graphic.m_propertyList.insert("draw:fill-image-width", size[0], librevenge::RVNG_POINT);
-    graphic.m_propertyList.insert("draw:fill-image-height", size[1], librevenge::RVNG_POINT);
-    graphic.m_propertyList.insert("draw:fill-image-ref-point-x",0, librevenge::RVNG_POINT);
-    graphic.m_propertyList.insert("draw:fill-image-ref-point-y",0, librevenge::RVNG_POINT);
-    graphic.m_propertyList.insert("librevenge:mime-type", object.m_typeList.empty() ? "image/pict" : object.m_typeList[0].c_str());
-  }
-  else
-    graphic.m_propertyList.insert("draw:fill", "none");
-}
-
-void StarGAttributeCrop::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarGAttributeCrop::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==SDRATTR_GRAFCROP) {
     if (m_leftTop==STOFFVec2i(0,0) && m_rightBottom==STOFFVec2i(0,0))
-      graphic.m_propertyList.insert("fo:clip", "auto");
+      state.m_graphic.m_propertyList.insert("fo:clip", "auto");
     else {
       librevenge::RVNGString clip;
       clip.sprintf("rect(%fpt,%ftt,%fpt,%fpt)", libstoff::convertMiniMToPoint(m_leftTop[1]), libstoff::convertMiniMToPoint(m_rightBottom[0]),
                    libstoff::convertMiniMToPoint(m_rightBottom[1]), libstoff::convertMiniMToPoint(m_leftTop[0]));
-      graphic.m_propertyList.insert("fo:clip", clip);
+      state.m_graphic.m_propertyList.insert("fo:clip", clip);
     }
   }
 }
 
-void StarGAttributeNamedArrow::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarGAttributeNamedArrow::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==XATTR_LINESTART || m_type==XATTR_LINEEND) {
     char const *pathName=m_type==XATTR_LINESTART ? "draw:marker-start-path" : "draw:marker-end-path";
     char const *viewboxName=m_type==XATTR_LINESTART ? "draw:marker-start-viewbox" : "draw:marker-end-viewbox";
     if (m_polygon.empty()) {
-      if (graphic.m_propertyList[pathName]) graphic.m_propertyList.remove(pathName);
-      if (graphic.m_propertyList[viewboxName]) graphic.m_propertyList.remove(viewboxName);
+      if (state.m_graphic.m_propertyList[pathName]) state.m_graphic.m_propertyList.remove(pathName);
+      if (state.m_graphic.m_propertyList[viewboxName]) state.m_graphic.m_propertyList.remove(viewboxName);
     }
     else {
       librevenge::RVNGString path, viewbox;
       if (m_polygon.convert(path, viewbox)) {
-        graphic.m_propertyList.insert(pathName, path);
-        graphic.m_propertyList.insert(viewboxName, viewbox);
+        state.m_graphic.m_propertyList.insert(pathName, path);
+        state.m_graphic.m_propertyList.insert(viewboxName, viewbox);
       }
     }
   }
 }
 
-void StarGAttributeNamedBitmap::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarGAttributeNamedBitmap::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==XATTR_FILLBITMAP) {
     if (!m_bitmap.isEmpty())
-      m_bitmap.addAsFillImageTo(graphic.m_propertyList);
+      m_bitmap.addAsFillImageTo(state.m_graphic.m_propertyList);
     else {
       STOFF_DEBUG_MSG(("StarGAttributeNamedBitmap::addTo: can not find the bitmap\n"));
     }
   }
 }
 
-void StarGAttributeFrameSize::addTo(STOFFPageSpan &page, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarGAttributeFrameSize::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_FRM_FRM_SIZE) {
     if (m_width)
-      page.m_propertiesList[0].insert("fo:page-width", double(m_width)*0.05, librevenge::RVNG_POINT);
+      state.m_page.m_propertiesList[0].insert("fo:page-width", double(m_width)*0.05, librevenge::RVNG_POINT);
     if (m_height)
-      page.m_propertiesList[0].insert("fo:page-height", double(m_height)*0.05, librevenge::RVNG_POINT);
+      state.m_page.m_propertiesList[0].insert("fo:page-height", double(m_height)*0.05, librevenge::RVNG_POINT);
   }
 }
 
-void StarGAttributeNamedColor::addTo(STOFFFont &font, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
-{
-  if (m_type==XATTR_FORMTXTSHDWCOLOR)
-    font.m_shadowColor=m_color;
-}
-
-void StarGAttributeNamedColor::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarGAttributeNamedColor::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==XATTR_LINECOLOR)
-    graphic.m_propertyList.insert("svg:stroke-color", m_color.str().c_str());
+    state.m_graphic.m_propertyList.insert("svg:stroke-color", m_color.str().c_str());
   else if (m_type==XATTR_FILLCOLOR)
-    graphic.m_propertyList.insert("draw:fill-color", m_color.str().c_str());
-  else if (m_type==SDRATTR_SHADOWCOLOR)
-    graphic.m_propertyList.insert("draw:shadow-color", m_color.str().c_str());
-}
-
-void StarGAttributeNamedDash::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
-{
-  if (m_type==XATTR_LINEDASH) {
-    graphic.m_propertyList.insert("draw:dots1", m_numbers[0]);
-    graphic.m_propertyList.insert("draw:dots1-length", libstoff::convertMiniMToPoint(m_lengths[0]), librevenge::RVNG_POINT);
-    graphic.m_propertyList.insert("draw:dots2", m_numbers[1]);
-    graphic.m_propertyList.insert("draw:dots2-length", libstoff::convertMiniMToPoint(m_lengths[1]), librevenge::RVNG_POINT);
-    graphic.m_propertyList.insert("draw:distance", libstoff::convertMiniMToPoint(m_distance), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:fill-color", m_color.str().c_str());
+  else if (m_type==SDRATTR_SHADOWCOLOR) {
+    state.m_graphic.m_propertyList.insert("draw:shadow-color", m_color.str().c_str());
+    state.m_font.m_shadowColor=m_color;
   }
 }
 
-void StarGAttributeNamedGradient::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarGAttributeNamedDash::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
+{
+  if (m_type==XATTR_LINEDASH) {
+    state.m_graphic.m_propertyList.insert("draw:dots1", m_numbers[0]);
+    state.m_graphic.m_propertyList.insert("draw:dots1-length", libstoff::convertMiniMToPoint(m_lengths[0]), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:dots2", m_numbers[1]);
+    state.m_graphic.m_propertyList.insert("draw:dots2-length", libstoff::convertMiniMToPoint(m_lengths[1]), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:distance", libstoff::convertMiniMToPoint(m_distance), librevenge::RVNG_POINT);
+  }
+}
+
+void StarGAttributeNamedGradient::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==XATTR_FILLGRADIENT) {
     // TODO XATTR_FILLFLOATTRANSPARENCE
@@ -1319,65 +1291,62 @@ void StarGAttributeNamedGradient::addTo(STOFFGraphicStyle &graphic, StarItemPool
       return;
     if (m_gradientType>=0 && m_gradientType<=5) {
       char const *(wh[])= {"linear", "axial", "radial", "ellipsoid", "square", "rectangle"};
-      graphic.m_propertyList.insert("draw:style", wh[m_gradientType]);
+      state.m_graphic.m_propertyList.insert("draw:style", wh[m_gradientType]);
     }
     else {
       STOFF_DEBUG_MSG(("StarGAttributeNamedGradient::addTo: unknown hash type %d\n", m_gradientType));
     }
-    graphic.m_propertyList.insert("draw:angle", double(m_angle)/10, librevenge::RVNG_GENERIC);
-    graphic.m_propertyList.insert("draw:border", double(m_border)/100, librevenge::RVNG_PERCENT);
-    graphic.m_propertyList.insert("draw:start-color", m_colors[0].str().c_str());
-    graphic.m_propertyList.insert("librevenge:start-opacity", double(m_intensities[0])/100, librevenge::RVNG_PERCENT);
-    graphic.m_propertyList.insert("draw:end-color", m_colors[1].str().c_str());
-    graphic.m_propertyList.insert("librevenge:end-opacity", double(m_intensities[1])/100, librevenge::RVNG_PERCENT);
-    graphic.m_propertyList.insert("svg:cx", double(m_offsets[0])/100, librevenge::RVNG_PERCENT);
-    graphic.m_propertyList.insert("svg:cy", double(m_offsets[1])/100, librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:angle", double(m_angle)/10, librevenge::RVNG_GENERIC);
+    state.m_graphic.m_propertyList.insert("draw:border", double(m_border)/100, librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:start-color", m_colors[0].str().c_str());
+    state.m_graphic.m_propertyList.insert("librevenge:start-opacity", double(m_intensities[0])/100, librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:end-color", m_colors[1].str().c_str());
+    state.m_graphic.m_propertyList.insert("librevenge:end-opacity", double(m_intensities[1])/100, librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("svg:cx", double(m_offsets[0])/100, librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("svg:cy", double(m_offsets[1])/100, librevenge::RVNG_PERCENT);
     // m_step ?
   }
 }
 
-void StarGAttributeNamedHatch::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarGAttributeNamedHatch::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==XATTR_FILLHATCH && m_distance>0) {
     if (m_hatchType>=0 && m_hatchType<3) {
       char const *(wh[])= {"single", "double", "triple"};
-      graphic.m_propertyList.insert("draw:style", wh[m_hatchType]);
+      state.m_graphic.m_propertyList.insert("draw:style", wh[m_hatchType]);
     }
     else {
       STOFF_DEBUG_MSG(("StarGAttributeNamedHatch::addTo: unknown hash type %d\n", m_hatchType));
     }
-    graphic.m_propertyList.insert("draw:color", m_color.str().c_str());
-    graphic.m_propertyList.insert("draw:distance", libstoff::convertMiniMToPoint(m_distance),librevenge::RVNG_POINT);
-    if (m_angle) graphic.m_propertyList.insert("draw:rotation", double(m_angle)/10, librevenge::RVNG_GENERIC);
+    state.m_graphic.m_propertyList.insert("draw:color", m_color.str().c_str());
+    state.m_graphic.m_propertyList.insert("draw:distance", libstoff::convertMiniMToPoint(m_distance),librevenge::RVNG_POINT);
+    if (m_angle) state.m_graphic.m_propertyList.insert("draw:rotation", double(m_angle)/10, librevenge::RVNG_GENERIC);
   }
 }
 
-void StarGAttributeShadow::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarGAttributeShadow::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
-  if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=100) {
-    cell.m_propertyList.insert("style:shadow", "none");
-    return;
+  // graphic
+  if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=255)
+    state.m_graphic.m_propertyList.insert("draw:shadow", "hidden");
+  else {
+    state.m_graphic.m_propertyList.insert("draw:shadow", "visible");
+    state.m_graphic.m_propertyList.insert("draw:shadow-color", m_color.str().c_str());
+    state.m_graphic.m_propertyList.insert("draw:shadow-opacity", 1.-double(m_transparency)/255., librevenge::RVNG_PERCENT);
+    state.m_graphic.m_propertyList.insert("draw:shadow-offset-x", ((m_location%2)?-1:1)*libstoff::convertMiniMToPoint(m_width), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:shadow-offset-y", (m_location<=2?-1:1)*libstoff::convertMiniMToPoint(m_width), librevenge::RVNG_POINT);
   }
-  std::stringstream s;
-  s << m_color.str().c_str() << " "
-    << ((m_location%2)?-1:1)*double(m_width)/20. << "pt "
-    << (m_location<=2?-1:1)*double(m_width)/20. << "pt";
-  cell.m_propertyList.insert("style:shadow", s.str().c_str());
-}
-
-void StarGAttributeShadow::addTo(STOFFGraphicStyle &graphic, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
-{
-  if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=255) {
-    graphic.m_propertyList.insert("draw:shadow", "hidden");
-    return;
+  // cell
+  if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=100)
+    state.m_cell.m_propertyList.insert("style:shadow", "none");
+  else {
+    std::stringstream s;
+    s << m_color.str().c_str() << " "
+      << ((m_location%2)?-1:1)*double(m_width)/20. << "pt "
+      << (m_location<=2?-1:1)*double(m_width)/20. << "pt";
+    state.m_cell.m_propertyList.insert("style:shadow", s.str().c_str());
   }
-  graphic.m_propertyList.insert("draw:shadow", "visible");
-  graphic.m_propertyList.insert("draw:shadow-color", m_color.str().c_str());
-  graphic.m_propertyList.insert("draw:shadow-opacity", 1.-double(m_transparency)/255., librevenge::RVNG_PERCENT);
-  graphic.m_propertyList.insert("draw:shadow-offset-x", ((m_location%2)?-1:1)*libstoff::convertMiniMToPoint(m_width), librevenge::RVNG_POINT);
-  graphic.m_propertyList.insert("draw:shadow-offset-y", (m_location<=2?-1:1)*libstoff::convertMiniMToPoint(m_width), librevenge::RVNG_POINT);
 }
-
 
 bool StarGAttributeBorder::read(StarZone &zone, int nVers, long endPos, StarObject &/*object*/)
 {

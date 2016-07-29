@@ -42,6 +42,7 @@
 #include "SWFieldManager.hxx"
 
 #include "StarObject.hxx"
+#include "StarState.hxx"
 #include "StarZone.hxx"
 
 #include "STOFFListener.hxx"
@@ -106,7 +107,7 @@ void Field::print(std::ostream &o) const
     o << "level=" << m_level << ",";
 }
 
-bool Field::send(STOFFListenerPtr listener, StarItemPool const */*pool*/, StarObject &object) const
+bool Field::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: can not find the listener\n"));
@@ -226,7 +227,7 @@ bool Field::send(STOFFListenerPtr listener, StarItemPool const */*pool*/, StarOb
     int subType=m_subType&0x7FF;
     if (subType>=4 && subType<8) {
       field.m_propertyList.insert("librevenge:field-type", "text:user-defined");
-      field.m_propertyList.insert("text:name", object.getUserNameMetaData(subType-4));
+      field.m_propertyList.insert("text:name", state.m_object.getUserNameMetaData(subType-4));
     }
     else if (subType==9) {
       if (m_format>=0 && m_format<=2) {
@@ -325,7 +326,7 @@ struct FieldDateTime : public Field {
   //! destructor
   virtual ~FieldDateTime();
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -343,7 +344,7 @@ FieldDateTime::~FieldDateTime()
 {
 }
 
-bool FieldDateTime::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+bool FieldDateTime::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldDateTime::send: can not find the listener\n"));
@@ -376,7 +377,7 @@ bool FieldDateTime::send(STOFFListenerPtr listener, StarItemPool const *pool, St
     }
   }
   else
-    return Field::send(listener, pool, object);
+    return Field::send(listener, state);
   //TODO: set the format
   listener->insertField(field);
   return true;
@@ -395,7 +396,7 @@ struct FieldDBField : public Field {
   //! destructor
   virtual ~FieldDBField();
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -416,7 +417,7 @@ FieldDBField::~FieldDBField()
 {
 }
 
-bool FieldDBField::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+bool FieldDBField::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldDBField::send: can not find the listener\n"));
@@ -435,7 +436,7 @@ bool FieldDBField::send(STOFFListenerPtr listener, StarItemPool const *pool, Sta
     field.m_propertyList.insert("text:column-name", m_colName);
   }
   else
-    return Field::send(listener, pool, object);
+    return Field::send(listener, state);
   //TODO: set the format
   listener->insertField(field);
   return true;
@@ -454,7 +455,7 @@ struct FieldHiddenText : public Field {
   //! destructor
   virtual ~FieldHiddenText();
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -472,7 +473,7 @@ FieldHiddenText::~FieldHiddenText()
 {
 }
 
-bool FieldHiddenText::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+bool FieldHiddenText::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldHiddenText::send: can not find the listener\n"));
@@ -505,7 +506,7 @@ bool FieldHiddenText::send(STOFFListenerPtr listener, StarItemPool const *pool, 
     field.m_propertyList.insert("text:is-hidden", m_hidden);
   }
   else // also ....
-    return Field::send(listener, pool, object);
+    return Field::send(listener, state);
   //TODO: set the format
   listener->insertField(field);
   return true;
@@ -561,7 +562,7 @@ struct FieldJumpEdit : public Field {
   //! destructor
   virtual ~FieldJumpEdit();
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -576,7 +577,7 @@ FieldJumpEdit::~FieldJumpEdit()
 {
 }
 
-bool FieldJumpEdit::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+bool FieldJumpEdit::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldJumpEdit::send: can not find the listener\n"));
@@ -597,7 +598,7 @@ bool FieldJumpEdit::send(STOFFListenerPtr listener, StarItemPool const *pool, St
       field.m_propertyList.insert("text:description", m_help);
   }
   else
-    return Field::send(listener, pool, object);
+    return Field::send(listener, state);
   listener->insertField(field);
   return true;
 }
@@ -615,7 +616,7 @@ struct FieldPageNumber : public Field {
   //! destructor
   virtual ~FieldPageNumber();
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -637,7 +638,7 @@ FieldPageNumber::~FieldPageNumber()
 {
 }
 
-bool FieldPageNumber::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+bool FieldPageNumber::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldPageNumber::send: can not find the listener\n"));
@@ -652,7 +653,7 @@ bool FieldPageNumber::send(STOFFListenerPtr listener, StarItemPool const *pool, 
       field.m_propertyList.insert("text:select-page", "next");
   }
   else // also 31 which is setPageRef
-    return Field::send(listener, pool, object);
+    return Field::send(listener, state);
   //TODO: set the format
   listener->insertField(field);
   return true;
@@ -671,7 +672,7 @@ struct FieldPostIt : public Field {
   //! destructor
   virtual ~FieldPostIt();
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -731,7 +732,7 @@ struct FieldSetExp : public Field {
   //! destructor
   virtual ~FieldSetExp();
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -761,7 +762,7 @@ FieldSetExp::~FieldSetExp()
 {
 }
 
-bool FieldSetExp::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+bool FieldSetExp::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldSetExp::send: can not find the listener\n"));
@@ -786,7 +787,7 @@ bool FieldSetExp::send(STOFFListenerPtr listener, StarItemPool const *pool, Star
       field.m_propertyList.insert("librevenge:field-content", m_content);
   }
   else
-    return Field::send(listener, pool, object);
+    return Field::send(listener, state);
   listener->insertField(field);
   return true;
 }
@@ -804,7 +805,7 @@ struct FieldSetField : public Field {
   //! destructor
   virtual ~FieldSetField();
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! print a field
   virtual void print(std::ostream &o) const
   {
@@ -828,7 +829,7 @@ FieldSetField::~FieldSetField()
 {
 }
 
-bool FieldSetField::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+bool FieldSetField::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldSetField::send: can not find the listener\n"));
@@ -848,7 +849,7 @@ bool FieldSetField::send(STOFFListenerPtr listener, StarItemPool const *pool, St
     // CHECKME: we need to set also text:table-type
   }
   else // also 27,29...
-    return Field::send(listener, pool, object);
+    return Field::send(listener, state);
   listener->insertField(field);
   return true;
 }
@@ -909,7 +910,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
     listener->insertUnicodeString(m_text);
 }
 
-bool FieldPostIt::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+bool FieldPostIt::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldPostIt::send: can not find the listener\n"));
@@ -923,7 +924,7 @@ bool FieldPostIt::send(STOFFListenerPtr listener, StarItemPool const *pool, Star
     listener->insertComment(doc, m_author, date);
     return true;
   }
-  return Field::send(listener, pool, object);
+  return Field::send(listener, state);
 }
 
 }

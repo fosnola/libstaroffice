@@ -43,6 +43,8 @@
 #include "libstaroffice_internal.hxx"
 #include "StarObject.hxx"
 
+class StarState;
+
 namespace StarObjectTextInternal
 {
 //! Internal: a basic sone of StarObjectTextInternal
@@ -54,7 +56,11 @@ struct Zone {
   //! destructor
   virtual ~Zone();
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const=0;
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const=0;
+  //! try to inventory the different pages
+  virtual void inventoryPage(StarState &/*state*/) const
+  {
+  }
 };
 
 //! Internal: a set of zone
@@ -66,7 +72,9 @@ struct Content {
   //! destructor
   ~Content();
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const;
+  //! try to inventory the different pages
+  void inventoryPages(StarState &state) const;
   //! the section id
   int m_sectionId;
   //! the list of text zone
@@ -98,7 +106,7 @@ public:
   bool parse();
 
   /** try to update the page span (to create draw document)*/
-  bool updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const;
+  bool updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages);
   //! try to send the different page
   bool sendPages(STOFFTextListenerPtr listener);
 

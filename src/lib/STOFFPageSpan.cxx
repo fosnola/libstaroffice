@@ -72,7 +72,7 @@ void STOFFHeaderFooter::send(STOFFListener *listener, bool isHeader) const
 }
 
 // ----------------- STOFFPageSpan ------------------------
-STOFFPageSpan::STOFFPageSpan() : m_pageSpan(1), m_actualZone(STOFFPageSpan::Page), m_pageNumber(-1)
+STOFFPageSpan::STOFFPageSpan() : m_pageSpan(1), m_pageNumber(-1)
 {
   m_propertiesList[0].insert("fo:page-height", 11., librevenge::RVNG_INCH);
   m_propertiesList[0].insert("fo:page-width", 8.5, librevenge::RVNG_INCH);

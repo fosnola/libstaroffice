@@ -51,6 +51,7 @@
 #include "StarObject.hxx"
 #include "StarObjectSmallText.hxx"
 #include "StarItemPool.hxx"
+#include "StarState.hxx"
 #include "StarZone.hxx"
 
 #include "StarObjectSmallGraphic.hxx"
@@ -407,16 +408,21 @@ public:
     s << "###type=" << m_identifier << ",";
     return s.str();
   }
-  //! try to update the style
-  void updateStyle(STOFFGraphicStyle &style, StarObject &/*object*/, STOFFListenerPtr /*listener*/) const
+  //! return a pool corresponding to an object
+  static shared_ptr<StarItemPool> getPool(StarObject &object)
+  {
+    return object.findItemPool(StarItemPool::T_XOutdevPool, false);
+  }
+  //! try to update the graphic style
+  void updateStyle(StarState &state, STOFFListenerPtr /*listener*/) const
   {
     if (m_flags[0] && m_flags[1])
-      style.m_propertyList.insert("style:protect", "position size");
+      state.m_graphic.m_propertyList.insert("style:protect", "position size");
     else if (m_flags[0])
-      style.m_propertyList.insert("style:protect", "position");
+      state.m_graphic.m_propertyList.insert("style:protect", "position");
     else if (m_flags[1])
-      style.m_propertyList.insert("style:protect", "size");
-    style.m_propertyList.insert("style:print-content", !m_flags[2]);
+      state.m_graphic.m_propertyList.insert("style:protect", "size");
+    state.m_graphic.m_propertyList.insert("style:print-content", !m_flags[2]);
     // todo noVisible as master ie hide in master
   }
   //! basic print function
@@ -481,28 +487,27 @@ public:
     return s.str();
   }
   //! try to update the style
-  void updateStyle(STOFFGraphicStyle &style, StarObject &object, STOFFListenerPtr listener) const
+  void updateStyle(StarState &state, STOFFListenerPtr listener) const
   {
-    SdrGraphic::updateStyle(style, object, listener);
-    shared_ptr<StarItemPool> pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
-    if (pool && !m_sheetStyle.empty()) {
-      StarItemStyle const *mStyle=pool->findStyleWithFamily(m_sheetStyle, StarItemStyle::F_Paragraph);
+    SdrGraphic::updateStyle(state, listener);
+    if (state.m_pool && !m_sheetStyle.empty()) {
+      StarItemStyle const *mStyle=state.m_pool->findStyleWithFamily(m_sheetStyle, StarItemStyle::F_Paragraph);
       if (mStyle && !mStyle->m_names[0].empty()) {
-        if (listener) pool->defineGraphicStyle(listener, mStyle->m_names[0]);
-        style.m_propertyList.insert("librevenge:parent-display-name", mStyle->m_names[0]);
+        if (listener) state.m_pool->defineGraphicStyle(listener, mStyle->m_names[0], state.m_object);
+        state.m_graphic.m_propertyList.insert("librevenge:parent-display-name", mStyle->m_names[0]);
       }
       else {
         std::map<int, shared_ptr<StarItem> >::const_iterator it;
         for (it=mStyle->m_itemSet.m_whichToItemMap.begin(); it!=mStyle->m_itemSet.m_whichToItemMap.end(); ++it) {
           if (it->second && it->second->m_attribute)
-            it->second->m_attribute->addTo(style, pool.get());
+            it->second->m_attribute->addTo(state);
         }
       }
     }
 
     for (size_t i=0; i<m_itemList.size(); ++i) {
       if (m_itemList[i] && m_itemList[i]->m_attribute)
-        m_itemList[i]->m_attribute->addTo(style, pool.get());
+        m_itemList[i]->m_attribute->addTo(state);
     }
   }
   //! print object data
@@ -638,12 +643,13 @@ public:
     position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
     position.setAnchor(STOFFPosition::Page);
-    STOFFGraphicStyle style;
-    updateStyle(style, object, listener);
-    if (!style.m_hasBackground) style.m_propertyList.insert("draw:fill", "none");
-    style.m_propertyList.insert("draw:fill", "none");
+    shared_ptr<StarItemPool> pool=getPool(object);
+    StarState state(pool.get(), object);
+    updateStyle(state, listener);
+    if (!state.m_graphic.m_hasBackground) state.m_graphic.m_propertyList.insert("draw:fill", "none");
+    state.m_graphic.m_propertyList.insert("draw:fill", "none");
     shared_ptr<SubDocument> doc(new SubDocument(m_outlinerParaObject));
-    listener->insertTextBox(position, doc, style);
+    listener->insertTextBox(position, doc, state.m_graphic);
     return true;
   }
   //! print object data
@@ -701,9 +707,10 @@ public:
       shape.m_command=STOFFGraphicShape::C_Rectangle;
       shape.m_bdbox=STOFFBox2f(libstoff::convertMiniMToPointVect(m_textRectangle[0]), libstoff::convertMiniMToPointVect(m_textRectangle[1]));
       updateTransformProperties(shape.m_propertyList);
-      STOFFGraphicStyle style;
-      updateStyle(style, object, listener);
-      listener->insertShape(shape, style, pos);
+      shared_ptr<StarItemPool> pool=getPool(object);
+      StarState state(pool.get(), object);
+      updateStyle(state, listener);
+      listener->insertShape(shape, state.m_graphic, pos);
       if (m_outlinerParaObject)
         sendTextZone(listener, object);
     }
@@ -785,9 +792,10 @@ public:
     polygon.addToPath(path, false);
     shape.m_propertyList.insert("svg:d", path);
     updateTransformProperties(shape.m_propertyList);
-    STOFFGraphicStyle style;
-    updateStyle(style, object, listener);
-    listener->insertShape(shape, style, pos);
+    shared_ptr<StarItemPool> pool=getPool(object);
+    StarState state(pool.get(), object);
+    updateStyle(state, listener);
+    listener->insertShape(shape, state.m_graphic, pos);
     return true;
   }
   //! a polygon
@@ -842,21 +850,20 @@ public:
       shape.m_propertyList.insert("draw:kind", wh[m_identifier-4]);
     }
     updateTransformProperties(shape.m_propertyList);
-    STOFFGraphicStyle style;
-    updateStyle(style, object, listener);
-    listener->insertShape(shape, style, pos);
+    shared_ptr<StarItemPool> pool=getPool(object);
+    StarState state(pool.get(), object);
+    updateStyle(state, listener);
+    listener->insertShape(shape, state.m_graphic, pos);
     if (m_outlinerParaObject)
       sendTextZone(listener, object);
     return true;
   }
   //! try to update the style
-  void updateStyle(STOFFGraphicStyle &style, StarObject &object, STOFFListenerPtr listener) const
+  void updateStyle(StarState &state, STOFFListenerPtr listener) const
   {
-    SdrGraphicRect::updateStyle(style, object, listener);
-    if (m_circleItem && m_circleItem->m_attribute) {
-      shared_ptr<StarItemPool> pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
-      m_circleItem->m_attribute->addTo(style, pool.get());
-    }
+    SdrGraphicRect::updateStyle(state, listener);
+    if (m_circleItem && m_circleItem->m_attribute)
+      m_circleItem->m_attribute->addTo(state);
   }
   //! print object data
   friend std::ostream &operator<<(std::ostream &o, SdrGraphicCircle const &graph)
@@ -968,9 +975,10 @@ public:
     polygon.addToPath(path, false);
     shape.m_propertyList.insert("svg:d", path);
     updateTransformProperties(shape.m_propertyList);
-    STOFFGraphicStyle style;
-    updateStyle(style, object, listener);
-    listener->insertShape(shape, style, pos);
+    shared_ptr<StarItemPool> pool=getPool(object);
+    StarState state(pool.get(), object);
+    updateStyle(state, listener);
+    listener->insertShape(shape, state.m_graphic, pos);
     return true;
   }
   //! the edge polygon
@@ -1024,27 +1032,26 @@ public:
     position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
     position.setAnchor(pos.m_anchorTo);
-    STOFFGraphicStyle style;
-    updateStyle(style, object, listener);
+    shared_ptr<StarItemPool> pool=getPool(object);
+    StarState state(pool.get(), object);
+    updateStyle(state, listener);
     if (!m_graphic || m_graphic->m_object.isEmpty()) {
       // CHECKME: we need probably correct the filename, transform ":" in "/", ...
       STOFFEmbeddedObject link;
       link.m_filenameLink=m_graphNames[1];
-      listener->insertPicture(position, link, style);
+      listener->insertPicture(position, link, state.m_graphic);
     }
     else
-      listener->insertPicture(position, m_graphic->m_object, style);
+      listener->insertPicture(position, m_graphic->m_object, state.m_graphic);
 
     return true;
   }
   //! try to update the style
-  void updateStyle(STOFFGraphicStyle &style, StarObject &object, STOFFListenerPtr listener) const
+  void updateStyle(StarState &state, STOFFListenerPtr listener) const
   {
-    SdrGraphicRect::updateStyle(style, object, listener);
-    if (m_graphItem && m_graphItem->m_attribute) {
-      shared_ptr<StarItemPool> pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
-      m_graphItem->m_attribute->addTo(style, pool.get());
-    }
+    SdrGraphicRect::updateStyle(state, listener);
+    if (m_graphItem && m_graphItem->m_attribute)
+      m_graphItem->m_attribute->addTo(state);
   }
   //! print object data
   friend std::ostream &operator<<(std::ostream &o, SdrGraphicGraph const &graph)
@@ -1110,8 +1117,9 @@ public:
   bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/)
   {
     STOFFGraphicShape shape;
-    STOFFGraphicStyle style;
-    updateStyle(style, object, listener);
+    shared_ptr<StarItemPool> pool=getPool(object);
+    StarState state(pool.get(), object);
+    updateStyle(state, listener);
     librevenge::RVNGPropertyListVector vect;
     shape.m_command=STOFFGraphicShape::C_Polyline;
     shape.m_propertyList.insert("draw:show-unit", true);
@@ -1123,17 +1131,15 @@ public:
     }
     shape.m_propertyList.insert("svg:points", vect);
     updateTransformProperties(shape.m_propertyList);
-    listener->insertShape(shape, style, pos);
+    listener->insertShape(shape, state.m_graphic, pos);
     return true;
   }
   //! try to update the style
-  void updateStyle(STOFFGraphicStyle &style, StarObject &object, STOFFListenerPtr listener) const
+  void updateStyle(StarState &state, STOFFListenerPtr listener) const
   {
-    SdrGraphicText::updateStyle(style, object, listener);
-    if (m_measureItem && m_measureItem->m_attribute) {
-      shared_ptr<StarItemPool> pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
-      m_measureItem->m_attribute->addTo(style, pool.get());
-    }
+    SdrGraphicText::updateStyle(state, listener);
+    if (m_measureItem && m_measureItem->m_attribute)
+      m_measureItem->m_attribute->addTo(state);
   }
   //! print object data
   friend std::ostream &operator<<(std::ostream &o, SdrGraphicMeasure const &graph)
@@ -1212,9 +1218,10 @@ public:
     position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
     position.setAnchor(pos.m_anchorTo);
-    STOFFGraphicStyle style;
-    updateStyle(style, object, listener);
-    listener->insertPicture(position, localPicture, style);
+    shared_ptr<StarItemPool> pool=getPool(object);
+    StarState state(pool.get(), object);
+    updateStyle(state, listener);
+    listener->insertPicture(position, localPicture, state.m_graphic);
 
     return true;
   }
@@ -1322,8 +1329,9 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFPosition const &pos, S
   }
 
   STOFFGraphicShape shape;
-  STOFFGraphicStyle style;
-  updateStyle(style, object, listener);
+  shared_ptr<StarItemPool> pool=getPool(object);
+  StarState state(pool.get(), object);
+  updateStyle(state, listener);
   librevenge::RVNGPropertyListVector vect;
   bool isClosed=false;
   switch (m_identifier) {
@@ -1348,7 +1356,7 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFPosition const &pos, S
       }
       shape.m_propertyList.insert("svg:points", vect);
       updateTransformProperties(shape.m_propertyList);
-      listener->insertShape(shape, style, pos);
+      listener->insertShape(shape, state.m_graphic, pos);
       if (m_outlinerParaObject)
         sendTextZone(listener, object);
       return true;
@@ -1402,7 +1410,7 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFPosition const &pos, S
     shape.m_propertyList.insert("svg:d", path);
   }
   updateTransformProperties(shape.m_propertyList);
-  listener->insertShape(shape, style, pos);
+  listener->insertShape(shape, state.m_graphic, pos);
   if (m_outlinerParaObject)
     sendTextZone(listener, object);
   return true;

@@ -49,6 +49,7 @@
 #include "StarFormatManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarObject.hxx"
+#include "StarState.hxx"
 #include "StarWriterStruct.hxx"
 #include "StarZone.hxx"
 #include "SWFieldManager.hxx"
@@ -80,6 +81,7 @@ public:
   //! the color
   STOFFColor m_color;
 };
+
 bool NoteDesc::read(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -145,9 +147,9 @@ public:
   {
   }
   //! update pagespan properties
-  void updatePageSpan(STOFFPageSpan &page, StarItemPool const *pool) const;
+  void updatePageSpan(StarState &state) const;
   /** try to update the section*/
-  bool updateSection(STOFFSection &section, StarItemPool const *pool) const;
+  bool updateState(StarState &state) const;
   //! operator<<
   friend std::ostream &operator<<(std::ostream &o, PageDesc const &desc);
   //! try to read a pageDesc: 'p'
@@ -172,14 +174,10 @@ public:
   std::vector<StarWriterStruct::Attribute> m_attributes[2];
 };
 
-void PageDesc::updatePageSpan(STOFFPageSpan &page, StarItemPool const *pool) const
+void PageDesc::updatePageSpan(StarState &state) const
 {
-  for (int step=0; step<2; ++step) {
-    for (size_t i=0; i<m_attributes[step].size(); ++i) {
-      if (m_attributes[step][i].m_attribute)
-        m_attributes[step][i].m_attribute->addTo(page, pool);
-    }
-  }
+  updateState(state);
+  STOFFPageSpan &page=state.m_page;
   if (m_landscape && page.m_propertiesList[0]["fo:page-height"] && page.m_propertiesList[0]["fo:page-width"] &&
       page.m_propertiesList[0]["fo:page-height"]->getInt() > page.m_propertiesList[0]["fo:page-width"]->getInt()) {
     // we must inverse fo:page-height and fo:page-width
@@ -190,12 +188,12 @@ void PageDesc::updatePageSpan(STOFFPageSpan &page, StarItemPool const *pool) con
   }
 }
 
-bool PageDesc::updateSection(STOFFSection &section, StarItemPool const *pool) const
+bool PageDesc::updateState(StarState &state) const
 {
   for (int step=0; step<2; ++step) {
     for (size_t i=0; i<m_attributes[step].size(); ++i) {
       if (m_attributes[step][i].m_attribute)
-        m_attributes[step][i].m_attribute->addTo(section, pool);
+        m_attributes[step][i].m_attribute->addTo(state);
     }
   }
   return true;
@@ -327,13 +325,15 @@ StarObjectPageStyle::~StarObjectPageStyle()
 ////////////////////////////////////////////////////////////
 // send data
 ////////////////////////////////////////////////////////////
-bool StarObjectPageStyle::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &number)
+bool StarObjectPageStyle::updatePageSpans
+(std::vector<librevenge::RVNGString> const &/*listNames*/, std::vector<STOFFPageSpan> &pageSpan, int &number)
 {
   number=10000; // only one type of page ?
-  STOFFPageSpan ps;
   shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
+  StarState state(pool.get(), *this);
   if (!m_pageStyleState->m_pageList.empty())
-    m_pageStyleState->m_pageList[0].updatePageSpan(ps, pool.get());
+    m_pageStyleState->m_pageList[0].updatePageSpan(state);
+  STOFFPageSpan &ps=state.m_page;
   ps.m_pageSpan=number;
   pageSpan.push_back(ps);
   return number!=0;
@@ -342,8 +342,10 @@ bool StarObjectPageStyle::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, 
 bool StarObjectPageStyle::updateSection(STOFFSection &section)
 {
   shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
+  StarState state(pool.get(), *this);
   if (!m_pageStyleState->m_pageList.empty())
-    m_pageStyleState->m_pageList[0].updateSection(section, pool.get());
+    m_pageStyleState->m_pageList[0].updateState(state);
+  section=state.m_section;
   return true;
 }
 ////////////////////////////////////////////////////////////

@@ -39,8 +39,6 @@
 
 #include "STOFFFont.hxx"
 
-#include "SWFieldManager.hxx"
-
 // font function
 STOFFFont::~STOFFFont()
 {

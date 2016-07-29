@@ -366,6 +366,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\..\src\lib\StarState.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\src\lib\StarTable.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -453,6 +457,7 @@
     <ClInclude Include="..\..\src\lib\StarObjectText.hxx" />
     <ClInclude Include="..\..\src\lib\StarPageAttribute.hxx" />
     <ClInclude Include="..\..\src\lib\StarParagraphAttribute.hxx" />
+    <ClInclude Include="..\..\src\lib\StarState.hxx" />
     <ClInclude Include="..\..\src\lib\StarTable.hxx" />
     <ClInclude Include="..\..\src\lib\StarWriterStruct.hxx" />
     <ClInclude Include="..\..\src\lib\StarZone.hxx" />

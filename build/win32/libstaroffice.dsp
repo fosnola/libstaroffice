@@ -351,6 +351,10 @@ SOURCE=..\..\src\lib\StarParagraphAttribute.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarState.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarTable.cxx
 # End Source File
 # Begin Source File
@@ -640,6 +644,10 @@ SOURCE=..\..\src\lib\StarPageAttribute.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarParagraphAttribute.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarState.hxx
 # End Source File
 # Begin Source File
 

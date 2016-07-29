@@ -39,17 +39,12 @@
 
 #include "libstaroffice_internal.hxx"
 
-namespace SWFieldManagerInternal
-{
-struct Field;
-}
-
 //! Class to store font
 class STOFFFont
 {
 public:
   /** constructor */
-  STOFFFont() : m_propertyList(), m_shadowColor(STOFFColor::black()), m_hyphen(false), m_softHyphen(false), m_lineBreak(false), m_content(false), m_footnote(false), m_relativeUnit(0.05), m_link(""), m_refMark(""), m_field()
+  STOFFFont() : m_propertyList(), m_shadowColor(STOFFColor::black()), m_hyphen(false), m_softHyphen(false), m_lineBreak(false)
   {
   }
   /** destructor */
@@ -76,18 +71,6 @@ public:
   bool m_softHyphen;
   /** line break */
   bool m_lineBreak;
-  /// flag to know if this is a content zone
-  bool m_content;
-  /// flag to know if this is a footnote
-  bool m_footnote;
-  /** the relative unit uses to transform rel font height in point, default 1/20 */
-  double m_relativeUnit;
-  /** the link url */
-  librevenge::RVNGString m_link;
-  /// the ref mark
-  librevenge::RVNGString m_refMark;
-  /** the field */
-  shared_ptr<SWFieldManagerInternal::Field> m_field;
 };
 
 

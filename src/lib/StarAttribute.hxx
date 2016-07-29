@@ -55,14 +55,8 @@ struct State;
 
 class StarItemPool;
 class StarObject;
+class StarState;
 class StarZone;
-
-class STOFFCellStyle;
-class STOFFFont;
-class STOFFGraphicStyle;
-class STOFFPageSpan;
-class STOFFParagraph;
-class STOFFSection;
 
 //! virtual class used to store the different attribute
 class StarAttribute
@@ -748,74 +742,24 @@ public:
   virtual shared_ptr<StarAttribute> create() const=0;
   //! read an attribute zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &document)=0;
-  //! add to a cell style
-  void addTo(STOFFCellStyle &cell, StarItemPool const *pool) const
+  //! add to a state
+  void addTo(StarState &state) const
   {
     std::set<StarAttribute const *> done;
-    addTo(cell, pool, done);
-  }
-  //! add to a font
-  void addTo(STOFFFont &font, StarItemPool const *pool) const
-  {
-    std::set<StarAttribute const *> done;
-    addTo(font, pool, done);
-  }
-  //! add to a graphic style
-  void addTo(STOFFGraphicStyle &graphic, StarItemPool const *pool) const
-  {
-    std::set<StarAttribute const *> done;
-    addTo(graphic, pool, done);
-  }
-  //! add to a pageSpan
-  void addTo(STOFFPageSpan &page, StarItemPool const *pool) const
-  {
-    std::set<StarAttribute const *> done;
-    addTo(page, pool, done);
-  }
-  //! add to a paragraph
-  void addTo(STOFFParagraph &para, StarItemPool const *pool) const
-  {
-    std::set<StarAttribute const *> done;
-    addTo(para, pool, done);
-  }
-  //! add to a section
-  void addTo(STOFFSection &sect, StarItemPool const *pool) const
-  {
-    std::set<StarAttribute const *> done;
-    addTo(sect, pool, done);
+    addTo(state, done);
   }
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+  bool send(STOFFListenerPtr listener, StarState &state) const
   {
     std::set<StarAttribute const *> done;
-    return send(listener, pool, object, done);
+    return send(listener, state, done);
   }
-  //! add to a cell style(internal)
-  virtual void addTo(STOFFCellStyle &/*cell*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
-  {
-  }
-  //! add to a font(internal)
-  virtual void addTo(STOFFFont &/*font*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
-  {
-  }
-  //! add to a graphic style(internal)
-  virtual void addTo(STOFFGraphicStyle &/*graphic*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
-  {
-  }
-  //! add to a pageSpan(internal)
-  virtual void addTo(STOFFPageSpan &/*page*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
-  {
-  }
-  //! add to a paragraph(internal)
-  virtual void addTo(STOFFParagraph &/*para*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
-  {
-  }
-  //! add to a section(internal)
-  virtual void addTo(STOFFSection &/*sect*/, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+  //! add to a state(internal)
+  virtual void addTo(StarState &/*state*/, std::set<StarAttribute const *> &/*done*/) const
   {
   }
   //! try to send the child zone(internal)
-  virtual bool send(STOFFListenerPtr /*listener*/, StarItemPool const */*pool*/, StarObject &/*object*/, std::set<StarAttribute const *> &/*done*/) const
+  virtual bool send(STOFFListenerPtr /*listener*/, StarState &/*state*/, std::set<StarAttribute const *> &/*done*/) const
   {
     return false;
   }
@@ -1089,20 +1033,10 @@ public:
   virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const;
 
 protected:
-  //! add to a cell style
-  virtual void addTo(STOFFCellStyle &graphic, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
-  //! add to a font
-  virtual void addTo(STOFFFont &font, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
-  //! add to a graphic style
-  virtual void addTo(STOFFGraphicStyle &graphic, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
-  //! add to a pageSpan
-  virtual void addTo(STOFFPageSpan &page, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
-  //! add to a paragraph
-  virtual void addTo(STOFFParagraph &para, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
-  //! add to a section
-  virtual void addTo(STOFFSection &sect, StarItemPool const *pool, std::set<StarAttribute const *> &done) const;
+  //! add to a state
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &done) const;
   //! try to send the sone data
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, std::set<StarAttribute const *> &done) const;
+  virtual bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const;
 
   //! copy constructor
   StarAttributeItemSet(StarAttributeItemSet const &orig) : StarAttribute(orig), m_limits(orig.m_limits), m_itemSet()

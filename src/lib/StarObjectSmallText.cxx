@@ -46,6 +46,7 @@
 #include "StarAttribute.hxx"
 #include "StarObject.hxx"
 #include "StarItemPool.hxx"
+#include "StarState.hxx"
 #include "StarZone.hxx"
 
 #include "StarObjectSmallText.hxx"
@@ -61,7 +62,7 @@ struct Paragraph {
   {
   }
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr &listener, StarItemPool const *mainPool, StarItemPool const *editPool) const;
+  bool send(STOFFListenerPtr &listener, StarState &mainState, StarState &editState) const;
   //! the text
   std::vector<uint32_t> m_text;
   //! the text initial position
@@ -78,7 +79,7 @@ struct Paragraph {
   std::vector<STOFFVec2i> m_charLimitList;
 };
 
-bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *mainPool, StarItemPool const *editPool) const
+bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState &editState) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("StarObjectSmallTextInternal::Paragraph::send: call without listener\n"));
@@ -86,44 +87,40 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *mainPool, S
   }
 
   std::map<int, shared_ptr<StarItem> >::const_iterator it;
-  STOFFFont mainFont;
-  STOFFParagraph para;
-  para.m_relativeUnit=mainFont.m_relativeUnit=0.028346457;
-  if (mainPool && !m_styleName.empty()) { // checkme
-    StarItemStyle const *style=mainPool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
+  mainState.m_break=0;
+  mainState.m_paragraph=STOFFParagraph();
+  if (mainState.m_pool && !m_styleName.empty()) { // checkme
+    StarItemStyle const *style=mainState.m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
     if (style) {
 #if 0
       bool done=false;
       if (!style->m_names[0].empty()) {
-        if (listener) mainPool->defineParagraphStyle(listener, style->m_names[0]);
+        if (listener) mainPool->defineParagraphStyle(listener, style->m_names[0], mainState.m_object);
         para.m_propertyList.insert("librevenge:parent-display-name", style->m_names[0]);
         done=true;
       }
 #endif
       for (it=style->m_itemSet.m_whichToItemMap.begin(); it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
-        if (it->second && it->second->m_attribute) {
-          it->second->m_attribute->addTo(mainFont, mainPool);
-#if 0
-          if (!done)
-#endif
-            it->second->m_attribute->addTo(para, mainPool);
-        }
+        if (it->second && it->second->m_attribute)
+          it->second->m_attribute->addTo(mainState);
       }
 #if 0
       std::cerr << "Para:" << style->m_itemSet.printChild() << "\n";
 #endif
     }
   }
+  editState.m_paragraph=mainState.m_paragraph;
+  editState.m_font=mainState.m_font;
   for (it=m_itemSet.m_whichToItemMap.begin(); it!=m_itemSet.m_whichToItemMap.end(); ++it) {
     if (!it->second || !it->second->m_attribute) continue;
-    it->second->m_attribute->addTo(mainFont, mainPool);
-    it->second->m_attribute->addTo(para, editPool);
+    it->second->m_attribute->addTo(editState);
 #if 0
     std::cerr << "ItemSet:" << m_itemSet.printChild() << "\n";
 #endif
   }
+  STOFFFont mainFont=editState.m_font; // save font
   listener->setFont(mainFont);
-  listener->setParagraph(para);
+  listener->setParagraph(editState.m_paragraph);
 
   std::set<size_t> modPosSet;
   size_t numFonts=m_charItemList.size();
@@ -145,17 +142,18 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarItemPool const *mainPool, S
       fontChange=true;
     }
     if (fontChange) {
-      STOFFFont font(mainFont);
-      font.m_relativeUnit=0.028346457;
+      STOFFFont &font=editState.m_font;
+      editState.reinitializeLineData();
+      font=mainFont;
       for (size_t f=0; f<numFonts; ++f) {
         if (m_charLimitList[f][0]>int(srcPos) || m_charLimitList[f][1]<=int(srcPos))
           continue;
         if (!m_charItemList[f] || !m_charItemList[f]->m_attribute)
           continue;
-        m_charItemList[f]->m_attribute->addTo(font, editPool);
+        m_charItemList[f]->m_attribute->addTo(editState);
       }
       static bool first=true;
-      if (first && (font.m_content || font.m_footnote || font.m_field || !font.m_link.empty() || !font.m_refMark.empty())) {
+      if (first && (editState.m_content || editState.m_footnote || editState.m_field || !editState.m_link.empty() || !editState.m_refMark.empty())) {
         STOFF_DEBUG_MSG(("StarObjectSmallTextInternal::Paragraph::send: sorry, sending content/field/footnote/refMark/link is not implemented\n"));
         first=false;
       }
@@ -205,8 +203,10 @@ bool StarObjectSmallText::send(shared_ptr<STOFFListener> listener)
   // fixme: this works almost alway, but ...
   shared_ptr<StarItemPool> editPool=findItemPool(StarItemPool::T_EditEnginePool, false);
   shared_ptr<StarItemPool> mainPool=findItemPool(StarItemPool::T_XOutdevPool, false);
+  StarState mainState(mainPool.get(), *this, 0.028346457);
+  StarState editState(editPool.get(), *this, 0.028346457);
   for (size_t p=0; p<m_textState->m_paragraphList.size(); ++p) {
-    m_textState->m_paragraphList[p].send(listener, mainPool.get(), editPool.get());
+    m_textState->m_paragraphList[p].send(listener, mainState, editState);
     if (p+1!=m_textState->m_paragraphList.size())
       listener->insertEOL();
   }

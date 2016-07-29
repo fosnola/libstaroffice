@@ -78,7 +78,7 @@ public:
   /** try to send a cell */
   bool sendCell(StarObjectSpreadsheetInternal::Cell &cell, StarAttribute *attrib, int table, int numRepeated, STOFFSpreadsheetListenerPtr listener);
   /** try to update the page span */
-  bool updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const;
+  bool updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages);
 protected:
   //
   // data

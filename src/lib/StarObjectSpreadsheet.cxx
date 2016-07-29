@@ -48,6 +48,7 @@
 #include "StarObjectDraw.hxx"
 #include "StarObjectModel.hxx"
 #include "StarObjectSmallText.hxx"
+#include "StarState.hxx"
 #include "StarZone.hxx"
 
 #include "STOFFCell.hxx"
@@ -534,7 +535,7 @@ StarObjectSpreadsheet::~StarObjectSpreadsheet()
 // send data
 //
 ////////////////////////////////////////////////////////////
-bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const
+bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages)
 {
   if (m_spreadsheetState->m_tableList.empty()) return false;
   numPages=int(m_spreadsheetState->m_tableList.size());
@@ -542,6 +543,7 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
   librevenge::RVNGString styleName("");
   int nPages=0;
   shared_ptr<StarItemPool> pool=const_cast<StarObjectSpreadsheet *>(this)->findItemPool(StarItemPool::T_SpreadsheetPool, false);
+  StarState state(pool.get(), *this);
   for (size_t i=0; i<=m_spreadsheetState->m_tableList.size(); ++i) {
     bool isEnd=(i==m_spreadsheetState->m_tableList.size());
     if (!isEnd && m_spreadsheetState->m_tableList[i] && m_spreadsheetState->m_tableList[i]->m_pageStyle==styleName) {
@@ -549,22 +551,22 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
       continue;
     }
     if (nPages) {
-      STOFFPageSpan ps;
-      ps.m_pageSpan=nPages;
       StarItemStyle const *style=(pool&&!styleName.empty()) ? pool->findStyleWithFamily(styleName, StarItemStyle::F_Page) : 0;
       if (!style && pool && !m_spreadsheetState->m_pageStyle.empty())
         style=pool->findStyleWithFamily(m_spreadsheetState->m_pageStyle, StarItemStyle::F_Page);
+      state.m_page=STOFFPageSpan();
+      state.m_page.m_pageSpan=nPages;
       if (style) {
         for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
              it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
           if (it->second && it->second->m_attribute)
-            it->second->m_attribute->addTo(ps, pool.get());
+            it->second->m_attribute->addTo(state);
         }
 #if 0
         std::cerr << style->m_itemSet.printChild() << "\n";
 #endif
       }
-      pageSpan.push_back(ps);
+      pageSpan.push_back(state.m_page);
     }
     if (isEnd) break;
     styleName=m_spreadsheetState->m_tableList[i] ? m_spreadsheetState->m_tableList[i]->m_pageStyle : "";
@@ -697,12 +699,10 @@ bool StarObjectSpreadsheet::sendCell(StarObjectSpreadsheetInternal::Cell &cell, 
   }
   if (attrib) {
     shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_SpreadsheetPool, false);
-    STOFFFont font;
-    attrib->addTo(font, pool.get());
-    cell.setFont(font);
-    STOFFCellStyle style;
-    attrib->addTo(style, pool.get());
-    cell.setCellStyle(style);
+    StarState state(pool.get(), *this);
+    attrib->addTo(state);
+    cell.setFont(state.m_font);
+    cell.setCellStyle(state.m_cell);
     // checkme: we need the pool here
     getFormatManager()->updateNumberingProperties(cell);
   }

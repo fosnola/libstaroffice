@@ -70,7 +70,7 @@ public:
   bool read(StarZone &zone);
 
   /** try to update the page span (to create text document)*/
-  bool updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages);
+  bool updatePageSpans(std::vector<librevenge::RVNGString> const &listNames, std::vector<STOFFPageSpan> &pageSpan, int &numPages);
   /** try to update the section (generic document section) */
   bool updateSection(STOFFSection &section);
 protected:

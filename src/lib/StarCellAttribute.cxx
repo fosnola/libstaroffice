@@ -39,6 +39,7 @@
 #include "StarItemPool.hxx"
 #include "StarObject.hxx"
 #include "StarObjectSmallText.hxx"
+#include "StarState.hxx"
 #include "StarZone.hxx"
 
 #include "StarCellAttribute.hxx"
@@ -60,7 +61,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeBool(*this));
   }
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
 
 protected:
   //! copy constructor
@@ -85,7 +86,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeColor(*this));
   }
   //! add to a cell style
-  //virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   StarCAttributeColor(StarCAttributeColor const &orig) : StarAttributeColor(orig)
@@ -106,7 +107,7 @@ public:
   {
   }
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -134,7 +135,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeUInt(*this));
   }
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   StarCAttributeUInt(StarCAttributeUInt const &orig) : StarAttributeUInt(orig)
@@ -158,7 +159,7 @@ public:
     return shared_ptr<StarAttribute>(new StarCAttributeVoid(*this));
   }
   //! add to a cell style
-  //virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  //virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
 protected:
   //! copy constructor
   StarCAttributeVoid(StarCAttributeVoid const &orig) : StarAttributeVoid(orig)
@@ -170,47 +171,47 @@ StarCAttributeVoid::~StarCAttributeVoid()
 {
 }
 
-void StarCAttributeBool::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarCAttributeBool::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_SC_LINEBREAK)
-    cell.m_propertyList.insert("fo:wrap-option",m_value ? "wrap" : "no-wrap");
+    state.m_cell.m_propertyList.insert("fo:wrap-option",m_value ? "wrap" : "no-wrap");
 }
 
-void StarCAttributeInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarCAttributeInt::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_SC_ROTATE_VALUE) {
-    int prevRot=cell.m_propertyList["style:rotation-angle"] ? cell.m_propertyList["style:rotation-angle"]->getInt() : 0;
-    cell.m_propertyList.insert("style:rotation-angle",prevRot+m_value);
+    int prevRot=state.m_cell.m_propertyList["style:rotation-angle"] ? state.m_cell.m_propertyList["style:rotation-angle"]->getInt() : 0;
+    state.m_cell.m_propertyList.insert("style:rotation-angle",prevRot+m_value);
   }
 }
 
-void StarCAttributeUInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarCAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_SC_VALUE_FORMAT)
-    cell.m_format=unsigned(m_value);
+    state.m_cell.m_format=unsigned(m_value);
   else if (m_type==ATTR_SC_HORJUSTIFY) {
-    cell.m_propertyList.insert("style:repeat-content", false);
+    state.m_cell.m_propertyList.insert("style:repeat-content", false);
     switch (m_value) {
     case 0: // standard
-      cell.m_propertyList.insert("style:text-align-source", "value-type");
-      if (cell.m_propertyList["fo:text-align"]) cell.m_propertyList.remove("fo:text-align");
+      state.m_cell.m_propertyList.insert("style:text-align-source", "value-type");
+      if (state.m_cell.m_propertyList["fo:text-align"]) state.m_cell.m_propertyList.remove("fo:text-align");
       break;
     case 1: // left
     case 2: // center
     case 3: // right
-      cell.m_propertyList.insert("style:text-align-source", "fix");
-      cell.m_propertyList.insert("fo:text-align", m_value==1 ? "first" : m_value==2 ? "center" : "end");
+      state.m_cell.m_propertyList.insert("style:text-align-source", "fix");
+      state.m_cell.m_propertyList.insert("fo:text-align", m_value==1 ? "first" : m_value==2 ? "center" : "end");
       break;
     case 4: // block
-      cell.m_propertyList.insert("style:text-align-source", "fix");
-      cell.m_propertyList.insert("fo:text-align", "justify");
+      state.m_cell.m_propertyList.insert("style:text-align-source", "fix");
+      state.m_cell.m_propertyList.insert("fo:text-align", "justify");
       break;
     case 5: // repeat
-      cell.m_propertyList.insert("style:repeat-content", true);
+      state.m_cell.m_propertyList.insert("style:repeat-content", true);
       break;
     default:
-      cell.m_propertyList.insert("style:text-align-source", "value-type");
-      if (cell.m_propertyList["fo:text-align"]) cell.m_propertyList.remove("fo:text-align");
+      state.m_cell.m_propertyList.insert("style:text-align-source", "value-type");
+      if (state.m_cell.m_propertyList["fo:text-align"]) state.m_cell.m_propertyList.remove("fo:text-align");
       STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeUInt::addTo: find unknown horizontal enum=%d\n", int(m_value)));
       break;
     }
@@ -219,21 +220,21 @@ void StarCAttributeUInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*
     switch (m_value) {
     case 0: // standard
       if (m_type==ATTR_SC_VERJUSTIFY)
-        cell.m_propertyList.insert("style:vertical-align", "automatic");
+        state.m_cell.m_propertyList.insert("style:vertical-align", "automatic");
       else
-        cell.m_propertyList.insert("style:rotation-align", "none");
+        state.m_cell.m_propertyList.insert("style:rotation-align", "none");
       break;
     case 1: // top
     case 2: // center
     case 3: // bottom
-      cell.m_propertyList.insert(m_type==ATTR_SC_VERJUSTIFY ? "style:vertical-align" : "style:rotation-align",
-                                 m_value==1 ? "top" : m_value==2 ? "middle" : "bottom");
+      state.m_cell.m_propertyList.insert(m_type==ATTR_SC_VERJUSTIFY ? "style:vertical-align" : "style:rotation-align",
+                                         m_value==1 ? "top" : m_value==2 ? "middle" : "bottom");
       break;
     default:
       if (m_type==ATTR_SC_VERJUSTIFY)
-        cell.m_propertyList.insert("style:vertical-align", "automatic");
+        state.m_cell.m_propertyList.insert("style:vertical-align", "automatic");
       else
-        cell.m_propertyList.insert("style:rotation-align", "none");
+        state.m_cell.m_propertyList.insert("style:rotation-align", "none");
       if (m_type==ATTR_SC_VERJUSTIFY && m_value==4) // block ?
         break;
       STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeUInt::addTo: find unknown vertical/rotateMode enum=%d\n", int(m_value)));
@@ -241,19 +242,19 @@ void StarCAttributeUInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*
     }
   }
   else if (m_type==ATTR_SC_ORIENTATION) {
-    if (cell.m_propertyList["style:direction"]) cell.m_propertyList.remove("style:direction");
+    if (state.m_cell.m_propertyList["style:direction"]) state.m_cell.m_propertyList.remove("style:direction");
     // fixme: we must also revert the rotation angle, but ...
     switch (m_value) {
     case 0: // standard
       break;
     case 1: // topbottom
     case 2: { // bottomtop
-      int prevRot=cell.m_propertyList["style:rotation-angle"] ? cell.m_propertyList["style:rotation-angle"]->getInt() : 0;
-      cell.m_propertyList.insert("style:rotation-angle",prevRot+(m_value==1 ? 270 : 90));
+      int prevRot=state.m_cell.m_propertyList["style:rotation-angle"] ? state.m_cell.m_propertyList["style:rotation-angle"]->getInt() : 0;
+      state.m_cell.m_propertyList.insert("style:rotation-angle",prevRot+(m_value==1 ? 270 : 90));
       break;
     }
     case 3: // stacked
-      cell.m_propertyList.insert("style:direction","ttb");
+      state.m_cell.m_propertyList.insert("style:direction","ttb");
       break;
     default:
       STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeUInt::addTo: find unknown orientation enum=%d\n", int(m_value)));
@@ -263,10 +264,10 @@ void StarCAttributeUInt::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*
   else if (m_type==ATTR_SC_WRITINGDIR) {
     if (m_value<=4) {
       char const *(wh[])= {"lr-tb", "rl-tb", "tb-rl", "tb-lr", "page"};
-      cell.m_propertyList.insert("style:writing-mode", wh[m_value]);
+      state.m_cell.m_propertyList.insert("style:writing-mode", wh[m_value]);
     }
     else {
-      cell.m_propertyList.insert("style:writing-mode", "page");
+      state.m_cell.m_propertyList.insert("style:writing-mode", "page");
       STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeUInt::addTo: find unknown writing dir enum=%d\n", int(m_value)));
     }
   }
@@ -319,7 +320,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -357,7 +358,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -460,7 +461,7 @@ public:
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
   //! add to a cell style
-  virtual void addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const;
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
   {
@@ -487,42 +488,42 @@ protected:
   bool m_doNotPrint;
 };
 
-void StarCAttributeMargins::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarCAttributeMargins::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type!=ATTR_SC_MARGIN)
     return;
   for (int i=0; i<4; ++i) {
     char const *(wh[])= {"top", "left", "right", "bottom"};
-    cell.m_propertyList.insert((std::string("fo:padding-")+wh[i]).c_str(), double(m_margins[i])/20., librevenge::RVNG_POINT);
+    state.m_cell.m_propertyList.insert((std::string("fo:padding-")+wh[i]).c_str(), double(m_margins[i])/20., librevenge::RVNG_POINT);
   }
 }
 
-void StarCAttributeMerge::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarCAttributeMerge::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type!=ATTR_SC_MERGE)
     return;
-  cell.m_numberCellSpanned=STOFFVec2i(1,1);
+  state.m_cell.m_numberCellSpanned=STOFFVec2i(1,1);
   if (m_span==STOFFVec2i(0,0)) // checkme
     return;
   if (m_span[0]<=0 || m_span[1]<=0) {
     STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributeMerge::addTo: the span value %dx%d seems bad\n", m_span[0], m_span[1]));
   }
   else
-    cell.m_numberCellSpanned=m_span;
+    state.m_cell.m_numberCellSpanned=m_span;
 }
 
-void StarCAttributeProtection::addTo(STOFFCellStyle &cell, StarItemPool const */*pool*/, std::set<StarAttribute const *> &/*done*/) const
+void StarCAttributeProtection::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type!=ATTR_SC_PROTECTION)
     return;
   if (m_hiddenCell)
-    cell.m_propertyList.insert("style:cell-protect","hidden-and-protected");
+    state.m_cell.m_propertyList.insert("style:cell-protect","hidden-and-protected");
   else if (m_protected || m_hiddenFormula)
-    cell.m_propertyList.insert
+    state.m_cell.m_propertyList.insert
     ("style:cell-protect", m_protected ? (m_hiddenFormula ? "hidden-and-protected" : "protected") : "formula-hidden");
   else
-    cell.m_propertyList.insert("style:cell-protect","none");
-  cell.m_propertyList.insert("style:print-content", m_doNotPrint);
+    state.m_cell.m_propertyList.insert("style:cell-protect","none");
+  state.m_cell.m_propertyList.insert("style:print-content", m_doNotPrint);
   // hiddenCell ?
 }
 

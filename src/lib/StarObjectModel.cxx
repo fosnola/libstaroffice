@@ -175,8 +175,8 @@ public:
     for (int i=0; i<4; ++i) {
       if (m_borders[i]<0 || m_borders[i]==0x7fffffff) continue;
       char const *(wh[])= {"left", "top", "right", "bottom"};
-      page.m_propertiesList[page.m_actualZone].insert((std::string("fo:margin-")+wh[i]).c_str(),
-          libstoff::convertMiniMToPoint(m_borders[i]), librevenge::RVNG_POINT);
+      page.m_propertiesList[0].insert((std::string("fo:margin-")+wh[i]).c_str(),
+                                      libstoff::convertMiniMToPoint(m_borders[i]), librevenge::RVNG_POINT);
     }
     if (m_background) {
       STOFF_DEBUG_MSG(("StarObjectModelInternal::Page::updatePageSpan: sorry sending background object is not implemented\n"));

@@ -697,6 +697,14 @@
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
+			<File RelativePath="..\..\src\lib\StarState.cxx">
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
 			<File RelativePath="..\..\src\lib\StarTable.cxx">
 				<FileConfiguration Name="Release|Win32">
 					<Tool Name="VCCLCompilerTool" PreprocessorDefinitions="" />
@@ -868,6 +876,8 @@
 			<File RelativePath="..\..\src\lib\StarPageAttribute.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarParagraphAttribute.hxx">
+			</File>
+			<File RelativePath="..\..\src\lib\StarState.hxx">
 			</File>
 			<File RelativePath="..\..\src\lib\StarTable.hxx">
 			</File>

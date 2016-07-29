@@ -40,6 +40,7 @@
 
 #include "StarFormatManager.hxx"
 #include "StarObjectText.hxx"
+#include "StarState.hxx"
 #include "StarWriterStruct.hxx"
 #include "StarZone.hxx"
 
@@ -64,7 +65,7 @@ struct TableBox {
   //! try to read the data
   bool read(StarZone &zone, StarObjectText &object);
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const;
   //! the format
   int m_formatId;
   //! the number of lines
@@ -86,7 +87,7 @@ struct TableLine {
   //! try to read the data
   bool read(StarZone &zone, StarObjectText &object);
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, int row) const;
+  bool send(STOFFListenerPtr listener, StarState &state, int row) const;
   //! the format
   int m_formatId;
   //! the number of boxes
@@ -147,7 +148,7 @@ bool TableBox::read(StarZone &zone, StarObjectText &object)
   return true;
 }
 
-bool TableBox::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+bool TableBox::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TableBox::send: call without listener\n"));
@@ -157,7 +158,7 @@ bool TableBox::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TableBox::send: sending box with line list is not implemented\n"));
   }
   if (m_content)
-    m_content->send(listener, pool, object);
+    m_content->send(listener, state);
   return true;
 }
 
@@ -207,7 +208,7 @@ bool TableLine::read(StarZone &zone, StarObjectText &object)
   return true;
 }
 
-bool TableLine::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, int row) const
+bool TableLine::send(STOFFListenerPtr listener, StarState &state, int row) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TableLine::send: call without listener\n"));
@@ -224,9 +225,10 @@ bool TableLine::send(STOFFListenerPtr listener, StarItemPool const *pool, StarOb
     STOFFCell cell;
     cell.setPosition(pos);
     cell.setCellStyle(cellStyle);
-    object.getFormatManager()->updateNumberingProperties(cell);
+    state.m_object.getFormatManager()->updateNumberingProperties(cell);
     listener->openTableCell(cell);
-    m_boxList[i]->send(listener, pool, object);
+    StarState cState(state);
+    m_boxList[i]->send(listener, state);
     listener->closeTableCell();
   }
   listener->closeTableRow();
@@ -311,7 +313,7 @@ bool StarTable::read(StarZone &zone, StarObjectText &object)
   return true;
 }
 
-bool StarTable::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+bool StarTable::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarTableInternal::Table::send: call without listener\n"));
@@ -327,8 +329,9 @@ bool StarTable::send(STOFFListenerPtr listener, StarItemPool const *pool, StarOb
   table.setColsSize(std::vector<float>(numCol,40)); // changeme
   listener->openTable(table);
   for (size_t i=0; i<m_lineList.size(); ++i) {
-    if (m_lineList[i])
-      m_lineList[i]->send(listener, pool, object, int(i));
+    if (!m_lineList[i]) continue;
+    StarState cState(state);
+    m_lineList[i]->send(listener, cState, int(i));
   }
   listener->closeTable();
   return true;

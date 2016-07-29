@@ -58,6 +58,7 @@
 #include "StarObjectModel.hxx"
 #include "StarObjectPageStyle.hxx"
 #include "StarObjectSpreadsheet.hxx"
+#include "StarState.hxx"
 #include "StarTable.hxx"
 #include "StarWriterStruct.hxx"
 #include "StarZone.hxx"
@@ -77,15 +78,30 @@ Content::~Content()
 {
 }
 
-bool Content::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+void Content::inventoryPages(StarState &state) const
+{
+  if (!state.m_pool) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::Content::inventoryPages: can not find the pool\n"));
+    return;
+  }
+  for (size_t t=0; t<m_zoneList.size(); ++t) {
+    if (m_zoneList[t])
+      m_zoneList[t]->inventoryPage(state);
+    if (t==0 && state.m_pageNameList.empty())
+      state.m_pageNameList.push_back("");
+  }
+}
+
+bool Content::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::Content::send: call without listener\n"));
     return false;
   }
+  StarState cState(state.m_pool, state.m_object, state.m_relativeUnit);
   for (size_t t=0; t<m_zoneList.size(); ++t) {
     if (m_zoneList[t])
-      m_zoneList[t]->send(listener, pool, object);
+      m_zoneList[t]->send(listener, cState);
     if (t+1!=m_zoneList.size())
       listener->insertEOL();
   }
@@ -100,12 +116,12 @@ struct FormatZone : public Zone {
   {
   }
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! the format
   shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
 };
 
-bool FormatZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+bool FormatZone::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::FormatZone::send: call without listener\n"));
@@ -115,7 +131,8 @@ bool FormatZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarO
     STOFF_DEBUG_MSG(("StarObjectTextInternal::FormatZone::send: can not find the format\n"));
     return false;
   }
-  return m_format->send(listener, pool, object);
+  StarState cState(state.m_pool, state.m_object, state.m_relativeUnit);
+  return m_format->send(listener, cState);
 }
 
 ////////////////////////////////////////
@@ -126,7 +143,7 @@ struct GraphZone : public Zone {
   {
   }
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const */*pool*/, StarObject &object) const;
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! the ole parser
   shared_ptr<STOFFOLEParser> m_oleParser;
   //! the graph name, the fltName, the replace text
@@ -137,7 +154,7 @@ struct GraphZone : public Zone {
   StarGraphicStruct::StarPolygon m_contour;
 };
 
-bool GraphZone::send(STOFFListenerPtr listener, StarItemPool const */*pool*/, StarObject &/*object*/) const
+bool GraphZone::send(STOFFListenerPtr listener, StarState &/* state */) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::GraphZone::send: call without listener\n"));
@@ -170,7 +187,7 @@ struct SectionZone : public Zone {
   {
   }
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! the section name
   librevenge::RVNGString m_name;
   //! the section condition
@@ -189,7 +206,7 @@ struct SectionZone : public Zone {
   STOFFSection m_defaultSection;
 };
 
-bool SectionZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+bool SectionZone::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::FormatZone::send: call without listener\n"));
@@ -203,7 +220,7 @@ bool SectionZone::send(STOFFListenerPtr listener, StarItemPool const *pool, Star
   if (listener->canOpenSectionAddBreak())
     listener->openSection(section);
   if (m_content)
-    m_content->send(listener, pool, object);
+    m_content->send(listener, state);
   else {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::FormatZone::send: call without content\n"));
   }
@@ -217,8 +234,10 @@ struct TextZone : public Zone {
   TextZone() : Zone(), m_text(), m_textSourcePosition(), m_styleName(""), m_charAttributeList(), m_format(), m_markList()
   {
   }
+  //! try to inventory the different pages
+  virtual void inventoryPage(StarState &state) const;
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! the text
   std::vector<uint32_t> m_text;
   //! the text initial position
@@ -233,7 +252,38 @@ struct TextZone : public Zone {
   std::vector<StarWriterStruct::Mark> m_markList;
 };
 
-bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+void TextZone::inventoryPage(StarState &state) const
+{
+  std::map<int, shared_ptr<StarItem> >::const_iterator it;
+  size_t numPages=state.m_pageNameList.size();
+  state.m_break=0;
+  if (state.m_pool && !m_styleName.empty()) { // checkme
+    StarItemStyle const *style=state.m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
+    if (style) {
+      StarItemSet const &itemSet=style->m_itemSet;
+      for (it=itemSet.m_whichToItemMap.begin(); it!=itemSet.m_whichToItemMap.end(); ++it) {
+        if (it->second && it->second->m_attribute)
+          it->second->m_attribute->addTo(state);
+      }
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::inventoryPage: can not find style %s\n", m_styleName.cstr()));
+    }
+  }
+  size_t numAttr=m_charAttributeList.size();
+  for (size_t i=0; i<numAttr; ++i) {
+    StarWriterStruct::Attribute const &attrib=m_charAttributeList[i];
+    if ((attrib.m_position[1]<0 && attrib.m_position[0]>0) || attrib.m_position[0]>0)
+      continue;
+    if (!attrib.m_attribute)
+      continue;
+    attrib.m_attribute->addTo(state);
+  }
+  if (state.m_pageNameList.size()==numPages && state.m_break==4)
+    state.m_pageNameList.push_back("");
+}
+
+bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: call without listener\n"));
@@ -241,28 +291,25 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
   }
 
   std::map<int, shared_ptr<StarItem> >::const_iterator it;
-  STOFFFont mainFont;
-  STOFFParagraph para;
-  if (pool && !m_styleName.empty()) { // checkme
-    StarItemStyle const *style=pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
+  state.m_break=0;
+  state.m_font=STOFFFont();
+  state.m_paragraph=STOFFParagraph();
+  STOFFParagraph &para=state.m_paragraph;
+  if (state.m_pool && !m_styleName.empty()) { // checkme
+    StarItemStyle const *style=state.m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
     if (style) {
 #if 0
       bool done=false;
       if (!style->m_names[0].empty()) {
-        if (listener) pool->defineParagraphStyle(listener, style->m_names[0]);
+        if (listener) state.m_pool->defineParagraphStyle(listener, style->m_names[0], state->m_object);
         para.m_propertyList.insert("librevenge:parent-display-name", style->m_names[0]);
         done=true;
       }
 #endif
       StarItemSet const &itemSet=style->m_itemSet;
       for (it=itemSet.m_whichToItemMap.begin(); it!=itemSet.m_whichToItemMap.end(); ++it) {
-        if (it->second && it->second->m_attribute) {
-          it->second->m_attribute->addTo(mainFont, pool);
-#if 0
-          if (!done)
-#endif
-            it->second->m_attribute->addTo(para, pool);
-        }
+        if (it->second && it->second->m_attribute)
+          it->second->m_attribute->addTo(state);
       }
 #if 0
       std::cerr << "Para:" << style->m_itemSet.printChild() << "\n";
@@ -272,10 +319,13 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
       STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: can not find style %s\n", m_styleName.cstr()));
     }
   }
+  STOFFFont mainFont=state.m_font;
   listener->setFont(mainFont);
   listener->setParagraph(para);
-  if (m_format)
-    m_format->send(listener, pool, object);
+  if (m_format) {
+    StarState cState(state.m_pool, state.m_object, state.m_relativeUnit);
+    m_format->send(listener, cState);
+  }
   if (!m_markList.empty()) {
     static bool first=true;
     if (first) {
@@ -283,8 +333,8 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
       first=false;
     }
   }
-  if (para.m_break) {
-    switch (para.m_break) {
+  if (state.m_break) {
+    switch (state.m_break) {
     case 0:
       break;
     case 1:
@@ -302,23 +352,19 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
       break;
     }
     }
-    para.m_break=0;
+    state.m_break=0;
   }
-  if (mainFont.m_footnote) {
+  if (state.m_footnote) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a footnote in mainFont\n"));
-    mainFont.m_footnote=false;
   }
-  if (mainFont.m_field) {
+  if (state.m_field) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a field in mainFont\n"));
-    mainFont.m_field.reset();
   }
-  if (!mainFont.m_link.empty()) {
+  if (!state.m_link.empty()) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a link in mainFont\n"));
-    mainFont.m_link.clear();
   }
-  if (!mainFont.m_refMark.empty()) {
+  if (!state.m_refMark.empty()) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a refMark in mainFont\n"));
-    mainFont.m_refMark.clear();
   }
   std::set<size_t> modPosSet;
   size_t numFonts=m_charAttributeList.size();
@@ -345,7 +391,9 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
     bool startRefMark=false;
 
     if (fontChange) {
-      STOFFFont font(mainFont);
+      state.reinitializeLineData();
+      state.m_font=mainFont;
+      STOFFFont &font=state.m_font;
       for (size_t f=0; f<numFonts; ++f) {
         StarWriterStruct::Attribute const &attrib=m_charAttributeList[f];
         if ((attrib.m_position[1]<0 && attrib.m_position[0]>=0 && attrib.m_position[0]!=int(srcPos)) ||
@@ -354,12 +402,11 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
           continue;
         if (!attrib.m_attribute)
           continue;
-        attrib.m_attribute->addTo(font, pool);
-        if (!footnote && font.m_footnote)
+        attrib.m_attribute->addTo(state);
+        if (!footnote && state.m_footnote)
           footnote=attrib.m_attribute;
         if (c==0) {
-          attrib.m_attribute->addTo(para, pool);
-          switch (para.m_break) {
+          switch (state.m_break) {
           case 0:
             break;
           case 1:
@@ -377,37 +424,36 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
             break;
           }
           }
-          para.m_break=0;
         }
-        if (font.m_field) {
+        if (state.m_field) {
           if (int(srcPos)==attrib.m_position[0])
-            field=font.m_field;
-          font.m_field.reset();
+            field=state.m_field;
+          state.m_field.reset();
         }
-        if (!font.m_link.empty()) {
+        if (!state.m_link.empty()) {
           if (endLinkPos<0) {
-            linkString=font.m_link;
+            linkString=state.m_link;
             endLinkPos=int(attrib.m_position[1]<0 ? attrib.m_position[0] : attrib.m_position[1]);
           }
-          font.m_link.clear();
+          state.m_link.clear();
         }
-        if (!font.m_refMark.empty()) {
+        if (!state.m_refMark.empty()) {
           if (endRefMarkPos<0) {
-            refMarkString=font.m_refMark;
+            refMarkString=state.m_refMark;
             endRefMarkPos=int(attrib.m_position[1]<0 ? attrib.m_position[0] : attrib.m_position[1]);
             startRefMark=true;
           }
           else {
             STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: multiple refmark is not implemented\n"));
           }
-          font.m_refMark.clear();
+          state.m_refMark.clear();
         }
       }
       listener->setFont(font);
       if (c==0)
         listener->setParagraph(para);
       static bool first=true;
-      if (font.m_content) {
+      if (state.m_content) {
         first=false;
         STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find unexpected content zone\n"));
       }
@@ -434,10 +480,14 @@ bool TextZone::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObj
       listener->insertField(cField);
       endRefMarkPos=-1;
     }
-    if (footnote)
-      footnote->send(listener, pool, object);
-    else if (field)
-      field->send(listener, pool, object);
+    if (footnote) {
+      StarState cState(state.m_pool, state.m_object, state.m_relativeUnit);
+      footnote->send(listener, cState);
+    }
+    else if (field) {
+      StarState cState(state.m_pool, state.m_object, state.m_relativeUnit);
+      field->send(listener, state);
+    }
     else if (c==m_text.size())
       break;
     else if (m_text[c]==0x9)
@@ -465,12 +515,12 @@ struct Table : public Zone {
   {
   }
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const;
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! the table
   shared_ptr<StarTable> m_table;
 };
 
-bool Table::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object) const
+bool Table::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::Table::send: call without listener\n"));
@@ -480,7 +530,7 @@ bool Table::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject
     STOFF_DEBUG_MSG(("StarObjectTextInternal::Table::send: can not find the table\n"));
     return false;
   }
-  return m_table->send(listener, pool, object);
+  return m_table->send(listener, state);
 }
 
 ////////////////////////////////////////
@@ -521,12 +571,16 @@ StarObjectText::~StarObjectText()
 ////////////////////////////////////////////////////////////
 // send the data
 ////////////////////////////////////////////////////////////
-bool StarObjectText::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const
+bool StarObjectText::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages)
 {
   numPages=0;
 
+  shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
+  StarState state(pool.get(), *this);
+  if (m_textState->m_mainContent)
+    m_textState->m_mainContent->inventoryPages(state);
   if (m_textState->m_pageStyle)
-    m_textState->m_pageStyle->updatePageSpans(pageSpan, numPages);
+    m_textState->m_pageStyle->updatePageSpans(state.m_pageNameList, pageSpan, numPages);
   else {
     numPages=1000;
     STOFFPageSpan ps;
@@ -558,8 +612,9 @@ bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
       m_textState->m_model->sendPage(i, listener);
   }
   shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
+  StarState state(pool.get(), *this);
   listener->openSection(m_textState->m_defaultSection);
-  m_textState->m_mainContent->send(listener, pool.get(), *this);
+  m_textState->m_mainContent->send(listener, state);
   listener->closeSection();
   return true;
 }

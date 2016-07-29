@@ -39,8 +39,6 @@
 
 #include <librevenge/librevenge.h>
 
-#include "STOFFGraphicStyle.hxx"
-
 #include "SWFieldManager.hxx"
 #include "StarFormatManager.hxx"
 
@@ -54,6 +52,7 @@
 #include "StarObject.hxx"
 #include "StarObjectSmallText.hxx"
 #include "StarObjectText.hxx"
+#include "StarState.hxx"
 #include "StarZone.hxx"
 
 #include "StarAttribute.hxx"
@@ -374,7 +373,7 @@ StarAttribute::~StarAttribute()
 {
 }
 
-void StarAttributeItemSet::addTo(STOFFCellStyle &cell, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
+void StarAttributeItemSet::addTo(StarState &state, std::set<StarAttribute const *> &done) const
 {
   if (done.find(this)!=done.end()) {
     STOFF_DEBUG_MSG(("StarAttributeItemSet::addTo: find a cycle\n"));
@@ -383,126 +382,16 @@ void StarAttributeItemSet::addTo(STOFFCellStyle &cell, StarItemPool const *pool,
   done.insert(this);
   StarItemSet finalSet;
   bool newSet=false;
-  if (pool && !m_itemSet.m_style.empty()) {
+  if (state.m_pool && !m_itemSet.m_style.empty()) {
     finalSet=m_itemSet;
-    pool->updateUsingStyles(finalSet);
+    state.m_pool->updateUsingStyles(finalSet);
     newSet=true;
   }
   StarItemSet const &set=newSet ? finalSet : m_itemSet;
   for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
        it!=set.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(cell, pool, done);
-  }
-}
-
-void StarAttributeItemSet::addTo(STOFFFont &font, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
-{
-  if (done.find(this)!=done.end()) {
-    STOFF_DEBUG_MSG(("StarAttributeItemSet::addTo: find a cycle\n"));
-    return;
-  }
-  done.insert(this);
-  StarItemSet finalSet;
-  bool newSet=false;
-  if (pool && !m_itemSet.m_style.empty()) {
-    finalSet=m_itemSet;
-    pool->updateUsingStyles(finalSet);
-    newSet=true;
-  }
-  StarItemSet const &set=newSet ? finalSet : m_itemSet;
-  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
-       it!=set.m_whichToItemMap.end(); ++it) {
-    if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(font, pool, done);
-  }
-}
-
-void StarAttributeItemSet::addTo(STOFFGraphicStyle &graphic, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
-{
-  if (done.find(this)!=done.end()) {
-    STOFF_DEBUG_MSG(("StarAttributeItemSet::addTo: find a cycle\n"));
-    return;
-  }
-  done.insert(this);
-  StarItemSet finalSet;
-  bool newSet=false;
-  if (pool && !m_itemSet.m_style.empty()) {
-    finalSet=m_itemSet;
-    pool->updateUsingStyles(finalSet);
-    newSet=true;
-  }
-  StarItemSet const &set=newSet ? finalSet : m_itemSet;
-  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
-       it!=set.m_whichToItemMap.end(); ++it) {
-    if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(graphic, pool, done);
-  }
-}
-
-void StarAttributeItemSet::addTo(STOFFPageSpan &page, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
-{
-  if (done.find(this)!=done.end()) {
-    STOFF_DEBUG_MSG(("StarAttributeItemSet::addTo: find a cycle\n"));
-    return;
-  }
-  done.insert(this);
-  StarItemSet finalSet;
-  bool newSet=false;
-  if (pool && !m_itemSet.m_style.empty()) {
-    finalSet=m_itemSet;
-    pool->updateUsingStyles(finalSet);
-    newSet=true;
-  }
-  StarItemSet const &set=newSet ? finalSet : m_itemSet;
-  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
-       it!=set.m_whichToItemMap.end(); ++it) {
-    if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(page, pool, done);
-  }
-}
-
-void StarAttributeItemSet::addTo(STOFFParagraph &para, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
-{
-  if (done.find(this)!=done.end()) {
-    STOFF_DEBUG_MSG(("StarAttributeItemSet::addTo: find a cycle\n"));
-    return;
-  }
-  done.insert(this);
-  StarItemSet finalSet;
-  bool newSet=false;
-  if (pool && !m_itemSet.m_style.empty()) {
-    finalSet=m_itemSet;
-    pool->updateUsingStyles(finalSet);
-    newSet=true;
-  }
-  StarItemSet const &set=newSet ? finalSet : m_itemSet;
-  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
-       it!=set.m_whichToItemMap.end(); ++it) {
-    if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(para, pool, done);
-  }
-}
-
-void StarAttributeItemSet::addTo(STOFFSection &sect, StarItemPool const *pool, std::set<StarAttribute const *> &done) const
-{
-  if (done.find(this)!=done.end()) {
-    STOFF_DEBUG_MSG(("StarAttributeItemSet::addTo: find a cycle\n"));
-    return;
-  }
-  done.insert(this);
-  StarItemSet finalSet;
-  bool newSet=false;
-  if (pool && !m_itemSet.m_style.empty()) {
-    finalSet=m_itemSet;
-    pool->updateUsingStyles(finalSet);
-    newSet=true;
-  }
-  StarItemSet const &set=newSet ? finalSet : m_itemSet;
-  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
-       it!=set.m_whichToItemMap.end(); ++it) {
-    if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(sect, pool, done);
+      it->second->m_attribute->addTo(state, done);
   }
 }
 
@@ -649,7 +538,7 @@ bool StarAttributeVoid::read(StarZone &zone, int /*vers*/, long /*endPos*/, Star
   return true;
 }
 
-bool StarAttributeItemSet::send(STOFFListenerPtr listener, StarItemPool const *pool, StarObject &object, std::set<StarAttribute const *> &done) const
+bool StarAttributeItemSet::send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const
 {
   if (done.find(this)!=done.end()) {
     STOFF_DEBUG_MSG(("StarAttributeItemSet::send: find a cycle\n"));
@@ -659,7 +548,7 @@ bool StarAttributeItemSet::send(STOFFListenerPtr listener, StarItemPool const *p
   for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
        it!=m_itemSet.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
-      it->second->m_attribute->send(listener, pool, object, done);
+      it->second->m_attribute->send(listener, state, done);
   }
   return true;
 }
@@ -828,24 +717,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
       f << "char=" << char(input->readULong(1)) << ",";
     break;
   // frame parameter
-  case StarAttribute::ATTR_FRM_PAGEDESC:
-    // sw_sw3npool.cxx SwFmtPageDesc::Create
-    f << "pageDesc,";
-    if (nVers<1)
-      f << "bAutor=" << input->readULong(1) << ",";
-    if (nVers< 2)
-      f << "nOff=" << input->readULong(2) << ",";
-    else {
-      unsigned long nOff;
-      if (!input->readCompressedULong(nOff)) {
-        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read nOff\n"));
-        f << "###nOff,";
-        break;
-      }
-      f << "nOff=" << nOff << ",";
-    }
-    f << "nIdx=" << input->readULong(2) << ",";
-    break;
   case StarAttribute::ATTR_FRM_PROTECT:
     f << "protect,";
     val=int(input->readULong(1));

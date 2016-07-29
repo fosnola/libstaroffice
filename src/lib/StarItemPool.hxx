@@ -104,16 +104,16 @@ public:
   /** update a itemset by adding attribute corresponding to its styles*/
   void updateUsingStyles(StarItemSet &itemSet) const;
   /** define a graphic style */
-  void defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName) const
+  void defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName, StarObject &object) const
   {
     std::set<librevenge::RVNGString> done;
-    defineGraphicStyle(listener, styleName, done);
+    defineGraphicStyle(listener, styleName, object, done);
   }
   /** define a paragraph style */
-  void defineParagraphStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName) const
+  void defineParagraphStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName, StarObject &object) const
   {
     std::set<librevenge::RVNGString> done;
-    defineParagraphStyle(listener, styleName, done);
+    defineParagraphStyle(listener, styleName, object, done);
   }
   /** try to find a style with a name and a family style */
   StarItemStyle const *findStyleWithFamily(librevenge::RVNGString const &style, int family) const;
@@ -128,9 +128,9 @@ public:
 
 protected:
   /** define a graphic style */
-  void defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName, std::set<librevenge::RVNGString> &done) const;
+  void defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName, StarObject &object, std::set<librevenge::RVNGString> &done) const;
   /** define a paragraph style */
-  void defineParagraphStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName, std::set<librevenge::RVNGString> &done) const;
+  void defineParagraphStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName, StarObject &object, std::set<librevenge::RVNGString> &done) const;
   //! try to read a "ItemPool" zone (version 1)
   bool readV1(StarZone &zone, StarItemPool *master);
   //! try to read a "ItemPool" zone (version 2)
