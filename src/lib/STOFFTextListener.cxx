@@ -562,6 +562,9 @@ void STOFFTextListener::_openPageSpan(bool sendHeaderFooters)
   // first paragraph in span (necessary for resetting page number)
   m_ps->m_firstParagraphInPageSpan = true;
   m_ps->m_numPagesRemainingInSpan = (currentPage.m_pageSpan - 1);
+
+  // finally update the section
+  m_ps->m_section=currentPage.m_section;
 }
 
 void STOFFTextListener::_closePageSpan()

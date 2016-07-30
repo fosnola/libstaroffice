@@ -66,7 +66,7 @@ struct Zone {
 //! Internal: a set of zone
 struct Content {
   //! constructor
-  Content() : m_sectionId(-1), m_zoneList()
+  Content() : m_sectionName(""), m_zoneList()
   {
   }
   //! destructor
@@ -75,8 +75,8 @@ struct Content {
   bool send(STOFFListenerPtr listener, StarState &state) const;
   //! try to inventory the different pages
   void inventoryPages(StarState &state) const;
-  //! the section id
-  int m_sectionId;
+  //! the section name
+  librevenge::RVNGString m_sectionName;
   //! the list of text zone
   std::vector<shared_ptr<Zone> > m_zoneList;
 };

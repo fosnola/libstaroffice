@@ -51,7 +51,7 @@ struct PageDesc;
 struct State;
 }
 
-class STOFFSection;
+class StarState;
 class StarZone;
 
 /** \brief the main class to read a SwPageStyleSheets zone
@@ -71,9 +71,9 @@ public:
 
   /** try to update the page span (to create text document)*/
   bool updatePageSpans(std::vector<librevenge::RVNGString> const &listNames, std::vector<STOFFPageSpan> &pageSpan, int &numPages);
-  /** try to update the section (generic document section) */
-  bool updateSection(STOFFSection &section);
 protected:
+  /// try to update the pagespan
+  bool updatePageSpan(librevenge::RVNGString const &name, StarState &state);
   //
   // low level
   //

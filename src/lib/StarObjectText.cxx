@@ -183,7 +183,7 @@ bool GraphZone::send(STOFFListenerPtr listener, StarState &/* state */) const
 //! Internal: a sectionZone of StarObjectTextInteral
 struct SectionZone : public Zone {
   //! constructor
-  SectionZone(STOFFSection const &defSection) : Zone(), m_name(""), m_condition(""), m_linkName(""), m_type(0), m_flags(0), m_format(), m_content(), m_defaultSection(defSection)
+  SectionZone() : Zone(), m_name(""), m_condition(""), m_linkName(""), m_type(0), m_flags(0), m_format(), m_content()
   {
   }
   //! try to send the data to a listener
@@ -202,8 +202,6 @@ struct SectionZone : public Zone {
   shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
   //! the content
   shared_ptr<Content> m_content;
-  //! the default section
-  STOFFSection m_defaultSection;
 };
 
 bool SectionZone::send(STOFFListenerPtr listener, StarState &state) const
@@ -212,13 +210,7 @@ bool SectionZone::send(STOFFListenerPtr listener, StarState &state) const
     STOFF_DEBUG_MSG(("StarObjectTextInternal::FormatZone::send: call without listener\n"));
     return false;
   }
-  STOFFSection section(m_defaultSection);
-  if (!m_name.empty())
-    section.m_propertyList.insert("text:name", m_name);
-  if (listener->isSectionOpened())
-    listener->closeSection();
-  if (listener->canOpenSectionAddBreak())
-    listener->openSection(section);
+  // checkme: do we need to create a new section here
   if (m_content)
     m_content->send(listener, state);
   else {
@@ -256,20 +248,24 @@ void TextZone::inventoryPage(StarState &state) const
 {
   std::map<int, shared_ptr<StarItem> >::const_iterator it;
   size_t numPages=state.m_pageNameList.size();
-  state.m_break=0;
-  if (state.m_pool && !m_styleName.empty()) { // checkme
-    StarItemStyle const *style=state.m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
-    if (style) {
-      StarItemSet const &itemSet=style->m_itemSet;
-      for (it=itemSet.m_whichToItemMap.begin(); it!=itemSet.m_whichToItemMap.end(); ++it) {
-        if (it->second && it->second->m_attribute)
-          it->second->m_attribute->addTo(state);
+  if (state.m_styleName!=m_styleName) {
+    state.reinitializeLineData();
+    state.m_styleName=m_styleName;
+    if (state.m_pool && !m_styleName.empty()) { // checkme
+      StarItemStyle const *style=state.m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
+      if (style) {
+        StarItemSet const &itemSet=style->m_itemSet;
+        for (it=itemSet.m_whichToItemMap.begin(); it!=itemSet.m_whichToItemMap.end(); ++it) {
+          if (it->second && it->second->m_attribute)
+            it->second->m_attribute->addTo(state);
+        }
+      }
+      else {
+        STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::inventoryPage: can not find style %s\n", m_styleName.cstr()));
       }
     }
-    else {
-      STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::inventoryPage: can not find style %s\n", m_styleName.cstr()));
-    }
   }
+  StarState lineState(state);
   size_t numAttr=m_charAttributeList.size();
   for (size_t i=0; i<numAttr; ++i) {
     StarWriterStruct::Attribute const &attrib=m_charAttributeList[i];
@@ -277,9 +273,13 @@ void TextZone::inventoryPage(StarState &state) const
       continue;
     if (!attrib.m_attribute)
       continue;
-    attrib.m_attribute->addTo(state);
+    attrib.m_attribute->addTo(lineState);
   }
-  if (state.m_pageNameList.size()==numPages && state.m_break==4)
+  if (lineState.m_pageNameList.size()!=state.m_pageNameList.size()) {
+    state.m_pageName=lineState.m_pageName;
+    state.m_pageNameList.push_back(state.m_pageName);
+  }
+  else if (lineState.m_pageNameList.size()==numPages && lineState.m_break==4)
     state.m_pageNameList.push_back("");
 }
 
@@ -290,38 +290,29 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
     return false;
   }
 
+  size_t numPages=state.m_pageNameList.size();
   std::map<int, shared_ptr<StarItem> >::const_iterator it;
-  state.m_break=0;
-  state.m_font=STOFFFont();
-  state.m_paragraph=STOFFParagraph();
-  STOFFParagraph &para=state.m_paragraph;
-  if (state.m_pool && !m_styleName.empty()) { // checkme
-    StarItemStyle const *style=state.m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
-    if (style) {
-#if 0
-      bool done=false;
-      if (!style->m_names[0].empty()) {
-        if (listener) state.m_pool->defineParagraphStyle(listener, style->m_names[0], state->m_object);
-        para.m_propertyList.insert("librevenge:parent-display-name", style->m_names[0]);
-        done=true;
+  if (state.m_styleName!=m_styleName) {
+    state.reinitializeLineData();
+    state.m_paragraph=STOFFParagraph();
+    state.m_styleName=m_styleName;
+    if (state.m_pool && !m_styleName.empty()) { // checkme
+      StarItemStyle const *style=state.m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
+      if (style) {
+        StarItemSet const &itemSet=style->m_itemSet;
+        for (it=itemSet.m_whichToItemMap.begin(); it!=itemSet.m_whichToItemMap.end(); ++it) {
+          if (it->second && it->second->m_attribute)
+            it->second->m_attribute->addTo(state);
+        }
       }
-#endif
-      StarItemSet const &itemSet=style->m_itemSet;
-      for (it=itemSet.m_whichToItemMap.begin(); it!=itemSet.m_whichToItemMap.end(); ++it) {
-        if (it->second && it->second->m_attribute)
-          it->second->m_attribute->addTo(state);
+      else {
+        STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: can not find style %s\n", m_styleName.cstr()));
       }
-#if 0
-      std::cerr << "Para:" << style->m_itemSet.printChild() << "\n";
-#endif
-    }
-    else {
-      STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: can not find style %s\n", m_styleName.cstr()));
     }
   }
   STOFFFont mainFont=state.m_font;
   listener->setFont(mainFont);
-  listener->setParagraph(para);
+  listener->setParagraph(state.m_paragraph);
   if (m_format) {
     StarState cState(state.m_pool, state.m_object, state.m_relativeUnit);
     m_format->send(listener, cState);
@@ -333,6 +324,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
       first=false;
     }
   }
+  bool newPage=false;
   if (state.m_break) {
     switch (state.m_break) {
     case 0:
@@ -342,6 +334,9 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
       break;
     case 4:
       listener->insertBreak(STOFFListener::PageBreak);
+      if (state.m_pageNameList.size()==numPages)
+        state.m_pageNameList.push_back("");
+      newPage=true;
       break;
     default: {
       static bool first=true;
@@ -378,6 +373,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
   std::set<size_t>::const_iterator posSetIt=modPosSet.begin();
   int endLinkPos=-1, endRefMarkPos=-1;
   librevenge::RVNGString refMarkString;
+  StarState lineState(state);
   for (size_t c=0; c<= m_text.size(); ++c) {
     bool fontChange=false;
     size_t srcPos=c<m_textSourcePosition.size() ? m_textSourcePosition[c] : 10000;
@@ -391,9 +387,9 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
     bool startRefMark=false;
 
     if (fontChange) {
-      state.reinitializeLineData();
-      state.m_font=mainFont;
-      STOFFFont &font=state.m_font;
+      lineState.reinitializeLineData();
+      lineState.m_font=mainFont;
+      STOFFFont &font=lineState.m_font;
       for (size_t f=0; f<numFonts; ++f) {
         StarWriterStruct::Attribute const &attrib=m_charAttributeList[f];
         if ((attrib.m_position[1]<0 && attrib.m_position[0]>=0 && attrib.m_position[0]!=int(srcPos)) ||
@@ -402,18 +398,21 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
           continue;
         if (!attrib.m_attribute)
           continue;
-        attrib.m_attribute->addTo(state);
-        if (!footnote && state.m_footnote)
+        attrib.m_attribute->addTo(lineState);
+        if (!footnote && lineState.m_footnote)
           footnote=attrib.m_attribute;
         if (c==0) {
-          switch (state.m_break) {
+          switch (lineState.m_break) {
           case 0:
             break;
           case 1:
             listener->insertBreak(STOFFListener::ColumnBreak);
             break;
           case 4:
+            newPage=true;
             listener->insertBreak(STOFFListener::PageBreak);
+            if (state.m_pageNameList.size()==numPages)
+              state.m_pageNameList.push_back("");
             break;
           default: {
             static bool first=true;
@@ -424,40 +423,44 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
             break;
           }
           }
+          lineState.m_break=0;
         }
-        if (state.m_field) {
+        if (lineState.m_field) {
           if (int(srcPos)==attrib.m_position[0])
-            field=state.m_field;
-          state.m_field.reset();
+            field=lineState.m_field;
+          lineState.m_field.reset();
         }
-        if (!state.m_link.empty()) {
+        if (!lineState.m_link.empty()) {
           if (endLinkPos<0) {
-            linkString=state.m_link;
+            linkString=lineState.m_link;
             endLinkPos=int(attrib.m_position[1]<0 ? attrib.m_position[0] : attrib.m_position[1]);
           }
-          state.m_link.clear();
+          lineState.m_link.clear();
         }
-        if (!state.m_refMark.empty()) {
+        if (!lineState.m_refMark.empty()) {
           if (endRefMarkPos<0) {
-            refMarkString=state.m_refMark;
+            refMarkString=lineState.m_refMark;
             endRefMarkPos=int(attrib.m_position[1]<0 ? attrib.m_position[0] : attrib.m_position[1]);
             startRefMark=true;
           }
           else {
             STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: multiple refmark is not implemented\n"));
           }
-          state.m_refMark.clear();
+          lineState.m_refMark.clear();
         }
       }
       listener->setFont(font);
       if (c==0)
-        listener->setParagraph(para);
+        listener->setParagraph(lineState.m_paragraph);
       static bool first=true;
-      if (state.m_content) {
+      if (lineState.m_content) {
         first=false;
         STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find unexpected content zone\n"));
       }
     }
+    if (c==0 && !newPage && numPages && numPages!=lineState.m_pageNameList.size())
+      listener->insertBreak(STOFFListener::SoftPageBreak);
+
     if (!linkString.empty()) {
       STOFFLink link;
       link.m_HRef=linkString.cstr();
@@ -537,7 +540,7 @@ bool Table::send(STOFFListenerPtr listener, StarState &state) const
 //! Internal: the state of a StarObjectText
 struct State {
   //! constructor
-  State() : m_numPages(0), m_numGraphicPages(0), m_mainContent(), m_pageStyle(), m_model(), m_defaultSection()
+  State() : m_numPages(0), m_numGraphicPages(0), m_mainContent(), m_pageStyle(), m_model()
   {
   }
   //! the number of pages
@@ -550,8 +553,6 @@ struct State {
   shared_ptr<StarObjectPageStyle> m_pageStyle;
   //! the drawing model
   shared_ptr<StarObjectModel> m_model;
-  //! the default section
-  STOFFSection m_defaultSection;
 };
 
 }
@@ -613,9 +614,7 @@ bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
   }
   shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
   StarState state(pool.get(), *this);
-  listener->openSection(m_textState->m_defaultSection);
   m_textState->m_mainContent->send(listener, state);
-  listener->closeSection();
   return true;
 }
 
@@ -659,10 +658,8 @@ bool StarObjectText::parse()
       try {
         StarZone zone(ole, name, "StarPageStyleSheets", getPassword());
         shared_ptr<StarObjectPageStyle> pageStyle(new StarObjectPageStyle(*this,true));
-        if (pageStyle->read(zone)) {
+        if (pageStyle->read(zone))
           m_textState->m_pageStyle=pageStyle;
-          pageStyle->updateSection(m_textState->m_defaultSection);
-        }
       }
       catch (...) {
       }
@@ -859,8 +856,13 @@ bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInte
     nNodes=int(input->readULong(4));
   else {
     if (zone.isCompatibleWith(5)) {
-      content->m_sectionId=int(input->readULong(2));
-      f << "sectId=" << content->m_sectionId << ",";
+      int id=int(input->readULong(2));
+      if (!zone.getPoolName(id, content->m_sectionName)) {
+        STOFF_DEBUG_MSG(("StarObjectText::readSWContent: oops, can not find the section name\n"));
+        f << "###sectId=" << id << ",";
+      }
+      else
+        f << "section[name]=" << content->m_sectionName.cstr() << ",";
     }
     nNodes=int(input->readULong(2));
   }
@@ -1307,7 +1309,7 @@ bool StarObjectText::readSWSection(StarZone &zone, shared_ptr<StarObjectTextInte
   // sw_sw3sectn.cxx: InSection
   libstoff::DebugStream f;
   f << "Entries(SWSection)[" << zone.getRecordLevel() << "]:";
-  section.reset(new StarObjectTextInternal::SectionZone(m_textState->m_defaultSection));
+  section.reset(new StarObjectTextInternal::SectionZone);
   std::vector<uint32_t> text;
   for (int i=0; i<2; ++i) {
     if (!zone.readString(text)) {

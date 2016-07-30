@@ -139,7 +139,7 @@ std::ostream &operator<<(std::ostream &o, NoteDesc const &desc)
 struct PageDesc {
 public:
   //! constructor
-  explicit PageDesc() : m_name(""), m_follow(""), m_landscape(false), m_poolId(0), m_numType(0), m_usedOn(0), m_regCollIdx(0xFFFF)
+  explicit PageDesc() : m_name(""), m_follow(""), m_landscape(false), m_poolId(0), m_numType(0), m_usedOn(3), m_regCollIdx(0xFFFF)
   {
   }
   //! destructor
@@ -290,10 +290,24 @@ std::ostream &operator<<(std::ostream &o, PageDesc const &desc)
   if (desc.m_landscape) o << "landscape,";
   if (desc.m_poolId) o << "poolId=" << desc.m_poolId << ",";
   if (desc.m_numType) o << "numType=" << desc.m_numType << ",";
+  switch (desc.m_usedOn&3) {
+  case 1:
+    o << "left,";
+    break;
+  case 2:
+    o << "right,";
+    break;
+  case 3:
+    o << "all,";
+    break;
+  case 0: // internal
+  default:
+    break;
+  }
   if (desc.m_usedOn&0x40) o << "header[share],";
   if (desc.m_usedOn&0x80) o << "footer[share],";
   if (desc.m_usedOn&0x100) o << "first[share],";
-  if (desc.m_usedOn&0xFE3F) o << "usedOn=" << std::hex << (desc.m_usedOn&0xFE3F) << std::dec << ",";
+  if (desc.m_usedOn&0xFE3C) o << "usedOn=" << std::hex << (desc.m_usedOn&0xFE3C) << std::dec << ",";
   if (desc.m_regCollIdx!=0xFFFF) o << "regCollIdx=" << desc.m_regCollIdx << ",";
   return o;
 }
@@ -302,11 +316,40 @@ std::ostream &operator<<(std::ostream &o, PageDesc const &desc)
 //! Internal: the state of a StarObjectPageStyle
 struct State {
   //! constructor
-  State() : m_pageList()
+  State() : m_pageList(), m_nameToPageIdMap(), m_simplifyNameToPageIdMap()
   {
+  }
+  //! small function to simplify a string (bad hack)
+  static librevenge::RVNGString getBasicString(librevenge::RVNGString const &s)
+  {
+    librevenge::RVNGString res("");
+    char const *ptr=s.cstr();
+    if (!ptr) return res;
+    int numBad=0;
+    while (*ptr) {
+      char c=*(ptr++);
+      if (unsigned(c)<0x80) {
+        if (numBad) {
+          numBad=0;
+          res.append('@');
+        }
+        res.append(c);
+        continue;
+      }
+      if (numBad++>=4) {
+        res.append('@');
+        numBad=0;
+      }
+    }
+    if (numBad) res.append('@');
+    return res;
   }
   //! list of pages
   std::vector<PageDesc> m_pageList;
+  //! map name to id
+  std::map<librevenge::RVNGString, size_t> m_nameToPageIdMap;
+  //! map simplify name to id
+  std::map<librevenge::RVNGString, size_t> m_simplifyNameToPageIdMap;
 };
 
 }
@@ -325,29 +368,95 @@ StarObjectPageStyle::~StarObjectPageStyle()
 ////////////////////////////////////////////////////////////
 // send data
 ////////////////////////////////////////////////////////////
-bool StarObjectPageStyle::updatePageSpans
-(std::vector<librevenge::RVNGString> const &/*listNames*/, std::vector<STOFFPageSpan> &pageSpan, int &number)
+bool StarObjectPageStyle::updatePageSpan(librevenge::RVNGString const &name, StarState &state)
 {
-  number=10000; // only one type of page ?
+  STOFFPageSpan &ps=state.m_page;
+  ps=STOFFPageSpan();
+  size_t id=0;
+  if (m_pageStyleState->m_nameToPageIdMap.find(name) != m_pageStyleState->m_nameToPageIdMap.end())
+    id=m_pageStyleState->m_nameToPageIdMap.find(name)->second;
+  else {
+    librevenge::RVNGString simpName=m_pageStyleState->getBasicString(name);
+    if (m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)!=m_pageStyleState->m_simplifyNameToPageIdMap.end())
+      id=m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)->second;
+    else if (!name.empty()) {
+      STOFF_DEBUG_MSG(("StarObjectPageStyle::updatePageSpan: can not find page %s\n", name.cstr()));
+    }
+  }
+  if (id>=m_pageStyleState->m_pageList.size())
+    return false;
+  size_t listIds[3];
+  std::string listOccurence[3];
+  std::set<librevenge::RVNGString> seen;
+  int numPages=0;
+  for (int i=0; i<3; ++i) {
+    StarObjectPageStyleInternal::PageDesc const &page=m_pageStyleState->m_pageList[id];
+    listIds[i]=id;
+    numPages=i+1;
+    if ((page.m_usedOn&3)==3) {
+      if (i==1) listOccurence[0]="first";
+      listOccurence[i]="all";
+      break;
+    }
+    listOccurence[i]=(page.m_usedOn&1) ? "left" : "right";
+    seen.insert(page.m_name);
+    librevenge::RVNGString const &follow=page.m_follow;
+    if (follow.empty() || seen.find(follow)!=seen.end())
+      break;
+    if (m_pageStyleState->m_nameToPageIdMap.find(follow) != m_pageStyleState->m_nameToPageIdMap.end())
+      id=m_pageStyleState->m_nameToPageIdMap.find(follow)->second;
+    else {
+      librevenge::RVNGString simpName=m_pageStyleState->getBasicString(follow);
+      if (m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)!=m_pageStyleState->m_simplifyNameToPageIdMap.end())
+        id=m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)->second;
+      else {
+        STOFF_DEBUG_MSG(("StarObjectPageStyle::updatePageSpan: can not find page %s\n", follow.cstr()));
+        break;
+      }
+    }
+    if (id>=m_pageStyleState->m_pageList.size())
+      break;
+  }
+  if (numPages==3) listOccurence[0]="first";
+  for (int p=numPages-1; p>=0; --p) { // invert so that section correspond to the first page
+    state.m_page.m_section=STOFFSection();
+    state.m_pageOccurence=listOccurence[p];
+    m_pageStyleState->m_pageList[listIds[p]].updatePageSpan(state);
+  }
+  return true;
+}
+
+bool StarObjectPageStyle::updatePageSpans
+(std::vector<librevenge::RVNGString> const &listNames, std::vector<STOFFPageSpan> &pageSpan, int &number)
+{
+  librevenge::RVNGString lastPageName("");
+  int numPage=0;
+  number=0;
   shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
   StarState state(pool.get(), *this);
-  if (!m_pageStyleState->m_pageList.empty())
-    m_pageStyleState->m_pageList[0].updatePageSpan(state);
   STOFFPageSpan &ps=state.m_page;
-  ps.m_pageSpan=number;
-  pageSpan.push_back(ps);
+  for (size_t i=0; i<=listNames.size(); ++i) {
+    bool newPage=(i==listNames.size()) || (lastPageName!="" && listNames[i]!="" && lastPageName!=listNames[i]);
+    if (!newPage) {
+      if (lastPageName.empty()) lastPageName=listNames[i];
+      ++numPage;
+      continue;
+    }
+    if (i==listNames.size())
+      numPage=10000; // be sure to allow enough page
+    if (numPage) {
+      updatePageSpan(lastPageName, state);
+      ps.m_pageSpan=numPage;
+      pageSpan.push_back(ps);
+      number+=numPage;
+    }
+    if (i==listNames.size()) break;
+    numPage=1;
+    lastPageName=listNames[i];
+  }
   return number!=0;
 }
 
-bool StarObjectPageStyle::updateSection(STOFFSection &section)
-{
-  shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
-  StarState state(pool.get(), *this);
-  if (!m_pageStyleState->m_pageList.empty())
-    m_pageStyleState->m_pageList[0].updateState(state);
-  section=state.m_section;
-  return true;
-}
 ////////////////////////////////////////////////////////////
 // the parser
 ////////////////////////////////////////////////////////////
@@ -391,6 +500,15 @@ try
         // read will check that we can read the data, ....
         if (!desc.read(zone, *this))
           break;
+        if (m_pageStyleState->m_nameToPageIdMap.find(desc.m_name)!=m_pageStyleState->m_nameToPageIdMap.end()) {
+          STOFF_DEBUG_MSG(("StarObjectPageStyle::read: oops page with name=%s already exists\n", desc.m_name.cstr()));
+        }
+        else {
+          m_pageStyleState->m_nameToPageIdMap[desc.m_name]=m_pageStyleState->m_pageList.size();
+          librevenge::RVNGString simpName=m_pageStyleState->getBasicString(desc.m_name);
+          if (m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)==m_pageStyleState->m_simplifyNameToPageIdMap.end())
+            m_pageStyleState->m_simplifyNameToPageIdMap[simpName]=m_pageStyleState->m_pageList.size();
+        }
         m_pageStyleState->m_pageList.push_back(desc);
       }
       break;

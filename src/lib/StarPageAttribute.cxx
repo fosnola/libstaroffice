@@ -821,7 +821,7 @@ void StarPAttributeColumns::addTo(StarState &state, std::set<StarAttribute const
         if (m_columnList[c].addTo(propList))
           columns.append(propList);
       }
-      state.m_section.m_propertyList.insert("style:columns", columns);
+      state.m_page.m_section.m_propertyList.insert("style:columns", columns);
     }
   }
 }
@@ -847,7 +847,7 @@ void StarPAttributeFrameHF::addTo(StarState &state, std::set<StarAttribute const
   if (m_type==ATTR_FRM_HEADER || m_type==ATTR_FRM_FOOTER) {
     STOFFHeaderFooter hf;
     hf.m_subDocument[3].reset(new SubDocument(m_format, state.m_pool, &state.m_object));
-    state.m_page.addHeaderFooter(m_type==ATTR_FRM_HEADER, "all", hf);
+    state.m_page.addHeaderFooter(m_type==ATTR_FRM_HEADER, state.m_pageOccurence.empty() ? "all" :  state.m_pageOccurence.c_str(), hf);
   }
   else {
     STOFF_DEBUG_MSG(("StarPAttributeFrameHF::addTo: unknown type\n"));
@@ -966,6 +966,7 @@ bool StarPAttributeColumns::read(StarZone &zone, int /*vers*/, long endPos, Star
 
 bool StarPAttributeFrameHF::read(StarZone &zone, int /*vers*/, long endPos, StarObject &object)
 {
+  // sw_sw3npool.cxx SwFmtHeader::Create
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
   libstoff::DebugFile &ascFile=zone.ascii();

@@ -39,8 +39,7 @@
 
 StarState::StarState(StarState const &orig) :
   m_pool(orig.m_pool), m_object(orig.m_object), m_styleName(orig.m_styleName),
-  m_page(orig.m_page), m_pageName(orig.m_pageName), m_pageNameList(orig.m_pageNameList), m_pageZone(orig.m_pageZone),
-  m_section(orig.m_section), m_sectionName(orig.m_sectionName),
+  m_page(orig.m_page), m_pageName(orig.m_pageName), m_pageNameList(orig.m_pageNameList), m_pageZone(orig.m_pageZone), m_pageOccurence(orig.m_pageOccurence),
   m_break(orig.m_break),
   m_cell(orig.m_cell),
   m_graphic(orig.m_graphic), m_paragraph(orig.m_paragraph),

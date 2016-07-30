@@ -40,6 +40,7 @@
 #include "libstaroffice_internal.hxx"
 
 #include "STOFFFont.hxx"
+#include "STOFFSection.hxx"
 
 class STOFFListener;
 
@@ -105,6 +106,8 @@ public:
   librevenge::RVNGPropertyList m_propertiesList[3];
   //! the map occurrence to header/footer document
   std::map<std::string, STOFFHeaderFooter> m_occurrenceHFMap[2];
+  //! the main section
+  STOFFSection m_section;
   //! the page number ( or -1)
   int m_pageNumber;
 };

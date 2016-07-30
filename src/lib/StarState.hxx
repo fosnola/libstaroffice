@@ -66,8 +66,7 @@ public:
   //! constructor
   StarState(StarItemPool const *pool, StarObject &object, double relUnit=0.05) :
     m_pool(pool), m_object(object), m_styleName(""),
-    m_page(), m_pageName(""), m_pageNameList(), m_pageZone(STOFFPageSpan::Page),
-    m_section(), m_sectionName(""),
+    m_page(), m_pageName(""), m_pageNameList(), m_pageZone(STOFFPageSpan::Page), m_pageOccurence("all"),
     m_break(0),
     m_cell(),
     m_graphic(), m_paragraph(),
@@ -96,11 +95,8 @@ public:
   std::vector<librevenge::RVNGString> m_pageNameList;
   /// the actual page zone: document, header, footer
   STOFFPageSpan::ZoneType m_pageZone;
-
-  /// the section
-  STOFFSection m_section;
-  /// the section name
-  librevenge::RVNGString m_sectionName;
+  /// the page occurence: all, first, left, right
+  std::string m_pageOccurence;
 
   //! a page/column break: 1=columnBefore, 2=columnAfter, 3=columnBoth, 4=pageBefore, 5=pageAfter,n 6=pageBoth
   int m_break;
