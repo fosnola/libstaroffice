@@ -112,7 +112,7 @@ bool Content::send(STOFFListenerPtr listener, StarState &state) const
 //! Internal: a formatZone of StarObjectTextInteral
 struct FormatZone : public Zone {
   //! constructor
-  FormatZone(shared_ptr<StarFormatManagerInternal::FormatDef> format) : Zone(), m_format(format)
+  explicit FormatZone(shared_ptr<StarFormatManagerInternal::FormatDef> format) : Zone(), m_format(format)
   {
   }
   //! try to send the data to a listener
@@ -139,7 +139,7 @@ bool FormatZone::send(STOFFListenerPtr listener, StarState &state) const
 //! Internal: a graphZone of StarObjectTextInteral
 struct GraphZone : public Zone {
   //! constructor
-  GraphZone(shared_ptr<STOFFOLEParser> oleParser) : Zone(), m_oleParser(oleParser), m_attributeList(), m_contour()
+  explicit GraphZone(shared_ptr<STOFFOLEParser> oleParser) : Zone(), m_oleParser(oleParser), m_attributeList(), m_contour()
   {
   }
   //! try to send the data to a listener
@@ -453,7 +453,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
       if (c==0)
         listener->setParagraph(lineState.m_paragraph);
       static bool first=true;
-      if (lineState.m_content) {
+      if (first && lineState.m_content) {
         first=false;
         STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find unexpected content zone\n"));
       }
@@ -1683,7 +1683,7 @@ try
       break;
     }
     case 'Y':
-      done=fieldManager.readField(zone,'Y');
+      done=bool(fieldManager.readField(zone,'Y'));
       break;
     case 'a': {
       std::vector<StarWriterStruct::Bookmark> markList;

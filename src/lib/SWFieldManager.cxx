@@ -75,7 +75,7 @@ Field::~Field()
 
 void Field::print(std::ostream &o) const
 {
-  if (m_type>=0 || m_type<40) {
+  if (m_type>=0 && m_type<40) {
     char const *(wh[])= {"db", "user", "filename", "dbName",
                          "inDate40", "inTime40", "pageNumber", "author",
                          "chapter", "docStat", "getExp", "setExp",

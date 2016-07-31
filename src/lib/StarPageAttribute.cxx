@@ -397,6 +397,10 @@ protected:
   StarObject *m_object;
   //! the pool
   StarItemPool const *m_pool;
+
+private:
+  SubDocument(SubDocument const &);
+  SubDocument &operator=(SubDocument const &);
 };
 
 void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*type*/)
@@ -547,7 +551,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributeFrameHF(StarPAttributeFrameHF const &orig) : StarAttribute(orig), m_active(orig.m_active), m_format(orig.m_format), m_object(orig.m_object)
+  explicit StarPAttributeFrameHF(StarPAttributeFrameHF const &orig) : StarAttribute(orig), m_active(orig.m_active), m_format(orig.m_format), m_object(orig.m_object)
   {
   }
   //! active flag
@@ -556,6 +560,8 @@ protected:
   shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
   //! the original object
   StarObject *m_object;
+private:
+  StarPAttributeFrameHF &operator=(StarPAttributeFrameHF const &);
 };
 
 // ------------------------------------------------------------

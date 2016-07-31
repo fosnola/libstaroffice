@@ -496,7 +496,7 @@ public:
         if (listener) state.m_pool->defineGraphicStyle(listener, mStyle->m_names[0], state.m_object);
         state.m_graphic.m_propertyList.insert("librevenge:parent-display-name", mStyle->m_names[0]);
       }
-      else {
+      else if (mStyle) {
         std::map<int, shared_ptr<StarItem> >::const_iterator it;
         for (it=mStyle->m_itemSet.m_whichToItemMap.begin(); it!=mStyle->m_itemSet.m_whichToItemMap.end(); ++it) {
           if (it->second && it->second->m_attribute)

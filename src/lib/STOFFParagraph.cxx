@@ -31,7 +31,7 @@
 * instead of those above.
 */
 
-#include <map>
+#include <string.h>
 
 #include <librevenge/librevenge.h>
 

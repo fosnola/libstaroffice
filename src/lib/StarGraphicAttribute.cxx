@@ -1124,12 +1124,13 @@ void StarGAttributeBrush::addTo(StarState &state, std::set<StarAttribute const *
       }
     }
   }
-  // graphic
+  // graphic|para
   if (m_type==ATTR_FRM_BACKGROUND) {
     if (m_brush.m_transparency>0 && m_brush.m_transparency<=255)
       state.m_graphic.m_propertyList.insert("draw:opacity", 1.-double(m_brush.m_transparency)/255., librevenge::RVNG_PERCENT);
     else
       state.m_graphic.m_propertyList.insert("draw:opacity",1., librevenge::RVNG_PERCENT);
+    state.m_paragraph.m_propertyList.insert("fo:background-color", "transparent");
     if (m_brush.isEmpty())
       state.m_graphic.m_propertyList.insert("draw:fill", "none");
     else {
@@ -1137,6 +1138,9 @@ void StarGAttributeBrush::addTo(StarState &state, std::set<StarAttribute const *
       if (m_brush.hasUniqueColor() && m_brush.getColor(color)) {
         state.m_graphic.m_propertyList.insert("draw:fill", "solid");
         state.m_graphic.m_propertyList.insert("draw:fill-color", color.str().c_str());
+
+        // para
+        state.m_paragraph.m_propertyList.insert("fo:background-color", color.str().c_str());
       }
       else {
         STOFFEmbeddedObject object;

@@ -428,6 +428,9 @@ protected:
   StarItemPool const *m_pool;
   //! the object
   StarObject &m_object;
+private:
+  SubDocument(SubDocument const &);
+  SubDocument &operator=(SubDocument const &);
 };
 
 void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*type*/)

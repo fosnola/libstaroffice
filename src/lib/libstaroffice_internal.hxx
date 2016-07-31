@@ -397,7 +397,7 @@ struct STOFFNote {
  */
 struct STOFFEmbeddedObject {
   //! empty constructor
-  STOFFEmbeddedObject() : m_dataList(), m_typeList()
+  STOFFEmbeddedObject() : m_dataList(), m_typeList(),  m_filenameLink("")
   {
   }
   //! constructor
