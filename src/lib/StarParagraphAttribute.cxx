@@ -37,6 +37,7 @@
 #include "StarAttribute.hxx"
 #include "StarItemPool.hxx"
 #include "StarObject.hxx"
+#include "StarObjectNumericRuler.hxx"
 #include "StarState.hxx"
 #include "StarZone.hxx"
 
@@ -504,17 +505,17 @@ protected:
 };
 
 //! a numRule attribute
-class StarPAttributeNumRule : public StarAttribute
+class StarPAttributeNumericRuler : public StarAttribute
 {
 public:
   //! constructor
-  StarPAttributeNumRule(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_name(""), m_poolId(0)
+  StarPAttributeNumericRuler(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_name(""), m_poolId(0)
   {
   }
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeNumRule(*this));
+    return shared_ptr<StarAttribute>(new StarPAttributeNumericRuler(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -530,7 +531,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarPAttributeNumRule(StarPAttributeNumRule const &orig) : StarAttribute(orig), m_name(orig.m_name), m_poolId(orig.m_poolId)
+  StarPAttributeNumericRuler(StarPAttributeNumericRuler const &orig) : StarAttribute(orig), m_name(orig.m_name), m_poolId(orig.m_poolId)
   {
   }
   //! the name value
@@ -680,7 +681,7 @@ void StarPAttributeDrop::addTo(StarState &state, std::set<StarAttribute const *>
 {
   if (m_type==ATTR_PARA_DROP) {
     librevenge::RVNGPropertyList cap;
-    cap.insert("style:distance", state.m_relativeUnit*double(m_numDistances), librevenge::RVNG_POINT);
+    cap.insert("style:distance", state.m_global->m_relativeUnit*double(m_numDistances), librevenge::RVNG_POINT);
     cap.insert("style:length", m_numChars);
     cap.insert("style:lines", m_numLines);
     librevenge::RVNGPropertyListVector capVector;
@@ -702,10 +703,10 @@ void StarPAttributeLineSpacing::addTo(StarState &state, std::set<StarAttribute c
     case 0:
       break;
     case 1:
-      state.m_paragraph.m_propertyList.insert("fo:line-height", state.m_relativeUnit*double(m_height), librevenge::RVNG_POINT);
+      state.m_paragraph.m_propertyList.insert("fo:line-height", state.m_global->m_relativeUnit*double(m_height), librevenge::RVNG_POINT);
       break;
     case 2:
-      state.m_paragraph.m_propertyList.insert("fo:line-height-at-least", state.m_relativeUnit*double(m_height), librevenge::RVNG_POINT);
+      state.m_paragraph.m_propertyList.insert("fo:line-height-at-least", state.m_global->m_relativeUnit*double(m_height), librevenge::RVNG_POINT);
       break;
     default:
       STOFF_DEBUG_MSG(("StarPAttributeLineSpacing::addTo: unknown rule %d\n", int(m_lineSpaceRule)));
@@ -718,7 +719,7 @@ void StarPAttributeLineSpacing::addTo(StarState &state, std::set<StarAttribute c
         state.m_paragraph.m_propertyList.insert("style:line-spacing", double(m_lineSpace<50 ? 50 : m_lineSpace)/100., librevenge::RVNG_PERCENT);
       break;
     case 2: // Fix
-      state.m_paragraph.m_propertyList.insert("style:line-spacing", state.m_relativeUnit*double(m_lineSpace), librevenge::RVNG_POINT);
+      state.m_paragraph.m_propertyList.insert("style:line-spacing", state.m_global->m_relativeUnit*double(m_lineSpace), librevenge::RVNG_POINT);
       break;
     default:
       STOFF_DEBUG_MSG(("StarPAttributeLineSpacing::addTo: unknown inter linse spacing rule %d\n", int(m_interLineSpaceRule)));
@@ -731,37 +732,40 @@ void StarPAttributeLRSpace::addTo(StarState &state, std::set<StarAttribute const
   // paragraph
   if (m_type==ATTR_FRM_LR_SPACE || m_type==ATTR_EE_PARA_OUTLLR_SPACE) {
     if (m_propMargins[0]==100) // unsure if/when we need to use textLeft/margins[0] here
-      state.m_paragraph.m_propertyList.insert("fo:margin-left", state.m_relativeUnit*double(m_textLeft), librevenge::RVNG_POINT);
+      state.m_paragraph.m_propertyList.insert("fo:margin-left", state.m_global->m_relativeUnit*double(m_textLeft), librevenge::RVNG_POINT);
     else
       state.m_paragraph.m_propertyList.insert("fo:margin-left", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
 
     if (m_propMargins[1]==100)
-      state.m_paragraph.m_propertyList.insert("fo:margin-right", state.m_relativeUnit*double(m_margins[1]), librevenge::RVNG_POINT);
+      state.m_paragraph.m_propertyList.insert("fo:margin-right", state.m_global->m_relativeUnit*double(m_margins[1]), librevenge::RVNG_POINT);
     else
       state.m_paragraph.m_propertyList.insert("fo:margin-right", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
     if (m_propMargins[2]==100)
-      state.m_paragraph.m_propertyList.insert("fo:text-indent", state.m_relativeUnit*double(m_margins[2]), librevenge::RVNG_POINT);
+      state.m_paragraph.m_propertyList.insert("fo:text-indent", state.m_global->m_relativeUnit*double(m_margins[2]), librevenge::RVNG_POINT);
     else
       state.m_paragraph.m_propertyList.insert("fo:text-indent", double(m_propMargins[2])/100., librevenge::RVNG_PERCENT);
     // m_textLeft: ok to ignore ?
     state.m_paragraph.m_propertyList.insert("style:auto-text-indent", m_autoFirst);
   }
   // page
-  if (m_type==ATTR_FRM_LR_SPACE && state.m_pageZone>=0 && state.m_pageZone<=2) {
+  if (m_type==ATTR_FRM_LR_SPACE && state.m_global->m_pageZone>=0 && state.m_global->m_pageZone<=2) {
     if (m_propMargins[0]==100)
-      state.m_page.m_propertiesList[state.m_pageZone].insert("fo:margin-left", double(m_margins[0])*0.05, librevenge::RVNG_POINT);
+      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-left", double(m_margins[0])*0.05, librevenge::RVNG_POINT);
     else
-      state.m_page.m_propertiesList[state.m_pageZone].insert("fo:margin-left", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
+      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-left", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
 
     if (m_propMargins[1]==100)
-      state.m_page.m_propertiesList[state.m_pageZone].insert("fo:margin-right", double(m_margins[1])*0.05, librevenge::RVNG_POINT);
+      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-right", double(m_margins[1])*0.05, librevenge::RVNG_POINT);
     else
-      state.m_page.m_propertiesList[state.m_pageZone].insert("fo:margin-right", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
+      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-right", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
   }
 }
 
-void StarPAttributeNumRule::addTo(StarState &/*state*/, std::set<StarAttribute const *> &/*done*/) const
+void StarPAttributeNumericRuler::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
+  if (m_name.empty() || !state.m_global->m_numericRuler)
+    return;
+  state.m_global->m_list=state.m_global->m_numericRuler->getList(m_name);
 }
 
 void StarPAttributeTabStop::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
@@ -799,7 +803,7 @@ void StarPAttributeTabStop::addTo(StarState &state, std::set<StarAttribute const
       tab.insert("style:leader-text", sFill);
       tab.insert("style:leader-style", "solid");
     }
-    tab.insert("style:position", state.m_relativeUnit*double(tabStop.m_pos), librevenge::RVNG_POINT);
+    tab.insert("style:position", state.m_global->m_relativeUnit*double(tabStop.m_pos), librevenge::RVNG_POINT);
     tabs.append(tab);
   }
   state.m_paragraph.m_propertyList.insert("style:tab-stops", tabs);
@@ -810,26 +814,26 @@ void StarPAttributeULSpace::addTo(StarState &state, std::set<StarAttribute const
   // paragraph
   if (m_type==ATTR_FRM_UL_SPACE) {
     if (m_propMargins[0]==100)
-      state.m_paragraph.m_propertyList.insert("fo:margin-top", state.m_relativeUnit*double(m_margins[0]), librevenge::RVNG_POINT);
+      state.m_paragraph.m_propertyList.insert("fo:margin-top", state.m_global->m_relativeUnit*double(m_margins[0]), librevenge::RVNG_POINT);
     else
       state.m_paragraph.m_propertyList.insert("fo:margin-top", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
 
     if (m_propMargins[1]==100)
-      state.m_paragraph.m_propertyList.insert("fo:margin-bottom", state.m_relativeUnit*double(m_margins[1]), librevenge::RVNG_POINT);
+      state.m_paragraph.m_propertyList.insert("fo:margin-bottom", state.m_global->m_relativeUnit*double(m_margins[1]), librevenge::RVNG_POINT);
     else
       state.m_paragraph.m_propertyList.insert("fo:margin-bottom", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
   }
   // page
-  if (m_type==ATTR_FRM_UL_SPACE && state.m_pageZone>=0 && state.m_pageZone<=2) {
+  if (m_type==ATTR_FRM_UL_SPACE && state.m_global->m_pageZone>=0 && state.m_global->m_pageZone<=2) {
     if (m_propMargins[0]==100)
-      state.m_page.m_propertiesList[state.m_pageZone].insert("fo:margin-top", double(m_margins[0])*0.05, librevenge::RVNG_POINT);
+      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-top", double(m_margins[0])*0.05, librevenge::RVNG_POINT);
     else
-      state.m_page.m_propertiesList[state.m_pageZone].insert("fo:margin-top", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
+      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-top", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
 
     if (m_propMargins[1]==100)
-      state.m_page.m_propertiesList[state.m_pageZone].insert("fo:margin-bottom", double(m_margins[1])*0.05, librevenge::RVNG_POINT);
+      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-bottom", double(m_margins[1])*0.05, librevenge::RVNG_POINT);
     else
-      state.m_page.m_propertiesList[state.m_pageZone].insert("fo:margin-bottom", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
+      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-bottom", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
   }
 }
 
@@ -952,13 +956,14 @@ bool StarPAttributeLRSpace::read(StarZone &zone, int vers, long endPos, StarObje
   return input->tell()<=endPos;
 }
 
-bool StarPAttributeNumRule::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
+bool StarPAttributeNumericRuler::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  // sw_sw3attr.cxx SwNumRuleItem::Create
   std::vector<uint32_t> string;
   if (!zone.readString(string) || input->tell()>endPos) {
     STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the sTmp\n"));
@@ -969,6 +974,7 @@ bool StarPAttributeNumRule::read(StarZone &zone, int vers, long endPos, StarObje
   }
   m_name=libstoff::getString(string);
   if (vers>0)
+    // 3<<11+1<<10+(num1,num2,...,num5,bul1,...,bul5)
     m_poolId=int(input->readULong(2));
   printData(f);
   ascFile.addPos(pos);
@@ -1062,7 +1068,7 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeBool(map,StarAttribute::ATTR_PARA_REGISTER,"para[register]",false);
   addAttributeBool(map,StarAttribute::ATTR_PARA_FORBIDDEN_RULES,"para[forbiddenRules]",true); // If the forbidden characters rules are to be applied or not.
   map[StarAttribute::ATTR_PARA_HYPHENZONE]=shared_ptr<StarAttribute>(new StarPAttributeHyphen(StarAttribute::ATTR_PARA_HYPHENZONE,"parAtrHyphenZone"));
-  map[StarAttribute::ATTR_PARA_NUMRULE]=shared_ptr<StarAttribute>(new StarPAttributeNumRule(StarAttribute::ATTR_PARA_NUMRULE,"parAtrNumRule"));
+  map[StarAttribute::ATTR_PARA_NUMRULE]=shared_ptr<StarAttribute>(new StarPAttributeNumericRuler(StarAttribute::ATTR_PARA_NUMRULE,"parAtrNumRule"));
 
   // TODO
 }

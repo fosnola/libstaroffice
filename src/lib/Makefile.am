@@ -129,6 +129,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarObjectDraw.hxx			\
 	StarObjectModel.cxx			\
 	StarObjectModel.hxx			\
+	StarObjectNumericRuler.cxx		\
+	StarObjectNumericRuler.hxx		\
 	StarObjectPageStyle.cxx			\
 	StarObjectPageStyle.hxx			\
 	StarObjectSmallGraphic.cxx		\

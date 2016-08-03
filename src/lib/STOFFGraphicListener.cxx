@@ -181,12 +181,10 @@ State::State() : m_origin(0,0),
 }
 }
 
-STOFFGraphicListener::STOFFGraphicListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGDrawingInterface *documentInterface) : STOFFListener(),
+STOFFGraphicListener::STOFFGraphicListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGDrawingInterface *documentInterface) : STOFFListener(listManager),
   m_ds(new STOFFGraphicListenerInternal::GraphicState(pageList)), m_ps(new STOFFGraphicListenerInternal::State),
-  m_psStack(), m_listManager(listManager), m_documentInterface(documentInterface)
+  m_psStack(), m_documentInterface(documentInterface)
 {
-  if (!listManager)
-    m_listManager.reset(new STOFFListManager);
 }
 
 STOFFGraphicListener::~STOFFGraphicListener()

@@ -227,73 +227,73 @@ protected:
 void StarPAttributeBool::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_SC_PAGE_HORCENTER) {
-    if (state.m_pageZone==0) {
+    if (state.m_global->m_pageZone==0) {
       librevenge::RVNGString act("");
-      if (state.m_page.m_propertiesList[0]["style:table-centering"])
-        act=state.m_page.m_propertiesList[0]["style:table-centering"]->getStr();
+      if (state.m_global->m_page.m_propertiesList[0]["style:table-centering"])
+        act=state.m_global->m_page.m_propertiesList[0]["style:table-centering"]->getStr();
       if (m_value)
-        state.m_page.m_propertiesList[0].insert("style:table-centering", (act=="both"||act=="vertical") ? "both" : "horizontal");
+        state.m_global->m_page.m_propertiesList[0].insert("style:table-centering", (act=="both"||act=="vertical") ? "both" : "horizontal");
       else
-        state.m_page.m_propertiesList[0].insert("style:table-centering", (act=="both"||act=="vertical") ? "vertical" : "none");
+        state.m_global->m_page.m_propertiesList[0].insert("style:table-centering", (act=="both"||act=="vertical") ? "vertical" : "none");
     }
   }
   else if (m_type==ATTR_SC_PAGE_VERCENTER) {
-    if (state.m_pageZone==0) {
+    if (state.m_global->m_pageZone==0) {
       librevenge::RVNGString act("");
-      if (state.m_page.m_propertiesList[0]["style:table-centering"])
-        act=state.m_page.m_propertiesList[0]["style:table-centering"]->getStr();
+      if (state.m_global->m_page.m_propertiesList[0]["style:table-centering"])
+        act=state.m_global->m_page.m_propertiesList[0]["style:table-centering"]->getStr();
       if (m_value)
-        state.m_page.m_propertiesList[0].insert("style:table-centering", (act=="both"||act=="horizontal") ? "both" : "vertical");
+        state.m_global->m_page.m_propertiesList[0].insert("style:table-centering", (act=="both"||act=="horizontal") ? "both" : "vertical");
       else
-        state.m_page.m_propertiesList[0].insert("style:table-centering", (act=="both"||act=="horizontal") ? "horizontal" : "none");
+        state.m_global->m_page.m_propertiesList[0].insert("style:table-centering", (act=="both"||act=="horizontal") ? "horizontal" : "none");
     }
   }
   else if (m_type==ATTR_SC_PAGE_HEADERS || m_type==ATTR_SC_PAGE_NOTES ||
            m_type==ATTR_SC_PAGE_GRID || m_type==ATTR_SC_PAGE_FORMULAS ||
            m_type==ATTR_SC_PAGE_NULLVALS) {
-    if (state.m_pageZone==0 && m_value) {
+    if (state.m_global->m_pageZone==0 && m_value) {
       librevenge::RVNGString wh
       (m_type==ATTR_SC_PAGE_HEADERS ? "headers" :
        m_type==ATTR_SC_PAGE_NOTES ? "annotations" :
        m_type==ATTR_SC_PAGE_GRID ? "grid" :
        m_type==ATTR_SC_PAGE_FORMULAS ? "formulas" : "zero-values");
-      if (state.m_page.m_propertiesList[0]["style:print"]) {
-        librevenge::RVNGString res(state.m_page.m_propertiesList[0]["style:print"]->getStr());
+      if (state.m_global->m_page.m_propertiesList[0]["style:print"]) {
+        librevenge::RVNGString res(state.m_global->m_page.m_propertiesList[0]["style:print"]->getStr());
         res.append(" ");
         res.append(wh);
-        state.m_page.m_propertiesList[0].insert("style:print", res);
+        state.m_global->m_page.m_propertiesList[0].insert("style:print", res);
       }
       else
-        state.m_page.m_propertiesList[0].insert("style:print", wh);
+        state.m_global->m_page.m_propertiesList[0].insert("style:print", wh);
     }
   }
   else if (m_type==ATTR_SC_PAGE_TOPDOWN) {
-    if (state.m_pageZone==0)
-      state.m_page.m_propertiesList[0].insert("style:print-page-order", m_value ? "ttb" : "ltr");
+    if (state.m_global->m_pageZone==0)
+      state.m_global->m_page.m_propertiesList[0].insert("style:print-page-order", m_value ? "ttb" : "ltr");
   }
 }
 
 void StarPAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_SC_PAGE_SCALE) {
-    if (state.m_pageZone==0) {
+    if (state.m_global->m_pageZone==0) {
       if (m_value)
-        state.m_page.m_propertiesList[0].insert("style:scale-to", double(m_value)/100., librevenge::RVNG_PERCENT);
-      else if (state.m_page.m_propertiesList[0]["style:scale-to"])
-        state.m_page.m_propertiesList[0].remove("style:scale-to");
+        state.m_global->m_page.m_propertiesList[0].insert("style:scale-to", double(m_value)/100., librevenge::RVNG_PERCENT);
+      else if (state.m_global->m_page.m_propertiesList[0]["style:scale-to"])
+        state.m_global->m_page.m_propertiesList[0].remove("style:scale-to");
     }
   }
   else if (m_type==ATTR_SC_PAGE_SCALETOPAGES) {
-    if (state.m_pageZone==0) {
+    if (state.m_global->m_pageZone==0) {
       if (m_value)
-        state.m_page.m_propertiesList[0].insert("style:scale-to-pages", int(m_value));
-      else if (state.m_page.m_propertiesList[0]["style:scale-to-pages"])
-        state.m_page.m_propertiesList[0].remove("style:scale-to-pages");
+        state.m_global->m_page.m_propertiesList[0].insert("style:scale-to-pages", int(m_value));
+      else if (state.m_global->m_page.m_propertiesList[0]["style:scale-to-pages"])
+        state.m_global->m_page.m_propertiesList[0].remove("style:scale-to-pages");
     }
   }
   else if (m_type==ATTR_SC_PAGE_FIRSTPAGENO) {
-    if (state.m_pageZone==0)
-      state.m_page.m_propertiesList[0].insert("style:first-page-number", int(m_value));
+    if (state.m_global->m_pageZone==0)
+      state.m_global->m_page.m_propertiesList[0].insert("style:first-page-number", int(m_value));
   }
 }
 
@@ -301,12 +301,12 @@ void StarPAttributeVec2i::addTo(StarState &state, std::set<StarAttribute const *
 {
   if (m_type!=ATTR_SC_PAGE_SIZE)
     return;
-  if (state.m_pageZone==0) {
-    state.m_page.m_propertiesList[0].insert("fo:page-width", double(m_value[0])/1440., librevenge::RVNG_INCH);
-    state.m_page.m_propertiesList[0].insert("fo:page-height", double(m_value[1])/1440., librevenge::RVNG_INCH);
+  if (state.m_global->m_pageZone==0) {
+    state.m_global->m_page.m_propertiesList[0].insert("fo:page-width", double(m_value[0])/1440., librevenge::RVNG_INCH);
+    state.m_global->m_page.m_propertiesList[0].insert("fo:page-height", double(m_value[1])/1440., librevenge::RVNG_INCH);
   }
-  else if (state.m_pageZone==1 || state.m_pageZone==2)
-    state.m_page.m_propertiesList[state.m_pageZone].insert("fo:min-height", double(m_value[1])/1440., librevenge::RVNG_INCH);
+  else if (state.m_global->m_pageZone==1 || state.m_global->m_pageZone==2)
+    state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:min-height", double(m_value[1])/1440., librevenge::RVNG_INCH);
 }
 
 void StarPAttributeItemSet::addTo(StarState &state, std::set<StarAttribute const *> &done) const
@@ -317,10 +317,10 @@ void StarPAttributeItemSet::addTo(StarState &state, std::set<StarAttribute const
   }
   if (m_type!=ATTR_SC_PAGE_HEADERSET && m_type!=ATTR_SC_PAGE_FOOTERSET)
     return;
-  STOFFPageSpan::ZoneType prevZone=state.m_pageZone;
-  state.m_pageZone=m_type==ATTR_SC_PAGE_HEADERSET ? STOFFPageSpan::Header : STOFFPageSpan::Footer;
+  STOFFPageSpan::ZoneType prevZone=state.m_global->m_pageZone;
+  state.m_global->m_pageZone=m_type==ATTR_SC_PAGE_HEADERSET ? STOFFPageSpan::Header : STOFFPageSpan::Footer;
   StarAttributeItemSet::addTo(state, done);
-  state.m_pageZone=prevZone;
+  state.m_global->m_pageZone=prevZone;
 }
 
 //! add a bool attribute
@@ -827,22 +827,22 @@ void StarPAttributeColumns::addTo(StarState &state, std::set<StarAttribute const
         if (m_columnList[c].addTo(propList))
           columns.append(propList);
       }
-      state.m_page.m_section.m_propertyList.insert("style:columns", columns);
+      state.m_global->m_page.m_section.m_propertyList.insert("style:columns", columns);
     }
   }
 }
 
 void StarPAttributePage::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
-  if (m_type!=ATTR_SC_PAGE || state.m_pageZone!=STOFFPageSpan::Page)
+  if (m_type!=ATTR_SC_PAGE || state.m_global->m_pageZone!=STOFFPageSpan::Page)
     return;
   // todo: check correctly m_used
   if (m_used<0||m_used>=4) return;
-  if (!m_name.empty()) state.m_page.m_propertiesList[0].insert("draw:name", m_name);
-  state.m_page.m_propertiesList[0].insert("style:print-orientation", m_landscape ? "landscape" : "portrait");
+  if (!m_name.empty()) state.m_global->m_page.m_propertiesList[0].insert("draw:name", m_name);
+  state.m_global->m_page.m_propertiesList[0].insert("style:print-orientation", m_landscape ? "landscape" : "portrait");
   if (m_pageType>=0 && m_pageType<6) {
     char const *(wh[])= {"a", "A", "i", "I", "1", ""};
-    state.m_page.m_propertiesList[0].insert("style:num-format", wh[m_pageType]);
+    state.m_global->m_page.m_propertiesList[0].insert("style:num-format", wh[m_pageType]);
   }
 }
 
@@ -852,8 +852,8 @@ void StarPAttributeFrameHF::addTo(StarState &state, std::set<StarAttribute const
     return;
   if (m_type==ATTR_FRM_HEADER || m_type==ATTR_FRM_FOOTER) {
     STOFFHeaderFooter hf;
-    hf.m_subDocument[3].reset(new SubDocument(m_format, state.m_pool, &state.m_object));
-    state.m_page.addHeaderFooter(m_type==ATTR_FRM_HEADER, state.m_pageOccurence.empty() ? "all" :  state.m_pageOccurence.c_str(), hf);
+    hf.m_subDocument[3].reset(new SubDocument(m_format, state.m_global->m_pool, &state.m_global->m_object));
+    state.m_global->m_page.addHeaderFooter(m_type==ATTR_FRM_HEADER, state.m_global->m_pageOccurence.empty() ? "all" :  state.m_global->m_pageOccurence.c_str(), hf);
   }
   else {
     STOFF_DEBUG_MSG(("StarPAttributeFrameHF::addTo: unknown type\n"));
@@ -863,8 +863,8 @@ void StarPAttributeFrameHF::addTo(StarState &state, std::set<StarAttribute const
 void StarPAttributePageDesc::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (!m_name.empty()) {
-    state.m_pageName=m_name;
-    state.m_pageNameList.push_back(m_name);
+    state.m_global->m_pageName=m_name;
+    state.m_global->m_pageNameList.push_back(m_name);
   }
 }
 
@@ -882,24 +882,24 @@ void StarPAttributePageHF::addTo(StarState &state, std::set<StarAttribute const 
   }
   if (!hasData) return;
   std::string wh(m_type==ATTR_SC_PAGE_HEADERLEFT || m_type==ATTR_SC_PAGE_FOOTERLEFT ? "left" : "right");
-  state.m_page.addHeaderFooter(isHeader,wh, hf);
+  state.m_global->m_page.addHeaderFooter(isHeader,wh, hf);
 }
 
 void StarPAttributeViewMode::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_SC_PAGE_CHARTS || m_type==ATTR_SC_PAGE_OBJECTS || m_type==ATTR_SC_PAGE_DRAWINGS) {
-    if (state.m_pageZone==0 && m_value==0) {
+    if (state.m_global->m_pageZone==0 && m_value==0) {
       librevenge::RVNGString wh
       (m_type==ATTR_SC_PAGE_CHARTS ? "charts" :
        m_type==ATTR_SC_PAGE_OBJECTS ? "objects" : "drawings");
-      if (state.m_page.m_propertiesList[0]["style:print"]) {
-        librevenge::RVNGString res(state.m_page.m_propertiesList[0]["style:print"]->getStr());
+      if (state.m_global->m_page.m_propertiesList[0]["style:print"]) {
+        librevenge::RVNGString res(state.m_global->m_page.m_propertiesList[0]["style:print"]->getStr());
         res.append(" ");
         res.append(wh);
-        state.m_page.m_propertiesList[0].insert("style:print", res);
+        state.m_global->m_page.m_propertiesList[0].insert("style:print", res);
       }
       else
-        state.m_page.m_propertiesList[0].insert("style:print", wh);
+        state.m_global->m_page.m_propertiesList[0].insert("style:print", wh);
     }
   }
 }

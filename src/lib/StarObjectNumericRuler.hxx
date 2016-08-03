@@ -31,41 +31,63 @@
 * instead of those above.
 */
 
-#include <librevenge/librevenge.h>
+/*
+ * Parser to convert a SwNumRules in a StarOffice document
+ *
+ */
+#ifndef STAR_OBJECT_NUMERICRULER
+#  define STAR_OBJECT_NUMERICRULER
 
-#include "StarState.hxx"
+#include <ostream>
+#include <vector>
 
-#include "STOFFList.hxx"
+#include "libstaroffice_internal.hxx"
+#include "StarObject.hxx"
 
-#include "StarObjectNumericRuler.hxx"
-
-#include "SWFieldManager.hxx"
-
-StarState::GlobalState::~GlobalState()
+namespace StarObjectNumericRulerInternal
 {
+struct State;
 }
 
-StarState::StarState(StarState const &orig) :
-  m_global(orig.m_global),
-  m_styleName(orig.m_styleName),
-  m_break(orig.m_break),
-  m_cell(orig.m_cell),
-  m_graphic(orig.m_graphic),
-  m_paragraph(orig.m_paragraph),
-  m_font(orig.m_font), m_content(orig.m_content), m_footnote(orig.m_footnote), m_link(orig.m_link), m_refMark(orig.m_refMark), m_field(orig.m_field)
-{
-}
+class StarState;
+class StarZone;
 
-StarState::~StarState()
-{
-}
+struct STOFFListLevel;
+class STOFFList;
 
-void StarState::reinitializeLineData()
+/** \brief the main class to read a SwNumRules zone
+ *
+ *
+ *
+ */
+class StarObjectNumericRuler : public StarObject
 {
-  m_font=STOFFFont();
-  m_content=m_footnote=false;
-  m_link=m_refMark="";
-  m_field.reset();
-}
+public:
+  //! constructor
+  StarObjectNumericRuler(StarObject const &orig, bool duplicateState);
+  //! destructor
+  virtual ~StarObjectNumericRuler();
+  //! try to read a number format zone : 'n'
+  static bool readLevel(StarZone &zone, STOFFListLevel &level);
+  //! try to read a list : '0' or 'R'
+  static bool readList(StarZone &zone, shared_ptr<STOFFList> &list);
+  //! try to read a SwNumRules zone
+  bool read(StarZone &zone);
+  //! try to return the list corresponding to a name
+  shared_ptr<STOFFList> getList(librevenge::RVNGString const &name) const;
+  //
+  // low level
+  //
 
+protected:
+  //
+  // data
+  //
+
+  //! the state
+  shared_ptr<StarObjectNumericRulerInternal::State> m_numericRulerState;
+private:
+  StarObjectNumericRuler &operator=(StarObjectNumericRuler const &orig);
+};
+#endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

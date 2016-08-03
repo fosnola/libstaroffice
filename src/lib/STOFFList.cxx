@@ -43,63 +43,18 @@
 ////////////////////////////////////////////////////////////
 // list level functions
 ////////////////////////////////////////////////////////////
-void STOFFListLevel::addTo(librevenge::RVNGPropertyList &propList) const
+void STOFFListLevel::addTo(librevenge::RVNGPropertyList &pList) const
 {
-  propList.insert("text:min-label-width", m_labelWidth, librevenge::RVNG_INCH);
-  propList.insert("text:space-before", m_labelBeforeSpace, librevenge::RVNG_INCH);
-  if (m_labelAfterSpace > 0)
-    propList.insert("text:min-label-distance", m_labelAfterSpace, librevenge::RVNG_INCH);
-  if (m_numBeforeLabels)
-    propList.insert("text:display-levels", m_numBeforeLabels+1);
-  switch (m_alignment) {
-  case LEFT:
-    break;
-  case CENTER:
-    propList.insert("fo:text-align", "center");
-    break;
-  case RIGHT:
-    propList.insert("fo:text-align", "end");
-    break;
-  default:
-    break;
-  }
-
-  switch (m_type) {
-  case NONE:
-    propList.insert("text:bullet-char", " ");
-    break;
-  case BULLET:
-    if (m_bullet.len())
-      propList.insert("text:bullet-char", m_bullet.cstr());
-    else {
-      STOFF_DEBUG_MSG(("STOFFListLevel::addTo: the bullet char is not defined\n"));
-      propList.insert("text:bullet-char", "*");
+  if (m_type==NUMBER)
+    pList.insert("text:start-value", getStartValue());
+  librevenge::RVNGPropertyList::Iter i(m_propertyList);
+  for (i.rewind(); i.next();) {
+    if (i.child()) {
+      STOFF_DEBUG_MSG(("STOFFListLevel::addTo: find unexpected property child\n"));
+      pList.insert(i.key(), *i.child());
+      continue;
     }
-    break;
-  case LABEL:
-    if (m_label.len())
-      propList.insert("style:num-suffix", librevenge::RVNGPropertyFactory::newStringProp(m_label));
-    propList.insert("style:num-format", "");
-    break;
-  case DECIMAL:
-  case LOWER_ALPHA:
-  case UPPER_ALPHA:
-  case LOWER_ROMAN:
-  case UPPER_ROMAN:
-    if (m_prefix.len())
-      propList.insert("style:num-prefix",librevenge::RVNGPropertyFactory::newStringProp(m_prefix));
-    if (m_suffix.len())
-      propList.insert("style:num-suffix", librevenge::RVNGPropertyFactory::newStringProp(m_suffix));
-    if (m_type==DECIMAL) propList.insert("style:num-format", "1");
-    else if (m_type==LOWER_ALPHA) propList.insert("style:num-format", "a");
-    else if (m_type==UPPER_ALPHA) propList.insert("style:num-format", "A");
-    else if (m_type==LOWER_ROMAN) propList.insert("style:num-format", "i");
-    else propList.insert("style:num-format", "I");
-    propList.insert("text:start-value", getStartValue());
-    break;
-  case DEFAULT:
-  default:
-    STOFF_DEBUG_MSG(("STOFFListLevel::addTo: the level type is not set\n"));
+    pList.insert(i.key(), i()->clone());
   }
 }
 
@@ -107,84 +62,10 @@ int STOFFListLevel::cmp(STOFFListLevel const &levl) const
 {
   int diff = int(m_type)-int(levl.m_type);
   if (diff) return diff;
-  double fDiff = m_labelBeforeSpace-levl.m_labelBeforeSpace;
-  if (fDiff < 0.0) return -1;
-  if (fDiff > 0.0) return 1;
-  fDiff = m_labelWidth-levl.m_labelWidth;
-  if (fDiff < 0.0) return -1;
-  if (fDiff > 0.0) return 1;
-  diff = int(m_alignment)-levl.m_alignment;
-  if (diff) return diff;
-  fDiff = m_labelAfterSpace-levl.m_labelAfterSpace;
-  if (fDiff < 0.0) return -1;
-  if (fDiff > 0.0) return 1;
-  diff = m_numBeforeLabels-levl.m_numBeforeLabels;
-  if (diff) return diff;
-  diff = strcmp(m_label.cstr(),levl.m_label.cstr());
-  if (diff) return diff;
-  diff = strcmp(m_prefix.cstr(),levl.m_prefix.cstr());
-  if (diff) return diff;
-  diff = strcmp(m_suffix.cstr(),levl.m_suffix.cstr());
-  if (diff) return diff;
-  diff = strcmp(m_bullet.cstr(),levl.m_bullet.cstr());
+  diff = strcmp(m_propertyList.getPropString().cstr(),
+                levl.m_propertyList.getPropString().cstr());
   if (diff) return diff;
   return 0;
-}
-
-std::ostream &operator<<(std::ostream &o, STOFFListLevel const &level)
-{
-  o << "ListLevel[";
-  switch (level.m_type) {
-  case STOFFListLevel::BULLET:
-    o << "bullet='" << level.m_bullet.cstr() <<"'";
-    break;
-  case STOFFListLevel::LABEL:
-    o << "text='" << level.m_label.cstr() << "'";
-    break;
-  case STOFFListLevel::DECIMAL:
-    o << "decimal";
-    break;
-  case STOFFListLevel::LOWER_ALPHA:
-    o << "alpha";
-    break;
-  case STOFFListLevel::UPPER_ALPHA:
-    o << "ALPHA";
-    break;
-  case STOFFListLevel::LOWER_ROMAN:
-    o << "roman";
-    break;
-  case STOFFListLevel::UPPER_ROMAN:
-    o << "ROMAN";
-    break;
-  case STOFFListLevel::NONE:
-    break;
-  case STOFFListLevel::DEFAULT:
-  default:
-    o << "####type";
-  }
-  switch (level.m_alignment) {
-  case STOFFListLevel::LEFT:
-    break;
-  case STOFFListLevel::CENTER:
-    o << ",center";
-    break;
-  case STOFFListLevel::RIGHT:
-    o << ",right";
-    break;
-  default:
-    o << "###align=" << int(level.m_alignment) << ",";
-  }
-  if (level.m_type != STOFFListLevel::BULLET && level.m_startValue)
-    o << ",startVal= " << level.m_startValue;
-  if (level.m_prefix.len()) o << ", prefix='" << level.m_prefix.cstr()<<"'";
-  if (level.m_suffix.len()) o << ", suffix='" << level.m_suffix.cstr()<<"'";
-  if (level.m_labelBeforeSpace < 0 || level.m_labelBeforeSpace > 0) o << ", indent=" << level.m_labelBeforeSpace;
-  if (level.m_labelWidth < 0 || level.m_labelWidth > 0) o << ", width=" << level.m_labelWidth;
-  if (level.m_labelAfterSpace > 0) o << ", labelTextW=" << level.m_labelAfterSpace;
-  if (level.m_numBeforeLabels) o << ", show=" << level.m_numBeforeLabels << "[before]";
-  o << "]";
-  if (level.m_extra.length()) o << ", " << level.m_extra;
-  return o;
 }
 
 ////////////////////////////////////////////////////////////
@@ -376,6 +257,23 @@ shared_ptr<STOFFList> STOFFListManager::getList(int index) const
   return res;
 }
 
+shared_ptr<STOFFList> STOFFListManager::addList(shared_ptr<STOFFList> actList)
+{
+  if (!actList) return actList;
+  if (actList->getId()>=0) return actList;
+  size_t numList=m_listList.size();
+  for (size_t l=0; l < numList; l++) {
+    if (!m_listList[l].isCompatibleWith(*actList))
+      continue;
+    actList->setId(int(2*l+1));
+    return actList;
+  }
+
+  actList->setId(int(2*numList+1));
+  m_listList.push_back(*actList);
+  return actList;
+}
+
 shared_ptr<STOFFList> STOFFListManager::getNewList(shared_ptr<STOFFList> actList, int levl, STOFFListLevel const &level)
 {
   if (actList && actList->getId()>=0 && actList->isCompatibleWith(levl, level)) {
@@ -386,7 +284,7 @@ shared_ptr<STOFFList> STOFFListManager::getNewList(shared_ptr<STOFFList> actList
       m_listList[mainId].set(levl, level);
     return actList;
   }
-  STOFFList res;
+  STOFFList res(false);
   if (actList) {
     res = *actList;
     res.resize(levl);

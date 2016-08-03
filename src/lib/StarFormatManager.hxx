@@ -94,8 +94,6 @@ public:
 
   //! try to read a format zone : 'f' or 'l' or 'o' or 'r' or 's'(in TOCX)
   bool readSWFormatDef(StarZone &zone, char kind, shared_ptr<StarFormatManagerInternal::FormatDef> &format, StarObject &doc);
-  //! try to read a number format zone : 'n'
-  bool readSWNumberFormat(StarZone &zone);
   //! try to read a number formatter type : 'q'
   bool readSWNumberFormatterList(StarZone &zone);
   //! try to read a fly frame list : 'F' (list of 'l' or 'o')

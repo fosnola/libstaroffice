@@ -177,7 +177,7 @@ public:
 void PageDesc::updatePageSpan(StarState &state) const
 {
   updateState(state);
-  STOFFPageSpan &page=state.m_page;
+  STOFFPageSpan &page=state.m_global->m_page;
   if (m_landscape && page.m_propertiesList[0]["fo:page-height"] && page.m_propertiesList[0]["fo:page-width"] &&
       page.m_propertiesList[0]["fo:page-height"]->getInt() > page.m_propertiesList[0]["fo:page-width"]->getInt()) {
     // we must inverse fo:page-height and fo:page-width
@@ -319,31 +319,6 @@ struct State {
   State() : m_pageList(), m_nameToPageIdMap(), m_simplifyNameToPageIdMap()
   {
   }
-  //! small function to simplify a string (bad hack)
-  static librevenge::RVNGString getBasicString(librevenge::RVNGString const &s)
-  {
-    librevenge::RVNGString res("");
-    char const *ptr=s.cstr();
-    if (!ptr) return res;
-    int numBad=0;
-    while (*ptr) {
-      char c=*(ptr++);
-      if (unsigned(c)<0x80) {
-        if (numBad) {
-          numBad=0;
-          res.append('@');
-        }
-        res.append(c);
-        continue;
-      }
-      if (numBad++>=4) {
-        res.append('@');
-        numBad=0;
-      }
-    }
-    if (numBad) res.append('@');
-    return res;
-  }
   //! list of pages
   std::vector<PageDesc> m_pageList;
   //! map name to id
@@ -370,13 +345,13 @@ StarObjectPageStyle::~StarObjectPageStyle()
 ////////////////////////////////////////////////////////////
 bool StarObjectPageStyle::updatePageSpan(librevenge::RVNGString const &name, StarState &state)
 {
-  STOFFPageSpan &ps=state.m_page;
+  STOFFPageSpan &ps=state.m_global->m_page;
   ps=STOFFPageSpan();
   size_t id=0;
   if (m_pageStyleState->m_nameToPageIdMap.find(name) != m_pageStyleState->m_nameToPageIdMap.end())
     id=m_pageStyleState->m_nameToPageIdMap.find(name)->second;
   else {
-    librevenge::RVNGString simpName=m_pageStyleState->getBasicString(name);
+    librevenge::RVNGString simpName=libstoff::simplifyString(name);
     if (m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)!=m_pageStyleState->m_simplifyNameToPageIdMap.end())
       id=m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)->second;
     else if (!name.empty()) {
@@ -406,7 +381,7 @@ bool StarObjectPageStyle::updatePageSpan(librevenge::RVNGString const &name, Sta
     if (m_pageStyleState->m_nameToPageIdMap.find(follow) != m_pageStyleState->m_nameToPageIdMap.end())
       id=m_pageStyleState->m_nameToPageIdMap.find(follow)->second;
     else {
-      librevenge::RVNGString simpName=m_pageStyleState->getBasicString(follow);
+      librevenge::RVNGString simpName=libstoff::simplifyString(follow);
       if (m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)!=m_pageStyleState->m_simplifyNameToPageIdMap.end())
         id=m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)->second;
       else {
@@ -419,8 +394,8 @@ bool StarObjectPageStyle::updatePageSpan(librevenge::RVNGString const &name, Sta
   }
   if (numPages==3) listOccurence[0]="first";
   for (int p=numPages-1; p>=0; --p) { // invert so that section correspond to the first page
-    state.m_page.m_section=STOFFSection();
-    state.m_pageOccurence=listOccurence[p];
+    ps.m_section=STOFFSection();
+    state.m_global->m_pageOccurence=listOccurence[p];
     m_pageStyleState->m_pageList[listIds[p]].updatePageSpan(state);
   }
   return true;
@@ -434,7 +409,7 @@ bool StarObjectPageStyle::updatePageSpans
   number=0;
   shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
   StarState state(pool.get(), *this);
-  STOFFPageSpan &ps=state.m_page;
+  STOFFPageSpan &ps=state.m_global->m_page;
   for (size_t i=0; i<=listNames.size(); ++i) {
     bool newPage=(i==listNames.size()) || (lastPageName!="" && listNames[i]!="" && lastPageName!=listNames[i]);
     if (!newPage) {
@@ -505,7 +480,7 @@ try
         }
         else {
           m_pageStyleState->m_nameToPageIdMap[desc.m_name]=m_pageStyleState->m_pageList.size();
-          librevenge::RVNGString simpName=m_pageStyleState->getBasicString(desc.m_name);
+          librevenge::RVNGString simpName=libstoff::simplifyString(desc.m_name);
           if (m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)==m_pageStyleState->m_simplifyNameToPageIdMap.end())
             m_pageStyleState->m_simplifyNameToPageIdMap[simpName]=m_pageStyleState->m_pageList.size();
         }

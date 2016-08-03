@@ -52,6 +52,8 @@
 class StarItemPool;
 class StarObject;
 class StarZone;
+class StarObjectNumericRuler;
+class STOFFList;
 
 namespace SWFieldManagerInternal
 {
@@ -63,40 +65,73 @@ struct Field;
 class StarState
 {
 public:
+  //! small struct use to store global data
+  struct GlobalState {
+    //! constructor
+    GlobalState(StarItemPool const *pool, StarObject &object, double relUnit=0.05) :
+      m_pool(pool), m_object(object), m_numericRuler(),
+      m_page(), m_pageName(""), m_pageNameList(), m_pageZone(STOFFPageSpan::Page), m_pageOccurence("all"),
+      m_list(), m_listLevel(-1),
+      m_relativeUnit(relUnit)
+    {
+    }
+    //! destructor
+    ~GlobalState();
+    /** the pool */
+    StarItemPool const *m_pool;
+    /** the object */
+    StarObject &m_object;
+    /// the numeric ruler manager
+    shared_ptr<StarObjectNumericRuler> m_numericRuler;
+    /// the page
+    STOFFPageSpan m_page;
+    /// the page name
+    librevenge::RVNGString m_pageName;
+    /// the list of page name
+    std::vector<librevenge::RVNGString> m_pageNameList;
+    /// the actual page zone: document, header, footer
+    STOFFPageSpan::ZoneType m_pageZone;
+    /// the page occurence: all, first, left, right
+    std::string m_pageOccurence;
+    /// the current list
+    shared_ptr<STOFFList> m_list;
+    /// the current list level
+    int m_listLevel;
+    /** the relative unit uses to transform rel font height in point, default 1/20 */
+    double m_relativeUnit;
+  };
   //! constructor
   StarState(StarItemPool const *pool, StarObject &object, double relUnit=0.05) :
-    m_pool(pool), m_object(object), m_styleName(""),
-    m_page(), m_pageName(""), m_pageNameList(), m_pageZone(STOFFPageSpan::Page), m_pageOccurence("all"),
+    m_global(new GlobalState(pool, object, relUnit)),
+    m_styleName(""),
     m_break(0),
     m_cell(),
-    m_graphic(), m_paragraph(),
-    m_font(), m_content(false), m_footnote(false), m_link(""), m_refMark(""), m_field(),
-    m_relativeUnit(relUnit)
+    m_graphic(),
+    m_paragraph(),
+    m_font(), m_content(false), m_footnote(false), m_link(""), m_refMark(""), m_field()
+  {
+  }
+  //! constructor
+  explicit StarState(shared_ptr<GlobalState> global) :
+    m_global(global),
+    m_styleName(""),
+    m_break(0),
+    m_cell(),
+    m_graphic(),
+    m_paragraph(),
+    m_font(), m_content(false), m_footnote(false), m_link(""), m_refMark(""), m_field()
   {
   }
   //! copy constructor
-  StarState(StarState const &orig);
+  explicit StarState(StarState const &orig);
   //! destructor
   ~StarState();
   //! reinit the local data: break, font, content, footnote, ...
   void reinitializeLineData();
-  /** the pool */
-  StarItemPool const *m_pool;
-  /** the object */
-  StarObject &m_object;
+  //! global state
+  shared_ptr<GlobalState> m_global;
   /// the style name
   librevenge::RVNGString m_styleName;
-
-  /// the page
-  STOFFPageSpan m_page;
-  /// the page name
-  librevenge::RVNGString m_pageName;
-  /// the list of page name
-  std::vector<librevenge::RVNGString> m_pageNameList;
-  /// the actual page zone: document, header, footer
-  STOFFPageSpan::ZoneType m_pageZone;
-  /// the page occurence: all, first, left, right
-  std::string m_pageOccurence;
 
   //! a page/column break: 1=columnBefore, 2=columnAfter, 3=columnBoth, 4=pageBefore, 5=pageAfter,n 6=pageBoth
   int m_break;
@@ -108,7 +143,6 @@ public:
 
   /// the paragraph style
   STOFFParagraph m_paragraph;
-
   /// the font
   STOFFFont m_font;
   /// flag to know if this is a content zone
@@ -122,8 +156,6 @@ public:
   /** the field */
   shared_ptr<SWFieldManagerInternal::Field> m_field;
 
-  /** the relative unit uses to transform rel font height in point, default 1/20 */
-  double m_relativeUnit;
 private:
   StarState &operator=(StarState const &);
 };

@@ -425,6 +425,32 @@ void splitString(librevenge::RVNGString const &string, librevenge::RVNGString co
   else
     string1=string;
 }
+
+librevenge::RVNGString simplifyString(librevenge::RVNGString const &s)
+{
+  librevenge::RVNGString res("");
+  char const *ptr=s.cstr();
+  if (!ptr) return res;
+  int numBad=0;
+  while (*ptr) {
+    char c=*(ptr++);
+    if (unsigned(c)<0x80) {
+      if (numBad) {
+        numBad=0;
+        res.append('@');
+      }
+      res.append(c);
+      continue;
+    }
+    if (numBad++>=4) {
+      res.append('@');
+      numBad=0;
+    }
+  }
+  if (numBad) res.append('@');
+  return res;
+}
+
 // a little geometry
 STOFFVec2f rotatePointAroundCenter(STOFFVec2f const &point, STOFFVec2f const &center, float angle)
 {

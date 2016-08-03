@@ -212,12 +212,10 @@ State::State() :
 }
 }
 
-STOFFSpreadsheetListener::STOFFSpreadsheetListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface) : STOFFListener(),
+STOFFSpreadsheetListener::STOFFSpreadsheetListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface) : STOFFListener(listManager),
   m_ds(new STOFFSpreadsheetListenerInternal::DocumentState(pageList)), m_ps(new STOFFSpreadsheetListenerInternal::State), m_psStack(),
-  m_listManager(listManager), m_documentInterface(documentInterface)
+  m_documentInterface(documentInterface)
 {
-  if (!listManager)
-    m_listManager.reset(new STOFFListManager);
 }
 
 STOFFSpreadsheetListener::~STOFFSpreadsheetListener()

@@ -122,8 +122,6 @@ protected:
 
   //! try to read a text style zone: SfxStyleSheets
   bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &fileName);
-  //! the rulers?
-  bool readSwNumRuleList(STOFFInputStreamPtr input, std::string const &fileName);
   //! the main zone
   bool readWriterDocument(STOFFInputStreamPtr input, std::string const &fileName);
 
@@ -135,8 +133,6 @@ protected:
   bool readSWGraphNode(StarZone &zone, shared_ptr<StarObjectTextInternal::GraphZone> &graphZone);
   //! try to read a SW zone setup : 'J'
   bool readSWJobSetUp(StarZone &zone);
-  //! a simple rule : '0' or 'R'
-  bool readSWNumRule(StarZone &zone, char kind);
   //! try to read a OLE node : 'O'
   bool readSWOLENode(StarZone &zone);
   //! try to read a section : 'I'

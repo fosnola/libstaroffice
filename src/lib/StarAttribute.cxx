@@ -382,9 +382,9 @@ void StarAttributeItemSet::addTo(StarState &state, std::set<StarAttribute const 
   done.insert(this);
   StarItemSet finalSet;
   bool newSet=false;
-  if (state.m_pool && !m_itemSet.m_style.empty()) {
+  if (state.m_global->m_pool && !m_itemSet.m_style.empty()) {
     finalSet=m_itemSet;
-    state.m_pool->updateUsingStyles(finalSet);
+    state.m_global->m_pool->updateUsingStyles(finalSet);
     newSet=true;
   }
   StarItemSet const &set=newSet ? finalSet : m_itemSet;
@@ -816,11 +816,16 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
   case StarAttribute::ATTR_FRM_TEXTGRID: // SwTextGridItem::Create
     f << "textgrid=" << input->readULong(1) << ",";
     break;
-  case StarAttribute::ATTR_FRM_LINENUMBER:
+  case StarAttribute::ATTR_FRM_LINENUMBER: {
+    // sw_sw3attr.cxx SwFmtLineNumber::Create
+    // style:page-number auto text:outline-level
     f << "lineNumber,";
     f << "start=" << input->readULong(4) << ",";
-    f << "count[lines]=" << input->readULong(1) << ",";
+    bool countLines;
+    *input>>countLines;
+    if (!countLines) f << "countLines*,";
     break;
+  }
   case StarAttribute::ATTR_FRM_FTN_AT_TXTEND:
   case StarAttribute::ATTR_FRM_END_AT_TXTEND:
     f << (nWhich==StarAttribute::ATTR_FRM_FTN_AT_TXTEND ? "ftnAtTextEnd" : "ednAtTextEnd") << "=" << input->readULong(1) << ",";

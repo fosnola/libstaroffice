@@ -227,7 +227,7 @@ bool Field::send(STOFFListenerPtr listener, StarState &state) const
     int subType=m_subType&0x7FF;
     if (subType>=4 && subType<8) {
       field.m_propertyList.insert("librevenge:field-type", "text:user-defined");
-      field.m_propertyList.insert("text:name", state.m_object.getUserNameMetaData(subType-4));
+      field.m_propertyList.insert("text:name", state.m_global->m_object.getUserNameMetaData(subType-4));
     }
     else if (subType==9) {
       if (m_format>=0 && m_format<=2) {

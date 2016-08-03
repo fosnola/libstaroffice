@@ -40,18 +40,16 @@
 
 #include <librevenge/librevenge.h>
 
+#include "libstaroffice_internal.hxx"
+
 /** small structure to keep information about a list level */
 struct STOFFListLevel {
   /** the type of the level */
-  enum Type { DEFAULT, NONE, BULLET, DECIMAL, LOWER_ALPHA, UPPER_ALPHA,
-              LOWER_ROMAN, UPPER_ROMAN, LABEL
-            };
-  //! the item alignment
-  enum Alignment { LEFT, RIGHT, CENTER };
+  enum Type { DEFAULT, NONE, BULLET, NUMBER };
 
   /** basic constructor */
-  STOFFListLevel() : m_type(NONE), m_labelBeforeSpace(0.0), m_labelWidth(0.1), m_labelAfterSpace(0.0), m_numBeforeLabels(0), m_alignment(LEFT), m_startValue(0),
-    m_label(""), m_prefix(""), m_suffix(""), m_bullet(""), m_extra("")
+  STOFFListLevel() : m_type(NONE), m_propertyList(),
+    m_startValue(0)
   {
   }
   /** destructor */
@@ -65,7 +63,7 @@ struct STOFFListLevel {
   /** returns true if the list is decimal, alpha or roman */
   bool isNumeric() const
   {
-    return m_type !=DEFAULT && m_type !=NONE && m_type != BULLET;
+    return m_type==NUMBER;
   }
   //! operator==
   bool operator==(STOFFListLevel const &levl) const
@@ -88,27 +86,12 @@ struct STOFFListLevel {
 
   /** comparison function ( compare all values excepted m_startValues */
   int cmp(STOFFListLevel const &levl) const;
-
-  //! operator<<
-  friend std::ostream &operator<<(std::ostream &o, STOFFListLevel const &ft);
-
   /** the type of the level */
   Type m_type;
-  double m_labelBeforeSpace /** the extra space between inserting a label */;
-  double m_labelWidth /** the minimum label width */;
-  double m_labelAfterSpace /** the minimum distance between the label and the text */;
-  /** the number of label to show before this */
-  int m_numBeforeLabels;
-  //! the alignment ( left, center, ...)
-  Alignment m_alignment;
+  //! the propertyList
+  librevenge::RVNGPropertyList m_propertyList;
   /** the actual value (if this is an ordered level ) */
   int m_startValue;
-  librevenge::RVNGString m_label /** the text label */,
-             m_prefix /** string which preceedes the number if we have an ordered level*/,
-             m_suffix/** string which follows the number if we have an ordered level*/,
-             m_bullet /** the bullet if we have an bullet level */;
-  //! extra data
-  std::string m_extra;
 };
 
 /** a small structure used to store the informations about a list */
@@ -116,7 +99,7 @@ class STOFFList
 {
 public:
   /** default constructor */
-  STOFFList() : m_levels(), m_actLevel(-1), m_actualIndices(), m_nextIndices(), m_modifyMarker(1)
+  explicit STOFFList(bool outline) : m_outline(outline), m_name(""), m_levels(), m_actLevel(-1), m_actualIndices(), m_nextIndices(), m_modifyMarker(1)
   {
     m_id[0] = m_id[1] = -1;
   }
@@ -188,6 +171,10 @@ public:
   /// retrieve the list level property
   bool addTo(int level, librevenge::RVNGPropertyList &pList) const;
 
+  /// flag to know if the list is a outline list
+  bool m_outline;
+  /// the list name
+  librevenge::RVNGString m_name;
 protected:
   //! the different levels
   std::vector<STOFFListLevel> m_levels;
@@ -215,6 +202,8 @@ public:
   shared_ptr<STOFFList> getList(int index) const;
   //! returns a new list corresponding to a list where we have a new level
   shared_ptr<STOFFList> getNewList(shared_ptr<STOFFList> actList, int levl, STOFFListLevel const &level);
+  //! add a new list
+  shared_ptr<STOFFList> addList(shared_ptr<STOFFList> actList);
 protected:
   //! the list of created list
   std::vector<STOFFList> m_listList;

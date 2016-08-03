@@ -554,8 +554,8 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
       StarItemStyle const *style=(pool&&!styleName.empty()) ? pool->findStyleWithFamily(styleName, StarItemStyle::F_Page) : 0;
       if (!style && pool && !m_spreadsheetState->m_pageStyle.empty())
         style=pool->findStyleWithFamily(m_spreadsheetState->m_pageStyle, StarItemStyle::F_Page);
-      state.m_page=STOFFPageSpan();
-      state.m_page.m_pageSpan=nPages;
+      state.m_global->m_page=STOFFPageSpan();
+      state.m_global->m_page.m_pageSpan=nPages;
       if (style) {
         for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
              it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
@@ -566,7 +566,7 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
         std::cerr << style->m_itemSet.printChild() << "\n";
 #endif
       }
-      pageSpan.push_back(state.m_page);
+      pageSpan.push_back(state.m_global->m_page);
     }
     if (isEnd) break;
     styleName=m_spreadsheetState->m_tableList[i] ? m_spreadsheetState->m_tableList[i]->m_pageStyle : "";

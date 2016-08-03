@@ -490,10 +490,10 @@ public:
   void updateStyle(StarState &state, STOFFListenerPtr listener) const
   {
     SdrGraphic::updateStyle(state, listener);
-    if (state.m_pool && !m_sheetStyle.empty()) {
-      StarItemStyle const *mStyle=state.m_pool->findStyleWithFamily(m_sheetStyle, StarItemStyle::F_Paragraph);
+    if (state.m_global->m_pool && !m_sheetStyle.empty()) {
+      StarItemStyle const *mStyle=state.m_global->m_pool->findStyleWithFamily(m_sheetStyle, StarItemStyle::F_Paragraph);
       if (mStyle && !mStyle->m_names[0].empty()) {
-        if (listener) state.m_pool->defineGraphicStyle(listener, mStyle->m_names[0], state.m_object);
+        if (listener) state.m_global->m_pool->defineGraphicStyle(listener, mStyle->m_names[0], state.m_global->m_object);
         state.m_graphic.m_propertyList.insert("librevenge:parent-display-name", mStyle->m_names[0]);
       }
       else if (mStyle) {

@@ -63,7 +63,11 @@ public:
   virtual Type getType() const = 0;
   /** returns true if we can add text data */
   virtual bool canWriteText() const =0;
-
+  /// return the list manager
+  STOFFListManagerPtr getListManager() const
+  {
+    return m_listManager;
+  }
   // ------ main document -------
   /** sets the documents language */
   virtual void setDocumentLanguage(std::string locale) = 0;
@@ -229,6 +233,12 @@ public:
   virtual void handleSubDocument(STOFFSubDocumentPtr subDocument, libstoff::SubDocumentType subDocumentType) = 0;
   /** returns true if a subdocument is open  */
   virtual bool isSubDocumentOpened(libstoff::SubDocumentType &subdocType) const = 0;
+
+protected:
+  /// constructor
+  STOFFListener(STOFFListManagerPtr listManager);
+  /// the list manager
+  STOFFListManagerPtr m_listManager;
 };
 
 #endif

@@ -225,7 +225,7 @@ bool TableLine::send(STOFFListenerPtr listener, StarState &state, int row) const
     STOFFCell cell;
     cell.setPosition(pos);
     cell.setCellStyle(cellStyle);
-    state.m_object.getFormatManager()->updateNumberingProperties(cell);
+    state.m_global->m_object.getFormatManager()->updateNumberingProperties(cell);
     listener->openTableCell(cell);
     StarState cState(state);
     m_boxList[i]->send(listener, state);

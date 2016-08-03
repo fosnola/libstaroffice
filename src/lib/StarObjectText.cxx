@@ -39,6 +39,7 @@
 
 #include <librevenge/librevenge.h>
 
+#include "STOFFList.hxx"
 #include "STOFFOLEParser.hxx"
 #include "STOFFPageSpan.hxx"
 #include "STOFFParagraph.hxx"
@@ -56,6 +57,7 @@
 #include "StarLayout.hxx"
 #include "StarObjectChart.hxx"
 #include "StarObjectModel.hxx"
+#include "StarObjectNumericRuler.hxx"
 #include "StarObjectPageStyle.hxx"
 #include "StarObjectSpreadsheet.hxx"
 #include "StarState.hxx"
@@ -80,15 +82,15 @@ Content::~Content()
 
 void Content::inventoryPages(StarState &state) const
 {
-  if (!state.m_pool) {
+  if (!state.m_global->m_pool) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::Content::inventoryPages: can not find the pool\n"));
     return;
   }
   for (size_t t=0; t<m_zoneList.size(); ++t) {
     if (m_zoneList[t])
       m_zoneList[t]->inventoryPage(state);
-    if (t==0 && state.m_pageNameList.empty())
-      state.m_pageNameList.push_back("");
+    if (t==0 && state.m_global->m_pageNameList.empty())
+      state.m_global->m_pageNameList.push_back("");
   }
 }
 
@@ -98,7 +100,7 @@ bool Content::send(STOFFListenerPtr listener, StarState &state) const
     STOFF_DEBUG_MSG(("StarObjectTextInternal::Content::send: call without listener\n"));
     return false;
   }
-  StarState cState(state.m_pool, state.m_object, state.m_relativeUnit);
+  StarState cState(state.m_global);
   for (size_t t=0; t<m_zoneList.size(); ++t) {
     if (m_zoneList[t])
       m_zoneList[t]->send(listener, cState);
@@ -131,7 +133,7 @@ bool FormatZone::send(STOFFListenerPtr listener, StarState &state) const
     STOFF_DEBUG_MSG(("StarObjectTextInternal::FormatZone::send: can not find the format\n"));
     return false;
   }
-  StarState cState(state.m_pool, state.m_object, state.m_relativeUnit);
+  StarState cState(state.m_global->m_pool, state.m_global->m_object, state.m_global->m_relativeUnit);
   return m_format->send(listener, cState);
 }
 
@@ -223,7 +225,7 @@ bool SectionZone::send(STOFFListenerPtr listener, StarState &state) const
 //! Internal: a textZone of StarObjectTextInteral
 struct TextZone : public Zone {
   //! constructor
-  TextZone() : Zone(), m_text(), m_textSourcePosition(), m_styleName(""), m_charAttributeList(), m_format(), m_markList()
+  TextZone() : Zone(), m_text(), m_textSourcePosition(), m_styleName(""), m_level(-1), m_charAttributeList(), m_format(), m_list(), m_markList()
   {
   }
   //! try to inventory the different pages
@@ -236,10 +238,14 @@ struct TextZone : public Zone {
   std::vector<size_t> m_textSourcePosition;
   //! the style name
   librevenge::RVNGString m_styleName;
+  //! the level -1=none, 200: keep in list with no bullet
+  int m_level;
   //! the character item list
   std::vector<StarWriterStruct::Attribute> m_charAttributeList;
   //! the format
   shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+  //! the list (if defined)
+  shared_ptr<STOFFList> m_list;
   //! the mark
   std::vector<StarWriterStruct::Mark> m_markList;
 };
@@ -247,12 +253,12 @@ struct TextZone : public Zone {
 void TextZone::inventoryPage(StarState &state) const
 {
   std::map<int, shared_ptr<StarItem> >::const_iterator it;
-  size_t numPages=state.m_pageNameList.size();
+  size_t numPages=state.m_global->m_pageNameList.size();
   if (state.m_styleName!=m_styleName) {
     state.reinitializeLineData();
     state.m_styleName=m_styleName;
-    if (state.m_pool && !m_styleName.empty()) { // checkme
-      StarItemStyle const *style=state.m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
+    if (state.m_global->m_pool && !m_styleName.empty()) { // checkme
+      StarItemStyle const *style=state.m_global->m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
       if (style) {
         StarItemSet const &itemSet=style->m_itemSet;
         for (it=itemSet.m_whichToItemMap.begin(); it!=itemSet.m_whichToItemMap.end(); ++it) {
@@ -275,12 +281,12 @@ void TextZone::inventoryPage(StarState &state) const
       continue;
     attrib.m_attribute->addTo(lineState);
   }
-  if (lineState.m_pageNameList.size()!=state.m_pageNameList.size()) {
-    state.m_pageName=lineState.m_pageName;
-    state.m_pageNameList.push_back(state.m_pageName);
+  if (lineState.m_global->m_pageNameList.size()!=state.m_global->m_pageNameList.size()) {
+    state.m_global->m_pageName=lineState.m_global->m_pageName;
+    state.m_global->m_pageNameList.push_back(state.m_global->m_pageName);
   }
-  else if (lineState.m_pageNameList.size()==numPages && lineState.m_break==4)
-    state.m_pageNameList.push_back("");
+  else if (lineState.m_global->m_pageNameList.size()==numPages && lineState.m_break==4)
+    state.m_global->m_pageNameList.push_back("");
 }
 
 bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
@@ -290,14 +296,15 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
     return false;
   }
 
-  size_t numPages=state.m_pageNameList.size();
+  if (m_list) state.m_global->m_list=listener->getListManager()->addList(m_list);
+  size_t numPages=state.m_global->m_pageNameList.size();
   std::map<int, shared_ptr<StarItem> >::const_iterator it;
   if (state.m_styleName!=m_styleName) {
     state.reinitializeLineData();
     state.m_paragraph=STOFFParagraph();
     state.m_styleName=m_styleName;
-    if (state.m_pool && !m_styleName.empty()) { // checkme
-      StarItemStyle const *style=state.m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
+    if (state.m_global->m_pool && !m_styleName.empty()) { // checkme
+      StarItemStyle const *style=state.m_global->m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
       if (style) {
         StarItemSet const &itemSet=style->m_itemSet;
         for (it=itemSet.m_whichToItemMap.begin(); it!=itemSet.m_whichToItemMap.end(); ++it) {
@@ -312,42 +319,12 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
   }
   STOFFFont mainFont=state.m_font;
   listener->setFont(mainFont);
-  listener->setParagraph(state.m_paragraph);
-  if (m_format) {
-    StarState cState(state.m_pool, state.m_object, state.m_relativeUnit);
-    m_format->send(listener, cState);
-  }
   if (!m_markList.empty()) {
     static bool first=true;
     if (first) {
       STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: sorry mark are not implemented\n"));
       first=false;
     }
-  }
-  bool newPage=false;
-  if (state.m_break) {
-    switch (state.m_break) {
-    case 0:
-      break;
-    case 1:
-      listener->insertBreak(STOFFListener::ColumnBreak);
-      break;
-    case 4:
-      listener->insertBreak(STOFFListener::PageBreak);
-      if (state.m_pageNameList.size()==numPages)
-        state.m_pageNameList.push_back("");
-      newPage=true;
-      break;
-    default: {
-      static bool first=true;
-      if (first) {
-        first=false;
-        STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: unexpected break\n"));
-      }
-      break;
-    }
-    }
-    state.m_break=0;
   }
   if (state.m_footnote) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a footnote in mainFont\n"));
@@ -374,6 +351,8 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
   int endLinkPos=-1, endRefMarkPos=-1;
   librevenge::RVNGString refMarkString;
   StarState lineState(state);
+  state.m_break=0;
+  bool newPage=false;
   for (size_t c=0; c<= m_text.size(); ++c) {
     bool fontChange=false;
     size_t srcPos=c<m_textSourcePosition.size() ? m_textSourcePosition[c] : 10000;
@@ -411,8 +390,8 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
           case 4:
             newPage=true;
             listener->insertBreak(STOFFListener::PageBreak);
-            if (state.m_pageNameList.size()==numPages)
-              state.m_pageNameList.push_back("");
+            if (state.m_global->m_pageNameList.size()==numPages)
+              state.m_global->m_pageNameList.push_back("");
             break;
           default: {
             static bool first=true;
@@ -450,15 +429,37 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
         }
       }
       listener->setFont(font);
-      if (c==0)
+      if (c==0) {
+        int level=m_level;
+        if (level==200) {
+          level=state.m_global->m_listLevel;
+          lineState.m_paragraph.m_bulletVisible=true; // useMe
+        }
+        if (level>=0 && (!state.m_global->m_list || state.m_global->m_list->numLevels()<=int(level))) {
+          STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: oops can not find the list\n"));
+          level=-1;
+        }
+        if (level>=0) {
+          lineState.m_paragraph.m_listLevel = state.m_global->m_list->getLevel(level);
+          lineState.m_paragraph.m_listId = state.m_global->m_list->getId();
+          lineState.m_paragraph.m_listLevelIndex = level+1;
+        }
+        else
+          lineState.m_paragraph.m_listLevelIndex=0;
         listener->setParagraph(lineState.m_paragraph);
+      }
+      if (c==0 && m_format) {
+        StarState cState(lineState.m_global->m_pool, lineState.m_global->m_object, lineState.m_global->m_relativeUnit);
+        m_format->send(listener, cState);
+        listener->setFont(font);
+      }
       static bool first=true;
       if (first && lineState.m_content) {
         first=false;
         STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find unexpected content zone\n"));
       }
     }
-    if (c==0 && !newPage && numPages && numPages!=lineState.m_pageNameList.size())
+    if (c==0 && !newPage && numPages && numPages!=lineState.m_global->m_pageNameList.size())
       listener->insertBreak(STOFFListener::SoftPageBreak);
 
     if (!linkString.empty()) {
@@ -484,11 +485,11 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
       endRefMarkPos=-1;
     }
     if (footnote) {
-      StarState cState(state.m_pool, state.m_object, state.m_relativeUnit);
+      StarState cState(state.m_global->m_pool, state.m_global->m_object, state.m_global->m_relativeUnit);
       footnote->send(listener, cState);
     }
     else if (field) {
-      StarState cState(state.m_pool, state.m_object, state.m_relativeUnit);
+      StarState cState(state.m_global->m_pool, state.m_global->m_object, state.m_global->m_relativeUnit);
       field->send(listener, state);
     }
     else if (c==m_text.size())
@@ -540,7 +541,7 @@ bool Table::send(STOFFListenerPtr listener, StarState &state) const
 //! Internal: the state of a StarObjectText
 struct State {
   //! constructor
-  State() : m_numPages(0), m_numGraphicPages(0), m_mainContent(), m_pageStyle(), m_model()
+  State() : m_numPages(0), m_numGraphicPages(0), m_mainContent(), m_numericRuler(), m_pageStyle(), m_model()
   {
   }
   //! the number of pages
@@ -549,6 +550,8 @@ struct State {
   int m_numGraphicPages;
   //! the main content
   shared_ptr<Content> m_mainContent;
+  //! the numeric ruler
+  shared_ptr<StarObjectNumericRuler> m_numericRuler;
   //! the page style
   shared_ptr<StarObjectPageStyle> m_pageStyle;
   //! the drawing model
@@ -581,7 +584,7 @@ bool StarObjectText::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &
   if (m_textState->m_mainContent)
     m_textState->m_mainContent->inventoryPages(state);
   if (m_textState->m_pageStyle)
-    m_textState->m_pageStyle->updatePageSpans(state.m_pageNameList, pageSpan, numPages);
+    m_textState->m_pageStyle->updatePageSpans(state.m_global->m_pageNameList, pageSpan, numPages);
   else {
     numPages=1000;
     STOFFPageSpan ps;
@@ -614,6 +617,7 @@ bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
   }
   shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
   StarState state(pool.get(), *this);
+  state.m_global->m_numericRuler=m_textState->m_numericRuler;
   m_textState->m_mainContent->send(listener, state);
   return true;
 }
@@ -651,7 +655,14 @@ bool StarObjectText::parse()
       base = name.substr(pos+1);
     ole->setReadInverted(true);
     if (base=="SwNumRules") {
-      readSwNumRuleList(ole, name);
+      try {
+        StarZone zone(ole, name, "StarNumericList", getPassword());
+        shared_ptr<StarObjectNumericRuler> numericRuler(new StarObjectNumericRuler(*this,true));
+        if (numericRuler->read(zone))
+          m_textState->m_numericRuler=numericRuler;
+      }
+      catch (...) {
+      }
       continue;
     }
     if (base=="SwPageStyleSheets") {
@@ -756,81 +767,6 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
 // Intermediate level
 //
 ////////////////////////////////////////////////////////////
-bool StarObjectText::readSwNumRuleList(STOFFInputStreamPtr input, std::string const &name)
-try
-{
-  StarZone zone(input, name, "SWNumRuleList", getPassword());
-  if (!zone.readSWHeader()) {
-    STOFF_DEBUG_MSG(("StarObjectText::readSwNumRuleList: can not read the header\n"));
-    return false;
-  }
-  zone.readStringsPool();
-  // sw_sw3num.cxx::Sw3IoImp::InNumRules
-  libstoff::DebugFile &ascFile=zone.ascii();
-  while (!input->isEnd()) {
-    long pos=input->tell();
-    int rType=input->peek();
-    if ((rType=='0' || rType=='R') && readSWNumRule(zone, char(rType)))
-      continue;
-    char type;
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    if (!zone.openSWRecord(type)) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    libstoff::DebugStream f;
-    f << "SWNumRuleList[" << type << "]:";
-    bool done=false;
-    switch (type) {
-    case '+': { // extra outline
-      zone.openFlagZone();
-      int N=int(input->readULong(1));
-      f << "N=" << N << ",";
-      zone.closeFlagZone();
-      if (input->tell()+3*N>zone.getRecordLastPosition()) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSwNumRuleList: nExtraOutline seems bad\n"));
-        f << "###,";
-        break;
-      }
-      f << "levSpace=[";
-      for (int i=0; i<N; ++i)
-        f << input->readULong(1) << ":" << input->readULong(2) << ",";
-      f << "],";
-      break;
-    }
-    case '?':
-      STOFF_DEBUG_MSG(("StarObjectText::readSwNumRuleList: reading inHugeRecord(TEST_HUGE_DOCS) is not implemented\n"));
-      break;
-    case 'Z':
-      done=true;
-      break;
-    default:
-      STOFF_DEBUG_MSG(("StarObjectText::readSwNumRuleList: find unimplemented type\n"));
-      f << "###type,";
-      break;
-    }
-    if (!zone.closeSWRecord(type, "SWNumRuleList")) {
-      input->seek(pos, librevenge::RVNG_SEEK_SET);
-      break;
-    }
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-
-    if (done)
-      break;
-  }
-  if (!input->isEnd()) {
-    STOFF_DEBUG_MSG(("StarObjectText::readSwNumRuleList: find extra data\n"));
-    ascFile.addPos(input->tell());
-    ascFile.addNote("SWNumRuleList:###extra");
-  }
-  return true;
-}
-catch (...)
-{
-  return false;
-}
-
 bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInternal::Content> &content)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -1186,72 +1122,6 @@ bool StarObjectText::readSWJobSetUp(StarZone &zone)
   zone.closeSWRecord(type, "JobSetUp[container]");
   return true;
 }
-bool StarObjectText::readSWNumRule(StarZone &zone, char cKind)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!=cKind || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  // sw_sw3num.cxx::Sw3IoImp::InNumRule
-  libstoff::DebugStream f;
-  f << "Entries(SWNumRuleDef)[" << cKind << "-" << zone.getRecordLevel() << "]:";
-  int val;
-  if (zone.isCompatibleWith(0x201)) {
-    int cFlags=int(zone.openFlagZone());
-    int nStringId=int(input->readULong(2));
-    librevenge::RVNGString poolName;
-    if (nStringId==0xFFFF)
-      ;
-    else if (!zone.getPoolName(nStringId, poolName))
-      f << "###nStringId=" << nStringId << ",";
-    else if (!poolName.empty())
-      f << poolName.cstr() << ",";
-    if (cFlags&0x10) {
-      int nPoolId=int(input->readULong(2));
-      f << "PoolId=" << nPoolId << ",";
-      val=int(input->readULong(2));
-      if (val) f << "poolHelpId=" << val << ",";
-      val=int(input->readULong(1));
-      if (val) f << "poolHelpFileId=" << val << ",";
-    }
-  }
-  val=int(input->readULong(1));
-  if (val) f << "eType=" << val << ",";
-  if (zone.isCompatibleWith(0x201))
-    zone.closeFlagZone();
-  int nFormat=int(input->readULong(1));
-  long lastPos=zone.getRecordLastPosition();
-  f << "nFormat=" << nFormat << ",";
-  if (input->tell()+nFormat>lastPos) {
-    STOFF_DEBUG_MSG(("StarObjectText::readSwNumRule: nFormat seems bad\n"));
-    f << "###,";
-    ascFile.addPos(pos);
-    ascFile.addNote(f.str().c_str());
-    zone.closeSWRecord(cKind, "SWNumRuleDef");
-    return true;
-  }
-  f << "lvl=[";
-  for (int i=0; i<nFormat; ++i) f  << input->readULong(1) << ",";
-  f << "],";
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-
-  int nKnownFormat=nFormat>10 ? 10 : nFormat;
-  for (int i=0; i<nKnownFormat; ++i) {
-    pos=input->tell();
-    if (getFormatManager()->readSWNumberFormat(zone)) continue;
-    STOFF_DEBUG_MSG(("StarObjectText::readSwNumRule: can not read a format\n"));
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    break;
-  }
-
-  zone.closeSWRecord(cKind, "SWNumRuleDef");
-  return true;
-}
 
 bool StarObjectText::readSWOLENode(StarZone &zone)
 {
@@ -1399,8 +1269,10 @@ bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInt
     int val=int(input->readULong(1));
     if (val==200 && zone.isCompatibleWith(0xf,0x101) && input->tell() < zone.getFlagLastPosition())
       val=int(input->readULong(1));
-    if (val)
+    if (val!=200) {
+      textZone->m_level=val&0x1f;
       f << "nLevel=" << val << ",";
+    }
   }
   if (zone.isCompatibleWith(0x19,0x22, 0x101))
     f << "nCondColl=" << input->readULong(2) << ",";
@@ -1443,9 +1315,13 @@ bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInt
       if (done) textZone->m_markList.push_back(mark);
       break;
     }
-    case 'R':
-      done=readSWNumRule(zone,'R');
+    case '0':
+    case 'R': {
+      shared_ptr<STOFFList> list;
+      done=StarObjectNumericRuler::readList(zone,list);
+      if (done && list) textZone->m_list=list;
       break;
+    }
     case 'S':
       done=StarWriterStruct::Attribute::readList(zone, textZone->m_charAttributeList, *this);
       break;
@@ -1480,8 +1356,15 @@ bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInt
       f << "nodeNum,";
       int cFlag=zone.openFlagZone();
       int nLevel=int(input->readULong(1));
-      if (nLevel!=201)
-        f << "nLevel=" << nLevel<< ",";
+      if (nLevel!=201) {
+        int level=(nLevel&0x1f);
+        if (level>=10) {
+          level=9;
+          if (nLevel&0x20) level |= 0x20;
+        }
+        textZone->m_level=level;
+        f << "nLevel=" << level<< ",";
+      }
       if (cFlag&0x20) f << "nSetValue=" << input->readULong(2) << ",";
       zone.closeFlagZone();
       if (nLevel!=201) {
@@ -1635,9 +1518,11 @@ try
       done=zone.readStringsPool();
       break;
     case 'R':
-    case '0': // Outline
-      done=readSWNumRule(zone,char(rType));
+    case '0': { // Outline
+      shared_ptr<STOFFList> list;
+      done=StarObjectNumericRuler::readList(zone,list);
       break;
+    }
     case '1': {
       StarWriterStruct::NoteInfo info(true);
       done=info.read(zone);

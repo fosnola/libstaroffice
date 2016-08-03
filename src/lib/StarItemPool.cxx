@@ -468,31 +468,6 @@ struct State {
     m_idToDefaultMap[which]=res;
     return res;
   }
-  //! small function to simplify a string (bad hack)
-  static librevenge::RVNGString getBasicString(librevenge::RVNGString const &s)
-  {
-    librevenge::RVNGString res("");
-    char const *ptr=s.cstr();
-    if (!ptr) return res;
-    int numBad=0;
-    while (*ptr) {
-      char c=*(ptr++);
-      if (unsigned(c)<0x80) {
-        if (numBad) {
-          numBad=0;
-          res.append('@');
-        }
-        res.append(c);
-        continue;
-      }
-      if (numBad++>=4) {
-        res.append('@');
-        numBad=0;
-      }
-    }
-    if (numBad) res.append('@');
-    return res;
-  }
   //! the document
   StarObject &m_document;
   //! the document type
@@ -2031,7 +2006,7 @@ void StarItemPool::updateStyles()
   std::set<librevenge::RVNGString> dupplicatedSimpName;
   for (it=m_state->m_styleIdToStyleMap.begin(); it!=m_state->m_styleIdToStyleMap.end(); ++it) {
     if (it->second.m_names[0].empty()) continue;
-    librevenge::RVNGString simpName=m_state->getBasicString(it->second.m_names[0]);
+    librevenge::RVNGString simpName=libstoff::simplifyString(it->second.m_names[0]);
     if (it->second.m_names[0]==simpName || dupplicatedSimpName.find(simpName)!=dupplicatedSimpName.end()) continue;
     if (m_state->m_simplifyNameToStyleNameMap.find(simpName)==m_state->m_simplifyNameToStyleNameMap.end())
       m_state->m_simplifyNameToStyleNameMap[simpName]=it->second.m_names[0];
@@ -2050,7 +2025,7 @@ StarItemStyle const *StarItemPool::findStyleWithFamily(librevenge::RVNGString co
     librevenge::RVNGString name(style);
     if (step==1) {
       // hack: try to retrieve the original style, ...
-      librevenge::RVNGString simpName=m_state->getBasicString(style);
+      librevenge::RVNGString simpName=libstoff::simplifyString(style);
       if (m_state->m_simplifyNameToStyleNameMap.find(simpName)==m_state->m_simplifyNameToStyleNameMap.end())
         break;
       name=m_state->m_simplifyNameToStyleNameMap.find(simpName)->second;

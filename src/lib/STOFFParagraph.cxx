@@ -68,7 +68,7 @@ std::ostream &operator<<(std::ostream &o, STOFFParagraph const &pp)
   o << pp.m_propertyList.getPropString().cstr() << ",";
   if (pp.m_listId >= 0) o << "listId=" << pp.m_listId << ",";
   if (pp.m_listLevelIndex >= 1)
-    o << pp.m_listLevel << ":" << pp.m_listLevelIndex <<",";
+    o << pp.m_listLevel.m_propertyList.getPropString().cstr() << ":" << pp.m_listLevelIndex <<",";
   return o;
 }
 

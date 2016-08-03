@@ -42,7 +42,6 @@
 #include "STOFFCell.hxx"
 #include "STOFFCellStyle.hxx"
 
-
 #include "StarAttribute.hxx"
 #include "StarFileManager.hxx"
 #include "StarGraphicStruct.hxx"
@@ -636,70 +635,6 @@ bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, shared_ptr<St
   }
 
   zone.closeSWRecord(kind, "SWFormatDef");
-  return true;
-}
-
-bool StarFormatManager::readSWNumberFormat(StarZone &zone)
-{
-  STOFFInputStreamPtr input=zone.input();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
-  long pos=input->tell();
-  if (input->peek()!='n' || !zone.openSWRecord(type)) {
-    input->seek(pos, librevenge::RVNG_SEEK_SET);
-    return false;
-  }
-  libstoff::DebugStream f;
-  f << "Entries(SWNumbFormat)[" << zone.getRecordLevel() << "]:";
-  // sw_sw3num.cxx Sw3IoImp::InNumFmt
-  std::vector<uint32_t> string;
-  for (int i=0; i<4; ++i) {
-    if (!zone.readString(string)) {
-      STOFF_DEBUG_MSG(("StarFormatManager::readSWNumberFormat: can not read a string\n"));
-      f << "###string";
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-
-      zone.closeSWRecord('n', "SWNumbFormat");
-      return true;
-    }
-    if (string.empty()) continue;
-    static char const *(wh[])= {"prefix", "postfix", "fontname", "fontstyle"};
-    f << wh[i] << "=" << libstoff::getString(string).cstr() << ",";
-  }
-  f << "nFmt=" << input->readULong(2) << ",";
-  f << "eType=" << input->readULong(1) << ",";
-  f << "cBullet=" << input->readULong(1) << ",";
-  f << "nUpperLevel=" << input->readULong(1) << ","; // int or bool
-  f << "nStart=" << input->readULong(2) << ",";
-  f << "eNumAdjust=" << input->readULong(1) << ",";
-  f << "nLSpace=" << input->readLong(4) << ",";
-  f << "nFirstLineOffset=" << input->readLong(4) << ",";
-  f << "eFamily=" << input->readULong(1) << ",";
-  f << "ePitch=" << input->readULong(1) << ",";
-  f << "eCharSet=" << input->readULong(1) << ",";
-  int cFlags=zone.openFlagZone();
-  zone.closeFlagZone();
-  if (cFlags&0xF0) f << "cFlags=" << (cFlags>>4) << ",";
-  if (zone.isCompatibleWith(0x17, 0x22))
-    f << "nFmt=" << input->readULong(2) << ",";
-  if (zone.isCompatibleWith(0x17,0x22, 0x101,0x201)) {
-    f << "bRelSpace=" << input->readULong(1) << ",";
-    f << "nRelLSpace=" << input->readLong(4) << ",";
-  }
-  if (zone.isCompatibleWith(0x17,0x22, 0x101)) {
-    f << "nTextOffset=" << input->readULong(2) << ",";
-    if (input->tell()<zone.getRecordLastPosition()) {
-      f << "width=" << input->readLong(4) << ",";
-      f << "height=" << input->readLong(4) << ",";
-      int cF=int(input->readULong(1));
-      if (cF&1) f << "nVer[brush]=" << input->readULong(2) << ",";
-      if (cF&2) f << "nVer[vertOrient]=" << input->readULong(2) << ",";
-    }
-  }
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  zone.closeSWRecord('n', "SWNumbFormat");
   return true;
 }
 

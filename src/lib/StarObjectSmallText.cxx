@@ -89,8 +89,8 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState
   std::map<int, shared_ptr<StarItem> >::const_iterator it;
   mainState.m_break=0;
   mainState.m_paragraph=STOFFParagraph();
-  if (mainState.m_pool && !m_styleName.empty()) { // checkme
-    StarItemStyle const *style=mainState.m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
+  if (mainState.m_global->m_pool && !m_styleName.empty()) { // checkme
+    StarItemStyle const *style=mainState.m_global->m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
     if (style) {
 #if 0
       bool done=false;

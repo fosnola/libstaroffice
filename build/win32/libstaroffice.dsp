@@ -323,6 +323,10 @@ SOURCE=..\..\src\lib\StarObjectModel.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarObjectNumericRuler.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarObjectPageStyle.cxx
 # End Source File
 # Begin Source File
@@ -616,6 +620,10 @@ SOURCE=..\..\src\lib\StarObjectDraw.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarObjectModel.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarObjectNumericRuler.hxx
 # End Source File
 # Begin Source File
 

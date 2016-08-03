@@ -338,6 +338,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\..\src\lib\StarObjectNumericRuler.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\src\lib\StarObjectPageStyle.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -450,6 +454,7 @@
     <ClInclude Include="..\..\src\lib\StarObjectChart.hxx" />
     <ClInclude Include="..\..\src\lib\StarObjectDraw.hxx" />
     <ClInclude Include="..\..\src\lib\StarObjectModel.hxx" />
+    <ClInclude Include="..\..\src\lib\StarObjectNumericRuler.hxx" />
     <ClInclude Include="..\..\src\lib\StarObjectPageStyle.hxx" />
     <ClInclude Include="..\..\src\lib\StarObjectSmallGraphic.hxx" />
     <ClInclude Include="..\..\src\lib\StarObjectSmallText.hxx" />

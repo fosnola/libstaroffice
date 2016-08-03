@@ -296,8 +296,6 @@ protected:
   shared_ptr<STOFFTextListenerInternal::State> m_ps;
   //! stack of local state
   std::vector<shared_ptr<STOFFTextListenerInternal::State> > m_psStack;
-  //! the list manager
-  STOFFListManagerPtr m_listManager;
   //! the document interface
   librevenge::RVNGTextInterface *m_documentInterface;
 

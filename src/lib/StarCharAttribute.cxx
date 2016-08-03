@@ -918,7 +918,7 @@ void StarCAttributeFontSize::addTo(StarState &state, std::set<StarAttribute cons
     state.m_font.m_propertyList.insert(wh.c_str(), double(m_size), librevenge::RVNG_POINT);
     break;
   case 13: // rel, checkme
-    state.m_font.m_propertyList.insert(wh.c_str(), double(m_size)*state.m_relativeUnit, librevenge::RVNG_POINT);
+    state.m_font.m_propertyList.insert(wh.c_str(), double(m_size)*state.m_global->m_relativeUnit, librevenge::RVNG_POINT);
     break;
   default: // checkme
     state.m_font.m_propertyList.insert(wh.c_str(), double(m_size)/20., librevenge::RVNG_POINT);
@@ -932,8 +932,8 @@ void StarCAttributeCharFormat::addTo(StarState &state, std::set<StarAttribute co
     return;
   done.insert(this);
   if (m_type==ATTR_TXT_CHARFMT) {
-    if (m_name.empty() || !state.m_pool) return;
-    StarItemStyle const *style=state.m_pool->findStyleWithFamily(m_name, StarItemStyle::F_Char);
+    if (m_name.empty() || !state.m_global->m_pool) return;
+    StarItemStyle const *style=state.m_global->m_pool->findStyleWithFamily(m_name, StarItemStyle::F_Char);
     if (style) {
       state.m_font=STOFFFont();
       StarItemSet const &itemSet=style->m_itemSet;
@@ -1301,7 +1301,7 @@ bool StarCAttributeFootnote::send(STOFFListenerPtr listener, StarState &state, s
     STOFF_DEBUG_MSG(("StarCAttributeFootnote::send: can not find the listener\n"));
     return false;
   }
-  STOFFSubDocumentPtr subDocument(new SubDocument(m_content, state.m_pool, state.m_object));
+  STOFFSubDocumentPtr subDocument(new SubDocument(m_content, state.m_global->m_pool, state.m_global->m_object));
   STOFFNote note(STOFFNote::FootNote);
   if (m_label.empty())
     note.m_label=m_label;
