@@ -69,6 +69,8 @@ public:
   virtual ~StarObjectNumericRuler();
   //! try to read a number format zone : 'n'
   static bool readLevel(StarZone &zone, STOFFListLevel &level);
+  //! try to read a attribute format : ATTR_EE_PARA_BULLET
+  static bool readAttributeLevel(StarZone &zone, int vers, long lastPos, STOFFListLevel &level);
   //! try to read a list : '0' or 'R'
   static bool readList(StarZone &zone, shared_ptr<STOFFList> &list);
   //! try to read a SwNumRules zone

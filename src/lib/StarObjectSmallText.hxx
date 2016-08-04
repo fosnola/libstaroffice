@@ -67,7 +67,7 @@ public:
   bool read(StarZone &zone, long lastPos);
 
   //! try to send a small text zone
-  bool send(shared_ptr<STOFFListener> listener);
+  bool send(shared_ptr<STOFFListener> listener, int level=-1);
 protected:
   //
   // low level

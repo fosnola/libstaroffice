@@ -816,16 +816,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
   case StarAttribute::ATTR_FRM_TEXTGRID: // SwTextGridItem::Create
     f << "textgrid=" << input->readULong(1) << ",";
     break;
-  case StarAttribute::ATTR_FRM_LINENUMBER: {
-    // sw_sw3attr.cxx SwFmtLineNumber::Create
-    // style:page-number auto text:outline-level
-    f << "lineNumber,";
-    f << "start=" << input->readULong(4) << ",";
-    bool countLines;
-    *input>>countLines;
-    if (!countLines) f << "countLines*,";
-    break;
-  }
   case StarAttribute::ATTR_FRM_FTN_AT_TXTEND:
   case StarAttribute::ATTR_FRM_END_AT_TXTEND:
     f << (nWhich==StarAttribute::ATTR_FRM_FTN_AT_TXTEND ? "ftnAtTextEnd" : "ednAtTextEnd") << "=" << input->readULong(1) << ",";
@@ -902,101 +892,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     }
     break;
 
-  case StarAttribute::ATTR_EE_PARA_NUMBULLET: {
-    // svx_numitem.cxx SvxNumRule::SvxNumRule
-    f << "eeParaNumBullet,";
-    uint16_t version, levelC, nFeatureFlags, nContinuousNumb, numberingType;
-    *input >> version >> levelC >> nFeatureFlags >> nContinuousNumb >> numberingType;
-    if (version) f << "vers=" << version << ",";
-    if (levelC) f << "level[count]=" << levelC << ",";
-    if (nFeatureFlags) f << "feature[flags]=" << nFeatureFlags << ",";
-    if (nContinuousNumb) f << "continuous[numbering],";
-    if (numberingType) f << "number[type]=" << numberingType << ",";
-    f << "set=[";
-    for (int i=0; i<10; ++i) {
-      uint16_t nSet;
-      *input>>nSet;
-      if (nSet) {
-        f << nSet << ",";
-        if (!object.getFormatManager()->readNumberFormat(zone, lastPos, object) || input->tell()>lastPos) {
-          f << "###";
-          break;
-        }
-      }
-      else
-        f << "_,";
-    }
-    f << "],";
-    if (version>=2) {
-      *input>>nFeatureFlags;
-      f << "nFeatureFlags2=" << nFeatureFlags << ",";
-    }
-    break;
-  }
-  case StarAttribute::ATTR_EE_PARA_BULLET: {
-    // svx_bulitem.cxx SvxBulletItem::SvxBulletItem
-    f << "paraBullet,";
-    uint16_t style;
-    *input >> style;
-    if (style==128) {
-      StarBitmap bitmap;
-      librevenge::RVNGBinaryData data;
-      std::string dType;
-      if (!bitmap.readBitmap(zone, true, lastPos, data, dType)) {
-        f << "###BM,";
-        break;
-      }
-    }
-    else {
-      // SvxBulletItem::CreateFont
-      STOFFColor col;
-      if (!input->readColor(col)) {
-        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a color\n"));
-        f << "###color,";
-        break;
-      }
-      else if (!col.isBlack())
-        f << "color=" << col << ",";
-      uint16_t family, encoding, pitch, align, weight, underline, strikeOut, italic;
-      *input >> family >> encoding >> pitch >> align >> weight >> underline >> strikeOut >> italic;
-      if (family) f << "family=" << family << ",";
-      if (encoding) f << "encoding=" << encoding << ",";
-      if (pitch) f << "pitch=" << pitch << ",";
-      if (weight) f << "weight=" << weight << ",";
-      if (underline) f << "underline=" << underline << ",";
-      if (strikeOut) f << "strikeOut=" << strikeOut << ",";
-      if (italic) f << "italic=" << italic << ",";
-      std::vector<uint32_t> text;
-      if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a name\n"));
-        f << "###text,";
-        break;
-      }
-      f << libstoff::getString(text).cstr() << ",";
-      // if (nVers==1) f << "size=" << input->readLong(4) << "x" << input->readLong(4) << ",";
-      bool outline, shadow, transparent;
-      *input >> outline >>  shadow >>  transparent;
-      if (outline) f << "outline,";
-      if (shadow) f << "shadow,";
-      if (transparent) f << "transparent,";
-    }
-    f << "width=" << input->readLong(4) << ",";
-    f << "start=" << input->readULong(2) << ",";
-    f << "justify=" << input->readULong(1) << ",";
-    f << "symbol=" << input->readULong(1) << ",";
-    f << "scale=" << input->readULong(2) << ",";
-    for (int i=0; i<2; ++i) {
-      std::vector<uint32_t> text;
-      if (!zone.readString(text)) {
-        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read a name\n"));
-        f << "###text,";
-        break;
-      }
-      else if (!text.empty())
-        f << (i==0 ? "prev" : "next") << "=" << libstoff::getString(text).cstr() << ",";
-    }
-    break;
-  }
   case StarAttribute::ATTR_EE_FEATURE_FIELD: {
     f << "eeFeatureField,vers=" << nVers << ",";
     // svx_flditem.cxx SvxFieldItem::Create

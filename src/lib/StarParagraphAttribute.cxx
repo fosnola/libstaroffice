@@ -35,6 +35,8 @@
 #include "STOFFPageSpan.hxx"
 
 #include "StarAttribute.hxx"
+#include "StarBitmap.hxx"
+#include "StarFormatManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarObject.hxx"
 #include "StarObjectNumericRuler.hxx"
@@ -237,7 +239,7 @@ void StarPAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
   else if (m_type==ATTR_EE_PARA_BULLETSTATE)
     state.m_paragraph.m_bulletVisible=m_value!=0;
   else if (m_type==ATTR_EE_PARA_OUTLLEVEL)
-    state.m_paragraph.m_propertyList.insert("text:outline-level", int(m_value));
+    state.m_paragraph.m_listLevelIndex=int(m_value);
   else if (m_type==ATTR_FRM_BREAK) {
     if (m_value>0 && m_value<=6) state.m_break=int(m_value);
     else if (m_value) {
@@ -311,6 +313,83 @@ protected:
   int m_adjust;
   //! the flags
   int m_flags;
+};
+
+// ------------------------------------------------------------
+//! a numeric bullet attribute
+class StarPAttributeBulletNumeric : public StarAttribute
+{
+public:
+  //! constructor
+  StarPAttributeBulletNumeric(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_numType(0), m_numLevels(0), m_flags(0), m_continuous(true)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarPAttributeBulletNumeric(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a para
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  //! debug function to print the data
+  virtual void printData(libstoff::DebugStream &o) const
+  {
+    o << m_debugName << "=[";
+    if (m_numType) o << "type=" << m_numType << ",";
+    if (m_numLevels) o << "numLevels=" << m_numLevels << ",";
+    if (m_flags) o << "flags=" << std::hex << m_flags << std::dec << ",";
+    if (!m_continuous) o << "continuous*,";
+    o << "],";
+  }
+protected:
+  //! copy constructor
+  StarPAttributeBulletNumeric(StarPAttributeBulletNumeric const &orig) : StarAttribute(orig), m_numType(orig.m_numType), m_numLevels(orig.m_numLevels), m_flags(orig.m_flags), m_continuous(orig.m_continuous)
+  {
+  }
+  //! the type
+  int m_numType;
+  //! the numLevels
+  int m_numLevels;
+  //! the flags
+  int m_flags;
+  //! a continuous flag
+  bool m_continuous;
+};
+
+// ------------------------------------------------------------
+//! a simple bullet attribute
+class StarPAttributeBulletSimple : public StarAttribute
+{
+public:
+  //! constructor
+  StarPAttributeBulletSimple(Type type, std::string const &debugName) :
+    StarAttribute(type, debugName), m_level()
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarPAttributeBulletSimple(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a para
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  //! debug function to print the data
+  virtual void printData(libstoff::DebugStream &o) const
+  {
+    o << m_debugName;
+  }
+protected:
+  //! copy constructor
+  StarPAttributeBulletSimple(StarPAttributeBulletSimple const &orig) :
+    StarAttribute(orig), m_level(orig.m_level)
+  {
+  }
+  //! the level
+  STOFFListLevel m_level;
 };
 
 //! a drop attribute
@@ -407,6 +486,43 @@ protected:
   int m_minTail;
   //! the max hyphen
   int m_maxHyphen;
+};
+
+//! a line numbering attribute
+class StarPAttributeLineNumbering : public StarAttribute
+{
+public:
+  //! constructor
+  StarPAttributeLineNumbering(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_start(-1), m_countLines(false)
+  {
+  }
+  //! create a new attribute
+  virtual shared_ptr<StarAttribute> create() const
+  {
+    return shared_ptr<StarAttribute>(new StarPAttributeLineNumbering(*this));
+  }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  //! add to a para
+  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  //! debug function to print the data
+  virtual void printData(libstoff::DebugStream &o) const
+  {
+    o << m_debugName;
+    if (m_countLines)
+      o << "=" << m_start << ",";
+    else
+      o << "*,";
+  }
+protected:
+  //! copy constructor
+  StarPAttributeLineNumbering(StarPAttributeLineNumbering const &orig) : StarAttribute(orig), m_start(orig.m_start), m_countLines(orig.m_countLines)
+  {
+  }
+  //! the name value
+  long m_start;
+  //! the countLines flag
+  bool m_countLines;
 };
 
 //! a line spacing attribute
@@ -677,6 +793,32 @@ void StarPAttributeAdjust::addTo(StarState &state, std::set<StarAttribute const 
   }
 }
 
+void StarPAttributeBulletNumeric::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
+{
+  if (m_type==ATTR_EE_PARA_NUMBULLET) {
+    STOFFListLevel level;
+    if (m_numType<=4) {
+      char const *(wh[])= {"A", "a", "I", "i", "1"};
+      level.m_propertyList.insert("style:num-format", wh[m_numType]);
+      level.m_type=STOFFListLevel::NUMBER;
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarPAttributeBulletNumeric::addTo: unknown type=%d\n", m_numType));
+      level.m_type=STOFFListLevel::BULLET;
+      librevenge::RVNGString bullet;
+      libstoff::appendUnicode(0x2022, bullet); // checkme
+      level.m_propertyList.insert("text:bullet-char", bullet);
+    }
+    state.m_paragraph.m_listLevel=level;
+  }
+}
+
+void StarPAttributeBulletSimple::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
+{
+  if (m_type==ATTR_EE_PARA_BULLET)
+    state.m_paragraph.m_listLevel=m_level;
+}
+
 void StarPAttributeDrop::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_PARA_DROP) {
@@ -692,6 +834,16 @@ void StarPAttributeDrop::addTo(StarState &state, std::set<StarAttribute const *>
 
 void StarPAttributeHyphen::addTo(StarState &/*state*/, std::set<StarAttribute const *> &/*done*/) const
 {
+}
+
+void StarPAttributeLineNumbering::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
+{
+  if (m_type==ATTR_FRM_LINENUMBER) {
+    if (m_start>=0 && m_countLines) {
+      state.m_paragraph.m_propertyList.insert("text:number-lines", true);
+      state.m_paragraph.m_propertyList.insert("text:line-number", m_start==0 ? 1 : int(m_start));
+    }
+  }
 }
 
 void StarPAttributeLineSpacing::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
@@ -852,6 +1004,49 @@ bool StarPAttributeAdjust::read(StarZone &zone, int vers, long endPos, StarObjec
   return input->tell()<=endPos;
 }
 
+bool StarPAttributeBulletNumeric::read(StarZone &zone, int /*vers*/, long endPos, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  // svx_numitem.cxx SvxNumRule::SvxNumRule
+  uint16_t version;
+  *input >> version;
+  m_numLevels=int(input->readULong(2));
+  m_flags=int(input->readULong(2));
+  m_continuous=(input->readULong(2)!=0);
+  m_numType=int(input->readULong(2));
+  f << "set=[";
+  for (int i=0; i<10; ++i) {
+    uint16_t nSet;
+    *input>>nSet;
+    if (nSet) {
+      f << nSet << ",";
+      if (!object.getFormatManager()->readNumberFormat(zone, endPos, object) || input->tell()>endPos) {
+        f << "###";
+        break;
+      }
+    }
+    else
+      f << "_,";
+  }
+  f << "],";
+  if (version>=2)
+    m_flags=int(input->readULong(2));
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
+bool StarPAttributeBulletSimple::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
+{
+  // svx_bulitem.cxx SvxBulletItem::SvxBulletItem
+  return StarObjectNumericRuler::readAttributeLevel(zone, vers, endPos, m_level);
+}
+
 bool StarPAttributeDrop::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -887,6 +1082,23 @@ bool StarPAttributeHyphen::read(StarZone &zone, int /*vers*/, long endPos, StarO
   m_minLead=int(input->readLong(1));
   m_minTail=int(input->readLong(1));
   m_maxHyphen=int(input->readLong(1));
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
+bool StarPAttributeLineNumbering::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  // sw_sw3attr.cxx SwFmtLineNumber::Create
+  m_start=long(input->readULong(4));
+  *input >> m_countLines;
+
   printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -966,7 +1178,7 @@ bool StarPAttributeNumericRuler::read(StarZone &zone, int vers, long endPos, Sta
   // sw_sw3attr.cxx SwNumRuleItem::Create
   std::vector<uint32_t> string;
   if (!zone.readString(string) || input->tell()>endPos) {
-    STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not find the sTmp\n"));
+    STOFF_DEBUG_MSG(("StarPAttributeNumericRuler::read: can not find the sTmp\n"));
     f << "###sTmp,";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -991,7 +1203,7 @@ bool StarPAttributeTabStop::read(StarZone &zone, int /*vers*/, long endPos, Star
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   int N=int(input->readULong(1));
   if (input->tell()+7*N>endPos) {
-    STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: N is too big\n"));
+    STOFF_DEBUG_MSG(("StarPAttributeTabStop::read: N is too big\n"));
     f << "###N=" << N << ",";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -1049,9 +1261,12 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   map[StarAttribute::ATTR_PARA_ADJUST]=shared_ptr<StarAttribute>(new StarPAttributeAdjust(StarAttribute::ATTR_PARA_ADJUST,"parAtrAdjust"));
   map[StarAttribute::ATTR_FRM_LR_SPACE]=shared_ptr<StarAttribute>(new StarPAttributeLRSpace(StarAttribute::ATTR_FRM_LR_SPACE,"lrSpace"));
   map[StarAttribute::ATTR_FRM_UL_SPACE]=shared_ptr<StarAttribute>(new StarPAttributeULSpace(StarAttribute::ATTR_FRM_UL_SPACE,"ulSpace"));
+  map[StarAttribute::ATTR_FRM_LINENUMBER]=shared_ptr<StarAttribute>(new StarPAttributeLineNumbering(StarAttribute::ATTR_FRM_LINENUMBER,"lineNumbering"));
   map[StarAttribute::ATTR_PARA_LINESPACING]=shared_ptr<StarAttribute>(new StarPAttributeLineSpacing(StarAttribute::ATTR_PARA_LINESPACING,"parAtrLinespacing"));
   map[StarAttribute::ATTR_PARA_TABSTOP]=shared_ptr<StarAttribute>(new StarPAttributeTabStop(StarAttribute::ATTR_PARA_TABSTOP,"parAtrTabStop"));
   map[StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE]=shared_ptr<StarAttribute>(new StarPAttributeLRSpace(StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE,"eeOutLrSpace"));
+  map[StarAttribute::ATTR_EE_PARA_NUMBULLET]=shared_ptr<StarAttribute>(new StarPAttributeBulletNumeric(StarAttribute::ATTR_EE_PARA_NUMBULLET,"eeParaNumBullet"));
+  map[StarAttribute::ATTR_EE_PARA_BULLET]=shared_ptr<StarAttribute>(new StarPAttributeBulletSimple(StarAttribute::ATTR_EE_PARA_BULLET,"paraBullet"));
   map[StarAttribute::ATTR_PARA_DROP]=shared_ptr<StarAttribute>(new StarPAttributeDrop(StarAttribute::ATTR_PARA_DROP,"parAtrDrop"));
 
   // seems safe to ignore

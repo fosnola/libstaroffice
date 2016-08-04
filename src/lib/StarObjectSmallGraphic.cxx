@@ -158,7 +158,7 @@ public:
       for (size_t z=0; z<m_zones.size(); ++z) {
         if (z) listener->insertEOL();
         if (m_zones[z].m_text)
-          m_zones[z].m_text->send(listener);
+          m_zones[z].m_text->send(listener, m_zones[z].m_depth);
       }
     }
     return true;

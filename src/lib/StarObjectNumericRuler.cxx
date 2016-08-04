@@ -46,6 +46,7 @@
 #include "STOFFPageSpan.hxx"
 
 #include "StarAttribute.hxx"
+#include "StarBitmap.hxx"
 #include "StarFormatManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarObject.hxx"
@@ -422,6 +423,138 @@ bool StarObjectNumericRuler::readList(StarZone &zone, shared_ptr<STOFFList> &lis
 
   zone.closeSWRecord(type, "StarNumericList");
   return true;
+}
+
+bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long lastPos, STOFFListLevel &level)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:paraBullet,";
+
+  level=STOFFListLevel();
+  // svx_bulitem.cxx SvxBulletItem::SvxBulletItem
+  uint16_t style;
+  *input >> style;
+  uint16_t encoding=0;
+  int alignement=-1;
+  if (style==128) {
+    f << "bitmap,";
+    StarBitmap bitmap;
+    librevenge::RVNGBinaryData data;
+    std::string dType;
+    if (!bitmap.readBitmap(zone, true, lastPos, data, dType)) {
+      f << "###BM,";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+  }
+  else {
+    f << "type=" << style << ",";
+    // SvxBulletItem::CreateFont
+    f << "font=[";
+    STOFFColor col;
+    if (!input->readColor(col)) {
+      STOFF_DEBUG_MSG(("StarObjectNumericRuler::readAttributeLevel: can not read a color\n"));
+      f << "###color,";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+    else if (!col.isBlack())
+      f << "color=" << col << ",";
+    uint16_t family, pitch, align, weight, underline, strikeOut, italic;
+    *input >> family >> encoding >> pitch >> align >> weight >> underline >> strikeOut >> italic;
+    alignement=int(align);
+    if (family) f << "family=" << family << ",";
+    if (encoding) f << "encoding=" << encoding << ",";
+    if (pitch) f << "pitch=" << pitch << ",";
+    if (weight) f << "weight=" << weight << ",";
+    if (underline) f << "underline=" << underline << ",";
+    if (strikeOut) f << "strikeOut=" << strikeOut << ",";
+    if (italic) f << "italic=" << italic << ",";
+    std::vector<uint32_t> text;
+    if (!zone.readString(text)) {
+      STOFF_DEBUG_MSG(("StarObjectNumericRuler::readAttributeLevel: can not read a name\n"));
+      f << "###fontName,";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return false;
+    }
+    if (!text.empty())
+      f << libstoff::getString(text).cstr() << ",";
+    if (vers==1) f << "size=" << input->readLong(4) << "x" << input->readLong(4) << ",";
+    bool outline, shadow, transparent;
+    *input >> outline >>  shadow >>  transparent;
+    if (outline) f << "outline,";
+    if (shadow) f << "shadow,";
+    if (transparent) f << "transparent,";
+    f << "],";
+  }
+  int width=int(input->readLong(4));
+  int start=int(input->readULong(2));
+  int justify=int(input->readULong(1));
+  int symbol=int(input->readULong(1));
+  int scale=int(input->readULong(2));
+  if (width) f << "width=" << width << ",";
+  if (start) f << "start=" << start << ",";
+  if (justify) f << "justify=" << justify << ",";
+  if (symbol) f << "symbol=" << symbol << ",";
+  if (scale) f << "scale=" << scale << ",";
+
+  if (style<=4) {
+    char const *(wh[])= {"A", "a", "I", "i", "1"};
+    level.m_propertyList.insert("style:num-format", wh[style]);
+    level.m_type=STOFFListLevel::NUMBER;
+  }
+  else if (style==5 || (style==6 && symbol==0)) {
+    level.m_propertyList.insert("text:bullet-char", " ");
+    level.m_type=STOFFListLevel::NONE;
+  }
+  else if (style==6) {
+    level.m_type=STOFFListLevel::BULLET;
+    std::vector<uint8_t> buffer(1, uint8_t(symbol));
+    std::vector<uint32_t> res;
+    std::vector<size_t> positions;
+    // checkme if fontname is StarBats or StarMath, this does not works very well...
+    StarEncoding::convert(buffer, StarEncoding::getEncodingForId(encoding), res, positions);
+    level.m_propertyList.insert("text:bullet-char", libstoff::getString(res));
+  }
+  else {
+    STOFF_DEBUG_MSG(("StarObjectNumericRuler::readAttributeLevel: unimplemented style %d\n", style));
+    // BITMAP
+    level.m_type=STOFFListLevel::BULLET;
+    librevenge::RVNGString bullet;
+    libstoff::appendUnicode(0x2022, bullet); // checkme
+    level.m_propertyList.insert("text:bullet-char", bullet);
+  }
+  if (alignement>=0 && alignement<=6) {
+    char const *(wh[])= {"left", "right", "justify", "center", "justify"/*block line*/, "end"};
+    level.m_propertyList.insert("fo:text-align", wh[alignement]);
+  }
+  else if (alignement>=0) {
+    STOFF_DEBUG_MSG(("StarObjectNumericRuler::readAttributeLevel: unknown align %d\n", alignement));
+  }
+
+  for (int i=0; i<2; ++i) {
+    std::vector<uint32_t> text;
+    if (!zone.readString(text)) {
+      STOFF_DEBUG_MSG(("StarObjectNumericRuler::readAttributeLevel: can not read a name\n"));
+      f << "###text,";
+      break;
+    }
+    else if (text.empty())
+      continue;
+    f << (i==0 ? "prefix" : "suffix") << "=" << libstoff::getString(text).cstr() << ",";
+    if (i==0) level.m_propertyList.insert("style:num-prefix",libstoff::getString(text));
+    else if (i==1) level.m_propertyList.insert("style:num-suffix",libstoff::getString(text));
+  }
+
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=lastPos;
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

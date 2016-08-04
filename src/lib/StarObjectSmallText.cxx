@@ -62,7 +62,7 @@ struct Paragraph {
   {
   }
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr &listener, StarState &mainState, StarState &editState) const;
+  bool send(STOFFListenerPtr &listener, StarState &mainState, StarState &editState, int level=-1) const;
   //! the text
   std::vector<uint32_t> m_text;
   //! the text initial position
@@ -79,7 +79,7 @@ struct Paragraph {
   std::vector<STOFFVec2i> m_charLimitList;
 };
 
-bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState &editState) const
+bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState &editState, int level) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("StarObjectSmallTextInternal::Paragraph::send: call without listener\n"));
@@ -110,6 +110,7 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState
     }
   }
   editState.m_paragraph=mainState.m_paragraph;
+  if (level>=0) editState.m_paragraph.m_listLevelIndex=level;
   editState.m_font=mainState.m_font;
   for (it=m_itemSet.m_whichToItemMap.begin(); it!=m_itemSet.m_whichToItemMap.end(); ++it) {
     if (!it->second || !it->second->m_attribute) continue;
@@ -194,7 +195,7 @@ StarObjectSmallText::~StarObjectSmallText()
 {
 }
 
-bool StarObjectSmallText::send(shared_ptr<STOFFListener> listener)
+bool StarObjectSmallText::send(shared_ptr<STOFFListener> listener, int level)
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("StarObjectSmallText::send: call without listener\n"));
@@ -206,7 +207,7 @@ bool StarObjectSmallText::send(shared_ptr<STOFFListener> listener)
   StarState mainState(mainPool.get(), *this, 0.028346457);
   StarState editState(editPool.get(), *this, 0.028346457);
   for (size_t p=0; p<m_textState->m_paragraphList.size(); ++p) {
-    m_textState->m_paragraphList[p].send(listener, mainState, editState);
+    m_textState->m_paragraphList[p].send(listener, mainState, editState, level);
     if (p+1!=m_textState->m_paragraphList.size())
       listener->insertEOL();
   }
