@@ -416,7 +416,7 @@ public:
     if (m_numFormats!=0xFFFF) o << "num[formats]=" << m_numFormats << ",";
     if (m_numLines) o << "num[lines]=" << m_numLines << ",";
     if (m_numChars) o << "num[chars]=" << m_numChars << ",";
-    if (m_numDistances) o << "num[distances]=" << m_numChars << ",";
+    if (m_numDistances) o << "num[distances]=" << m_numDistances << ",";
     if (m_whole) o << "whole,";
     if (m_numX) o << "numX=" << m_numX << ",";
     if (m_numY) o << "numY=" << m_numY << ",";

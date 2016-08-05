@@ -779,7 +779,7 @@ bool Redline::read(StarZone &zone)
   m_time=long(input->readULong(4));
   std::vector<uint32_t> text;
   if (!zone.readString(text)) {
-    STOFF_DEBUG_MSG(("StarObjectText::readSWRedlineList: can not read the comment\n"));
+    STOFF_DEBUG_MSG(("StarWriterStruct::Redline: can not read the comment\n"));
     f << "###comment";
   }
   else

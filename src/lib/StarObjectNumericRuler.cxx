@@ -650,7 +650,7 @@ bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long l
     libstoff::appendUnicode(0x2022, bullet); // checkme
     level.m_propertyList.insert("text:bullet-char", bullet);
   }
-  if (alignement>=0 && alignement<=6) {
+  if (alignement>=0 && alignement<6) {
     char const *(wh[])= {"left", "right", "justify", "center", "justify"/*block line*/, "end"};
     level.m_propertyList.insert("fo:text-align", wh[alignement]);
   }
