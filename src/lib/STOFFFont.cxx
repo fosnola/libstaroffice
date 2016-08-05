@@ -54,10 +54,23 @@ std::ostream &operator<<(std::ostream &o, STOFFFont const &font)
   return o;
 }
 
-bool STOFFFont::operator==(STOFFFont const &font) const
+int STOFFFont::cmp(STOFFFont const &font) const
 {
-  return m_propertyList.getPropString() == font.m_propertyList.getPropString() && m_shadowColor==font.m_shadowColor &&
-         m_hyphen==font.m_hyphen && m_softHyphen==font.m_softHyphen && m_lineBreak==font.m_lineBreak;
+  if (m_propertyList.getPropString() < font.m_propertyList.getPropString())
+    return -1;
+  if (m_propertyList.getPropString() > font.m_propertyList.getPropString())
+    return 1;
+  if (m_shadowColor < font.m_shadowColor)
+    return -1;
+  if (m_shadowColor > font.m_shadowColor)
+    return 1;
+  if (m_hyphen != font.m_hyphen)
+    return m_hyphen ? 1 : -1;
+  if (m_softHyphen != font.m_softHyphen)
+    return m_softHyphen ? 1 : -1;
+  if (m_lineBreak != font.m_lineBreak)
+    return m_lineBreak ? 1 : -1;
+  return 0;
 }
 
 void STOFFFont::addTo(librevenge::RVNGPropertyList &pList) const

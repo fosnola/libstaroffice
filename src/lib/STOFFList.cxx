@@ -39,10 +39,16 @@
 #include "libstaroffice_internal.hxx"
 
 #include "STOFFList.hxx"
+#include "STOFFListener.hxx"
 
+#include "STOFFFont.hxx"
 ////////////////////////////////////////////////////////////
 // list level functions
 ////////////////////////////////////////////////////////////
+STOFFListLevel::~STOFFListLevel()
+{
+}
+
 void STOFFListLevel::addTo(librevenge::RVNGPropertyList &pList) const
 {
   if (m_type==NUMBER)
@@ -65,6 +71,12 @@ int STOFFListLevel::cmp(STOFFListLevel const &levl) const
   diff = strcmp(m_propertyList.getPropString().cstr(),
                 levl.m_propertyList.getPropString().cstr());
   if (diff) return diff;
+  if (m_font) {
+    if (!levl.m_font) return -1;
+    diff=m_font->cmp(*levl.m_font);
+    if (diff) return diff;
+  }
+  else if (levl.m_font) return 1;
   return 0;
 }
 
@@ -144,6 +156,8 @@ bool STOFFList::addTo(int level, librevenge::RVNGPropertyList &pList) const
   pList.insert("librevenge:list-id", getId());
   pList.insert("librevenge:level", level);
   m_levels[size_t(level-1)].addTo(pList);
+  if (m_levels[size_t(level-1)].m_font && m_levels[size_t(level-1)].m_font->m_propertyList["style:font-name"])
+    pList.insert("style:font-name", m_levels[size_t(level-1)].m_font->m_propertyList["style:font-name"]->getStr());
   return true;
 }
 

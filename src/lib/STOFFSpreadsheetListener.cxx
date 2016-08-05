@@ -81,7 +81,7 @@ struct DocumentState {
     m_pageList(pageList), m_pageSpan(), m_metaData(), m_footNoteNumber(0), m_smallPictureNumber(0),
     m_isDocumentStarted(false), m_isSheetOpened(false), m_isSheetRowOpened(false),
     m_sentListMarkers(), m_numberingIdMap(),
-    m_subDocuments(), m_definedGraphicStyleSet(), m_definedParagraphStyleSet(), m_section()
+    m_subDocuments(), m_definedFontStyleSet(), m_definedGraphicStyleSet(), m_definedParagraphStyleSet(), m_section()
   {
   }
   //! destructor
@@ -107,6 +107,8 @@ struct DocumentState {
   /** a map cell's format to id */
   std::map<librevenge::RVNGString,int> m_numberingIdMap;
   std::vector<STOFFSubDocumentPtr> m_subDocuments; /** list of document actually open */
+  //! the set of defined font style
+  std::set<librevenge::RVNGString> m_definedFontStyleSet;
   //! the set of defined graphic style
   std::set<librevenge::RVNGString> m_definedGraphicStyleSet;
   //! the set of defined paragraph style
@@ -222,6 +224,13 @@ STOFFSpreadsheetListener::~STOFFSpreadsheetListener()
 {
 }
 
+void STOFFSpreadsheetListener::defineStyle(STOFFFont const &style)
+{
+  if (style.m_propertyList["style:display-name"])
+    m_ds->m_definedFontStyleSet.insert(style.m_propertyList["style:display-name"]->getStr());
+  m_documentInterface->defineCharacterStyle(style.m_propertyList);
+}
+
 void STOFFSpreadsheetListener::defineStyle(STOFFGraphicStyle const &style)
 {
   if (style.m_propertyList["style:display-name"])
@@ -234,6 +243,11 @@ void STOFFSpreadsheetListener::defineStyle(STOFFParagraph const &style)
   if (style.m_propertyList["style:display-name"])
     m_ds->m_definedParagraphStyleSet.insert(style.m_propertyList["style:display-name"]->getStr());
   m_documentInterface->defineParagraphStyle(style.m_propertyList);
+}
+
+bool STOFFSpreadsheetListener::isFontStyleDefined(librevenge::RVNGString const &name) const
+{
+  return m_ds->m_definedFontStyleSet.find(name)!=m_ds->m_definedFontStyleSet.end();
 }
 
 bool STOFFSpreadsheetListener::isGraphicStyleDefined(librevenge::RVNGString const &name) const

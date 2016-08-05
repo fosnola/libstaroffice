@@ -235,7 +235,7 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
     else if (i==1) level.m_propertyList.insert("style:num-suffix",libstoff::getString(string));
     else if (i==2) fontName=libstoff::getString(string);
   }
-  f << "nFmt=" << input->readULong(2) << ",";
+  int format=int(input->readULong(2));
   int eType=int(input->readULong(1));
   uint8_t cBullet=uint8_t(input->readULong(1));
   int maxLevel=0;
@@ -253,6 +253,18 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
   int fontFamily=int(input->readULong(1));
   int fontPitch=int(input->readULong(1));
   int charSet=int(input->readULong(1));
+  bool isSymbolFont=false;
+  if (!fontName.empty()) {
+    // todo find where other font characteristic are stored
+    level.m_font.reset(new STOFFFont);
+    STOFFFont &font=*level.m_font;
+    font.m_propertyList.insert("style:font-name", fontName);
+    if (fontName=="StarBats" || fontName=="StarMath") {
+      isSymbolFont=true;
+      font.m_propertyList.insert("style:font-charset","x-symbol");
+    }
+  }
+  if (format!=0xFFFF) f << "nFmt=" << format << ",";
   if (eType<=4 || eType==9 || eType==10) {
     char const *(wh[])= {"A", "a", "I", "i", "1", "", "", "", "", "A"/*UPPER_LETTER_N*/, "a"/*LOWER_LETTER_N*/};
     level.m_propertyList.insert("style:num-format", wh[eType]);
@@ -270,7 +282,8 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
     std::vector<uint32_t> res;
     std::vector<size_t> positions;
     // checkme if fontname is StarBats or StarMath, this does not works very well...
-    StarEncoding::convert(buffer, StarEncoding::getEncodingForId(charSet), res, positions);
+    StarEncoding::Encoding encoding=(charSet==0 && isSymbolFont) ? StarEncoding::E_SYMBOL : StarEncoding::getEncodingForId(charSet);
+    StarEncoding::convert(buffer, encoding, res, positions);
     level.m_propertyList.insert("text:bullet-char", libstoff::getString(res));
     f << "bullet=" << libstoff::getString(res).cstr() << ",";
   }
@@ -437,7 +450,8 @@ bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long l
   // svx_bulitem.cxx SvxBulletItem::SvxBulletItem
   uint16_t style;
   *input >> style;
-  uint16_t encoding=0;
+  uint16_t charSet=0;
+  bool isSymbolFont=false;
   int alignement=-1;
   if (style==128) {
     f << "bitmap,";
@@ -455,6 +469,9 @@ bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long l
     f << "type=" << style << ",";
     // SvxBulletItem::CreateFont
     f << "font=[";
+    level.m_font.reset(new STOFFFont);
+    STOFFFont &font=*level.m_font;
+
     STOFFColor col;
     if (!input->readColor(col)) {
       STOFF_DEBUG_MSG(("StarObjectNumericRuler::readAttributeLevel: can not read a color\n"));
@@ -463,13 +480,16 @@ bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long l
       ascFile.addNote(f.str().c_str());
       return false;
     }
-    else if (!col.isBlack())
-      f << "color=" << col << ",";
+    else {
+      font.m_propertyList.insert("fo:color", col.str().c_str());
+      if (!col.isBlack())
+        f << "color=" << col << ",";
+    }
     uint16_t family, pitch, align, weight, underline, strikeOut, italic;
-    *input >> family >> encoding >> pitch >> align >> weight >> underline >> strikeOut >> italic;
+    *input >> family >> charSet >> pitch >> align >> weight >> underline >> strikeOut >> italic;
     alignement=int(align);
     if (family) f << "family=" << family << ",";
-    if (encoding) f << "encoding=" << encoding << ",";
+    if (charSet) f << "charSet=" << charSet << ",";
     if (pitch) f << "pitch=" << pitch << ",";
     if (weight) f << "weight=" << weight << ",";
     if (underline) f << "underline=" << underline << ",";
@@ -483,8 +503,15 @@ bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long l
       ascFile.addNote(f.str().c_str());
       return false;
     }
-    if (!text.empty())
-      f << libstoff::getString(text).cstr() << ",";
+    if (!text.empty()) {
+      librevenge::RVNGString name=libstoff::getString(text);
+      font.m_propertyList.insert("style:font-name", name);
+      f << name.cstr() << ",";
+      if (name=="StarBats" || name=="StarMath") {
+        font.m_propertyList.insert("style:font-charset","x-symbol");
+        isSymbolFont=true;
+      }
+    }
     if (vers==1) f << "size=" << input->readLong(4) << "x" << input->readLong(4) << ",";
     bool outline, shadow, transparent;
     *input >> outline >>  shadow >>  transparent;
@@ -492,6 +519,99 @@ bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long l
     if (shadow) f << "shadow,";
     if (transparent) f << "transparent,";
     f << "],";
+    //
+    // time to update the font
+    //
+    font.m_propertyList.insert("style:font-pitch", pitch==1 ? "fixed" : "variable");
+    if (weight==5)
+      font.m_propertyList.insert("fo:font-weight", "normal");
+    else if (weight==8)
+      font.m_propertyList.insert("fo:font-weight", "bold");
+    else if (weight>=1 && weight<=9)
+      font.m_propertyList.insert("fo:font-weight", weight*100, librevenge::RVNG_GENERIC);
+    else // 10: WEIGHT_BLACK
+      font.m_propertyList.insert("fo:font-weight", "normal");
+    switch (underline) {
+    case 0: // none
+    case 4: // unknown
+      font.m_propertyList.insert("style:text-underline-type", "none");
+      break;
+    case 1: // single
+    case 2: // double
+      font.m_propertyList.insert("style:text-underline-type", underline==1 ? "single" : "double");
+      font.m_propertyList.insert("style:text-underline-style", "solid");
+      break;
+    case 3: // dot
+    case 5: // dash
+    case 6: // long-dash
+    case 7: // dash-dot
+    case 8: // dash-dot-dot
+      font.m_propertyList.insert("style:text-underline-type", "single");
+      font.m_propertyList.insert("style:text-underline-style", underline==3 ? "dotted" : underline==5 ? "dash" :
+                                 underline==6 ? "long-dash" : underline==7 ? "dot-dash" : "dot-dot-dash");
+      break;
+    case 9: // small wave
+    case 10: // wave
+    case 11: // double wave
+      font.m_propertyList.insert("style:text-underline-type", underline==11 ? "single" : "double");
+      font.m_propertyList.insert("style:text-underline-style", "wave");
+      if (underline==9)
+        font.m_propertyList.insert("style:text-underline-width", "thin");
+      break;
+    case 12: // bold
+    case 13: // bold dot
+    case 14: // bold dash
+    case 15: // bold long-dash
+    case 16: // bold dash-dot
+    case 17: // bold dash-dot-dot
+    case 18: { // bold wave
+      char const *(wh[])= {"solid", "dotted", "dash", "long-dash", "dot-dash", "dot-dot-dash", "wave"};
+      font.m_propertyList.insert("style:text-underline-type", "single");
+      font.m_propertyList.insert("style:text-underline-style", wh[underline-12]);
+      font.m_propertyList.insert("style:text-underline-width", "thick");
+      break;
+    }
+    default:
+      font.m_propertyList.insert("style:text-underline-type", "none");
+      STOFF_DEBUG_MSG(("StarObjectNumericRuler::readAttributeLevel: find unknown underline enum=%d\n", underline));
+      break;
+    }
+    switch (strikeOut) {
+    case 0: // none
+      font.m_propertyList.insert("style:text-line-through-type", "none");
+      break;
+    case 1: // single
+    case 2: // double
+      font.m_propertyList.insert("style:text-line-through-type", strikeOut==1 ? "single" : "double");
+      font.m_propertyList.insert("style:text-line-through-style", "solid");
+      break;
+    case 3: // dontknow
+      break;
+    case 4: // bold
+      font.m_propertyList.insert("style:text-line-through-type", "single");
+      font.m_propertyList.insert("style:text-line-through-style", "solid");
+      font.m_propertyList.insert("style:text-line-through-width", "thick");
+      break;
+    case 5: // slash
+    case 6: // X
+      font.m_propertyList.insert("style:text-line-through-type", "single");
+      font.m_propertyList.insert("style:text-line-through-style", "solid");
+      font.m_propertyList.insert("style:text-line-through-text", strikeOut==5 ? "/" : "X");
+      break;
+    default:
+      font.m_propertyList.insert("style:text-line-through-type", "none");
+      STOFF_DEBUG_MSG(("StarObjectNumericRuler::readAttributeLevel: find unknown crossedout enum=%d\n", strikeOut));
+      break;
+    }
+    if (italic==1)
+      font.m_propertyList.insert("fo:font-style", "oblique");
+    else if (italic==2)
+      font.m_propertyList.insert("fo:font-style", "italic");
+    else if (italic) {
+      STOFF_DEBUG_MSG(("StarObjectNumericRuler::readAttributeLevel: find unknown posture enum=%d\n", italic));
+    }
+    font.m_propertyList.insert("style:text-outline", outline);
+    font.m_propertyList.insert("fo:text-shadow", shadow ? "1pt 1pt" : "none");
   }
   int width=int(input->readLong(4));
   int start=int(input->readULong(2));
@@ -518,8 +638,8 @@ bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long l
     std::vector<uint8_t> buffer(1, uint8_t(symbol));
     std::vector<uint32_t> res;
     std::vector<size_t> positions;
-    // checkme if fontname is StarBats or StarMath, this does not works very well...
-    StarEncoding::convert(buffer, StarEncoding::getEncodingForId(encoding), res, positions);
+    StarEncoding::Encoding encoding=(charSet==0 && isSymbolFont) ? StarEncoding::E_SYMBOL : StarEncoding::getEncodingForId(charSet);
+    StarEncoding::convert(buffer, encoding, res, positions);
     level.m_propertyList.insert("text:bullet-char", libstoff::getString(res));
   }
   else {

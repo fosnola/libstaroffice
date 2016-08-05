@@ -54,12 +54,22 @@ public:
 
   //! operator<<
   friend std::ostream &operator<<(std::ostream &o, STOFFFont const &font);
+  //! a comparison function
+  int cmp(STOFFFont const &font) const;
   //! operator==
-  bool operator==(STOFFFont const &font) const;
+  bool operator==(STOFFFont const &font) const
+  {
+    return cmp(font)==0;
+  }
   //! operator!=
   bool operator!=(STOFFFont const &font) const
   {
-    return !operator==(font);
+    return cmp(font)!=0;
+  }
+  //! operator<
+  bool operator<(STOFFFont const &font) const
+  {
+    return cmp(font)<0;
   }
   /** the property list */
   librevenge::RVNGPropertyList m_propertyList;

@@ -75,7 +75,7 @@ struct TextState {
   explicit TextState(std::vector<STOFFPageSpan> const &pageList) :
     m_pageList(pageList), m_pageSpan(), m_metaData(), m_footNoteNumber(0), m_endNoteNumber(0), m_smallPictureNumber(0),
     m_isDocumentStarted(false), m_isHeaderFooterOpened(false), m_isHeaderFooterRegionOpened(false), m_sentListMarkers(), m_subDocuments(),
-    m_definedGraphicStyleSet(), m_definedParagraphStyleSet()
+    m_definedFontStyleSet(), m_definedGraphicStyleSet(), m_definedParagraphStyleSet()
   {
   }
   //! destructor
@@ -98,6 +98,8 @@ struct TextState {
   /// the list of marker corresponding to sent list
   std::vector<int> m_sentListMarkers;
   std::vector<STOFFSubDocumentPtr> m_subDocuments; /** list of document actually open */
+  //! the set of defined font style
+  std::set<librevenge::RVNGString> m_definedFontStyleSet;
   //! the set of defined graphic style
   std::set<librevenge::RVNGString> m_definedGraphicStyleSet;
   //! the set of defined paragraph style
@@ -214,6 +216,13 @@ STOFFTextListener::~STOFFTextListener()
 {
 }
 
+void STOFFTextListener::defineStyle(STOFFFont const &style)
+{
+  if (style.m_propertyList["style:display-name"])
+    m_ds->m_definedFontStyleSet.insert(style.m_propertyList["style:display-name"]->getStr());
+  m_documentInterface->defineCharacterStyle(style.m_propertyList);
+}
+
 void STOFFTextListener::defineStyle(STOFFGraphicStyle const &style)
 {
   if (style.m_propertyList["style:display-name"])
@@ -226,6 +235,11 @@ void STOFFTextListener::defineStyle(STOFFParagraph const &style)
   if (style.m_propertyList["style:display-name"])
     m_ds->m_definedParagraphStyleSet.insert(style.m_propertyList["style:display-name"]->getStr());
   m_documentInterface->defineParagraphStyle(style.m_propertyList);
+}
+
+bool STOFFTextListener::isFontStyleDefined(librevenge::RVNGString const &name) const
+{
+  return m_ds->m_definedFontStyleSet.find(name)!=m_ds->m_definedFontStyleSet.end();
 }
 
 bool STOFFTextListener::isGraphicStyleDefined(librevenge::RVNGString const &name) const

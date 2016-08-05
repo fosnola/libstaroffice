@@ -176,11 +176,15 @@ public:
   STOFFParagraph const &getParagraph() const;
 
   // ------ style definition -----------
+  /** defines a font styles */
+  void defineStyle(STOFFFont const &style);
+  /** check if a font style with a display name is already defined */
+  bool isFontStyleDefined(librevenge::RVNGString const &name) const;
   /** defines a graphic styles */
   void defineStyle(STOFFGraphicStyle const &style);
   /** check if a graphic style with a display name is already defined */
   bool isGraphicStyleDefined(librevenge::RVNGString const &name) const;
-  /** defines a paragraph styles, return the paragraph id */
+  /** defines a paragraph styles */
   void defineStyle(STOFFParagraph const &style);
   /** check if a paragraph style with a display name is already defined */
   bool isParagraphStyleDefined(librevenge::RVNGString const &name) const;

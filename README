@@ -4,18 +4,20 @@ https://sourceforge.net/p/libwpd/wiki/librevenge/ and
 http://www.documentliberation.org/projects/ ).
 
 Currently:
+- .sda files: it tries to retrieve some basic contents, ie. the basic shapes
+  (lines, rectangles, ellipse, ...), the bitmaps and some formattings. But
+  this parser is still incomplete: some default formattings are simply ignored
+  ...
 - .sdc files: it tries to convert the main content of a .sdc files, ie. the
   cells' value/text/formula, the cells' comments and the cells'
   formattings. But it does not try to retrieve formatting in the bock
-  of texts or any embedded charts, pictures, ...
-- .sda files: it tries to retrieve some basic contents, ie. the basic shapes
-  (lines, rectangles, ellipse, ...), the bitmaps and some formattings. But
-  this parser is still incomplete: many formattings are simply ignored, all
-  text formatting are ignored and it does not try to retrieve any embedded
-  objects, ...
+  of texts or any embedded charts, ...
 - .sdg files: it tries to retrieve all the bitmap .bm in the files. Other
   objects are simply ignored and some bitmaps are reconstructed with bad
   vertical orientations, ...
+- .sdw files: begins to retrieve the main text contents with formattings. But
+  this parser is still incomplete, ie. many embedding pictures/tables are not
+  retrieved and when table are retrieved, their formatting is lost...
 - other .sd? files: it refuses to convert them, ...
 
 Notes:

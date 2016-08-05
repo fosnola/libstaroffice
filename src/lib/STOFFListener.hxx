@@ -144,11 +144,15 @@ public:
   virtual STOFFParagraph const &getParagraph() const=0;
 
   // ------ style definition -----------
-  /** defines a graphic styles, return the graphic id */
+  /** defines a font styles */
+  virtual void defineStyle(STOFFFont const &style) = 0;
+  /** check if a font style with a display name is already defined */
+  virtual bool isFontStyleDefined(librevenge::RVNGString const &name) const = 0;
+  /** defines a graphic styles */
   virtual void defineStyle(STOFFGraphicStyle const &style) = 0;
   /** check if a graphic style with a display name is already defined */
   virtual bool isGraphicStyleDefined(librevenge::RVNGString const &name) const = 0;
-  /** defines a paragraph styles, return the paragraph id */
+  /** defines a paragraph styles */
   virtual void defineStyle(STOFFParagraph const &style) = 0;
   /** check if a paragraph style with a display name is already defined */
   virtual bool isParagraphStyleDefined(librevenge::RVNGString const &name) const = 0;

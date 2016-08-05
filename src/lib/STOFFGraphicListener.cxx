@@ -69,7 +69,7 @@ struct GraphicState {
     m_pageList(pageList), m_metaData(),
     m_isDocumentStarted(false), m_isPageSpanOpened(false), m_isMasterPageSpanOpened(false), m_isAtLeastOnePageOpened(false),
     m_isHeaderFooterOpened(false), m_isHeaderFooterRegionOpened(false), m_pageSpan(), m_sentListMarkers(), m_subDocuments(),
-    m_definedGraphicStyleSet(), m_definedParagraphStyleSet(), m_section()
+    m_definedFontStyleSet(), m_definedGraphicStyleSet(), m_definedParagraphStyleSet(), m_section()
   {
   }
   //! destructor
@@ -97,6 +97,8 @@ struct GraphicState {
   std::vector<int> m_sentListMarkers;
   //! the list of actual subdocument
   std::vector<STOFFSubDocumentPtr> m_subDocuments;
+  //! the set of defined font style
+  std::set<librevenge::RVNGString> m_definedFontStyleSet;
   //! the set of defined graphic style
   std::set<librevenge::RVNGString> m_definedGraphicStyleSet;
   //! the set of defined paragraph style
@@ -191,6 +193,13 @@ STOFFGraphicListener::~STOFFGraphicListener()
 {
 }
 
+void STOFFGraphicListener::defineStyle(STOFFFont const &style)
+{
+  if (style.m_propertyList["style:display-name"])
+    m_ds->m_definedFontStyleSet.insert(style.m_propertyList["style:display-name"]->getStr());
+  m_documentInterface->defineCharacterStyle(style.m_propertyList);
+}
+
 void STOFFGraphicListener::defineStyle(STOFFGraphicStyle const &style)
 {
   if (style.m_propertyList["style:display-name"])
@@ -203,6 +212,11 @@ void STOFFGraphicListener::defineStyle(STOFFParagraph const &style)
   if (style.m_propertyList["style:display-name"])
     m_ds->m_definedParagraphStyleSet.insert(style.m_propertyList["style:display-name"]->getStr());
   m_documentInterface->defineParagraphStyle(style.m_propertyList);
+}
+
+bool STOFFGraphicListener::isFontStyleDefined(librevenge::RVNGString const &name) const
+{
+  return m_ds->m_definedFontStyleSet.find(name)!=m_ds->m_definedFontStyleSet.end();
 }
 
 bool STOFFGraphicListener::isGraphicStyleDefined(librevenge::RVNGString const &name) const

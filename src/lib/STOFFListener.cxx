@@ -31,6 +31,9 @@
 * instead of those above.
 */
 
+#include <map>
+
+#include "STOFFFont.hxx"
 #include "STOFFListener.hxx"
 
 #include "STOFFList.hxx"
@@ -44,4 +47,5 @@ STOFFListener::STOFFListener(STOFFListManagerPtr listManager) : m_listManager(li
 STOFFListener::~STOFFListener()
 {
 }
+
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

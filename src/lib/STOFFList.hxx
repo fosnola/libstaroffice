@@ -42,18 +42,20 @@
 
 #include "libstaroffice_internal.hxx"
 
+class STOFFFont;
+
 /** small structure to keep information about a list level */
 struct STOFFListLevel {
   /** the type of the level */
   enum Type { DEFAULT, NONE, BULLET, NUMBER };
 
   /** basic constructor */
-  STOFFListLevel() : m_type(NONE), m_propertyList(),
+  STOFFListLevel() : m_type(NONE), m_propertyList(), m_font(),
     m_startValue(0)
   {
   }
   /** destructor */
-  ~STOFFListLevel() {}
+  ~STOFFListLevel();
 
   /** returns true if the level type was not set */
   bool isDefault() const
@@ -90,6 +92,8 @@ struct STOFFListLevel {
   Type m_type;
   //! the propertyList
   librevenge::RVNGPropertyList m_propertyList;
+  /// the font
+  shared_ptr<STOFFFont> m_font;
   /** the actual value (if this is an ordered level ) */
   int m_startValue;
 };
