@@ -7,7 +7,7 @@ AC_PREREQ([2.65])
 # ====================
 m4_define([libstaroffice_version_major],[0])
 m4_define([libstaroffice_version_minor],[0])
-m4_define([libstaroffice_version_micro],[1])
+m4_define([libstaroffice_version_micro],[2])
 m4_define([libstaroffice_version],[libstaroffice_version_major.libstaroffice_version_minor.libstaroffice_version_micro])
 
 # =============
@@ -169,6 +169,15 @@ AS_IF([test "x$native_win32" = "xyes"], [
 	CXXFLAGS="$CXXFLAGS -Wall -Wextra -pedantic"
 ], [
 	AS_IF([test x"$GCC" = xyes], [
+		# clang or gcc, check if the compiler is clang
+		AC_COMPILE_IFELSE(
+			[AC_LANG_PROGRAM(
+				[[]],
+				[[#ifndef __clang__]
+				 [   not clang]
+				 [#endif]]
+			)],
+		[CLANG=yes], [CLANG=no])
 		# Be tough with warnings and produce less careless code
 		CFLAGS="$CFLAGS -Wall -Wextra -pedantic"
 		CXXFLAGS="$CXXFLAGS -Wall -Wextra -pedantic -Wshadow -Wunused-variable"
@@ -176,6 +185,11 @@ AS_IF([test "x$native_win32" = "xyes"], [
 			CXXFLAGS="$CXXFLAGS -Weffc++"
 		])
 		AS_IF([test x"$enable_wparanoic" != "xno"], [
+		# uncomment the 5 following comments to compile with Weverything
+		#AS_IF([test x"$CLANG" = "xyes"], [
+		#	CXXFLAGS="$CXXFLAGS -Weverything -Wno-padded -Wno-covered-switch-default --system-header-prefix=librevenge"
+		#	],
+		#	[
 			CXXFLAGS="$CXXFLAGS -Wcast-align -Wcast-qual -Wchar-subscripts"
 			CXXFLAGS="$CXXFLAGS -Wcomment -Wconversion -Wdisabled-optimization"
 			CXXFLAGS="$CXXFLAGS -Wfloat-equal -Wformat -Wformat=2"
@@ -191,6 +205,7 @@ AS_IF([test "x$native_win32" = "xyes"], [
 			CXXFLAGS="$CXXFLAGS -Wunused-function -Wunused-label -Wunused-parameter"
 			CXXFLAGS="$CXXFLAGS -Wunused-value -Wvariadic-macros"
 			CXXFLAGS="$CXXFLAGS -Wvolatile-register-var -Wwrite-strings"
+		#       ])
 		])
 	])
 ])
