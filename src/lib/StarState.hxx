@@ -99,6 +99,9 @@ public:
     int m_listLevel;
     /** the relative unit uses to transform rel font height in point, default 1/20 */
     double m_relativeUnit;
+  private:
+    GlobalState(GlobalState const &);
+    GlobalState &operator=(GlobalState const &);
   };
   //! constructor
   StarState(StarItemPool const *pool, StarObject &object, double relUnit=0.05) :

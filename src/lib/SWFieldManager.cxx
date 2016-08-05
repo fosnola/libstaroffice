@@ -320,7 +320,7 @@ struct FieldDateTime : public Field {
   {
   }
   //! copy constructor
-  FieldDateTime(Field const &orig) : Field(orig), m_dateTime(0), m_offset(0)
+  explicit FieldDateTime(Field const &orig) : Field(orig), m_dateTime(0), m_offset(0)
   {
   }
   //! destructor
@@ -390,7 +390,7 @@ struct FieldDBField : public Field {
   {
   }
   //! copy constructor
-  FieldDBField(Field const &orig) : Field(orig), m_dbName(""), m_colName(""), m_longNumber(0)
+  explicit FieldDBField(Field const &orig) : Field(orig), m_dbName(""), m_colName(""), m_longNumber(0)
   {
   }
   //! destructor
@@ -449,7 +449,7 @@ struct FieldHiddenText : public Field {
   {
   }
   //! copy constructor
-  FieldHiddenText(Field const &orig) : Field(orig), m_hidden(true), m_condition("")
+  explicit FieldHiddenText(Field const &orig) : Field(orig), m_hidden(true), m_condition("")
   {
   }
   //! destructor
@@ -519,7 +519,7 @@ struct FieldINet : public Field {
   {
   }
   //! copy constructor
-  FieldINet(Field const &orig) : Field(orig), m_url(""), m_target(""), m_libNames()
+  explicit FieldINet(Field const &orig) : Field(orig), m_url(""), m_target(""), m_libNames()
   {
   }
   //! destructor
@@ -556,7 +556,7 @@ struct FieldJumpEdit : public Field {
   {
   }
   //! copy constructor
-  FieldJumpEdit(Field const &orig) : Field(orig), m_help("")
+  explicit FieldJumpEdit(Field const &orig) : Field(orig), m_help("")
   {
   }
   //! destructor
@@ -610,7 +610,7 @@ struct FieldPageNumber : public Field {
   {
   }
   //! copy constructor
-  FieldPageNumber(Field const &orig) : Field(orig), m_userString(""), m_offset(0), m_isOn(true)
+  explicit FieldPageNumber(Field const &orig) : Field(orig), m_userString(""), m_offset(0), m_isOn(true)
   {
   }
   //! destructor
@@ -666,7 +666,7 @@ struct FieldPostIt : public Field {
   {
   }
   //! copy constructor
-  FieldPostIt(Field const &orig) : Field(orig), m_author(""), m_date(0)
+  explicit FieldPostIt(Field const &orig) : Field(orig), m_author(""), m_date(0)
   {
   }
   //! destructor
@@ -697,7 +697,7 @@ struct FieldScript : public Field {
   {
   }
   //! copy constructor
-  FieldScript(Field const &orig) : Field(orig), m_code(""), m_scriptType("")
+  explicit FieldScript(Field const &orig) : Field(orig), m_code(""), m_scriptType("")
   {
   }
   //! destructor
@@ -726,7 +726,7 @@ struct FieldSetExp : public Field {
   {
   }
   //! copy constructor
-  FieldSetExp(Field const &orig) : Field(orig), m_fieldType(0), m_formula(""), m_prompt(""), m_seqVal(0), m_seqNo(0), m_delim('.')
+  explicit FieldSetExp(Field const &orig) : Field(orig), m_fieldType(0), m_formula(""), m_prompt(""), m_seqVal(0), m_seqNo(0), m_delim('.')
   {
   }
   //! destructor
@@ -799,7 +799,7 @@ struct FieldSetField : public Field {
   {
   }
   //! copy constructor
-  FieldSetField(Field const &orig) : Field(orig), m_condition(""), m_dbName(""), m_textNumber(""), m_longNumber(0)
+  explicit FieldSetField(Field const &orig) : Field(orig), m_condition(""), m_dbName(""), m_textNumber(""), m_longNumber(0)
   {
   }
   //! destructor

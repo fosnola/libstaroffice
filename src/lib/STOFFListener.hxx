@@ -240,7 +240,7 @@ public:
 
 protected:
   /// constructor
-  STOFFListener(STOFFListManagerPtr listManager);
+  explicit STOFFListener(STOFFListManagerPtr listManager);
   /// the list manager
   STOFFListManagerPtr m_listManager;
 };

@@ -220,7 +220,7 @@ bool StarLayout::readC2(StarZone &zone, StarObject &object)
   f << "StarLayout[" << what << "-" << zone.getRecordLevel() << "]:";
   long lastPos=zone.getRecordLastPosition();
   int type1;
-  bool ok=readHeader(zone, f, type1, (mainType<=0xc3||mainType==0xce || mainType>=0xd2 || mainType>=0xd7 || mainType>=0xe3) ? 2 : mainType==0xc9 ? 0 : 1);
+  bool ok=readHeader(zone, f, type1, (mainType<=0xc3||mainType==0xce || mainType>=0xd2) ? 2 : mainType==0xc9 ? 0 : 1);
   if (!ok || input->tell()+(mainType==0xc9 ? 21 : mainType==0xce ? 4 : mainType==0xd4 ? 3 : mainType==0xd2 || mainType==0xd7 ? 2 : 0)+1>lastPos) {
     if (ok) {
       STOFF_DEBUG_MSG(("StarLayout::readC2: the zone seems too short\n"));
@@ -543,10 +543,12 @@ bool StarLayout::readHeader(StarZone &zone, libstoff::DebugStream &f, int &type,
     break;
   default:
     STOFF_DEBUG_MSG(("StarLayout::readHeader: oops, unknown value mode %d\n", valueMode));
+    f << "###mode=" << valueMode << ",";
     break;
   }
   if (input->tell()>lastPos) {
     STOFF_DEBUG_MSG(("StarLayout::readHeader: oops, the zone seems too short\n"));
+    f << "###toShort,";
     return false;
   }
   return true;
