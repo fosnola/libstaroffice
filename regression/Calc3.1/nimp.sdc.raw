@@ -1,6 +1,6 @@
 startDocument()
   setDocumentMetaData(dc:creator: alonso laurent, dc:date: 2015-09-29T17:23:18.00, dc:title: nimp, meta:creation-date: 2015-09-29T17:23:18.00, meta:initial-creator: alonso laurent, meta:print-date: 2015-09-29T17:23:18.00)
-  openPageSpan(fo:page-height: 11.0000in, fo:page-width: 8.5000in, librevenge:footer: ((fo:margin-bottom: 0.0986in, fo:margin-left: 0.0000in, fo:margin-right: 0.0000in, fo:margin-top: 0.0986in, fo:min-height: 0.2958in)), librevenge:header: ((fo:margin-bottom: 0.0986in, fo:margin-left: 0.0000in, fo:margin-right: 0.0000in, fo:margin-top: 0.0986in, fo:min-height: 0.2958in)), librevenge:is-last-page-span: true, librevenge:num-pages: 1, style:print-orientation: portrait)
+  openPageSpan(fo:page-height: 11.0000in, fo:page-width: 8.5000in, librevenge:footer: ((fo:margin-bottom: 7.1000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 7.1000pt, fo:min-height: 0.2958in)), librevenge:header: ((fo:margin-bottom: 7.1000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 7.1000pt, fo:min-height: 0.2958in)), librevenge:is-last-page-span: true, librevenge:num-pages: 1, style:print-orientation: portrait)
     openHeader(librevenge:occurrence: right)
       openParagraph()
         openSpan()
