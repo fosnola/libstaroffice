@@ -181,7 +181,7 @@ bool SDWParser::checkHeader(STOFFHeader *header, bool /*strict*/)
     if (textInput->readULong(2)==0x5357)
       textInput->setReadInverted(!textInput->readInverted());
     textInput->seek(10, librevenge::RVNG_SEEK_SET);
-    header->setEncrypted((input->readULong(2)&8)!=0);
+    header->setEncrypted((textInput->readULong(2)&8)!=0);
   }
   return true;
 }

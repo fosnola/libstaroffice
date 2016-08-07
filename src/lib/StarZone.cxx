@@ -299,6 +299,8 @@ bool StarZone::readSWHeader()
   f << "time=" << time << ",";
   if (hasPasswd)
     checkEncryption(date,time,passwd);
+  else
+    m_encryption.reset();
   if (hSz==0x2e +64 && (fFlags&2)) {
     std::string string("");
     for (int i=0; i<64; ++i) {
