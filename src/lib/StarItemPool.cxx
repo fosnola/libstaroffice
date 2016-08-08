@@ -1286,7 +1286,7 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
     }
     f << "pos=[";
     std::vector<int> listData;
-    for (uint16_t i=nStart; i<=nEnd; ++i) {
+    for (int i=int(nStart); i<=int(nEnd); ++i) {
       uint16_t nPos;
       *input>>nPos;
       listData.push_back(int(nPos));

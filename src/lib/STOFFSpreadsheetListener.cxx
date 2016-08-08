@@ -400,6 +400,10 @@ void STOFFSpreadsheetListener::setParagraph(STOFFParagraph const &para)
   if (para==m_ps->m_paragraph) return;
 
   m_ps->m_paragraph=para;
+  if (m_ps->m_paragraph.m_listLevelIndex>20) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::setParagraph: the level index seems bad, resets it to 10\n"));
+    m_ps->m_paragraph.m_listLevelIndex=10;
+  }
 }
 
 STOFFParagraph const &STOFFSpreadsheetListener::getParagraph() const

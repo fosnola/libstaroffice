@@ -408,6 +408,10 @@ void STOFFTextListener::setParagraph(STOFFParagraph const &para)
   if (para==m_ps->m_paragraph) return;
 
   m_ps->m_paragraph=para;
+  if (m_ps->m_paragraph.m_listLevelIndex>20) {
+    STOFF_DEBUG_MSG(("STOFFTextListener::setParagraph: the level index seems bad, resets it to 10\n"));
+    m_ps->m_paragraph.m_listLevelIndex=10;
+  }
 }
 
 STOFFParagraph const &STOFFTextListener::getParagraph() const
@@ -431,7 +435,7 @@ void STOFFTextListener::insertField(STOFFField const &field)
 void STOFFTextListener::openLink(STOFFLink const &link)
 {
   if (m_ps->m_inLink) {
-    STOFF_DEBUG_MSG(("STOFFTextListener:openLink: a link is already opened\n"));
+    STOFF_DEBUG_MSG(("STOFFTextListener::openLink: a link is already opened\n"));
     return;
   }
   if (!m_ps->m_isSpanOpened) _openSpan();
