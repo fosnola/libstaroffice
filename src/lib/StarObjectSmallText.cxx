@@ -285,8 +285,9 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  m_textState->m_paragraphList.resize(size_t(nPara));
   for (size_t i=0; i<size_t(nPara); ++i) {
+    if (i>=m_textState->m_paragraphList.size())
+      m_textState->m_paragraphList.resize(i+10>size_t(nPara) ? size_t(nPara) : i+10);
     StarObjectSmallTextInternal::Paragraph &para=m_textState->m_paragraphList[i];
     pos=input->tell();
     f.str("");
