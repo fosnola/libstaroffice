@@ -1245,7 +1245,8 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       f << "pos=" << input->readLong(4) << "x" << input->readLong(4) << ",";
       int32_t nIndex, nLen, nAryLen;
       *input>>nIndex>>nLen >> nTmp >> nAryLen;
-      if (nTmp<0 || nAryLen<0 || input->tell()+nTmp+4*nAryLen>endDataPos) {
+      if (nTmp<0 || nAryLen<0 || input->tell()+nTmp+4*nAryLen>endDataPos ||
+          long(endDataPos-input->tell()-nTmp)/4<long(nAryLen)) {
         STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad string\n"));
         f << "###string";
         break;
