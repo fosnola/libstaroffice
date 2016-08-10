@@ -1419,7 +1419,7 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
   return true;
 }
 
-bool StarItemPool::readV1(StarZone &zone, StarItemPool */*master*/)
+bool StarItemPool::readV1(StarZone &zone, StarItemPool * /*master*/)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascii=zone.ascii();
