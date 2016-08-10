@@ -1,5 +1,14 @@
+0.0.2:
+- 08/10/2016
+   - begin to convert .sdw files ; but the mark, the outline, the tables,
+     the embedded shapes/pictures/... are not correctly retrieved, 
+   - .sdc files : try to recover some embedded shapes/pictures/...,
+
+   + all : try to retrieve "all" formatting in small text zones, ...
+   + begin to retrieve some list, must be improved...
+
 0.0.1:
-- 22/01/2015:
+- 01/22/2015:
    - try to retrieve cell's styles, number formatings, formula with Index and comments in .sdc files,
    - try to retrieve basic shapes and bitmap in .sda files + some formatting(but not all),
    - try to retrieve the bitmap in .sdg files,
