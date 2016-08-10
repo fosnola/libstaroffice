@@ -298,7 +298,7 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
   }
   if (maxLevel) f << "nUpperLevel=" << maxLevel << ",";
   if (level.m_startValue) f << "start=" << level.m_startValue << ",";
-  if (adjust<=6) {
+  if (adjust>=0 && adjust<=5) {
     char const *(wh[])= {"left", "right", "justify", "center", "justify"/*block line*/, "end"};
     level.m_propertyList.insert("fo:text-align", wh[adjust]);
     f << wh[adjust] << ",";
