@@ -76,7 +76,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectDraw::StarObjectDraw(StarObject const &orig, bool duplicateState) : StarObject::StarObject(orig, duplicateState), m_drawState(new StarObjectDrawInternal::State)
+StarObjectDraw::StarObjectDraw(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_drawState(new StarObjectDrawInternal::State)
 {
 }
 

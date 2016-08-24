@@ -521,7 +521,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectSpreadsheet::StarObjectSpreadsheet(StarObject const &orig, bool duplicateState) : StarObject::StarObject(orig, duplicateState), m_spreadsheetState(new StarObjectSpreadsheetInternal::State)
+StarObjectSpreadsheet::StarObjectSpreadsheet(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_spreadsheetState(new StarObjectSpreadsheetInternal::State)
 {
 }
 
