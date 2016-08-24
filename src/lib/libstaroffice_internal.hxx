@@ -407,7 +407,7 @@ struct STOFFEmbeddedObject {
     add(binaryData, type);
   }
   //! destructor
-  virtual ~STOFFEmbeddedObject();
+  ~STOFFEmbeddedObject();
   //! return true if the picture contains no data
   bool isEmpty() const
   {

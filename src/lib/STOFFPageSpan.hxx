@@ -81,7 +81,7 @@ public:
   //! constructor
   STOFFPageSpan();
   //! destructor
-  virtual ~STOFFPageSpan();
+  ~STOFFPageSpan();
 
   //! add a header on some page: occurrence must be odd|right, even|left, first, last or all
   void addHeaderFooter(bool header, std::string const &occurrence, STOFFHeaderFooter const &hf);

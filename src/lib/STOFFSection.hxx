@@ -51,7 +51,7 @@ public:
   {
   }
   //! destructor
-  virtual ~STOFFSection();
+  ~STOFFSection();
   //! returns the number of columns
   int numColumns() const;
   //! add to the propList
