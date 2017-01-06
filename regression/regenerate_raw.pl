@@ -4,7 +4,7 @@ $html = 1;
 
 sub GenRaw {
 
-    $STOFFVL = 'Calc3.1 Draw3.1 Text3.1';
+    $STOFFVL = 'Calc3.1 Draw3.1 Draw5 Text3.1 Text5';
 
     @stoffVersionList = split(/\s+/, $STOFFVL);
 

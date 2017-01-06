@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" office:mimetype="application/vnd.oasis.opendocument.text" office:version="1.1">
+  <office:meta>
+    <dc:creator> </dc:creator>
+    <dc:date>2001-08-25T17:30:52.00</dc:date>
+    <meta:creation-date>2001-08-25T17:05:16.00</meta:creation-date>
+    <meta:print-date>2001-08-25T17:29:24.00</meta:print-date>
+    <meta:generator>libodfgen/0.1.6</meta:generator>
+  </office:meta>
+  <office:font-face-decls>
+    <style:font-face style:name="Times" svg:font-family="Times"/>
+    <style:font-face style:name="starbats" svg:font-family="starbats"/>
+    <style:font-face style:font-charset="x-symbol" style:name="StarSymbol" svg:font-family="StarSymbol"/>
+  </office:font-face-decls>
+  <office:styles>
+    <style:default-style style:family="graphic"/>
+    <style:default-style style:family="paragraph">
+      <style:paragraph-properties style:line-break="strict" style:punctuation-wrap="hanging" style:tab-stop-distance="0.5in" style:text-autospace="ideograph-alpha" style:use-window-font-color="true" style:writing-mode="page"/>
+    </style:default-style>
+    <style:default-style style:family="table"/>
+    <style:default-style style:family="table-row">
+      <style:table-row-properties fo:keep-together="auto"/>
+    </style:default-style>
+    <style:default-style style:family="table-column"/>
+    <style:default-style style:family="table-cell"/>
+    <style:style style:class="text" style:family="paragraph" style:name="Standard"/>
+    <style:style style:class="text" style:display-name="Text Body" style:family="paragraph" style:name="Text_Body" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Table Contents" style:family="paragraph" style:name="Table_Contents" style:parent-style-name="Text_Body"/>
+    <style:style style:class="extra" style:display-name="Table Heading" style:family="paragraph" style:name="Table_Heading" style:parent-style-name="Table_Contents"/>
+    <style:style style:class="list" style:display-name="List" style:family="paragraph" style:name="List" style:parent-style-name="Text_Body"/>
+    <style:style style:class="extra" style:display-name="Header" style:family="paragraph" style:name="Header" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Footer" style:family="paragraph" style:name="Footer" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Caption" style:family="paragraph" style:name="Caption" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Footnote" style:family="paragraph" style:name="Footnote" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Endnote" style:family="paragraph" style:name="Endnote" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Index" style:family="paragraph" style:name="Index" style:parent-style-name="Standard"/>
+    <style:style style:display-name="Footnote_Symbol" style:family="text" style:name="Footnote_Symbol">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Endnote_Symbol" style:family="text" style:name="Endnote_Symbol">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Footnote_anchor" style:family="text" style:name="Footnote_anchor">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Endnote_anchor" style:family="text" style:name="Endnote_anchor">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <text:linenumbering-configuration style:num-format="1" text:increment="5" text:number-lines="false" text:number-position="left" text:offset="0.1965in"/>
+    <text:notes-configuration style:num-format="1" text:citation-body-style-name="Footnote_anchor" text:citation-style-name="Footnote_Symbol" text:footnotes-position="page" text:note-class="footnote" text:start-numbering-at="document" text:start-value="0"/>
+    <text:notes-configuration style:num-format="i" text:citation-body-style-name="Endnote_anchor" text:citation-style-name="Endnote_Symbol" text:master-page-name="Endnote" text:note-class="endnote" text:start-value="0"/>
+  </office:styles>
+  <office:automatic-styles>
+    <style:page-layout style:name="PL0">
+      <style:page-layout-properties fo:margin-bottom="1.0000in" fo:margin-left="1.0000in" fo:margin-right="1.0000in" fo:margin-top="1.0000in" fo:page-height="11.0000in" fo:page-width="8.5000in" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:distance-after-sep="0.0398in" style:distance-before-sep="0.0398in" style:rel-width="25.0000%" style:width="0.0071in"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:page-layout style:name="PL1">
+      <style:page-layout-properties fo:margin-bottom="1.0000in" fo:margin-left="1.0000in" fo:margin-right="1.0000in" fo:margin-top="1.0000in" fo:page-height="11.0000in" fo:page-width="8.5000in" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:rel-width="25.0000%"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:page-layout style:name="PL2">
+      <style:page-layout-properties fo:margin-bottom="72.0000pt" fo:margin-left="72.0000pt" fo:margin-right="72.0000pt" fo:margin-top="72.0000pt" fo:page-height="792.0000pt" fo:page-width="612.0000pt" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:distance-after-sep="0.0398in" style:distance-before-sep="0.0398in" style:rel-width="25.0000%" style:width="0.0071in"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:style style:family="text" style:name="Span0">
+      <style:text-properties fo:font-size="14.0000pt" fo:font-weight="bold" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-pitch="variable" style:font-size-asian="14.0000pt" style:font-size-complex="14.0000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span1">
+      <style:text-properties fo:font-size="10.0000pt" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span2">
+      <style:text-properties fo:font-size="10.0000pt" fo:font-weight="normal" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span3">
+      <style:text-properties fo:font-size="10.0000pt" fo:font-weight="bold" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="paragraph" style:master-page-name="PM2" style:name="S0" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S1" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S2" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:break-before="page" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S3" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-left="14.1500pt" fo:margin-right="0.0000pt" fo:text-indent="-14.1500pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <text:list-style style:name="UL0">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+  </office:automatic-styles>
+  <office:master-styles>
+    <style:master-page style:display-name="Standard" style:name="PM0" style:page-layout-name="PL0"/>
+    <style:master-page style:display-name="EndNote" style:name="PM1" style:page-layout-name="PL1"/>
+    <style:master-page style:name="PM2" style:page-layout-name="PL2"/>
+  </office:master-styles>
+  <office:body>
+    <office:text>
+      <text:p text:style-name="S0">
+        <text:span text:style-name="Span0">GNOME Print Perl script</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">#!/usr/bin/perl -w</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">#TITLE: Gnome Print sample</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">#REQUIRES: Gtk Gnome GnomePrint</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">use Gnome::Print;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">init Gnome $0, '0.1';</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">Gtk::Widget-&gt;set_default_colormap(Gtk::Gdk::Rgb-&gt;get_cmap());</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">Gtk::Widget-&gt;set_default_visual(Gtk::Gdk::Rgb-&gt;get_visual());</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$file = shift || "duck.jpeg";</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$pixbuf = Gtk::Gdk::Pixbuf-&gt;new_from_file($file);</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">@slanted = (0.9, 0.1, -0.8, 0.9, 0, 0);</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$print_master = new Gnome::PrintMaster;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context = $print_master-&gt;get_context;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;beginpage("APageName");</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"># test gray and rgb images</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$width <text:s/>= 256;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$height = 120;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$image = pack("C*", 0..$width-1) x $height;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;gsave;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;concat($width, 0, 0, -$height, 250, 200);</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;grayimage($image, $width, $height);</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;grestore;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"># whack an pretty image up</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;moveto(250, 350);</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;gsave;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;concat(100, 0, 0, 100, 350, 440);</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;pixbuf($pixbuf);</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;grestore;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"># a line</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;moveto(100, 100);</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;lineto(200, 200);</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;stroke;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"># Text on a slant</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;setfont(Gnome::Font-&gt;new_closest("Times", 'bold', 1, 20));</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;gsave();</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;moveto(150, 400);</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;concat(@slanted);</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;show("Slanted text, Times, bold 20");</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;grestore();</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"># A rotated string thing</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;moveto(250, 600);</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;setrgbcolor(1,0.1,0);</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">foreach (map {$_*30} 0 .. 6) {</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"><text:tab/>$context-&gt;gsave();</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"><text:tab/>$context-&gt;concat(Gnome::Print-&gt;affine_rotate($_));</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"><text:tab/>$context-&gt;show(" LWE August 2001 ...");</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"><text:tab/>$context-&gt;grestore();</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">}</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$context-&gt;showpage;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$print_master-&gt;close;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"># Show the preview ...</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$preview = new Gnome::PrintMasterPreview ($print_master, 'Gnome::Print from perl');</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$preview-&gt;signal_connect('destroy', sub {Gtk-&gt;main_quit;});</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">$preview-&gt;show;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">main Gtk;</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">UTF-8(7) <text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/>Linux Programmer's Manual <text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/>UTF-8(7)</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span2">NAME</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span3">UTF-8</text:span>
+        <text:span text:style-name="Span1"> - an ASCII compatible multibyte Unicode encoding</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">DESCRIPTION</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"><text:tab/>The <text:s/>Unicode <text:s/>character <text:s/>set occupies a 16-bit code space.The most obvious Unicode encoding (known <text:s/>as <text:s/>UCS-2) <text:s/>con-sists of a sequence of 16-bit words. Such strings can con-tain as parts of many 16-bit characters bytes like '\0' or'/' <text:s/>which have a special meaning in filenames and other Clibrary function parameters. <text:s/>In addition, the majority of UNIX tools expects ASCII files and can't read 16-bit words as characters without major modifications. For these <text:s/>reasons, UCS-2 is not a suitable external encoding of Unicode</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">in filenames, text files, environment variables, etc. <text:s/>The ISO <text:s/>10646 <text:s/>Universal <text:s/>Character <text:s/>Set (UCS), a superset of Unicode, occupies even a 31-bit code space and the obvious UCS-4 <text:s/>encoding <text:s/><text:s/>for <text:s/>it (a sequence of 32-bit words) has the same problems.</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"><text:tab/>The UTF-8 encoding of Unicode and UCS does not have <text:s/>these problems <text:s/>and is the way to go for using the Unicode char-acter set under Unix-style operating systems.</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">PROPERTIES</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">The UTF-8 encoding has the following nice properties:</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:list text:style-name="UL0">
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span1"> UCS characters 0x00000000 to 0x0000007f <text:s/>(the <text:s/>classical <text:s/>US-ASCII characters) are encoded simply as bytes 0x00 to <text:s/>0x7f (ASCII compatibility). This means <text:s/>that <text:s/>files <text:s/>and <text:s/>strings <text:s/>which <text:s/>contain only 7-bit ASCII characters have <text:s/>the same encoding under both ASCII and UTF-8.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span1">All UCS characters &gt; 0x7f are <text:s/>encoded <text:s/>as <text:s/>a <text:s/>multibyte <text:s/>sequence <text:s/>consisting <text:s/>only of bytes in the range 0x80 to <text:s/>0xfd, so no ASCII byte can appear <text:s/>as <text:s/>part <text:s/>of <text:s/>another <text:s/>character <text:s/>and <text:s/>there <text:s/>are no problems with e.g. '\0' or <text:s/>'/'.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span1">The lexicographic sorting order of UCS-4 strings is preserved.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span1">All <text:s/>possible 2^31 UCS codes can be encoded using UTF-8.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span1">The bytes 0xfe and 0xff are <text:s/>never <text:s/>used <text:s/>in <text:s/>the <text:s/>UTF-8 encoding.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span1">The <text:s/>first byte of a multibyte sequence which represents a single non-ASCII UCS character is always in the <text:s/>range 0xc0 <text:s/>to <text:s/>0xfd <text:s/>and <text:s/>indicates <text:s/>how <text:s/>long this multibyte sequence is. All further bytes in a <text:s/>multibyte <text:s/>sequence are <text:s/>in <text:s/>the range 0x80 to 0xbf. This allows easy resyn- chronization and makes the encoding stateless and robust against missing bytes.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span1">UTF-8 <text:s/>encoded <text:s/>UCS <text:s/>characters <text:s/>may <text:s/>be up to six bytes long, however Unicode characters can only be up to three bytes long. As Linux uses only the 16-bit Unicode subset of UCS, under Linux, UTF-8 multibyte sequences can <text:s/>only be one, two or three bytes long.</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">ENCODING</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">The following byte sequences are used to represent a char-</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">acter. The sequence to be used depends <text:s/>on <text:s/>the <text:s/>UCS <text:s/>code</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">number of the character:</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">0x00000000 - 0x0000007F:</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"><text:s/><text:s/><text:s/>0xxxxxxx</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">0x00000080 - 0x000007FF:</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"><text:s/><text:s/><text:s/>110xxxxx 10xxxxxx</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">0x00000800 - 0x0000FFFF:</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"><text:s/><text:s/><text:s/>1110xxxx 10xxxxxx 10xxxxxx</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">0x00010000 - 0x001FFFFF:</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"><text:s/><text:s/><text:s/>11110xxx 10xxxxxx 10xxxxxx 10xxxxxx</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">0x00200000 - 0x03FFFFFF:</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"><text:s/><text:s/><text:s/>111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">0x04000000 - 0x7FFFFFFF:</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"><text:s/><text:s/><text:s/>1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">The <text:s/>xxx <text:s/>bit <text:s/>positions <text:s/>are <text:s/>filled with the bits of the character code number in binary representation. <text:s/>Only <text:s/>the shortest <text:s/>possible <text:s/>multibyte sequence which can represent the code number of the character can be used.</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">EXAMPLES</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">The Unicode character 0xa9 <text:s/>= <text:s/>1010 <text:s/>1001 <text:s/>(the <text:s/>copyright</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">sign) is encoded in UTF-8 as</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">11000010 10101001 = 0xc2 0xa9</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">and <text:s/>character <text:s/>0x2260 <text:s/>= <text:s/>0010 <text:s/>0010 <text:s/>0110 0000 (the "not</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">equal" symbol) is encoded as:</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">11100010 10001001 10100000 = 0xe2 0x89 0xa0</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">AUTHOR: </text:span>
+        <text:span text:style-name="Span3">Markus Kuhn </text:span>
+        <text:span text:style-name="Span1">&lt;mskuhn@cip.informatik.uni-erlangen.de&gt;</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">SEE ALSO unicode(7)</text:span>
+      </text:p>
+    </office:text>
+  </office:body>
+</office:document>

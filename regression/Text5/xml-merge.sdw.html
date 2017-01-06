@@ -1,0 +1,240 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" >
+<meta name="author" content=" ">
+<meta name="typist" content=" ">
+<title></title>
+<style>
+.para0 {
+ margin: 0px 0px 0px 0px;
+}
+.span3 {
+
+}
+.span5 {
+ font-size: 10.0000pt; font-family: 'Courier';
+}
+.span4 {
+ font-size: 10.0000pt; font-weight: bold; font-family: 'Courier';
+}
+.span1 {
+ font-size: 10.0000pt; font-weight: normal; font-family: 'Courier';
+}
+.span0 {
+ font-size: 12.0000pt; font-weight: bold; font-family: 'Courier';
+}
+.span2 {
+ font-weight: bold;
+}
+</style>
+</head>
+<body>
+<p class="para0"><span class="span0">User Interface described by XML</span>
+</p>
+<p class="para0"><span class="span1">&lt;Root&gt;</span>
+</p>
+<p class="para0"><span class="span1">&lt;commands&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cmd name=&quot;FileNew&quot; _label=&quot;New&quot; sensitive=&quot;0&quot;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_tip=&quot;Start a new document&quot; pixtype=&quot;stock&quot; pixname=&quot;New&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cmd name=&quot;FileOpen&quot; _label=&quot;Open&quot;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_tip=&quot;Open a file&quot; pixtype=&quot;stock&quot; pixname=&quot;Open&quot; accel=&quot;F3&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cmd name=&quot;FileClose&quot; _label=&quot;Close&quot;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_tip=&quot;Close the current file&quot; pixtype=&quot;stock&quot; pixname=&quot;Close&quot;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accel=&quot;*Control*w&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;cmd name=&quot;FileExit&quot; _label=&quot;Exit&quot; _tip=&quot;Exit the program&quot;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pixtype=&quot;stock&quot; pixname=&quot;Exit&quot; accel=&quot;*Control*q&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1">&lt;/commands&gt;</span>
+</p>
+<p class="para0"><span class="span1">&lt;menu&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;submenu name=&quot;File&quot; _label=&quot;_File&quot;&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;menuitem name=&quot;FileNew&quot; verb=&quot;&quot; _label=&quot;_New&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;menuitem name=&quot;FileOpen&quot; verb=&quot;&quot; _label=&quot;_Open...&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;placeholder name=&quot;FileOps&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;placeholder/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;menuitem name=&quot;FileRevert&quot; verb=&quot;&quot; _label=&quot;_Revert&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;separator/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;menuitem name=&quot;FileClose&quot; verb=&quot;&quot; _label=&quot;_Close&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;menuitem name=&quot;FileExit&quot; verb=&quot;&quot; _label=&quot;E_xit&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/submenu&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;placeholder name=&quot;Component&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;submenu name=&quot;Help&quot; _label=&quot;_Help&quot;&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;placeholder name=&quot;BuiltMenuItems&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;menuitem name=&quot;HelpAbout&quot; verb=&quot;&quot; _label=&quot;_About...&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/submenu&gt;</span>
+</p>
+<p class="para0"><span class="span1">&lt;/menu&gt;</span>
+</p>
+<p class="para0"><span class="span1">&lt;dockitem name=&quot;Toolbar&quot; _tip=&quot;Main toolbar&quot;&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;toolitem name=&quot;whatever&quot; verb=&quot;FileClose&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;separator/&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;toolitem name=&quot;bold&quot; type=&quot;toggle&quot; _label=&quot;Bold&quot;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_descr=&quot;Sets something as bold&quot; pixtype=&quot;stock&quot;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pixname=&quot;Open&quot; id=&quot;bold&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1">&lt;/dockitem&gt;</span>
+</p>
+<p class="para0"><span class="span1">&lt;status&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;item name=&quot;main&quot;&gt;This is the staus bar text &lt;/a&gt;</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;control name=&quot;Progress&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span1">&lt;/status&gt;</span>
+</p>
+<p class="para0"><span class="span1">&lt;/Root&gt;</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span2">UI XML Merging </span>
+<span class="span3">... an example:</span>
+</p>
+<p class="para0"><span class="span3">Merging into the container, we insert a the default placeholder: which has no name</span>
+</p>
+<p class="para0"><span class="span4">Initial</span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5">&lt;submenu name=&quot;File&quot;&gt;</span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5">	&lt;item name=&quot;Open&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5">	&lt;placeholder/&gt;</span>
+</p>
+<p class="para0"><span class="span5">&lt;/submenu&gt;</span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5">But we can insert before:</span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5">&lt;submenu name=&quot;File&quot;&gt;</span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5">	&lt;placeholder/&gt;</span>
+</p>
+<p class="para0"><span class="span5">	&lt;item name=&quot;Open&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span5">&lt;/submenu&gt;</span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span4">Overlaid</span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5">&lt;submenu name=&quot;File&quot;&gt;</span>
+</p>
+<p class="para0"><span class="span5">	&lt;item name=&quot;Close&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5">	&lt;item name=&quot;Exit&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span5">&lt;/submenu&gt;</span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span3"></span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5">&lt;submenu name=&quot;File&quot;&gt;</span>
+</p>
+<p class="para0"><span class="span5">	&lt;item name=&quot;Close&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span5">	&lt;item name=&quot;Exit&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5">&lt;/submenu&gt;</span>
+</p>
+<p class="para0"><span class="span4">Result</span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5">&lt;submenu name=&quot;File&quot;&gt;</span>
+</p>
+<p class="para0"><span class="span5">	&lt;item name=&quot;Open&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span5">	&lt;item name=&quot;Close&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span5">	&lt;item name=&quot;Exit&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span5">	&lt;placeholder/&gt;</span>
+</p>
+<p class="para0"><span class="span5">&lt;/submenu&gt;</span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5">&lt;submenu name=&quot;File&quot;&gt;</span>
+</p>
+<p class="para0"><span class="span5">	&lt;item name=&quot;Close&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span5">	&lt;item name=&quot;Exit&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span5">	&lt;placeholder/&gt;</span>
+</p>
+<p class="para0"><span class="span5">	&lt;item name=&quot;Open&quot;/&gt;</span>
+</p>
+<p class="para0"><span class="span5">&lt;/submenu&gt;</span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+<p class="para0"><span class="span5"></span>
+</p>
+
+</body>
+</html>

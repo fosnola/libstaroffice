@@ -149,7 +149,7 @@ sub RegTest
   my $endLine=($html?"<br>\n":"\n");
 
   # list of directories containing test files
-  my @listDirectory = ( "Calc3.1", "Draw3.1", "Text3.1" );
+  my @listDirectory = ( "Calc3.1", "Draw3.1", "Draw5", "Text3.1", "Text5" );
 
   # list of commands to test
   # type => [ "name", "extension", "array of accepted types", "command", "filter" ]

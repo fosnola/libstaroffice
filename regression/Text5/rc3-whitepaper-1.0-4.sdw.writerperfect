@@ -1,0 +1,688 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" office:mimetype="application/vnd.oasis.opendocument.text" office:version="1.1">
+  <office:meta>
+    <dc:creator>Keith Erskine</dc:creator>
+    <dc:date>2002-01-23T10:13:55.00</dc:date>
+    <dc:title>Introduction</dc:title>
+    <meta:creation-date>2001-11-14T20:38:00.00</meta:creation-date>
+    <meta:initial-creator>Nancy Perry</meta:initial-creator>
+    <meta:print-date>2001-11-15T11:15:00.00</meta:print-date>
+    <meta:generator>libodfgen/0.1.6</meta:generator>
+  </office:meta>
+  <office:font-face-decls>
+    <style:font-face style:name="Arial" svg:font-family="Arial"/>
+    <style:font-face style:name="Times New Roman" svg:font-family="Times New Roman"/>
+    <style:font-face style:name="starbats" svg:font-family="starbats"/>
+    <style:font-face style:font-charset="x-symbol" style:name="StarSymbol" svg:font-family="StarSymbol"/>
+  </office:font-face-decls>
+  <office:styles>
+    <style:default-style style:family="graphic"/>
+    <style:default-style style:family="paragraph">
+      <style:paragraph-properties style:line-break="strict" style:punctuation-wrap="hanging" style:tab-stop-distance="0.5in" style:text-autospace="ideograph-alpha" style:use-window-font-color="true" style:writing-mode="page"/>
+    </style:default-style>
+    <style:default-style style:family="table"/>
+    <style:default-style style:family="table-row">
+      <style:table-row-properties fo:keep-together="auto"/>
+    </style:default-style>
+    <style:default-style style:family="table-column"/>
+    <style:default-style style:family="table-cell"/>
+    <style:style style:class="text" style:family="paragraph" style:name="Standard"/>
+    <style:style style:class="text" style:display-name="Text Body" style:family="paragraph" style:name="Text_Body" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Table Contents" style:family="paragraph" style:name="Table_Contents" style:parent-style-name="Text_Body"/>
+    <style:style style:class="extra" style:display-name="Table Heading" style:family="paragraph" style:name="Table_Heading" style:parent-style-name="Table_Contents"/>
+    <style:style style:class="list" style:display-name="List" style:family="paragraph" style:name="List" style:parent-style-name="Text_Body"/>
+    <style:style style:class="extra" style:display-name="Header" style:family="paragraph" style:name="Header" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Footer" style:family="paragraph" style:name="Footer" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Caption" style:family="paragraph" style:name="Caption" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Footnote" style:family="paragraph" style:name="Footnote" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Endnote" style:family="paragraph" style:name="Endnote" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Index" style:family="paragraph" style:name="Index" style:parent-style-name="Standard"/>
+    <style:style style:display-name="Footnote_Symbol" style:family="text" style:name="Footnote_Symbol">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Endnote_Symbol" style:family="text" style:name="Endnote_Symbol">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Footnote_anchor" style:family="text" style:name="Footnote_anchor">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Endnote_anchor" style:family="text" style:name="Endnote_anchor">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <text:linenumbering-configuration style:num-format="1" text:increment="5" text:number-lines="false" text:number-position="left" text:offset="0.1965in"/>
+    <text:notes-configuration style:num-format="1" text:citation-body-style-name="Footnote_anchor" text:citation-style-name="Footnote_Symbol" text:footnotes-position="page" text:note-class="footnote" text:start-numbering-at="document" text:start-value="0"/>
+    <text:notes-configuration style:num-format="i" text:citation-body-style-name="Endnote_anchor" text:citation-style-name="Endnote_Symbol" text:master-page-name="Endnote" text:note-class="endnote" text:start-value="0"/>
+  </office:styles>
+  <office:automatic-styles>
+    <style:page-layout style:name="PL0">
+      <style:page-layout-properties fo:margin-bottom="1.0000in" fo:margin-left="1.0000in" fo:margin-right="1.0000in" fo:margin-top="1.0000in" fo:page-height="11.0000in" fo:page-width="8.5000in" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:distance-after-sep="0.0398in" style:distance-before-sep="0.0398in" style:rel-width="25.0000%" style:width="0.0071in"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:page-layout style:name="PL1">
+      <style:page-layout-properties fo:margin-bottom="1.0000in" fo:margin-left="1.0000in" fo:margin-right="1.0000in" fo:margin-top="1.0000in" fo:page-height="11.0000in" fo:page-width="8.5000in" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:rel-width="25.0000%"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:page-layout style:name="PL2">
+      <style:page-layout-properties fo:margin-bottom="72.0000pt" fo:margin-left="90.0000pt" fo:margin-right="90.0000pt" fo:margin-top="72.0000pt" fo:page-height="792.0000pt" fo:page-width="612.0000pt" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:distance-after-sep="0.0398in" style:distance-before-sep="0.0398in" style:rel-width="25.0000%" style:width="0.0071in"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:style style:family="text" style:name="Span_M0">
+      <style:text-properties fo:country="US" fo:font-size="10.0000pt" fo:language="en" style:font-name="Times New Roman" style:font-name-asian="Times New Roman" style:font-name-complex="Times New Roman" style:font-pitch="variable" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S_M0" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:orphans="2" fo:widows="2" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:char="." style:leader-style="solid" style:leader-text=" " style:position="216.0000pt" style:type="char"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="432.0000pt" style:type="right"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="text" style:name="Span1">
+      <style:text-properties fo:country="US" fo:font-size="12.0000pt" fo:font-weight="bold" fo:language="en" style:font-name="Arial" style:font-name-asian="Arial" style:font-name-complex="Arial" style:font-pitch="variable" style:font-size-asian="12.0000pt" style:font-size-complex="12.0000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span2">
+      <style:text-properties fo:country="US" fo:font-size="12.0000pt" fo:language="en" style:font-name="Times New Roman" style:font-name-asian="Times New Roman" style:font-name-complex="Times New Roman" style:font-pitch="variable" style:font-size-asian="12.0000pt" style:font-size-complex="12.0000pt"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span3">
+      <style:text-properties fo:country="US" fo:font-size="14.0000pt" fo:font-weight="bold" fo:language="en" style:font-name="Arial" style:font-name-asian="Arial" style:font-name-complex="Arial" style:font-pitch="variable" style:font-size-asian="14.0000pt" style:font-size-complex="14.0000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span4">
+      <style:text-properties fo:country="US" fo:font-size="12.0000pt" fo:font-weight="bold" fo:language="en" style:font-name="Times New Roman" style:font-name-asian="Times New Roman" style:font-name-complex="Times New Roman" style:font-pitch="variable" style:font-size-asian="12.0000pt" style:font-size-complex="12.0000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span5">
+      <style:text-properties fo:country="US" fo:font-size="12.0000pt" fo:language="en" style:font-name="Times New Roman" style:font-name-asian="Times New Roman" style:font-name-complex="Times New Roman" style:font-pitch="variable" style:font-size-asian="12.0000pt" style:font-size-complex="12.0000pt" style:text-underline-style="solid" style:text-underline-type="single"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span6">
+      <style:text-properties fo:country="US" fo:font-size="10.0000pt" fo:language="en" style:font-name="Arial" style:font-name-asian="Arial" style:font-name-complex="Arial" style:font-pitch="variable" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span7">
+      <style:text-properties fo:country="US" fo:font-size="12.0000pt" fo:language="en" style:font-name="Arial" style:font-name-asian="Arial" style:font-name-complex="Arial" style:font-pitch="variable" style:font-size-asian="12.0000pt" style:font-size-complex="12.0000pt"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span8">
+      <style:text-properties fo:country="US" fo:font-size="10.0000pt" fo:language="en" style:font-name="Times New Roman" style:font-name-asian="Times New Roman" style:font-name-complex="Times New Roman" style:font-pitch="variable" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span9">
+      <style:text-properties fo:color="#000000" fo:country="US" fo:font-size="12.0000pt" fo:font-weight="bold" fo:language="en" style:font-name="Arial" style:font-name-asian="Arial" style:font-name-complex="Arial" style:font-pitch="variable" style:font-size-asian="12.0000pt" style:font-size-complex="12.0000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="paragraph" style:master-page-name="PM2" style:name="S1" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:orphans="0" fo:widows="0" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S10" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="0.0000in" fo:margin-top="0.0000pt" fo:orphans="0" fo:widows="0" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S11" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="3.0000pt" fo:margin-top="22.0000pt" fo:orphans="0" fo:text-align="center" fo:widows="0" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S12" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:orphans="2" fo:widows="2" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S13" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:orphans="0" fo:text-align="center" fo:widows="0" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S14" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="0.0000in" fo:margin-top="0.0000pt" fo:orphans="2" fo:widows="2" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S15" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:orphans="2" fo:widows="2" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S2" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="7.2000pt" fo:margin-top="0.0000pt" fo:orphans="0" fo:widows="0" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S3" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="3.0000pt" fo:margin-top="22.0000pt" fo:orphans="0" fo:widows="0" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S4" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="7.2000pt" fo:margin-left="14.1500pt" fo:margin-right="0.0000pt" fo:margin-top="0.0000pt" fo:orphans="0" fo:text-indent="-14.1500pt" fo:widows="0" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S5" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="22.0000pt" fo:orphans="0" fo:widows="0" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S6" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="7.2000pt" fo:margin-top="7.2000pt" fo:orphans="0" fo:text-align="center" fo:widows="0" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S7" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="7.2000pt" fo:margin-top="0.0000pt" fo:orphans="0" fo:text-align="center" fo:widows="0" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S8" style:parent-style-name="Table_Contents">
+      <style:paragraph-properties fo:margin-bottom="7.2000pt" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:margin-top="0.0000pt" fo:orphans="0" fo:text-indent="0.0000pt" fo:widows="0" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S9" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:orphans="2" fo:text-align="center" fo:widows="2" style:justify-single-word="false"/>
+    </style:style>
+    <text:list-style style:name="UL0">
+      <text:list-level-style-bullet text:bullet-char=" " text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="OpenSymbol"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL1">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL2">
+      <text:list-level-style-bullet text:bullet-char=" " text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="OpenSymbol"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL3">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL4">
+      <text:list-level-style-bullet text:bullet-char=" " text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="OpenSymbol"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL5">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL6">
+      <text:list-level-style-bullet text:bullet-char=" " text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="OpenSymbol"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <style:style style:family="table" style:name="Table0">
+      <style:table-properties style:width="80.0000pt" table:align="left" table:border-model="collapsing"/>
+    </style:style>
+    <style:style style:family="table-column" style:name="Table0.Column1">
+      <style:table-column-properties style:column-width="40.0000pt"/>
+    </style:style>
+    <style:style style:family="table-column" style:name="Table0.Column2">
+      <style:table-column-properties style:column-width="40.0000pt"/>
+    </style:style>
+    <style:style style:family="table-row" style:name="Table0_row0">
+      <style:table-row-properties fo:keep-together="auto"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell0">
+      <style:table-cell-properties fo:padding="0.0382in"/>
+    </style:style>
+  </office:automatic-styles>
+  <office:master-styles>
+    <style:master-page style:display-name="Standard" style:name="PM0" style:page-layout-name="PL0"/>
+    <style:master-page style:display-name="EndNote" style:name="PM1" style:page-layout-name="PL1"/>
+    <style:master-page style:name="PM2" style:page-layout-name="PL2">
+      <style:footer>
+        <text:p text:style-name="S_M0">
+          <text:span text:style-name="Span_M0">Red Carpet CorporateConnect<text:tab/><text:tab/><text:page-number text:select-page="current"/></text:span>
+        </text:p>
+      </style:footer>
+    </style:master-page>
+  </office:master-styles>
+  <office:body>
+    <office:text>
+      <text:list text:style-name="UL0">
+        <text:list-item>
+          <text:p style:master-page-name="PM2" text:style-name="S1">
+            <text:span text:style-name="Span1">Introduction</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">The conventional wisdom among the world's leading software giants is that Linux/UNIX users waste time, money, and efficiency by having to perpetually update and renew software, and they have a point. <text:s/>What Linux IT administrator has not been frustrated by projects thwarted because developers were using different versions of the same software? </text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2">To address the situation, in the year 2000 Ximian?, the open-source desktop leader, introduced Red Carpet?, a comprehensive Linux software distribution and updating service designed to centralize these tasks within the organization. <text:s/>Today hundreds of thousands of developers rely on Red Carpet to keep their Linux and UNIX systems up-to-date automatically, efficiently, and securely, while saving themselves and their organizations significant time and resources.</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2">Extending the value of Red Carpet even further, Red Carpet CorporateConnect? is Ximian's unique ASP service that enables individual companies to manage and control their Linux desktop software standards through an intuitive Web management console. <text:s/>With Red Carpet CorporateConnect, companies can now manage users and access privileges, create secure, private Red Carpet channels, and distribute and update internal software -- all of which translates into significant savings of time and money better spent on moving their businesses forward with new services. <text:s/></text:span>
+      </text:p>
+      <text:list text:style-name="UL0">
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span3">The Challenge of Managing Linux Adaptations in the Organization</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">Companies that develop software using the Linux platform may have hundreds of engineers at computers spread throughout the world. <text:s/>These organizations cannot afford to learn mid-stream or at the end of a project that some of their developers were working with the wrong version of software. <text:s/>Yet, the ongoing task of keeping so many machines up-to-date has proven to be a real headache for IT administrators, who, if they don't have Red Carpet, can spend on average one to two hours every day on infrastructure maintenance.</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2">Linux IT administrators frequently mention the following challenges:</text:span>
+      </text:p>
+      <text:list text:style-name="UL1">
+        <text:list-item>
+          <text:p text:style-name="S4">
+            <text:span text:style-name="Span2">Educating a non-engineering work force that may not know how to build new versions of software from software development tools;</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S4">
+            <text:span text:style-name="Span2">Finding enough time to resolve the dependencies and requirements of various software applications;</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S4">
+            <text:span text:style-name="Span2">Deciding on how much control to give technical users for installing applications and other software. (Can these users be relied upon to keep critical systems up-to-date?); and,</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S4">
+            <text:span text:style-name="Span2">Figuring out how to enable specific groups in the organization to control access to updates on expensive applications, such as those for ECAE/CAD referenced below.</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:list text:style-name="UL2">
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span3">The Practical Realities of Linux Software Maintenance</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">In an effort to enhance their software management systems, Linux IT administrators have made valiant attempts to develop a range of procedures and policies for software updating and version management, with varying degrees of success. <text:s/>Unfortunately, solutions that satisfy the short-term needs for consistency in platform software tend not to evolve with the organization over the long term, and may even introduce other problems. </text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2">For example, to manage internal software updates manually the IT administrator must comb email lists and web sites for software revisions, sending emails when software is updated, or posting information on the Web/ftp site -- and hoping that people check it. <text:s/>In addition, the administrator must use passwords or other procedures to block individuals who don't have access rights or a reason to enter, maintain ftp sites, and ensure that the most recent software is up and running - all very time-consuming pursuits.</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2">Sometimes administrators resort to more forcible methods of installing software, such as using tar files or manually configuring machines. <text:s/>Not only are these methods of installation time-consuming, they may promote invisibility to management tools built into the operating systems. Other "home grown" solutions, such as scripts and software used to solve distribution problems, may satisfy the needs of the organization, but at the expense of dedicated resources to maintain and improve the system as requirements change over time. </text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2">In each of these scenarios, valuable resources are derailed from the more important function of moving the business forward into the maintenance of basic infrastructure. Clearly, a seamless, automated system for software maintenance and version management can spell the difference between inefficiency and productivity in today's rapidly evolving Linux environment.</text:span>
+      </text:p>
+      <text:list text:style-name="UL2">
+        <text:list-item>
+          <text:p text:style-name="S5">
+            <text:span text:style-name="Span1">About Red Carpet</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">With several hundred thousand satisfied users already at work, Ximian Red Carpet is a complete software management solution that keeps Linux and UNIX systems up-to-date automatically, efficiently, and securely. <text:s/>Red Carpet's convenient software channels and powerful dependency and conflict resolution technology enable end users to easily maintain, update, and remove software from developers worldwide, regardless of the operating system they use.</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2">Each time applications are added, modified, or removed from the Linux workstation, Red Carpet compares them with the latest software version information from Ximian and select third-party software providers and operating systems vendors. Next, Red Carpet generates an on-screen list, organized into logical channels, of the new packages and updates that are available. <text:s/>Finally, Red Carpet verifies the integrity of the new software, resolves all of the intricate software dependencies that could affect the desktop, and updates or removes obsolete files. In sum, Red Carpet saves its users hours of system administration effort.</text:span>
+      </text:p>
+      <text:p text:style-name="S6">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:list text:style-name="UL2">
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span3">Red Carpet Technology</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">The underlying technology that makes Red Carpet so powerful, yet so easy for users, is an XML-based software data engine that works in conjunction with a knowledge base developed by Ximian. A high-level representation of software information, called Metadata, provides the data interchange between the service and the Red Carpet Client. The Metadata comprises all of the knowledge about software platforms and applications, including their requirements of and provisions to other software components. <text:s/>Metadata from each software channel to which the user subscribes is sent to the Red Carpet Client, which reconciles the data against information about the user's machine and then presents it to the user via an intuitive, easy-to-use graphical user interface (GUI). </text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S7">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:list text:style-name="UL2">
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span1">A Custom Solution: <text:s/>Red Carpet CorporateConnect</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">For administrators who want to bring even more of the power of Red Carpet to bear on their organizations, Ximian offers Red Carpet CorporateConnect. <text:s/>Red Carpet CorporateConnect is a unique service that lets companies manage and control Linux desktop software standards and versions for users, teams, workgroups, and departments within their organizations. In addition to providing end-user access to software updating through the publicly available Ximian Red Carpet channels, Red Carpet CorporateConnect lets administrators create and manage private, secure channels for company software standards and custom internal applications -- saving them precious time and money by keeping systems up-to-date and users productive. </text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2">Red Carpet CorporateConnect provides a Web-based management console that lets IT staff define the software that corporate users can download, enabling centralized management and version control of downloaded software. System components include:</text:span>
+      </text:p>
+      <table:table table:name="Table0" table:style-name="Table0">
+        <table:table-column table:style-name="Table0.Column1"/>
+        <table:table-column table:style-name="Table0.Column2"/>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S8">
+              <text:span text:style-name="Span4">Channel Manager</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S8">
+              <text:span text:style-name="Span2">Defines the software applications, packages, and supported platforms; </text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S8">
+              <text:span text:style-name="Span4">User Manager</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S8">
+              <text:span text:style-name="Span2">Invites and manages desktop users;</text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S8">
+              <text:span text:style-name="Span4">Group Manager</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S8">
+              <text:span text:style-name="Span2">Defines software access privileges by team or workgroup; and </text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S8">
+              <text:span text:style-name="Span4">Reports</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S8">
+              <text:span text:style-name="Span2">Shows downloaded statistics and installations by channel and user.</text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+      </table:table>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2">Once a week or once a day -- however often is desired -- administrators can connect to a set of servers containing the current version of software that they are supposed to be running.</text:span>
+      </text:p>
+      <text:list text:style-name="UL2">
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span3">Additional Features </text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">With Red Carpet CorporateConnect, the client has:</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:list text:style-name="UL3">
+        <text:list-item>
+          <text:p text:style-name="S4">
+            <text:span text:style-name="Span5">Forced Updates</text:span>
+            <text:span text:style-name="Span2"> for security and version control. Working with the client, CorporateConnect will download and install software automatically;</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S4">
+            <text:span text:style-name="Span5">Logged Transactions</text:span>
+            <text:span text:style-name="Span2"><text:s/>for administrators to see what has been done to the systems in their control;</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S4">
+            <text:span text:style-name="Span5">Target/Channel Selection</text:span>
+            <text:span text:style-name="Span2"> for software to be used by each group. <text:s/>Several target machines are defined for selected software packages. Groups can have different types of machines (e.g., Linux, Solaris); </text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S4">
+            <text:span text:style-name="Span5">Access Control</text:span>
+            <text:span text:style-name="Span2"> of each group by the administrator, who generates access codes for each user to put into their Client to activate it. </text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S4">
+            <text:span text:style-name="Span5">Selective Viewing</text:span>
+            <text:span text:style-name="Span2"> for users to see only what they need to see, nothing more; and</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S4">
+            <text:span text:style-name="Span5">Reporting</text:span>
+            <text:span text:style-name="Span2"><text:s/>on usage to administrators. </text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:list text:style-name="UL4">
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span3">How Does CorporateConnect Work?</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">Red Carpet CorporateConnect is a hosted service delivered over the Internet. It provides the administrator all of the power of Red Carpet without the need to invest in additional computing hardware or software. While some parts of CorporateConnect reside inside the company's network, the key components are hosted and maintained by Ximian. The following diagram shows all of these components and their relationship to each other:</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S6">
+        <text:span text:style-name="Span6"/>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span6">Five components make up the architecture of Red Carpet CorporateConnect</text:span>
+        <text:span text:style-name="Span7">.</text:span>
+      </text:p>
+      <text:list text:style-name="UL4">
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span1">Client</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">The Red Carpet Client enables users to download and update software from channels defined by administrators. The Client offers an easy-to-use interface for receiving updates and starting installs. </text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S10">
+            <text:span text:style-name="Span1">Metadata Server</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">The Metadata Server holds all of the information about software and groups that users access for software. The Metadata Server provides clients with information to resolve dependencies and indicates which software needs to be updated.</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Log Server </text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2">The Log Server keeps track of all internal software and system updates and serves reports to the administrator through the Administrator's Console. </text:span>
+      </text:p>
+      <text:list text:style-name="UL4">
+        <text:list-item>
+          <text:p text:style-name="S10">
+            <text:span text:style-name="Span1"/>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S10">
+            <text:span text:style-name="Span1">Package Server</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">The Package Server is a repository of software to which the Metadata Server points users through the Client. The Package Server can offer software to users in a range of network protocols, including http, https, ftp, and nfs.</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:list text:style-name="UL4">
+        <text:list-item>
+          <text:p text:style-name="S10">
+            <text:span text:style-name="Span1">Web-based Administrator's Console</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span8"/>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S6">
+        <text:span text:style-name="Span8"/>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2">The Administrator's Console -- a Web-based interface to all software and user functions needed to control CorporateConnect -- can access and maintain CorporateConnect from any Web browser.</text:span>
+      </text:p>
+      <text:list text:style-name="UL4">
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span1">Groups, Channels, Targets, and Packages</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">To fully understand how Red Carpet CorporateConnect works, consider its basic building blocks, each of which comprises a set of machines, people, or software working together to deliver software maintenance services:</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:list text:style-name="UL5">
+        <text:list-item>
+          <text:p text:style-name="S4">
+            <text:span text:style-name="Span4">Groups</text:span>
+            <text:span text:style-name="Span2"><text:s/><text:s/>Logical collections of users, groups are defined by the administrator. <text:s/>Groups can be configured by organization (e.g., Engineering or Marketing), geography, product team, or any other suitable designation within the firm. </text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S4">
+            <text:span text:style-name="Span4">Channels <text:s/><text:s/></text:span>
+            <text:span text:style-name="Span2">Users subscribe to channels</text:span>
+            <text:span text:style-name="Span4"> -- </text:span>
+            <text:span text:style-name="Span2">logical groupings of software by function, type, or manufacturer -- when signing on to CorporateConnect. The simplicity of channels hides the complexity of the dependency resolution and access control;</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S4">
+            <text:span text:style-name="Span4">Targets</text:span>
+            <text:span text:style-name="Span2"><text:s/><text:s/>The platforms (i.e., Red Hat, Linux, Debian, Solaris) on which the software runs; and, </text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S4">
+            <text:span text:style-name="Span4">Packages</text:span>
+            <text:span text:style-name="Span2"><text:s/><text:s/>The actual software packages downloaded and installed by using the Red Carpet Client. </text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:list text:style-name="UL6">
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span3">An Example of How CorporateConnect is Used</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">The following example illustrates how an engineering manager employs Red Carpet CorporateConnect to manage the mission-critical software used by the engineers in her company. </text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2">Pat is in charge of a software development group for a consulting company. The diagram below shows how the department's engineering workstations are connected and distributed by job function.</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S6">
+        <text:span text:style-name="Span8"/>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2">The department is divided equally between software engineers and web designers. To develop custom server-based solutions, the chip designers use a customized version of gcc, a software compiler. The web designers use PHP, an HTML-embedded scripting language. The entire department uses EMACS for text editing.</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span2">Pat's challenge is to keep track of whose software is up-to-date and which individuals have access to certain software. </text:span>
+      </text:p>
+      <text:list text:style-name="UL6">
+        <text:list-item>
+          <text:p text:style-name="S11">
+            <text:span text:style-name="Span1">Defining Groups</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">With the help of Red Carpet CorporateConnect, Pat sets up two groups of software users: software engineers (Alice, Bob, and Carol) and web designers (Dave, Ellen, and Fred). </text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span7"/>
+      </text:p>
+      <text:list text:style-name="UL6">
+        <text:list-item>
+          <text:p text:style-name="S11">
+            <text:span text:style-name="Span1">Channels and Targets</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">Next, Pat sets up channels and targets (specific pieces of software that need to be updated as required) that each of the groups will use to obtain the software that is meant for them. <text:s/>She establishes a channel for each of the major titles of software and assigns targets to each channel. <text:s/>Channels are then assigned to different groups, giving them access only to the channels they are authorized to receive, via an access code. </text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S12">
+        <text:span text:style-name="Span7"/>
+      </text:p>
+      <text:list text:style-name="UL6">
+        <text:list-item>
+          <text:p text:style-name="S13">
+            <text:span text:style-name="Span9">Trouble Shooting</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">A problem occurred during the last major project in which some engineers did not have the most recent version of gcc on their system. The trouble was uncovered during an integration phase of the project, leading to a significant slip in the overall schedule. <text:s/>To prevent another such disruption, Pat sets up an automatic update on gcc so that the software engineers will not have to do it themselves.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span3">Security Guaranteed</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span2">When companies work with CorporateConnect, they want to know that the information on the Metadata Server is secure and that information sent between the administrator and the service is protected. <text:s/>Ximian takes this trust very seriously. <text:s/>All communications between the Web-based Administrator's Console, the Red Carpet Client, and the CorporateConnect service use https protocol, and </text:span>
+            <text:span text:style-name="Span4">[or "with"?]</text:span>
+            <text:span text:style-name="Span2"> SSL encryption. <text:s/>Whenever software is put into repositories or installed, CorporateConnect verifies their digital signatures to insure that they were packaged by the intended organization.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S3">
+            <text:span text:style-name="Span3">Conclusion: <text:s/>Fast Forward</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S14">
+            <text:span text:style-name="Span2">Although Red Carpet CorporateConnect is a hosted service at present, Ximian is investigating avenues such as a scheme to enable more of its functions and features to reside within the client's firewall in the future.</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S15">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S15">
+        <text:span text:style-name="Span2"><text:tab/><text:tab/>[NEED MORE TEXT FOR CONCLUSION]</text:span>
+      </text:p>
+    </office:text>
+  </office:body>
+</office:document>

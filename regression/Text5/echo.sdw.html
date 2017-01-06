@@ -1,0 +1,286 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" >
+<meta name="typist" content=" ">
+<title></title>
+<style>
+.listElt0 {
+ margin: 0px 0.0000pt 0px -10px; text-indent:-14.1500pt; padding-left:14.1500pt;
+}
+.listLevel0 {
+ text-align:left; margin: 0px 0px 0px 4.15px; text-indent:-14.1500pt; padding-left:14.1500pt;
+
+}
+.para0 {
+ margin: 0px 0.0000pt 0px 0.0000pt; text-indent:0.0000pt;
+}
+.span1 {
+ font-size: 10.0000pt;
+}
+.span3 {
+ font-size: 10.0000pt; font-weight: bold;
+}
+.span2 {
+ font-size: 10.0000pt; font-weight: normal;
+}
+.span0 {
+ font-size: 14.0000pt; font-weight: bold; font-family: 'Times';
+}
+</style>
+</head>
+<body>
+<p class="para0"><span class="span0">GNOME Print Perl script</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">#!/usr/bin/perl -w</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">#TITLE: Gnome Print sample</span>
+</p>
+<p class="para0"><span class="span1">#REQUIRES: Gtk Gnome GnomePrint</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">use Gnome::Print;</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">init Gnome $0, &apos;0.1&apos;;</span>
+</p>
+<p class="para0"><span class="span1">Gtk::Widget-&gt;set_default_colormap(Gtk::Gdk::Rgb-&gt;get_cmap());</span>
+</p>
+<p class="para0"><span class="span1">Gtk::Widget-&gt;set_default_visual(Gtk::Gdk::Rgb-&gt;get_visual());</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">$file = shift || &quot;duck.jpeg&quot;;</span>
+</p>
+<p class="para0"><span class="span1">$pixbuf = Gtk::Gdk::Pixbuf-&gt;new_from_file($file);</span>
+</p>
+<p class="para0"><span class="span1">@slanted = (0.9, 0.1, -0.8, 0.9, 0, 0);</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">$print_master = new Gnome::PrintMaster;</span>
+</p>
+<p class="para0"><span class="span1">$context = $print_master-&gt;get_context;</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;beginpage(&quot;APageName&quot;);</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1"># test gray and rgb images</span>
+</p>
+<p class="para0"><span class="span1">$width &nbsp;= 256;</span>
+</p>
+<p class="para0"><span class="span1">$height = 120;</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">$image = pack(&quot;C*&quot;, 0..$width-1) x $height;</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;gsave;</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;concat($width, 0, 0, -$height, 250, 200);</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;grayimage($image, $width, $height);</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;grestore;</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1"># whack an pretty image up</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;moveto(250, 350);</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;gsave;</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;concat(100, 0, 0, 100, 350, 440);</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;pixbuf($pixbuf);</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;grestore;</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1"># a line</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;moveto(100, 100);</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;lineto(200, 200);</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;stroke;</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1"># Text on a slant</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;setfont(Gnome::Font-&gt;new_closest(&quot;Times&quot;, &apos;bold&apos;, 1, 20));</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;gsave();</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;moveto(150, 400);</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;concat(@slanted);</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;show(&quot;Slanted text, Times, bold 20&quot;);</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;grestore();</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1"># A rotated string thing</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;moveto(250, 600);</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;setrgbcolor(1,0.1,0);</span>
+</p>
+<p class="para0"><span class="span1">foreach (map {$_*30} 0 .. 6) {</span>
+</p>
+<p class="para0"><span class="span1">	$context-&gt;gsave();</span>
+</p>
+<p class="para0"><span class="span1">	$context-&gt;concat(Gnome::Print-&gt;affine_rotate($_));</span>
+</p>
+<p class="para0"><span class="span1">	$context-&gt;show(&quot; LWE August 2001 ...&quot;);</span>
+</p>
+<p class="para0"><span class="span1">	$context-&gt;grestore();</span>
+</p>
+<p class="para0"><span class="span1">}</span>
+</p>
+<p class="para0"><span class="span1">$context-&gt;showpage;</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">$print_master-&gt;close;</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1"># Show the preview ...</span>
+</p>
+<p class="para0"><span class="span1">$preview = new Gnome::PrintMasterPreview ($print_master, &apos;Gnome::Print from perl&apos;);</span>
+</p>
+<p class="para0"><span class="span1">$preview-&gt;signal_connect(&apos;destroy&apos;, sub {Gtk-&gt;main_quit;});</span>
+</p>
+<p class="para0"><span class="span1">$preview-&gt;show;</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">main Gtk;</span>
+</p>
+<p class="para0"><span class="span1">UTF-8(7) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Linux Programmer&apos;s Manual &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UTF-8(7)</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span2">NAME</span>
+</p>
+<p class="para0"><span class="span3">UTF-8</span>
+<span class="span1"> - an ASCII compatible multibyte Unicode encoding</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">DESCRIPTION</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">	The &nbsp;Unicode &nbsp;character &nbsp;set occupies a 16-bit code space.The most obvious Unicode encoding (known &nbsp;as &nbsp;UCS-2) &nbsp;con-sists of a sequence of 16-bit words. Such strings can con-tain as parts of many 16-bit characters bytes like &apos;\0&apos; or&apos;/&apos; &nbsp;which have a special meaning in filenames and other Clibrary function parameters. &nbsp;In addition, the majority of UNIX tools expects ASCII files and can&apos;t read 16-bit words as characters without major modifications. For these &nbsp;reasons, UCS-2 is not a suitable external encoding of Unicode</span>
+</p>
+<p class="para0"><span class="span1">in filenames, text files, environment variables, etc. &nbsp;The ISO &nbsp;10646 &nbsp;Universal &nbsp;Character &nbsp;Set (UCS), a superset of Unicode, occupies even a 31-bit code space and the obvious UCS-4 &nbsp;encoding &nbsp;&nbsp;for &nbsp;it (a sequence of 32-bit words) has the same problems.</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">	The UTF-8 encoding of Unicode and UCS does not have &nbsp;these problems &nbsp;and is the way to go for using the Unicode char-acter set under Unix-style operating systems.</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">PROPERTIES</span>
+</p>
+<p class="para0"><span class="span1">The UTF-8 encoding has the following nice properties:</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<ul class="listLevel0">
+<li class="listElt0"><span class="span1"> UCS characters 0x00000000 to 0x0000007f &nbsp;(the &nbsp;classical &nbsp;US-ASCII characters) are encoded simply as bytes 0x00 to &nbsp;0x7f (ASCII compatibility). This means &nbsp;that &nbsp;files &nbsp;and &nbsp;strings &nbsp;which &nbsp;contain only 7-bit ASCII characters have &nbsp;the same encoding under both ASCII and UTF-8.</span>
+</li>
+<li class="listElt0"><span class="span1">All UCS characters &gt; 0x7f are &nbsp;encoded &nbsp;as &nbsp;a &nbsp;multibyte &nbsp;sequence &nbsp;consisting &nbsp;only of bytes in the range 0x80 to &nbsp;0xfd, so no ASCII byte can appear &nbsp;as &nbsp;part &nbsp;of &nbsp;another &nbsp;character &nbsp;and &nbsp;there &nbsp;are no problems with e.g. &apos;\0&apos; or &nbsp;&apos;/&apos;.</span>
+</li>
+<li class="listElt0"><span class="span1">The lexicographic sorting order of UCS-4 strings is preserved.</span>
+</li>
+<li class="listElt0"><span class="span1">All &nbsp;possible 2^31 UCS codes can be encoded using UTF-8.</span>
+</li>
+<li class="listElt0"><span class="span1">The bytes 0xfe and 0xff are &nbsp;never &nbsp;used &nbsp;in &nbsp;the &nbsp;UTF-8 encoding.</span>
+</li>
+<li class="listElt0"><span class="span1">The &nbsp;first byte of a multibyte sequence which represents a single non-ASCII UCS character is always in the &nbsp;range 0xc0 &nbsp;to &nbsp;0xfd &nbsp;and &nbsp;indicates &nbsp;how &nbsp;long this multibyte sequence is. All further bytes in a &nbsp;multibyte &nbsp;sequence are &nbsp;in &nbsp;the range 0x80 to 0xbf. This allows easy resyn- chronization and makes the encoding stateless and robust against missing bytes.</span>
+</li>
+<li class="listElt0"><span class="span1">UTF-8 &nbsp;encoded &nbsp;UCS &nbsp;characters &nbsp;may &nbsp;be up to six bytes long, however Unicode characters can only be up to three bytes long. As Linux uses only the 16-bit Unicode subset of UCS, under Linux, UTF-8 multibyte sequences can &nbsp;only be one, two or three bytes long.</span>
+</li>
+</ul>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">ENCODING</span>
+</p>
+<p class="para0"><span class="span1">The following byte sequences are used to represent a char-</span>
+</p>
+<p class="para0"><span class="span1">acter. The sequence to be used depends &nbsp;on &nbsp;the &nbsp;UCS &nbsp;code</span>
+</p>
+<p class="para0"><span class="span1">number of the character:</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">0x00000000 - 0x0000007F:</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;0xxxxxxx</span>
+</p>
+<p class="para0"><span class="span1">0x00000080 - 0x000007FF:</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;110xxxxx 10xxxxxx</span>
+</p>
+<p class="para0"><span class="span1">0x00000800 - 0x0000FFFF:</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;1110xxxx 10xxxxxx 10xxxxxx</span>
+</p>
+<p class="para0"><span class="span1">0x00010000 - 0x001FFFFF:</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;11110xxx 10xxxxxx 10xxxxxx 10xxxxxx</span>
+</p>
+<p class="para0"><span class="span1">0x00200000 - 0x03FFFFFF:</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx</span>
+</p>
+<p class="para0"><span class="span1">0x04000000 - 0x7FFFFFFF:</span>
+</p>
+<p class="para0"><span class="span1"> &nbsp;&nbsp;&nbsp;1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">The &nbsp;xxx &nbsp;bit &nbsp;positions &nbsp;are &nbsp;filled with the bits of the character code number in binary representation. &nbsp;Only &nbsp;the shortest &nbsp;possible &nbsp;multibyte sequence which can represent the code number of the character can be used.</span>
+</p>
+<p class="para0"><span class="span1"></span>
+</p>
+<p class="para0"><span class="span1">EXAMPLES</span>
+</p>
+<p class="para0"><span class="span1">The Unicode character 0xa9 &nbsp;= &nbsp;1010 &nbsp;1001 &nbsp;(the &nbsp;copyright</span>
+</p>
+<p class="para0"><span class="span1">sign) is encoded in UTF-8 as</span>
+</p>
+<p class="para0"><span class="span1">11000010 10101001 = 0xc2 0xa9</span>
+</p>
+<p class="para0"><span class="span1">and &nbsp;character &nbsp;0x2260 &nbsp;= &nbsp;0010 &nbsp;0010 &nbsp;0110 0000 (the &quot;not</span>
+</p>
+<p class="para0"><span class="span1">equal&quot; symbol) is encoded as:</span>
+</p>
+<p class="para0"><span class="span1">11100010 10001001 10100000 = 0xe2 0x89 0xa0</span>
+</p>
+<p class="para0"><span class="span1">AUTHOR: </span>
+<span class="span3">Markus Kuhn </span>
+<span class="span1">&lt;mskuhn@cip.informatik.uni-erlangen.de&gt;</span>
+</p>
+<p class="para0"><span class="span1">SEE ALSO unicode(7)</span>
+</p>
+
+</body>
+</html>
