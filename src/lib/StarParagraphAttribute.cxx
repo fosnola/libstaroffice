@@ -212,7 +212,7 @@ void StarPAttributeBool::addTo(StarState &state, std::set<StarAttribute const *>
   if (m_type==ATTR_PARA_SPLIT)
     state.m_paragraph.m_propertyList.insert("fo:keep-together", m_value ? "auto" : "always");
   else if (m_type==ATTR_PARA_HANGINGPUNCTUATION)
-    state.m_paragraph.m_propertyList.insert("fo:style:punctuation-wrap", m_value ? "hanging" : "simple");
+    state.m_paragraph.m_propertyList.insert("style:punctuation-wrap", m_value ? "hanging" : "simple");
   else if (m_type==ATTR_PARA_SNAPTOGRID)
     state.m_paragraph.m_propertyList.insert("style:snap-to-layout-grid", m_value);
   else if (m_type==ATTR_PARA_CONNECT_BORDER)
