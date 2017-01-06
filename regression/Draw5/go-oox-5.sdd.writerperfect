@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" office:mimetype="application/vnd.oasis.opendocument.graphics" office:version="1.0">
+  <office:meta>
+    <dc:date>2017-01-06T10:38:50.00</dc:date>
+    <meta:creation-date>2017-01-06T10:38:50.00</meta:creation-date>
+    <meta:print-date>1601-01-01T00:00:00.00</meta:print-date>
+    <meta:generator>libodfgen/0.1.6</meta:generator>
+  </office:meta>
+  <office:settings>
+    <config:config-item-set config:name="ooo:view-settings">
+      <config:config-item config:name="VisibleAreaTop" config:type="int">0</config:config-item>
+      <config:config-item config:name="VisibleAreaLeft" config:type="int">0</config:config-item>
+      <config:config-item config:name="VisibleAreaWidth" config:type="int">28002</config:config-item>
+      <config:config-item config:name="VisibleAreaHeight" config:type="int">20999</config:config-item>
+    </config:config-item-set>
+  </office:settings>
+  <office:font-face-decls>
+    <style:font-face style:name="Arial" svg:font-family="Arial"/>
+    <style:font-face style:name="StarSymbol" svg:font-family="StarSymbol"/>
+    <style:font-face style:font-charset="x-symbol" style:name="StarSymbol" svg:font-family="StarSymbol"/>
+  </office:font-face-decls>
+  <office:styles>
+    <draw:gradient draw:angle="0" draw:border="0.0000%" draw:cx="50.0000%" draw:cy="50.0000%" draw:end-color="#ffffff" draw:name="Gradient_0" draw:start-color="#000000" draw:style="single"/>
+    <draw:hatch draw:color="#000000" draw:distance="0.5669pt" draw:name="Hatch_0" draw:rotation="0" draw:style="single"/>
+    <draw:marker draw:name="Marker_0" svg:d="M150 0L300 300L0 300L150 0 Z" svg:viewBox="0 0 170 170"/>
+    <style:style style:display-name="Default~LT~Hintergrund" style:family="graphic" style:name="GraphicStyle_0" style:parent-style-name="standard">
+      <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:stroke="none"/>
+    </style:style>
+    <style:style style:display-name="Default~LT~Titel" style:family="graphic" style:name="GraphicStyle_2" style:parent-style-name="standard">
+      <style:graphic-properties draw:fill="none" draw:stroke="none"/>
+    </style:style>
+    <style:style style:display-name="Default" style:family="graphic" style:name="GraphicStyle_4" style:parent-style-name="standard">
+      <style:graphic-properties draw:fill="solid" draw:fill-color="#99ccff" draw:fill-gradient-name="Gradient_0" draw:fill-hatch-name="Hatch_0" draw:marker-end-center="false" draw:marker-end-width="8.5039pt" draw:marker-start-center="false" draw:marker-start-width="8.5039pt" draw:shadow="hidden" draw:shadow-color="#808080" draw:shadow-offset-x="8.5039pt" draw:shadow-offset-y="8.5039pt" draw:stroke="solid" svg:stroke-color="#000000" svg:stroke-width="0.0000pt"/>
+    </style:style>
+    <style:style style:display-name="Default~LT~Gliederung 1" style:family="graphic" style:name="GraphicStyle_8" style:parent-style-name="standard">
+      <style:graphic-properties draw:auto-grow-height="false" draw:fill="none" draw:stroke="none"/>
+    </style:style>
+  </office:styles>
+  <office:automatic-styles>
+    <style:page-layout style:name="PL0">
+      <style:page-layout-properties fo:margin-bottom="0.0000pt" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:margin-top="0.0000pt" fo:page-height="595.2473pt" fo:page-width="793.7575pt" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:style style:family="drawing-page" style:name="DP1">
+      <style:drawing-page-properties draw:fill="none"/>
+    </style:style>
+    <style:style style:family="graphic" style:name="gr_M1" style:parent-style-name="GraphicStyle_0">
+      <style:graphic-properties draw:auto-grow-height="false" draw:shadow="hidden" draw:stroke="solid"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span0">
+      <style:text-properties fo:color="#000000" fo:country="GB" fo:font-size="43.9937pt" fo:font-weight="normal" fo:language="en" fo:letter-spacing="0*" fo:text-shadow="none" style:country-asian="GB" style:country-complex="GB" style:font-name="Arial" style:font-name-asian="SimSun" style:font-name-complex="Tahoma" style:font-pitch-asian="variable" style:font-relief="none" style:font-size-asian="43.9937pt" style:font-size-complex="43.9937pt" style:font-weight-asian="normal" style:font-weight-complex="normal" style:language-asian="en" style:language-complex="en" style:letter-kerning="true" style:text-line-through-type="none" style:text-outline="false" style:text-underline-type="none"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span1">
+      <style:text-properties fo:color="#000000" fo:font-size="18.0000pt" fo:font-weight="normal" fo:letter-spacing="0*" fo:text-shadow="none" style:font-name="Arial" style:font-name-asian="SimSun" style:font-name-complex="Tahoma" style:font-pitch="variable" style:font-pitch-asian="variable" style:font-pitch-complex="variable" style:font-relief="none" style:font-size-asian="18.0000pt" style:font-size-complex="18.0000pt" style:font-weight-asian="normal" style:font-weight-complex="normal" style:letter-kerning="true" style:text-line-through-type="none" style:text-outline="false" style:text-underline-type="none"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span2">
+      <style:text-properties fo:color="#000000" fo:country="GB" fo:font-size="18.0000pt" fo:font-weight="normal" fo:hyphenate="false" fo:language="en" fo:letter-spacing="0*" fo:text-shadow="none" style:country-asian="GB" style:country-complex="GB" style:font-name="Arial" style:font-name-asian="SimSun" style:font-name-complex="Tahoma" style:font-pitch-asian="variable" style:font-relief="none" style:font-size-asian="18.0000pt" style:font-size-complex="18.0000pt" style:font-weight-asian="normal" style:font-weight-complex="normal" style:language-asian="en" style:language-complex="en" style:letter-kerning="true" style:text-line-through-type="none" style:text-outline="false" style:text-underline-type="none"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span3">
+      <style:text-properties fo:color="#000000" fo:font-size="24.0094pt" fo:font-weight="normal" fo:letter-spacing="0*" fo:text-shadow="none" style:font-name="Arial" style:font-name-asian="SimSun" style:font-name-complex="Tahoma" style:font-pitch="variable" style:font-pitch-asian="variable" style:font-pitch-complex="variable" style:font-relief="none" style:font-size-asian="24.0094pt" style:font-size-complex="24.0094pt" style:font-weight-asian="normal" style:font-weight-complex="normal" style:letter-kerning="true" style:text-line-through-type="none" style:text-outline="false" style:text-underline-type="none"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S0" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="0.0000in" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:margin-top="0.0000pt" fo:text-align="center" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false" style:punctuation-wrap="simple">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="57.0047pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="114.0095pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="171.0142pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="227.9906pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="284.9953pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="342.0000pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="399.0047pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="456.0095pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="513.0142pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="569.9906pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="626.9953pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="684.0000pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S1" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="normal" fo:margin-bottom="0.0000in" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:margin-top="0.0000pt" fo:text-align="left" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false" style:punctuation-wrap="simple">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="57.0047pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="114.0095pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="171.0142pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="227.9906pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="284.9953pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S2" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="0.0000in" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:margin-top="0.0000pt" fo:text-align="left" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false" style:punctuation-wrap="hanging">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="57.0047pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="114.0095pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="171.0142pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="227.9906pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="284.9953pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="342.0000pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="399.0047pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="456.0095pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="513.0142pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="569.9906pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="626.9953pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="684.0000pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S3" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="14.1732pt" fo:margin-left="36.0000pt" fo:margin-right="0.0000pt" fo:margin-top="0.0000pt" fo:text-align="left" fo:text-indent="-16.9795pt" style:auto-text-indent="false" style:justify-single-word="false" style:punctuation-wrap="simple">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="57.0047pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="114.0095pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="171.0142pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="227.9906pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="284.9953pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="342.0000pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="399.0047pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="456.0095pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="513.0142pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="569.9906pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="626.9953pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="684.0000pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S4" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="14.1732pt" fo:margin-left="72.0000pt" fo:margin-right="0.0000pt" fo:margin-top="0.0000pt" fo:text-align="left" fo:text-indent="-16.9795pt" style:auto-text-indent="false" style:justify-single-word="false" style:punctuation-wrap="simple">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="57.0047pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="114.0095pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="171.0142pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="227.9906pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="284.9953pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="342.0000pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="399.0047pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="456.0095pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="513.0142pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="569.9906pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="626.9953pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="684.0000pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S5" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="normal" fo:margin-bottom="0.0000in" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:margin-top="0.0000pt" fo:text-align="left" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false" style:punctuation-wrap="simple">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="57.0047pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <text:list-style style:name="UL0">
+      <text:list-level-style-bullet text:bullet-char=" " text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="StarSymbol"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <style:style style:family="graphic" style:name="gr_3" style:parent-style-name="GraphicStyle_2">
+      <style:graphic-properties draw:auto-grow-height="false" draw:fill="none" draw:fill-color="#ffffff" draw:stroke="none" draw:textarea-vertical-align="middle" fo:min-height="99.3827pt" fo:min-width="1.0000in"/>
+    </style:style>
+    <style:style style:family="graphic" style:name="gr_5" style:parent-style-name="GraphicStyle_4">
+      <style:graphic-properties draw:shadow="hidden" draw:stroke="solid"/>
+    </style:style>
+    <style:style style:family="graphic" style:name="gr_6" style:parent-style-name="GraphicStyle_4">
+      <style:graphic-properties draw:auto-grow-height="false" draw:fill="none" draw:shadow="hidden" draw:stroke="none"/>
+    </style:style>
+    <style:style style:family="graphic" style:name="gr_7" style:parent-style-name="GraphicStyle_4">
+      <style:graphic-properties draw:auto-grow-height="false" draw:fill="none" draw:fill-color="#ffffff" draw:stroke="none" draw:textarea-vertical-align="top" fo:min-height="27.2126pt" fo:min-width="1.0000in"/>
+    </style:style>
+    <style:style style:family="graphic" style:name="gr_9" style:parent-style-name="GraphicStyle_8">
+      <style:graphic-properties draw:auto-grow-height="false" draw:fill="none" draw:fill-color="#ffffff" draw:stroke="none" draw:textarea-vertical-align="top" fo:min-height="392.8535pt" fo:min-width="1.0000in"/>
+    </style:style>
+    <style:style style:family="graphic" style:name="gr_10" style:parent-style-name="GraphicStyle_4">
+      <style:graphic-properties draw:auto-grow-height="false" draw:fill="none" draw:fill-color="#ffffff" draw:stroke="none" draw:textarea-vertical-align="top" fo:min-height="33.8457pt" fo:min-width="1.0000in"/>
+    </style:style>
+    <style:style style:family="graphic" style:name="gr_11" style:parent-style-name="GraphicStyle_4">
+      <style:graphic-properties draw:auto-grow-height="false" draw:fill="none" draw:marker-end="Marker_0" draw:marker-end-center="false" draw:marker-end-width="5.9528pt" draw:shadow="hidden" draw:stroke="solid" svg:stroke-color="#000000" svg:stroke-width="0.7370pt"/>
+    </style:style>
+  </office:automatic-styles>
+  <office:master-styles>
+    <style:master-page draw:style-name="DP1" style:display-name="Master1" style:name="PM0" style:page-layout-name="PL0">
+      <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_M1" svg:height="595.2473pt" svg:width="793.7575pt" svg:x="0.0000pt" svg:y="0.0000pt" text:anchor-type="page"/>
+    </style:master-page>
+  </office:master-styles>
+  <office:body>
+    <office:drawing>
+      <draw:page draw:master-page-name="PM0" draw:name="page1" draw:style-name="DP1">
+        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_3" draw:textarea-vertical-align="middle" fo:min-height="99.3827pt" svg:height="92.2110pt" svg:width="714.2173pt" svg:x="0.5504in" svg:y="0.3783in">
+          <draw:text-box>
+            <text:p text:style-name="S0">
+              <text:span text:style-name="Span0">Savings for libsvx (2)?</text:span>
+            </text:p>
+          </draw:text-box>
+        </draw:frame>
+        <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_5" svg:height="309.6000pt" svg:width="366.9732pt" svg:x="22.6205pt" svg:y="165.4866pt" text:anchor-page-number="2" text:anchor-type="page"/>
+        <draw:g>
+          <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_6" svg:height="27.2126pt" svg:width="292.7339pt" svg:x="27.9780pt" svg:y="134.3622pt" text:anchor-page-number="2" text:anchor-type="page"/>
+          <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_7" draw:textarea-vertical-align="top" fo:min-height="27.2126pt" svg:height="27.2126pt" svg:width="292.7339pt" svg:x="0.3886in" svg:y="1.8661in">
+            <draw:text-box>
+              <text:p text:style-name="S1">
+                <text:span text:style-name="Span1">dlopen time: millions of cycles.</text:span>
+              </text:p>
+            </draw:text-box>
+          </draw:frame>
+        </draw:g>
+        <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_5" svg:height="181.5874pt" svg:width="292.3370pt" svg:x="413.4898pt" svg:y="155.1118pt" text:anchor-page-number="2" text:anchor-type="page"/>
+        <draw:g>
+          <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_6" svg:height="27.2126pt" svg:width="292.7339pt" svg:x="428.7118pt" svg:y="120.6142pt" text:anchor-page-number="2" text:anchor-type="page"/>
+          <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_7" draw:textarea-vertical-align="top" fo:min-height="27.2126pt" svg:height="27.2126pt" svg:width="292.7339pt" svg:x="5.9543in" svg:y="1.6752in">
+            <draw:text-box>
+              <text:p text:style-name="S1">
+                <text:span text:style-name="Span1">Size savings: ~5%</text:span>
+              </text:p>
+            </draw:text-box>
+          </draw:frame>
+        </draw:g>
+        <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_5" svg:height="181.5874pt" svg:width="292.3370pt" svg:x="418.9890pt" svg:y="389.6220pt" text:anchor-page-number="2" text:anchor-type="page"/>
+        <draw:g>
+          <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_6" svg:height="27.2126pt" svg:width="292.7339pt" svg:x="421.7102pt" svg:y="357.5055pt" text:anchor-page-number="2" text:anchor-type="page"/>
+          <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_7" draw:textarea-vertical-align="top" fo:min-height="27.2126pt" svg:height="27.2126pt" svg:width="292.7339pt" svg:x="5.8571in" svg:y="4.9654in">
+            <draw:text-box>
+              <text:p text:style-name="S1">
+                <text:span text:style-name="Span1">Binding savings (writer startup)?</text:span>
+              </text:p>
+            </draw:text-box>
+          </draw:frame>
+        </draw:g>
+      </draw:page>
+      <draw:page draw:master-page-name="PM0" draw:name="page2" draw:style-name="DP1">
+        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_3" draw:textarea-vertical-align="middle" fo:min-height="99.3827pt" svg:height="92.2110pt" svg:width="714.2173pt" svg:x="0.5504in" svg:y="0.1787in">
+          <draw:text-box>
+            <text:p text:style-name="S0">
+              <text:span text:style-name="Span0">Conclusion:</text:span>
+            </text:p>
+          </draw:text-box>
+        </draw:frame>
+        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_9" draw:textarea-vertical-align="top" fo:min-height="392.8535pt" svg:height="265.4646pt" svg:width="714.2173pt" svg:x="0.5346in" svg:y="1.4689in">
+          <draw:text-box>
+            <text:list text:style-name="UL0">
+              <text:list-item>
+                <text:p text:style-name="S2">
+                  <text:span text:style-name="Span2">A set of useful wins</text:span>
+                </text:p>
+              </text:list-item>
+              <text:list-item>
+                <text:p text:style-name="S2">
+                  <text:span text:style-name="Span2">More space/time saving work is possible</text:span>
+                </text:p>
+              </text:list-item>
+              <text:list-item>
+                <text:p text:style-name="S3">
+                  <text:span text:style-name="Span2">breaking the C++ ABI as a side-effect</text:span>
+                </text:p>
+              </text:list-item>
+              <text:list-item>
+                <text:p text:style-name="S4">
+                  <text:span text:style-name="Span2">private thunks, direct vtable calls etc.</text:span>
+                </text:p>
+              </text:list-item>
+              <text:list-item>
+                <text:p text:style-name="S3">
+                  <text:span text:style-name="Span2">existing DSO size breakdown:</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </draw:text-box>
+        </draw:frame>
+        <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_5" svg:height="263.2252pt" svg:width="301.6063pt" svg:x="475.6252pt" svg:y="315.3827pt" text:anchor-page-number="4" text:anchor-type="page"/>
+        <draw:g>
+          <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_6" svg:height="33.8457pt" svg:width="103.2094pt" svg:x="327.6000pt" svg:y="388.0063pt" text:anchor-page-number="4" text:anchor-type="page"/>
+          <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_10" draw:textarea-vertical-align="top" fo:min-height="33.8457pt" svg:height="33.8457pt" svg:width="103.2094pt" svg:x="4.5500in" svg:y="5.3890in">
+            <draw:text-box>
+              <text:p text:style-name="S5">
+                <text:span text:style-name="Span3">Before:</text:span>
+              </text:p>
+            </draw:text-box>
+          </draw:frame>
+        </draw:g>
+        <draw:g>
+          <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_6" svg:height="33.8457pt" svg:width="104.7118pt" svg:x="337.2378pt" svg:y="466.3842pt" text:anchor-page-number="4" text:anchor-type="page"/>
+          <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_10" draw:textarea-vertical-align="top" fo:min-height="33.8457pt" svg:height="33.8457pt" svg:width="104.7118pt" svg:x="4.6839in" svg:y="6.4776in">
+            <draw:text-box>
+              <text:p text:style-name="S5">
+                <text:span text:style-name="Span3">After:</text:span>
+              </text:p>
+            </draw:text-box>
+          </draw:frame>
+        </draw:g>
+        <draw:line draw:layer="layout" draw:style-name="gr_11" svg:x1="421.9937pt" svg:x2="662.7402pt" svg:y1="403.3701pt" svg:y2="390.2457pt" text:anchor-page-number="4" text:anchor-type="page"/>
+        <draw:line draw:layer="layout" draw:style-name="gr_11" svg:x1="419.6126pt" svg:x2="592.3559pt" svg:y1="487.3606pt" svg:y2="414.3685pt" text:anchor-page-number="4" text:anchor-type="page"/>
+      </draw:page>
+    </office:drawing>
+  </office:body>
+</office:document>

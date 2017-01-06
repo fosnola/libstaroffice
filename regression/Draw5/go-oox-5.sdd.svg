@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  >
+<rect x="0.0000" y="0.0000" width="793.7575" height="595.2473" style=""/>
+<text x="39.6283" y="73.3465">
+<tspan font-family="Arial" font-weight="normal" font-size="43.9937" fill="#000000" >
+Savings for libsvx (2)?</tspan>
+</text>
+<rect x="22.6205" y="165.4866" width="366.9732" height="309.6000" style=""/>
+<g id="Group1000" >
+<rect x="27.9780" y="134.3622" width="292.7339" height="27.2126" style="stroke-width: 0.7370; fill: none; "/>
+<text x="27.9780" y="134.3622">
+<tspan font-family="Arial" font-weight="normal" font-size="18.0000" fill="#000000" >
+dlopen time: millions of cycles.</tspan>
+</text>
+</g>
+<rect x="413.4898" y="155.1118" width="292.3370" height="181.5874" style=""/>
+<g id="Group1001" >
+<rect x="428.7118" y="120.6142" width="292.7339" height="27.2126" style="stroke-width: 0.7370; fill: none; "/>
+<text x="428.7118" y="120.6142">
+<tspan font-family="Arial" font-weight="normal" font-size="18.0000" fill="#000000" >
+Size savings: ~5%</tspan>
+</text>
+</g>
+<rect x="418.9890" y="389.6220" width="292.3370" height="181.5874" style=""/>
+<g id="Group1002" >
+<rect x="421.7102" y="357.5055" width="292.7339" height="27.2126" style="stroke-width: 0.7370; fill: none; "/>
+<text x="421.7102" y="357.5055">
+<tspan font-family="Arial" font-weight="normal" font-size="18.0000" fill="#000000" >
+Binding savings (writer startup)?</tspan>
+</text>
+</g>
+</svg>
+
