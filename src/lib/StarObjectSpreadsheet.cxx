@@ -2135,8 +2135,9 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
         }
 #if 0
         libstoff::DebugStream f2;
-        item->m_attribute->print(f2);
-        std::cerr << "\t" << STOFFVec2i(row, newRow) << ":" << f2.str().c_str() << "\n";
+        std::set<StarAttribute const *> done;
+        item->m_attribute->print(f2, done);
+        std::cerr << "\tC" << column << "x" << STOFFVec2i(row, newRow) << ":" << f2.str().c_str() << "[" << item->m_attribute.get() << "]\n";
 #endif
         if (newRow>=row) {
           table.updateRowsBlocks(STOFFVec2i(row, newRow));

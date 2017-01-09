@@ -179,10 +179,8 @@ void StarCAttributeBool::addTo(StarState &state, std::set<StarAttribute const *>
 
 void StarCAttributeInt::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
-  if (m_type==ATTR_SC_ROTATE_VALUE) {
-    int prevRot=state.m_cell.m_propertyList["style:rotation-angle"] ? state.m_cell.m_propertyList["style:rotation-angle"]->getInt() : 0;
-    state.m_cell.m_propertyList.insert("style:rotation-angle",prevRot+m_value);
-  }
+  if (m_type==ATTR_SC_ROTATE_VALUE)
+    state.m_cell.m_propertyList.insert("style:rotation-angle",m_value/100);
 }
 
 void StarCAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
@@ -200,7 +198,7 @@ void StarCAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
     case 2: // center
     case 3: // right
       state.m_cell.m_propertyList.insert("style:text-align-source", "fix");
-      state.m_cell.m_propertyList.insert("fo:text-align", m_value==1 ? "first" : m_value==2 ? "center" : "end");
+      state.m_cell.m_propertyList.insert("fo:text-align", m_value==1 ? "start" : m_value==2 ? "center" : "end");
       break;
     case 4: // block
       state.m_cell.m_propertyList.insert("style:text-align-source", "fix");
@@ -216,6 +214,8 @@ void StarCAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
       break;
     }
   }
+  else if (m_type==ATTR_SC_INDENT)
+    state.m_cell.m_propertyList.insert("fo:margin-left", double(m_value)/18.3, librevenge::RVNG_POINT);
   else if (m_type==ATTR_SC_VERJUSTIFY || m_type==ATTR_SC_ROTATE_MODE) {
     switch (m_value) {
     case 0: // standard
@@ -591,6 +591,7 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeUInt(map, StarAttribute::ATTR_SC_VERJUSTIFY,"justify[vert]",2,0); // standart
   addAttributeBool(map, StarAttribute::ATTR_SC_LINEBREAK,"lineBreak", false);
   addAttributeUInt(map, StarAttribute::ATTR_SC_ORIENTATION,"orientation",2,0); // standard
+  addAttributeUInt(map, StarAttribute::ATTR_SC_INDENT,"indent",2,0);
   addAttributeInt(map, StarAttribute::ATTR_SC_ROTATE_VALUE,"rotate[value]",4,0);
   addAttributeUInt(map, StarAttribute::ATTR_SC_ROTATE_MODE,"rotate[mode]",2,0); // normal
   addAttributeUInt(map, StarAttribute::ATTR_SC_WRITINGDIR,"writing[dir]",2,4); // frame environment
@@ -601,7 +602,6 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   map[StarAttribute::ATTR_SC_PROTECTION]=shared_ptr<StarAttribute>(new StarCAttributeProtection(StarAttribute::ATTR_SC_PROTECTION,"scProtection"));
 
   // TOUSE
-  addAttributeUInt(map, StarAttribute::ATTR_SC_INDENT,"indent",2,0);
   addAttributeBool(map, StarAttribute::ATTR_SC_VERTICAL_ASIAN,"vertical[asian]", false);
   addAttributeInt(map, StarAttribute::ATTR_SC_MERGE_FLAG,"merge[flag]",2,0);
   addAttributeUInt(map, StarAttribute::ATTR_SC_VALIDDATA,"data[valid]",4,0);

@@ -1490,6 +1490,7 @@ void STOFFSpreadsheetListener::openSheetCell(STOFFCell const &cell, STOFFCellCon
     }
   }
 
+  _pushParsingState();
   m_ps->m_isSheetCellOpened = true;
   m_documentInterface->openSheetCell(propList);
 }
@@ -1505,6 +1506,7 @@ void STOFFSpreadsheetListener::closeSheetCell()
 
   m_ps->m_isSheetCellOpened = false;
   m_documentInterface->closeSheetCell();
+  _popParsingState();
 }
 
 void STOFFSpreadsheetListener::insertTable(STOFFPosition const &pos, STOFFTable &table, STOFFGraphicStyle const &style)

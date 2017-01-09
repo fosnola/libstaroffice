@@ -723,6 +723,11 @@ bool StarCellFormula::readSCToken(StarZone &zone, StarCellFormulaInternal::Token
     token.m_content=StarCellFormulaInternal::Token::C_FunctionOperator;
     token.m_longValue=-1;
     break;
+  case 11:
+    STOFF_DEBUG_MSG(("StarCellFormula::readSCToken: find bad opcode\n"));
+    f << "#bad[opcode],";
+    ok=false;
+    break;
   case 12:
     // extra space
     if (type) f << "##type=" << type << ",";
@@ -736,14 +741,14 @@ bool StarCellFormula::readSCToken(StarZone &zone, StarCellFormulaInternal::Token
     break;
   default:
     if (type!=0) {
-      STOFF_DEBUG_MSG(("StarCellFormula::readSCToken: can not read a formule\n"));
+      STOFF_DEBUG_MSG(("StarCellFormula::readSCToken: can not read a formula\n"));
       f << "##f" << nOp << "[" << type << "],";
       ok=false;
     }
     else if (token.updateFunction())
       token.m_type=StarCellFormulaInternal::Token::Function;
     else {
-      STOFF_DEBUG_MSG(("StarCellFormula::readSCToken: can not read a formule\n"));
+      STOFF_DEBUG_MSG(("StarCellFormula::readSCToken: can not read a formula\n"));
       f << "##f" << nOp << ",";
       ok=false;
     }

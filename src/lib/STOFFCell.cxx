@@ -305,14 +305,14 @@ bool STOFFCell::sendContent(STOFFListenerPtr, STOFFTable &)
 bool STOFFCellContent::double2Date(double val, int &Y, int &M, int &D)
 {
   /* first convert the date in long*/
-  long numDaysSinceOrigin=long(val+0.4);
+  long numDaysSinceOrigin=long(val+(val>0 ? -2 : -3)+0.4);
   // checkme: do we need to check before for isNan(val) ?
   if (numDaysSinceOrigin<-10000*365 || numDaysSinceOrigin>10000*365) {
-    /* normally, we can expect documents to contain date between 1904
-       and 2004. So even if such a date can make sense, storing it as
+    /* normally, we can expect documents to contain date between 1900
+       and 2100. So even if such a date can make sense, storing it as
        a number of days is clearly abnormal */
     STOFF_DEBUG_MSG(("STOFFCellContent::double2Date: using a double to represent the date %ld seems odd\n", numDaysSinceOrigin));
-    Y=1904;
+    Y=1900;
     M=D=1;
     return false;
   }
