@@ -228,14 +228,19 @@ void STOFFSpreadsheetListener::defineStyle(STOFFFont const &style)
 {
   if (style.m_propertyList["style:display-name"])
     m_ds->m_definedFontStyleSet.insert(style.m_propertyList["style:display-name"]->getStr());
-  m_documentInterface->defineCharacterStyle(style.m_propertyList);
+  librevenge::RVNGPropertyList pList(style.m_propertyList);
+  STOFFFont::checkForDefault(pList);
+  m_documentInterface->defineCharacterStyle(pList);
 }
 
 void STOFFSpreadsheetListener::defineStyle(STOFFGraphicStyle const &style)
 {
   if (style.m_propertyList["style:display-name"])
     m_ds->m_definedGraphicStyleSet.insert(style.m_propertyList["style:display-name"]->getStr());
-  m_documentInterface->defineGraphicStyle(style.m_propertyList);
+  librevenge::RVNGPropertyList pList(style.m_propertyList);
+  STOFFGraphicStyle::checkForDefault(pList);
+  STOFFGraphicStyle::checkForPadding(pList);
+  m_documentInterface->defineGraphicStyle(pList);
 }
 
 void STOFFSpreadsheetListener::defineStyle(STOFFParagraph const &style)
@@ -877,6 +882,7 @@ void STOFFSpreadsheetListener::_openSpan()
 
   librevenge::RVNGPropertyList propList;
   m_ps->m_font.addTo(propList);
+  STOFFFont::checkForDefault(propList);
 
   m_documentInterface->openSpan(propList);
 
@@ -1037,6 +1043,7 @@ void STOFFSpreadsheetListener::insertTextBox
   librevenge::RVNGPropertyList propList;
   if (frameStyle.m_propertyList["librevenge:next-frame-name"])
     propList.insert("librevenge:next-frame-name",frameStyle.m_propertyList["librevenge:next-frame-name"]->clone());
+  STOFFGraphicStyle::checkForPadding(propList);
   m_documentInterface->openTextBox(propList);
   handleSubDocument(subDocument, libstoff::DOC_TEXT_BOX);
   m_documentInterface->closeTextBox();
@@ -1086,6 +1093,7 @@ void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFF
   pos.addTo(shapeProp);
   shape.addTo(shapeProp);
   style.addTo(styleProp);
+  STOFFGraphicStyle::checkForDefault(styleProp);
 
   m_documentInterface->defineGraphicStyle(styleProp);
   switch (shape.m_command) {

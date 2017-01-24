@@ -197,14 +197,19 @@ void STOFFGraphicListener::defineStyle(STOFFFont const &style)
 {
   if (style.m_propertyList["style:display-name"])
     m_ds->m_definedFontStyleSet.insert(style.m_propertyList["style:display-name"]->getStr());
-  m_documentInterface->defineCharacterStyle(style.m_propertyList);
+  librevenge::RVNGPropertyList pList(style.m_propertyList);
+  STOFFFont::checkForDefault(pList);
+  m_documentInterface->defineCharacterStyle(pList);
 }
 
 void STOFFGraphicListener::defineStyle(STOFFGraphicStyle const &style)
 {
   if (style.m_propertyList["style:display-name"])
     m_ds->m_definedGraphicStyleSet.insert(style.m_propertyList["style:display-name"]->getStr());
-  m_documentInterface->setStyle(style.m_propertyList);
+  librevenge::RVNGPropertyList pList(style.m_propertyList);
+  STOFFGraphicStyle::checkForDefault(pList);
+  STOFFGraphicStyle::checkForPadding(pList);
+  m_documentInterface->setStyle(pList);
 }
 
 void STOFFGraphicListener::defineStyle(STOFFParagraph const &style)
@@ -756,6 +761,7 @@ void STOFFGraphicListener::_openSpan()
 
   librevenge::RVNGPropertyList propList;
   m_ps->m_font.addTo(propList);
+  STOFFFont::checkForDefault(propList);
 
   m_documentInterface->openSpan(propList);
 
@@ -1040,6 +1046,7 @@ void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGrap
   pos.addTo(shapeProp);
   shape.addTo(shapeProp);
   style.addTo(styleProp);
+  STOFFGraphicStyle::checkForDefault(styleProp);
   m_documentInterface->setStyle(styleProp);
   switch (shape.m_command) {
   case STOFFGraphicShape::C_Connector:
@@ -1086,6 +1093,7 @@ void STOFFGraphicListener::insertTextBox
     return;
   librevenge::RVNGPropertyList propList;
   _handleFrameParameters(propList, pos, style);
+  STOFFGraphicStyle::checkForPadding(propList);
   m_documentInterface->startTextObject(propList);
   handleSubDocument(subDocument, libstoff::DOC_TEXT_BOX);
   m_documentInterface->endTextObject();

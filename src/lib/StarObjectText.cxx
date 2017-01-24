@@ -364,7 +364,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
     shared_ptr<SWFieldManagerInternal::Field> field;
     librevenge::RVNGString linkString;
     bool startRefMark=false;
-
+    bool softHyphen=false;
     if (fontChange) {
       lineState.reinitializeLineData();
       lineState.m_font=mainFont;
@@ -428,6 +428,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
           lineState.m_refMark.clear();
         }
       }
+      softHyphen=font.m_softHyphen;
       listener->setFont(font);
       if (c==0) {
         int level=m_level;
@@ -494,6 +495,8 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
     }
     else if (c==m_text.size())
       break;
+    else if (softHyphen)
+      listener->insertUnicode(0xad);
     else if (m_text[c]==0x9)
       listener->insertTab();
     else if (m_text[c]==0xa)

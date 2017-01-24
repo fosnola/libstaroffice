@@ -48,7 +48,11 @@ public:
   STOFFGraphicStyle();
   //! add to the propList
   void addTo(librevenge::RVNGPropertyList &propList) const;
-
+  /** check if the line style is set and the fill style is set.
+      If not set the line style, to black color and the fill style to none */
+  static void checkForDefault(librevenge::RVNGPropertyList &propList);
+  //! check if the padding margins are set, if not set them to 0
+  static void checkForPadding(librevenge::RVNGPropertyList &propList);
   //! operator<<
   friend std::ostream &operator<<(std::ostream &o, STOFFGraphicStyle const &graphicStyle);
   //! operator==

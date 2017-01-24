@@ -51,6 +51,8 @@ public:
   ~STOFFFont();
   //! add to the propList
   void addTo(librevenge::RVNGPropertyList &propList) const;
+  /** check if the font name defined. If not set Times*/
+  static void checkForDefault(librevenge::RVNGPropertyList &propList);
 
   //! operator<<
   friend std::ostream &operator<<(std::ostream &o, STOFFFont const &font);

@@ -75,4 +75,27 @@ void STOFFGraphicStyle::addTo(librevenge::RVNGPropertyList &pList) const
   }
 }
 
+void STOFFGraphicStyle::checkForPadding(librevenge::RVNGPropertyList &propList)
+{
+  if (propList["librevenge:parent-display-name"]) return;
+  for (int i=0; i<4; ++i) {
+    char const *(wh[])= { "fo:padding-top", "fo:padding-bottom",
+                          "fo:padding-left", "fo:padding-right"
+                        };
+    if (propList[wh[i]])
+      continue;
+    propList.insert(wh[i],0,librevenge::RVNG_POINT);
+  }
+}
+
+void STOFFGraphicStyle::checkForDefault(librevenge::RVNGPropertyList &propList)
+{
+  if (propList["librevenge:parent-display-name"]) return;
+  if (!propList["draw:stroke"])
+    propList.insert("draw:stroke", "solid");
+  if (!propList["svg:stroke-color"] && propList["draw:stroke"]->getStr()=="solid")
+    propList.insert("svg:stroke-color", "#000000");
+  if (!propList["draw:fill"])
+    propList.insert("draw:fill", "none");
+}
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

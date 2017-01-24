@@ -98,4 +98,10 @@ void STOFFFont::addTo(librevenge::RVNGPropertyList &pList) const
   }
 }
 
+void STOFFFont::checkForDefault(librevenge::RVNGPropertyList &propList)
+{
+  if (propList["librevenge:parent-display-name"]) return;
+  if (!propList["style:font-name"])
+    propList.insert("style:font-name", "Times");
+}
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
