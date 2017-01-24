@@ -646,8 +646,15 @@ public:
     shared_ptr<StarItemPool> pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
-    if (!state.m_graphic.m_hasBackground) state.m_graphic.m_propertyList.insert("draw:fill", "none");
+    // if (!state.m_graphic.m_hasBackground) state.m_graphic.m_propertyList.insert("draw:fill", "none"); checkme
     state.m_graphic.m_propertyList.insert("draw:fill", "none");
+    if (m_textDrehWink) {
+      static bool isFirst=true;
+      if (isFirst) {
+        isFirst=false;
+        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicText::send: text rotation is not taken in account\n"));
+      }
+    }
     shared_ptr<SubDocument> doc(new SubDocument(m_outlinerParaObject));
     listener->insertTextBox(position, doc, state.m_graphic);
     return true;

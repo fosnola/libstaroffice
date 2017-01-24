@@ -530,7 +530,7 @@ class StarPAttributeLineSpacing : public StarAttribute
 {
 public:
   //! constructor
-  StarPAttributeLineSpacing(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_propLineSpace(100), m_lineSpace(0), m_height(200), m_lineSpaceRule(0), m_interLineSpaceRule(0)
+  StarPAttributeLineSpacing(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_propLineSpace(100), m_interLineSpace(0), m_lineHeight(200), m_lineSpaceRule(0), m_interLineSpaceRule(0)
   {
   }
   //! create a new attribute
@@ -546,23 +546,24 @@ public:
   virtual void printData(libstoff::DebugStream &o) const
   {
     o << m_debugName << "=[";
-    if (m_lineSpace) o << "lineSpace=" << m_lineSpace << "[" << m_propLineSpace << "],";
-    if (m_height) o << "height=" << m_height << ",";
+    if (m_interLineSpace) o << "lineSpace=" << m_interLineSpace;
+    if (m_propLineSpace!=100) o << "propLineSpace=" << m_propLineSpace << ",";
+    if (m_lineHeight) o << "height=" << m_lineHeight << ",";
     if (m_lineSpaceRule) o << "lineSpaceRule=" << m_lineSpaceRule << ",";
     if (m_interLineSpaceRule) o << "interLineSpaceRule=" << m_interLineSpaceRule << ",";
     o << "],";
   }
 protected:
   //! copy constructor
-  StarPAttributeLineSpacing(StarPAttributeLineSpacing const &orig) : StarAttribute(orig), m_propLineSpace(orig.m_propLineSpace), m_lineSpace(orig.m_lineSpace), m_height(orig.m_height), m_lineSpaceRule(orig.m_lineSpaceRule), m_interLineSpaceRule(orig.m_interLineSpaceRule)
+  StarPAttributeLineSpacing(StarPAttributeLineSpacing const &orig) : StarAttribute(orig), m_propLineSpace(orig.m_propLineSpace), m_interLineSpace(orig.m_interLineSpace), m_lineHeight(orig.m_lineHeight), m_lineSpaceRule(orig.m_lineSpaceRule), m_interLineSpaceRule(orig.m_interLineSpaceRule)
   {
   }
   //! the prop lineSpacing
   int m_propLineSpace;
   //! the line spacing
-  int m_lineSpace;
+  int m_interLineSpace;
   //! the height
-  int m_height;
+  int m_lineHeight;
   //! the line spacing rule: SvxLineSpace
   int m_lineSpaceRule;
   //! the inter line spacing rule: SvxInterLineSpace
@@ -776,7 +777,7 @@ void StarPAttributeAdjust::addTo(StarState &state, std::set<StarAttribute const 
       break;
     case 2: // block
       state.m_paragraph.m_propertyList.insert("fo:text-align", "justify");
-      state.m_paragraph.m_propertyList.insert("fo:text-align-last", "justify");
+      state.m_paragraph.m_propertyList.insert("fo:text-align-last", "default");
       break;
     case 3:
       state.m_paragraph.m_propertyList.insert("fo:text-align", "center");
@@ -849,29 +850,30 @@ void StarPAttributeLineNumbering::addTo(StarState &state, std::set<StarAttribute
 void StarPAttributeLineSpacing::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_PARA_LINESPACING) {
+    // svx_paraitem.cxx SvxLineSpacingItem::QueryValue
     if (m_interLineSpaceRule==0)
       state.m_paragraph.m_propertyList.insert("fo:line-height", "normal");
     switch (m_lineSpaceRule) {
-    case 0:
+    case 0: // will be set later
       break;
     case 1:
-      state.m_paragraph.m_propertyList.insert("fo:line-height", state.m_global->m_relativeUnit*double(m_height), librevenge::RVNG_POINT);
-      break;
+      state.m_paragraph.m_propertyList.insert("fo:line-height", state.m_global->m_relativeUnit*double(m_lineHeight), librevenge::RVNG_POINT);
+      return;
     case 2:
-      state.m_paragraph.m_propertyList.insert("fo:line-height-at-least", state.m_global->m_relativeUnit*double(m_height), librevenge::RVNG_POINT);
-      break;
+      state.m_paragraph.m_propertyList.insert("fo:line-height-at-least", state.m_global->m_relativeUnit*double(m_lineHeight), librevenge::RVNG_POINT);
+      return;
     default:
       STOFF_DEBUG_MSG(("StarPAttributeLineSpacing::addTo: unknown rule %d\n", int(m_lineSpaceRule)));
     }
     switch (m_interLineSpaceRule) {
-    case 0: // auto
+    case 0: // off
+      state.m_paragraph.m_propertyList.insert("fo:line-height", 1., librevenge::RVNG_PERCENT);
       break;
     case 1: // Prop
-      if (m_lineSpace)
-        state.m_paragraph.m_propertyList.insert("style:line-spacing", double(m_lineSpace<50 ? 50 : m_lineSpace)/100., librevenge::RVNG_PERCENT);
+      state.m_paragraph.m_propertyList.insert("fo:line-height", double(m_propLineSpace)/100., librevenge::RVNG_PERCENT);
       break;
     case 2: // Fix
-      state.m_paragraph.m_propertyList.insert("style:line-spacing", state.m_global->m_relativeUnit*double(m_lineSpace), librevenge::RVNG_POINT);
+      state.m_paragraph.m_propertyList.insert("fo:line-height", state.m_global->m_relativeUnit*double(m_interLineSpace), librevenge::RVNG_POINT);
       break;
     default:
       STOFF_DEBUG_MSG(("StarPAttributeLineSpacing::addTo: unknown inter linse spacing rule %d\n", int(m_interLineSpaceRule)));
@@ -1112,9 +1114,9 @@ bool StarPAttributeLineSpacing::read(StarZone &zone, int /*vers*/, long endPos, 
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  m_propLineSpace=int(input->readLong(1));
-  m_lineSpace=int(input->readLong(2));
-  m_height=int(input->readULong(2));
+  m_propLineSpace=int(input->readULong(1));
+  m_interLineSpace=int(input->readLong(2));
+  m_lineHeight=int(input->readULong(2));
   m_lineSpaceRule=int(input->readULong(1));
   m_interLineSpaceRule=int(input->readULong(1));
 
