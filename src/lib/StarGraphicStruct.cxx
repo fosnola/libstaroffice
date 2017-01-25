@@ -576,11 +576,59 @@ bool StarGraphicStruct::StarGraphic::read(StarZone &zone, long endPos)
       ok=false;
     }
     else {
-      STOFF_DEBUG_MSG(("StarGraphicStruct::StarGraphic::read: reading native file is not implemented\n"));
-      f << "###Nat5";
-      ascFile.addDelimiter(input->tell(),'|');
-      input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
+      // gfxlink.cxx
+      f << "native,";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
       zone.closeVersionCompatHeader("SDRGraphic");
+
+      pos=input->tell();
+      f.str("");
+      f << "SDRGraphic:native";
+      if (!zone.openVersionCompatHeader()) {
+        STOFF_DEBUG_MSG(("StarGraphicStruct::StarGraphic::read: can not open version compat header\n"));
+        f << "###vCompat,";
+        ok=false;
+      }
+      long endZone=zone.getRecordLastPosition();
+      if (ok && pos+10>endZone) {
+        STOFF_DEBUG_MSG(("StarGraphicStruct::StarGraphic::read: the zone seems to short\n"));
+        f << "###link,";
+        ok=false;
+      }
+      long size=0;
+      if (ok) {
+        f << "type=" << int(input->readULong(2)) << ",";
+        size=long(input->readULong(4));
+        f << "sz=" << size << ",";
+        f << "userId=" << input->readULong(4) << ",";
+      }
+      if (input->tell()!=endZone && input->tell()!=pos)
+        ascFile.addDelimiter(input->tell(),'|');
+      input->seek(endZone, librevenge::RVNG_SEEK_SET);
+      zone.closeVersionCompatHeader("SDRGraphic");
+      if (ok && size>0 && input->tell()+size<=lastPos) {
+        ascFile.addPos(pos);
+        ascFile.addNote(f.str().c_str());
+        pos=input->tell();
+        f.str("");
+        f << "SDRGraphic:native";
+        librevenge::RVNGBinaryData data;
+        if (!input->readDataBlock(size,data)) {
+          STOFF_DEBUG_MSG(("StarGraphicStruct::StarGraphic::read: can not save a Nat5 file\n"));
+          input->seek(pos, librevenge::RVNG_SEEK_SET);
+        }
+        else {
+          m_object.add(data, "image/pict");
+          ascFile.skipZone(pos,pos+size-1);
+          return true;
+        }
+      }
+      else if (ok) {
+        STOFF_DEBUG_MSG(("StarGraphicStruct::StarGraphic::read: the picture size seems bad\n"));
+        f << "###size,";
+      }
+      ok=true;
     }
   }
   else if (header=="SVGD") {
