@@ -107,6 +107,32 @@ void SDAParser::parse(librevenge::RVNGDrawingInterface *docInterface)
   if (!ok) throw(libstoff::ParseException());
 }
 
+void SDAParser::parse(librevenge::RVNGPresentationInterface *docInterface)
+{
+  if (!getInput().get() || !checkHeader(0L))  throw(libstoff::ParseException());
+  bool ok = true;
+  try {
+    // create the asciiFile
+    checkHeader(0L);
+    ok = createZones();
+    if (ok) {
+      createDocument(docInterface);
+      if (m_state->m_mainGraphic)
+        m_state->m_mainGraphic->sendPages(getGraphicListener());
+#ifdef DEBUG
+      StarFileManager::checkUnparsed(getInput(), m_oleParser, m_password);
+#endif
+    }
+    ascii().reset();
+  }
+  catch (...) {
+    STOFF_DEBUG_MSG(("SDAParser::parse: exception catched when parsing\n"));
+    ok = false;
+  }
+
+  resetGraphicListener();
+  if (!ok) throw(libstoff::ParseException());
+}
 
 bool SDAParser::createZones()
 {
@@ -152,6 +178,27 @@ void SDAParser::createDocument(librevenge::RVNGDrawingInterface *documentInterfa
     m_state->m_mainGraphic->sendMasterPages(listen);
 }
 
+void SDAParser::createDocument(librevenge::RVNGPresentationInterface *documentInterface)
+{
+  if (!documentInterface) return;
+
+  std::vector<STOFFPageSpan> pageList;
+  if (!m_state->m_mainGraphic || !m_state->m_mainGraphic->updatePageSpans(pageList, m_state->m_numPages)) {
+    STOFFPageSpan ps(getPageSpan());
+    ps.m_pageSpan=1;
+    pageList.push_back(ps);
+    m_state->m_numPages = 1;
+  }
+  STOFFGraphicListenerPtr listen(new STOFFGraphicListener(getParserState()->m_listManager, pageList, documentInterface));
+  setGraphicListener(listen);
+  if (m_state->m_mainGraphic)
+    listen->setDocumentMetaData(m_state->m_mainGraphic->getMetaData());
+
+  listen->startDocument();
+  if (m_state->m_mainGraphic)
+    m_state->m_mainGraphic->sendMasterPages(listen);
+}
+
 ////////////////////////////////////////////////////////////
 //
 // Intermediate level
@@ -174,12 +221,18 @@ bool SDAParser::checkHeader(STOFFHeader *header, bool /*strict*/)
   STOFFInputStreamPtr input = getInput();
   if (!input || !input->hasDataFork() || !input->isStructured())
     return false;
+  bool isPres=false;
   STOFFInputStreamPtr drawInput=input->getSubStreamByName("StarDrawDocument");
-  if (!drawInput) drawInput=input->getSubStreamByName("StarDrawDocument3");
-  if (!drawInput)
-    return false;
+  if (!drawInput) {
+    drawInput=input->getSubStreamByName("StarDrawDocument3");
+    if (!drawInput)
+      return false;
+    STOFFOLEParser oleParser;
+    std::string clipName;
+    isPres=oleParser.getCompObjName(input, clipName) && clipName.substr(0,11)=="StarImpress";
+  }
   if (header) {
-    header->reset(1, STOFFDocument::STOFF_K_DRAW);
+    header->reset(1, isPres ? STOFFDocument::STOFF_K_PRESENTATION : STOFFDocument::STOFF_K_DRAW);
     drawInput->seek(0, librevenge::RVNG_SEEK_SET);
     header->setEncrypted(drawInput->readULong(2)!=0x7244);
   }

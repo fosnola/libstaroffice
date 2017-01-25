@@ -103,6 +103,16 @@ STOFFGraphicParser::~STOFFGraphicParser()
 {
 }
 
+void STOFFGraphicParser::parse(librevenge::RVNGDrawingInterface * /*documentInterface*/)
+{
+  STOFF_DEBUG_MSG(("STOFFGraphicParser::parse[drawingInterface]: not implemented\n"));
+}
+
+void STOFFGraphicParser::parse(librevenge::RVNGPresentationInterface * /*documentInterface*/)
+{
+  STOFF_DEBUG_MSG(("STOFFGraphicParser::parse[drawing/Interface]: not implemented\n"));
+}
+
 STOFFSpreadsheetParser::~STOFFSpreadsheetParser()
 {
 }

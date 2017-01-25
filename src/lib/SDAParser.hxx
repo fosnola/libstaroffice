@@ -56,7 +56,7 @@ class StarObject;
 class StarZone;
 class STOFFOLEParser;
 class StarFormatManager;
-/** \brief the main class to read a StarOffice sda file
+/** \brief the main class to read a StarOffice sda/sdd file
  *
  *
  *
@@ -78,10 +78,14 @@ public:
 
   // the main parse function
   void parse(librevenge::RVNGDrawingInterface *documentInterface);
+  // the main presentation parse function
+  void parse(librevenge::RVNGPresentationInterface *documentInterface);
 
 protected:
   //! creates the listener which will be associated to the document
   void createDocument(librevenge::RVNGDrawingInterface *documentInterface);
+  //! creates the listener which will be associated to the document
+  void createDocument(librevenge::RVNGPresentationInterface *documentInterface);
 
   //! parses the different OLE, ...
   bool createZones();

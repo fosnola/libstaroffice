@@ -102,6 +102,8 @@ public:
   std::vector<shared_ptr<OleDirectory> > &getDirectoryList();
   //! returns a OleDirectory corresponding to a dir if found
   shared_ptr<OleDirectory> getDirectory(std::string const &dir);
+  //! returns the main compobj program name
+  bool getCompObjName(STOFFInputStreamPtr fileInput, std::string &programName);
 
   /** structure use to store an object content */
   struct OleContent {
@@ -221,15 +223,14 @@ protected:
   //! the summary information
   static bool readSummaryInformation(STOFFInputStreamPtr input, std::string const &oleName,
                                      libstoff::DebugFile &ascii);
-
+  //!  parse the "CompObj" contains : UserType,ClipName,ProgIdName
+  bool readCompObj(STOFFInputStreamPtr ip, OleDirectory &directory);
   //!  the "Ole" small structure : unknown contain
   static bool readOle(STOFFInputStreamPtr ip, std::string const &oleName,
                       libstoff::DebugFile &ascii);
   //!  the "ObjInfo" small structure : seems to contain 3 ints=0,3,4
   static bool readObjInfo(STOFFInputStreamPtr input, std::string const &oleName,
                           libstoff::DebugFile &ascii);
-  //!  the "CompObj" contains : UserType,ClipName,ProgIdName
-  bool readCompObj(STOFFInputStreamPtr ip, OleDirectory &directory);
 
   /** the OlePres001 seems to contain standart picture file and size */
   static  bool isOlePres(STOFFInputStreamPtr ip, std::string const &oleName);

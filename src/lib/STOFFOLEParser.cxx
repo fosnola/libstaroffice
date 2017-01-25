@@ -367,6 +367,16 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
 }
 
 
+bool STOFFOLEParser::getCompObjName(STOFFInputStreamPtr file, std::string &programName)
+{
+  if (!file.get() || !file->isStructured()) return false;
+  STOFFInputStreamPtr ole = file->getSubStreamByName("/CompObj");
+  if (!ole) return false;
+  STOFFOLEParser::OleDirectory oleDir(file,"");
+  if (!readCompObj(ole, oleDir) || oleDir.m_clipName.empty()) return false;
+  programName=oleDir.m_clipName;
+  return true;
+}
 
 ////////////////////////////////////////
 //

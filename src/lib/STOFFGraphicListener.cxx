@@ -183,9 +183,15 @@ State::State() : m_origin(0,0),
 }
 }
 
-STOFFGraphicListener::STOFFGraphicListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGDrawingInterface *documentInterface) : STOFFListener(listManager),
+STOFFGraphicListener::STOFFGraphicListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGDrawingInterface *drawingInterface) : STOFFListener(listManager),
   m_ds(new STOFFGraphicListenerInternal::GraphicState(pageList)), m_ps(new STOFFGraphicListenerInternal::State),
-  m_psStack(), m_documentInterface(documentInterface)
+  m_psStack(), m_drawingInterface(drawingInterface), m_presentationInterface(0)
+{
+}
+
+STOFFGraphicListener::STOFFGraphicListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGPresentationInterface *presentationInterface) : STOFFListener(listManager),
+  m_ds(new STOFFGraphicListenerInternal::GraphicState(pageList)), m_ps(new STOFFGraphicListenerInternal::State),
+  m_psStack(), m_drawingInterface(0), m_presentationInterface(presentationInterface)
 {
 }
 
@@ -199,7 +205,10 @@ void STOFFGraphicListener::defineStyle(STOFFFont const &style)
     m_ds->m_definedFontStyleSet.insert(style.m_propertyList["style:display-name"]->getStr());
   librevenge::RVNGPropertyList pList(style.m_propertyList);
   STOFFFont::checkForDefault(pList);
-  m_documentInterface->defineCharacterStyle(pList);
+  if (m_drawingInterface)
+    m_drawingInterface->defineCharacterStyle(pList);
+  else
+    m_presentationInterface->defineCharacterStyle(pList);
 }
 
 void STOFFGraphicListener::defineStyle(STOFFGraphicStyle const &style)
@@ -209,14 +218,20 @@ void STOFFGraphicListener::defineStyle(STOFFGraphicStyle const &style)
   librevenge::RVNGPropertyList pList(style.m_propertyList);
   STOFFGraphicStyle::checkForDefault(pList);
   STOFFGraphicStyle::checkForPadding(pList);
-  m_documentInterface->setStyle(pList);
+  if (m_drawingInterface)
+    m_drawingInterface->setStyle(pList);
+  else
+    m_presentationInterface->setStyle(pList);
 }
 
 void STOFFGraphicListener::defineStyle(STOFFParagraph const &style)
 {
   if (style.m_propertyList["style:display-name"])
     m_ds->m_definedParagraphStyleSet.insert(style.m_propertyList["style:display-name"]->getStr());
-  m_documentInterface->defineParagraphStyle(style.m_propertyList);
+  if (m_drawingInterface)
+    m_drawingInterface->defineParagraphStyle(style.m_propertyList);
+  else
+    m_presentationInterface->defineParagraphStyle(style.m_propertyList);
 }
 
 bool STOFFGraphicListener::isFontStyleDefined(librevenge::RVNGString const &name) const
@@ -290,7 +305,10 @@ void STOFFGraphicListener::insertEOL(bool soft)
     _openSpan();
   if (soft) {
     _flushText();
-    m_documentInterface->insertLineBreak();
+    if (m_drawingInterface)
+      m_drawingInterface->insertLineBreak();
+    else
+      m_presentationInterface->insertLineBreak();
   }
   else if (m_ps->m_isParagraphOpened)
     _closeParagraph();
@@ -304,7 +322,10 @@ void STOFFGraphicListener::insertTab()
   }
   if (!m_ps->m_isSpanOpened) _openSpan();
   _flushText();
-  m_documentInterface->insertTab();
+  if (m_drawingInterface)
+    m_drawingInterface->insertTab();
+  else
+    m_presentationInterface->insertTab();
 }
 
 ///////////////////
@@ -364,7 +385,10 @@ void STOFFGraphicListener::insertField(STOFFField const &field)
   field.addTo(propList);
   _flushText();
   _openSpan();
-  m_documentInterface->insertField(propList);
+  if (m_drawingInterface)
+    m_drawingInterface->insertField(propList);
+  else
+    m_presentationInterface->insertField(propList);
 }
 
 void STOFFGraphicListener::openLink(STOFFLink const &link)
@@ -380,7 +404,10 @@ void STOFFGraphicListener::openLink(STOFFLink const &link)
   if (!m_ps->m_isSpanOpened) _openSpan();
   librevenge::RVNGPropertyList propList;
   link.addTo(propList);
-  m_documentInterface->openLink(propList);
+  if (m_drawingInterface)
+    m_drawingInterface->openLink(propList);
+  else
+    m_presentationInterface->openLink(propList);
   _pushParsingState();
   m_ps->m_inLink=true;
 // we do not want any close open paragraph in a link
@@ -393,7 +420,10 @@ void STOFFGraphicListener::closeLink()
     STOFF_DEBUG_MSG(("STOFFGraphicListener::closeLink: closed outside a link\n"));
     return;
   }
-  m_documentInterface->closeLink();
+  if (m_drawingInterface)
+    m_drawingInterface->closeLink();
+  else
+    m_presentationInterface->closeLink();
   _popParsingState();
 }
 
@@ -407,8 +437,14 @@ void STOFFGraphicListener::startDocument()
     return;
   }
   m_ds->m_isDocumentStarted=true;
-  m_documentInterface->startDocument(librevenge::RVNGPropertyList());
-  m_documentInterface->setDocumentMetaData(m_ds->m_metaData);
+  if (m_drawingInterface) {
+    m_drawingInterface->startDocument(librevenge::RVNGPropertyList());
+    m_drawingInterface->setDocumentMetaData(m_ds->m_metaData);
+  }
+  else {
+    m_presentationInterface->startDocument(librevenge::RVNGPropertyList());
+    m_presentationInterface->setDocumentMetaData(m_ds->m_metaData);
+  }
 }
 
 void STOFFGraphicListener::endDocument(bool /*delayed*/)
@@ -423,7 +459,10 @@ void STOFFGraphicListener::endDocument(bool /*delayed*/)
   }
   if (m_ds->m_isPageSpanOpened)
     _closePageSpan(m_ds->m_isMasterPageSpanOpened);
-  m_documentInterface->endDocument();
+  if (m_drawingInterface)
+    m_drawingInterface->endDocument();
+  else
+    m_presentationInterface->endDocument();
   m_ds->m_isDocumentStarted=false;
   *m_ds=STOFFGraphicListenerInternal::GraphicState(std::vector<STOFFPageSpan>());
 }
@@ -483,7 +522,10 @@ bool STOFFGraphicListener::openMasterPage(STOFFPageSpan &masterPage)
   librevenge::RVNGPropertyList propList;
   masterPage.getPageProperty(propList);
 
-  m_documentInterface->startMasterPage(propList);
+  if (m_drawingInterface)
+    m_drawingInterface->startMasterPage(propList);
+  else
+    m_presentationInterface->startMasterSlide(propList);
   m_ds->m_isPageSpanOpened = m_ds->m_isMasterPageSpanOpened = true;
 
   // checkme: can we send some header/footer if some exists
@@ -525,8 +567,12 @@ void STOFFGraphicListener::_openPageSpan(bool sendHeaderFooters)
   propList.insert("svg:y",double(m_ps->m_origin.y()), librevenge::RVNG_POINT);
   propList.insert("librevenge:enforce-frame",true);
 
-  if (!m_ds->m_isPageSpanOpened)
-    m_documentInterface->startPage(propList);
+  if (!m_ds->m_isPageSpanOpened) {
+    if (m_drawingInterface)
+      m_drawingInterface->startPage(propList);
+    else
+      m_presentationInterface->startSlide(propList);
+  }
   m_ds->m_isPageSpanOpened = true;
   m_ds->m_pageSpan = currentPage;
 
@@ -567,10 +613,18 @@ void STOFFGraphicListener::_closePageSpan(bool masterPage)
     _changeList(); // flush the list exterior
   }
   m_ds->m_isPageSpanOpened = m_ds->m_isMasterPageSpanOpened = false;
-  if (masterPage)
-    m_documentInterface->endMasterPage();
-  else
-    m_documentInterface->endPage();
+  if (m_drawingInterface) {
+    if (masterPage)
+      m_drawingInterface->endMasterPage();
+    else
+      m_drawingInterface->endPage();
+  }
+  else {
+    if (masterPage)
+      m_presentationInterface->endMasterSlide();
+    else
+      m_presentationInterface->endSlide();
+  }
 }
 
 ///////////////////
@@ -591,7 +645,10 @@ void STOFFGraphicListener::_openParagraph()
 
   librevenge::RVNGPropertyList propList;
   m_ps->m_paragraph.addTo(propList);
-  m_documentInterface->openParagraph(propList);
+  if (m_drawingInterface)
+    m_drawingInterface->openParagraph(propList);
+  else
+    m_presentationInterface->openParagraph(propList);
 
   _resetParagraphState();
 }
@@ -611,7 +668,10 @@ void STOFFGraphicListener::_closeParagraph()
   if (m_ps->m_isParagraphOpened) {
     if (m_ps->m_isSpanOpened)
       _closeSpan();
-    m_documentInterface->closeParagraph();
+    if (m_drawingInterface)
+      m_drawingInterface->closeParagraph();
+    else
+      m_presentationInterface->closeParagraph();
   }
 
   m_ps->m_isParagraphOpened = false;
@@ -649,7 +709,10 @@ void STOFFGraphicListener::_openListElement()
   }
 
   if (m_ps->m_list) m_ps->m_list->openElement();
-  m_documentInterface->openListElement(propList);
+  if (m_drawingInterface)
+    m_drawingInterface->openListElement(propList);
+  else
+    m_presentationInterface->openListElement(propList);
   _resetParagraphState(true);
 }
 
@@ -660,7 +723,10 @@ void STOFFGraphicListener::_closeListElement()
       _closeSpan();
 
     if (m_ps->m_list) m_ps->m_list->closeElement();
-    m_documentInterface->closeListElement();
+    if (m_drawingInterface)
+      m_drawingInterface->closeListElement();
+    else
+      m_presentationInterface->closeListElement();
   }
 
   m_ps->m_isListElementOpened = m_ps->m_isParagraphOpened = false;
@@ -699,10 +765,18 @@ void STOFFGraphicListener::_changeList()
                     (m_ps->m_list && m_ps->m_list->getId()!=newListId);
   size_t minLevel = changeList ? 0 : newLevel;
   while (actualLevel > minLevel) {
-    if (m_ps->m_listOrderedLevels[--actualLevel])
-      m_documentInterface->closeOrderedListLevel();
-    else
-      m_documentInterface->closeUnorderedListLevel();
+    if (m_drawingInterface) {
+      if (m_ps->m_listOrderedLevels[--actualLevel])
+        m_drawingInterface->closeOrderedListLevel();
+      else
+        m_drawingInterface->closeUnorderedListLevel();
+    }
+    else {
+      if (m_ps->m_listOrderedLevels[--actualLevel])
+        m_presentationInterface->closeOrderedListLevel();
+      else
+        m_presentationInterface->closeUnorderedListLevel();
+    }
   }
 
   if (newLevel) {
@@ -730,10 +804,18 @@ void STOFFGraphicListener::_changeList()
 
     librevenge::RVNGPropertyList level;
     m_ps->m_list->addTo(int(i), level);
-    if (ordered)
-      m_documentInterface->openOrderedListLevel(level);
-    else
-      m_documentInterface->openUnorderedListLevel(level);
+    if (m_drawingInterface) {
+      if (ordered)
+        m_drawingInterface->openOrderedListLevel(level);
+      else
+        m_drawingInterface->openUnorderedListLevel(level);
+    }
+    else {
+      if (ordered)
+        m_presentationInterface->openOrderedListLevel(level);
+      else
+        m_presentationInterface->openUnorderedListLevel(level);
+    }
   }
 }
 
@@ -763,7 +845,10 @@ void STOFFGraphicListener::_openSpan()
   m_ps->m_font.addTo(propList);
   STOFFFont::checkForDefault(propList);
 
-  m_documentInterface->openSpan(propList);
+  if (m_drawingInterface)
+    m_drawingInterface->openSpan(propList);
+  else
+    m_presentationInterface->openSpan(propList);
 
   m_ps->m_isSpanOpened = true;
 }
@@ -780,7 +865,10 @@ void STOFFGraphicListener::_closeSpan()
     return;
 
   _flushText();
-  m_documentInterface->closeSpan();
+  if (m_drawingInterface)
+    m_drawingInterface->closeSpan();
+  else
+    m_presentationInterface->closeSpan();
   m_ps->m_isSpanOpened = false;
 }
 
@@ -803,15 +891,24 @@ void STOFFGraphicListener::_flushText()
 
     if (numConsecutiveSpaces > 1) {
       if (tmpText.len() > 0) {
-        m_documentInterface->insertText(tmpText);
+        if (m_drawingInterface)
+          m_drawingInterface->insertText(tmpText);
+        else
+          m_presentationInterface->insertText(tmpText);
         tmpText.clear();
       }
-      m_documentInterface->insertSpace();
+      if (m_drawingInterface)
+        m_drawingInterface->insertSpace();
+      else
+        m_presentationInterface->insertSpace();
     }
     else
       tmpText.append(i());
   }
-  m_documentInterface->insertText(tmpText);
+  if (m_drawingInterface)
+    m_drawingInterface->insertText(tmpText);
+  else
+    m_presentationInterface->insertText(tmpText);
   m_ps->m_textBuffer.clear();
 }
 
@@ -844,7 +941,10 @@ bool STOFFGraphicListener::openHeader(librevenge::RVNGPropertyList const &extras
   librevenge::RVNGPropertyList propList(extras);
   _handleFrameParameters(propList, pos, STOFFGraphicStyle());
 
-  m_documentInterface->startTextObject(propList);
+  if (m_drawingInterface)
+    m_drawingInterface->startTextObject(propList);
+  else
+    m_presentationInterface->startTextObject(propList);
   return true;
 }
 
@@ -864,7 +964,10 @@ bool STOFFGraphicListener::closeHeader()
     STOFF_DEBUG_MSG(("STOFFGraphicListener::closeHeader: Oops no opened header/footer\n"));
     return false;
   }
-  m_documentInterface->endTextObject();
+  if (m_drawingInterface)
+    m_drawingInterface->endTextObject();
+  else
+    m_presentationInterface->endTextObject();
   closeFrame();
   m_ds->m_isHeaderFooterOpened=false;
   return true;
@@ -891,7 +994,10 @@ bool STOFFGraphicListener::openFooter(librevenge::RVNGPropertyList const &extras
   librevenge::RVNGPropertyList propList(extras);
   _handleFrameParameters(propList, pos, STOFFGraphicStyle());
 
-  m_documentInterface->startTextObject(propList);
+  if (m_drawingInterface)
+    m_drawingInterface->startTextObject(propList);
+  else
+    m_presentationInterface->startTextObject(propList);
   return true;
 }
 
@@ -911,7 +1017,10 @@ bool STOFFGraphicListener::closeFooter()
     STOFF_DEBUG_MSG(("STOFFGraphicListener::closeFooter: Oops no opened header/footer\n"));
     return false;
   }
-  m_documentInterface->endTextObject();
+  if (m_drawingInterface)
+    m_drawingInterface->endTextObject();
+  else
+    m_presentationInterface->endTextObject();
   closeFrame();
   m_ds->m_isHeaderFooterOpened=false;
   return true;
@@ -1012,12 +1121,18 @@ void STOFFGraphicListener::insertPicture(STOFFPosition const &pos, STOFFEmbedded
     _openPageSpan();
   librevenge::RVNGPropertyList list;
   style.addTo(list);
-  m_documentInterface->setStyle(list);
-
+  if (m_drawingInterface)
+    m_drawingInterface->setStyle(list);
+  else
+    m_presentationInterface->setStyle(list);
   list.clear();
   _handleFrameParameters(list, pos, style);
-  if (picture.addTo(list))
-    m_documentInterface->drawGraphicObject(list);
+  if (picture.addTo(list)) {
+    if (m_drawingInterface)
+      m_drawingInterface->drawGraphicObject(list);
+    else
+      m_presentationInterface->drawGraphicObject(list);
+  }
 }
 
 void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos)
@@ -1047,31 +1162,61 @@ void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGrap
   shape.addTo(shapeProp);
   style.addTo(styleProp);
   STOFFGraphicStyle::checkForDefault(styleProp);
-  m_documentInterface->setStyle(styleProp);
-  switch (shape.m_command) {
-  case STOFFGraphicShape::C_Connector:
-    m_documentInterface->drawConnector(shapeProp);
-    break;
-  case STOFFGraphicShape::C_Ellipse:
-    m_documentInterface->drawEllipse(shapeProp);
-    break;
-  case STOFFGraphicShape::C_Path:
-    m_documentInterface->drawPath(shapeProp);
-    break;
-  case STOFFGraphicShape::C_Polyline:
-    m_documentInterface->drawPolyline(shapeProp);
-    break;
-  case STOFFGraphicShape::C_Polygon:
-    m_documentInterface->drawPolygon(shapeProp);
-    break;
-  case STOFFGraphicShape::C_Rectangle:
-    m_documentInterface->drawRectangle(shapeProp);
-    break;
-  case STOFFGraphicShape::C_Unknown:
-    break;
-  default:
-    STOFF_DEBUG_MSG(("STOFFGraphicListener::insertShape: unexpected shape\n"));
-    break;
+  if (m_drawingInterface) {
+    m_drawingInterface->setStyle(styleProp);
+    switch (shape.m_command) {
+    case STOFFGraphicShape::C_Connector:
+      m_drawingInterface->drawConnector(shapeProp);
+      break;
+    case STOFFGraphicShape::C_Ellipse:
+      m_drawingInterface->drawEllipse(shapeProp);
+      break;
+    case STOFFGraphicShape::C_Path:
+      m_drawingInterface->drawPath(shapeProp);
+      break;
+    case STOFFGraphicShape::C_Polyline:
+      m_drawingInterface->drawPolyline(shapeProp);
+      break;
+    case STOFFGraphicShape::C_Polygon:
+      m_drawingInterface->drawPolygon(shapeProp);
+      break;
+    case STOFFGraphicShape::C_Rectangle:
+      m_drawingInterface->drawRectangle(shapeProp);
+      break;
+    case STOFFGraphicShape::C_Unknown:
+      break;
+    default:
+      STOFF_DEBUG_MSG(("STOFFGraphicListener::insertShape: unexpected shape\n"));
+      break;
+    }
+  }
+  else {
+    m_presentationInterface->setStyle(styleProp);
+    switch (shape.m_command) {
+    case STOFFGraphicShape::C_Connector:
+      m_presentationInterface->drawConnector(shapeProp);
+      break;
+    case STOFFGraphicShape::C_Ellipse:
+      m_presentationInterface->drawEllipse(shapeProp);
+      break;
+    case STOFFGraphicShape::C_Path:
+      m_presentationInterface->drawPath(shapeProp);
+      break;
+    case STOFFGraphicShape::C_Polyline:
+      m_presentationInterface->drawPolyline(shapeProp);
+      break;
+    case STOFFGraphicShape::C_Polygon:
+      m_presentationInterface->drawPolygon(shapeProp);
+      break;
+    case STOFFGraphicShape::C_Rectangle:
+      m_presentationInterface->drawRectangle(shapeProp);
+      break;
+    case STOFFGraphicShape::C_Unknown:
+      break;
+    default:
+      STOFF_DEBUG_MSG(("STOFFGraphicListener::insertShape: unexpected shape\n"));
+      break;
+    }
   }
 }
 
@@ -1094,9 +1239,15 @@ void STOFFGraphicListener::insertTextBox
   librevenge::RVNGPropertyList propList;
   _handleFrameParameters(propList, pos, style);
   STOFFGraphicStyle::checkForPadding(propList);
-  m_documentInterface->startTextObject(propList);
+  if (m_drawingInterface)
+    m_drawingInterface->startTextObject(propList);
+  else
+    m_presentationInterface->startTextObject(propList);
   handleSubDocument(subDocument, libstoff::DOC_TEXT_BOX);
-  m_documentInterface->endTextObject();
+  if (m_drawingInterface)
+    m_drawingInterface->endTextObject();
+  else
+    m_presentationInterface->endTextObject();
   closeFrame();
 }
 
@@ -1167,7 +1318,10 @@ void STOFFGraphicListener::openTable(STOFFPosition const &pos, STOFFTable const 
 
   _handleFrameParameters(propList, pos, STOFFGraphicStyle());
   table.addTablePropertiesTo(propList);
-  m_documentInterface->startTableObject(propList);
+  if (m_drawingInterface)
+    m_drawingInterface->startTableObject(propList);
+  else
+    m_presentationInterface->startTableObject(propList);
   m_ps->m_isTableOpened = true;
 }
 
@@ -1180,7 +1334,10 @@ void STOFFGraphicListener::closeTable()
 
   m_ps->m_isTableOpened = false;
   _endSubDocument();
-  m_documentInterface->endTableObject();
+  if (m_drawingInterface)
+    m_drawingInterface->endTableObject();
+  else
+    m_presentationInterface->endTableObject();
 
   _popParsingState();
 }
@@ -1202,7 +1359,10 @@ void STOFFGraphicListener::openTableRow(float h, librevenge::RVNGUnit unit, bool
     propList.insert("style:row-height", double(h), unit);
   else if (h < 0)
     propList.insert("style:min-row-height", double(-h), unit);
-  m_documentInterface->openTableRow(propList);
+  if (m_drawingInterface)
+    m_drawingInterface->openTableRow(propList);
+  else
+    m_presentationInterface->openTableRow(propList);
   m_ps->m_isTableRowOpened = true;
 }
 
@@ -1213,7 +1373,10 @@ void STOFFGraphicListener::closeTableRow()
     return;
   }
   m_ps->m_isTableRowOpened = false;
-  m_documentInterface->closeTableRow();
+  if (m_drawingInterface)
+    m_drawingInterface->closeTableRow();
+  else
+    m_presentationInterface->closeTableRow();
 }
 
 void STOFFGraphicListener::addEmptyTableCell(STOFFVec2i const &pos, STOFFVec2i span)
@@ -1231,8 +1394,14 @@ void STOFFGraphicListener::addEmptyTableCell(STOFFVec2i const &pos, STOFFVec2i s
   propList.insert("librevenge:row", pos[1]);
   propList.insert("table:number-columns-spanned", span[0]);
   propList.insert("table:number-rows-spanned", span[1]);
-  m_documentInterface->openTableCell(propList);
-  m_documentInterface->closeTableCell();
+  if (m_drawingInterface) {
+    m_drawingInterface->openTableCell(propList);
+    m_drawingInterface->closeTableCell();
+  }
+  else {
+    m_presentationInterface->openTableCell(propList);
+    m_presentationInterface->closeTableCell();
+  }
 }
 
 void STOFFGraphicListener::openTableCell(STOFFCell const &cell)
@@ -1249,7 +1418,10 @@ void STOFFGraphicListener::openTableCell(STOFFCell const &cell)
   librevenge::RVNGPropertyList propList;
   cell.addTo(propList);
   m_ps->m_isTableCellOpened = true;
-  m_documentInterface->openTableCell(propList);
+  if (m_drawingInterface)
+    m_drawingInterface->openTableCell(propList);
+  else
+    m_presentationInterface->openTableCell(propList);
 }
 
 void STOFFGraphicListener::closeTableCell()
@@ -1263,7 +1435,10 @@ void STOFFGraphicListener::closeTableCell()
   m_ps->m_paragraph.m_listLevelIndex=0;
   _changeList(); // flush the list exterior
 
-  m_documentInterface->closeTableCell();
+  if (m_drawingInterface)
+    m_drawingInterface->closeTableCell();
+  else
+    m_presentationInterface->closeTableCell();
   m_ps->m_isTableCellOpened = false;
 }
 
@@ -1320,7 +1495,10 @@ bool  STOFFGraphicListener::openGroup(STOFFPosition const &pos)
 
   librevenge::RVNGPropertyList propList;
   pos.addTo(propList);
-  m_documentInterface->openGroup(propList);
+  if (m_drawingInterface)
+    m_drawingInterface->openGroup(propList);
+  else
+    m_presentationInterface->openGroup(propList);
 
   return true;
 }
@@ -1333,7 +1511,10 @@ void  STOFFGraphicListener::closeGroup()
   }
   _endSubDocument();
   _popParsingState();
-  m_documentInterface->closeGroup();
+  if (m_drawingInterface)
+    m_drawingInterface->closeGroup();
+  else
+    m_presentationInterface->closeGroup();
 }
 
 bool STOFFGraphicListener::openLayer(librevenge::RVNGString const &layerName)
@@ -1359,7 +1540,10 @@ bool STOFFGraphicListener::openLayer(librevenge::RVNGString const &layerName)
 
   librevenge::RVNGPropertyList propList;
   propList.insert("draw:layer", layerName);
-  m_documentInterface->startLayer(propList);
+  if (m_drawingInterface)
+    m_drawingInterface->startLayer(propList);
+  else
+    m_presentationInterface->startLayer(propList);
   return true;
 }
 
@@ -1369,7 +1553,10 @@ void  STOFFGraphicListener::closeLayer()
     STOFF_DEBUG_MSG(("STOFFGraphicListener::closeLayer: called but no layer is already opened\n"));
     return;
   }
-  m_documentInterface->endLayer();
+  if (m_drawingInterface)
+    m_drawingInterface->endLayer();
+  else
+    m_presentationInterface->endLayer();
   _endSubDocument();
   _popParsingState();
 }

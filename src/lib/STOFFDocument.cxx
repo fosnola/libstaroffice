@@ -53,6 +53,7 @@
 namespace STOFFDocumentInternal
 {
 shared_ptr<STOFFGraphicParser> getGraphicParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
+shared_ptr<STOFFGraphicParser> getPresentationParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
 shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
 shared_ptr<STOFFSpreadsheetParser> getSpreadsheetParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
 STOFFHeader *getHeader(STOFFInputStreamPtr &input, bool strict);
@@ -126,11 +127,20 @@ catch (...)
   return STOFF_R_UNKNOWN_ERROR;
 }
 
-STOFFDocument::Result STOFFDocument::parse(librevenge::RVNGInputStream */*input*/, librevenge::RVNGPresentationInterface */*documentInterface*/, char const *)
+STOFFDocument::Result STOFFDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGPresentationInterface *documentInterface, char const *password)
 try
 {
-  STOFF_DEBUG_MSG(("STOFFDocument::parse[presentation]: is not implemented\n"));
-  return STOFF_R_UNKNOWN_ERROR;
+  if (!input)
+    return STOFF_R_UNKNOWN_ERROR;
+
+  STOFFInputStreamPtr ip(new STOFFInputStream(input, false));
+  shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
+
+  if (!header.get()) return STOFF_R_UNKNOWN_ERROR;
+  shared_ptr<STOFFGraphicParser> parser=STOFFDocumentInternal::getPresentationParserFromHeader(ip, header.get(), password);
+  if (!parser) return STOFF_R_UNKNOWN_ERROR;
+  parser->parse(documentInterface);
+  return STOFF_R_OK;
 }
 catch (libstoff::FileException)
 {
@@ -329,6 +339,22 @@ shared_ptr<STOFFGraphicParser> getGraphicParserFromHeader(STOFFInputStreamPtr &i
       parser.reset(sdgParser);
       if (passwd) sdgParser->setDocumentPassword(passwd);
     }
+  }
+  catch (...) {
+  }
+  return parser;
+}
+
+/** Factory wrapper to construct a parser corresponding to an presentation header */
+shared_ptr<STOFFGraphicParser> getPresentationParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd)
+{
+  shared_ptr<STOFFGraphicParser> parser;
+  if (!header || header->getKind()!=STOFFDocument::STOFF_K_PRESENTATION)
+    return parser;
+  try {
+    SDAParser *sdaParser=new SDAParser(input, header);
+    parser.reset(sdaParser);
+    if (passwd) sdaParser->setDocumentPassword(passwd);
   }
   catch (...) {
   }

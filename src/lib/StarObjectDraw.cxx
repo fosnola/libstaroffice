@@ -242,7 +242,7 @@ bool StarObjectDraw::readPresentationData(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(SCDrawPres):";
-  // sd_drawdoc.xx: operator>>(SdDrawDocument)
+  // sd_drawdoc.cxx: operator>>(SdDrawDocument)
   int vers=zone.getHeaderVersion();
   long lastPos=zone.getRecordLastPosition();
   f << "vers=" << vers << ",";

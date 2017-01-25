@@ -205,12 +205,14 @@ protected:
   virtual ~STOFFTextParser();
 };
 
-/** virtual class which defines the ancestor of all graphic zone parser */
+/** virtual class which defines the ancestor of all graphic/presentation zone parser */
 class STOFFGraphicParser : public STOFFParser
 {
 public:
   //! virtual function used to parse the input
-  virtual void parse(librevenge::RVNGDrawingInterface *documentInterface) = 0;
+  virtual void parse(librevenge::RVNGDrawingInterface *documentInterface);
+  //! virtual function used to parse the input
+  virtual void parse(librevenge::RVNGPresentationInterface *documentInterface);
 protected:
   //! constructor (protected)
   STOFFGraphicParser(STOFFInputStreamPtr input, STOFFHeader *header) : STOFFParser(STOFFParserState::Graphic, input, header) {}
