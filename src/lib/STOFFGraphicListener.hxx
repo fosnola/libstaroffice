@@ -208,8 +208,6 @@ public:
 
   // ------- table -----------------
 
-  /** adds a table in given position */
-  void insertTable(STOFFPosition const &pos, STOFFTable &table, STOFFGraphicStyle const &style=STOFFGraphicStyle());
   /** open a table (using the last parameters of openFrame for the position ) */
   void openTable(STOFFTable const &table);
   /** open a table in a given position */

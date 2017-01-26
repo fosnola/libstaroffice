@@ -62,11 +62,11 @@ public:
     Paragraph, Left, Center, Right
   };
   //! the constructor
-  explicit STOFFTable(uint32_t givenData=BoxBit) :
-    m_givenData(givenData), m_setData(givenData), m_mergeBorders(true), m_cellsList(),
-    m_numRows(0), m_numCols(0), m_rowsSize(), m_colsSize(), m_alignment(Paragraph), m_leftMargin(0), m_rightMargin(0),
-    m_posToCellId() {}
-
+  STOFFTable() :
+    m_mergeBorders(true), m_cellsList(),
+    m_numRows(0), m_numCols(0), m_rowsSize(), m_colsSize(), m_alignment(Paragraph), m_leftMargin(0), m_rightMargin(0)
+  {
+  }
   //! the destructor
   virtual ~STOFFTable();
 
@@ -126,15 +126,6 @@ public:
   //! returns the i^th cell
   shared_ptr<STOFFCell> get(int id);
 
-  /** try to build the table structures */
-  bool updateTable();
-
-  /** try to send the table
-
-  Note: either send the table ( and returns true ) or do nothing.
-   */
-  bool sendTable(STOFFListenerPtr listener);
-
   /** try to send the table as basic text */
   bool sendAsText(STOFFListenerPtr listener);
 
@@ -153,18 +144,8 @@ protected:
       return -1;
     return col*int(m_numRows)+row;
   }
-  //! create the correspondance list, ...
-  bool buildStructures();
-  /** compute the rows and the cells size */
-  bool buildDims();
-  /** a function which fills to posToCellId vector using the cell position */
-  bool buildPosToCellId();
 
 protected:
-  /** a int to indicate what data are given in entries*/
-  uint32_t m_givenData;
-  /** a int to indicate what data are been reconstruct*/
-  uint32_t m_setData;
   /** do we need to merge cell borders ( default yes) */
   bool m_mergeBorders;
   /** the list of cells */
@@ -183,9 +164,6 @@ protected:
   float m_leftMargin;
   /** the right margin in point */
   float m_rightMargin;
-
-  /** a vector used to store an id corresponding to each cell */
-  std::vector<int> m_posToCellId;
 };
 
 #endif

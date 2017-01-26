@@ -1254,31 +1254,6 @@ void STOFFGraphicListener::insertTextBox
 ///////////////////
 // table
 ///////////////////
-void STOFFGraphicListener::insertTable(STOFFPosition const &pos, STOFFTable &table, STOFFGraphicStyle const &style)
-{
-  if (!m_ds->m_isDocumentStarted || m_ps->m_inSubDocument) {
-    STOFF_DEBUG_MSG(("STOFFGraphicListener::insertTable insert a table in a subdocument is not implemented\n"));
-    return;
-  }
-  if (!openFrame(pos, style)) return;
-
-  _pushParsingState();
-  _startSubDocument();
-  m_ps->m_subDocumentType = libstoff::DOC_TABLE;
-
-  shared_ptr<STOFFListener> listen(this, STOFF_shared_ptr_noop_deleter<STOFFGraphicListener>());
-  try {
-    table.sendTable(listen);
-  }
-  catch (...) {
-    STOFF_DEBUG_MSG(("STOFFGraphicListener::insertTable exception catched \n"));
-  }
-  _endSubDocument();
-  _popParsingState();
-
-  closeFrame();
-}
-
 void STOFFGraphicListener::openTable(STOFFTable const &table)
 {
   if (!m_ps->m_isFrameOpened) {

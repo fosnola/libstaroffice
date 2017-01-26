@@ -214,8 +214,6 @@ public:
   void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument,
                      STOFFGraphicStyle const &frameStyle=STOFFGraphicStyle());
   // ------- table -----------------
-  /** adds a table in given position */
-  void insertTable(STOFFPosition const &pos, STOFFTable &table, STOFFGraphicStyle const &style=STOFFGraphicStyle());
   /** open a table */
   void openTable(STOFFTable const &table);
   /** closes this table */
