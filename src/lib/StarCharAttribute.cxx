@@ -1162,10 +1162,10 @@ bool StarCAttributeFootnote::read(StarZone &zone, int nVers, long endPos, StarOb
     ascFile.addNote(f.str().c_str());
     return false;
   }
-  if (nVers>=1) {
+  if (nVers>=1)
     m_numSeq=int(input->readULong(2));
+  if (nVers>=2)
     m_flags=int(input->readULong(1));
-  }
 
   printData(f);
   ascFile.addPos(pos);

@@ -545,15 +545,17 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
     // chaxis.cxx: ChartAxis::LoadMemberCompat
     f << "chart" << char('X'+i) << "=[";
     double mfMin, mfMax, mfStep, mfStepHelp, mfOrigin;
-    *input>>mfMin>> mfMax>> mfStep>> mfStepHelp>> mfOrigin;
+    *input>>mfMin>> mfMax>> mfStep>> mfStepHelp >> mfOrigin;
     f << "minMax=" << mfMin << ":" << mfMax << ",";
     f << "step=" << mfStep << "[" << mfStepHelp << "],";
     if (mfOrigin<0||mfOrigin>0) f << "origin=" << mfOrigin << ",";
     f << "],";
-    // sometimes the file stop just after mfStepHelp...
+    // sometimes the zone stops just here...
     if (input->tell()>=lastPos) {
-      STOFF_DEBUG_MSG(("StarObjectChart::readSCHAttributes: can not read a axis\n"));
-      f << "###axis,";
+      if (input->tell()!=lastPos) {
+        STOFF_DEBUG_MSG(("StarObjectChart::readSCHAttributes: can not read a axis\n"));
+        f << "###axis,";
+      }
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       zone.closeSCHHeader("SCHAttributes");

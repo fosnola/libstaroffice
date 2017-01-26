@@ -156,8 +156,6 @@ bool StarZone::readStringsPool()
     }
   }
   closeSWRecord(type, "SWPoolList");
-  m_ascii.addPos(pos);
-  m_ascii.addNote(f.str().c_str());
   return true;
 }
 

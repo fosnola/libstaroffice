@@ -204,7 +204,7 @@ bool SDGParser::createZones()
 
   input->seek(0, librevenge::RVNG_SEEK_SET);
   long pos=input->tell();
-  while (readSGA3(zone))
+  while (!input->isEnd() && readSGA3(zone))
     pos=input->tell();
   input->seek(pos, librevenge::RVNG_SEEK_SET);
   pos=input->tell();
@@ -265,7 +265,7 @@ bool SDGParser::readSGA3(StarZone &zone)
   libstoff::DebugStream f;
   f << "Entries(SGA3):";
   if (!findHeader) {
-    STOFF_DEBUG_MSG(("SDGParser::readSGA3: can not find header\n"));
+    STOFF_DEBUG_MSG(("SDGParser::readSGA3: can not find the header\n"));
     f << "###header";
   }
   else if (input->tell()!=pos+4) {

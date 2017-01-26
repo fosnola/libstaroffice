@@ -796,10 +796,9 @@ bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInte
   else {
     if (zone.isCompatibleWith(5)) {
       int id=int(input->readULong(2));
-      if (!zone.getPoolName(id, content->m_sectionName)) {
-        STOFF_DEBUG_MSG(("StarObjectText::readSWContent: oops, can not find the section name\n"));
-        f << "###sectId=" << id << ",";
-      }
+      // dummy sectid, so probably ok if we do not find the pool name
+      if (id>=zone.getNumPoolNames() || !zone.getPoolName(id, content->m_sectionName))
+        f << "#sectId=" << id << ",";
       else
         f << "section[name]=" << content->m_sectionName.cstr() << ",";
     }

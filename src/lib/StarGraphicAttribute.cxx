@@ -1723,6 +1723,7 @@ bool StarGAttributeNamedHatch::read(StarZone &zone, int nVers, long endPos, Star
     return false;
   }
   if (m_namedId<0) {
+    // XFillHatchItem::XFillHatchItem svx_xattr.cxx
     m_hatchType=int(input->readULong(2));
     uint16_t red, green, blue;
     *input >> red >> green >> blue;

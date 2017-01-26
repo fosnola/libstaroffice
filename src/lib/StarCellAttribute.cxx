@@ -407,12 +407,18 @@ public:
     if (hasStyle) {
       f << "hasStyle,";
       std::vector<uint32_t> text;
-      if (!zone.readString(text) || text.size()>1000 || input->tell()>endPos) {
+      if (!zone.readString(text) || input->tell()>endPos) {
         STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributePattern::read: can not read a name\n"));
         f << "###name,";
         return false;
       }
-      m_itemSet.m_style=libstoff::getString(text);
+      if (text.size()>1000) {
+        STOFF_DEBUG_MSG(("StarCellAttribute::StarCAttributePattern::read: the name seems bad\n"));
+        f << "#name=bad,";
+        text.resize(0);
+      }
+      else
+        m_itemSet.m_style=libstoff::getString(text);
       if (!text.empty())
         f << "name=" << m_itemSet.m_style.cstr() << ",";
       m_itemSet.m_family=int(input->readULong(2));

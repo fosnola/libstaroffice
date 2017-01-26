@@ -206,14 +206,13 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
   f << "Entries(StarBitmap)[" << zone.getRecordLevel() << "]:";
 
   // bitmap2.cxx: Bitmap::Read
-  long dataPos=0;
+  long dataPos=0, offset=0;
   if (inFileHeader) {
     // ImplReadDIBFileHeader
     f << "header,";
     uint16_t header;
     *input >> header;
     bool ok=true;
-    long offset=0;
     if (header==0x4142) {
       input->seek(12, librevenge::RVNG_SEEK_CUR);
       ok=(input->readULong(2)==0x4d42);
@@ -227,15 +226,13 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
     else
       ok=false;
     f << "offset=" << offset << ",";
-    if (!ok || offset<0 || beginPos+long(offset)>lastPos) {
+    if (!ok || offset<0) {
       STOFF_DEBUG_MSG(("StarBitmap::readBitmap: can not read the header\n"));
       f << "###";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       return false;
     }
-    if (offset)
-      dataPos=beginPos+offset;
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -325,7 +322,7 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
     (void)inflateEnd(&strm);
     shared_ptr<librevenge::RVNGInputStream> newStream(new STOFFStringStream(&converted[0], unsigned(converted.size())));
     dInput.reset(new STOFFInputStream(newStream, input->readInverted()));
-    dataPos=0;
+    dataPos=offset=0;
     endDataPos=dInput->size();
 #else
     STOFF_DEBUG_MSG(("StarBitmap::readBitmap: can not decode zip file\n"));
@@ -336,6 +333,15 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
     return true;
 #endif
   }
+  if (offset && beginPos+long(offset)>endDataPos) {
+    STOFF_DEBUG_MSG(("StarBitmap::readBitmap: the offset seems bad\n"));
+    f << "###";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
+  if (offset)
+    dataPos=beginPos+offset;
   int const bitCount=bitmap.m_bitCount<=1 ? 1 : bitmap.m_bitCount<=4 ? 4 : bitmap.m_bitCount<=8 ? 8 : 24;
   int const nColors=(bitCount>8) ? 0 : bitmap.m_numColors[0] ? int(bitmap.m_numColors[0]) : int(1 << bitCount);
   int const numComponent=bitmap.m_hasAlphaColor ? 4 : 3;

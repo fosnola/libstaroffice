@@ -1881,12 +1881,13 @@ bool StarObjectSmallGraphic::readSVDRObjectAttrib(StarZone &zone, StarObjectSmal
                             };
     uint16_t nWhich=what[i];
     shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
-    if (!item || input->tell()>lastPos) {
+    if (input->tell()>lastPos) { // null is ok
       f << "###";
       ok=false;
       break;
     }
-    graphic.m_itemList.push_back(item);
+    if (item)
+      graphic.m_itemList.push_back(item);
     if (vers<5 && i==3) break;
     if (vers<6 && i==4) break;
   }
