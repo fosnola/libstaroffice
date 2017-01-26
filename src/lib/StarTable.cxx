@@ -326,7 +326,14 @@ bool StarTable::send(STOFFListenerPtr listener, StarState &state) const
     if (m_lineList[i] && m_lineList[i]->m_boxList.size()>numCol)
       numCol=m_lineList[i]->m_boxList.size();
   }
-  table.setColsSize(std::vector<float>(numCol,40)); // changeme
+  librevenge::RVNGPropertyListVector columns;
+  for (size_t c = 0; c < numCol; ++c) {
+    librevenge::RVNGPropertyList column;
+    float w=40;
+    column.insert("style:column-width", double(w), librevenge::RVNG_POINT);
+    columns.append(column);
+  }
+  table.setColsSize(columns);
   listener->openTable(table);
   for (size_t i=0; i<m_lineList.size(); ++i) {
     if (!m_lineList[i]) continue;

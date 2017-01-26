@@ -64,7 +64,7 @@ public:
   //! the constructor
   STOFFTable() :
     m_mergeBorders(true), m_cellsList(),
-    m_numRows(0), m_numCols(0), m_rowsSize(), m_colsSize(), m_alignment(Paragraph), m_leftMargin(0), m_rightMargin(0)
+    m_colsSize(), m_tableWidth(0), m_alignment(Paragraph), m_leftMargin(0), m_rightMargin(0)
   {
   }
   //! the destructor
@@ -102,25 +102,11 @@ public:
   {
     return int(m_cellsList.size());
   }
-  /** returns the row size if defined (in point) */
-  std::vector<float> const &getRowsSize() const
-  {
-    return m_rowsSize;
-  }
-  /** define the row size (in point) */
-  void setRowsSize(std::vector<float> const &rSize)
-  {
-    m_rowsSize=rSize;
-  }
-  /** returns the columns size if defined (in point) */
-  std::vector<float> const &getColsSize() const
-  {
-    return m_colsSize;
-  }
-  /** define the columns size (in point) */
-  void setColsSize(std::vector<float> const &cSize)
+  /** define the columns size */
+  void setColsSize(librevenge::RVNGPropertyListVector const &cSize, float tableWidth=0)
   {
     m_colsSize=cSize;
+    m_tableWidth=tableWidth;
   }
 
   //! returns the i^th cell
@@ -135,29 +121,14 @@ public:
   void addTablePropertiesTo(librevenge::RVNGPropertyList &propList) const;
 
 protected:
-  //! convert a cell position in a posToCellId's position
-  int getCellIdPos(int col, int row) const
-  {
-    if (col<0||col>=int(m_numCols))
-      return -1;
-    if (row<0||row>=int(m_numRows))
-      return -1;
-    return col*int(m_numRows)+row;
-  }
-
-protected:
   /** do we need to merge cell borders ( default yes) */
   bool m_mergeBorders;
   /** the list of cells */
   std::vector<shared_ptr<STOFFCell> > m_cellsList;
-  /** the number of rows ( set by buildPosToCellId ) */
-  size_t m_numRows;
-  /** the number of cols ( set by buildPosToCellId ) */
-  size_t m_numCols;
-  /** the final row  size (in point) */
-  std::vector<float> m_rowsSize;
-  /** the final col size (in point) */
-  std::vector<float> m_colsSize;
+  /** the final col size, ... */
+  librevenge::RVNGPropertyListVector m_colsSize;
+  //! the table width
+  float m_tableWidth;
   /** the table alignment */
   Alignment m_alignment;
   /** the left margin in point */

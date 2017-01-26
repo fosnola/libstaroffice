@@ -139,18 +139,10 @@ void STOFFTable::addTablePropertiesTo(librevenge::RVNGPropertyList &propList) co
   if (mergeBorders())
     propList.insert("table:border-model","collapsing");
 
-  size_t nCols = m_colsSize.size();
-  float tableWidth = 0;
-  librevenge::RVNGPropertyListVector columns;
-  for (size_t c = 0; c < nCols; ++c) {
-    librevenge::RVNGPropertyList column;
-    column.insert("style:column-width", double(m_colsSize[c]), librevenge::RVNG_POINT);
-    columns.append(column);
-    tableWidth += m_colsSize[c];
-  }
-  propList.insert("librevenge:table-columns", columns);
-  if (tableWidth>0)
-    propList.insert("style:width", double(tableWidth), librevenge::RVNG_POINT);
+  if (!m_colsSize.empty())
+    propList.insert("librevenge:table-columns", m_colsSize);
+  if (m_tableWidth>0)
+    propList.insert("style:width", double(m_tableWidth), librevenge::RVNG_POINT);
 }
 
 ////////////////////////////////////////////////////////////
