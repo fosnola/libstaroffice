@@ -49,7 +49,7 @@ class StarState;
 class StarZone;
 namespace StarTableInternal
 {
-struct TableLine;
+class Table;
 }
 
 /** \brief class to store a table in a sdw file
@@ -58,9 +58,7 @@ class StarTable
 {
 public:
   //! the constructor
-  StarTable() : m_headerRepeated(false), m_numBoxes(0), m_chgMode(0), m_lineList()
-  {
-  }
+  StarTable();
   //! the destructor
   ~StarTable();
   //! try to read the data
@@ -68,14 +66,8 @@ public:
   //! try to send the data to a listener
   bool send(STOFFListenerPtr listener, StarState &state) const;
 
-  //! flag to know if the header is repeated
-  bool m_headerRepeated;
-  //! the number of boxes
-  int m_numBoxes;
-  //! the change mode
-  int m_chgMode;
-  //! the list of line
-  std::vector<shared_ptr<StarTableInternal::TableLine> > m_lineList;
+  //! the table
+  shared_ptr<StarTableInternal::Table> m_table;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

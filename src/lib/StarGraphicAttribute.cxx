@@ -1257,10 +1257,14 @@ void StarGAttributeNamedBitmap::addTo(StarState &state, std::set<StarAttribute c
 void StarGAttributeFrameSize::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_FRM_FRM_SIZE) {
-    if (m_width)
-      state.m_global->m_page.m_propertiesList[0].insert("fo:page-width", double(m_width)*0.05, librevenge::RVNG_POINT);
-    if (m_height)
-      state.m_global->m_page.m_propertiesList[0].insert("fo:page-height", double(m_height)*0.05, librevenge::RVNG_POINT);
+    if (m_width>0) {
+      state.m_frameSize[0]=float(m_width)*0.05f;
+      state.m_global->m_page.m_propertiesList[0].insert("fo:page-width", double(state.m_frameSize[0]), librevenge::RVNG_POINT);
+    }
+    if (m_height>0) {
+      state.m_frameSize[1]=float(m_height)*0.05f;
+      state.m_global->m_page.m_propertiesList[0].insert("fo:page-height", double(state.m_frameSize[1]), librevenge::RVNG_POINT);
+    }
   }
 }
 
@@ -1472,8 +1476,8 @@ bool StarGAttributeFrameSize::read(StarZone &zone, int nVers, long endPos, StarO
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   // sw_sw3attr.cxx SwFmtFrmSize::Create
   m_frmType=int(input->readULong(1));
-  m_width=int(input->readULong(4));
-  m_height=int(input->readULong(4));
+  m_width=int(input->readLong(4));
+  m_height=int(input->readLong(4));
   if (nVers>1) {
     int dim[2];
     for (int i=0; i<2; ++i) dim[i]=int(input->readULong(1));

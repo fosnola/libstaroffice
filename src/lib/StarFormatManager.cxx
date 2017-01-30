@@ -63,6 +63,15 @@ FormatDef::~FormatDef()
 {
 }
 
+void FormatDef::updateState(StarState &state) const
+{
+  for (size_t i=0; i<m_attributeList.size(); ++i) {
+    if (!m_attributeList[i].m_attribute)
+      continue;
+    m_attributeList[i].m_attribute->addTo(state);
+  }
+}
+
 bool FormatDef::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener) {
@@ -528,13 +537,16 @@ bool NumberFormatter::Format::updateNumberingProperties(STOFFCell &cell, std::st
 //! Internal: the state of a StarFormatManager
 struct State {
   //! constructor
-  State() : m_idNumberFormatMap()
+  State()
+    : m_idNumberFormatMap()
+    , m_nameToFormatDefMap()
   {
   }
   //! a map id to number format
   std::map<unsigned, NumberFormatter> m_idNumberFormatMap;
+  //! a map name to format definition
+  std::map<librevenge::RVNGString, shared_ptr<StarFormatManagerInternal::FormatDef> > m_nameToFormatDefMap;
 };
-
 }
 
 ////////////////////////////////////////////////////////////
@@ -548,6 +560,22 @@ StarFormatManager::~StarFormatManager()
 {
 }
 
+void StarFormatManager::storeSWFormatDef(librevenge::RVNGString const &name, shared_ptr<StarFormatManagerInternal::FormatDef> &format)
+{
+  if (m_state->m_nameToFormatDefMap.find(name)!=m_state->m_nameToFormatDefMap.end()) {
+    STOFF_DEBUG_MSG(("StarFormatManager::getSWFormatDef: a format with name %s is already defined\n", name.cstr()));
+  }
+  else
+    m_state->m_nameToFormatDefMap[name]=format;
+}
+
+shared_ptr<StarFormatManagerInternal::FormatDef> StarFormatManager::getSWFormatDef(librevenge::RVNGString const &name) const
+{
+  if (m_state->m_nameToFormatDefMap.find(name)!=m_state->m_nameToFormatDefMap.end())
+    return m_state->m_nameToFormatDefMap.find(name)->second;
+  STOFF_DEBUG_MSG(("StarFormatManager::getSWFormatDef: can not find any format corresponding to %s\n", name.cstr()));
+  return shared_ptr<StarFormatManagerInternal::FormatDef>();
+}
 bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, shared_ptr<StarFormatManagerInternal::FormatDef> &format, StarObject &doc)
 {
   STOFFInputStreamPtr input=zone.input();

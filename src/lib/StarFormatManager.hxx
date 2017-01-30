@@ -59,6 +59,8 @@ struct FormatDef {
   }
   //! destructor
   ~FormatDef();
+  //! try to update the state
+  void updateState(StarState &state) const;
   //! try to send the data to a listener
   bool send(STOFFListenerPtr listener, StarState &state) const;
   //! debug function to print the data
@@ -94,6 +96,10 @@ public:
 
   //! try to read a format zone : 'f' or 'l' or 'o' or 'r' or 's'(in TOCX)
   bool readSWFormatDef(StarZone &zone, char kind, shared_ptr<StarFormatManagerInternal::FormatDef> &format, StarObject &doc);
+  //! store a named format zone
+  void storeSWFormatDef(librevenge::RVNGString const &name, shared_ptr<StarFormatManagerInternal::FormatDef> &format);
+  //! try to return a named format zone(if possible)
+  shared_ptr<StarFormatManagerInternal::FormatDef> getSWFormatDef(librevenge::RVNGString const &name) const;
   //! try to read a number formatter type : 'q'
   bool readSWNumberFormatterList(StarZone &zone);
   //! try to read a fly frame list : 'F' (list of 'l' or 'o')

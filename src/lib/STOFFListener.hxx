@@ -180,6 +180,8 @@ public:
   virtual void openTableCell(STOFFCell const &cell) = 0;
   /** close a cell */
   virtual void closeTableCell() = 0;
+  /** add covered cell */
+  virtual void addCoveredTableCell(STOFFVec2i const &pos) = 0;
   /** add empty cell */
   virtual void addEmptyTableCell(STOFFVec2i const &pos, STOFFVec2i span=STOFFVec2i(1,1)) = 0;
 

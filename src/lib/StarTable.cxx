@@ -31,7 +31,9 @@
 * instead of those above.
 */
 
+#include <cmath>
 #include <map>
+#include <set>
 #include <string>
 
 #include <librevenge/librevenge.h>
@@ -59,13 +61,17 @@ struct TableLine;
 //! small structure used to store a table box
 struct TableBox {
   //! constructor
-  TableBox() : m_formatId(0), m_numLines(0), m_content(), m_lineList(), m_format()
+  TableBox() : m_position(), m_formatId(0xFFFF), m_numLines(0), m_content(), m_lineList(), m_format(), m_xDimension(0,0)
   {
   }
   //! try to read the data
-  bool read(StarZone &zone, StarObjectText &object);
+  bool read(Table &table, StarZone &zone, StarObjectText &object, STOFFBox2i &cPos);
   //! try to send the data to a listener
   bool send(STOFFListenerPtr listener, StarState &state) const;
+  //! update the position to correspond to cover the m_position[0],right/bottom
+  void updatePosition(Table &table, StarState const &state, float xOrigin, STOFFVec2i const &RBpos=STOFFVec2i(-1,-1));
+  //! the position
+  STOFFBox2i m_position;
   //! the format
   int m_formatId;
   //! the number of lines
@@ -76,18 +82,22 @@ struct TableBox {
   std::vector<shared_ptr<TableLine> > m_lineList;
   //! the format
   shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+  //! the x position
+  STOFFVec2f m_xDimension;
 };
 
 //! small structure used to store a table line
 struct TableLine {
   //! constructor
-  TableLine() : m_formatId(0), m_numBoxes(0), m_boxList(), m_format()
+  TableLine() : m_position(), m_formatId(0xFFFF), m_numBoxes(0), m_boxList(), m_format()
   {
   }
   //! try to read the data
-  bool read(StarZone &zone, StarObjectText &object);
-  //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarState &state, int row) const;
+  bool read(Table &table, StarZone &zone, StarObjectText &object, STOFFBox2i &cPos);
+  //! update the position to correspond to cover the m_position[0],right/bottom
+  void updatePosition(Table &table, StarState const &state, float xOrigin, STOFFVec2i const &RBpos=STOFFVec2i(-1,-1));
+  //! the position
+  STOFFBox2i m_position;
   //! the format
   int m_formatId;
   //! the number of boxes
@@ -98,7 +108,105 @@ struct TableLine {
   shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
 };
 
-bool TableBox::read(StarZone &zone, StarObjectText &object)
+/** \brief class to store a table data in a sdw file
+ */
+class Table
+{
+public:
+  //! the constructor
+  Table()
+    : m_headerRepeated(false), m_numBoxes(0), m_chgMode(0)
+    , m_dimension(), m_minColWidth(1000000)
+    , m_format(), m_formatList(), m_lineList()
+    , m_xPositionSet(), m_rowToBoxMap()
+  {
+  }
+  //! try use the xdimension to compute the final col positions
+  void updateColumnsPosition();
+  //! try to read the data
+  bool read(StarZone &zone, StarObjectText &object);
+  //! try to send the data to a listener
+  bool send(STOFFListenerPtr listener, StarState &state);
+
+  //! flag to know if the header is repeated
+  bool m_headerRepeated;
+  //! the number of boxes
+  int m_numBoxes;
+  //! the change mode
+  int m_chgMode;
+  //! the dimension
+  STOFFVec2i m_dimension;
+  //! the minimal col width
+  float m_minColWidth;
+  //! the table format
+  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+  //! map format id to format def
+  std::vector<shared_ptr<StarFormatManagerInternal::FormatDef> > m_formatList;
+  //! the list of line
+  std::vector<shared_ptr<StarTableInternal::TableLine> > m_lineList;
+  //! the list of x position
+  std::set<float> m_xPositionSet;
+  //! the list of row to box
+  std::map<int, std::vector<StarTableInternal::TableBox *> > m_rowToBoxMap;
+};
+
+void TableBox::updatePosition(Table &table, StarState const &state, float xOrigin, STOFFVec2i const &RBpos)
+{
+  for (int i=0; i<2; ++i) {
+    if (RBpos[i]>=0 && m_position[1][i]<RBpos[i])
+      m_position.max()[i]=RBpos[i];
+  }
+  StarState cState(state);
+  if (m_formatId!=0xFFFF && !m_format) {
+    if (m_formatId>=0 && m_formatId<int(table.m_formatList.size()))
+      m_format=table.m_formatList[size_t(m_formatId)];
+    else {
+      STOFF_DEBUG_MSG(("StarTableInternal::TableBox::updatePosition: oops, can not find format %d\n", m_formatId));
+    }
+  }
+  if (m_format) {
+    cState.m_frameSize=STOFFVec2i(0,0);
+    m_format->updateState(cState);
+    if (cState.m_frameSize[0]<=0) {
+      if (m_lineList.empty()) {
+        static bool first=true;
+        if (first) {
+          STOFF_DEBUG_MSG(("StarTableInternal::TableBox::updatePosition: oops, can not find some box witdh\n"));
+          first=false;
+        }
+        table.m_minColWidth=0;
+      }
+    }
+    else {
+      m_xDimension=STOFFVec2f(xOrigin, xOrigin+cState.m_frameSize[0]);
+      table.m_xPositionSet.insert(xOrigin+cState.m_frameSize[0]);
+      if (cState.m_frameSize[0] < table.m_minColWidth)
+        table.m_minColWidth=cState.m_frameSize[0];
+    }
+  }
+  else if (m_lineList.empty()) {
+    static bool first=true;
+    if (first) {
+      STOFF_DEBUG_MSG(("StarTableInternal::TableBox::updatePosition: oops, can not find some box witdh\n"));
+      first=false;
+    }
+    table.m_minColWidth=0;
+  }
+  if (m_lineList.empty()) {
+    int row=m_position.min()[1];
+    if (table.m_rowToBoxMap.find(row)==table.m_rowToBoxMap.end())
+      table.m_rowToBoxMap[row]=std::vector<StarTableInternal::TableBox *>();
+    table.m_rowToBoxMap.find(row)->second.push_back(this);
+    return;
+  }
+  for (size_t i=0; i< m_lineList.size(); ++i) {
+    if (!m_lineList[i]) continue;
+    int nextRow=(RBpos[1]>=0 && i+1==m_lineList.size()) ? RBpos[1] : m_lineList[i]->m_position.max()[1];
+    m_lineList[i]->updatePosition(table, cState, xOrigin, STOFFVec2i(RBpos[0], nextRow));
+  }
+}
+
+bool TableBox::read(Table &table, StarZone &zone, StarObjectText &object, STOFFBox2i &cPos)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -110,39 +218,76 @@ bool TableBox::read(StarZone &zone, StarObjectText &object)
   }
   // sw_sw3table.cxx: InTableBox
   libstoff::DebugStream f;
-  f << "Entries(StarTable)[box-" << zone.getRecordLevel() << "]:";
+  f << "Entries(StarTable)[box-" << zone.getRecordLevel() << "]:" << cPos[0] << ",";
   int fl=zone.openFlagZone();
-  if (fl&0x20 || !zone.isCompatibleWith(0x201)) {
+  librevenge::RVNGString formatName;
+  if ((fl&0x20) || !zone.isCompatibleWith(0x201)) {
     m_formatId=int(input->readULong(2));
-    librevenge::RVNGString format;
-    if (!zone.getPoolName(m_formatId, format))
-      f << "###format=" << m_formatId << ",";
-    else
-      f << format.cstr() << ",";
+    if ((fl&0x20)==0) {
+      if (!zone.getPoolName(m_formatId, formatName))
+        f << "###format=" << m_formatId << ",";
+      else
+        f << formatName.cstr() << ",";
+      m_formatId=0xFFFF; // CHANGEME
+    }
+    else if (m_formatId!=0xFFFF)
+      f << "format[id]=" << m_formatId << ",";
   }
   if (fl&0x10) {
     m_numLines=int(input->readULong(2));
     if (m_numLines)
       f << "numLines=" << m_numLines << ",";
   }
+  bool saveFormat=false;
+  if (fl&0x40) {
+    f << "save[format],";
+    saveFormat=true;
+  }
   zone.closeFlagZone();
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  if (input->peek()=='f')
+  if (input->peek()=='f') {
     object.getFormatManager()->readSWFormatDef(zone,'f', m_format, object);
+    if (saveFormat)
+      table.m_formatList.push_back(m_format);
+    else if (!formatName.empty())
+      object.getFormatManager()->storeSWFormatDef(formatName, m_format);
+  }
+  else if (!formatName.empty())
+    m_format=object.getFormatManager()->getSWFormatDef(formatName);
   if (input->peek()=='N')
     object.readSWContent(zone, m_content);
   long lastPos=zone.getRecordLastPosition();
+  STOFFBox2i boxCPos(cPos);
+  STOFFVec2i maxPos=cPos[0]+STOFFVec2i(1,1);
   while (input->tell()<lastPos) {
     pos=input->tell();
     shared_ptr<TableLine> line(new TableLine);
-    if (line->read(zone, object) && input->tell()<=lastPos) {
+    boxCPos.min()[0]=cPos.min()[0];
+    boxCPos.max()[0]=cPos.max()[0];
+    if (line->read(table, zone, object, boxCPos) && input->tell()<=lastPos) {
+      for (int i=0; i<2; ++i) {
+        if (boxCPos[0][i]>maxPos[i])
+          maxPos[i]=boxCPos[0][i];
+      }
       m_lineList.push_back(line);
       continue;
     }
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
+  }
+  m_position=STOFFBox2i(cPos.min(), maxPos);
+  for (int i=0; i<2; ++i) {
+    if (maxPos[i]>cPos[1][i]) {
+      static bool first=true;
+      if (first) {
+        STOFF_DEBUG_MSG(("StarTableInternal::TableBox::read: the dim %d number seems bad: %d>%d\n", i, maxPos[i], cPos[1][i]));
+      }
+      m_position.max()[i]=cPos.max()[i];
+    }
+    else
+      cPos.min()[i]=maxPos[i];
   }
   zone.closeSWRecord('t', "StarTable");
   return true;
@@ -151,18 +296,50 @@ bool TableBox::read(StarZone &zone, StarObjectText &object)
 bool TableBox::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener) {
-    STOFF_DEBUG_MSG(("StarObjectTextInternal::TableBox::send: call without listener\n"));
+    STOFF_DEBUG_MSG(("StarTableInternal::TableBox::send: call without listener\n"));
     return false;
   }
-  if (!m_lineList.empty()) {
-    STOFF_DEBUG_MSG(("StarObjectTextInternal::TableBox::send: sending box with line list is not implemented\n"));
-  }
+  STOFFCellStyle cellStyle;
+  cellStyle.m_format=unsigned(m_formatId);
+  cellStyle.m_numberCellSpanned=m_position.size();
+  cellStyle.m_propertyList.insert("fo:border", "0.035cm solid #000000"); // REMOVEME
+  STOFFCell cell;
+  cell.setPosition(m_position.min());
+  cell.setCellStyle(cellStyle);
+
+  state.m_global->m_object.getFormatManager()->updateNumberingProperties(cell);
+  listener->openTableCell(cell);
+  StarState cState(state);
   if (m_content)
     m_content->send(listener, state);
+  listener->closeTableCell();
   return true;
 }
 
-bool TableLine::read(StarZone &zone, StarObjectText &object)
+void TableLine::updatePosition(Table &table, StarState const &state, float xOrigin, STOFFVec2i const &RBpos)
+{
+  for (int i=0; i<2; ++i) {
+    if (RBpos[i]>=0 && m_position[1][i]<RBpos[i])
+      m_position.max()[i]=RBpos[i];
+  }
+  StarState cState(state);
+  if (m_formatId!=0xFFFF && !m_format) {
+    if (m_formatId>=0 && m_formatId<int(table.m_formatList.size()))
+      m_format=table.m_formatList[size_t(m_formatId)];
+    else
+      STOFF_DEBUG_MSG(("StarTableInternal::TableBox::updatePosition: oops, can not find format %d\n", m_formatId));
+  }
+  if (m_format)
+    m_format->updateState(cState);
+  for (size_t i=0; i< m_boxList.size(); ++i) {
+    if (!m_boxList[i]) continue;
+    int nextCol=(RBpos[0]>=0 && i+1==m_boxList.size()) ? RBpos[0] : m_boxList[i]->m_position.max()[0];
+    m_boxList[i]->updatePosition(table, cState, xOrigin, STOFFVec2i(nextCol, RBpos[1]));
+    xOrigin=m_boxList[i]->m_xDimension[1];
+  }
+}
+
+bool TableLine::read(Table &table, StarZone &zone, StarObjectText &object, STOFFBox2i &cPos)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -174,15 +351,25 @@ bool TableLine::read(StarZone &zone, StarObjectText &object)
   }
   // sw_sw3table.cxx: InTableLine
   libstoff::DebugStream f;
-  f << "Entries(StarTable)[line-" << zone.getRecordLevel() << "]:";
+  f << "Entries(StarTable)[line-" << zone.getRecordLevel() << "]:R" << cPos[0][1] << ",";
   int fl=zone.openFlagZone();
-  if (fl&0x20 || !zone.isCompatibleWith(0x201)) {
+  librevenge::RVNGString formatName;
+  if ((fl&0x20) || !zone.isCompatibleWith(0x201)) {
     m_formatId=int(input->readULong(2));
-    librevenge::RVNGString format;
-    if (!zone.getPoolName(m_formatId, format))
-      f << "###format=" << m_formatId << ",";
-    else
-      f << format.cstr() << ",";
+    if ((fl&0x20)==0) {
+      if (!zone.getPoolName(m_formatId, formatName))
+        f << "###format=" << m_formatId << ",";
+      else
+        f << formatName.cstr() << ",";
+      m_formatId=0xFFFF; // CHANGEME
+    }
+    else if (m_formatId!=0xFFFF)
+      f << "format[id]=" << m_formatId << ",";
+  }
+  bool saveFormat=false;
+  if (fl&0x40) {
+    saveFormat=true;
+    f << "save[format],";
   }
   m_numBoxes=int(input->readULong(2));
   if (m_numBoxes)
@@ -190,62 +377,108 @@ bool TableLine::read(StarZone &zone, StarObjectText &object)
   zone.closeFlagZone();
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  if (input->peek()=='f')
+  if (input->peek()=='f') {
     object.getFormatManager()->readSWFormatDef(zone,'f',m_format, object);
-
+    if (saveFormat)
+      table.m_formatList.push_back(m_format);
+    else if (!formatName.empty())
+      object.getFormatManager()->storeSWFormatDef(formatName, m_format);
+  }
+  else if (!formatName.empty())
+    m_format=object.getFormatManager()->getSWFormatDef(formatName);
   long lastPos=zone.getRecordLastPosition();
+  STOFFVec2i maxPos=cPos[0]+STOFFVec2i(1,1);
+  STOFFBox2i boxCPos(cPos);
   while (input->tell()<lastPos) {
     pos=input->tell();
     shared_ptr<TableBox> box(new TableBox);
-    if (box->read(zone, object) && input->tell()<=lastPos) {
+    boxCPos.min()[1]=cPos.min()[1];
+    boxCPos.max()[1]=cPos.max()[1];
+    if (box->read(table, zone, object, boxCPos) && input->tell()<=lastPos) {
+      for (int i=0; i<2; ++i) {
+        if (boxCPos[0][i]>maxPos[i])
+          maxPos[i]=boxCPos[0][i];
+      }
       m_boxList.push_back(box);
       continue;
     }
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
+  m_position=STOFFBox2i(cPos.min(), maxPos);
+  for (int i=0; i<2; ++i) {
+    if (maxPos[i]>cPos[1][i]) {
+      static bool first=true;
+      if (first) {
+        STOFF_DEBUG_MSG(("StarTableInternal::TableLine::read: the dim %d number seems bad: %d>%d\n", i, maxPos[i], cPos[1][i]));
+      }
+      m_position.max()[i]=cPos.max()[i];
+    }
+    else
+      cPos.min()[i]=maxPos[i];
+  }
   zone.closeSWRecord('L', "StarTable");
   return true;
 }
 
-bool TableLine::send(STOFFListenerPtr listener, StarState &state, int row) const
+void Table::updateColumnsPosition()
 {
-  if (!listener) {
-    STOFF_DEBUG_MSG(("StarObjectTextInternal::TableLine::send: call without listener\n"));
-    return false;
+  if (m_minColWidth<=0 || m_xPositionSet.empty()) return;
+  std::set<float> xPositionSet;
+  float f=2.f/m_minColWidth;
+  for (std::set<float>::const_iterator it=m_xPositionSet.begin(); it!=m_xPositionSet.end(); ++it)
+    xPositionSet.insert(0.5f*std::round(f*(*it))*m_minColWidth);
+  int col=0;
+  std::map<float,int> xPosToColMap;
+  for (std::set<float>::const_iterator it=xPositionSet.begin(); it!=xPositionSet.end(); ++it, ++col)
+    xPosToColMap[(*it)]=col;
+  int maxCol=int(xPosToColMap.size()-1);
+  for (std::map<int, std::vector<StarTableInternal::TableBox *> >::iterator it=m_rowToBoxMap.begin(); it!=m_rowToBoxMap.end(); ++it) {
+    std::vector<StarTableInternal::TableBox *> &boxes=it->second;
+    int actCol=0;
+    for (size_t b=0; b<boxes.size(); ++b) {
+      if (!boxes[b])
+        continue;
+      StarTableInternal::TableBox &box=*(boxes[b]);
+      for (int c=0; c<2; ++c) {
+        float x=box.m_xDimension[c];
+        std::map<float,int>::const_iterator mIt=xPosToColMap.lower_bound(x);
+        int newCol=0;
+        if (mIt==xPosToColMap.end())
+          newCol=maxCol;
+        else
+          newCol=(x<mIt->first-0.5f*m_minColWidth) ? mIt->second-1 : mIt->second;
+        if (newCol<0) newCol=0;
+        if (newCol<actCol) {
+          STOFF_DEBUG_MSG(("Table::updateColumnsPosition: can not compute a col find %d<%d\n", newCol, actCol));
+          break;
+        }
+        static bool first=true;
+        if (c==0) {
+          if (newCol!=box.m_position.min()[0]) {
+            if (first) {
+              first=false;
+              STOFF_DEBUG_MSG(("Table::updateColumnsPosition: move %d to %d\n", box.m_position.min()[0], newCol));
+            }
+            box.m_position.min()[0]=newCol;
+          }
+        }
+        else {
+          if (newCol!=box.m_position.max()[0]) {
+            if (first) {
+              first=false;
+              STOFF_DEBUG_MSG(("Table::updateColumnsPosition: move %d to %d\n", box.m_position.max()[0], newCol));
+            }
+            box.m_position.max()[0]=newCol;
+          }
+        }
+        actCol=newCol;
+      }
+    }
   }
-  listener->openTableRow(0, librevenge::RVNG_POINT);
-  for (size_t i=0; i<m_boxList.size(); ++i) {
-    STOFFVec2i pos(int(i), row);
-    if (!m_boxList[i])
-      listener->addEmptyTableCell(pos);
-
-    STOFFCellStyle cellStyle;
-    cellStyle.m_format=unsigned(m_boxList[i]->m_formatId);
-    STOFFCell cell;
-    cell.setPosition(pos);
-    cell.setCellStyle(cellStyle);
-    state.m_global->m_object.getFormatManager()->updateNumberingProperties(cell);
-    listener->openTableCell(cell);
-    StarState cState(state);
-    m_boxList[i]->send(listener, state);
-    listener->closeTableCell();
-  }
-  listener->closeTableRow();
-  return true;
 }
 
-}
-
-////////////////////////////////////////////////////////////
-// StarTable
-////////////////////////////////////////////////////////////
-StarTable::~StarTable()
-{
-}
-
-
-bool StarTable::read(StarZone &zone, StarObjectText &object)
+bool Table::read(StarZone &zone, StarObjectText &object)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -278,10 +511,9 @@ bool StarTable::read(StarZone &zone, StarObjectText &object)
   ascFile.addNote(f.str().c_str());
 
   long lastPos=zone.getRecordLastPosition();
-  // TODO storeme
-  shared_ptr<StarFormatManagerInternal::FormatDef> format;
-  if (input->peek()=='f') object.getFormatManager()->readSWFormatDef(zone, 'f', format, object);
+  if (input->peek()=='f') object.getFormatManager()->readSWFormatDef(zone, 'f', m_format, object);
   if (input->peek()=='Y') {
+    // TODO storeme
     SWFieldManager fieldManager;
     fieldManager.readField(zone,'Y');
   }
@@ -291,57 +523,114 @@ bool StarTable::read(StarZone &zone, StarObjectText &object)
     StarWriterStruct::NodeRedline redline;
     if (redline.read(zone))
       continue;
-    STOFF_DEBUG_MSG(("StarTable::read: can not read a red line\n"));
+    STOFF_DEBUG_MSG(("StarTableInternal::Table::read: can not read a red line\n"));
     ascFile.addPos(pos);
     ascFile.addNote("SWTableDef:###redline");
     zone.closeSWRecord('E',"StarTable");
     return true;
   }
 
+  STOFFBox2i cPos(STOFFVec2i(0,0),STOFFVec2i(200,200));
+  int maxCol=0;
   while (input->tell()<lastPos && input->peek()=='L') {
     pos=input->tell();
     shared_ptr<StarTableInternal::TableLine> line(new StarTableInternal::TableLine);
-    if (line->read(zone, object)) {
+    cPos.min()[0]=0;
+    cPos.max()[0]=200;
+    if (line->read(*this, zone, object, cPos)) {
+      if (cPos.min()[0]>maxCol) maxCol=cPos.min()[0];
       m_lineList.push_back(line);
       continue;
     }
-    STOFF_DEBUG_MSG(("StarTable::read: can not read a table line\n"));
+    STOFF_DEBUG_MSG(("StarTableInternal::Table::read: can not read a table line\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }
+  m_dimension=STOFFVec2i(maxCol,cPos.min()[1]);
   zone.closeSWRecord('E',"StarTable");
   return true;
 }
 
-bool StarTable::send(STOFFListenerPtr listener, StarState &state) const
+bool StarTableInternal::Table::send(STOFFListenerPtr listener, StarState &state)
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarTableInternal::Table::send: call without listener\n"));
     return false;
   }
   STOFFTable table;
-  // first find the number of columns
-  size_t numCol=0;
-  for (size_t i=0; i<m_lineList.size(); ++i) {
-    if (m_lineList[i] && m_lineList[i]->m_boxList.size()>numCol)
-      numCol=m_lineList[i]->m_boxList.size();
+  float percentMaxValue=0;
+  StarState cState(state.m_global);
+  if (m_format) {
+    m_format->updateState(cState);
+    m_minColWidth=cState.m_frameSize[0];
+    // checkme sometime the width is 65535/20, ie. bigger than the page width...
+    if (cState.m_frameSize[0]>=float(65535/20)) {
+      percentMaxValue=cState.m_frameSize[0];
+      table.m_propertyList.insert("style:width", 1., librevenge::RVNG_PERCENT);
+    }
+    else if (cState.m_frameSize[0]>=65535)
+      table.m_propertyList.insert("style:width", double(cState.m_frameSize[0]), librevenge::RVNG_POINT);
   }
+  m_xPositionSet.insert(0);
+  for (size_t l=0; l<m_lineList.size(); ++l) {
+    if (!m_lineList[l]) continue;
+    TableLine &line=*m_lineList[l];
+    line.updatePosition(*this, cState, 0, STOFFVec2i(m_dimension[0],line.m_position.max()[1]));
+  }
+  updateColumnsPosition();
+  // first find the number of columns
   librevenge::RVNGPropertyListVector columns;
-  for (size_t c = 0; c < numCol; ++c) {
+  for (int c = 0; c < m_dimension[0]; ++c) {
     librevenge::RVNGPropertyList column;
     float w=40;
     column.insert("style:column-width", double(w), librevenge::RVNG_POINT);
     columns.append(column);
   }
-  table.setColsSize(columns);
+  table.m_propertyList.insert("librevenge:table-columns", columns);
   listener->openTable(table);
-  for (size_t i=0; i<m_lineList.size(); ++i) {
-    if (!m_lineList[i]) continue;
-    StarState cState(state);
-    m_lineList[i]->send(listener, cState, int(i));
+  std::map<int, std::vector<StarTableInternal::TableBox *> >::const_iterator it;
+  int row=-1;
+  for (it=m_rowToBoxMap.begin(); it!=m_rowToBoxMap.end(); ++it) {
+    while (++row<it->first) {
+      listener->openTableRow(0, librevenge::RVNG_POINT);
+      listener->closeTableRow();
+    }
+    listener->openTableRow(0, librevenge::RVNG_POINT);
+    std::vector<StarTableInternal::TableBox *> const &line=it->second;
+    int col=-1;
+    for (size_t b=0; b<line.size(); ++b) {
+      TableBox const *box=line[b];
+      if (!box) continue;
+      while (++col<box->m_position.min()[0])
+        listener->addCoveredTableCell(STOFFVec2i(col,row));
+      box->send(listener, state);
+    }
+    listener->closeTableRow();
   }
   listener->closeTable();
   return true;
+}
+}
+
+////////////////////////////////////////////////////////////
+// StarTable
+////////////////////////////////////////////////////////////
+StarTable::StarTable() : m_table(new StarTableInternal::Table)
+{
+}
+
+StarTable::~StarTable()
+{
+}
+
+bool StarTable::read(StarZone &zone, StarObjectText &object)
+{
+  return m_table->read(zone, object);
+}
+
+bool StarTable::send(STOFFListenerPtr listener, StarState &state) const
+{
+  return m_table->send(listener, state);
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

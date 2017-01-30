@@ -544,13 +544,14 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
   for (int i=0; i<3; ++i) {
     // chaxis.cxx: ChartAxis::LoadMemberCompat
     f << "chart" << char('X'+i) << "=[";
-    double mfMin, mfMax, mfStep, mfStepHelp, mfOrigin;
-    *input>>mfMin>> mfMax>> mfStep>> mfStepHelp >> mfOrigin;
+    double mfMin, mfMax, mfStep, mfStepHelp, mfOrigin=0;
+    *input>>mfMin>> mfMax>> mfStep>> mfStepHelp;
+    // sometimes the zone stops just here...
+    if (input->tell()<lastPos) *input >> mfOrigin;
     f << "minMax=" << mfMin << ":" << mfMax << ",";
     f << "step=" << mfStep << "[" << mfStepHelp << "],";
     if (mfOrigin<0||mfOrigin>0) f << "origin=" << mfOrigin << ",";
     f << "],";
-    // sometimes the zone stops just here...
     if (input->tell()>=lastPos) {
       if (input->tell()!=lastPos) {
         STOFF_DEBUG_MSG(("StarObjectChart::readSCHAttributes: can not read a axis\n"));

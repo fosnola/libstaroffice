@@ -1354,6 +1354,25 @@ void STOFFGraphicListener::closeTableRow()
     m_presentationInterface->closeTableRow();
 }
 
+void STOFFGraphicListener::addCoveredTableCell(STOFFVec2i const &pos)
+{
+  if (!m_ps->m_isTableRowOpened) {
+    STOFF_DEBUG_MSG(("STOFFGraphicListener::addCoveredTableCell: called with m_isTableRowOpened=false\n"));
+    return;
+  }
+  if (m_ps->m_isTableCellOpened) {
+    STOFF_DEBUG_MSG(("STOFFGraphicListener::addCoveredTableCell: called with m_isTableCellOpened=true\n"));
+    closeTableCell();
+  }
+  librevenge::RVNGPropertyList propList;
+  propList.insert("librevenge:column", pos[0]);
+  propList.insert("librevenge:row", pos[1]);
+  if (m_drawingInterface)
+    m_drawingInterface->insertCoveredTableCell(propList);
+  else
+    m_presentationInterface->insertCoveredTableCell(propList);
+}
+
 void STOFFGraphicListener::addEmptyTableCell(STOFFVec2i const &pos, STOFFVec2i span)
 {
   if (!m_ps->m_isTableRowOpened) {
@@ -1451,7 +1470,7 @@ void STOFFGraphicListener::closeFrame()
   m_ps->m_isFrameOpened = false;
 }
 
-bool  STOFFGraphicListener::openGroup(STOFFPosition const &pos)
+bool STOFFGraphicListener::openGroup(STOFFPosition const &pos)
 {
   if (!m_ds->m_isDocumentStarted) {
     STOFF_DEBUG_MSG(("STOFFGraphicListener::openGroup: the document is not started\n"));

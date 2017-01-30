@@ -1616,6 +1616,22 @@ void STOFFSpreadsheetListener::closeTableRow()
   m_documentInterface->closeTableRow();
 }
 
+void STOFFSpreadsheetListener::addCoveredTableCell(STOFFVec2i const &pos)
+{
+  if (!m_ps->m_isTableRowOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::addCoveredTableCell: called with m_isTableRowOpened=false\n"));
+    return;
+  }
+  if (m_ps->m_isTableCellOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::addCoveredTableCell: called with m_isTableCellOpened=true\n"));
+    closeTableCell();
+  }
+  librevenge::RVNGPropertyList propList;
+  propList.insert("librevenge:column", pos[0]);
+  propList.insert("librevenge:row", pos[1]);
+  m_documentInterface->insertCoveredTableCell(propList);
+}
+
 void STOFFSpreadsheetListener::addEmptyTableCell(STOFFVec2i const &pos, STOFFVec2i span)
 {
   if (!m_ps->m_isTableRowOpened) {

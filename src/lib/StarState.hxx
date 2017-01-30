@@ -99,6 +99,7 @@ public:
     int m_listLevel;
     /** the relative unit uses to transform rel font height in point, default 1/20 */
     double m_relativeUnit;
+
   private:
     GlobalState(GlobalState const &);
     GlobalState &operator=(GlobalState const &);
@@ -111,7 +112,8 @@ public:
     m_cell(),
     m_graphic(),
     m_paragraph(),
-    m_font(), m_content(false), m_footnote(false), m_link(""), m_refMark(""), m_field()
+    m_font(), m_content(false), m_footnote(false), m_link(""), m_refMark(""), m_field(),
+    m_frameSize()
   {
   }
   //! constructor
@@ -122,7 +124,8 @@ public:
     m_cell(),
     m_graphic(),
     m_paragraph(),
-    m_font(), m_content(false), m_footnote(false), m_link(""), m_refMark(""), m_field()
+    m_font(), m_content(false), m_footnote(false), m_link(""), m_refMark(""), m_field(),
+    m_frameSize()
   {
   }
   //! copy constructor
@@ -158,7 +161,8 @@ public:
   librevenge::RVNGString m_refMark;
   /** the field */
   shared_ptr<SWFieldManagerInternal::Field> m_field;
-
+  /** the last frame dimension */
+  STOFFVec2f m_frameSize;
 private:
   StarState &operator=(StarState const &);
 };

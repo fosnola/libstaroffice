@@ -51,90 +51,20 @@
 class STOFFTable
 {
 public:
-  //! an enum used to indicate what the list of entries which are filled
-  enum DataSet {
-    CellPositionBit=1, BoxBit=2, SizeBit=4, TableDimBit=8, TablePosToCellBit=0x10
-  };
-  /** an enum do define the table alignment.
-
-  \note Paragraph means using the default alignment, left page alignment and use left margin */
-  enum Alignment {
-    Paragraph, Left, Center, Right
-  };
   //! the constructor
-  STOFFTable() :
-    m_mergeBorders(true), m_cellsList(),
-    m_colsSize(), m_tableWidth(0), m_alignment(Paragraph), m_leftMargin(0), m_rightMargin(0)
+  STOFFTable() : m_propertyList()
   {
   }
   //! the destructor
   virtual ~STOFFTable();
-
-  //! add a new cells
-  void add(shared_ptr<STOFFCell> cell)
-  {
-    if (!cell) {
-      STOFF_DEBUG_MSG(("STOFFTable::add: must be called with a cell\n"));
-      return;
-    }
-    m_cellsList.push_back(cell);
-  }
-  //! returns true if we need to merge borders
-  bool mergeBorders() const
-  {
-    return m_mergeBorders;
-  }
-  //! sets the merge borders' value
-  bool setMergeBorders(bool val)
-  {
-    return m_mergeBorders=val;
-  }
-  /** defines the current alignment
-      \note: leftMargin,rightMargin are given in Points */
-  void setAlignment(Alignment align, float leftMargin=0, float rightMargin=0)
-  {
-    m_alignment = align;
-    m_leftMargin = leftMargin;
-    m_rightMargin = rightMargin;
-  }
-  //! returns the number of cell
-  int numCells() const
-  {
-    return int(m_cellsList.size());
-  }
-  /** define the columns size */
-  void setColsSize(librevenge::RVNGPropertyListVector const &cSize, float tableWidth=0)
-  {
-    m_colsSize=cSize;
-    m_tableWidth=tableWidth;
-  }
-
-  //! returns the i^th cell
-  shared_ptr<STOFFCell> get(int id);
-
-  /** try to send the table as basic text */
-  bool sendAsText(STOFFListenerPtr listener);
 
   // interface with the content listener
 
   //! adds the table properties to propList
   void addTablePropertiesTo(librevenge::RVNGPropertyList &propList) const;
 
-protected:
-  /** do we need to merge cell borders ( default yes) */
-  bool m_mergeBorders;
-  /** the list of cells */
-  std::vector<shared_ptr<STOFFCell> > m_cellsList;
-  /** the final col size, ... */
-  librevenge::RVNGPropertyListVector m_colsSize;
-  //! the table width
-  float m_tableWidth;
-  /** the table alignment */
-  Alignment m_alignment;
-  /** the left margin in point */
-  float m_leftMargin;
-  /** the right margin in point */
-  float m_rightMargin;
+  /** the property list */
+  librevenge::RVNGPropertyList m_propertyList;
 };
 
 #endif

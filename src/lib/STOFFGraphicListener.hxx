@@ -222,6 +222,8 @@ public:
   void openTableCell(STOFFCell const &cell);
   /** close a cell */
   void closeTableCell();
+  /** add covered cell */
+  void addCoveredTableCell(STOFFVec2i const &pos);
   /** add empty cell */
   void addEmptyTableCell(STOFFVec2i const &pos, STOFFVec2i span=STOFFVec2i(1,1));
 

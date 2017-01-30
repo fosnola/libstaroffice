@@ -54,49 +54,6 @@
 /** Internal: the structures of a STOFFTable */
 namespace STOFFTableInternal
 {
-//! a comparaison structure used retrieve the rows and the columns
-struct Compare {
-  explicit Compare(int dim) : m_coord(dim) {}
-  //! small structure to define a cell point
-  struct Point {
-    Point(int wh, STOFFCell const *cell, int cellId) : m_which(wh), m_cell(cell), m_cellId(cellId) {}
-    float getPos(int coord) const
-    {
-      if (m_which)
-        return m_cell->bdBox().max()[coord];
-      return m_cell->bdBox().min()[coord];
-    }
-    /** returns the cells size */
-    float getSize(int coord) const
-    {
-      return m_cell->bdBox().size()[coord];
-    }
-    /** the position of the point in the cell (0: LT, 1: RB) */
-    int m_which;
-    /** the cell */
-    STOFFCell const *m_cell;
-    //! the cell id ( used by compare)
-    int m_cellId;
-  };
-
-  //! comparaison function
-  bool operator()(Point const &c1, Point const &c2) const
-  {
-    float diffF = c1.getPos(m_coord)-c2.getPos(m_coord);
-    if (diffF < 0) return true;
-    if (diffF > 0) return false;
-    int diff = c2.m_which - c1.m_which;
-    if (diff) return (diff < 0);
-    diffF = c1.m_cell->bdBox().size()[m_coord]
-            - c2.m_cell->bdBox().size()[m_coord];
-    if (diffF < 0) return true;
-    if (diffF > 0) return false;
-    return c1.m_cellId < c2.m_cellId;
-  }
-
-  //! the coord to compare
-  int m_coord;
-};
 }
 
 ////////////////////////////////////////////////////////////
@@ -108,17 +65,19 @@ STOFFTable::~STOFFTable()
 {
 }
 
-shared_ptr<STOFFCell> STOFFTable::get(int id)
+void STOFFTable::addTablePropertiesTo(librevenge::RVNGPropertyList &pList) const
 {
-  if (id < 0 || id >= int(m_cellsList.size())) {
-    STOFF_DEBUG_MSG(("STOFFTable::get: cell %d does not exists\n",id));
-    return shared_ptr<STOFFCell>();
+  if (!m_propertyList["table:border-model"])
+    pList.insert("table:border-model","collapsing");
+  librevenge::RVNGPropertyList::Iter i(m_propertyList);
+  for (i.rewind(); i.next();) {
+    if (i.child()) {
+      pList.insert(i.key(), *i.child());
+      continue;
+    }
+    pList.insert(i.key(), i()->clone());
   }
-  return m_cellsList[size_t(id)];
-}
-
-void STOFFTable::addTablePropertiesTo(librevenge::RVNGPropertyList &propList) const
-{
+#if 0
   switch (m_alignment) {
   case Paragraph:
     break;
@@ -136,26 +95,6 @@ void STOFFTable::addTablePropertiesTo(librevenge::RVNGPropertyList &propList) co
   default:
     break;
   }
-  if (mergeBorders())
-    propList.insert("table:border-model","collapsing");
-
-  if (!m_colsSize.empty())
-    propList.insert("librevenge:table-columns", m_colsSize);
-  if (m_tableWidth>0)
-    propList.insert("style:width", double(m_tableWidth), librevenge::RVNG_POINT);
+#endif
 }
 
-////////////////////////////////////////////////////////////
-// try to send the table
-bool STOFFTable::sendAsText(STOFFListenerPtr listener)
-{
-  if (!listener) return true;
-
-  size_t nCells = m_cellsList.size();
-  for (size_t i = 0; i < nCells; i++) {
-    if (!m_cellsList[i]) continue;
-    m_cellsList[i]->sendContent(listener, *this);
-    listener->insertEOL();
-  }
-  return true;
-}
