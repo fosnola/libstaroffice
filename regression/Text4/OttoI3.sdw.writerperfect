@@ -1,0 +1,1872 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" office:mimetype="application/vnd.oasis.opendocument.text" office:version="1.1">
+  <office:meta>
+    <dc:creator>Gerald Leppert</dc:creator>
+    <dc:date>1998-08-18T04:42:00.00</dc:date>
+    <meta:creation-date>1998-08-18T04:42:00.00</meta:creation-date>
+    <meta:initial-creator>Gerald Leppert</meta:initial-creator>
+    <meta:print-date>1601-01-01T00:00:00.00</meta:print-date>
+    <meta:generator>libodfgen/0.1.6</meta:generator>
+  </office:meta>
+  <office:font-face-decls>
+    <style:font-face style:name="Times" svg:font-family="Times"/>
+    <style:font-face style:name="helvetica" svg:font-family="helvetica"/>
+    <style:font-face style:name="starbats" svg:font-family="starbats"/>
+    <style:font-face style:font-charset="x-symbol" style:name="StarSymbol" svg:font-family="StarSymbol"/>
+  </office:font-face-decls>
+  <office:styles>
+    <style:default-style style:family="graphic"/>
+    <style:default-style style:family="paragraph">
+      <style:paragraph-properties style:line-break="strict" style:punctuation-wrap="hanging" style:tab-stop-distance="0.5in" style:text-autospace="ideograph-alpha" style:use-window-font-color="true" style:writing-mode="page"/>
+    </style:default-style>
+    <style:default-style style:family="table"/>
+    <style:default-style style:family="table-row">
+      <style:table-row-properties fo:keep-together="auto"/>
+    </style:default-style>
+    <style:default-style style:family="table-column"/>
+    <style:default-style style:family="table-cell"/>
+    <style:style style:class="text" style:family="paragraph" style:name="Standard"/>
+    <style:style style:class="text" style:display-name="Text Body" style:family="paragraph" style:name="Text_Body" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Table Contents" style:family="paragraph" style:name="Table_Contents" style:parent-style-name="Text_Body"/>
+    <style:style style:class="extra" style:display-name="Table Heading" style:family="paragraph" style:name="Table_Heading" style:parent-style-name="Table_Contents"/>
+    <style:style style:class="list" style:display-name="List" style:family="paragraph" style:name="List" style:parent-style-name="Text_Body"/>
+    <style:style style:class="extra" style:display-name="Header" style:family="paragraph" style:name="Header" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Footer" style:family="paragraph" style:name="Footer" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Caption" style:family="paragraph" style:name="Caption" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Footnote" style:family="paragraph" style:name="Footnote" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Endnote" style:family="paragraph" style:name="Endnote" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Index" style:family="paragraph" style:name="Index" style:parent-style-name="Standard"/>
+    <style:style style:display-name="Footnote_Symbol" style:family="text" style:name="Footnote_Symbol">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Endnote_Symbol" style:family="text" style:name="Endnote_Symbol">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Footnote_anchor" style:family="text" style:name="Footnote_anchor">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Endnote_anchor" style:family="text" style:name="Endnote_anchor">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <text:linenumbering-configuration style:num-format="1" text:increment="5" text:number-lines="false" text:number-position="left" text:offset="0.1965in"/>
+    <text:notes-configuration style:num-format="1" text:citation-body-style-name="Footnote_anchor" text:citation-style-name="Footnote_Symbol" text:footnotes-position="page" text:note-class="footnote" text:start-numbering-at="document" text:start-value="0"/>
+    <text:notes-configuration style:num-format="i" text:citation-body-style-name="Endnote_anchor" text:citation-style-name="Endnote_Symbol" text:master-page-name="Endnote" text:note-class="endnote" text:start-value="0"/>
+  </office:styles>
+  <office:automatic-styles>
+    <style:page-layout style:name="PL0">
+      <style:page-layout-properties fo:margin-bottom="1.0000in" fo:margin-left="1.0000in" fo:margin-right="1.0000in" fo:margin-top="1.0000in" fo:page-height="11.0000in" fo:page-width="8.5000in" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:distance-after-sep="0.0398in" style:distance-before-sep="0.0398in" style:rel-width="25.0000%" style:width="0.0071in"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:page-layout style:name="PL1">
+      <style:page-layout-properties fo:margin-bottom="1.0000in" fo:margin-left="1.0000in" fo:margin-right="1.0000in" fo:margin-top="1.0000in" fo:page-height="11.0000in" fo:page-width="8.5000in" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:rel-width="25.0000%"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:page-layout style:name="PL2">
+      <style:page-layout-properties fo:margin-bottom="74.8500pt" fo:margin-left="86.0000pt" fo:margin-right="86.0000pt" fo:margin-top="26.6500pt" fo:page-height="841.9000pt" fo:page-width="595.3000pt" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:distance-after-sep="0.0398in" style:distance-before-sep="0.0398in" style:rel-width="25.0000%" style:width="0.0071in"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:style style:family="text" style:name="Span_M0">
+      <style:text-properties style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S_M0" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:text-align="center" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:char="," style:leader-style="solid" style:leader-text=" " style:position="240.9500pt" style:type="char"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="481.9500pt" style:type="right"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S_M1" style:parent-style-name="Standard">
+      <style:paragraph-properties style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:char="," style:leader-style="solid" style:leader-text=" " style:position="240.9500pt" style:type="char"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="481.9500pt" style:type="right"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="text" style:name="Span1">
+      <style:text-properties fo:font-size="16.0000pt" fo:font-weight="bold" style:font-name="helvetica" style:font-name-asian="helvetica" style:font-name-complex="helvetica" style:font-pitch="variable" style:font-size-asian="16.0000pt" style:font-size-complex="16.0000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span2">
+      <style:text-properties style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span3">
+      <style:text-properties fo:font-size="14.0000pt" fo:font-style="italic" fo:font-weight="bold" style:font-name="helvetica" style:font-name-asian="helvetica" style:font-name-complex="helvetica" style:font-pitch="variable" style:font-size-asian="14.0000pt" style:font-size-complex="14.0000pt" style:font-style-asian="italic" style:font-style-complex="italic" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span4">
+      <style:text-properties fo:font-style="italic" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-style-asian="italic" style:font-style-complex="italic"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span5">
+      <style:text-properties fo:font-size="10.0000pt" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span6">
+      <style:text-properties fo:font-size="14.0000pt" fo:font-weight="bold" style:font-name="helvetica" style:font-name-asian="helvetica" style:font-name-complex="helvetica" style:font-pitch="variable" style:font-size-asian="14.0000pt" style:font-size-complex="14.0000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span7">
+      <style:text-properties fo:font-size="11.9000pt" fo:font-style="italic" fo:font-weight="bold" style:font-name="helvetica" style:font-name-asian="helvetica" style:font-name-complex="helvetica" style:font-pitch="variable" style:font-size-asian="11.9000pt" style:font-size-complex="11.9000pt" style:font-style-asian="italic" style:font-style-complex="italic" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span8">
+      <style:text-properties fo:font-size="16.1000pt" fo:font-weight="bold" style:font-name="helvetica" style:font-name-asian="helvetica" style:font-name-complex="helvetica" style:font-pitch="variable" style:font-size-asian="16.1000pt" style:font-size-complex="16.1000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S10" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:text-align="justify" fo:text-align-last="default" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S11" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-left="14.1500pt" fo:margin-right="0.0000pt" fo:text-indent="-14.1500pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S12" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-top="12.0000pt" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S13" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:text-align="justify" fo:text-align-last="default" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S14" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S15" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-top="12.0000pt" fo:text-align="justify" fo:text-align-last="default" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S16" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="12.0000pt" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="15.8000pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S17" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:text-align="justify" fo:text-align-last="default" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="19.9000pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S18" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="19.9000pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S19" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-left="14.1500pt" fo:margin-right="0.0000pt" fo:margin-top="0.0000pt" fo:text-indent="-14.1500pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:master-page-name="PM2" style:name="S2" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:margin-top="12.0000pt" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S20" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-left="14.1500pt" fo:margin-right="0.0000pt" fo:margin-top="0.0000pt" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S3" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:margin-top="12.0000pt" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S4" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="200.0000%" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:text-align="right" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text="." style:position="481.9500pt" style:type="right"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S5" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="200.0000%" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text="." style:position="481.9500pt" style:type="right"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S6" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="200.0000%" fo:margin-left="14.1500pt" fo:margin-right="0.0000pt" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text="." style:position="467.8000pt" style:type="right"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S7" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="200.0000%" fo:margin-left="28.3000pt" fo:margin-right="0.0000pt" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text="." style:position="453.6500pt" style:type="right"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S8" style:parent-style-name="Standard">
+      <style:paragraph-properties style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S9" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="12.0000pt" style:justify-single-word="false"/>
+    </style:style>
+    <text:list-style style:name="UL0">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL1">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL2">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL3">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL4">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL5">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL6">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL7">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL8">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL9">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL10">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL11">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL12">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL13">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL14">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL15">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL16">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL17">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL18">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL19">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL20">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL21">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL22">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL23">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL24">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL25">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL26">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL27">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL28">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL29">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL30">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL31">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL32">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL33">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL34">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL35">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL36">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL37">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <text:list-style style:name="UL38">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+  </office:automatic-styles>
+  <office:master-styles>
+    <style:master-page style:display-name="Standard" style:name="PM0" style:page-layout-name="PL0"/>
+    <style:master-page style:display-name="EndNote" style:name="PM1" style:page-layout-name="PL1"/>
+    <style:master-page style:name="PM2" style:page-layout-name="PL2">
+      <style:header>
+        <text:p text:style-name="S_M0">
+          <text:span text:style-name="Span_M0">- <text:page-number text:select-page="current"/> -</text:span>
+        </text:p>
+      </style:header>
+      <style:footer>
+        <text:p text:style-name="S_M1">
+          <text:span text:style-name="Span_M0"/>
+        </text:p>
+      </style:footer>
+    </style:master-page>
+  </office:master-styles>
+  <office:body>
+    <office:text>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S3">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S3">
+        <text:span text:style-name="Span1">Inhaltsverzeichnis:</text:span>
+      </text:p>
+      <text:p text:style-name="S4">
+        <text:span text:style-name="Span2">Seite:</text:span>
+      </text:p>
+      <text:p text:style-name="S5">
+        <text:span text:style-name="Span2">1. Die Quellenlage zur Königserhebung Ottos I. <text:tab/>3</text:span>
+      </text:p>
+      <text:p text:style-name="S5">
+        <text:span text:style-name="Span2">2. Die Designation Ottos durch Heinrich I.<text:tab/>4</text:span>
+      </text:p>
+      <text:p text:style-name="S6">
+        <text:span text:style-name="Span2">2.1. Das Frühstadium der ´Hausordnung´ 927<text:tab/>5</text:span>
+      </text:p>
+      <text:p text:style-name="S6">
+        <text:span text:style-name="Span2">2.2 Die ´Hausordnung´ 929<text:tab/>5</text:span>
+      </text:p>
+      <text:p text:style-name="S6">
+        <text:span text:style-name="Span2">2.3. Einbeziehung der Stämme in Heinrichs Entscheidung<text:tab/>7</text:span>
+      </text:p>
+      <text:p text:style-name="S6">
+        <text:span text:style-name="Span2">2.4. Beurteilung dieser Nachfolgeregelung Heinrichs<text:tab/>8</text:span>
+      </text:p>
+      <text:p text:style-name="S5">
+        <text:span text:style-name="Span2">3. Die Königserhebung Ottos I. im Jahre 936<text:tab/>9</text:span>
+      </text:p>
+      <text:p text:style-name="S6">
+        <text:span text:style-name="Span2">3.1. Bekräftigung der Designation im Jahre 936<text:tab/>9</text:span>
+      </text:p>
+      <text:p text:style-name="S6">
+        <text:span text:style-name="Span2">3.2. Die Wahl Ottos I.<text:tab/>9</text:span>
+      </text:p>
+      <text:p text:style-name="S7">
+        <text:span text:style-name="Span2">3.2.1. Welche Kandidaten standen bei der Wahl zur Disposition ?<text:tab/>10</text:span>
+      </text:p>
+      <text:p text:style-name="S7">
+        <text:span text:style-name="Span2">3.2.2. Vorverhandlungen vor der Wahl im Jahre 936<text:tab/>10</text:span>
+      </text:p>
+      <text:p text:style-name="S6">
+        <text:span text:style-name="Span2">3.3. Die Königserhebung Ottos in Aachen 936<text:tab/>11</text:span>
+      </text:p>
+      <text:p text:style-name="S6">
+        <text:span text:style-name="Span2">3.4. Handelte es sich um eine freie Wahl oder Akklamation ?<text:tab/>12</text:span>
+      </text:p>
+      <text:p text:style-name="S5">
+        <text:span text:style-name="Span2">4. Auswirkungen der Königserhebung Ottos I. auf die folgende Zeit<text:tab/>13</text:span>
+      </text:p>
+      <text:p text:style-name="S5">
+        <text:span text:style-name="Span2">Literaturverzeichnis:<text:tab/>14</text:span>
+      </text:p>
+      <text:p text:style-name="S7">
+        <text:span text:style-name="Span2">Primärliteratur/ Quellen:<text:tab/>14</text:span>
+      </text:p>
+      <text:p text:style-name="S7">
+        <text:span text:style-name="Span2">Sekundärliteratur:<text:tab/>14</text:span>
+      </text:p>
+      <text:p text:style-name="S8">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S8">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S8">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S8">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S8">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S8">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S8">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S8">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S8">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span3">1. Die Quellenlage zur Königserhebung Ottos I. </text:span>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">Da die Quellenlage zur Königserhebung Ottos des Großen nicht besonders gut ist, <text:s/>muß sich das meiste auf die Überlieferung von Widukind von Corvey gründen. Widukinds Aussagen sind mangels anderer Quellen oft nicht überprüfbar, was der Wissenschaft in diesem Bereich oft zu Spekulationen Anlaß gab; dies zeigt z.B. die divergierende Da</text:span>
+        <text:span text:style-name="Span2">­tierung des entscheidenden Aktes der Königserhebung zwischen 927 und 936. Wie ist jedoch der Wahrheitsgehalt von Widukinds Sachsengeschichte einzustufen ?</text:span>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">Widukind war Mönch im Reichskloster Korvei, in das er im Alter von etwa 15 Jahren eintrat; er schrieb zuerst Heiligengeschichten, wendete sich jedoch bald der Profange</text:span>
+        <text:span text:style-name="Span2">­schichte zu und schrieb die </text:span>
+        <text:span text:style-name="Span4">Rerum Saxonicarum libri III.</text:span>
+        <text:note text:id="ftn1" text:note-class="footnote">
+          <text:note-citation>1</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Quellen zur Geschichte der sächsischen Kaiserzeit, unter Benützung d. Übers. von Paul Hirsch, neu bearb. von <text:s/>Albert Bauer u. Reinhold Rau, 2. durchges. u. berichtigte Aufl., Darmstadt 1977. (=Ausgewählte Quellen zur deutschen Geschichte des Mittelalter; Bd. 8), S. 3f.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span4"> </text:span>
+        <text:span text:style-name="Span2">Als Motiv gibt er in </text:span>
+        <text:span text:style-name="Span4">devotio generis gentisque meae</text:span>
+        <text:span text:style-name="Span2">, die Ergebenheit gegenüber Sippe (Fürstenhaus) und Volk, an.</text:span>
+        <text:note text:id="ftn2" text:note-class="footnote">
+          <text:note-citation>2</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL0">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Widukindi res gestae Saxonicae, In: Quellen zur Geschichte der sächsischen Kaiserzeit, unter Benützung d. Übers. von Paul Hirsch, neu bearb. von <text:s/>Albert Bauer u. Reinhold Rau, 2. durchges. u. berichtigte Aufl., Darmstadt 1977. (=Ausgewählte Quellen zur deutschen Geschichte des Mittelalter; Bd. 8). I 1; S. 20. </text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Es liegt es nahe, daß er Nachfahr des gleichnamigen Sachsenherzogs ist, somit ist auch eine » wohl entferntere Verwandtschaft [...] mit der Königin Mathilde« anzunehmen.</text:span>
+        <text:note text:id="ftn3" text:note-class="footnote">
+          <text:note-citation>3</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Quellen zur Geschichte der sächsischen Kaiserzeit, S. 5.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Er »hatte schon länger, keineswegs <text:s/>unmittelbar oder in gleichmäßigen Abständen den Geschehnissen folgend, an seiner Sachsengeschichte gearbeitet«</text:span>
+        <text:note text:id="ftn4" text:note-class="footnote">
+          <text:note-citation>4</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Ebd. S. 7.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2">, die er wie allgemein angenommen erst um 968 abschloß.</text:span>
+        <text:note text:id="ftn5" text:note-class="footnote">
+          <text:note-citation>5</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL1">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Keller, Hagen, Widukinds Bericht über die Aachener Wahl und Krönung Ottos I., In: Hagen Keller u. Joachim Wollasch (Hg.), Frühmittelalterliche Studien, Bd. 29, Berlin 1995. S. 417.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Er widmete seine Werk Mathilde, die Tochter Ot</text:span>
+        <text:span text:style-name="Span2">­tos I., so daß »der ursprüngliche Zweck des Werkes, die Sachsengeschichte, nunmehr in eine Geschichte des Fürstenhauses mit betont <text:s/>höfisch- panegyrischer Tendenz um­geändert wurde.«</text:span>
+        <text:note text:id="ftn6" text:note-class="footnote">
+          <text:note-citation>6</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Quellen zur Geschichte der sächsischen Kaiserzeit, S. 8.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2">, <text:s/>Weiterhin wirft man ihm vor, sich mit weit zurückliegenden Ge</text:span>
+        <text:span text:style-name="Span2">­schichten befaßt zu haben, von denen er kaum etwas genaues wissen konnte; so war er wahrscheinlich auch bei der Königserhebung Ottos <text:s/>936 nicht persönlich dabei, sondern war auf Erzählungen angewiesen.</text:span>
+        <text:note text:id="ftn7" text:note-class="footnote">
+          <text:note-citation>7</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL2">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Hoffmann, Hartmut, Ottonische Fragen, In: Johannes Fried u. Rudolf Schieffer (Hg.), Deutsches Archiv für die Erforschung des Mittelalters, 51. Jahrgang, Heft 1, Köln 1995. S. <text:s/>62.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> </text:span>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">Im allgemeinen kann man Widukind »wenigstens mit einem gewissen Vorbehalt auch dort noch Glauben schenken, wo er allein stand und somit nicht direkt durch parallele Überlieferung kontrolliert werden konnte«.</text:span>
+        <text:note text:id="ftn8" text:note-class="footnote">
+          <text:note-citation>8</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL3">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Hoffmann, Hartmut, Ottonische Fragen, In: Johannes Fried u. Rudolf Schieffer (Hg.), Deutsches Archiv für die Erforschung des Mittelalters, 51. Jahrgang, Heft 1, Köln 1995. S. 61.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">Eine weitere Überlieferung, die den Ereignissen einigermaßen nahesteht, ist die </text:span>
+        <text:span text:style-name="Span4">Li</text:span>
+        <text:span text:style-name="Span4">­udprandi antapodosis</text:span>
+        <text:span text:style-name="Span2"> von Liudprand von Cremona, bei dem sicher zu sehen ist, daß er »hier die offizielle Darstellung des sächsischen Hofes wiedergibt«</text:span>
+        <text:note text:id="ftn9" text:note-class="footnote">
+          <text:note-citation>9</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL4">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Liudprandi antapodosis, In: Quellen zur Geschichte der sächsischen Kaiserzeit, unter Benützung d. Übers. von Paul Hirsch, neu bearb. von <text:s/>Albert Bauer u. Reinhold Rau, 2. durchges. u. berichtigte Aufl., Darmstadt 1977. (=Ausgewählte Quellen zur deutschen Geschichte des Mittelalter; Bd. 8). S. 237.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2">; dorthin hatte er sich geflüchtet, nachdem er seit 950 bei König Bengar, wo er sich aufhielt, in Ungnade gefallen ist.</text:span>
+        <text:note text:id="ftn10" text:note-class="footnote">
+          <text:note-citation>10</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Ebd. S. 235.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"><text:s/>Wie er zu Beginn des 4. Buches selbst <text:s/>sagt, war er bei den Ereignissen nicht zugegen, sondern auf Erzählungen angewiesen;</text:span>
+        <text:note text:id="ftn11" text:note-class="footnote">
+          <text:note-citation>11</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Ebd. IV. 1, S. 405</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> desweiteren wird seine Be</text:span>
+        <text:span text:style-name="Span2">­schränkung des Gesichtskreises und die mangelnden chronologischen Hinweise kriti­siert.</text:span>
+        <text:note text:id="ftn12" text:note-class="footnote">
+          <text:note-citation>12</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Ebd. S. 237.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">Auf andere Überlieferungen, die entweder nur kurz auf die Ereignisse eingehen oder zeitlich zu entfernt sind und Überreste wie z.B. Urkunden, die nur Zeitpunkte beleuch</text:span>
+        <text:span text:style-name="Span2">­ten, wird im Text eingegangen.</text:span>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span3">2. Die Designation Ottos durch Heinrich I.</text:span>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">Die Designation ist Teil des Geblütsrechts: Dieses »wirkte am stärksten im legitimen Sohne, der potentiell am besten zum Thron legitimiert war, weil er am reichsten mit dem heilbringenden »Königsstoff« [...] ausgestattet war.«</text:span>
+        <text:note text:id="ftn13" text:note-class="footnote">
+          <text:note-citation>13</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL5">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Mitteis, Heinrich, Die Krise des deutschen Königswahlrechts (1950), In: Eduard Hlawitschka (Hg.), Königswahl und Thronfolge in ottonisch- frühdeutscher Zeit, Darmstadt <text:s/>1971. (=Wege der Forschung, Band CLXXVIII), S. 282.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Dieses Recht wird jedoch erst durch den Rechtsakt <text:s/>´Designation´ <text:s/>aktiv. Otto wurde </text:span>
+        <text:span text:style-name="Span4">de futuro</text:span>
+        <text:span text:style-name="Span2"> designiert; d. h. er war kein Mitregent zu Lebzeiten des Vaters.</text:span>
+        <text:note text:id="ftn14" text:note-class="footnote">
+          <text:note-citation>14</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Ebd. S. 284.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> </text:span>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">Die Designation Ottos ging der Königserhebung im Jahre 936 mehrere Jahre voraus.</text:span>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2"> »Daß Heinrich trotz der starken Stellung, die er als König seit der Mitte der 20er Jahre zusehends gewann, bis zu seinem nahen Ende gewartet haben soll, ehe er an die Nach</text:span>
+        <text:span text:style-name="Span2">­folgeregelung ging, ist unwahrscheinlich, wenn man die karolingische Praxis selbst so­wie das Verhalten anderer nachkarolingischer Herrscher zum Vergleich heran­zieht.«</text:span>
+        <text:note text:id="ftn15" text:note-class="footnote">
+          <text:note-citation>15</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Keller, Widukinds Bericht über die Aachener Wahl und Krönung Ottos I. , S. 432. </text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Auch bei Widukind lassen sich Anzeichen für eine Designation finden, die vor 936 stattgefunden hat; er erwähnt zu Beginn der Beschreibung der Königserhebung 936 »</text:span>
+        <text:span text:style-name="Span4">iam olim designatum regem a patre</text:span>
+        <text:span text:style-name="Span2">«</text:span>
+        <text:note text:id="ftn16" text:note-class="footnote">
+          <text:note-citation>16</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL6">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Widukindi res gestae Saxonicae, II.1, <text:s/>S. 84.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2">, wobei das</text:span>
+        <text:span text:style-name="Span4"> iam olim</text:span>
+        <text:span text:style-name="Span2"> nach einer analogen For</text:span>
+        <text:span text:style-name="Span2">­mulierung an anderer Stelle nur mit »schon längst« übersetzt werden kann, was auf eine offizielle oder halboffizielle Designation vor 936 hindeutet.</text:span>
+        <text:note text:id="ftn17" text:note-class="footnote">
+          <text:note-citation>17</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL7">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Laudage, Johannes, Hausrecht und Thronfolge, Überlegungen zur Königserhebung Ottos des Großen und zu den Aufständen Thankmars, Heinrichs und Liudolfs, In: Boehm Laetitia u.a. <text:s/>(Hg.), Historisches Jahrbuch, Jahrgang 112, München 1992. S. 24.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Die Designation, grün</text:span>
+        <text:span text:style-name="Span2">­dend auf eine Urkunde des Jahres 929</text:span>
+        <text:note text:id="ftn18" text:note-class="footnote">
+          <text:note-citation>18</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL8">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">DH I 20., In: MGH, Diplomata regum Germaniae et imperatorum Germaniae, hrsg. von Gesellschaft für ältere deutsche Geschichtskunde, Bd. 1, Hannover 1879-1884. S. 55f.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"><text:s/>auch <text:s/>´Hausordnung´ <text:s/>genannt, kann jedoch <text:s/>nicht als einmaliger Akt, sondern muß als langwieriger Prozeß verstanden werden, der bereits 927 beginnt und erst mit der Inthronisation 936 endet.</text:span>
+        <text:note text:id="ftn19" text:note-class="footnote">
+          <text:note-citation>19</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Laudage, Hausrecht und Thronfolge, S. 50.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span6">2.1. Das Frühstadium der ´Hausordnung´ 927</text:span>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">Die ´Hausordnung´ wurde bereits am 13. Mai 927 eingeleitet, da schon hier Otto einer Schenkung seines Vaters an seine Mutter Mathilde zugestimmt hat.</text:span>
+        <text:note text:id="ftn20" text:note-class="footnote">
+          <text:note-citation>20</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL9">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Schmid, Karl, Die Thronfolge Ottos des Großen, In: M. Kaser u.a. (Hg.), Zeitschrift der Savigny- Stiftung für Rechtsgeschichte, Bd. 81, Weimar 1964. S. 103.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Otto wurde am 23. Nov. 927 bereits 15 Jahre alt und damit rechtswirksam handlungsfähig, so daß hier Heinrich durchaus an seine Nachfolgeregelung gedacht haben könnte. Gunther Wolf meint sogar, » daß die</text:span>
+        <text:span text:style-name="Span4"> benedictio</text:span>
+        <text:span text:style-name="Span2"> Ottos zum </text:span>
+        <text:span text:style-name="Span4">rex futurus</text:span>
+        <text:span text:style-name="Span2"> schon Weihnachten 927 in Mainz anläßlich von Ottos Volljährigkeit stattfand, nicht erst anläßlich der Hochzeit bzw. der Hausbestellung im Herbst 929.«</text:span>
+        <text:note text:id="ftn21" text:note-class="footnote">
+          <text:note-citation>21</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL10">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Wolf, Gunther, Nochmals zur benedictio Ottonis in regem: 927 oder 929 ?, In: Walter Heinemeyer (Hg.), Archiv für Diplomatik, Schriftgeschichte, Siegel- und Wappenkunde, Bd. 40, Köln 1994. S. 84.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Wolfs Begründung für die Annahme, daß bereits 927 die förmliche <text:s/>benedictio vorgenommen wurde, erscheint sehr spekulativ, da er sich im wesentlichen nur auf die Volljährigkeit Ottos und auf dem Hoftag in Mainz Ende 927 stützt.</text:span>
+        <text:note text:id="ftn22" text:note-class="footnote">
+          <text:note-citation>22</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Ebd. S. 80f.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> </text:span>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span6">2.2 Die ´Hausordnung´ 929</text:span>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">Karl Schmid stellte 1964 die These auf, daß Heinrich I. seinen Sohn Otto bereits 929 offiziell zum Thronfolger gemacht habe;</text:span>
+        <text:note text:id="ftn23" text:note-class="footnote">
+          <text:note-citation>23</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Schmid, Die Thronfolge Ottos des Großen, S. 125.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> hierbei beruft er sich hauptsächlich auf die ´Hausordnung´ von 929, ein Diplom, mit dem Heinrich I. seiner Gemahlin Mathilde ein Wittum zuwies und sein Haus »ordnungsgemäß bestellen« wollte (DH I 20).</text:span>
+        <text:note text:id="ftn24" text:note-class="footnote">
+          <text:note-citation>24</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL11">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Hoffmann, Ottonische Fragen, S. 53.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Diese Wittumszuweisung »fand [...] in rechtlicher Form, in Gegenwart von königlichen </text:span>
+        <text:span text:style-name="Span4">fide</text:span>
+        <text:span text:style-name="Span4">­les</text:span>
+        <text:span text:style-name="Span2">, mit Zustimmung und Beipflichtung des Königssohnes Otto und auf Bitten der Großen, von Bischöfen und Grafen statt. Sie trug mithin die Züge einer Regierungs</text:span>
+        <text:span text:style-name="Span2">­handlung.«</text:span>
+        <text:note text:id="ftn25" text:note-class="footnote">
+          <text:note-citation>25</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Schmid, Die Thronfolge Ottos des Großen, S. 101.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> So sollte die Königin für die Zeit nach dem Tode ihres Mannes gesichert werden, was offensichtlich nicht nur mit dem bevorstehenden Eintritt einer Schwieger</text:span>
+        <text:span text:style-name="Span2">­tochter in das Königshaus zusammenhing, sondern vor allem mit der Tatsache, daß de­ren Gemahl zum künftigen König ausersehen war.</text:span>
+        <text:note text:id="ftn26" text:note-class="footnote">
+          <text:note-citation>26</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Keller, Widukinds Bericht über die Aachener Wahl und Krönung Ottos I. , S. 393 f. </text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Nach Schmid war 929 also »die Abschichtung innerhalb des königliche Hauses bereits in vollem Gange«.</text:span>
+        <text:note text:id="ftn27" text:note-class="footnote">
+          <text:note-citation>27</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Schmid, Die Thronfolge Ottos des Großen, S. 102.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"><text:s/>Die Thesen Schmids wurden im folgenden kontrovers diskutiert. Jedoch merkt Laudage an, daß man aufgrund der spärlichen Quellenlage »für die Existenz einer umfassenden Haus</text:span>
+        <text:span text:style-name="Span2">­ordnung Heinrich I. allenfalls einen Indizienbeweis führen«</text:span>
+        <text:note text:id="ftn28" text:note-class="footnote">
+          <text:note-citation>28</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Laudage, Hausrecht und Thronfolge, S. 24.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> kann.</text:span>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">So kritisierte Hoffmann, daß die Vermählung mit Edgitha nicht zu Spekulationen über die Thronfolge berechtigt, da die Aussage von Hrothsvith von Gandersheim, »</text:span>
+        <text:span text:style-name="Span4">Ipse suo primogenito regique futuro Oddoni dignam iam disponsaret amicam, quae propriae proli digne posset sociari</text:span>
+        <text:span text:style-name="Span2">«</text:span>
+        <text:note text:id="ftn29" text:note-class="footnote">
+          <text:note-citation>29</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL12">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Hrotsvithae Opera, In: <text:s/>MGH, Scriptores Rerum Germanicarum, hrsg. von <text:s/>Paulus von Winterfeld, <text:s/>Berlin 1902. S. 206.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2">, im Kontext und Anbetracht der Entfernung zu den Ereig</text:span>
+        <text:span text:style-name="Span2">­nissen nicht dazu berechtigt, zu behaupten, daß es hier eindeutig um eine Heirat der Thronfolge willen handelt.</text:span>
+        <text:note text:id="ftn30" text:note-class="footnote">
+          <text:note-citation>30</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL13">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Hoffmann, Ottonische Fragen, S. 57.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Jedoch kann eine eheliche Verbindung mit einer König</text:span>
+        <text:span text:style-name="Span2">­stochter der stammverwandten Angelsachsen durchaus eine wichtige Legitimation be­deuten.</text:span>
+        <text:note text:id="ftn31" text:note-class="footnote">
+          <text:note-citation>31</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Keller, Widukinds Bericht über die Aachener Wahl und Krönung Ottos I. , S. 391 f. </text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">Ein Indiz dafür, wie umfassend die ´Hausordnung´ <text:s/>angelegt ist, könnte sein, daß »der jüngste Sohn König Heinrichs, Brun, im gleichen Jahre 929 im Alter von ungefähr vier Jahren der Kirche Utrecht übergeben worden«</text:span>
+        <text:note text:id="ftn32" text:note-class="footnote">
+          <text:note-citation>32</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Schmid, Die Thronfolge Ottos des Großen, S. 102.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> war. Jedoch erscheint es verwunderlich gerade dies als Argument für die umfassende Thronfolgeregelung Heinrichs zu ver</text:span>
+        <text:span text:style-name="Span2">­wenden, da Heinrich, der mittlere Sohn Heinrichs I., doch eher Otto die Thronfolge streitig machen kann, wie sich ja später zeigt.</text:span>
+        <text:note text:id="ftn33" text:note-class="footnote">
+          <text:note-citation>33</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Vgl. mit Kapitel 4.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"><text:s/>Auf Heinrich geht Schmid jedoch nicht ein. </text:span>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">Ein weiteres wichtiges Argument für die ´Hausordnung´ ist die Tatsache, daß im Rei</text:span>
+        <text:span text:style-name="Span2">­chenauer Gedenkbuch von den drei Königssöhnen einer, der älteste und spätere Thron­folger, Otto wie Heinrich und Mathilde den Königstitel: </text:span>
+        <text:span text:style-name="Span4">Otto rex erhält.</text:span>
+        <text:note text:id="ftn34" text:note-class="footnote">
+          <text:note-citation>34</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Keller, Widukinds Bericht über die Aachener Wahl und Krönung Ottos I. , S. 390.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span4"> </text:span>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">Die Datierung dieses Eintrags ist zwischen 928 und spätestens Anfang 930 anzusie</text:span>
+        <text:span text:style-name="Span2">­deln.</text:span>
+        <text:note text:id="ftn35" text:note-class="footnote">
+          <text:note-citation>35</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Keller, Widukinds Bericht über die Aachener Wahl und Krönung Ottos I. ,S. 391.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Jedoch kann man daraus nicht schließen, daß »Otto <text:s/>damals bereits offiziell (und mit Zustimmung der Großen des Reichs) zum Thronfolger designiert worden war, denn es gibt ähnliche Memorialzeugnisse, in denen ein Königssohn den gleichen Rang wie sein Va</text:span>
+        <text:span text:style-name="Span2">­ter erhält, ohne daß <text:s/>von einer Designation die Rede sein könnte.</text:span>
+        <text:note text:id="ftn36" text:note-class="footnote">
+          <text:note-citation>36</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL14">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Hoffmann, Ottonische Fragen, S. 56.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Laudages Argument, daß sonst die Königssöhne in Verbrüderungslisten verfrüht den Titel</text:span>
+        <text:span text:style-name="Span4"> rex </text:span>
+        <text:span text:style-name="Span2">er</text:span>
+        <text:span text:style-name="Span2">­halten hät­ten, die ohnehin für die Nachfolge <text:s/>im Königsamt vorgesehen waren,</text:span>
+        <text:note text:id="ftn37" text:note-class="footnote">
+          <text:note-citation>37</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Laudage, Hausrecht und Thronfolge, S. 29.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> be</text:span>
+        <text:span text:style-name="Span2">­weist jedoch nicht, daß dies bereits mit Zustimmung der Großen, also offiziell, <text:s/>ge­schehen sein muß; und daß »Heinrich <text:s/>I. selbst sich 929 seinen ältesten Sohn Otto zum Nachfolger ge­wünscht hatte, ist nicht unwahrscheinlich.«</text:span>
+        <text:note text:id="ftn38" text:note-class="footnote">
+          <text:note-citation>38</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL15">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Hoffmann, Ottonische Fragen, S. 57.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2">
+          <text:s/>
+        </text:span>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">Bemerkenwert ist das äußerst auffällige Itinerar Heinrichs I. in den Jahren 929/930. Der König brach 929 <text:s/>im Anschluß <text:s/>an den Prager Feldzug zu einem Ritt durch das ganze Reich auf, wie er ihn vorher und nachher nicht unternahm. Er besuchte in dieser Zeit alle Stammesgebiete des Reiches ( Er reiste über Bayern nach Sachsen, von dort nach Alemannien und Franken, um über Lothringen wieder nach Sachsen zurückzukehren.)</text:span>
+        <text:note text:id="ftn39" text:note-class="footnote">
+          <text:note-citation>39</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Schmid, Die Thronfolge Ottos des Großen, S. 121 f.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> und inmitten dieser Reise sind die Ordnung des Königshauses und die Vermählung des Königssohnes Otto zu datieren. »Diese Verbindung von Hausordnung und »Umritt« weist auf die Tragweite des Geschehens für das Schicksal des Reiches hin und spricht dafür, daß es mit den Herzögen abgesprochen war und in ihrem Einvernehmen erfolg</text:span>
+        <text:span text:style-name="Span2">­te.</text:span>
+        <text:note text:id="ftn40" text:note-class="footnote">
+          <text:note-citation>40</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Ebd. S. 123.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> </text:span>
+      </text:p>
+      <text:p text:style-name="S12">
+        <text:span text:style-name="Span6">2.3. Einbeziehung der Stämme in Heinrichs Entscheidung</text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Die Frage inwieweit die Stämme in die ´Hausordnung´ <text:s/>eingebunden waren und mit</text:span>
+        <text:span text:style-name="Span2">­entschieden bzw. zustimmten kann nicht eindeutig geklärt werden, ist aber ausschlag­gebend für die Gewichtung der Ereignisse in den Jahren 929/930, da ohne Einbezie­hung der Stämme wohl keine rechtmäßige Designation möglich war.</text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Die Forschung ist in diesen Bereichen zu sehr unterschiedlichen Ergebnissen gekom</text:span>
+        <text:span text:style-name="Span2">­men:</text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">So setzt Lintzel, sich auf Widukind berufend, voraus, daß <text:s/>Ottos »Designation nicht bloß vor dem versammelten </text:span>
+        <text:span text:style-name="Span4">populus</text:span>
+        <text:span text:style-name="Span2">, sondern auch mit seiner Mitwirkung erfolgte.</text:span>
+        <text:note text:id="ftn41" text:note-class="footnote">
+          <text:note-citation>41</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL16">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Lintzel, Martin, Miszellen zur Geschichte des 10 Jahrhunderts (Miszellen I-IV) (1952), In: Eduard Hlawitschka (Hg.), Königswahl und Thronfolge in ottonisch- frühdeutscher Zeit, Darmstadt <text:s/>1971. (=Wege der Forschung, Band CLXXVIII), S. 372.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Er geht sogar einen Schritt weiter, indem er behauptet, daß Heinrich zwar die Stellung des Königtums gefestigt hat, aber »so stark ist sie doch auch <text:s/>um 936 nicht gewesen, daß der König einfach nach Gutdünken handeln konnte. Es gab kein Gesetz, das er selbst</text:span>
+        <text:span text:style-name="Span2">­ständig erlassen, keine wichtige politische Entscheidung, die er allein treffen konnte: überall war er auf die Mitwirkung der Großen angewiesen.«</text:span>
+        <text:note text:id="ftn42" text:note-class="footnote">
+          <text:note-citation>42</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL17">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Lintzel, Miszellen zur Geschichte des 10 Jahrhunderts, S. 373. </text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Dies deckt sich mit der Erkenntnis, daß Heinrich die Herzöge und ihre Sippen als gleichberechtigte Partner be</text:span>
+        <text:span text:style-name="Span2">­handelte und Laudage daraus schlußfolgert: »Dies dürfte der Preis dafür gewesen sein, daß sie ihn als Haupt des Gesamtreiches anerkannten und seiner Nachfolgeregelung zustimmten«.</text:span>
+        <text:note text:id="ftn43" text:note-class="footnote">
+          <text:note-citation>43</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Laudage, Hausrecht und Thronfolge, S. 54.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Jedoch berichten die Quellen auch darüber, wie Herrscher gezielt den Rat der Großen einholten, sich der Zustimmung versicherten oder auch Widerstrebende einschüchterten.</text:span>
+        <text:note text:id="ftn44" text:note-class="footnote">
+          <text:note-citation>44</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Keller, Widukinds Bericht über die Aachener Wahl und Krönung Ottos I. , S. 437.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Dies hat Heinrich I. mit seinem großen ´Umritt´ durch das gesamte Reich in den Jahren 929/930 wahrscheinlich bereits getan.</text:span>
+        <text:note text:id="ftn45" text:note-class="footnote">
+          <text:note-citation>45</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Vgl. mit Kapitel 2.2.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"><text:s/><text:s/>»Denn man würde den König einfach unterschätzen, wenn man annehmen wollte, [...] der König habe sein Haus und seine Nachfolge betreffende Bestimmungen ohne die sichernde Zustimmung des Volkes, d.h. ohne die Beipflichtung der Großen des Reiches <text:s/>vorgenommen.«</text:span>
+        <text:note text:id="ftn46" text:note-class="footnote">
+          <text:note-citation>46</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Schmid, Die Thronfolge Ottos des Großen, S. 123.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+      </text:p>
+      <text:p text:style-name="S12">
+        <text:span text:style-name="Span6">2.4. Beurteilung dieser Nachfolgeregelung Heinrichs</text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Rörig betont, daß die Nachfolgeregelung Heinrichs durchaus in den Anschauungskreis des Geblütsrechts gehört, wobei es um »ein Handeln aus einem ganz bestimmten, all</text:span>
+        <text:span text:style-name="Span2">­gemein als verbindlich anerkannten Rechtsgefühl heraus«</text:span>
+        <text:note text:id="ftn47" text:note-class="footnote">
+          <text:note-citation>47</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL18">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Rörig, Fritz, Geblütsrecht und freie Wahl in ihrer Auswirkung auf die deutsche Geschichte (1948), In: Eduard Hlawitschka (Hg.), Königswahl und Thronfolge in ottonisch- frühdeutscher Zeit, Darmstadt <text:s/>1971. (=Wege der Forschung, Band CLXXVIII), S. 95 f.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"><text:s/>handelt. Schon bei der De</text:span>
+        <text:span text:style-name="Span2">­signierung Ottos hatte wohl das Prinzip der Sohnesfolge eine derart große Rolle er­reicht, »daß man diese Art der Erbfolge sowohl auf der Ebene des Königtums als auch auf der Herzogs- und Grafenebene als den Normalzustand betrachtete.«</text:span>
+        <text:note text:id="ftn48" text:note-class="footnote">
+          <text:note-citation>48</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Laudage, Hausrecht und Thronfolge, S. 51 f.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> </text:span>
+      </text:p>
+      <text:p text:style-name="S14">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Eine wichtige Neuerung in der Thronfolgeregelung Heinrichs, die viel zu wenig ge</text:span>
+        <text:span text:style-name="Span2">­würdigt wird, ist die Thronfolge im Sinne der Individualsukzession, die 929 bereits be­schlossen gewesen sein muß, als Brun für den geistlichen Weg vorgesehen wurde.</text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">»Und sie ist beschlossen und entschieden worden im Zusammenwirken des Königs mit den Großen des Reiches, auch wenn <text:s/>die auf uns gekommenen Quellen davon expressis verbi nichts berichten. Das Itinerar Heinrichs I. in den Jahren 929/930 ist dafür Beweis genug.«</text:span>
+        <text:note text:id="ftn49" text:note-class="footnote">
+          <text:note-citation>49</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Schmid, Die Thronfolge Ottos des Großen, S. 125.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Die Abstimmungen mit den Großen in Bezug auf die Individualsukzession geschahen wahrscheinlich bei dem ´Umritt´ <text:s/>929/930, wobei mit Sicherheit bereits Otto als Nachfolger gehandelt wurde.</text:span>
+        <text:note text:id="ftn50" text:note-class="footnote">
+          <text:note-citation>50</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Vgl. mit Kapitel 2.2.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Jedoch sind die Beweise, die für eine offizielle Desi</text:span>
+        <text:span text:style-name="Span2">­gnation im Jahre 929 sprechen, nicht aussagekräftig genug.</text:span>
+        <text:note text:id="ftn51" text:note-class="footnote">
+          <text:note-citation>51</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">wie aus Kapitel 2.2. hervorgeht.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Außerdem werden zu Recht Bedenken aufgezeigt, wenn man beachtet, daß »Otto und Edgith zwischen 929 und 936 aus der Überlieferung verschwinden«,</text:span>
+        <text:note text:id="ftn52" text:note-class="footnote">
+          <text:note-citation>52</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL19">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Hoffmann, Ottonische Fragen, S. 58.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> was bei einem offiziell designierten Thronfolger seltsam erscheint. Wahrscheinlicher erscheint <text:s/>- wobei ich mit Hoffmann konform gehe - eine halboffizielle Designation, also ein weiterer Schritt in dem lang</text:span>
+        <text:span text:style-name="Span2">­wierigen Prozeß der ´Hausordnung´ Heinrichs I., die wohl auf dem ´Umritt´ mit den Großen des Reichs <text:s/>abgestimmt wurde, jedoch nicht voll rechtskräftig war, da wahr­scheinlich keine <text:s/>gemeinsame Zustimmung und Huldigung der Großen vorlag.</text:span>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span3">3. Die Königserhebung Ottos I. im Jahre 936</text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Die Königserhebung Ottos wird als »fortgesetzte Wahl« (Mitteis) oder als »Ketten</text:span>
+        <text:span text:style-name="Span2">­handlung« (Rörig) begriffen, als eine Handlung, die zwei deutlich zu unterschiedende Akte umfaßt: »die Auswahl des Kandidaten« und die »förmliche Erhebung zum Kö­nig« (Schlesinger).</text:span>
+        <text:note text:id="ftn53" text:note-class="footnote">
+          <text:note-citation>53</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Schmid, Die Thronfolge Ottos des Großen, S. 87.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Hierbei sind jedoch alle Handlungen in bestimmten Teilen von</text:span>
+        <text:span text:style-name="Span2">­einander abhängig, von der offiziellen Designation bis zur formellen Inthronisation in Aachen.</text:span>
+      </text:p>
+      <text:p text:style-name="S12">
+        <text:span text:style-name="Span6">3.1. Bekräftigung der Designation im Jahre 936</text:span>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span2">Im Frühjahr 936, als sich Heinrich I. etwas von seiner Krankheit erholte, <text:s/>ließ er sich von Bodfeld nach Erfurt bringen und berief hierher die Großen des Reiches.</text:span>
+        <text:note text:id="ftn54" text:note-class="footnote">
+          <text:note-citation>54</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL20">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Holtzmann, Robert, Geschichte der Sächsischen Kaiserzeit (900-1024), 6. Aufl., München 1979. S. 104.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Bei die</text:span>
+        <text:span text:style-name="Span2">­sem Hoftag in Erfurt, wie man zumeist annimmt, sei die offizielle Designation Ottos zum Thronfolger vorgenommen worden.</text:span>
+        <text:note text:id="ftn55" text:note-class="footnote">
+          <text:note-citation>55</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Schmid, Die Thronfolge Ottos des Großen, S. 89.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+      </text:p>
+      <text:p text:style-name="S12">
+        <text:span text:style-name="Span6">3.2. Die Wahl Ottos I.</text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">»Otto [...] im Juli 936, bald nach dem Tode des Vaters, an einem unbekannten Ort von Franken und Sachsen <text:s/>gewählt«.</text:span>
+        <text:note text:id="ftn56" text:note-class="footnote">
+          <text:note-citation>56</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Holtzmann, Geschichte <text:s/>der Sächsischen Kaiserzeit, S. 109.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Nach Widukind wird als Ort der allgemeinen Wahl die Pfalz zu Aachen bestimmt.</text:span>
+        <text:note text:id="ftn57" text:note-class="footnote">
+          <text:note-citation>57</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL21">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Widukindi res gestae Saxonicae, II.1, S. 84.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Jedoch ist in der Zeit zwischen dem Tod Heinrichs und der Krönung in Aachen am 7. August, nur eine Versammlung wahrscheinlich, die dann die</text:span>
+        <text:span text:style-name="Span4"> universalis electio, also die Krönung, </text:span>
+        <text:span text:style-name="Span2">in Aachen berief.</text:span>
+        <text:note text:id="ftn58" text:note-class="footnote">
+          <text:note-citation>58</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL22">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Mitteis, Die Krise des deutschen Königswahlrechts, S. 379.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Außerdem ist eine vor</text:span>
+        <text:span text:style-name="Span2">­herrschende Meinung, daß in dem</text:span>
+        <text:span text:style-name="Span4"> omnes populus Francorum et</text:span>
+        <text:span text:style-name="Span2"> </text:span>
+        <text:span text:style-name="Span4">Saxorum</text:span>
+        <text:span text:style-name="Span2"><text:s/>bei Widu</text:span>
+        <text:span text:style-name="Span2">­kind die Repräsentation aller Stämme zu sehen ist, so daß Widukinds Nachricht der Thietmars:</text:span>
+        <text:span text:style-name="Span4"> omnes rei publicae</text:span>
+        <text:span text:style-name="Span2"> ungefähr entspricht.</text:span>
+        <text:note text:id="ftn59" text:note-class="footnote">
+          <text:note-citation>59</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL23">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Rörig, Geblütsrecht und freie Wahl in ihrer Auswirkung auf die deutsche Geschichte, S. 138. </text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Da folglich nur eine Wahl exi</text:span>
+        <text:span text:style-name="Span2">­stiert, kann man nicht von einer »Vorwahl« durch Franken und Sachsen sprechen, son­dern von der bestimmenden Wahl.</text:span>
+      </text:p>
+      <text:p text:style-name="S12">
+        <text:span text:style-name="Span7">3.2.1. Welche Kandidaten standen bei der Wahl zur Disposition ?</text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Thronanwärter waren nahezu auf die Königssöhne beschränkt. »Ein unanfechtbares Anrecht auf die Nachfolge in der Hausherrschaft hätten keineswegs alle Agnaten, son</text:span>
+        <text:span text:style-name="Span2">­dern nur die Königssöhne besessen.«</text:span>
+        <text:note text:id="ftn60" text:note-class="footnote">
+          <text:note-citation>60</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Laudage, Hausrecht und Thronfolge, S. 27.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"><text:s/>Jedoch wirkt wohl auch noch der Idoneitätsge</text:span>
+        <text:span text:style-name="Span2">­danke mit,da die »Vorraussetzung für die Anerkennung des Erbanspruchs in der Wahl [...] also die Eignung des zu Wählenden«</text:span>
+        <text:note text:id="ftn61" text:note-class="footnote">
+          <text:note-citation>61</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL24">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Lintzel, Miszellen zur Geschichte des 10. Jahrhunderts, S. 376.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2">ist.</text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Wenn man diese Eingrenzung der Kandidatenauswahl beachtet, bleiben nur noch Otto und sein Bruder Heinrich, der ungefähr 15 war (also bereits wahlfähig), übrig.</text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Denn der jüngste Bruder Brun war bereits früh für den geistlichen Stand bestimmt ge</text:span>
+        <text:span text:style-name="Span2">­wesen.</text:span>
+        <text:note text:id="ftn62" text:note-class="footnote">
+          <text:note-citation>62</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Vgl. mit Kapitel 2.2.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Thankmar, der älteste Bruder, war »aus der Ehe mit Hatheburg, die der Kirche freilich als illegitim galt«</text:span>
+        <text:note text:id="ftn63" text:note-class="footnote">
+          <text:note-citation>63</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Holtzmann, Geschichte <text:s/>der Sächsischen Kaiserzeit, S. 104.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2">, wurde deswegen wahrscheinlich gar nicht in Betracht ge</text:span>
+        <text:span text:style-name="Span2">­zogen. </text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Heinrich stand wirklich zur Auswahl, da es »am königlichen Hofe eine starke Partei (gab), <text:s/>die sich für Ottos jüngeren Bruder Heinrich einsetzte, weil dieser schon in der <text:s/>Regierungszeit seines Vaters geboren, in</text:span>
+        <text:span text:style-name="Span4"> aula regia natus</text:span>
+        <text:span text:style-name="Span2"> sei.</text:span>
+        <text:note text:id="ftn64" text:note-class="footnote">
+          <text:note-citation>64</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL25">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Mitteis, Die Krise des deutschen Königswahlrechts, S. 272.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Man sieht, daß es also eine wirkliche Auswahl bei den Thronanwärtern gab, zwischen denen durch Wahl entschieden werden konnte.</text:span>
+      </text:p>
+      <text:p text:style-name="S12">
+        <text:span text:style-name="Span7">3.2.2. Vorverhandlungen vor der Wahl im Jahre 936</text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Wie ausführlich die Verhandlungen waren, liegt weitgehend im Dunkeln, da »uns keine Quelle darüber Auskunft gibt, wo die entscheidenden Verhandlungen stattgefunden haben, die zur Einigung auf Otto führten«.</text:span>
+        <text:note text:id="ftn65" text:note-class="footnote">
+          <text:note-citation>65</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Mitteis, Die Krise des deutschen Königswahlrechts, S. 274.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Es ist noch nicht einmal eindeutig, ob die entscheidenden Verhandlungen noch mit Heinrich oder bereits nach seinem Tod statt</text:span>
+        <text:span text:style-name="Span2">­fanden. Wenn die Entscheidung bereits in den Verhandlungen mit Heinrich geschah, dann wären die nach seinem Tode erfolgten »Wahlen« keine echten Wahlen, sondern nur Proklamationen des neuen Königs gewesen.</text:span>
+        <text:note text:id="ftn66" text:note-class="footnote">
+          <text:note-citation>66</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL26">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Lintzel, Miszellen zur Geschichte des 10 Jahrhunderts, S. 378.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Jedoch waren die Verhandlungen scheinbar gar nicht darauf ausgerichtet, in eine breitere Öffentlichkeit zu dringen.</text:span>
+        <text:note text:id="ftn67" text:note-class="footnote">
+          <text:note-citation>67</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL27">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Mitteis, Die Krise des deutschen Königswahlrechts, S. 275.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Beteiligt an den Verhandlungen waren wohl die Großen des Reichs. »Ohne Zweifel doch die höchsten und einflußreichsten <text:s/>weltlichen und geistlichen Würdenträger, allen Adligen voran die Stammesherzöge und an der Spitze der Kirchenfürsten die Metropo</text:span>
+        <text:span text:style-name="Span2">­liten. [...] Denn hätten sie nicht seiner Designation zugestimmt, ja hätten sie diese nicht mitvollzogen, so wären sie gewiß nicht nach Aachen gekommen, um dort zu vollenden und zu feiern, was bereits vorher feststand: die Thronfolge Ottos I.«</text:span>
+        <text:note text:id="ftn68" text:note-class="footnote">
+          <text:note-citation>68</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Schmid, Die Thronfolge Ottos des Großen, S. 92.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+      </text:p>
+      <text:p text:style-name="S12">
+        <text:span text:style-name="Span6">3.3. Die Königserhebung Ottos in Aachen 936</text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Die Königserhebung fand am 7. August in Aachen statt. Durch die Auswahl des Ortes Aachen wurde die Königserhebung Ottos bewußt in die Tradition Karls des Großen ge</text:span>
+        <text:span text:style-name="Span2">­stellt.</text:span>
+        <text:note text:id="ftn69" text:note-class="footnote">
+          <text:note-citation>69</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Holtzmann, Geschichte <text:s/>der Sächsischen Kaiserzeit, S. 111.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Zuerst »versammelten sich die Herzöge und die Ersten der Grafen mit der Schar der vornehmen Ritter [...]; hier huldigten sie ihm, gelobten ihm Treue und versprachen ihm Hilfe gegen alle seine Feinde und machten ihn so nach ihrem Brauche zum Köni</text:span>
+        <text:span text:style-name="Span2">­ge.«</text:span>
+        <text:note text:id="ftn70" text:note-class="footnote">
+          <text:note-citation>70</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL28">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Widukindi res gestae Saxonicae, II, 1. S. 87.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Außerdem wurde durch Heben der rechten Hand, die Wahl Ottos durch das </text:span>
+        <text:span text:style-name="Span4">om</text:span>
+        <text:span text:style-name="Span4">­nis populus</text:span>
+        <text:span text:style-name="Span2"> bestätigt.</text:span>
+        <text:note text:id="ftn71" text:note-class="footnote">
+          <text:note-citation>71</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Ebd. II, 1. S. 87.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Weitere Teile der Zeremonie waren »dann, wie Widukind aus</text:span>
+        <text:span text:style-name="Span2">­führlich beschreibt, die Bekleidung Ottos mit den Insignien, seine Salbung und Krö­nung und schließlich seine Inthronisation auf dem Thron Karls des Großen. Und im Anschluß daran habe schließlich das Krönungsmahl stattgefunden.«</text:span>
+        <text:note text:id="ftn72" text:note-class="footnote">
+          <text:note-citation>72</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL29">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Lintzel, Miszellen zur Geschichte des 10. Jahrhunderts, S. 381.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> </text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Im Münster zu Aachen fand allerdings keine Wahl mehr statt. »Was dort stattfand, war der feierliche Staatsakt, der dem Ganzen noch die höchste Weihe zu geben hatte.</text:span>
+        <text:note text:id="ftn73" text:note-class="footnote">
+          <text:note-citation>73</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL30">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Rörig, Geblütsrecht und freie Wahl in ihrer Auswirkung auf die deutsche Geschichte, S. 91. </text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Mitteis sieht hier den Endpunkt der »Kettenhandlung«, nämlich »die Erklärung des Wahlwillens, durch die der Wahlbeschluß erst rechtswirksam werden konnte.</text:span>
+        <text:note text:id="ftn74" text:note-class="footnote">
+          <text:note-citation>74</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL31">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Mitteis, Die Krise des deutschen Königswahlrechts, S. 277.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+      </text:p>
+      <text:p text:style-name="S15">
+        <text:span text:style-name="Span6">3.4. Handelte es sich um eine freie Wahl oder Akklamation ?</text:span>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Um diese Frage zu beantworten, müssen die Begriffe <text:s/>´freie Wahl´ und ´Akklamation´ genauer geklärt werden. Der Begriff der ´Akklamation´ umfaßt den Bereich der »Kö</text:span>
+        <text:span text:style-name="Span2">­nigswahl«, »in denen die entscheidende Auswahl nicht von einer Wählergruppe, son­dern von dem noch lebenden König selbst getroffen wird. Das ist die Designation. Sie enthält die Entscheidung des Königs, wer aus der königlichen Sippe sein Nachfolger werden soll.«</text:span>
+        <text:note text:id="ftn75" text:note-class="footnote">
+          <text:note-citation>75</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL32">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Rörig, Geblütsrecht und freie Wahl in ihrer Auswirkung auf die deutsche Geschichte, S. 75. </text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Dieser Wahlvorschlag sei bei Sohnesnachfolge ein bindender gewesen und eine Nichtfolgeleistung wäre eine schwere Pflichtverletzung gegen den König; bei Sohneswahl ist sie geradeszu eine »befohlene Wahl«. </text:span>
+        <text:note text:id="ftn76" text:note-class="footnote">
+          <text:note-citation>76</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL33">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Rörig, Geblütsrecht und freie Wahl in ihrer Auswirkung auf die deutsche Geschichte, S. 75 f.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Aber auch »gegen einen Befehl ist nach germanischer Rechtsauffassung ein Widerstandsrecht gegeben, wenn dieser gegen das Recht verstößt. Und daß sich die Anhänger Heinrichs in ihrem Rechtsbe</text:span>
+        <text:span text:style-name="Span2">­wußtsein verletzt fühlten,«</text:span>
+        <text:note text:id="ftn77" text:note-class="footnote">
+          <text:note-citation>77</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL34">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Mitteis, Die Krise des deutschen Königswahlrechts, S. 274.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> sagt Liutprand ganz deutlich.</text:span>
+        <text:note text:id="ftn78" text:note-class="footnote">
+          <text:note-citation>78</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL35">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Liudprandi antapodosis, IV, 18., S. 420.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Bei der ´freien Wahl´ geht die Initiative bei der Kandidatenauswahl jedoch von den wirklichen Wählern aus.</text:span>
+        <text:note text:id="ftn79" text:note-class="footnote">
+          <text:note-citation>79</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Rörig, Geblütsrecht und freie Wahl in ihrer Auswirkung auf die deutsche Geschichte, S. 76.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">Die Anhänger Heinrichs bewiesen jedenfalls, »daß <text:s/>die königliche Designation für sich nicht imstande war, klare Rechtsverhältnisse zu schaffen. Nicht Ottos Machtanspruch, sondern der Wille der Wähler, die die Oppositionspartei zurückdrängten und sich für Otto entschieden, also eine »Auswahl« vollzogen und den ungeeigneten Kandidaten ausschieden, gaben den Ausschlag.«</text:span>
+        <text:note text:id="ftn80" text:note-class="footnote">
+          <text:note-citation>80</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL36">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Mitteis, Die Krise des deutschen Königswahlrechts, S. 273.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> In diesem Sinne erwähnt auch Lintzel, daß es allgemein üblich war nach Geblütsrecht zu designieren, die letzte Entscheidung jedoch die Wahl hatte.</text:span>
+        <text:note text:id="ftn81" text:note-class="footnote">
+          <text:note-citation>81</text:note-citation>
+          <text:note-body>
+            <text:list text:style-name="UL37">
+              <text:list-item>
+                <text:p text:style-name="S11">
+                  <text:span text:style-name="Span5">Lintzel, Miszellen zur Geschichte des 10. Jahrhunderts, S. 374.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </text:note-body>
+        </text:note>
+      </text:p>
+      <text:p text:style-name="S13">
+        <text:span text:style-name="Span2">So scheint es, daß trotz starker Vorprägung zugunsten Ottos, die bereits 927 begann und die Großen des Reichs stark einbezog, es in diesem Falle wohl eine ´freie Wahl´ war, da bei gravierender Änderung der Rahmenbedingungen, prinzipiell auch die Wahl zugunsten Heinrichs nicht ausgeschlossen war. Wenn jedoch die entscheidenden Ver</text:span>
+        <text:span text:style-name="Span2">­handlungen bereits vor dem Tod Heinrichs abgeschlossen waren, ist eine Akklama­tion wesentlich wahrscheinlicher.</text:span>
+        <text:note text:id="ftn82" text:note-class="footnote">
+          <text:note-citation>82</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Vgl. mit Kapitel 3.2.2.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+      </text:p>
+      <text:p text:style-name="S16">
+        <text:span text:style-name="Span3">4. Auswirkungen der Königserhebung Ottos I. auf die folgende <text:tab/>Zeit</text:span>
+      </text:p>
+      <text:p text:style-name="S17">
+        <text:span text:style-name="Span2">In der Tronfolge Ottos fand eine wesentliche Neurerung statt. Sie »bestand darin, daß Otto das Königtum nicht mit seinen ebenbürtigen Brüdern zu teilen hatte, wie dies un</text:span>
+        <text:span text:style-name="Span2">­ter solchen aus dem Geschlechte der Karolinger der Fall gewesen war.«</text:span>
+        <text:note text:id="ftn83" text:note-class="footnote">
+          <text:note-citation>83</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Schmid, Die Thronfolge Ottos des Großen, S. 81.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> Daß diese Neuerung sich erst langsam durchsetzte, zeigt sich bei Widukind als auch Hrothsvith, da beide »Otto lediglich eine Vorrangstellung in der Brüdergemeinschaft zubilligen, aber im Prinzip daran festhalten, daß das Reich von den Söhnen Heinrichs I. gesamt</text:span>
+        <text:span text:style-name="Span2">­händerisch verwaltet«</text:span>
+        <text:note text:id="ftn84" text:note-class="footnote">
+          <text:note-citation>84</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Laudage, Hausrecht und Thronfolge, S. 65.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> wird. So lassen sich die lang währenden Aufstände der beiden Brüder Thankmar und Heinrich so deuten, daß zumindest die drei ersten Verschwörun</text:span>
+        <text:span text:style-name="Span2">­gen gegen Otto den Großen [...] Reaktionen auf angebliche oder tatsächliche Verstöße gegen das geltende Erb- und Anwachsungsrecht«</text:span>
+        <text:note text:id="ftn85" text:note-class="footnote">
+          <text:note-citation>85</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Laudage, Hausrecht und Thronfolge, S. 59.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> waren. Diese neue Art der Thron</text:span>
+        <text:span text:style-name="Span2">­folge war »insofern epochemachend, als sie die im Frankenreich bis dahin übliche Kö­nigsherrschaft des </text:span>
+        <text:span text:style-name="Span4">corpus fratrum</text:span>
+        <text:span text:style-name="Span2"> nicht fortführte.«</text:span>
+        <text:note text:id="ftn86" text:note-class="footnote">
+          <text:note-citation>86</text:note-citation>
+          <text:note-body>
+            <text:p text:style-name="S11">
+              <text:span text:style-name="Span5">Schmid, Die Thronfolge Ottos des Großen, S. 81.</text:span>
+            </text:p>
+          </text:note-body>
+        </text:note>
+        <text:span text:style-name="Span2"> </text:span>
+      </text:p>
+      <text:p text:style-name="S17">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S12">
+        <text:span text:style-name="Span8"/>
+      </text:p>
+      <text:p text:style-name="S14">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S14">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S14">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S14">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S14">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span3">Literaturverzeichnis:</text:span>
+      </text:p>
+      <text:p text:style-name="S14">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span7">Primärliteratur/ Quellen:</text:span>
+      </text:p>
+      <text:list text:style-name="UL38">
+        <text:list-item>
+          <text:p text:style-name="S19">
+            <text:span text:style-name="Span2">DH I 20., In: MGH, Diplomata regum Germaniae et imperatorum Germaniae, hrsg. von Gesellschaft für ältere deutsche Geschichtskunde, Bd. 1, Hannover 1879-1884.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S19">
+            <text:span text:style-name="Span2">Hrotsvithae Opera, In: <text:s/>MGH, Scriptores Rerum Germanicarum, hrsg. von <text:s/>Paulus <text:s/>von Winterfeld, Berlin 1902.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S19">
+            <text:span text:style-name="Span2">Liudprandi antapodosis, In: Quellen zur Geschichte der sächsischen Kaiserzeit, unter Benützung d. Übers. von Paul Hirsch, neu bearb. von <text:s/>Albert Bauer u. Reinhold Rau, 2. durchges. u. berichtigte Aufl., Darmstadt 1977. (=Ausgewählte Quellen zur deut</text:span>
+            <text:span text:style-name="Span2">­schen Geschichte des Mittelalter; Bd. 8). S. 233-495.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S19">
+            <text:span text:style-name="Span2">Widukindi res gestae Saxonicae, In: Quellen zur Geschichte der sächsischen Kaiser</text:span>
+            <text:span text:style-name="Span2">­zeit, unter Benützung d. Übers. von Paul Hirsch, neu bearb. von <text:s/>Albert Bauer u. Reinhold Rau, 2. durchges. u. berichtigte Aufl., Darmstadt 1977. (=Ausgewählte Quellen zur deutschen Geschichte des Mittelalter; Bd. 8). S. 1-183.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S20">
+            <text:span text:style-name="Span2"/>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span7">Sekundärliteratur:</text:span>
+      </text:p>
+      <text:list text:style-name="UL38">
+        <text:list-item>
+          <text:p text:style-name="S19">
+            <text:span text:style-name="Span2">Hoffmann, Hartmut, Ottonische Fragen, In: Johannes Fried u. Rudolf Schieffer (Hg.), Deutsches Archiv für die Erforschung des Mittelalters, 51. Jahrgang, Heft 1, Köln 1995. S. <text:s/>53-82.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S19">
+            <text:span text:style-name="Span2">Holtzmann, Robert, Geschichte der Sächsischen Kaiserzeit (900-1024), 6. Aufl., München 1979.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S19">
+            <text:span text:style-name="Span2">Keller, Hagen, Widukinds Bericht über die Aachener Wahl und Krönung Ottos I., In: Hagen Keller u. Joachim Wollasch (Hg.), Frühmittelalterliche Studien, Bd. 29, Berlin 1995. S. 390-453.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S19">
+            <text:span text:style-name="Span2">Laudage, Johannes, Hausrecht und Thronfolge, Überlegungen zur Königserhebung Ottos des Großen und zu den Aufständen Thankmars, Heinrichs und Liudolfs, In: Laetitia Boehm u.a. <text:s/>(Hg.), Historisches Jahrbuch, Jahrgang 112, München 1992. S. 23-71.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S19">
+            <text:span text:style-name="Span2">Lintzel, Martin, Miszellen zur Geschichte des 10 Jahrhunderts (Miszellen I-IV) (1952), In: Eduard Hlawitschka (Hg.), Königswahl und Thronfolge in ottonisch- frühdeutscher Zeit, Darmstadt <text:s/>1971. (=Wege der Forschung, Band CLXXVIII), S. 309-388.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S19">
+            <text:span text:style-name="Span2">Mitteis, Heinrich, Die Krise des deutschen Königswahlrechts (1950), In: Eduard Hlawitschka (Hg.), Königswahl und Thronfolge in ottonisch- frühdeutscher Zeit, Darmstadt <text:s/>1971. (=Wege der Forschung, Band CLXXVIII), S. 216-302.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S19">
+            <text:span text:style-name="Span2">Rörig, Fritz, Geblütsrecht und freie Wahl in ihrer Auswirkung auf die deutsche Ge</text:span>
+            <text:span text:style-name="Span2">­schichte (1948), In: Eduard Hlawitschka (Hg.), Königswahl und Thronfolge in otto­nisch- frühdeutscher Zeit, Darmstadt <text:s/>1971. (=Wege der Forschung, Band CLXXVIII), S. 71-147. </text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S19">
+            <text:span text:style-name="Span2">Schmid, Karl, Die Thronfolge Ottos des Großen, In: M. Kaser u.a. (Hg.), Zeitschrift der Savigny- Stiftung für Rechtsgeschichte, Bd. 81, Weimar 1964. S. 80-163.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S19">
+            <text:span text:style-name="Span2">Wolf, Gunther, Nochmals zur benedictio Ottonis in regem: 927 oder 929 ?, In: Wal</text:span>
+            <text:span text:style-name="Span2">­ter Heinemeyer (Hg.), Archiv für Diplomatik, Schriftgeschichte, Siegel- und Wap­penkunde, Bd. 40, Köln 1994. S. 79-84.</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S18">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+    </office:text>
+  </office:body>
+</office:document>

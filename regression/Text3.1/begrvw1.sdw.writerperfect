@@ -1,0 +1,1066 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" office:mimetype="application/vnd.oasis.opendocument.text" office:version="1.1">
+  <office:meta>
+    <dc:creator> </dc:creator>
+    <dc:date>1998-01-22T15:26:04.00</dc:date>
+    <dc:title>begrvw1</dc:title>
+    <meta:creation-date>1998-01-08T00:03:10.00</meta:creation-date>
+    <meta:initial-creator>Gerald Leppert</meta:initial-creator>
+    <meta:print-date>1998-01-11T22:28:01.00</meta:print-date>
+    <meta:generator>libodfgen/0.1.6</meta:generator>
+  </office:meta>
+  <office:font-face-decls>
+    <style:font-face style:name="Times" svg:font-family="Times"/>
+    <style:font-face style:font-charset="x-symbol" style:name="StarSymbol" svg:font-family="StarSymbol"/>
+  </office:font-face-decls>
+  <office:styles>
+    <style:default-style style:family="graphic"/>
+    <style:default-style style:family="paragraph">
+      <style:paragraph-properties style:line-break="strict" style:punctuation-wrap="hanging" style:tab-stop-distance="0.5in" style:text-autospace="ideograph-alpha" style:use-window-font-color="true" style:writing-mode="page"/>
+    </style:default-style>
+    <style:default-style style:family="table"/>
+    <style:default-style style:family="table-row">
+      <style:table-row-properties fo:keep-together="auto"/>
+    </style:default-style>
+    <style:default-style style:family="table-column"/>
+    <style:default-style style:family="table-cell"/>
+    <style:style style:class="text" style:family="paragraph" style:name="Standard"/>
+    <style:style style:class="text" style:display-name="Text Body" style:family="paragraph" style:name="Text_Body" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Table Contents" style:family="paragraph" style:name="Table_Contents" style:parent-style-name="Text_Body"/>
+    <style:style style:class="extra" style:display-name="Table Heading" style:family="paragraph" style:name="Table_Heading" style:parent-style-name="Table_Contents"/>
+    <style:style style:class="list" style:display-name="List" style:family="paragraph" style:name="List" style:parent-style-name="Text_Body"/>
+    <style:style style:class="extra" style:display-name="Header" style:family="paragraph" style:name="Header" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Footer" style:family="paragraph" style:name="Footer" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Caption" style:family="paragraph" style:name="Caption" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Footnote" style:family="paragraph" style:name="Footnote" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Endnote" style:family="paragraph" style:name="Endnote" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Index" style:family="paragraph" style:name="Index" style:parent-style-name="Standard"/>
+    <style:style style:display-name="Footnote_Symbol" style:family="text" style:name="Footnote_Symbol">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Endnote_Symbol" style:family="text" style:name="Endnote_Symbol">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Footnote_anchor" style:family="text" style:name="Footnote_anchor">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Endnote_anchor" style:family="text" style:name="Endnote_anchor">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <text:linenumbering-configuration style:num-format="1" text:increment="5" text:number-lines="false" text:number-position="left" text:offset="0.1965in"/>
+    <text:notes-configuration style:num-format="1" text:citation-body-style-name="Footnote_anchor" text:citation-style-name="Footnote_Symbol" text:footnotes-position="page" text:note-class="footnote" text:start-numbering-at="document" text:start-value="0"/>
+    <text:notes-configuration style:num-format="i" text:citation-body-style-name="Endnote_anchor" text:citation-style-name="Endnote_Symbol" text:master-page-name="Endnote" text:note-class="endnote" text:start-value="0"/>
+  </office:styles>
+  <office:automatic-styles>
+    <style:page-layout style:name="PL0">
+      <style:page-layout-properties fo:margin-bottom="1.0000in" fo:margin-left="1.0000in" fo:margin-right="1.0000in" fo:margin-top="1.0000in" fo:page-height="11.0000in" fo:page-width="8.5000in" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:distance-after-sep="0.0398in" style:distance-before-sep="0.0398in" style:rel-width="25.0000%" style:width="0.0071in"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:page-layout style:name="PL1">
+      <style:page-layout-properties fo:margin-bottom="1.0000in" fo:margin-left="1.0000in" fo:margin-right="1.0000in" fo:margin-top="1.0000in" fo:page-height="11.0000in" fo:page-width="8.5000in" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:rel-width="25.0000%"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:page-layout style:name="PL2">
+      <style:page-layout-properties fo:margin-bottom="56.7000pt" fo:margin-left="56.7000pt" fo:margin-right="56.7000pt" fo:margin-top="56.7000pt" fo:page-height="841.8500pt" fo:page-width="595.2500pt" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:distance-after-sep="0.0398in" style:distance-before-sep="0.0398in" style:rel-width="25.0000%" style:width="0.0071in"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:style style:family="text" style:name="Span0">
+      <style:text-properties fo:font-size="12.0000pt" fo:font-weight="normal" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-size-asian="12.0000pt" style:font-size-complex="12.0000pt" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span1">
+      <style:text-properties fo:font-size="14.0000pt" fo:font-weight="bold" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-size-asian="14.0000pt" style:font-size-complex="14.0000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span2">
+      <style:text-properties fo:font-size="14.0000pt" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-size-asian="14.0000pt" style:font-size-complex="14.0000pt"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span3">
+      <style:text-properties fo:font-style="italic" fo:font-weight="bold" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-style-asian="italic" style:font-style-complex="italic" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span4">
+      <style:text-properties style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times"/>
+    </style:style>
+    <style:style style:family="paragraph" style:master-page-name="PM2" style:name="S0" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:text-align="right" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S1" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S2" style:parent-style-name="Table_Contents">
+      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:text-align="center" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S3" style:parent-style-name="Table_Contents">
+      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S4" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:text-align="left" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="table" style:name="Table0">
+      <style:table-properties style:width="100.0000%" table:align="left" table:border-model="collapsing"/>
+    </style:style>
+    <style:style style:family="table-column" style:name="Table0.Column1">
+      <style:table-column-properties style:column-width="4.8814%"/>
+    </style:style>
+    <style:style style:family="table-column" style:name="Table0.Column2">
+      <style:table-column-properties style:column-width="11.1391%"/>
+    </style:style>
+    <style:style style:family="table-column" style:name="Table0.Column3">
+      <style:table-column-properties style:column-width="42.3407%"/>
+    </style:style>
+    <style:style style:family="table-column" style:name="Table0.Column4">
+      <style:table-column-properties style:column-width="9.3339%"/>
+    </style:style>
+    <style:style style:family="table-column" style:name="Table0.Column5">
+      <style:table-column-properties style:column-width="32.3049%"/>
+    </style:style>
+    <style:style style:family="table-row" style:name="Table0_row0">
+      <style:table-row-properties fo:keep-together="auto"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell0">
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="0.05pt solid #000000" fo:padding="0.0382in"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell1">
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="0.05pt solid #000000" fo:padding="0.0382in"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell2">
+      <style:table-cell-properties fo:border-bottom="none" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="0.05pt solid #000000" fo:padding="0.0382in"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell3">
+      <style:table-cell-properties fo:border-bottom="none" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="none" fo:padding="0.0382in"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell4">
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="none" fo:padding="0.0382in"/>
+    </style:style>
+  </office:automatic-styles>
+  <office:master-styles>
+    <style:master-page style:display-name="Standard" style:name="PM0" style:page-layout-name="PL0"/>
+    <style:master-page style:display-name="EndNote" style:name="PM1" style:page-layout-name="PL1"/>
+    <style:master-page style:name="PM2" style:page-layout-name="PL2"/>
+  </office:master-styles>
+  <office:body>
+    <office:text>
+      <text:p text:style-name="S0">
+        <text:span text:style-name="Span0">98 - 01 - 11</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">Begriffeverwaltung</text:span>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <table:table table:name="Table0" table:style-name="Table0">
+        <table:table-column table:style-name="Table0.Column1"/>
+        <table:table-column table:style-name="Table0.Column2"/>
+        <table:table-column table:style-name="Table0.Column3"/>
+        <table:table-column table:style-name="Table0.Column4"/>
+        <table:table-column table:style-name="Table0.Column5"/>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S2">
+              <text:span text:style-name="Span3">Feld</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S2">
+              <text:span text:style-name="Span3">Bedeutung</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S2">
+              <text:span text:style-name="Span3">Stellen</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell1">
+            <text:p text:style-name="S2">
+              <text:span text:style-name="Span3">Bemerkung</text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> IDN</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Informationselementenummer</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 16</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell1">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/>=&gt; C 1a</text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Schicht</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Standortkennung</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 8</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> E 1</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Informationsebene (JE)</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 3</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> E 2</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> X- Koordinate <text:s/>in JE</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 3</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/>=&gt; C 22a <text:s/><text:s/></text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> E 3</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Y- Koordinate <text:s/>in JE</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 3</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4">
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+              </text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> E 4</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> X- Koordinate <text:s/>in Unterebene</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 2</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> E 5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Y- Koordinate <text:s/>in Unterebene</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 3</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/>=&gt; C 22b</text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> P</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Benennung, praktiziert +)</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 88</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/>+ STM 1 =&gt; *</text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> B</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Benennung (Standard)</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 1(2) 32</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> ein- oder zweizeilig =&gt; B 1</text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> E</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Benennung, en</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 1(2) 32</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> ein- oder zweizeilig =&gt; B 4</text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> G</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Gruppenbenennung ++)</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 32</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/>=&gt; C 22c</text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> KENN 1</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Normnummer</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 25</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> KENN 2</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Erweiterter Oberbegriff/Erw. Basiswort</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 50</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> KENN 3</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Richtliniennummer</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 50</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> KENN 4</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Formelzeichen/Dokumentenkennung</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/><text:s/>7</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/>=&gt; B15</text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> KENN 5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Oberbegriff/Basiswort</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 50</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4">
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+                <text:s/>
+              </text:span>
+            </text:p>
+          </table:table-cell>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 1</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Benennungsart (P, E, S, K, A, B)</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>1</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 2</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 3</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 4</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 6</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 7</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 8</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 9</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 10</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 11</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 12</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 13</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 14</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 15</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 16</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 17</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 18</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 19</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> STM 20</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"><text:s/>5</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+        </table:table-row>
+        <table:table-row table:style-name="Table0_row0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Quelle</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> Nachvollziehbarer Ursprung</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span4"> 88</text:span>
+            </text:p>
+          </table:table-cell>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell1"/>
+        </table:table-row>
+      </table:table>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span2"/>
+      </text:p>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span4"/>
+      </text:p>
+      <text:p text:style-name="S4">
+        <text:span text:style-name="Span4">*) P + A =&gt; B 3b, Benennung, Abkürzung <text:s/><text:s/><text:s/>(12 Stellen)</text:span>
+      </text:p>
+      <text:p text:style-name="S4">
+        <text:span text:style-name="Span4"><text:s/><text:s/><text:s/>P + B =&gt; B 1, <text:s/><text:s/>Benennung</text:span>
+      </text:p>
+      <text:p text:style-name="S4">
+        <text:span text:style-name="Span4"><text:s/><text:s/><text:s/>P + E =&gt; B 4, <text:s/><text:s/><text:s/>Benennung, englisch <text:s/><text:s/><text:s/></text:span>
+      </text:p>
+      <text:p text:style-name="S4">
+        <text:span text:style-name="Span4"><text:s/><text:s/><text:s/>P + I =&gt; B 2, <text:s/><text:s/><text:s/><text:s/>Benennung, invertiert <text:s/><text:s/><text:s/><text:s/><text:s/>(1(2)32 Stellen)</text:span>
+      </text:p>
+      <text:p text:style-name="S4">
+        <text:span text:style-name="Span4"><text:s/><text:s/><text:s/>P + K =&gt; B 3a, Benennung, Kurzfassung (24 Stellen)</text:span>
+      </text:p>
+      <text:p text:style-name="S4">
+        <text:span text:style-name="Span4"><text:s/><text:s/><text:s/>P + S =&gt; B 5, <text:s/><text:s/><text:s/>Synonym <text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/>(32 Stellen, 1:m)</text:span>
+      </text:p>
+      <text:p text:style-name="S4">
+        <text:span text:style-name="Span4">+) <text:s/><text:s/>für Stichwortverzeichnis <text:s/><text:s/><text:s/><text:s/><text:s/><text:s/>++) für Benennungen gleichartigen Inhalts</text:span>
+      </text:p>
+      <text:p text:style-name="S4">
+        <text:span text:style-name="Span4"/>
+      </text:p>
+      <text:p text:style-name="S4">
+        <text:span text:style-name="Span4"/>
+      </text:p>
+      <text:p text:style-name="S4">
+        <text:span text:style-name="Span4"/>
+      </text:p>
+    </office:text>
+  </office:body>
+</office:document>

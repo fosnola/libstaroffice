@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" office:mimetype="application/vnd.oasis.opendocument.text" office:version="1.1">
+  <office:meta>
+    <dc:creator>Gerald Leppert</dc:creator>
+    <dc:date>1999-06-25T01:05:52.00</dc:date>
+    <dc:title>Super-wissenschaftstheoretische Grundlagen</dc:title>
+    <meta:creation-date>1999-06-22T15:01:09.00</meta:creation-date>
+    <meta:initial-creator>Gerald Leppert</meta:initial-creator>
+    <meta:print-date>1601-01-01T00:00:00.00</meta:print-date>
+    <meta:generator>libodfgen/0.1.6</meta:generator>
+  </office:meta>
+  <office:font-face-decls>
+    <style:font-face style:name="Times" svg:font-family="Times"/>
+    <style:font-face style:name="helvetica" svg:font-family="helvetica"/>
+    <style:font-face style:name="starbats" svg:font-family="starbats"/>
+    <style:font-face style:font-charset="x-symbol" style:name="StarSymbol" svg:font-family="StarSymbol"/>
+  </office:font-face-decls>
+  <office:styles>
+    <style:default-style style:family="graphic"/>
+    <style:default-style style:family="paragraph">
+      <style:paragraph-properties style:line-break="strict" style:punctuation-wrap="hanging" style:tab-stop-distance="0.5in" style:text-autospace="ideograph-alpha" style:use-window-font-color="true" style:writing-mode="page"/>
+    </style:default-style>
+    <style:default-style style:family="table"/>
+    <style:default-style style:family="table-row">
+      <style:table-row-properties fo:keep-together="auto"/>
+    </style:default-style>
+    <style:default-style style:family="table-column"/>
+    <style:default-style style:family="table-cell"/>
+    <style:style style:class="text" style:family="paragraph" style:name="Standard"/>
+    <style:style style:class="text" style:display-name="Text Body" style:family="paragraph" style:name="Text_Body" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Table Contents" style:family="paragraph" style:name="Table_Contents" style:parent-style-name="Text_Body"/>
+    <style:style style:class="extra" style:display-name="Table Heading" style:family="paragraph" style:name="Table_Heading" style:parent-style-name="Table_Contents"/>
+    <style:style style:class="list" style:display-name="List" style:family="paragraph" style:name="List" style:parent-style-name="Text_Body"/>
+    <style:style style:class="extra" style:display-name="Header" style:family="paragraph" style:name="Header" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Footer" style:family="paragraph" style:name="Footer" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Caption" style:family="paragraph" style:name="Caption" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Footnote" style:family="paragraph" style:name="Footnote" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Endnote" style:family="paragraph" style:name="Endnote" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Index" style:family="paragraph" style:name="Index" style:parent-style-name="Standard"/>
+    <style:style style:display-name="Footnote_Symbol" style:family="text" style:name="Footnote_Symbol">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Endnote_Symbol" style:family="text" style:name="Endnote_Symbol">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Footnote_anchor" style:family="text" style:name="Footnote_anchor">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Endnote_anchor" style:family="text" style:name="Endnote_anchor">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <text:linenumbering-configuration style:num-format="1" text:increment="5" text:number-lines="false" text:number-position="left" text:offset="0.1965in"/>
+    <text:notes-configuration style:num-format="1" text:citation-body-style-name="Footnote_anchor" text:citation-style-name="Footnote_Symbol" text:footnotes-position="page" text:note-class="footnote" text:start-numbering-at="document" text:start-value="0"/>
+    <text:notes-configuration style:num-format="i" text:citation-body-style-name="Endnote_anchor" text:citation-style-name="Endnote_Symbol" text:master-page-name="Endnote" text:note-class="endnote" text:start-value="0"/>
+  </office:styles>
+  <office:automatic-styles>
+    <style:page-layout style:name="PL0">
+      <style:page-layout-properties fo:margin-bottom="1.0000in" fo:margin-left="1.0000in" fo:margin-right="1.0000in" fo:margin-top="1.0000in" fo:page-height="11.0000in" fo:page-width="8.5000in" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:distance-after-sep="0.0398in" style:distance-before-sep="0.0398in" style:rel-width="25.0000%" style:width="0.0071in"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:page-layout style:name="PL1">
+      <style:page-layout-properties fo:margin-bottom="1.0000in" fo:margin-left="1.0000in" fo:margin-right="1.0000in" fo:margin-top="1.0000in" fo:page-height="11.0000in" fo:page-width="8.5000in" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:rel-width="25.0000%"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:page-layout style:name="PL2">
+      <style:page-layout-properties fo:margin-bottom="56.7000pt" fo:margin-left="79.3500pt" fo:margin-right="79.3500pt" fo:margin-top="51.0000pt" fo:page-height="841.9000pt" fo:page-width="595.3000pt" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:distance-after-sep="0.0398in" style:distance-before-sep="0.0398in" style:rel-width="25.0000%" style:width="0.0071in"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:style style:family="text" style:name="Span_M0">
+      <style:text-properties fo:font-weight="600.0000" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-weight-asian="600.0000" style:font-weight-complex="600.0000"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S_M0" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:text-align="center" fo:text-align-last="default" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:char="," style:leader-style="solid" style:leader-text=" " style:position="240.9500pt" style:type="char"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="481.9500pt" style:type="right"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="text" style:name="Span1">
+      <style:text-properties fo:font-weight="600.0000" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-weight-asian="600.0000" style:font-weight-complex="600.0000"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span2">
+      <style:text-properties fo:font-size="16.1000pt" fo:font-weight="bold" style:font-name="helvetica" style:font-name-asian="helvetica" style:font-name-complex="helvetica" style:font-pitch="variable" style:font-size-asian="16.1000pt" style:font-size-complex="16.1000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span3">
+      <style:text-properties fo:font-size="14.0000pt" fo:font-weight="normal" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-size-asian="14.0000pt" style:font-size-complex="14.0000pt" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span4">
+      <style:text-properties fo:font-size="14.0000pt" fo:font-weight="600.0000" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-size-asian="14.0000pt" style:font-size-complex="14.0000pt" style:font-weight-asian="600.0000" style:font-weight-complex="600.0000"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span5">
+      <style:text-properties fo:font-size="11.9000pt" fo:font-style="italic" fo:font-weight="bold" style:font-name="helvetica" style:font-name-asian="helvetica" style:font-name-complex="helvetica" style:font-pitch="variable" style:font-size-asian="11.9000pt" style:font-size-complex="11.9000pt" style:font-style-asian="italic" style:font-style-complex="italic" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span6">
+      <style:text-properties fo:font-size="11.9000pt" fo:font-weight="bold" style:font-name="helvetica" style:font-name-asian="helvetica" style:font-name-complex="helvetica" style:font-pitch="variable" style:font-size-asian="11.9000pt" style:font-size-complex="11.9000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span7">
+      <style:text-properties fo:font-size="10.0000pt" fo:font-weight="600.0000" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt" style:font-weight-asian="600.0000" style:font-weight-complex="600.0000"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span8">
+      <style:text-properties fo:font-size="12.0000pt" fo:font-weight="600.0000" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-size-asian="12.0000pt" style:font-size-complex="12.0000pt" style:font-weight-asian="600.0000" style:font-weight-complex="600.0000"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span9">
+      <style:text-properties fo:font-style="italic" fo:font-weight="600.0000" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-style-asian="italic" style:font-style-complex="italic" style:font-weight-asian="600.0000" style:font-weight-complex="600.0000"/>
+    </style:style>
+    <style:style style:family="paragraph" style:master-page-name="PM2" style:name="S1" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S10" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:margin-top="12.0000pt" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S11" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-left="14.1500pt" fo:margin-right="0.0000pt" fo:margin-top="12.0000pt" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-14.1500pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S12" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-left="56.6000pt" fo:margin-right="0.0000pt" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-14.1500pt" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="0.0000pt"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S13" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-left="14.1500pt" fo:margin-right="0.0000pt" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-14.1500pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S14" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="100.0000%" fo:margin-left="14.1500pt" fo:margin-right="0.0000pt" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-14.1500pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S2" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S3" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:margin-top="12.0000pt" fo:text-align="center" fo:text-align-last="default" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S4" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-left="14.1000pt" fo:margin-right="0.0000pt" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-14.1000pt" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="0.0000pt"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="27.7500pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S5" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-left="8.7500pt" fo:margin-right="0.0000pt" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-8.7500pt" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="0.0000pt"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S6" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-left="56.6000pt" fo:margin-right="0.0000pt" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-14.1500pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S7" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-left="56.6000pt" fo:margin-right="0.0000pt" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S8" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-left="17.5500pt" fo:margin-right="0.0000pt" fo:margin-top="12.0000pt" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-17.5500pt" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="0.0000pt"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S9" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="0.0000pt"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <text:list-style style:name="OL0">
+      <text:list-level-style-number style:num-format="1" style:num-suffix="." text:level="1" text:start-value="1" text:style-name="Numbering_Symbols">
+        <style:list-level-properties fo:text-align="left"/>
+        <style:text-properties/>
+      </text:list-level-style-number>
+    </text:list-style>
+    <text:list-style style:name="UL1">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+  </office:automatic-styles>
+  <office:master-styles>
+    <style:master-page style:display-name="Standard" style:name="PM0" style:page-layout-name="PL0"/>
+    <style:master-page style:display-name="EndNote" style:name="PM1" style:page-layout-name="PL1"/>
+    <style:master-page style:name="PM2" style:page-layout-name="PL2">
+      <style:header>
+        <text:p text:style-name="S_M0">
+          <text:span text:style-name="Span_M0">- <text:page-number text:select-page="current"/> -</text:span>
+        </text:p>
+      </style:header>
+    </style:master-page>
+  </office:master-styles>
+  <office:body>
+    <office:text>
+      <text:p text:style-name="S1">
+        <text:span text:style-name="Span1">Einführung in die Methoden der empirischen Sozialforschung<text:tab/> <text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/>25.06.1999</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Dr. Birgit Hodenius</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Referent: Gerald Leppert <text:tab/><text:tab/><text:tab/><text:tab/></text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S3">
+        <text:span text:style-name="Span2">Wissenschaftstheoretische Grundprobleme</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span3">Gliederung:</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S4">
+        <text:span text:style-name="Span4">0. Einführung anhand von zentralen Grundfragen der Wissenschaftstheorie</text:span>
+      </text:p>
+      <text:p text:style-name="S5">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span4">I. Wissenschaftstheoretische Modelle</text:span>
+      </text:p>
+      <text:list text:style-name="OL0">
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span1">Der naive Induktivismus und die Mängel der induktivistischen Auffassung</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span1">Der (raffinierte) Falsifikationismus als Erweiterung und seine <text:s/>Grenzen</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span1">Forschungsprogramme nach Lakatos: Theorien in einem strukturierten Gan</text:span>
+            <text:span text:style-name="Span1">­zen </text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S6">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span4">II. Besonderheit der Sozialwissenschaften</text:span>
+      </text:p>
+      <text:list text:continue-numbering="true" text:style-name="OL0">
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span1">Kontroverse: Einheit der wissenschaftlichen Methodologie oder eigene gei</text:span>
+            <text:span text:style-name="Span1">­stes- und sozialwissenschaftliche Methodologie?</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span1">Gründe und Kritik einer eigenständigen Methodologie für die Sozialwissen</text:span>
+            <text:span text:style-name="Span1">­schaften</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span1">Gründe und Kritik einer Einheit der wissenschaftlichen Methodologie</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span1">Die unterschiedlichen Positionen über den Ge</text:span>
+            <text:span text:style-name="Span1">­genstand der Soziologie anhand von zwei Beispielen: Durkheim und Schütz</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span1">Versuch der Kombination der widerstrebenden Ansätze als Lösung</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S6">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span4">III. Literatur</text:span>
+      </text:p>
+      <text:p text:style-name="S7">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S7">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S7">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S8">
+        <text:span text:style-name="Span5">0. Einführung anhand von zentralen Grundfragen der Wissenschafts- <text:s/>theorie</text:span>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span1">Diese Darstellung dreht sich um zentrale Fragen, die sich jede Disziplin der Wissen</text:span>
+        <text:span text:style-name="Span1">­schaft zu stellen hat. Was ist wissenschaftlich? Wie kommt wissenschaftliche Erkenntnis zustande? Was ist die wissenschaftliche Methode? Wie funktioniert wissenschaftlicher Fortschritt? Im ersten Teil wird auf die wissenschaftstheoretischen Modelle eingegangen, welche sich hauptsächlich in den Naturwissenschaften herausgebildet haben und weiterentwickelt wurden. Begonnen wird mit dem wohl ältesten Modell, dem naiven Induktivismus, dessen Fehler vielfach kritisiert wurden. Ein Versuch, die Fehler des Induktivismus auszuräumen stellt der Falsifikationismus dar und dessen Weiterentwicklung, der raffinierte Falsifikationismus. Die Mängel dieses Modells, welche hier dargestellt werden, versucht Lakatos mit seinem »Modell des Forschungsprogramms« zu beheben, indem er die Theorien in ein strukturiertes Ganzes stellt. Im zweiten Teil wird auf die Kontroverse in den Sozialwissenschaften eingegangen, ob denn die Methodologien aus den Naturwissenschaften zu verwenden seien, oder ob eine spezifisch sozialwissenschaftliche Methodologie angewendet werden müsse. In der noch andauernden Kontroverse wird auf die Verfechter der beiden Seiten eingegangen. Anhand von zwei Beispielen - Alfred Schütz und Emile Durkheim - werden die Mängel beider Positionen deutlich und der Versuch einer Kombination beider Ansätze dargestellt.</text:span>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span5">I. Wissenschaftstheoretische Modelle</text:span>
+      </text:p>
+      <text:list text:continue-numbering="true" text:style-name="OL0">
+        <text:list-item>
+          <text:p text:style-name="S11">
+            <text:span text:style-name="Span6">Der naive Induktivismus und die Mängel der induktivistischen Auffas</text:span>
+            <text:span text:style-name="Span6">­sung</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Der naive Induktivismus ist ein sehr frühes Modell, das von der Erfahrung als Erkenntnisquelle ausgeht; es wird davon ausgegangen, daß Beobachtungen über die Welt, <text:s/>die man mit den Sinnesorganen nachprüfbar bewerkstelligen kann, als objektiv gelten können. Grundlage des naiven Induktivismus ist somit die sorgfältige Beobachtung, deren Ergebnis Einzelaussagen über die beobachtete Sache sind. Aus diesen Einzelaussagen können wiederum mittels induktivem Schließen allgemeine Sätze gebildet werden, welche sich nicht mehr auf den Einzelfall beziehen, sondern eine größere Reichweite in der Anwendung besitzen. Ein einfaches Beispiel wären die Einzelaussagen »Säure 1 färbt das Lackmuspapier rot« und »Säure 2 färbt das Lackmuspapier rot«. Der induktive Schluß wäre »Säuren färben Lackmuspapier rot« ist somit weitreichender gültig wie die Einzelaussagen, aus denen er geschlossen wurde. Erklärungen kann man mittels deduktivem Schließen machen. Das deduktive Schließen beruht auf den Gesetzen der Logik. Ein typisches Beispiel wäre hiermit: »Säuren färben Lackmuspapier rot«, »Die Flüssigkeit meiner Probe färbt Lackmuspapier rot«. Die logisch gültige Deduktion wäre folglich: »Meine Flüssigkeit ist eine Säure«. Es gilt bei deduktivem Schließen also die Aussage, »wenn die Voraussetzungen wahr sind, dann muß die Schlußfolgerung wahr sein«.</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Was jedoch sind die Voraussetzungen für einen induktiven Schluß? Im wesentlichen sind das drei: </text:span>
+      </text:p>
+      <text:list text:continue-numbering="true" text:style-name="OL0">
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span7">Verallgemeinerungen müssen auf einer großen Anzahl von Beobachtungsaussagen beruhen.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span7">Die Beobachtungen müssen unter einer großen Vielfalt von Bedingungen wiederholt werden. So wäre eine Bedingung zum Beispiel eine bestimmte experimentelle Versuchsanordnung</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span7">Keine Beobachtungsaussage darf im Widerspruch zu dem entsprechenden allgemeinen Gesetz stehen.</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span8">Es gibt jedoch einige wesentliche Mängel der induktivistischen Auffassung, die bei ihrer eigenen Rechtfertigung beginnen: Eine logische Begründung läßt sich ausschließen, da induktive Schlüsse nie absolut (zu 100 %) wahr sein können. Ebenso läßt es sich nicht durch Induktion aus Erfahrungswerten rechtfertigen, da dies ein Zirkelschluß wäre: »ein Induktionsschluß wird als Beweis herangezogen, obwohl es gerade die Gültigkeit es Induktionsschlusses ist, die gerechtfertigt werden soll. Ebenso sind die Voraussetzungen stark anzweifelbar; so läßt sich die Forderung nach einer großen Anzahl von Aussagen nur schwer näher bestimmen, da diese offensichtlich zwischen Induktionsschlüssen sehr variiert; genau so verhält es sich mit der Vielfalt der Bedingungen, unter denen die Beobachtungen wiederholt werden sollen: Die Vielfalt der Bedingungen ist unendlich groß. Wie soll innerhalb des naiven Induktivismus garantiert werden, daß die bedeutsamen Variationen gefunden werden? </text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span8">Eine wichtige Erkenntnis ist also folgende: »Wissenschaftliche Erkenntnis ist nicht bewiesenes Wissen, doch sie repräsentiert Wissen, das wahrscheinlich wahr ist. Je größer die Anzahl der Beobachtungen, die die Grundlage der Induktion darstellt, um so größer ist die Wahrscheinlichkeit, daß <text:s/>die daraus folgenden Verallgemeinerungen wahr sind.« </text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span8">Diese Wahrscheinlichkeit kann jedoch nicht genau beziffert werden, dies ist lediglich bei Einzelvorhersagen möglich.</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span8">Da das große Problem des Induktivismus - »Die Theorieabhängigkeit der Wahrnehmung« - bekannt ist, fasse ich es hier nur kurz zusammen: Wenn auch alle Menschen weitgehend optisch dasselbe sehen, ist doch das wirkliche Bild der Sache unterschiedlich. Es hängt von vielerlei Faktoren ab: Wissen und Erwartung des Betrachters, Erfahrung, Wahrnehmung, allgemeiner innerer Zustand, Kultur. Ebenso sind Beobachtungsaussagen theorieabhängig, wie z. B. Der Satz »Der Elektronenstrahl wurde durch den Nordpol des Magneten abgestoßen« deutlich macht. Auch wissenschaftlichen Beobachtungen und Experimenten sind theoriegeleitet. Es wird also deutlich, daß in der Wissenschaft die Theorie der Wahrnehmung vorausgehen muß. </text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span8">Der naive Induktivismus hat - trotz Versuche ihn zu reformieren - mit großen Problemen zu kämpfen, weswegen er mittlerweile als degeneriert bezeichnet werden kann, vor allem, weil andere wissenschaftstheoretische Ansätze angemessener, interessanter und fruchtbarer sind. </text:span>
+      </text:p>
+      <text:list text:continue-numbering="true" text:style-name="OL0">
+        <text:list-item>
+          <text:p text:style-name="S11">
+            <text:span text:style-name="Span6">Der Falsifikationismus als Erweiterung und seine <text:s/>Grenzen</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Der Falsifikationismus ist sich der Mängel des Induktivismus bewußt und hat einige von diesen elegant vermieden. So geht der Falsifikationismus davon aus, daß jede Beobachtung theoriegeleitet ist und Theorie voraussetzt. Er verzichtet auch darauf, Theorien auf der Basis von Beobachtung als wahr oder wahrscheinlich wahr zu bezeichnen. Desweiteren richtet der Falsifikationismus sein Augenmerk nicht darauf, wie Theorien zustande kommen; er ermuntert vor allem zu kühnen Theorien. »Spekulativem Theorien müssen, wenn sie einmal vorgeschlagen wurden, rigoros und nach strengen Kriterien durch Beobachtung und Experiment überprüft werden. Theorien die den Überprüfungen nicht standhalten, gelten als falsifiziert und müssen eliminiert und durch neue spekulative Theorien ersetzt werden. Es wird davon ausgegangen, daß nur die besten Theorien überleben. Die Falsifizierung des obengenannten Beispiels wäre also durch folgende logische Deduktion zu erreichen: Wenn die Einzelaussage »In der Säure xyz färbt sich das Lackmuspapier nicht rot.« eintreten sollte, wäre die Schlußfolgerung: »Nicht bei allen Säuren färbt sich das Lackmuspapier rot«.</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Der Falsifikationismus stellt einige Grundanforderungen an eine wissenschaftliche Theorie: Sie muß grundsätzlich falsifizierbar sein. Dies ist dann der Fall, wenn es logisch mögliche Beobachtungsaussagen gibt, die mit der Theorie unvereinbar sind. Ein Bsp: Die Theorie »Alle Stoffe dehnen sich bei Hitze aus.« ist grundsätzlich falsifizierbar, da es logisch möglich ist, daß es einen Stoff gibt, der sich nicht ausdehnt. Auch bedeutet die höhere Falsifizierbarkeit, also mehrere mögliche Gelegenheiten diese Theorie zu falsifizieren, eine höhere Qualität der Theorie. So ist z. B. die allgemeingültigere Theorie »Alle Stoffe dehnen sich bei Hitze aus« der Theorie »Eisen dehnt sich bei Hitze aus« überlegen, es sei denn sie würde wirklich falsifiziert. </text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Durch diese Aufforderung zu immer allgemeingültigeren Theorien zu kommen und falsifizierte Theorien auszuschließen, erfolgreiche Theorien jedoch sehr genau zu prüfen, kommt im Falsifikationismus der wissenschaftliche Fortschritt zustande. Der wissenschaftliche Fortschritt besagt jedoch nicht, daß diese Theorie dann wahr oder wahrscheinlich war ist, sondern nur, daß sie der vorhergehenden überlegen ist. </text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Eine wichtige Erweiterung des Falsifikationismus ist der Raffinierte Falsifikationismus, der wesentlich mehr das Augenmerk auf den wissenschaftlichen Fortschritt richtet. Zum einen muß eine neue Theorie falsifizierbarer sein als ihr Vorgänger und Phänomene vorhersagen, die von der alten Theorie unberührt geblieben sind. Auch erkennt der raffinierte Falsifikationismus, daß es nicht immer zu einer Ablösung der Theorien in einer Reihe geben muß, sondern daß es konkurrierende Theorien geben kann. Dies kann den wissenschaftlichen Fortschritt ebenfalls fördern.</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Ein Problem für den Falsifikationisten sind nachträgliche Modifikationen an Theorien. Hier darf es nur Modifikationen geben, welche unabhängig geprüft werden können und die Falsifizierbarkeit nicht einschränken. Modifikationen, welche die Theorie weniger falsifizierbarer machen, werden ad hoc-Modifikationen genannt und werden abgelehnt. An ihre Stelle sollen neue kühne Hypothesen treten, die eine potentielle Verbesserung darstellen, wobei die Definition »kühn« immer vom Hintergrundwissen der Zeit abhängt. </text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Auch wenn der Falsifikationismus offensichtlich einige Probleme des Induktivismus <text:s/>beseitigt, gibt es ebenfalls vielfältige Kritik: Der </text:span>
+        <text:span text:style-name="Span9">erste</text:span>
+        <text:span text:style-name="Span1"> Kritikpunkt bezieht sich auf die Annahme der Falsifikationisten, daß Theorien endgültig falsifiziert werden können. Dies ist so nicht richtig, da ja die Beobachtungsaussage, welche die Theorie falsifiziert, <text:s/>falsch sein kann. Es kann also nie ausgeschlossen werden, daß neue theoretische Fortschritte eben diese Beobachtungsaussage als falsch und unangemessen herausstellen. D.h., eine Beobachtungsaussage ist nur vorläufig anerkannt und hängt generell in ihrer Beweiskraft vom jeweils aktuellen Stand der Wissenschaft ab, in dem sie allen Überprüfungen standhalten muß. Das </text:span>
+        <text:span text:style-name="Span9">zweite</text:span>
+        <text:span text:style-name="Span1"> Problem ist, daß wissenschaftliche Theorien nicht für sich alleine stehen, sondern eine Vielzahl von Hilfshypothesen und Anfangsbedingungen wie z. B. die Testsituation benötigen. Es ist hier zum einen möglich, daß die Fehler in der komplexen Testsituation nicht in der Theorie zu finden sind, also die Theorie zu Unrecht falsifiziert wird; zum anderen wird nicht die fehlerhafte Theorie falsifiziert, sondern höchstwahrscheinlich nur ein Teil des komplexen <text:s/>Netzwerkes der Hilfshypothesen, es wird also auf einer fehlerhaften Theorie verharrt. Dies führt bereits zum </text:span>
+        <text:span text:style-name="Span9">dritten</text:span>
+        <text:span text:style-name="Span1"> Kritikpunkt: In der historischen Betrachtung einiger großer Fortschritte wie z. B. die Theoriegebäude von Kopernikus oder Newton, zeigt sich, daß diese relativ früh - mit Hilfe des theoretischen Unterbaus der alten Theorien überprüft - falsifiziert wurden. Sie hätten folglich eliminiert werden müssen. Jedoch wurden sie weiterentwickelt und ihnen in einem längeren Zeitraum (zw. 50 und einigen hundert Jahren) ein neuer tragfähiger theoretischer Unterbau zugewiesen. Hier konnte also nur durch das lange Festhalten an einer falsifizierten Theorie ein wissenschaftlicher Fortschritt erzielt werden!</text:span>
+      </text:p>
+      <text:list text:continue-numbering="true" text:style-name="OL0">
+        <text:list-item>
+          <text:p text:style-name="S11">
+            <text:span text:style-name="Span6">Forschungsprogramme nach Lakatos: Theorien in einem strukturierten Ganzen </text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Dem Problem des raffinierten Falsifikationismus, daß er die Komplexität umfassender Theorien oder ganzer Theoriegebäude nicht umfassend beachtet, wendet sich die Theorie des Forschungsprogramms nach Lakatos zu. Sie geht davon aus, daß Theorien in einem strukturierten Ganzen stehen. Ein Forschungsprogramm versucht, einen Leitfaden für zukünftige Forschung zu bieten. So besitzt jedes Programm einen harten Kern, einer Haupthypothese, und einem Schutzgürtel aus Hilfshypothesen. Der harte Kern besteht aus den sehr allgemeinen, theoretischen Grundannahmen, welche von den Befürwortern als unfalsifizierbar definiert wird, was als negative Heuristik bezeichnet wird. Dies wäre z. B. bei Kopernikus, »daß die Erde und die Planeten um eine feststehende Sonne kreisen und daß die Erde sich in einem Tag um die eigene Achse dreht.« Aufgrund der negativen Heuristik wird es also verboten, diesen harten Kern zu verwerfen oder auch nur zu verändern. Um den harten Kern wird jedoch ein Schutzgürtel aus Hilfshypothesen und Anfangsbedingungen gebildet, die positive Heuristik; hierdurch werden innerhalb des Forschungsprogramms Richtlinien vorgegeben, wie Hilfshypothesen zu bilden sind. Diese Hilfshypothesen lassen sich überprüfen und widerlegen, also falsifizieren. Da jedoch der Schutzgürtel nichts statisches ist, läßt er sich modifizieren und raffinierter gestalten. Diese Modifikationen dürfen wie bei dem raffinierten Falsifikationismus keine ad hoc-Modifikationen sein. Der harte Kern darf jedoch nicht verändert werden, da dann ein neues Forschungsprogramm entstünde. Nur durch diese Festlegungen kann ein Forschungsprogramm seine gesamte Leistungsfähigkeit unter Beweis stellen. </text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Wie läßt sich nun der Wert eines wissenschaftlichen Forschungsprogramms messen? Hierfür müssen zwei Bedingungen erfüllt sein: Erstens muß es ein Programm (Richtlinien) für zukünftige Forschung besitzen. Zum zweiten muß es zur Entdeckung neuartiger Phänomene führen.</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Betrachtet man nun konkurrierende Forschungsprogramme, dann kann man nicht sagen, welches nun »besser« sei. Man kann jedoch wohl beurteilen, welches Programm progressiver ist. Es wird angenommen, daß - wenn angemessene Zeit verstrichen ist - das degenerativere Programm dem progressiveren weicht. </text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1"/>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span5">II. Besonderheit der Sozialwissenschaften</text:span>
+      </text:p>
+      <text:list text:continue-numbering="true" text:style-name="OL0">
+        <text:list-item>
+          <text:p text:style-name="S11">
+            <text:span text:style-name="Span6">Kontroverse: Einheit der wissenschaftlichen Methodologie oder eigene geistes- und sozialwissenschaftliche Methodologie?</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Alle oben dargestellten Wissenschaftstheoretischen Modelle sind speziell auf die Naturwissenschaften angepaßt und weitgehend auch in ihnen entstanden. Deshalb hatte sich in den Sozialwissenschaften eine heftige Kontroverse, die sogenannte »Erklären-Verstehen«-Kontroverse, entzündet. Die Frage ist, ob es eine einheitswissenschaftliche Methodologie gibt, also eine für alle Wissenschaften verbindliche Logik der Forschung. Oder ob für die Sozialwissenschaften eine eigene Methodologie von Nöten ist, da der Gegenstandsbereich der Sozialwissenschaften etwas besonderes ist, wie im folgenden dargestellt wird.</text:span>
+      </text:p>
+      <text:list text:continue-numbering="true" text:style-name="OL0">
+        <text:list-item>
+          <text:p text:style-name="S11">
+            <text:span text:style-name="Span6">Gründe und Kritik einer eigenständigen Methodologie für die Sozial</text:span>
+            <text:span text:style-name="Span6">­wissenschaften</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Die Vertreter einer eigenständigen Methodologie für die Sozialwissenschaften gehen davon aus, daß eine Methodik des »Verstehens« der Beschaffenheit des geistes- und sozialwissenschaftlichen Beobachtungsgegenstandes wesentlich mehr entspricht als eine aus den Naturwissenschaften entlehnte Methodologie. Der wesentliche Unterschied in den Gegenständen sind die »sinnhaften Handlungen«, welche in den Sozialwissenschaften <text:s/>beobachtet werden. Es gehe also nicht um die »erklärende Subsumtion von Einzelphänomenen unter allgemeine Sätze«, sondern um den »verstehenden Nachvollzug sinnhafter Handlungen«; eben der Unterschied zwischen Erklären und Verstehen. Ein Zitat von Wilhelm Dilthey zeigt dies deutlich: »Die Natur erklären wir, das Seelenleben verstehen wir.«</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Der abstrakte Begriff »Verstehen« wird weiter differenziert. So gibt es das 'elementare' Verstehen; dies bezieht sich auf eine einzelne Lebensäußerung bzw. Handlung und ihre Deutung. Als weit wichtiger für die Wissenschaft wird jedoch das 'höhere' Verstehen verstanden. Beim 'höheren' Verstehen wird nicht mehr die Einzelhandlung an sich betrachtet, sondern sie wird mit dem gesamten Lebenszusammenhang in Beziehung gesetzt, um hieraus eine angemessene Deutung zu gewinnen.</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">An dieses 'höhere Verstehen' lehnt Dilthey seine 'Hermeneutik' an, die »Kunstlehre des Verstehens«. Der Wissenschaftler soll »seine eigene Lebendigkeit gleichsam probierend in ein historisches Milieu« versetzen und so »eine Nachbildung fremden Lebens in sich herbeiführen«; darüberhinaus soll alles verfügbare Wissen kritisch herangezogen werden. Dilthey schränkt den Wirkungsbereich seiner Methodik auf die Auslegung von schriftlich fixierten Lebensäußerungen ein. Dilthey nennt zwei Punkte, die die »objektive Erkenntnis« aus dieser Methodik erläutern: Die Objektivität wird erstens durch die große Übereinstimmung zwischen den Menschen und zweitens dadurch, daß alle Menschen dasselbe »allgemeine Welt- und Lebensverständnis« teilen, gewährleistet. </text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Dieser Ansatz lehnt jedoch nicht generell die anderen wissenschaftlichen Methoden ab, sondern nur deren ungerechtfertigte Übernahme. </text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Der Ansatz einer eigenständigen sozialwissenschaftlichen Kritik wurde und wird stark kritisiert. Grundsätzliche Kritik erfährt dieser Ansatz, weil noch viele Voraussetzungen, die Logik und die Anwendungsmöglichkeiten noch nie systematisch entwickelt worden sind. Aufgrund der begrenzten eigenen Erfahrungswelt des Forschers ergeben sich vielfältige Probleme und Gefahren: So können unkontrollierbare Fehlschlüsse entstehen und ideologische Probleme auftreten. Die Deutung des Forschers hat somit nur den Charakter einer Hypothese, welche überprüft werden müsse. Die Kritiker gehen davon aus, daß <text:s/>bei der Deutung einer Handlung bereits nach einer Theorie vorgegangen wird. Das reine Verstehen kann also nichts Neues herausfinden, sondern nur bekanntes bestätigen. Ebenso wird kritisiert, daß der Forscher die Distanz zu dem Beobachtungsgegenstand verliert und damit auch die gesellschaftskritische Komponente der Wissenschaft verloren wäre.</text:span>
+      </text:p>
+      <text:list text:continue-numbering="true" text:style-name="OL0">
+        <text:list-item>
+          <text:p text:style-name="S11">
+            <text:span text:style-name="Span6">Gründe und Kritik einer Einheit der wissenschaftlichen Methodologie</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Die Verfechter der einheitlichen wissenschaftlichen Methodik geht von der grundsätzliche Gleichheit der Methoden in allen Wissenschaften aus. So könne die »intuitive Vertrautheit« des Wissenschaftlers mit seinem Gegenstandsbereich lediglich einen Beitrag zur Gewinnung von Hypothesen leisten; sie ist sonst jedoch »irrelevant«. Der wissenschaftlich wichtigere Bereich ist allein die Phase der Überprüfung der Hypothesen. Dieser Prozeß sei in allen Wissenschaften derselbe; er folgt damit einheitlichen Regeln. Die Besonderheit des Beobachtungsgegenstandes gegenüber den Naturwissenschaften wird jedoch eingeräumt. </text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Die gesamte Diskussion gilt als asymmetrisch, da zu Beginn der 60iger Jahre die Methodologie nach dem Vorbild der Naturwissenschaften weit etabliert war. Deswegen wurden Begründungen nicht für nötig gehalten, ob die naturwissenschaftliche Herangehensweise tatsächlich für sozialwissenschaftliche Phänomene geeignet ist. Obwohl es einige begriffliche Klärungen und Verfeinerungen der Theorien gegeben hat, steht weiterhin eine konsensfähige Aufhebung der widerstreitenden Geltungsansprüche aus.</text:span>
+      </text:p>
+      <text:list text:continue-numbering="true" text:style-name="OL0">
+        <text:list-item>
+          <text:p text:style-name="S11">
+            <text:span text:style-name="Span6">Die unterschiedlichen Positionen über den Gegenstand der Soziologie anhand von zwei Beispielen: Durkheim und Schütz</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Die Vorstellung von dem zu erforschenden Gegenstand beeinflußt die wissenschaftliche Vorgehensweise, die Methodologie wesentlich. Es finden sich in der Soziologie erstaunlicherweise nur wenige ausgeführte Darlegungen in der engeren wissenschaftstheoretischen Diskussion. Beispielhaft werden hier die Ansätze von Emile Durkheim und Alfred Schütz erläutert.</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Emile Durkheim vertritt mit der Theorie der sozialen Tatbestände (faits sociaux) eine an die naturwissenschaftliche Methodologie orientierten Position. Grundlage der Theorie sind die 'sozialen Tatbestände', die folgende Bedingungen erfüllen müssen:</text:span>
+      </text:p>
+      <text:list text:continue-numbering="true" text:style-name="OL0">
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span7">die »sozialen Erscheinungen« sind unabhängig vom Individuum, sie sind ihm »exterior«</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span7">sie drängen sich dem einzelnen mit »gebieterischer Macht« auf und üben Zwang auf ihn aus, »er mag wollen oder nicht«;</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S6">
+            <text:span text:style-name="Span7">sie sind allgemein, d. h. »wenigstens der Mehrzahl« der Gesellschaftsmitglieder gemeinsam. </text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span8">Der Wissenschaftler muß seine Unabhängigkeit von dem zu untersuchenden Gegenstand wahren. Denn soziale Tatbestände »offenbaren sich dem Betrachter eben nicht in ihrem individuellen Erscheinungsformen, sondern gerade unabhängig von diesen: in Recht, Sitte, Dogmen, Organisationsformen, Statistiken« u. ä. So soll nach dem Vorbild der Naturwissenschaften eine »objektive« Wissenschaft betrieben werden, indem man mit methodischen Regeln den Gegenstand erschließt.</text:span>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span8">Alfred Schütz stellt hingegen das »sinnhafte soziale Handeln« in den Vordergrund. Im Gegensatz zu Durkheim ist die Berücksichtigung der Motive und Interpretationen der Individuen für die wissenschaftliche Analyse unabdingbar. Nach der</text:span>
+        <text:span text:style-name="Span1"> Theorie von Schütz erlangt jedes Individuum je nach gesellschaftlicher Stellung einen Teil des kollektiven Wissensbestandes. In Rückgriff auf diesen persönliche Wissensvorrat wird die Welt interpretiert und ein Handlungsplan entworfen. Das Wissen und damit die Wahrnehmung ist sozialen Ursprungs und deswegen ist der individuelle Interpretations- und Handlungsakt nur in der sozialen Einbettung denkbar. Der Untersuchungsgegenstand des Sozialforschers ist somit zweifach sinnhaft konstruiert: Zum einen die Konstruktionen und Interpretationen des Handelnden, zum anderen die sozialwissenschaftlichen Konstruktionen des Forschers.</text:span>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span1">Betrachtet man das Bild des Verstehens bei Durkheim, so ergibt sich, daß er sich gegen <text:s/><text:s/><text:s/>das Verstehen, das er für ungeeignet hält soziale Phänomene zu analysieren, darüberhinaus rein ideologisch klassifiziert ist. Die Vertreter der einheitswissenschaftlichen Methodologie vernachlässigen also die sinnhafte Konstitution aller sozialen Phänomene. Sie können somit »einem konstitutiven Teil des sozialwissenschaftlichen Gegenstandes nicht gerecht werden«, und zwar dem Teil, der den Unterschied zu den Naturwissenschaften ausmacht. Es wird die soziale Verankerung des Forschers und seines Forschungsobjekts in keinster Weise beachtet. Auch die Trennung der wissenschaftlichen Erkenntnis von den übrigen Erkenntnisprozessen in der Gesellschaft entspricht nicht der realen Verflechtung beider. Es bleibt also weiterhin die strenge Trennung der <text:s/>Begriffe »Verstehen« und »Erklären« erhalten.</text:span>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span1">Das Konzept des Verstehens bei Schütz ist wesentlich differenzierter, so gibt es drei Unterscheidungen: »die Erfahrungsweise des Alltagsverstandes«, »einem epistemologischen Problem« und »einer den Sozialwissenschaften eigentümlichen Methode«. Da jeder Mensch von Kind an das alltagsweltliche Verstehen lernen und praktizieren mußte, <text:s/>ist das sinnhafte Verstehen des Handelns anderer erkenntnistheoretisch begründet.</text:span>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span1">Das sinnhafte Verstehen erklärt jedoch noch nicht, wie »man objektive Begriffe und eine objektiv verifizierbare Theorie von subjektiven Sinnstrukturen bilden« kann. Hierzu gibt Schütz drei Erklärungsversuche: </text:span>
+      </text:p>
+      <text:list text:continue-numbering="true" text:style-name="OL0">
+        <text:list-item>
+          <text:p text:style-name="S12">
+            <text:span text:style-name="Span1">Die Verknüpfung des wissenschaftlichen mit dem alltäglichen Verständnis, ermöglicht ein objektiviertes Verstehen des Forschers. Vor allem, da bereits objektivierte Typisierungen durch die Handelnden erbracht werden.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S12">
+            <text:span text:style-name="Span1">Der sozialwissenschaftliche Beobachter ist objektiv, da er außerhalb aller sozialer Beziehungen steht. <text:s/><text:s/><text:s/><text:s/><text:s/><text:s/><text:s/></text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S12">
+            <text:span text:style-name="Span1">Die wissenschaftliche Objektivierung beruht auf »objektiven, idealtypischen Konstruktionen«.</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span1">Diese drei Erklärungsversuche sind allerdings sehr kritisierbar: Erstens kann nicht davon ausgegangen werden, daß das Verstehen des Forschers gelingt. Auch wenn es auf der allgemeinen Kompetenz sinnhafte Handlungen zu verstehen aufgebaut ist. Zweitens ist die völlige Ausschaltbarkeit der sozialen Beziehungen bei dem Forscher innerhalb der Konstitutionsleistung nicht möglich. Und drittens bleibt er die Erklärung schuldig, wie der Weg von der »subjektiven Interpretation« des Forschers zur objektivierbaren Entscheidung verläuft. </text:span>
+      </text:p>
+      <text:p text:style-name="S9">
+        <text:span text:style-name="Span1">Einen wesentlichen Kritikpunkt gibt es an der Theorie von Schütz und auch seinen Nachfolgern. Es fehlen nahezu vollständig Forschungsanweisungen, wie die Umsetzung dieser Theorie in der Forschungspraxis vonstatten gehen soll.</text:span>
+        <text:span text:style-name="Span8">
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+          <text:s/>
+        </text:span>
+      </text:p>
+      <text:list text:continue-numbering="true" text:style-name="OL0">
+        <text:list-item>
+          <text:p text:style-name="S11">
+            <text:span text:style-name="Span6">Versuch der Kombination der widerstrebenden Ansätze als Lösung</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Eine Möglichkeit die widerstrebenden Theorien zusammenzuführen, soll hier kurz dargestellt werden. In der Bestimmung des Ziels wissenschaftlicher Forschung herrscht weitgehender Grundkonsens. Ziel ist die Formulierung gültiger, allgemeiner und von der Subjektivität des einzelnen Forschers unabhängiger Aussagen über die Realität. </text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Grundlegende Divergenzen treten jedoch am Konzept der Objektivität auf. Übereinstimmung herrscht noch in der Gefährdung des wissenschaftlichen Arbeitens durch den die Person Forschers. Doch die Lösungsansätze sind grundverschieden. Wollen die Vertreter einer eigenen sozialwissenschaftlichen Methodologie als Lösung »das gemeinsame Menschsein«. Ebenso erwähnen sie die Objektivierung des Forschers in der Rolle des Sozialforschers. Die Vertreter des einheitswissenschaftlichen Ansatzes hingegen vertreten hingegen die Entwicklung konkreter methodischer Vorkehrungen um subjektive Einflüsse auszuschließen.</text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Die größte Spaltung findet, wie wir gesehen haben, am Konzept des Verstehens statt. Die unterschiedlichen Vorstellungen können auf vier Modelle verdichtet werden.</text:span>
+      </text:p>
+      <text:list text:continue-numbering="true" text:style-name="OL0">
+        <text:list-item>
+          <text:p text:style-name="S13">
+            <text:span text:style-name="Span1">Das Verstehen ist eine eigenständige, dem Erklären entgegengesetzte Methode. Das Erklären findet Anwendung in den Naturwissenschaften, das Verstehen ist auf die Sozialwissenschaften beschränkt.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span1">Dieses Modell ist nicht haltbar, da jeder Verstehensprozeß auf Theorien über menschliches Handeln basiert und die Explikation und systematische Überprüfung für eine wissenschaftliche Forschung unverzichtbar ist.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S13">
+            <text:span text:style-name="Span1">Verstehen ist zwar im Alltagshandeln notwendig, im wissenschaftlichen Kontext dient es nur der Hypothesengewinnung. </text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span1">Dieses Modell ist ebenfalls nicht haltbar, da der Sozialwissenschaftler selbst innerhalb von völlig standardisierten Forschungsdesigns ständig Verstehensleistungen erbringen muß bzw. Sinnzuschreibungen als selbstverständlich unterstellen muß.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S13">
+            <text:span text:style-name="Span1">Das Verstehen ist eine eigenständige dem Erklären gleichwertige Methode innerhalb der Sozialwissenschaft. Hier wird je nach dem Grad der strukturellen Verfestigung der sozialen Phänomene eine unterschiedliche Methodik gewählt.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S2">
+            <text:span text:style-name="Span1">Auch dieses Modell kann der Überprüfung nicht standhalten, da jedes soziale Handeln auf einer sinnhaften Basis beruht, folglich keine Differenzierung in den Methoden erfolgen kann. Prinzipiell sind also auf alle soziale Phänomene <text:s/>dieselben methodischen Vorgehensweisen anzuwenden.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S13">
+            <text:span text:style-name="Span1">Verstehen ist eine grundlegende Voraussetzung für das Beschreiben und das Erklären sozialer Phänomene. Es gibt folglich keine Beschreibung ohne Erfassung des Sinnzusammenhangs.</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">Dieses Modell beschreibt den soziologischen Forschungsprozeß angemessen: Das Verstehen ist eine grundlegende Voraussetzung für die soziologische Analyse. Es kann folglich dem Beschreiben oder Erklären nur gleichgestellt werden. Es handelt sich beim Verstehen-Erklären nur um zwei Aspekte desselben Erkenntnisvorgangs. <text:s/></text:span>
+      </text:p>
+      <text:p text:style-name="S2">
+        <text:span text:style-name="Span1">-----</text:span>
+      </text:p>
+      <text:p text:style-name="S10">
+        <text:span text:style-name="Span5">III. Literatur</text:span>
+      </text:p>
+      <text:list text:style-name="UL1">
+        <text:list-item>
+          <text:p text:style-name="S14">
+            <text:span text:style-name="Span7">Chalmers, A. F., Wege der Wissenschaft, Einführung in die Wissenschaftstheorie, Berlin 1986, S. 1-104.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S14">
+            <text:span text:style-name="Span7">Lamnek, Siegfried, Qualitative Sozialforschung, München/Weinheim 1988, S. 209-211.</text:span>
+          </text:p>
+        </text:list-item>
+        <text:list-item>
+          <text:p text:style-name="S14">
+            <text:span text:style-name="Span7">Meinefeld, Werner, Realität und Konstruktion, Erkenntnistheoretische Grundlagen einer Methodo</text:span>
+            <text:span text:style-name="Span7">­logie der empirischen Sozialforschung, Opladen, 1996, S. 21-94.</text:span>
+          </text:p>
+        </text:list-item>
+      </text:list>
+    </office:text>
+  </office:body>
+</office:document>

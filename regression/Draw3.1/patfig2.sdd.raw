@@ -1,0 +1,323 @@
+startDocument()
+  setDocumentMetaData(dc:creator:  , dc:date: 1998-02-01T14:42:45.00, dc:title: patfig2, meta:creation-date: 1998-01-31T20:17:50.00, meta:initial-creator:  , meta:print-date: 1998-02-01T14:40:00.00)
+  startMasterPage(fo:margin-bottom: 56.6929pt, fo:margin-left: 99.2126pt, fo:margin-right: 56.6929pt, fo:margin-top: 56.6929pt, fo:page-height: 841.8898pt, fo:page-width: 595.2756pt, librevenge:master-page-name: Master1, librevenge:num-pages: 1, style:print-orientation: portrait)
+    setStyle(draw:fill: none, draw:stroke: none, fo:padding-bottom: 0.0000pt, fo:padding-left: 0.0000pt, fo:padding-right: 0.0000pt, fo:padding-top: 0.0000pt, style:display-name: Standard~LT~Hintergrund)
+    setStyle(draw:auto-grow-height: false, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, fo:min-height: 481.9181pt, librevenge:parent-display-name: Standard~LT~Hintergrund, style:print-content: true, style:protect: position size)
+    drawRectangle (svg:height: 728.5039pt, svg:width: 439.3701pt, svg:x: 99.2126pt, svg:y: 56.6929pt, text:anchor-type: page)
+  endMasterPage
+  setStyle(draw:angle: 0.0000, draw:border: 0.0000%, draw:color: #000000, draw:distance: 0.5669pt, draw:dots1: 1, draw:dots1-length: 0.5669pt, draw:dots2: 1, draw:dots2-length: 0.5669pt, draw:end-color: #ffffff, draw:fill: solid, draw:fill-color: #d3d3d3, draw:fill-image: Qk02AAAAAAAAAHYAAAAoAAAAQAAAAEAAAAABAAQAAAAAAAAIAAAAAAAAAAAAABAAAAAAAAAAAAAAAQAAgAEAgAABAICAAYAAAAGAAIABgIAAAcDAwAGAgIABAAD/AQD/AAEA//8B/wAAAf8A/wH//wAB////AXd3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3///////////////////////////////3d3d3d3d3d3f4iIiIiIiIiIiIiIiIiIiIiIiIiIiIiPd3d3d3d3d3d/j////////////////////////////493d3d3d3d3d3+P//////////////qqqqqqqqqq////j3d3d3d3d3d3f4///////////////6qqqqqqqq////+Pd3d3d3d3d3d/j/+ZmZmZmZmZ////qqqqqqqqr////493d3d3d3d3d3+P/5mZmZmZmZn////6qqqqqqr/////j3d3d3d3d3d3f4//mZmZmZmZmf////qqqqqqqv////+Pd3d3d3d3d3d/j/+ZmZmZmZmZ/////6qqqqqv/////493d3d3d3d3d3+P/5mZmZmZmZnMzM//qqqqqq//////j3d3d3d3d3d3f4//mZmZmZmZzMzMzM/6qqqq//////+Pd3d3d3d3d3d/j/+ZmZmZmZzMzMzMzPqqqqr//////493d3d3d3d3d3+P/5mZmZmZnMzMzMzM/6qqr///////j3d3d3d3d3d3f4//mZmZmZnMzMzMzMzPqqqv//////+Pd3d3d3d3d3d/j////////8zMzMzMzM/6qv///////493d3d3d3d3d3+P////////zMzMzMzMz/qq////////j3d3d3d3d3d3f4/////////MzMzMzMzP/6////////+Pd3d3d3d3d3d/j/////////zMzMzMzP//r////////493d3d3d3d3d3+P/////////MzMzMzM////////////j3d3d3d3d3d3f4//////////zMzMzM////////////+Pd3d3d3d3d3d/j///////////zMzP/////////////493d3d3d3d3d3+P////////////////////////////j3d3d3d3d3d3f4////////////////////////////+Pd3d3d3d3d3d/j////////////////////////////493d3d3d3d3d3+IiIiIiIiIiIiIiIiIiIiIiIiIiIiIj3d3d3d3d3d3f///////////////////////////////d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3, draw:marker-end-center: false, draw:marker-end-width: 8.5039pt, draw:marker-start-center: false, draw:marker-start-width: 8.5039pt, draw:shadow: hidden, draw:shadow-color: #bebebe, draw:shadow-offset-x: 8.5039pt, draw:shadow-offset-y: 8.5039pt, draw:start-color: #000000, draw:stroke: solid, draw:style: single, fo:padding-bottom: 0.0000pt, fo:padding-left: 0.0000pt, fo:padding-right: 0.0000pt, fo:padding-top: 0.0000pt, librevenge:end-opacity: 0.0000%, librevenge:mime-type: image/bm, librevenge:start-opacity: 0.0000%, style:display-name: Standard, svg:cx: 50.0000%, svg:cy: 50.0000%, svg:stroke-color: #000000, svg:stroke-width: 0.0000pt)
+  startPage(fo:margin-bottom: 56.6929pt, fo:margin-left: 99.2126pt, fo:margin-right: 56.6929pt, fo:margin-top: 56.6929pt, fo:page-height: 841.8898pt, fo:page-width: 595.2756pt, librevenge:enforce-frame: true, librevenge:is-last-page-span: true, librevenge:master-page-name: Master1, librevenge:num-pages: 1, style:print-orientation: portrait, svg:x: 0.0000pt, svg:y: 0.0000pt)
+    setStyle(draw:fill: none, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true, svg:stroke-width: 0.8504pt)
+    drawRectangle (draw:transform: translate(-127.559056pt -640.856700pt) rotate(1.570796) translate(127.559056pt 640.856700pt), svg:height: 56.6929pt, svg:width: 555.8174pt, svg:x: 127.5591pt, svg:y: 640.8567pt, text:anchor-page-number: 2, text:anchor-type: page)
+    startTextObject (draw:fill: none, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 557.5181pt, svg:stroke-width: 0.8504pt, svg:width: 58.3937pt, svg:x: 126.7087pt, svg:y: 84.1890pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (Dokumenterstellung, z.B. Bericht)
+        closeSpan
+      closeParagraph
+    endTextObject
+    setStyle(draw:fill: none, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true, svg:stroke-width: 0.8504pt)
+    drawRectangle (svg:height: 555.8173pt, svg:width: 28.3465pt, svg:x: 240.9449pt, svg:y: 85.0394pt, text:anchor-page-number: 2, text:anchor-type: page)
+    startTextObject (draw:fill: none, draw:fill-color: #ffffff, draw:stroke: none, fo:min-height: 28.3465pt, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 28.3465pt, svg:stroke-color: #000000, svg:stroke-width: 0.8504pt, svg:width: 28.3465pt, svg:x: 240.9449pt, svg:y: 255.1181pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText ( )
+          insertSpace
+          insertSpace
+          insertText (x)
+        closeSpan
+      closeParagraph
+    endTextObject
+    setStyle(draw:fill: none, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true, svg:stroke-width: 0.8504pt)
+    drawRectangle (draw:transform: translate(-477.694493pt -640.856700pt) rotate(1.570796) translate(477.694493pt 640.856700pt), svg:height: 46.7150pt, svg:width: 555.8174pt, svg:x: 477.6945pt, svg:y: 640.8567pt, text:anchor-page-number: 2, text:anchor-type: page)
+    startTextObject (draw:fill: none, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 557.5181pt, svg:stroke-width: 0.8504pt, svg:width: 48.4157pt, svg:x: 476.8441pt, svg:y: 84.1890pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (Nutzung)
+        closeSpan
+      closeParagraph
+    endTextObject
+    setStyle(draw:fill: none, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: top, librevenge:parent-display-name: Standard, style:print-content: true, svg:stroke-width: 0.8504pt)
+    drawRectangle (svg:height: 555.8173pt, svg:width: 116.2205pt, svg:x: 323.1496pt, svg:y: 85.0394pt, text:anchor-page-number: 2, text:anchor-type: page)
+    startTextObject (draw:fill: none, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: top, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 556.6677pt, svg:stroke-width: 0.8504pt, svg:width: 117.0709pt, svg:x: 322.7244pt, svg:y: 84.6142pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (Wissens-)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (plattform)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (Informationspool)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (gemäß)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (Informations-)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (hierarchie)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (Ebene 1)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (.)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (.)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (.)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (.)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (.)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (.)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (.)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (.)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: center, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (Ebene 9)
+        closeSpan
+      closeParagraph
+    endTextObject
+    startTextObject (draw:fill: none, draw:fill-color: #ffffff, draw:stroke: none, fo:min-height: 28.3465pt, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 28.3465pt, svg:stroke-color: #000000, svg:stroke-width: 0.8504pt, svg:width: 28.3465pt, svg:x: 240.9449pt, svg:y: 311.8110pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText ( )
+          insertSpace
+          insertText ((x))
+        closeSpan
+      closeParagraph
+    endTextObject
+    startTextObject (draw:fill: none, draw:fill-color: #ffffff, draw:stroke: none, fo:min-height: 28.3465pt, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 28.3465pt, svg:stroke-color: #000000, svg:stroke-width: 0.8504pt, svg:width: 28.3465pt, svg:x: 240.9449pt, svg:y: 411.7606pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText ( )
+          insertSpace
+          insertSpace
+          insertText (x)
+        closeSpan
+      closeParagraph
+    endTextObject
+    startTextObject (draw:fill: none, draw:fill-color: #ffffff, draw:stroke: none, fo:min-height: 28.3465pt, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 28.3465pt, svg:stroke-color: #000000, svg:stroke-width: 0.8504pt, svg:width: 28.3465pt, svg:x: 240.9449pt, svg:y: 538.5827pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText ( )
+          insertSpace
+          insertText ((x))
+        closeSpan
+      closeParagraph
+    endTextObject
+    startTextObject (draw:fill: none, draw:fill-color: #ffffff, draw:stroke: none, fo:min-height: 28.3465pt, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 28.3465pt, svg:stroke-color: #000000, svg:stroke-width: 0.8504pt, svg:width: 28.3465pt, svg:x: 240.9449pt, svg:y: 598.1102pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText ( )
+          insertSpace
+          insertSpace
+          insertText (x)
+        closeSpan
+      closeParagraph
+    endTextObject
+    startTextObject (draw:fill: none, draw:fill-color: #ffffff, draw:stroke: none, draw:textarea-vertical-align: middle, fo:min-height: 56.6929pt, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 283.4646pt, svg:stroke-color: #000000, svg:width: 56.6929pt, svg:x: 265.8898pt, svg:y: 226.2898pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (Füllen nach )
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertText (Akzeptanz)
+        closeSpan
+      closeParagraph
+    endTextObject
+    startTextObject (draw:fill: none, draw:fill-color: #ffffff, draw:stroke: none, draw:textarea-vertical-align: middle, fo:min-height: 28.3465pt, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 283.4646pt, svg:stroke-color: #000000, svg:width: 28.3465pt, svg:x: 439.3701pt, svg:y: 254.4661pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (Anforderung nach )
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertText (Bedarf)
+        closeSpan
+      closeParagraph
+    endTextObject
+    setStyle(draw:marker-end-path: M10 0L0 30L20 30 Z, draw:marker-end-viewbox: 0 0 11 17, draw:marker-end-width: 8.5039pt, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true, svg:stroke-width: 0.8504pt)
+    drawPolyline (svg:points: ((svg:x: 187.7953pt, svg:y: 396.8504pt), (svg:x: 240.9449pt, svg:y: 396.8504pt)), text:anchor-page-number: 2, text:anchor-type: page)
+    setStyle(draw:marker-end-path: M10 0L0 30L20 30 Z, draw:marker-end-viewbox: 0 0 11 17, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true, svg:stroke-width: 0.8504pt)
+    drawPolyline (svg:points: ((svg:x: 269.2913pt, svg:y: 266.4567pt), (svg:x: 318.6425pt, svg:y: 266.4567pt)), text:anchor-page-number: 2, text:anchor-type: page)
+    setStyle(draw:angle: 0.0000, draw:border: 0.0000%, draw:color: #000000, draw:distance: 0.5669pt, draw:dots1: 1, draw:dots1-length: 0.5669pt, draw:dots2: 1, draw:dots2-length: 0.5669pt, draw:end-color: #ffffff, draw:fill: solid, draw:fill-color: #d3d3d3, draw:fill-image: Qk02AAAAAAAAAHYAAAAoAAAAQAAAAEAAAAABAAQAAAAAAAAIAAAAAAAAAAAAABAAAAAAAAAAAAAAAQAAgAEAgAABAICAAYAAAAGAAIABgIAAAcDAwAGAgIABAAD/AQD/AAEA//8B/wAAAf8A/wH//wAB////AXd3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3///////////////////////////////3d3d3d3d3d3f4iIiIiIiIiIiIiIiIiIiIiIiIiIiIiPd3d3d3d3d3d/j////////////////////////////493d3d3d3d3d3+P//////////////qqqqqqqqqq////j3d3d3d3d3d3f4///////////////6qqqqqqqq////+Pd3d3d3d3d3d/j/+ZmZmZmZmZ////qqqqqqqqr////493d3d3d3d3d3+P/5mZmZmZmZn////6qqqqqqr/////j3d3d3d3d3d3f4//mZmZmZmZmf////qqqqqqqv////+Pd3d3d3d3d3d/j/+ZmZmZmZmZ/////6qqqqqv/////493d3d3d3d3d3+P/5mZmZmZmZnMzM//qqqqqq//////j3d3d3d3d3d3f4//mZmZmZmZzMzMzM/6qqqq//////+Pd3d3d3d3d3d/j/+ZmZmZmZzMzMzMzPqqqqr//////493d3d3d3d3d3+P/5mZmZmZnMzMzMzM/6qqr///////j3d3d3d3d3d3f4//mZmZmZnMzMzMzMzPqqqv//////+Pd3d3d3d3d3d/j////////8zMzMzMzM/6qv///////493d3d3d3d3d3+P////////zMzMzMzMz/qq////////j3d3d3d3d3d3f4/////////MzMzMzMzP/6////////+Pd3d3d3d3d3d/j/////////zMzMzMzP//r////////493d3d3d3d3d3+P/////////MzMzMzM////////////j3d3d3d3d3d3f4//////////zMzMzM////////////+Pd3d3d3d3d3d/j///////////zMzP/////////////493d3d3d3d3d3+P////////////////////////////j3d3d3d3d3d3f4////////////////////////////+Pd3d3d3d3d3d/j////////////////////////////493d3d3d3d3d3+IiIiIiIiIiIiIiIiIiIiIiIiIiIiIj3d3d3d3d3d3f///////////////////////////////d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3, draw:marker-end-center: false, draw:marker-end-path: M10 0L0 30L20 30 Z, draw:marker-end-viewbox: 0 0 11 17, draw:marker-end-width: 8.5039pt, draw:marker-start-center: false, draw:marker-start-width: 8.5039pt, draw:shadow: hidden, draw:shadow-color: #bebebe, draw:shadow-offset-x: 8.5039pt, draw:shadow-offset-y: 8.5039pt, draw:start-color: #000000, draw:stroke: solid, draw:style: single, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:end-opacity: 0.0000%, librevenge:mime-type: image/bm, librevenge:parent-display-name: Standard, librevenge:start-opacity: 0.0000%, style:print-content: true, svg:cx: 50.0000%, svg:cy: 50.0000%, svg:stroke-color: #000000, svg:stroke-width: 0.8504pt)
+    drawPolyline (svg:points: ((svg:x: 269.2913pt, svg:y: 609.4488pt), (svg:x: 318.1606pt, svg:y: 609.4488pt)), text:anchor-page-number: 2, text:anchor-type: page)
+    setStyle(draw:marker-end-path: M10 0L0 30L20 30 Z, draw:marker-end-viewbox: 0 0 11 17, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true, svg:stroke-width: 0.8504pt)
+    drawPolyline (svg:points: ((svg:x: 439.3701pt, svg:y: 266.4567pt), (svg:x: 474.3213pt, svg:y: 266.4567pt)), text:anchor-page-number: 2, text:anchor-type: page)
+    setStyle(draw:marker-end-path: M10 0L0 30L20 30 Z, draw:marker-end-viewbox: 0 0 11 17, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true, svg:stroke-width: 0.8504pt)
+    drawPolyline (svg:points: ((svg:x: 439.3701pt, svg:y: 609.4488pt), (svg:x: 472.8756pt, svg:y: 609.4488pt)), text:anchor-page-number: 2, text:anchor-type: page)
+    setStyle(draw:marker-end-path: M10 0L0 30L20 30 Z, draw:marker-end-viewbox: 0 0 11 17, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true, svg:stroke-width: 0.8504pt)
+    drawPolyline (svg:points: ((svg:x: 439.3701pt, svg:y: 396.8504pt), (svg:x: 472.8756pt, svg:y: 396.8504pt)), text:anchor-page-number: 2, text:anchor-type: page)
+    startTextObject (draw:fill: none, draw:fill-color: #ffffff, draw:marker-end-path: M10 0L0 30L20 30 Z, draw:marker-end-viewbox: 0 0 11 17, draw:marker-start-path: M10 0L0 30L20 30 Z, draw:marker-start-viewbox: 0 0 11 17, draw:stroke: none, fo:min-height: 28.3465pt, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 28.3465pt, svg:stroke-color: #000000, svg:width: 56.6929pt, svg:x: 127.5591pt, svg:y: 697.2378pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 18.0000pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (Fig. 2)
+        closeSpan
+      closeParagraph
+    endTextObject
+    setStyle(draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true)
+    drawPolyline (svg:points: ((svg:x: 148.5354pt, svg:y: 95.3575pt), (svg:x: 145.8992pt, svg:y: 88.4976pt), (svg:x: 144.8504pt, svg:y: 85.5496pt), (svg:x: 143.7732pt, svg:y: 80.4472pt), (svg:x: 142.6961pt, svg:y: 77.4425pt), (svg:x: 143.2346pt, svg:y: 78.7465pt)), text:anchor-page-number: 2, text:anchor-type: page)
+    setStyle(draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true)
+    drawPolyline (svg:points: ((svg:x: 211.9465pt, svg:y: 97.7102pt), (svg:x: 213.9307pt, svg:y: 89.3480pt), (svg:x: 214.6961pt, svg:y: 85.7764pt), (svg:x: 215.4898pt, svg:y: 79.5685pt), (svg:x: 216.3118pt, svg:y: 75.9402pt), (svg:x: 215.8866pt, svg:y: 77.4992pt)), text:anchor-page-number: 2, text:anchor-type: page)
+    setStyle(draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true)
+    drawPolyline (svg:points: ((svg:x: 404.4472pt, svg:y: 95.3575pt), (svg:x: 401.8110pt, svg:y: 88.4976pt), (svg:x: 400.7622pt, svg:y: 85.5496pt), (svg:x: 399.6850pt, svg:y: 80.4472pt), (svg:x: 398.6079pt, svg:y: 77.4425pt), (svg:x: 399.1465pt, svg:y: 78.7465pt)), text:anchor-page-number: 2, text:anchor-type: page)
+    setStyle(draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true)
+    drawPolyline (svg:points: ((svg:x: 478.7433pt, svg:y: 97.2850pt), (svg:x: 470.8630pt, svg:y: 89.6598pt), (svg:x: 467.7165pt, svg:y: 86.4000pt), (svg:x: 464.4567pt, svg:y: 80.7024pt), (svg:x: 461.2252pt, svg:y: 77.3575pt), (svg:x: 462.8409pt, svg:y: 78.8315pt)), text:anchor-page-number: 2, text:anchor-type: page)
+    startTextObject (draw:fill: none, draw:fill-color: #ffffff, draw:stroke: none, fo:min-height: 7.0299pt, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 17.2913pt, svg:stroke-color: #000000, svg:width: 17.5181pt, svg:x: 138.8126pt, svg:y: 60.1795pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 13.9748pt, fo:font-style: italic, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (14)
+        closeSpan
+      closeParagraph
+    endTextObject
+    startTextObject (draw:fill: none, draw:fill-color: #ffffff, draw:stroke: none, fo:min-height: 7.0299pt, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 17.2913pt, svg:stroke-color: #000000, svg:width: 17.5181pt, svg:x: 212.5984pt, svg:y: 59.8394pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 13.9748pt, fo:font-style: italic, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (12)
+        closeSpan
+      closeParagraph
+    endTextObject
+    startTextObject (draw:fill: none, draw:fill-color: #ffffff, draw:stroke: none, fo:min-height: 7.0299pt, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 17.2913pt, svg:stroke-color: #000000, svg:width: 17.5181pt, svg:x: 387.5811pt, svg:y: 60.4630pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 13.9748pt, fo:font-style: italic, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (16)
+        closeSpan
+      closeParagraph
+    endTextObject
+    startTextObject (draw:fill: none, draw:fill-color: #ffffff, draw:stroke: none, fo:min-height: 7.0299pt, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 17.2913pt, svg:stroke-color: #000000, svg:width: 17.5181pt, svg:x: 450.1984pt, svg:y: 61.1150pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 13.9748pt, fo:font-style: italic, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (13)
+        closeSpan
+      closeParagraph
+    endTextObject
+    setStyle(draw:marker-end-path: M10 0L0 30L20 30 Z, draw:marker-end-viewbox: 0 0 11 17, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, librevenge:parent-display-name: Standard, style:print-content: true, svg:stroke-width: 0.8504pt)
+    drawPolyline (svg:points: ((svg:x: 269.2913pt, svg:y: 423.6945pt), (svg:x: 319.1244pt, svg:y: 423.6945pt)), text:anchor-page-number: 2, text:anchor-type: page)
+    startTextObject (draw:fill: none, draw:fill-color: #ffffff, draw:stroke: none, fo:min-height: 25.0866pt, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 310.2803pt, svg:stroke-color: #000000, svg:width: 25.0866pt, svg:x: 198.5953pt, svg:y: 237.0331pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 15.9874pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: times, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (Füllvorschlag gemäß )
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertSpace
+          insertText (Texterkennung)
+        closeSpan
+      closeParagraph
+    endTextObject
+  endPage
+endDocument

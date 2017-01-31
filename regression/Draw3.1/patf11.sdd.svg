@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  >
+<rect x="85.0394" y="56.6929" width="467.7166" height="728.5039" style=""/>
+<defs>
+<marker id="startMarker1"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<line x1="104.2016"  y1="83.0268" x2="104.2016"  y2="172.4032"
+style="stroke-width: 0.8504; marker-start: url(#startMarker1); "/>
+<defs>
+<marker id="endMarker1"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="1" refY="5">
+<polyline points="0,0 10,5 0,10 1,5" fill="solid" />
+</marker>
+</defs>
+<line x1="104.7402"  y1="174.0756" x2="489.6000"  y2="174.0756"
+style="stroke-width: 0.8504; marker-end: url(#endMarker1); "/>
+<text x="72.8504" y="175.2945">
+<tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
+ </tspan>
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+Menge Daten D</tspan>
+</text>
+<text x="366.6047" y="201.2598">
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+ L  Lebenslauf  Produkt</tspan>
+</text>
+<ellipse cx="103.5213" cy="96.4346" rx="323.1213" ry="76.6205" style="stroke-width: 1.1339; "/>
+<text x="209.1118" y="232.8945">
+<tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
+ </tspan>
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+Füllen gemäß          Lebenslauf</tspan>
+</text>
+<rect x="201.9969" y="254.5795" width="250.9795" height="27.5244" style="stroke-width: 0.8504; fill: #ffffff; "/>
+<text x="201.5717" y="268.3417">
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+Datenpool für Produkt</tspan>
+</text>
+<text x="227.8205" y="318.5858">
+<tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
+ </tspan>
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+Selektions -      Regel</tspan>
+</text>
+<rect x="248.7968" y="334.4031" width="146.8630" height="40.9890" style="stroke-width: 0.8504; fill: #ffffff; "/>
+<text x="248.3717" y="354.8977">
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+benötigte</tspan>
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+Datenelemente</tspan>
+</text>
+<text x="108.8787" y="534.6425">
+<tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
+ </tspan>
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+Regeln zur Nutzung  (10)</tspan>
+</text>
+<text x="218.9197" y="411.2220">
+<tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
+ </tspan>
+<tspan font-family="times" font-weight="normal" font-size="13.9748" fill="#000000" >
+ </tspan>
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+Strukturie -       rungs - Regel</tspan>
+</text>
+<rect x="233.5181" y="429.1087" width="174.7559" height="48.9260" style="stroke-width: 0.8504; fill: #ffffff; "/>
+<text x="233.0929" y="453.5717">
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+verknüpfte</tspan>
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+Datenelemente</tspan>
+</text>
+<defs>
+<marker id="endMarker2"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="1" refY="5">
+<polyline points="0,0 10,5 0,10 1,5" fill="solid" />
+</marker>
+</defs>
+<line x1="320.2299"  y1="488.4945" x2="320.2299"  y2="536.9953"
+style="marker-end: url(#endMarker2); "/>
+<text x="210.2173" y="538.1575">
+<tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
+ </tspan>
+<tspan font-family="times" font-weight="normal" font-size="11.9906" fill="#000000" >
+ </tspan>
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+Darstellungs  -     Regel</tspan>
+</text>
+<rect x="233.2346" y="543.3449" width="175.3795" height="46.6866" style="stroke-width: 0.8504; fill: #ffffff; "/>
+<text x="232.8094" y="566.6882">
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+benötigtes</tspan>
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+Dokument</tspan>
+</text>
+<rect x="228.1323" y="648.7654" width="177.5055" height="46.6866" style="stroke-width: 0.8504; fill: #ffffff; "/>
+<text x="227.7071" y="672.1087">
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+kundenspezifisches</tspan>
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+Dokument</tspan>
+</text>
+<text x="113.9528" y="755.8583">
+<tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
+ </tspan>
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+Fig 1</tspan>
+</text>
+<defs>
+<marker id="endMarker3"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="1" refY="5">
+<polyline points="0,0 10,5 0,10 1,5" fill="solid" />
+</marker>
+</defs>
+<line x1="322.3276"  y1="598.8756" x2="322.3276"  y2="634.1386"
+style="marker-end: url(#endMarker3); "/>
+<text x="232.8094" y="628.3842">
+<tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
+ </tspan>
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+Ausgabe -       Regel</tspan>
+</text>
+<defs>
+<marker id="endMarker4"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="1" refY="5">
+<polyline points="0,0 10,5 0,10 1,5" fill="solid" />
+</marker>
+</defs>
+<line x1="319.6913"  y1="383.3291" x2="319.6913"  y2="419.8961"
+style="marker-end: url(#endMarker4); "/>
+<defs>
+<marker id="endMarker5"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="1" refY="5">
+<polyline points="0,0 10,5 0,10 1,5" fill="solid" />
+</marker>
+</defs>
+<line x1="323.0362"  y1="286.1008" x2="322.0441"  y2="322.5827"
+style="marker-end: url(#endMarker5); "/>
+<defs>
+<marker id="endMarker6"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="1" refY="5">
+<polyline points="0,0 10,5 0,10 1,5" fill="solid" />
+</marker>
+</defs>
+<line x1="323.0362"  y1="189.1276" x2="323.0362"  y2="236.1827"
+style="marker-end: url(#endMarker6); "/>
+<text x="472.3087" y="479.5937">
+<tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
+ </tspan>
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+benötigter</tspan>
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+ Datensatz</tspan>
+</text>
+<defs>
+<marker id="endMarker7"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="1" refY="5">
+<polyline points="0,0 10,5 0,10 1,5" fill="solid" />
+</marker>
+</defs>
+<line x1="415.4457"  y1="456.0095" x2="469.9843"  y2="456.0095"
+style="marker-end: url(#endMarker7); "/>
+<text x="478.0630" y="279.0425">
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+ 1</tspan>
+</text>
+<text x="455.4992" y="366.9732">
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+3</tspan>
+</text>
+<text x="454.3937" y="319.3512">
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+2</tspan>
+</text>
+<text x="448.9795" y="410.9386">
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+11</tspan>
+</text>
+<text x="458.5039" y="437.0740">
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+4</tspan>
+</text>
+<text x="457.6535" y="513.5244">
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+6</tspan>
+</text>
+<text x="529.9370" y="424.9701">
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+5</tspan>
+</text>
+<text x="459.5811" y="567.8929">
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+7</tspan>
+</text>
+<text x="461.1402" y="614.6079">
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+8</tspan>
+</text>
+<text x="463.9748" y="663.7039">
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+9</tspan>
+</text>
+<line x1="87.7323"  y1="295.7102" x2="205.8803"  y2="295.7102"
+style="stroke-width: 0.8504; "/>
+<line x1="85.1244"  y1="644.5701" x2="218.9197"  y2="644.5701"
+style="stroke-width: 0.8504; "/>
+<path d=" 
+M441.2409,268.3559
+C444.5858,265.2378 448.4976,263.9339 452.5512,263.0835
+C457.0866,262.1480 459.9780,267.1370 463.5496,269.3197
+C467.2347,271.5874 471.8551,271.8992 475.5118,268.8378
+L479.1969,267.8740
+L479.1969,268.3559" 
+style=""/>
+<path d=" 
+M382.3654,305.3197
+C388.1764,309.7417 394.9228,311.5843 401.8394,312.7748
+C409.6347,314.0221 414.6236,307.0488 420.7465,303.9591
+C427.0961,300.7843 435.0331,300.3307 441.2976,304.6394
+L447.5622,306.0000
+L447.5622,305.3197" 
+style=""/>
+<path d=" 
+M384.8032,353.3386
+C390.6142,357.7606 397.3606,359.6032 404.2772,360.7937
+C412.0724,362.0409 417.0614,355.0677 423.1843,351.9780
+C429.5339,348.8032 437.4709,348.3496 443.7354,352.6583
+L450.0000,354.0189
+L450.0000,353.3386" 
+style=""/>
+</svg>
+

@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" office:mimetype="application/vnd.oasis.opendocument.text" office:version="1.1">
+  <office:meta>
+    <dc:creator>Gerald Leppert</dc:creator>
+    <dc:date>1999-04-03T20:41:10.00</dc:date>
+    <dc:title>Satzung der Vereinigung mittelfränkischer Schülerinnen und Schü</dc:title>
+    <meta:template xlink:actuate="onRequest" xlink:href="" xlink:title="Normal.dot" xlink:type="simple"/>
+    <meta:creation-date>1999-04-03T20:03:56.00</meta:creation-date>
+    <meta:initial-creator>Gerald Leppert</meta:initial-creator>
+    <meta:print-date>1999-04-03T20:33:18.00</meta:print-date>
+    <meta:generator>libodfgen/0.1.6</meta:generator>
+  </office:meta>
+  <office:font-face-decls>
+    <style:font-face style:name="Times New Roman" svg:font-family="Times New Roman"/>
+    <style:font-face style:font-charset="x-symbol" style:name="StarSymbol" svg:font-family="StarSymbol"/>
+  </office:font-face-decls>
+  <office:styles>
+    <style:default-style style:family="graphic"/>
+    <style:default-style style:family="paragraph">
+      <style:paragraph-properties style:line-break="strict" style:punctuation-wrap="hanging" style:tab-stop-distance="0.5in" style:text-autospace="ideograph-alpha" style:use-window-font-color="true" style:writing-mode="page"/>
+    </style:default-style>
+    <style:default-style style:family="table"/>
+    <style:default-style style:family="table-row">
+      <style:table-row-properties fo:keep-together="auto"/>
+    </style:default-style>
+    <style:default-style style:family="table-column"/>
+    <style:default-style style:family="table-cell"/>
+    <style:style style:class="text" style:family="paragraph" style:name="Standard"/>
+    <style:style style:class="text" style:display-name="Text Body" style:family="paragraph" style:name="Text_Body" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Table Contents" style:family="paragraph" style:name="Table_Contents" style:parent-style-name="Text_Body"/>
+    <style:style style:class="extra" style:display-name="Table Heading" style:family="paragraph" style:name="Table_Heading" style:parent-style-name="Table_Contents"/>
+    <style:style style:class="list" style:display-name="List" style:family="paragraph" style:name="List" style:parent-style-name="Text_Body"/>
+    <style:style style:class="extra" style:display-name="Header" style:family="paragraph" style:name="Header" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Footer" style:family="paragraph" style:name="Footer" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Caption" style:family="paragraph" style:name="Caption" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Footnote" style:family="paragraph" style:name="Footnote" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Endnote" style:family="paragraph" style:name="Endnote" style:parent-style-name="Standard"/>
+    <style:style style:class="extra" style:display-name="Index" style:family="paragraph" style:name="Index" style:parent-style-name="Standard"/>
+    <style:style style:display-name="Footnote_Symbol" style:family="text" style:name="Footnote_Symbol">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Endnote_Symbol" style:family="text" style:name="Endnote_Symbol">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Footnote_anchor" style:family="text" style:name="Footnote_anchor">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <style:style style:display-name="Endnote_anchor" style:family="text" style:name="Endnote_anchor">
+      <style:text-properties style:text-position="super 58%"/>
+    </style:style>
+    <text:linenumbering-configuration style:num-format="1" text:increment="5" text:number-lines="false" text:number-position="left" text:offset="0.1965in"/>
+    <text:notes-configuration style:num-format="1" text:citation-body-style-name="Footnote_anchor" text:citation-style-name="Footnote_Symbol" text:footnotes-position="page" text:note-class="footnote" text:start-numbering-at="document" text:start-value="0"/>
+    <text:notes-configuration style:num-format="i" text:citation-body-style-name="Endnote_anchor" text:citation-style-name="Endnote_Symbol" text:master-page-name="Endnote" text:note-class="endnote" text:start-value="0"/>
+  </office:styles>
+  <office:automatic-styles>
+    <style:page-layout style:name="PL0">
+      <style:page-layout-properties fo:margin-bottom="1.0000in" fo:margin-left="1.0000in" fo:margin-right="1.0000in" fo:margin-top="1.0000in" fo:page-height="11.0000in" fo:page-width="8.5000in" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:distance-after-sep="0.0398in" style:distance-before-sep="0.0398in" style:rel-width="25.0000%" style:width="0.0071in"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:page-layout style:name="PL1">
+      <style:page-layout-properties fo:margin-bottom="1.0000in" fo:margin-left="1.0000in" fo:margin-right="1.0000in" fo:margin-top="1.0000in" fo:page-height="11.0000in" fo:page-width="8.5000in" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:rel-width="25.0000%"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:page-layout style:name="PL2">
+      <style:page-layout-properties fo:margin-bottom="36.8500pt" fo:margin-left="52.4500pt" fo:margin-right="52.4500pt" fo:margin-top="36.8500pt" fo:page-height="841.9000pt" fo:page-width="595.3000pt" style:footnote-max-height="0.0000in" style:print-orientation="portrait" style:writing-mode="lr-tb">
+        <style:footnote-sep style:adjustment="left" style:color="#000000" style:distance-after-sep="0.0398in" style:distance-before-sep="0.0398in" style:rel-width="25.0000%" style:width="0.0071in"/>
+      </style:page-layout-properties>
+    </style:page-layout>
+    <style:style style:family="section" style:name="Section0">
+      <style:section-properties>
+        <style:columns fo:column-count="2">
+          <style:column style:rel-width="3473*"/>
+          <style:column fo:start-indent="10.6500pt" style:rel-width="3614*"/>
+        </style:columns>
+      </style:section-properties>
+    </style:style>
+    <style:style style:family="text" style:name="Span0">
+      <style:text-properties fo:font-size="9.0000pt" fo:font-weight="bold" style:font-name="Times New Roman" style:font-name-asian="Times New Roman" style:font-name-complex="Times New Roman" style:font-pitch="variable" style:font-size-asian="9.0000pt" style:font-size-complex="9.0000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:family="text" style:name="Span1">
+      <style:text-properties fo:font-size="8.0000pt" style:font-name="Times New Roman" style:font-name-asian="Times New Roman" style:font-name-complex="Times New Roman" style:font-pitch="variable" style:font-size-asian="8.0000pt" style:font-size-complex="8.0000pt"/>
+    </style:style>
+    <style:style style:family="paragraph" style:master-page-name="PM2" style:name="S0" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:orphans="2" fo:text-align="center" fo:widows="2" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S1" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:orphans="2" fo:text-align="center" fo:widows="2" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S10" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-left="21.3000pt" fo:margin-right="0.0000pt" fo:orphans="2" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="0.0000pt" fo:widows="2" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="7.0500pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="14.1500pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S11" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-left="28.3500pt" fo:margin-right="0.0000pt" fo:orphans="2" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-7.0500pt" fo:widows="2" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="0.0000pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S12" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-left="35.4500pt" fo:margin-right="0.0000pt" fo:orphans="2" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-14.1500pt" fo:widows="2" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S13" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-left="7.1000pt" fo:margin-right="0.0000pt" fo:orphans="2" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-7.1000pt" fo:widows="2" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S2" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:orphans="2" fo:text-align="justify" fo:text-align-last="default" fo:widows="2" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S3" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-left="7.1000pt" fo:margin-right="0.0000pt" fo:orphans="2" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-7.1000pt" fo:widows="2" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="0.0000pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S4" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="0.0000in" fo:margin-top="6.0000pt" fo:orphans="2" fo:text-align="justify" fo:text-align-last="default" fo:widows="2" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S5" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-left="21.3000pt" fo:margin-right="0.0000pt" fo:orphans="2" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-7.1000pt" fo:widows="2" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="0.0000pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S6" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-left="7.1000pt" fo:margin-right="0.0000pt" fo:orphans="2" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-7.1000pt" fo:widows="2" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="0.0000pt" style:type="left"/>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="35.4500pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S7" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-left="14.2000pt" fo:margin-right="0.0000pt" fo:orphans="2" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-7.1000pt" fo:widows="2" style:auto-text-indent="false" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S8" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-left="39.3000pt" fo:margin-right="0.0000pt" fo:orphans="2" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-18.0000pt" fo:widows="2" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="35.4500pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S9" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-left="35.4500pt" fo:margin-right="0.0000pt" fo:orphans="2" fo:text-align="justify" fo:text-align-last="default" fo:text-indent="-14.1500pt" fo:widows="2" style:auto-text-indent="false" style:justify-single-word="false">
+        <style:tab-stops>
+          <style:tab-stop style:leader-style="solid" style:leader-text=" " style:position="0.0000pt" style:type="left"/>
+        </style:tab-stops>
+      </style:paragraph-properties>
+    </style:style>
+    <text:list-style style:name="OL0">
+      <text:list-level-style-number style:num-format="a" text:level="1" text:start-value="1" text:style-name="Numbering_Symbols">
+        <style:list-level-properties fo:text-align="left"/>
+        <style:text-properties/>
+      </text:list-level-style-number>
+    </text:list-style>
+    <text:list-style style:name="OL1">
+      <text:list-level-style-number style:num-format="a" text:level="1" text:start-value="5" text:style-name="Numbering_Symbols">
+        <style:list-level-properties fo:text-align="left"/>
+        <style:text-properties/>
+      </text:list-level-style-number>
+    </text:list-style>
+    <text:list-style style:name="OL2">
+      <text:list-level-style-number style:num-format="a" text:level="1" text:start-value="5" text:style-name="Numbering_Symbols">
+        <style:list-level-properties fo:text-align="left"/>
+        <style:text-properties/>
+      </text:list-level-style-number>
+    </text:list-style>
+    <text:list-style style:name="OL3">
+      <text:list-level-style-number style:num-format="a" text:level="1" text:start-value="1" text:style-name="Numbering_Symbols">
+        <style:list-level-properties fo:text-align="left"/>
+        <style:text-properties/>
+      </text:list-level-style-number>
+    </text:list-style>
+    <text:list-style style:name="OL4">
+      <text:list-level-style-number style:num-format="1" text:level="1" text:start-value="1" text:style-name="Numbering_Symbols">
+        <style:list-level-properties fo:text-align="left"/>
+        <style:text-properties/>
+      </text:list-level-style-number>
+    </text:list-style>
+    <text:list-style style:name="OL5">
+      <text:list-level-style-number style:num-format="a" text:level="1" text:start-value="1" text:style-name="Numbering_Symbols">
+        <style:list-level-properties fo:text-align="left"/>
+        <style:text-properties/>
+      </text:list-level-style-number>
+    </text:list-style>
+  </office:automatic-styles>
+  <office:master-styles>
+    <style:master-page style:display-name="Standard" style:name="PM0" style:page-layout-name="PL0"/>
+    <style:master-page style:display-name="EndNote" style:name="PM1" style:page-layout-name="PL1"/>
+    <style:master-page style:name="PM2" style:page-layout-name="PL2"/>
+  </office:master-styles>
+  <office:body>
+    <office:text>
+      <text:section text:name="Section0" text:style-name="Section0">
+        <text:p text:style-name="S0">
+          <text:span text:style-name="Span0">Satzung der Vereinigung mittelfränkischer Schülerinnen und Schüler e.V.</text:span>
+        </text:p>
+        <text:p text:style-name="S1">
+          <text:span text:style-name="Span0"/>
+        </text:p>
+        <text:p text:style-name="S2">
+          <text:span text:style-name="Span0">§ 1 Name und Sitz des Vereins</text:span>
+        </text:p>
+        <text:p text:style-name="S3">
+          <text:span text:style-name="Span1">a)<text:tab/>Der Verein führt den Namen „Vereinigung mittelfränkischer Schülerinnen und Schüler e.V.“ (VMS e.V.)</text:span>
+        </text:p>
+        <text:p text:style-name="S3">
+          <text:span text:style-name="Span1">b)<text:tab/>Der Verein hat seinen Sitz in Nürnberg und ist in das Vereinsregister eingetragen.</text:span>
+        </text:p>
+        <text:p text:style-name="S4">
+          <text:span text:style-name="Span0">§ 2 Zweck des Vereins</text:span>
+        </text:p>
+        <text:list text:style-name="OL0">
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Der Verein versteht sich als eine Initiative der Jugendarbeit.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Er hat die Aufgabe, im Bezirk Mittelfranken die Zusammenarbeit von Schule und Jugendarbeit zu fördern sowie die Interessenvertretung und Mitsprache der Schülerinnen und Schüler bei schulischen und außerschulischen Belangen zu verbessern. Er unterstützt die gewählten Schü</text:span>
+              <text:span text:style-name="Span1">­lervertreterinnen und Schülervertreter sowie Schülerinnen und Schüler, die Schule aktiv mit­gestalten wollen und unterhält Kontakte zu den im schulischen bzw. schulpolitischen Bereich und in der Jugendarbeit Tätigen. </text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Er vertritt die jugend- und bildungspolitischen Interessen seiner Mitglieder und versucht durch Treffen, Tagungen, Seminare und Freizeiten Jugendliche von verschiedenen Schularten zu</text:span>
+              <text:span text:style-name="Span1">­sammenzubringen, um sie für SchülerInnen- und Jugendarbeit zu interessieren und zum Engage­ment und gemeinsamen Eintreten für ihre Be­lange zu motivieren.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Der Verein führt die ihm zur Erreichung und Umsetzung der Vereinszwecke geeignet erschei</text:span>
+              <text:span text:style-name="Span1">­nenden Maßnahmen durch; er ist überparteilich, unabhängig und konfessionell nicht gebunden.</text:span>
+            </text:p>
+          </text:list-item>
+        </text:list>
+        <text:p text:style-name="S4">
+          <text:span text:style-name="Span0">§ 3 Gemeinnützigkeit</text:span>
+        </text:p>
+        <text:p text:style-name="S2">
+          <text:span text:style-name="Span1">Der Verein verfolgt ausschließlich und unmittelbar gemeinnützige Zwecke im Sinne des Abschnitts „Steuerbegünstigte Zwecke“ der Abgabenordnung.</text:span>
+        </text:p>
+        <text:p text:style-name="S2">
+          <text:span text:style-name="Span1">Der Verein ist selbstlos tätig; er verfolgt nicht in erster Linie eigenwirtschaftliche Zwecke. Mittel des Vereins dürfen nur für satzungsmäßige Zwecke verwendet werden. Die Mitglieder erhalten keine Zuwendungen aus Mitteln des Vereins. Es darf keine Person durch Ausgaben, die dem Zweck des Vereins fremd sind, oder durch unverhältnismäßig hohe Vergütungen begünstigt werden.</text:span>
+        </text:p>
+        <text:p text:style-name="S4">
+          <text:span text:style-name="Span0">§ 4 Geschäftsjahr</text:span>
+        </text:p>
+        <text:p text:style-name="S2">
+          <text:span text:style-name="Span1">Das Geschäftsjahr beginnt am 1. September und endet am 31. August des folgenden Kalenderjah</text:span>
+          <text:span text:style-name="Span1">­res.</text:span>
+        </text:p>
+        <text:p text:style-name="S4">
+          <text:span text:style-name="Span0">§ 5 Mitgliedschaft</text:span>
+        </text:p>
+        <text:list text:continue-numbering="true" text:style-name="OL0">
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Mitglied des Vereins kann jede Schülerin und jeder Schüler einer mittelfränkischen Schule werden.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Förderndes Mitglied kann jede Person werden. Fördernde Mitglieder haben kein Stimmrecht in der Mitgliederversammlung und können nicht in den Vorstand gewählt werden. Rede- und An</text:span>
+              <text:span text:style-name="Span1">­tragsrecht bleiben unberührt.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Über den schriftlichen Mitgliedsantrag entschei</text:span>
+              <text:span text:style-name="Span1">­det der Vorstand. Die Mitgliedschaft wird durch Eintragung in das Vereinsbuch erworben.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Die Mitgliedschaft endet</text:span>
+            </text:p>
+          </text:list-item>
+        </text:list>
+        <text:p text:style-name="S5">
+          <text:span text:style-name="Span1">1) durch schriftliche, an den Verein gerichtete Austrittserklärung zum Ende eines Ge</text:span>
+          <text:span text:style-name="Span1">­schäftsjahres</text:span>
+        </text:p>
+        <text:p text:style-name="S5">
+          <text:span text:style-name="Span1">2) durch Ausschluß des Mitglieds aus dem Verein</text:span>
+        </text:p>
+        <text:p text:style-name="S5">
+          <text:span text:style-name="Span1">3) mit dem Tod des Mitglieds</text:span>
+        </text:p>
+        <text:list text:style-name="OL1">
+          <text:list-item>
+            <text:p text:style-name="S6">
+              <text:span text:style-name="Span1">Nach Ausscheiden aus der Schule erwirbt das Mitglied automatisch die Fördermitgliedschaft. </text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S6">
+              <text:span text:style-name="Span1">Ein Mitglied, das in erheblichem Maße gegen die Vereinsinteressen verstoßen hat, kann durch Beschluß der Mitgliederversammlung aus dem Verein ausgeschlossen werden. Vor dem Aus</text:span>
+              <text:span text:style-name="Span1">­schluß wird dem betroffenen Mitglied Gelegen­heit gegeben, sich persönlich oder schriftlich zu äußern.</text:span>
+            </text:p>
+          </text:list-item>
+        </text:list>
+        <text:p text:style-name="S4">
+          <text:span text:style-name="Span0">§ 6 Organe</text:span>
+        </text:p>
+        <text:p text:style-name="S2">
+          <text:span text:style-name="Span1">Die Organe des Vereins sind</text:span>
+        </text:p>
+        <text:list text:style-name="OL2">
+          <text:list-item>
+            <text:p text:style-name="S7">
+              <text:span text:style-name="Span1">der Vorstand</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S7">
+              <text:span text:style-name="Span1">der erweiterte Vorstand</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S7">
+              <text:span text:style-name="Span1">die Mitgliederversammlung</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S7">
+              <text:span text:style-name="Span1">die Ausschüsse und Regionalgruppen</text:span>
+            </text:p>
+          </text:list-item>
+        </text:list>
+        <text:p text:style-name="S2">
+          <text:span text:style-name="Span1">Sie geben sich jeweils eine Geschäftsordnung und führen über ihre Sitzungen Protokoll, das von dem Sitzungsleiter / der Sitzungsleiterin und dem Protokollführer / der Protokollführerin zu unter</text:span>
+          <text:span text:style-name="Span1">­zeichnen ist.</text:span>
+        </text:p>
+        <text:p text:style-name="S4">
+          <text:span text:style-name="Span0">§ 7 Der Vorstand</text:span>
+        </text:p>
+        <text:list text:style-name="OL3">
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Der Vorstand des Vereins besteht aus drei gleichberechtigten Vorsitzenden. Der Verein wird gerichtlich und außergerichtlich durch zwei Vorstandsmitglieder vertreten.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Der Vorstand ist an die Beschlüsse der Mitglie</text:span>
+              <text:span text:style-name="Span1">­derversammlung gebunden. Er legt über seine Tätigkeit der Mitgliederversammlung Rechen­schaft ab.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Der Vorstand wird von der Mitgliederver</text:span>
+              <text:span text:style-name="Span1">­sammlung aus deren Mitte für die Dauer eines Jahres gewählt. Er bleibt so lange im Amt, bis eine Neuwahl erfolgt. Scheidet ein Mitglied des Vorstandes während einer Amtsperiode aus, so wählt die Mitgliederversammlung ein Ersatzmit­glied für den Rest der Amtsdauer ausgeschie­denen Vorstandsmitgliedes.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Die Mitglieder des Vorstands werden einzeln in schriftlicher und geheimer Wahl gewählt. Ge</text:span>
+              <text:span text:style-name="Span1">­wählt ist, wer mehr als die Hälfte der abgege­benen gültigen Stimmen erhält. Wird die Mehr­heit im ersten Wahlgang nicht erreicht, so findet eine Stichwahl unter den beiden Bewerbern / Bewerberinnen mit den höchsten Stimmenzahlen statt. Bei Stimmengleichheit in der Stichwahl entscheidet das Los.</text:span>
+            </text:p>
+          </text:list-item>
+        </text:list>
+        <text:p text:style-name="S4">
+          <text:span text:style-name="Span0">§ 8 Der erweiterte Vorstand</text:span>
+        </text:p>
+        <text:list text:continue-numbering="true" text:style-name="OL3">
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Der erweiterte Vorstand besteht aus den Vor</text:span>
+              <text:span text:style-name="Span1">­standsmitgliedern und einem/einer Delegierten der Ausschüsse und Regionalgruppen. Ein Stimmrecht setzt die Vereinsmitgliedschaft vor­aus. Der Vorstand beruft den erweiterten Vor­stand auf Antrag von mehr als der Hälfte seiner Mitglieder und/oder bei Bedarf ein. Alle Mit­glieder können ohne Stimmrecht an den Sitzun­gen des erweiterten Vorstandes teilnehmen.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Der erweiterte Vorstand entscheidet mit absolu</text:span>
+              <text:span text:style-name="Span1">­ter Mehrheit über alle wichtigen Vereinsan­gele­genheiten zwischen den Mitgliederversamm­lungen.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Der erweiterte Vorstand ist beschlußfähig, wenn zwei Drittel seiner Mitglieder anwesend sind.</text:span>
+            </text:p>
+          </text:list-item>
+        </text:list>
+        <text:p text:style-name="S4">
+          <text:span text:style-name="Span0">§ 9 Ausschüsse und Regionalgruppen</text:span>
+        </text:p>
+        <text:list text:continue-numbering="true" text:style-name="OL3">
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Ausschüsse und Regionalgruppen bereiten die Willensbildung für die Mitgliederversamm</text:span>
+              <text:span text:style-name="Span1">­lungen vor und dienen zur regionalen Verwirk­lichung der Vereinsziele gemäß § 2. Sie sind ideell und finanziell unabhängig, arbeiten nach demokratischen Grundsätzen und legen Arbeits­schwerpunkte fest.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Jeder Ausschuß und jede Regionalgruppe wählt sich einen Vorsitzenden / eine Vorsitzende.</text:span>
+            </text:p>
+          </text:list-item>
+        </text:list>
+        <text:p text:style-name="S4">
+          <text:span text:style-name="Span0">§ 10 Die Mitgliederversammlung</text:span>
+        </text:p>
+        <text:list text:continue-numbering="true" text:style-name="OL3">
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Die Mitgliederversammlung ist oberstes Vereins</text:span>
+              <text:span text:style-name="Span1">­organ.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Der Vorstand richtet mindestens einmal pro Geschäftsjahr eine Mitgliederversammlung aus. Die Mitglieder sind mindestens zwei Wochen vorher schriftlich unter Bekanntgabe der Tages</text:span>
+              <text:span text:style-name="Span1">­ordnung einzuladen.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Der Vorstand hat unverzüglich eine Mitglieder</text:span>
+              <text:span text:style-name="Span1">­versammlung einzuberufen, wenn das Ver­einsinteresse dies erfordert oder mindestens ein Fünftel der Mitglieder die Einberufung schrift­lich und unter Angabe des Zwecks und der Gründe fordert.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Die Mitgliederversammlung ist beschlußfähig, wenn sie ordnungsgemäß einberufen wurde und mindestens ein Zehntel der Mitglieder und ein Vorstandsmitglied anwesend sind.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S3">
+              <text:span text:style-name="Span1">Die Mitgliederversammlung hat insbesondere folgende Aufgaben:</text:span>
+            </text:p>
+          </text:list-item>
+        </text:list>
+        <text:list text:style-name="OL4">
+          <text:list-item>
+            <text:p text:style-name="S8">
+              <text:span text:style-name="Span1">Wahl des Vorstandes</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S9">
+              <text:span text:style-name="Span1">Absetzung des Vorstandes mit einer Zweidrittelmehrheit der anwesenden Mitglieder durch ein</text:span>
+            </text:p>
+          </text:list-item>
+        </text:list>
+        <text:p text:style-name="S10">
+          <text:span text:style-name="Span1"><text:tab/>konstruktives Mißtrauensvotum</text:span>
+        </text:p>
+        <text:p text:style-name="S11">
+          <text:span text:style-name="Span1">3) <text:s/><text:s/><text:s/>Entlastung des Vorstandes</text:span>
+        </text:p>
+        <text:p text:style-name="S9">
+          <text:span text:style-name="Span1">4) <text:tab/>Beschlußfassung über den Haushalts</text:span>
+          <text:span text:style-name="Span1">­plan</text:span>
+        </text:p>
+        <text:list text:continue-numbering="true" text:style-name="OL4">
+          <text:list-item>
+            <text:p text:style-name="S12">
+              <text:span text:style-name="Span1">Beschlußfassung über Arbeitsschwer</text:span>
+              <text:span text:style-name="Span1">­punkte und Jahresplanung</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S12">
+              <text:span text:style-name="Span1">Festsetzung der Höhe der Mitglieder</text:span>
+              <text:span text:style-name="Span1">­beiträge</text:span>
+            </text:p>
+          </text:list-item>
+        </text:list>
+        <text:p text:style-name="S9">
+          <text:span text:style-name="Span1">7) <text:tab/>Beschlüsse über Satzungsänderungen und Vereinsauflösung</text:span>
+        </text:p>
+        <text:p text:style-name="S9">
+          <text:span text:style-name="Span1">8)<text:tab/>Beschlüsse über den Ausschluß von Mitgliedern</text:span>
+        </text:p>
+        <text:p text:style-name="S9">
+          <text:span text:style-name="Span1">9) <text:tab/>Einsetzung und Auflösung von Aus</text:span>
+          <text:span text:style-name="Span1">­schüssen</text:span>
+        </text:p>
+        <text:list text:style-name="OL5">
+          <text:list-item>
+            <text:p text:style-name="S13">
+              <text:span text:style-name="Span1">Beschlüsse werden mit einfacher Mehrheit gefaßt. Bei Stimmengleichheit gilt ein Antrag als abgelehnt.</text:span>
+            </text:p>
+          </text:list-item>
+          <text:list-item>
+            <text:p text:style-name="S13">
+              <text:span text:style-name="Span1">Beschlüsse über Satzungsänderungen sowie über die Auflösung des Vereins und den Ausschluß von Mitgliedern bedürfen einer Zweidrittel</text:span>
+              <text:span text:style-name="Span1">­mehrheit.</text:span>
+            </text:p>
+          </text:list-item>
+        </text:list>
+        <text:p text:style-name="S4">
+          <text:span text:style-name="Span0">§ 11 Geschäftsführer</text:span>
+        </text:p>
+        <text:p text:style-name="S2">
+          <text:span text:style-name="Span1">Die Mitgliederversammlung kann zur Erledigung der laufenden Vereinsgeschäfte oder einzelner Angelegenheiten einen oder mehrere Geschäftsfüh</text:span>
+          <text:span text:style-name="Span1">­rer berufen.</text:span>
+        </text:p>
+        <text:p text:style-name="S4">
+          <text:span text:style-name="Span0">§ 12 Rechnungsprüfung</text:span>
+        </text:p>
+        <text:p text:style-name="S2">
+          <text:span text:style-name="Span1">Mindestens einmal im Jahr findet eine Rechnungs</text:span>
+          <text:span text:style-name="Span1">­prüfung durch einen von der Mitgliederversamm­lung gewählten Rechnungs­prüfer statt.</text:span>
+        </text:p>
+        <text:p text:style-name="S2">
+          <text:span text:style-name="Span1">Der Rechnungsprüfer erstattet der Mitglieder</text:span>
+          <text:span text:style-name="Span1">­versammlung Bericht.</text:span>
+        </text:p>
+        <text:p text:style-name="S4">
+          <text:span text:style-name="Span0">§ 13 Auflösung des Vereins und An</text:span>
+          <text:span text:style-name="Span0">­fall von Vereinsvermögen</text:span>
+        </text:p>
+        <text:p text:style-name="S2">
+          <text:span text:style-name="Span1">Bei Aufhebung oder Auflösung des Vereins oder bei Wegfall seines bisherigen Zwecks fällt das Vermögen des Vereins nach Beschluß der Mitglie</text:span>
+          <text:span text:style-name="Span1">­derversammlung an eine andere gemeinnützige Körperschaft mit ähnlichen Zielen, die es aus­schließlich und unmittelbar für gemeinnützige Zwecke zu verwenden hat. Die Ausführung des Beschlusses der Mitgliederversammlung darf erst nach Zustimmung des zuständigen Finanzamtes erfolgen.</text:span>
+        </text:p>
+        <text:p text:style-name="S4">
+          <text:span text:style-name="Span0">§ 14 Inkrafttreten und Gültigkeits</text:span>
+          <text:span text:style-name="Span0">­dauer dieser Satzung</text:span>
+        </text:p>
+        <text:p text:style-name="S2">
+          <text:span text:style-name="Span1">Diese Satzung wurde am 13.03.1994 errichtet und zuletzt geändert durch die Mitgliederversamm</text:span>
+          <text:span text:style-name="Span1">­lung am 28.09.1997. Sie tritt an dem auf die letzte Änderung folgenden Kalendertag in Kraft und gilt solange keine Ände­rungen beschlossen werden.</text:span>
+        </text:p>
+      </text:section>
+    </office:text>
+  </office:body>
+</office:document>

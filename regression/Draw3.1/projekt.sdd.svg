@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  >
+<rect x="56.6929" y="56.6929" width="498.6142" height="678.6141" style=""/>
+<defs>
+  <linearGradient id="grad1" >
+    <stop offset="0%" stop-color="#ffff66" stop-opacity="1.0000" />
+    <stop offset="100%" stop-color="#996633" stop-opacity="1.0000" />
+  </linearGradient>
+  <linearGradient xlink:href="#grad1" id="grad2" x1="0" y1="0" x2="0" y2="1" gradientTransform="rotate(315 .5 .5)" gradientUnits="objectBoundingBox" >
+  </linearGradient>
+</defs>
+<defs>
+<marker id="startMarker1"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<defs>
+<marker id="endMarker1"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="1" refY="5">
+<polyline points="0,0 10,5 0,10 1,5" fill="solid" />
+</marker>
+</defs>
+<rect x="55.3606" y="55.3606" width="497.3669" height="709.6535" style="fill: url(#grad2); marker-start: url(#startMarker1); marker-end: url(#endMarker1); "/>
+<rect x="143.7165" y="87.1654" width="315.8362" height="59.0740" style="fill: none; filter:url(#shadow0); "/>
+<text x="143.7165" y="118.1197">
+<tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
+finden,</tspan>
+<tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
+auswählen eines Gebietes</tspan>
+</text>
+<defs>
+<marker id="startMarker2"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<line x1="294.8882"  y1="192.0189" x2="294.8882"  y2="153.6095"
+style="marker-start: url(#startMarker2); "/>
+<defs>
+  <linearGradient id="grad3" >
+    <stop offset="0%" stop-color="#ffff66" stop-opacity="1.0000" />
+    <stop offset="100%" stop-color="#996633" stop-opacity="1.0000" />
+  </linearGradient>
+  <linearGradient xlink:href="#grad3" id="grad4" x1="0" y1="0" x2="0" y2="1" gradientTransform="rotate(315 .5 .5)" gradientUnits="objectBoundingBox" >
+  </linearGradient>
+</defs>
+<defs>
+<marker id="startMarker3"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<ellipse cx="293.4142" cy="242.7874" rx="102.5291" ry="31.7480" style="fill: url(#grad4); filter:url(#shadow0); marker-start: url(#startMarker3); "/>
+<text x="190.8850" y="244.2047">
+<tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
+eingrenzen</tspan>
+</text>
+<rect x="198.7370" y="291.7417" width="194.2583" height="36.0000" style="fill: none; "/>
+<text x="198.7370" y="309.7417">
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+verschiedene Aufgaben</tspan>
+</text>
+<defs>
+  <radialGradient id="grad5" cx="50.0000%" cy="50.0000%" r="100.0000%" >
+    <stop offset="0%" stop-color="#e6ff00" stop-opacity="1.0000" />
+    <stop offset="100%" stop-color="#ff3333" stop-opacity="1.0000" />
+  </radialGradient>
+</defs>
+<rect x="204.7465" y="358.4977" width="181.5023" height="34.4976" style="fill: url(#grad5); filter:url(#shadow0); "/>
+<text x="204.7465" y="378.5811">
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+Arbeit in Kleingruppen</tspan>
+</text>
+<defs>
+<marker id="startMarker4"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<line x1="295.5118"  y1="423.0142" x2="295.5118"  y2="394.4976"
+style="marker-start: url(#startMarker4); "/>
+<defs>
+<marker id="startMarker5"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<rect x="206.2488" y="432.0000" width="183.0047" height="22.4787" style="fill: none; marker-start: url(#startMarker5); "/>
+<text x="206.2488" y="443.2394">
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+gemeinsam nachdenken</tspan>
+</text>
+<defs>
+<marker id="startMarker6"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<line x1="295.5118"  y1="479.2535" x2="295.5118"  y2="461.2535"
+style="marker-start: url(#startMarker6); "/>
+<defs>
+<marker id="startMarker7"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<ellipse cx="282.7701" cy="221.9953" rx="0.0142" ry="0.7512" style="marker-start: url(#startMarker7); "/>
+<defs>
+<marker id="startMarker8"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<rect x="204.7465" y="490.5071" width="181.5023" height="50.2299" style="stroke: #cccc00; stroke-dasharray: , 1.4173, 1.4173; fill: none; marker-start: url(#startMarker8); "/>
+<text x="204.7465" y="515.6221">
+<tspan font-family="Wingdings" font-weight="normal" font-size="23.9811" fill="#000000" >
+l</tspan>
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+Fixpunkt</tspan>
+<tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
+ </tspan>
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+einlegen</tspan>
+</text>
+<defs>
+  <radialGradient id="grad6" cx="50.0000%" cy="50.0000%" r="100.0000%" >
+    <stop offset="0%" stop-color="#e6ff00" stop-opacity="1.0000" />
+    <stop offset="100%" stop-color="#ff3333" stop-opacity="1.0000" />
+  </radialGradient>
+</defs>
+<defs>
+<marker id="startMarker9"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<rect x="194.2583" y="578.2394" width="209.2535" height="36.7370" style="fill: url(#grad6); filter:url(#shadow0); marker-start: url(#startMarker9); "/>
+<text x="194.2583" y="598.0252">
+<tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
+Einzel- und Gruppenarbeit</tspan>
+</text>
+<defs>
+<marker id="startMarker10"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<line x1="244.4882"  y1="641.9906" x2="244.4882"  y2="622.4882"
+style="marker-start: url(#startMarker10); "/>
+<defs>
+<marker id="startMarker11"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<line x1="268.4976"  y1="641.2536" x2="268.4976"  y2="623.9906"
+style="marker-start: url(#startMarker11); "/>
+<defs>
+<marker id="startMarker12"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<line x1="321.7606"  y1="640.8850" x2="321.7606"  y2="623.6221"
+style="marker-start: url(#startMarker12); "/>
+<defs>
+<marker id="startMarker13"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<line x1="345.7417"  y1="640.8850" x2="345.7417"  y2="623.6221"
+style="marker-start: url(#startMarker13); "/>
+<rect x="197.2630" y="645.7606" width="206.9858" height="18.0000" style="fill: none; "/>
+<text x="197.2630" y="654.7748">
+<tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
+Berichte, Arbeitsergebnisse</tspan>
+</text>
+<defs>
+<marker id="startMarker14"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
+ viewBox="0 0 10 10" refX="9" refY="5">
+<polyline points="10,0 0,5 10,10 9,5" fill="solid" />
+</marker>
+</defs>
+<line x1="295.5118"  y1="687.0047" x2="295.5118"  y2="671.2441"
+style="marker-start: url(#startMarker14); "/>
+<defs>
+<filter filterUnits="userSpaceOnUse" id="shadow1"><feOffset in="SourceGraphic" result="offset" dx="2.8346" dy="2.8346" /><feColorMatrix in="offset" result="offset-color" type="matrix" values="0 0 0 0 0.0000 0 0 0 0 0.0000 0 0 0 0 0.0000 0 0 0 1.0000 0"/><feMerge><feMergeNode in="offset-color" /><feMergeNode in="SourceGraphic" /></feMerge></filter></defs><rect x="126.7654" y="697.4929" width="346.4787" height="62.2488" style="filter:url(#shadow1); "/>
+<text x="126.7654" y="730.0347">
+<tspan font-family="times" font-weight="normal" font-size="19.9843" fill="#000000" >
+Diskussion der Gruppenresultate &amp;</tspan>
+<tspan font-family="times" font-weight="normal" font-size="19.9843" fill="#000000" >
+Erarbeiten des gemeinsamen Ergebnisses</tspan>
+</text>
+</svg>
+
