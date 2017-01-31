@@ -204,7 +204,7 @@ void TableBox::updatePosition(Table &table, StarState const &state, float xOrigi
     if (table.m_rowToBoxMap.find(row)==table.m_rowToBoxMap.end())
       table.m_rowToBoxMap[row]=std::vector<StarTableInternal::TableBox *>();
     table.m_rowToBoxMap.find(row)->second.push_back(this);
-    m_cellStyle.m_propertyList=cState.m_graphic.m_propertyList;
+    m_cellStyle=cState.m_cell;
     return;
   }
   for (size_t i=0; i< m_lineList.size(); ++i) {
@@ -471,24 +471,13 @@ void Table::updateColumnsPosition()
           STOFF_DEBUG_MSG(("Table::updateColumnsPosition: can not compute a col find %d<%d\n", newCol, actCol));
           break;
         }
-        static bool first=true;
         if (c==0) {
-          if (newCol!=box.m_position.min()[0]) {
-            if (first) {
-              first=false;
-              STOFF_DEBUG_MSG(("Table::updateColumnsPosition: move %d to %d\n", box.m_position.min()[0], newCol));
-            }
+          if (newCol!=box.m_position.min()[0])
             box.m_position.min()[0]=newCol;
-          }
         }
         else {
-          if (newCol!=box.m_position.max()[0]) {
-            if (first) {
-              first=false;
-              STOFF_DEBUG_MSG(("Table::updateColumnsPosition: move %d to %d\n", box.m_position.max()[0], newCol));
-            }
+          if (newCol!=box.m_position.max()[0])
             box.m_position.max()[0]=newCol;
-          }
         }
         actCol=newCol;
       }

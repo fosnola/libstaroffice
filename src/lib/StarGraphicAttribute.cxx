@@ -1099,6 +1099,9 @@ void StarGAttributeBorder::addTo(StarState &state, std::set<StarAttribute const 
     // paragraph
     for (int i=0; i<4; ++i)
       m_borders[i].addTo(state.m_paragraph.m_propertyList, wh[i]);
+    // SW table
+    for (int i=0; i<4; ++i)
+      m_borders[i].addTo(state.m_cell.m_propertyList, wh[i]);
   }
   else if (m_type==ATTR_SC_BORDER) {
     // checkme what is m_distance?
@@ -1131,6 +1134,7 @@ void StarGAttributeBrush::addTo(StarState &state, std::set<StarAttribute const *
     else
       state.m_graphic.m_propertyList.insert("draw:opacity",1., librevenge::RVNG_PERCENT);
     state.m_paragraph.m_propertyList.insert("fo:background-color", "transparent");
+    // graphic
     if (m_brush.isEmpty())
       state.m_graphic.m_propertyList.insert("draw:fill", "none");
     else {
@@ -1156,6 +1160,18 @@ void StarGAttributeBrush::addTo(StarState &state, std::set<StarAttribute const *
         }
         else
           state.m_graphic.m_propertyList.insert("draw:fill", "none");
+      }
+    }
+    // SW table
+    if (m_brush.isEmpty())
+      state.m_cell.m_propertyList.insert("fo:background-color", "transparent");
+    else {
+      STOFFColor color;
+      if (m_brush.getColor(color))
+        state.m_cell.m_propertyList.insert("fo:background-color", color.str().c_str());
+      else {
+        STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a cell background\n"));
+        state.m_cell.m_propertyList.insert("fo:background-color", "transparent");
       }
     }
   }
