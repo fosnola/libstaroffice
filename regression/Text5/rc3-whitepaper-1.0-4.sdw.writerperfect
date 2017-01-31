@@ -111,21 +111,24 @@
       <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:orphans="0" fo:widows="0" style:justify-single-word="false"/>
     </style:style>
     <style:style style:family="paragraph" style:name="S10" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-bottom="0.0000in" fo:margin-top="0.0000pt" fo:orphans="0" fo:widows="0" style:justify-single-word="false"/>
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="0.0000in" fo:margin-top="0.0000pt" fo:orphans="0" fo:widows="0" style:justify-single-word="false"/>
     </style:style>
     <style:style style:family="paragraph" style:name="S11" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-bottom="3.0000pt" fo:margin-top="22.0000pt" fo:orphans="0" fo:text-align="center" fo:widows="0" style:justify-single-word="false"/>
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="3.0000pt" fo:margin-top="22.0000pt" fo:orphans="0" fo:widows="0" style:justify-single-word="false"/>
     </style:style>
     <style:style style:family="paragraph" style:name="S12" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:orphans="2" fo:widows="2" style:justify-single-word="false"/>
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="3.0000pt" fo:margin-top="22.0000pt" fo:orphans="0" fo:text-align="center" fo:widows="0" style:justify-single-word="false"/>
     </style:style>
     <style:style style:family="paragraph" style:name="S13" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:orphans="0" fo:text-align="center" fo:widows="0" style:justify-single-word="false"/>
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:orphans="2" fo:widows="2" style:justify-single-word="false"/>
     </style:style>
     <style:style style:family="paragraph" style:name="S14" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-bottom="0.0000in" fo:margin-top="0.0000pt" fo:orphans="2" fo:widows="2" style:justify-single-word="false"/>
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:orphans="0" fo:text-align="center" fo:widows="0" style:justify-single-word="false"/>
     </style:style>
     <style:style style:family="paragraph" style:name="S15" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-bottom="0.0000in" fo:margin-top="0.0000pt" fo:orphans="2" fo:widows="2" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:family="paragraph" style:name="S16" style:parent-style-name="Standard">
       <style:paragraph-properties fo:orphans="2" fo:widows="2" style:justify-single-word="false"/>
     </style:style>
     <style:style style:family="paragraph" style:name="S2" style:parent-style-name="Standard">
@@ -150,7 +153,7 @@
       <style:paragraph-properties fo:margin-bottom="7.2000pt" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:margin-top="0.0000pt" fo:orphans="0" fo:text-indent="0.0000pt" fo:widows="0" style:auto-text-indent="false" style:justify-single-word="false"/>
     </style:style>
     <style:style style:family="paragraph" style:name="S9" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:orphans="2" fo:text-align="center" fo:widows="2" style:justify-single-word="false"/>
+      <style:paragraph-properties fo:line-height="150.0000%" fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:orphans="2" fo:text-align="center" fo:widows="2" style:justify-single-word="false"/>
     </style:style>
     <text:list-style style:name="UL0">
       <text:list-level-style-bullet text:bullet-char=" " text:level="1" text:style-name="Bullet_Symbols">
@@ -195,19 +198,28 @@
       </text:list-level-style-bullet>
     </text:list-style>
     <style:style style:family="table" style:name="Table0">
-      <style:table-properties style:width="80.0000pt" table:align="left" table:border-model="collapsing"/>
+      <style:table-properties table:align="left" table:border-model="collapsing"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table0.Column1">
-      <style:table-column-properties style:column-width="40.0000pt"/>
+      <style:table-column-properties style:column-width="121.5000pt"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table0.Column2">
-      <style:table-column-properties style:column-width="40.0000pt"/>
+      <style:table-column-properties style:column-width="260.1500pt"/>
     </style:style>
     <style:style style:family="table-row" style:name="Table0_row0">
       <style:table-row-properties fo:keep-together="auto"/>
     </style:style>
     <style:style style:family="table-cell" style:name="Table0_cell0">
-      <style:table-cell-properties fo:padding="0.0382in"/>
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="0.05pt solid #000000" fo:padding="0.0382in"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell1">
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="0.05pt solid #000000" fo:padding="0.0382in"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell2">
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="none" fo:padding="0.0382in"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell3">
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="none" fo:padding="0.0382in"/>
     </style:style>
   </office:automatic-styles>
   <office:master-styles>
@@ -362,43 +374,43 @@
               <text:span text:style-name="Span4">Channel Manager</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell1">
             <text:p text:style-name="S8">
               <text:span text:style-name="Span2">Defines the software applications, packages, and supported platforms; </text:span>
             </text:p>
           </table:table-cell>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
             <text:p text:style-name="S8">
               <text:span text:style-name="Span4">User Manager</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
             <text:p text:style-name="S8">
               <text:span text:style-name="Span2">Invites and manages desktop users;</text:span>
             </text:p>
           </table:table-cell>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
             <text:p text:style-name="S8">
               <text:span text:style-name="Span4">Group Manager</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
             <text:p text:style-name="S8">
               <text:span text:style-name="Span2">Defines software access privileges by team or workgroup; and </text:span>
             </text:p>
           </table:table-cell>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
             <text:p text:style-name="S8">
               <text:span text:style-name="Span4">Reports</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
             <text:p text:style-name="S8">
               <text:span text:style-name="Span2">Shows downloaded statistics and installations by channel and user.</text:span>
             </text:p>
@@ -548,7 +560,7 @@
       </text:p>
       <text:list text:style-name="UL4">
         <text:list-item>
-          <text:p text:style-name="S3">
+          <text:p text:style-name="S11">
             <text:span text:style-name="Span1">Groups, Channels, Targets, and Packages</text:span>
           </text:p>
         </text:list-item>
@@ -615,7 +627,7 @@
       </text:p>
       <text:list text:style-name="UL6">
         <text:list-item>
-          <text:p text:style-name="S11">
+          <text:p text:style-name="S12">
             <text:span text:style-name="Span1">Defining Groups</text:span>
           </text:p>
         </text:list-item>
@@ -630,7 +642,7 @@
       </text:p>
       <text:list text:style-name="UL6">
         <text:list-item>
-          <text:p text:style-name="S11">
+          <text:p text:style-name="S12">
             <text:span text:style-name="Span1">Channels and Targets</text:span>
           </text:p>
         </text:list-item>
@@ -640,12 +652,12 @@
           </text:p>
         </text:list-item>
       </text:list>
-      <text:p text:style-name="S12">
+      <text:p text:style-name="S13">
         <text:span text:style-name="Span7"/>
       </text:p>
       <text:list text:style-name="UL6">
         <text:list-item>
-          <text:p text:style-name="S13">
+          <text:p text:style-name="S14">
             <text:span text:style-name="Span9">Trouble Shooting</text:span>
           </text:p>
         </text:list-item>
@@ -672,15 +684,15 @@
           </text:p>
         </text:list-item>
         <text:list-item>
-          <text:p text:style-name="S14">
+          <text:p text:style-name="S15">
             <text:span text:style-name="Span2">Although Red Carpet CorporateConnect is a hosted service at present, Ximian is investigating avenues such as a scheme to enable more of its functions and features to reside within the client's firewall in the future.</text:span>
           </text:p>
         </text:list-item>
       </text:list>
-      <text:p text:style-name="S15">
+      <text:p text:style-name="S16">
         <text:span text:style-name="Span2"/>
       </text:p>
-      <text:p text:style-name="S15">
+      <text:p text:style-name="S16">
         <text:span text:style-name="Span2"><text:tab/><text:tab/>[NEED MORE TEXT FOR CONCLUSION]</text:span>
       </text:p>
     </office:text>

@@ -149,7 +149,7 @@ sub RegTest
   my $endLine=($html?"<br>\n":"\n");
 
   # list of directories containing test files
-  my @listDirectory = ( "Calc3.1", "Calc4", "Calc5', "Draw3.1", "Draw4", "Draw5", "Text3.1", "Text4", "Text5" );
+  my @listDirectory = ( "Calc3.1", "Calc4", "Calc5", "Draw3.1", "Draw4", "Draw5", "Pres5", "Text3.1", "Text4", "Text5" );
 
   # list of commands to test
   # type => [ "name", "extension", "array of accepted types", "command", "filter" ]
@@ -200,7 +200,7 @@ sub RegTest
 
     my @fileList = split(/\n/, `cat $regrInput`);
     foreach $_ ( @fileList ) {
-      if (!/^([GST]):(.*)/) {
+      if (!/^([GPST]):(.*)/) {
         print "Skip ".$_.": unknown type\n";
 	next;
       }

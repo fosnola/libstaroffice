@@ -36,19 +36,19 @@
     <draw:opacity draw:angle="2250" draw:border="0.0000%" draw:cx="10.0000%" draw:cy="10.0000%" draw:name="Transparency_2"/>
     <draw:stroke-dash draw:distance="1.4173pt" draw:dots1="1" draw:dots1-length="1.4173pt" draw:dots2="1" draw:dots2-length="1.4173pt" draw:name="Dash_0" draw:style="rect"/>
     <style:style style:display-name="Blau~LT~Hintergrund" style:family="graphic" style:name="GraphicStyle_0" style:parent-style-name="standard">
-      <style:graphic-properties draw:fill="gradient" draw:fill-gradient-name="Gradient_0" draw:fill-hatch-name="Hatch_0" draw:opacity-name="Transparency_0" draw:shadow="hidden" draw:shadow-color="#000000" draw:shadow-offset-x="0.0000pt" draw:shadow-offset-y="0.0000pt" draw:stroke="none"/>
+      <style:graphic-properties draw:fill="gradient" draw:fill-gradient-name="Gradient_0" draw:fill-hatch-name="Hatch_0" draw:opacity-name="Transparency_0" draw:shadow="hidden" draw:shadow-color="#000000" draw:shadow-offset-x="0.0000pt" draw:shadow-offset-y="0.0000pt" draw:stroke="none" fo:min-width="1.0000in" fo:padding-bottom="0.0000pt" fo:padding-left="0.0000pt" fo:padding-right="0.0000pt" fo:padding-top="0.0000pt"/>
     </style:style>
     <style:style style:display-name="breite Säule" style:family="graphic" style:name="GraphicStyle_2" style:parent-style-name="standard">
-      <style:graphic-properties draw:fill="gradient" draw:fill-color="#ffffff" draw:fill-gradient-name="Gradient_1" draw:fill-hatch-name="Hatch_1" draw:opacity-name="Transparency_1" draw:shadow="hidden" draw:shadow-color="#000000" draw:shadow-offset-x="0.0000pt" draw:shadow-offset-y="0.0000pt" draw:stroke="none" svg:stroke-color="#000000" svg:stroke-width="0.0000pt"/>
+      <style:graphic-properties draw:fill="gradient" draw:fill-color="#ffffff" draw:fill-gradient-name="Gradient_1" draw:fill-hatch-name="Hatch_1" draw:opacity-name="Transparency_1" draw:shadow="hidden" draw:shadow-color="#000000" draw:shadow-offset-x="0.0000pt" draw:shadow-offset-y="0.0000pt" draw:stroke="none" fo:min-width="1.0000in" fo:padding-bottom="0.0000pt" fo:padding-left="0.0000pt" fo:padding-right="0.0000pt" fo:padding-top="0.0000pt" svg:stroke-color="#000000" svg:stroke-width="0.0000pt"/>
     </style:style>
     <style:style style:display-name="schmale Säule" style:family="graphic" style:name="GraphicStyle_4" style:parent-style-name="standard">
-      <style:graphic-properties draw:fill="gradient" draw:fill-color="#ffffff" draw:fill-gradient-name="Gradient_2" draw:fill-hatch-name="Hatch_1" draw:shadow="hidden" draw:shadow-color="#000000" draw:shadow-offset-x="0.0000pt" draw:shadow-offset-y="0.0000pt" draw:stroke="none" svg:stroke-color="#000000" svg:stroke-width="0.0000pt"/>
+      <style:graphic-properties draw:fill="gradient" draw:fill-color="#ffffff" draw:fill-gradient-name="Gradient_2" draw:fill-hatch-name="Hatch_1" draw:shadow="hidden" draw:shadow-color="#000000" draw:shadow-offset-x="0.0000pt" draw:shadow-offset-y="0.0000pt" draw:stroke="none" fo:min-width="1.0000in" fo:padding-bottom="0.0000pt" fo:padding-left="0.0000pt" fo:padding-right="0.0000pt" fo:padding-top="0.0000pt" svg:stroke-color="#000000" svg:stroke-width="0.0000pt"/>
     </style:style>
     <style:style style:display-name="Ecke" style:family="graphic" style:name="GraphicStyle_6" style:parent-style-name="standard">
-      <style:graphic-properties draw:fill="gradient" draw:fill-color="#ffffff" draw:fill-gradient-name="Gradient_3" draw:fill-hatch-name="Hatch_2" draw:opacity-name="Transparency_2" draw:shadow="hidden" draw:shadow-color="#000000" draw:shadow-offset-x="0.0000pt" draw:shadow-offset-y="0.0000pt" draw:stroke="none" svg:stroke-color="#000000" svg:stroke-width="0.0000pt"/>
+      <style:graphic-properties draw:fill="gradient" draw:fill-color="#ffffff" draw:fill-gradient-name="Gradient_3" draw:fill-hatch-name="Hatch_2" draw:opacity-name="Transparency_2" draw:shadow="hidden" draw:shadow-color="#000000" draw:shadow-offset-x="0.0000pt" draw:shadow-offset-y="0.0000pt" draw:stroke="none" fo:min-width="1.0000in" fo:padding-bottom="0.0000pt" fo:padding-left="0.0000pt" fo:padding-right="0.0000pt" fo:padding-top="0.0000pt" svg:stroke-color="#000000" svg:stroke-width="0.0000pt"/>
     </style:style>
     <style:style style:display-name="Blau~LT~Titel" style:family="graphic" style:name="GraphicStyle_8" style:parent-style-name="standard">
-      <style:graphic-properties draw:fill="none" draw:stroke="none"/>
+      <style:graphic-properties draw:fill="none" draw:stroke="none" draw:textarea-vertical-align="middle" fo:min-width="1.0000in" fo:padding-bottom="0.0000pt" fo:padding-left="0.0000pt" fo:padding-right="0.0000pt" fo:padding-top="0.0000pt"/>
     </style:style>
   </office:styles>
   <office:automatic-styles>
@@ -85,10 +85,10 @@
       <style:graphic-properties draw:shadow="hidden" draw:stroke="solid" style:mirror="none"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_11" style:parent-style-name="standard">
-      <style:graphic-properties draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties draw:fill="none" draw:shadow="hidden" draw:stroke="solid" svg:stroke-color="#000000"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_12" style:parent-style-name="standard">
-      <style:graphic-properties draw:shadow="hidden" draw:stroke="dash" draw:stroke-dash="Dash_0" svg:stroke-color="#800000" svg:stroke-opacity="50.0000%" svg:stroke-width="4.2520pt"/>
+      <style:graphic-properties draw:fill="none" draw:shadow="hidden" draw:stroke="dash" draw:stroke-dash="Dash_0" svg:stroke-color="#800000" svg:stroke-opacity="50.0000%" svg:stroke-width="4.2520pt"/>
     </style:style>
   </office:automatic-styles>
   <office:master-styles>

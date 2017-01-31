@@ -70,13 +70,13 @@
       <style:text-properties fo:font-size="14.0000pt" fo:font-weight="bold" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-pitch="variable" style:font-size-asian="14.0000pt" style:font-size-complex="14.0000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
     </style:style>
     <style:style style:family="text" style:name="Span1">
-      <style:text-properties fo:font-size="10.0000pt" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt"/>
+      <style:text-properties fo:font-size="10.0000pt" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt"/>
     </style:style>
     <style:style style:family="text" style:name="Span2">
-      <style:text-properties fo:font-size="10.0000pt" fo:font-weight="normal" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
+      <style:text-properties fo:font-size="10.0000pt" fo:font-weight="normal" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
     </style:style>
     <style:style style:family="text" style:name="Span3">
-      <style:text-properties fo:font-size="10.0000pt" fo:font-weight="bold" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+      <style:text-properties fo:font-size="10.0000pt" fo:font-weight="bold" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
     </style:style>
     <style:style style:family="paragraph" style:master-page-name="PM2" style:name="S0" style:parent-style-name="Standard">
       <style:paragraph-properties fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false"/>

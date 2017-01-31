@@ -10,6 +10,7 @@
     <meta:generator>libodfgen/0.1.6</meta:generator>
   </office:meta>
   <office:font-face-decls>
+    <style:font-face style:name="Times" svg:font-family="Times"/>
     <style:font-face style:font-charset="x-symbol" style:name="StarSymbol" svg:font-family="StarSymbol"/>
   </office:font-face-decls>
   <office:styles>
@@ -72,13 +73,13 @@
       </style:footer-style>
     </style:page-layout>
     <style:style style:family="text" style:name="Span_M0">
-      <style:text-properties/>
+      <style:text-properties style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times"/>
     </style:style>
     <style:style style:family="paragraph" style:name="S_M0" style:parent-style-name="Standard">
       <style:paragraph-properties style:justify-single-word="false"/>
     </style:style>
     <style:style style:family="text" style:name="Span1">
-      <style:text-properties/>
+      <style:text-properties style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times"/>
     </style:style>
     <style:style style:family="paragraph" style:name="S1" style:parent-style-name="Table_Contents">
       <style:paragraph-properties style:justify-single-word="false"/>

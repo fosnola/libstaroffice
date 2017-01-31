@@ -10,6 +10,7 @@
   </office:meta>
   <office:font-face-decls>
     <style:font-face style:name="Courier" svg:font-family="Courier"/>
+    <style:font-face style:name="Times" svg:font-family="Times"/>
     <style:font-face style:font-charset="x-symbol" style:name="StarSymbol" svg:font-family="StarSymbol"/>
   </office:font-face-decls>
   <office:styles>
@@ -73,10 +74,10 @@
       <style:text-properties fo:font-size="10.0000pt" fo:font-weight="normal" style:font-name="Courier" style:font-name-asian="Courier" style:font-name-complex="Courier" style:font-pitch="fixed" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
     </style:style>
     <style:style style:family="text" style:name="Span2">
-      <style:text-properties fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+      <style:text-properties fo:font-weight="bold" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
     </style:style>
     <style:style style:family="text" style:name="Span3">
-      <style:text-properties/>
+      <style:text-properties style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times"/>
     </style:style>
     <style:style style:family="text" style:name="Span4">
       <style:text-properties fo:font-size="10.0000pt" fo:font-weight="bold" style:font-name="Courier" style:font-name-asian="Courier" style:font-name-complex="Courier" style:font-pitch="fixed" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt" style:font-weight-asian="bold" style:font-weight-complex="bold"/>

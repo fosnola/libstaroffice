@@ -10,6 +10,7 @@
     <meta:generator>libodfgen/0.1.6</meta:generator>
   </office:meta>
   <office:font-face-decls>
+    <style:font-face style:name="Times" svg:font-family="Times"/>
     <style:font-face style:font-charset="x-symbol" style:name="StarSymbol" svg:font-family="StarSymbol"/>
   </office:font-face-decls>
   <office:styles>
@@ -70,19 +71,19 @@
       </style:page-layout-properties>
     </style:page-layout>
     <style:style style:family="text" style:name="Span0">
-      <style:text-properties/>
+      <style:text-properties style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times"/>
     </style:style>
     <style:style style:family="text" style:name="Span1">
-      <style:text-properties fo:font-size="16.0000pt" style:font-size-asian="16.0000pt" style:font-size-complex="16.0000pt"/>
+      <style:text-properties fo:font-size="16.0000pt" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-size-asian="16.0000pt" style:font-size-complex="16.0000pt"/>
     </style:style>
     <style:style style:family="text" style:name="Span2">
-      <style:text-properties fo:font-style="italic" fo:font-weight="bold" style:font-style-asian="italic" style:font-style-complex="italic" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+      <style:text-properties fo:font-style="italic" fo:font-weight="bold" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-style-asian="italic" style:font-style-complex="italic" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
     </style:style>
     <style:style style:family="text" style:name="Span3">
-      <style:text-properties fo:font-weight="normal" fo:text-shadow="1pt 1pt" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
+      <style:text-properties fo:font-weight="normal" fo:text-shadow="1pt 1pt" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
     </style:style>
     <style:style style:family="text" style:name="Span4">
-      <style:text-properties fo:font-size="10.0000pt" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt"/>
+      <style:text-properties fo:font-size="10.0000pt" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-size-asian="10.0000pt" style:font-size-complex="10.0000pt"/>
     </style:style>
     <style:style style:family="paragraph" style:master-page-name="PM2" style:name="S0" style:parent-style-name="Standard">
       <style:paragraph-properties style:justify-single-word="false"/>
@@ -97,7 +98,7 @@
       <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:text-align="center" style:justify-single-word="false"/>
     </style:style>
     <style:style style:family="paragraph" style:name="S4" style:parent-style-name="Table_Contents">
-      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:text-align="justify" fo:text-align-last="justify" style:justify-single-word="false"/>
+      <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" fo:text-align="justify" fo:text-align-last="default" style:justify-single-word="false"/>
     </style:style>
     <style:style style:family="paragraph" style:name="S5" style:parent-style-name="Table_Contents">
       <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="0.0000pt" style:justify-single-word="false"/>
@@ -145,28 +146,28 @@
       </style:paragraph-properties>
     </style:style>
     <style:style style:family="graphic" style:name="gr_0" style:parent-style-name="standard">
-      <style:graphic-properties draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties draw:fill="none" draw:shadow="hidden" draw:stroke="solid" svg:stroke-color="#000000"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_2" style:parent-style-name="GraphicStyle_1">
       <style:graphic-properties draw:ole-draw-aspect="1" draw:shadow="hidden" fo:min-width="1.0000in"/>
     </style:style>
     <style:style style:family="table" style:name="Table0">
-      <style:table-properties style:width="200.0000pt" table:align="left" table:border-model="collapsing"/>
+      <style:table-properties style:width="100.0000%" table:align="left" table:border-model="collapsing"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table0.Column1">
-      <style:table-column-properties style:column-width="40.0000pt"/>
+      <style:table-column-properties style:column-width="16.8032%"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table0.Column2">
-      <style:table-column-properties style:column-width="40.0000pt"/>
+      <style:table-column-properties style:column-width="23.1968%"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table0.Column3">
-      <style:table-column-properties style:column-width="40.0000pt"/>
+      <style:table-column-properties style:column-width="20.0000%"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table0.Column4">
-      <style:table-column-properties style:column-width="40.0000pt"/>
+      <style:table-column-properties style:column-width="20.0000%"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table0.Column5">
-      <style:table-column-properties style:column-width="40.0000pt"/>
+      <style:table-column-properties style:column-width="20.0000%"/>
     </style:style>
     <style:style style:family="table-row" style:name="Table0_row0">
       <style:table-row-properties fo:keep-together="auto"/>
@@ -289,10 +290,10 @@
         <text:span text:style-name="Span0"><text:page-number text:select-page="previous"/><text:page-number text:select-page="next"/><text:s/><text:s/><text:date/><text:time/> (time variable)</text:span>
       </text:p>
       <text:p text:style-name="S6">
-        <text:span text:style-name="Span0">time fixed: <text:time/><text:date text:date-value="2016-07-13" text:fixed="true"/></text:span>
+        <text:span text:style-name="Span0">time fixed: <text:time office:time-value="PT10H45M09S" text:fixed="true"/><text:date text:date-value="2016-07-13" text:fixed="true"/></text:span>
       </text:p>
       <text:p text:style-name="S6">
-        <text:span text:style-name="Span0"><text:chapter/><text:chapter/>(chapter)<text:author-name/> (author)<text:file-name/>(filename)(databasename)</text:span>
+        <text:span text:style-name="Span0"><text:chapter text:display="number" text:outline-level="1"/><text:chapter text:display="number" text:outline-level="1"/>(chapter)<text:author-name/> (author)<text:file-name text:display="name-and-extension"/>(filename)(databasename)</text:span>
       </text:p>
       <text:p text:style-name="S6">
         <text:span text:style-name="Span0">
@@ -300,7 +301,7 @@
         </text:span>
       </text:p>
       <text:p text:style-name="S8">
-        <text:span text:style-name="Span0"><text:sender-company/>(sender) <text:page-count/>(stat number of page) <text:template-name/>template</text:span>
+        <text:span text:style-name="Span0"><text:sender-company/>(sender) <text:page-count/>(stat number of page) <text:template-name text:display="full"/>template</text:span>
       </text:p>
     </office:text>
   </office:body>
