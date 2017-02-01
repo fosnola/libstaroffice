@@ -128,6 +128,8 @@ protected:
   bool readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
   //! try to read the "Star Framework Config File"
   bool readStarFrameworkConfigFile(STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
+  //! try to read an item in a "Star Framework Config File"
+  bool readStarFrameworkConfigItem(STOFFEntry &entry, STOFFInputStreamPtr input, libstoff::DebugFile &ascii);
 
   //
   // data

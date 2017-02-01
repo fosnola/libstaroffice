@@ -726,20 +726,13 @@ bool StarObject::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libstoff
     *input >> nType >> lPos >> lLength;
     if (nType) f << "nType=" << nType << ",";
     if (lPos!=-1) {
-      if (!input->checkPosition(long(lPos))) {
-        STOFF_DEBUG_MSG(("StarObject::readStarFrameworkConfigFile: a item position seems bad\n"));
-        f << "###";
-      }
-      else {
-        static bool first=true;
-        if (first) {
-          STOFF_DEBUG_MSG(("StarObject::readStarFrameworkConfigFile: Ohhh find some item\n"));
-          first=true;
-        }
-        asciiFile.addPos(long(lPos));
-        asciiFile.addNote("StarFrameworkConfig[Item]:###");
-        // see SfxConfigManagerImExport_Impl::ImportItem, if needed
-      }
+      long actPos=input->tell();
+      STOFFEntry entry;
+      entry.setId(int(nType));
+      entry.setBegin(lPos);
+      entry.setLength(lLength);
+      readStarFrameworkConfigItem(entry, input, asciiFile);
+      input->seek(actPos, librevenge::RVNG_SEEK_SET);
       if (lLength) f << "len=" << lLength << ",";
     }
     int strSz=int(input->readULong(2));
@@ -756,6 +749,42 @@ bool StarObject::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libstoff
   asciiFile.addPos(pos);
   asciiFile.addNote(f.str().c_str());
 
+  return true;
+}
+
+bool StarObject::readStarFrameworkConfigItem(STOFFEntry &entry, STOFFInputStreamPtr input, libstoff::DebugFile &asciiFile)
+{
+  libstoff::DebugStream f;
+  f << "StarFrameworkConfig[Item]:";
+  // see sfx2_cfgimex SfxConfigManagerImExport_Impl::ImportItem
+  if (!entry.valid() || !input->checkPosition(long(entry.end()))) {
+    STOFF_DEBUG_MSG(("StarObject::readStarFrameworkConfigFile: a item position seems bad\n"));
+    f << "###";
+    asciiFile.addPos(entry.begin());
+    asciiFile.addNote(f.str().c_str());
+
+    return true;
+  }
+  input->seek(entry.begin(), librevenge::RVNG_SEEK_SET);
+  uint16_t nType;
+  *input >> nType;
+  f << "type=" << nType << ",";
+  if (nType!=uint16_t(entry.id()) &&
+      !(1294 <= nType && nType <= 1301 && 1294 <= entry.id() && entry.id() <= 1301)) {
+    STOFF_DEBUG_MSG(("StarObject::readStarFrameworkConfigFile: find unexpected type\n"));
+    f << "###";
+    asciiFile.addPos(entry.begin());
+    asciiFile.addNote(f.str().c_str());
+
+    return true;
+  }
+  f << "#";
+  // readme, some toolbar, ...
+  if (input->tell()!=entry.length())
+    asciiFile.addDelimiter(input->tell(),'|');
+
+  asciiFile.addPos(entry.begin());
+  asciiFile.addNote(f.str().c_str());
   return true;
 }
 

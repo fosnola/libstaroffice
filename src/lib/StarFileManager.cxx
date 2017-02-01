@@ -43,6 +43,7 @@
 
 #include "StarAttribute.hxx"
 #include "StarBitmap.hxx"
+#include "StarGraphicStruct.hxx"
 #include "StarObject.hxx"
 #include "StarObjectChart.hxx"
 #include "StarObjectDraw.hxx"
@@ -572,20 +573,44 @@ try
   int32_t nLen;
 
   *input>>nId;
-  if (nId==0x35465347 || nId==0x47534635) { // CHECKME: order
+  int type=0;
+  if (nId==0x35465247 || nId==0x47524635) {
+    if (nId==0x47524635)
+      input->setReadInverted(!input->readInverted());
+    if (!zone.openVersionCompatHeader()) {
+      f << "###";
+      STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: can not open the header\n"));
+      ascii.addPos(0);
+      ascii.addNote(f.str().c_str());
+      return false;
+    }
     int32_t nType;
     uint16_t nMapMode;
-    int32_t nOffsX, nOffsY, nScaleNumX, nScaleDenomX, nScaleNumY, nScaleDenomY;
+    int32_t sizeX, sizeY, nOffsX, nOffsY, nScaleNumX, nScaleDenomX, nScaleNumY, nScaleDenomY;
     bool mbSimple;
-    *input >> nType >> nLen;
-    if (nType) f << "type=" << nType << ",";
+    *input >> nType >> nLen >> sizeX>> sizeY;
+    if (nType) {
+      f << "type=" << nType << ",";
+      type=int(nType);
+    }
+    f << "size=" << sizeX << "x" << sizeY << ",";
     // mapmod.cxx: operator>>(..., ImplMapMode& )
-    *input >> nMapMode >> nOffsX>> nOffsY;
-    if (nMapMode) f << "mapMode=" << nMapMode << ",";
-    *input >> nScaleNumX >> nScaleDenomX >> nScaleNumY >> nScaleDenomY >> mbSimple;
-    f << "scaleX=" << nScaleNumX << "/" << nScaleDenomX << ",";
-    f << "scaleY=" << nScaleNumY << "/" << nScaleDenomY << ",";
-    if (mbSimple) f << "simple,";
+    if (!zone.openVersionCompatHeader()) {
+      f << "###";
+      STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: can not open the mapmod header\n"));
+    }
+    else {
+      *input >> nMapMode >> nOffsX>> nOffsY;
+      if (nMapMode) f << "mapMode=" << nMapMode << ",";
+      if (nOffsX || nOffsY)
+        f << "offs=" << nOffsX << "x" << nOffsY << ",";
+      *input >> nScaleNumX >> nScaleDenomX >> nScaleNumY >> nScaleDenomY >> mbSimple;
+      f << "scaleX=" << nScaleNumX << "/" << nScaleDenomX << ",";
+      f << "scaleY=" << nScaleNumY << "/" << nScaleDenomY << ",";
+      if (mbSimple) f << "simple,";
+      zone.closeVersionCompatHeader("StarFileManager");
+    }
+    zone.closeVersionCompatHeader("StarFileManager");
   }
   else {
     if (nId>0x100) {
@@ -593,7 +618,10 @@ try
       input->setReadInverted(!input->readInverted());
       *input>>nId;
     }
-    if (nId) f << "type=" << nId << ",";
+    if (nId) {
+      f << "type=" << nId << ",";
+      type=int(nId);
+    }
     int32_t nWidth, nHeight, nMapMode, nScaleNumX, nScaleDenomX, nScaleNumY, nScaleDenomY, nOffsX, nOffsY;
     *input >> nLen >> nWidth >> nHeight >> nMapMode;
     f << "size=" << nWidth << "x" << nHeight << ",";
@@ -633,6 +661,27 @@ try
   else if (header==0xcdd7) {
     dataType="image/wmf";
     extension="wmf";
+  }
+  else if (header==0x414e) {
+    bool nat5=input->readULong(4)==0x3554414e;
+    input->seek(pictPos, librevenge::RVNG_SEEK_SET);
+    StarGraphicStruct::StarGraphic graphic;
+    if (nat5 && graphic.read(zone,input->size())) {
+      ascii.addPos(0);
+      ascii.addNote(f.str().c_str());
+      dataType=graphic.m_object.m_typeList.empty() ? "image/pict" : graphic.m_object.m_typeList[0];
+      if (!graphic.m_object.m_dataList.empty())
+        data=graphic.m_object.m_dataList[0];
+      extension="pict";
+      return true;
+    }
+    dataType="image/pict";
+    f << "###unknown";
+    STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: find unknown format\n"));
+  }
+  else if (header==0x4356) { // VLCMTF
+    dataType="image/pict";
+    extension="pict";
   }
   else {
     dataType="image/pict";
