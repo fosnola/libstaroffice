@@ -516,66 +516,6 @@ inline void addAttributeVoid(std::map<int, shared_ptr<StarAttribute> > &map, Sta
 namespace StarGraphicAttribute
 {
 // ------------------------------------------------------------
-//! a border attribute
-class StarGAttributeBorder : public StarAttribute
-{
-public:
-  //! constructor
-  StarGAttributeBorder(Type type, std::string const &debugName) :
-    StarAttribute(type, debugName), m_distance(0)
-  {
-    for (int i=0; i<4; ++i) m_distances[i]=0;
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarGAttributeBorder(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  //! add to a cell/graphic/paragraph style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
-  //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
-  {
-    o << m_debugName << "=[";
-    if (m_distance) o << "dist=" << m_distance << ",";
-    for (int i=0; i<4; ++i) {
-      if (!m_borders[i].isEmpty())
-        o << "border" << i << "=[" << m_borders[i] << "],";
-    }
-    bool hasDistances=false;
-    for (int i=0; i<4; ++i) {
-      if (m_distances[i]) {
-        hasDistances=true;
-        break;
-      }
-    }
-    if (hasDistances) {
-      o << "dists=[";
-      for (int i=0; i<4; ++i)
-        o << m_distances[i] << ",";
-      o << "],";
-    }
-    o << "],";
-  }
-
-protected:
-  //! copy constructor
-  StarGAttributeBorder(StarGAttributeBorder const &orig) : StarAttribute(orig), m_distance(orig.m_distance)
-  {
-    for (int i=0; i<4; ++i) {
-      m_borders[i]=orig.m_borders[i];
-      m_distances[i]=orig.m_distances[i];
-    }
-  }
-  //! the distance
-  int m_distance;
-  //! the border list: top, left, right, bottom
-  STOFFBorderLine m_borders[4];
-  //! the padding distance: top, left, right, bottom
-  int m_distances[4];
-};
 
 //! a box info attribute
 class StarGAttributeBoxInfo : public StarAttribute
@@ -621,38 +561,6 @@ protected:
   int m_flags;
 };
 
-//! a brush attribute
-class StarGAttributeBrush : public StarAttribute
-{
-public:
-  //! constructor
-  StarGAttributeBrush(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_brush()
-  {
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarGAttributeBrush(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  //! add to a cell/font/graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
-  //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
-  {
-    o << m_debugName << "=[" << m_brush << "],";
-  }
-
-protected:
-  //! copy constructor
-  StarGAttributeBrush(StarGAttributeBrush const &orig) : StarAttribute(orig), m_brush(orig.m_brush)
-  {
-  }
-  //! the brush
-  StarGraphicStruct::StarBrush m_brush;
-};
-
 //! a crop attribute
 class StarGAttributeCrop : public StarAttribute
 {
@@ -685,55 +593,6 @@ protected:
   STOFFVec2i m_leftTop;
   //! the cropping right/bottom
   STOFFVec2i m_rightBottom;
-};
-
-//! a frameSize attribute
-class StarGAttributeFrameSize : public StarAttribute
-{
-public:
-  //! constructor
-  StarGAttributeFrameSize(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_frmType(0), m_width(0), m_height(0), m_percent(0,0)
-  {
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarGAttributeFrameSize(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  // //! add to a graphic style
-  // virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
-  //! add to a page
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
-  //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
-  {
-    o << m_debugName << "=[";
-    if (m_frmType) // 0: var, 1:fixed, 2:min
-      o << "type=" << m_frmType << ",";
-    if (m_width)
-      o << "width=" << m_width << ",";
-    if (m_height)
-      o << "height=" << m_height << ",";
-    if (m_percent[0]>0 || m_percent[1]>0)
-      o << "size[%]=" << m_percent << ",";
-    o << "],";
-  }
-
-protected:
-  //! copy constructor
-  StarGAttributeFrameSize(StarGAttributeFrameSize const &orig) : StarAttribute(orig), m_frmType(orig.m_frmType), m_width(orig.m_width), m_height(orig.m_height), m_percent(orig.m_percent)
-  {
-  }
-  //! the type
-  int m_frmType;
-  //! the width
-  long m_width;
-  //! the height
-  long m_height;
-  //! the percent value
-  STOFFVec2i m_percent;
 };
 
 //! a named attribute
@@ -898,7 +757,7 @@ public:
     o << "style=" << m_dashStyle << ",";
     for (int i=0; i<2; ++i) {
       if (m_numbers[i])
-        o << (i==0 ? "dots" : "dashs") << "=" << m_numbers[i] << ":" << m_lengths[i] << ",";
+        o << (i==0 ? "dots" : "dashes") << "=" << m_numbers[i] << ":" << m_lengths[i] << ",";
     }
     if (m_distance) o << "distance=" << m_distance << ",";
     o << "],";
@@ -1029,203 +888,6 @@ protected:
   int m_angle;
 };
 
-//! a shadow attribute
-class StarGAttributeShadow : public StarAttribute
-{
-public:
-  //! constructor
-  StarGAttributeShadow(Type type, std::string const &debugName) :
-    StarAttribute(type, debugName), m_location(0), m_width(0), m_transparency(0), m_color(STOFFColor::white()),
-    m_fillColor(STOFFColor::white()), m_style(0)
-  {
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarGAttributeShadow(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  //! add to a cell/graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
-  //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
-  {
-    o << m_debugName << "=[";
-    if (m_location) o << "loc=" << m_location << ",";
-    if (m_width) o << "width=" << m_width << ",";
-    if (m_transparency) o << "transparency=" << m_transparency << ",";
-    if (!m_color.isWhite()) o << "col=" << m_color << ",";
-    if (!m_fillColor.isWhite()) o << "col[fill]=" << m_fillColor << ",";
-    if (m_style) o << "style=" << m_style << ",";
-    o << "],";
-  }
-
-protected:
-  //! copy constructor
-  StarGAttributeShadow(StarGAttributeShadow const &orig) :
-    StarAttribute(orig), m_location(orig.m_location), m_width(orig.m_width), m_transparency(orig.m_transparency), m_color(orig.m_color),
-    m_fillColor(orig.m_fillColor), m_style(orig.m_style)
-  {
-  }
-  //! the location 0-4
-  int m_location;
-  //! the width in twip
-  int m_width;
-  //! the trans?
-  int m_transparency;
-  //! the color
-  STOFFColor m_color;
-  //! the fill color
-  STOFFColor m_fillColor;
-  //! the style
-  int m_style;
-};
-
-void StarGAttributeBorder::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
-{
-  if (m_type==ATTR_FRM_BOX) {
-    // checkme what is m_distance
-
-    // graphic
-    char const * (wh[])= {"top", "left", "right", "bottom"};
-    for (int i=0; i<4; ++i) {
-      if (!m_borders[i].isEmpty())
-        m_borders[i].addTo(state.m_graphic.m_propertyList, wh[i]);
-    }
-    for (int i=0; i<4; ++i)
-      state.m_graphic.m_propertyList.insert((std::string("padding-")+wh[i]).c_str(), libstoff::convertMiniMToPoint(m_distances[i]), librevenge::RVNG_POINT);
-
-    // paragraph
-    for (int i=0; i<4; ++i)
-      m_borders[i].addTo(state.m_paragraph.m_propertyList, wh[i]);
-    // SW table
-    for (int i=0; i<4; ++i)
-      m_borders[i].addTo(state.m_cell.m_propertyList, wh[i]);
-  }
-  else if (m_type==ATTR_SC_BORDER) {
-    // checkme what is m_distance?
-    char const * (wh[])= {"top", "left", "right", "bottom"};
-    for (int i=0; i<4; ++i)
-      m_borders[i].addTo(state.m_cell.m_propertyList, wh[i]);
-  }
-}
-
-void StarGAttributeBrush::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
-{
-  // font
-  if (m_type == ATTR_CHR_BACKGROUND) {
-    if (m_brush.isEmpty())
-      state.m_font.m_propertyList.insert("fo:background-color", "transparent");
-    else {
-      STOFFColor color;
-      if (m_brush.getColor(color))
-        state.m_font.m_propertyList.insert("fo:background-color", color.str().c_str());
-      else {
-        state.m_font.m_propertyList.insert("fo:background-color", "transparent");
-        STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a font background\n"));
-      }
-    }
-  }
-  // graphic|para
-  if (m_type==ATTR_FRM_BACKGROUND) {
-    if (m_brush.m_transparency>0 && m_brush.m_transparency<=255)
-      state.m_graphic.m_propertyList.insert("draw:opacity", 1.-double(m_brush.m_transparency)/255., librevenge::RVNG_PERCENT);
-    else
-      state.m_graphic.m_propertyList.insert("draw:opacity",1., librevenge::RVNG_PERCENT);
-    state.m_paragraph.m_propertyList.insert("fo:background-color", "transparent");
-    // graphic
-    if (m_brush.isEmpty())
-      state.m_graphic.m_propertyList.insert("draw:fill", "none");
-    else {
-      STOFFColor color;
-      if (m_brush.hasUniqueColor() && m_brush.getColor(color)) {
-        state.m_graphic.m_propertyList.insert("draw:fill", "solid");
-        state.m_graphic.m_propertyList.insert("draw:fill-color", color.str().c_str());
-
-        // para
-        state.m_paragraph.m_propertyList.insert("fo:background-color", color.str().c_str());
-      }
-      else {
-        STOFFEmbeddedObject object;
-        STOFFVec2i size;
-        if (m_brush.getPattern(object, size) && object.m_dataList.size()) {
-          state.m_graphic.m_propertyList.insert("draw:fill", "bitmap");
-          state.m_graphic.m_propertyList.insert("draw:fill-image", object.m_dataList[0].getBase64Data());
-          state.m_graphic.m_propertyList.insert("draw:fill-image-width", size[0], librevenge::RVNG_POINT);
-          state.m_graphic.m_propertyList.insert("draw:fill-image-height", size[1], librevenge::RVNG_POINT);
-          state.m_graphic.m_propertyList.insert("draw:fill-image-ref-point-x",0, librevenge::RVNG_POINT);
-          state.m_graphic.m_propertyList.insert("draw:fill-image-ref-point-y",0, librevenge::RVNG_POINT);
-          state.m_graphic.m_propertyList.insert("librevenge:mime-type", object.m_typeList.empty() ? "image/pict" : object.m_typeList[0].c_str());
-        }
-        else
-          state.m_graphic.m_propertyList.insert("draw:fill", "none");
-      }
-    }
-    // SW table
-    if (m_brush.isEmpty())
-      state.m_cell.m_propertyList.insert("fo:background-color", "transparent");
-    else {
-      STOFFColor color;
-      if (m_brush.getColor(color))
-        state.m_cell.m_propertyList.insert("fo:background-color", color.str().c_str());
-      else {
-        STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a cell background\n"));
-        state.m_cell.m_propertyList.insert("fo:background-color", "transparent");
-      }
-    }
-  }
-  // cell
-  if (m_type == ATTR_SC_BACKGROUND) {
-    if (m_brush.isEmpty()) {
-      state.m_cell.m_propertyList.insert("fo:background-color", "transparent");
-      return;
-    }
-
-    STOFFColor color;
-#if 1
-    if (m_brush.getColor(color)) {
-      state.m_cell.m_propertyList.insert("fo:background-color", color.str().c_str());
-      return;
-    }
-    STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a cell background\n"));
-    state.m_cell.m_propertyList.insert("fo:background-color", "transparent");
-#else
-    /* checkme, is it possible to use style:background-image here ?
-       Can not create any working ods file with bitmap cell's background...
-    */
-    if (m_brush.hasUniqueColor() && m_brush.getColor(color)) {
-      state.m_cell.m_propertyList.insert("fo:background-color", color.str().c_str());
-      return;
-    }
-    STOFFEmbeddedObject object;
-    STOFFVec2i size;
-    if (m_brush.getPattern(object, size) && object.m_dataList.size()) {
-      librevenge::RVNGPropertyList backgroundList;
-      backgroundList.insert("librevenge:bitmap", object.m_dataList[0].getBase64Data());
-      backgroundList.insert("xlink:type", "simple");
-      backgroundList.insert("xlink:show", "embed");
-      backgroundList.insert("xlink:actuate", "onLoad");
-      backgroundList.insert("style:filter-name", object.m_typeList.empty() ? "image/pict" : object.m_typeList[0].c_str());
-      if (m_brush.m_transparency>0 && m_brush.m_transparency<=255)
-        backgroundList.insert("draw:opacity", 1.-double(m_brush.m_transparency)/255., librevenge::RVNG_PERCENT);
-      if (m_brush.m_position>=1 && m_brush.m_position<=9) {
-        int xPos=(m_brush.m_position-1)%3, yPos=(m_brush.m_position-1)%3;
-        backgroundList.insert("style:position",
-                              (std::string(xPos==0 ? "left " : xPos==1 ? "center " : "right ")+
-                               std::string(yPos==0 ? "top" : yPos==1 ? "center" : "bottom")).c_str());
-      }
-      librevenge::RVNGPropertyListVector backgroundVector;
-      backgroundVector.append(backgroundList);
-      state.m_cell.m_propertyList.insert("librevenge:background-image", backgroundVector);
-    }
-    else {
-      STOFF_DEBUG_MSG(("StarGAttributeBrush::addTo: can not set a cell background\n"));
-    }
-#endif
-  }
-}
-
 void StarGAttributeCrop::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==SDRATTR_GRAFCROP) {
@@ -1266,20 +928,6 @@ void StarGAttributeNamedBitmap::addTo(StarState &state, std::set<StarAttribute c
       m_bitmap.addAsFillImageTo(state.m_graphic.m_propertyList);
     else {
       STOFF_DEBUG_MSG(("StarGAttributeNamedBitmap::addTo: can not find the bitmap\n"));
-    }
-  }
-}
-
-void StarGAttributeFrameSize::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
-{
-  if (m_type==ATTR_FRM_FRM_SIZE) {
-    if (m_width>0) {
-      state.m_frameSize[0]=float(m_width)*0.05f;
-      state.m_global->m_page.m_propertiesList[0].insert("fo:page-width", double(state.m_frameSize[0]), librevenge::RVNG_POINT);
-    }
-    if (m_height>0) {
-      state.m_frameSize[1]=float(m_height)*0.05f;
-      state.m_global->m_page.m_propertiesList[0].insert("fo:page-height", double(state.m_frameSize[1]), librevenge::RVNG_POINT);
     }
   }
 }
@@ -1340,76 +988,12 @@ void StarGAttributeNamedHatch::addTo(StarState &state, std::set<StarAttribute co
       state.m_graphic.m_propertyList.insert("draw:style", wh[m_hatchType]);
     }
     else {
-      STOFF_DEBUG_MSG(("StarGAttributeNamedHatch::addTo: unknown hash type %d\n", m_hatchType));
+      STOFF_DEBUG_MSG(("StarGraphicAttribute::StarGAttributeNamedHatch::addTo: unknown hash type %d\n", m_hatchType));
     }
     state.m_graphic.m_propertyList.insert("draw:color", m_color.str().c_str());
     state.m_graphic.m_propertyList.insert("draw:distance", libstoff::convertMiniMToPoint(m_distance),librevenge::RVNG_POINT);
     if (m_angle) state.m_graphic.m_propertyList.insert("draw:rotation", double(m_angle)/10, librevenge::RVNG_GENERIC);
   }
-}
-
-void StarGAttributeShadow::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
-{
-  // graphic
-  if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=255)
-    state.m_graphic.m_propertyList.insert("draw:shadow", "hidden");
-  else {
-    state.m_graphic.m_propertyList.insert("draw:shadow", "visible");
-    state.m_graphic.m_propertyList.insert("draw:shadow-color", m_color.str().c_str());
-    state.m_graphic.m_propertyList.insert("draw:shadow-opacity", 1.-double(m_transparency)/255., librevenge::RVNG_PERCENT);
-    state.m_graphic.m_propertyList.insert("draw:shadow-offset-x", ((m_location%2)?-1:1)*libstoff::convertMiniMToPoint(m_width), librevenge::RVNG_POINT);
-    state.m_graphic.m_propertyList.insert("draw:shadow-offset-y", (m_location<=2?-1:1)*libstoff::convertMiniMToPoint(m_width), librevenge::RVNG_POINT);
-  }
-  // cell
-  if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=100)
-    state.m_cell.m_propertyList.insert("style:shadow", "none");
-  else {
-    std::stringstream s;
-    s << m_color.str().c_str() << " "
-      << ((m_location%2)?-1:1)*double(m_width)/20. << "pt "
-      << (m_location<=2?-1:1)*double(m_width)/20. << "pt";
-    state.m_cell.m_propertyList.insert("style:shadow", s.str().c_str());
-  }
-}
-
-bool StarGAttributeBorder::read(StarZone &zone, int nVers, long endPos, StarObject &/*object*/)
-{
-  STOFFInputStreamPtr input=zone.input();
-  long pos=input->tell();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  m_distance=int(input->readULong(2));
-  int cLine=0;
-  bool ok=true;
-  while (input->tell()<endPos) {
-    cLine=int(input->readULong(1));
-    if (cLine>3) break;
-    STOFFBorderLine border;
-    if (!input->readColor(border.m_color)) {
-      STOFF_DEBUG_MSG(("StarGraphicAttribute::StarGAttributeBorder::read: can not find a box's color\n"));
-      f << "###color,";
-      ok=false;
-      break;
-    }
-    border.m_outWidth=int(input->readULong(2));
-    border.m_inWidth=int(input->readULong(2));
-    border.m_distance=int(input->readULong(2));
-    m_borders[cLine]=border;
-  }
-  if (ok && nVers>=1 && cLine&0x10) {
-    if (input->tell()+8 > endPos) {
-      STOFF_DEBUG_MSG(("StarGraphicAttribute::StarGAttributeBorder::read: can not find the box's borders\n"));
-      f << "###distances,";
-    }
-    else {
-      for (int i=0; i<4; ++i) m_distances[i]=int(input->readULong(2));
-    }
-  }
-  printData(f);
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  return ok && input->tell()<=endPos;
 }
 
 bool StarGAttributeBoxInfo::read(StarZone &zone, int /*nVers*/, long endPos, StarObject &/*object*/)
@@ -1444,26 +1028,6 @@ bool StarGAttributeBoxInfo::read(StarZone &zone, int /*nVers*/, long endPos, Sta
   return ok && input->tell()<=endPos;
 }
 
-bool StarGAttributeBrush::read(StarZone &zone, int nVers, long endPos, StarObject &object)
-{
-  STOFFInputStreamPtr input=zone.input();
-  long pos=input->tell();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  bool transparent=false;
-  *input>>transparent;
-  bool ok=m_brush.read(zone, nVers, endPos, object);
-  if (!ok)
-    f << "###brush,";
-  if (transparent)
-    m_brush.m_transparency=255;
-  printData(f);
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  return ok && input->tell()<=endPos;
-}
-
 bool StarGAttributeCrop::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -1481,28 +1045,6 @@ bool StarGAttributeCrop::read(StarZone &zone, int vers, long endPos, StarObject 
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return pos+8<=endPos;
-}
-
-bool StarGAttributeFrameSize::read(StarZone &zone, int nVers, long endPos, StarObject &/*object*/)
-{
-  STOFFInputStreamPtr input=zone.input();
-  long pos=input->tell();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  // sw_sw3attr.cxx SwFmtFrmSize::Create
-  m_frmType=int(input->readULong(1));
-  m_width=int(input->readLong(4));
-  m_height=int(input->readLong(4));
-  if (nVers>1) {
-    int dim[2];
-    for (int i=0; i<2; ++i) dim[i]=int(input->readULong(1));
-    m_percent=STOFFVec2i(dim[0],dim[1]);
-  }
-  printData(f);
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  return input->tell()<=endPos;
 }
 
 bool StarGAttributeNamed::read(StarZone &zone, int /*nVers*/, long endPos, StarObject &/*object*/)
@@ -1755,35 +1297,6 @@ bool StarGAttributeNamedHatch::read(StarZone &zone, int nVers, long endPos, Star
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return input->tell()<=endPos;
-}
-
-bool StarGAttributeShadow::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
-{
-  STOFFInputStreamPtr input=zone.input();
-  long pos=input->tell();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-  bool ok=true;
-  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  m_location=int(input->readULong(1));
-  m_width=int(input->readULong(2));
-  m_transparency=int(input->readULong(1));
-  if (!input->readColor(m_color)) {
-    STOFF_DEBUG_MSG(("StarGraphicAttribute::StarGAttributeShadow::read: can not find a fill color\n"));
-    f << "###color,";
-    ok=false;
-  }
-  if (ok && !input->readColor(m_fillColor)) {
-    STOFF_DEBUG_MSG(("StarGraphicAttribute::StarGAttributeShadow::read: can not find a fill color\n"));
-    f << "###fillcolor,";
-    ok=false;
-  }
-  if (ok) m_style=int(input->readULong(1));
-
-  printData(f);
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  return ok && input->tell()<=endPos;
 }
 
 }
@@ -2041,16 +1554,6 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   map[StarAttribute::XATTR_FILLFLOATTRANSPARENCE]=shared_ptr<StarAttribute>
       (new StarGAttributeNamedGradient(StarAttribute::XATTR_FILLFLOATTRANSPARENCE,"gradient[trans,fill]"));
 
-
-  map[StarAttribute::ATTR_FRM_BOX]=shared_ptr<StarAttribute>(new StarGAttributeBorder(StarAttribute::ATTR_FRM_BOX,"box"));
-  map[StarAttribute::ATTR_FRM_FRM_SIZE]=shared_ptr<StarAttribute>(new StarGAttributeFrameSize(StarAttribute::ATTR_FRM_FRM_SIZE,"frmSize"));
-  map[StarAttribute::ATTR_SC_BORDER]=shared_ptr<StarAttribute>(new StarGAttributeBorder(StarAttribute::ATTR_SC_BORDER,"scBorder"));
-  map[StarAttribute::ATTR_CHR_BACKGROUND]=shared_ptr<StarAttribute>(new StarGAttributeBrush(StarAttribute::ATTR_CHR_BACKGROUND,"chrBackground"));
-  map[StarAttribute::ATTR_FRM_BACKGROUND]=shared_ptr<StarAttribute>(new StarGAttributeBrush(StarAttribute::ATTR_FRM_BACKGROUND,"frmBackground"));
-  map[StarAttribute::ATTR_SC_BACKGROUND]=shared_ptr<StarAttribute>(new StarGAttributeBrush(StarAttribute::ATTR_SC_BACKGROUND,"scBackground"));
-  map[StarAttribute::ATTR_SCH_SYMBOL_BRUSH]=shared_ptr<StarAttribute>(new StarGAttributeBrush(StarAttribute::ATTR_SCH_SYMBOL_BRUSH,"symbold[brush]"));
-  map[StarAttribute::ATTR_FRM_SHADOW]=shared_ptr<StarAttribute>(new StarGAttributeShadow(StarAttribute::ATTR_FRM_SHADOW,"shadow"));
-  map[StarAttribute::ATTR_SC_SHADOW]=shared_ptr<StarAttribute>(new StarGAttributeShadow(StarAttribute::ATTR_SC_SHADOW,"shadow"));
 
   // TOUSE
   map[StarAttribute::ATTR_SC_BORDER_INNER]=shared_ptr<StarAttribute>(new StarGAttributeBoxInfo(StarAttribute::ATTR_SC_BORDER_INNER,"scBorder[inner]"));

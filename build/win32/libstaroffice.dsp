@@ -283,6 +283,10 @@ SOURCE=..\..\src\lib\StarFormatManager.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\StarFrameAttribute.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\StarGraphicAttribute.cxx
 # End Source File
 # Begin Source File
@@ -580,6 +584,10 @@ SOURCE=..\..\src\lib\StarFileManager.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\StarFormatManager.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\StarFrameAttribute.hxx
 # End Source File
 # Begin Source File
 

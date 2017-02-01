@@ -298,6 +298,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\..\src\lib\StarFrameAttribute.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\src\lib\StarGraphicAttribute.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -444,6 +448,7 @@
     <ClInclude Include="..\..\src\lib\StarEncryption.hxx" />
     <ClInclude Include="..\..\src\lib\StarFileManager.hxx" />
     <ClInclude Include="..\..\src\lib\StarFormatManager.hxx" />
+    <ClInclude Include="..\..\src\lib\StarFrameAttribute.hxx" />
     <ClInclude Include="..\..\src\lib\StarGraphicAttribute.hxx" />
     <ClInclude Include="..\..\src\lib\StarGraphicStruct.hxx" />
     <ClInclude Include="..\..\src\lib\StarItem.hxx" />

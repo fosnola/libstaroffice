@@ -144,24 +144,6 @@ public:
   }
   //! destructor
   ~StarPAttributeUInt();
-  //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object)
-  {
-    if (m_type==ATTR_FRM_BREAK) {
-      // SvxFmtBreakItem
-      STOFFInputStreamPtr input=zone.input();
-      long pos=input->tell();
-      libstoff::DebugFile &ascFile=zone.ascii();
-      libstoff::DebugStream f;
-      m_value=static_cast<unsigned int>(input->readULong(1));
-      f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
-      if (vers==0) input->seek(1, librevenge::RVNG_SEEK_CUR); // dummy
-      ascFile.addPos(pos);
-      ascFile.addNote(f.str().c_str());
-      return input->tell()<=endPos;
-    }
-    return StarAttributeUInt::read(zone, vers, endPos, object);
-  }
   //! create a new attribute
   virtual shared_ptr<StarAttribute> create() const
   {
@@ -240,12 +222,6 @@ void StarPAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
     state.m_paragraph.m_bulletVisible=m_value!=0;
   else if (m_type==ATTR_EE_PARA_OUTLLEVEL)
     state.m_paragraph.m_listLevelIndex=int(m_value);
-  else if (m_type==ATTR_FRM_BREAK) {
-    if (m_value>0 && m_value<=6) state.m_break=int(m_value);
-    else if (m_value) {
-      STOFF_DEBUG_MSG(("StarPAttributeUInt::addTo: unknown break value %d\n", int(m_value)));
-    }
-  }
 }
 
 //! add a bool attribute
@@ -488,43 +464,6 @@ protected:
   int m_maxHyphen;
 };
 
-//! a line numbering attribute
-class StarPAttributeLineNumbering : public StarAttribute
-{
-public:
-  //! constructor
-  StarPAttributeLineNumbering(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_start(-1), m_countLines(false)
-  {
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarPAttributeLineNumbering(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  //! add to a para
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
-  //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
-  {
-    o << m_debugName;
-    if (m_countLines)
-      o << "=" << m_start << ",";
-    else
-      o << "*,";
-  }
-protected:
-  //! copy constructor
-  StarPAttributeLineNumbering(StarPAttributeLineNumbering const &orig) : StarAttribute(orig), m_start(orig.m_start), m_countLines(orig.m_countLines)
-  {
-  }
-  //! the name value
-  long m_start;
-  //! the countLines flag
-  bool m_countLines;
-};
-
 //! a line spacing attribute
 class StarPAttributeLineSpacing : public StarAttribute
 {
@@ -568,57 +507,6 @@ protected:
   int m_lineSpaceRule;
   //! the inter line spacing rule: SvxInterLineSpace
   int m_interLineSpaceRule;
-};
-
-//! a left, right, ... attribute
-class StarPAttributeLRSpace : public StarAttribute
-{
-public:
-  //! constructor
-  StarPAttributeLRSpace(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_textLeft(0), m_autoFirst(false)
-  {
-    for (int i=0; i<3; ++i) m_margins[i]=0;
-    for (int i=0; i<3; ++i) m_propMargins[i]=100;
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarPAttributeLRSpace(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  //! add to a paragraph/page
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
-  //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
-  {
-    o << m_debugName << "=[";
-    for (int i=0; i<3; ++i) {
-      char const *(wh[])= {"left", "right", "firstLine"};
-      if (m_propMargins[i]!=100)
-        o << wh[i] << "=" << m_propMargins[i] << "%,";
-      else if (m_margins[i])
-        o << wh[i] << "=" << m_margins[i] << ",";
-    }
-    if (m_textLeft) o << "text[left]=" << m_textLeft << ",";
-    if (!m_autoFirst) o << "autoFirst=no,";
-    o << "],";
-  }
-protected:
-  //! copy constructor
-  StarPAttributeLRSpace(StarPAttributeLRSpace const &orig) : StarAttribute(orig), m_textLeft(orig.m_textLeft), m_autoFirst(orig.m_autoFirst)
-  {
-    for (int i=0; i<3; ++i) m_margins[i]=orig.m_margins[i];
-    for (int i=0; i<3; ++i) m_propMargins[i]=orig.m_propMargins[i];
-  }
-  //! the margins: left, right, firstline
-  int m_margins[3];
-  //! the prop margins: left, right, firstline
-  int m_propMargins[3];
-  //! the text left
-  int m_textLeft;
-  //! a bool
-  bool m_autoFirst;
 };
 
 //! a numRule attribute
@@ -720,51 +608,6 @@ protected:
   std::vector<TabStop> m_tabList;
 };
 
-//! a top, bottom, ... attribute
-class StarPAttributeULSpace : public StarAttribute
-{
-public:
-  //! constructor
-  StarPAttributeULSpace(Type type, std::string const &debugName) : StarAttribute(type, debugName)
-  {
-    for (int i=0; i<2; ++i) m_margins[i]=0;
-    for (int i=0; i<2; ++i) m_propMargins[i]=100;
-  }
-  //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
-  {
-    return shared_ptr<StarAttribute>(new StarPAttributeULSpace(*this));
-  }
-  //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  //! add to a page/paragraph
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
-  //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
-  {
-    o << m_debugName << "=[";
-    for (int i=0; i<2; ++i) {
-      char const *(wh[])= {"top", "bottom" };
-      if (m_propMargins[i]!=100)
-        o << wh[i] << "=" << m_propMargins[i] << "%,";
-      else if (m_margins[i])
-        o << wh[i] << "=" << m_margins[i] << ",";
-    }
-    o << "],";
-  }
-protected:
-  //! copy constructor
-  StarPAttributeULSpace(StarPAttributeULSpace const &orig) : StarAttribute(orig)
-  {
-    for (int i=0; i<2; ++i) m_margins[i]=orig.m_margins[i];
-    for (int i=0; i<2; ++i) m_propMargins[i]=orig.m_propMargins[i];
-  }
-  //! the margins: top, bottom
-  int m_margins[2];
-  //! the prop margins: top, bottom
-  int m_propMargins[2];
-};
-
 void StarPAttributeAdjust::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_PARA_ADJUST) {
@@ -837,16 +680,6 @@ void StarPAttributeHyphen::addTo(StarState &/*state*/, std::set<StarAttribute co
 {
 }
 
-void StarPAttributeLineNumbering::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
-{
-  if (m_type==ATTR_FRM_LINENUMBER) {
-    if (m_start>=0 && m_countLines) {
-      state.m_paragraph.m_propertyList.insert("text:number-lines", true);
-      state.m_paragraph.m_propertyList.insert("text:line-number", m_start==0 ? 1 : int(m_start));
-    }
-  }
-}
-
 void StarPAttributeLineSpacing::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_PARA_LINESPACING) {
@@ -878,40 +711,6 @@ void StarPAttributeLineSpacing::addTo(StarState &state, std::set<StarAttribute c
     default:
       STOFF_DEBUG_MSG(("StarPAttributeLineSpacing::addTo: unknown inter linse spacing rule %d\n", int(m_interLineSpaceRule)));
     }
-  }
-}
-
-void StarPAttributeLRSpace::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
-{
-  // paragraph
-  if (m_type==ATTR_FRM_LR_SPACE || m_type==ATTR_EE_PARA_OUTLLR_SPACE) {
-    if (m_propMargins[0]==100) // unsure if/when we need to use textLeft/margins[0] here
-      state.m_paragraph.m_propertyList.insert("fo:margin-left", state.m_global->m_relativeUnit*double(m_textLeft), librevenge::RVNG_POINT);
-    else
-      state.m_paragraph.m_propertyList.insert("fo:margin-left", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
-
-    if (m_propMargins[1]==100)
-      state.m_paragraph.m_propertyList.insert("fo:margin-right", state.m_global->m_relativeUnit*double(m_margins[1]), librevenge::RVNG_POINT);
-    else
-      state.m_paragraph.m_propertyList.insert("fo:margin-right", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
-    if (m_propMargins[2]==100)
-      state.m_paragraph.m_propertyList.insert("fo:text-indent", state.m_global->m_relativeUnit*double(m_margins[2]), librevenge::RVNG_POINT);
-    else
-      state.m_paragraph.m_propertyList.insert("fo:text-indent", double(m_propMargins[2])/100., librevenge::RVNG_PERCENT);
-    // m_textLeft: ok to ignore ?
-    state.m_paragraph.m_propertyList.insert("style:auto-text-indent", m_autoFirst);
-  }
-  // page
-  if (m_type==ATTR_FRM_LR_SPACE && state.m_global->m_pageZone>=0 && state.m_global->m_pageZone<=2) {
-    if (m_propMargins[0]==100)
-      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-left", double(m_margins[0])*0.05, librevenge::RVNG_POINT);
-    else
-      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-left", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
-
-    if (m_propMargins[1]==100)
-      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-right", double(m_margins[1])*0.05, librevenge::RVNG_POINT);
-    else
-      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-right", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
   }
 }
 
@@ -961,34 +760,6 @@ void StarPAttributeTabStop::addTo(StarState &state, std::set<StarAttribute const
     tabs.append(tab);
   }
   state.m_paragraph.m_propertyList.insert("style:tab-stops", tabs);
-}
-
-void StarPAttributeULSpace::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
-{
-  // paragraph
-  if (m_type==ATTR_FRM_UL_SPACE) {
-    if (m_propMargins[0]==100)
-      state.m_paragraph.m_propertyList.insert("fo:margin-top", state.m_global->m_relativeUnit*double(m_margins[0]), librevenge::RVNG_POINT);
-    else
-      state.m_paragraph.m_propertyList.insert("fo:margin-top", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
-
-    if (m_propMargins[1]==100)
-      state.m_paragraph.m_propertyList.insert("fo:margin-bottom", state.m_global->m_relativeUnit*double(m_margins[1]), librevenge::RVNG_POINT);
-    else
-      state.m_paragraph.m_propertyList.insert("fo:margin-bottom", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
-  }
-  // page
-  if (m_type==ATTR_FRM_UL_SPACE && state.m_global->m_pageZone>=0 && state.m_global->m_pageZone<=2) {
-    if (m_propMargins[0]==100)
-      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-top", double(m_margins[0])*0.05, librevenge::RVNG_POINT);
-    else
-      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-top", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
-
-    if (m_propMargins[1]==100)
-      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-bottom", double(m_margins[1])*0.05, librevenge::RVNG_POINT);
-    else
-      state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-bottom", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
-  }
 }
 
 bool StarPAttributeAdjust::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
@@ -1090,23 +861,6 @@ bool StarPAttributeHyphen::read(StarZone &zone, int /*vers*/, long endPos, StarO
   return input->tell()<=endPos;
 }
 
-bool StarPAttributeLineNumbering::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
-{
-  STOFFInputStreamPtr input=zone.input();
-  long pos=input->tell();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  // sw_sw3attr.cxx SwFmtLineNumber::Create
-  m_start=long(input->readULong(4));
-  *input >> m_countLines;
-
-  printData(f);
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  return input->tell()<=endPos;
-}
-
 bool StarPAttributeLineSpacing::read(StarZone &zone, int /*vers*/, long endPos, StarObject &/*object*/)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -1120,50 +874,6 @@ bool StarPAttributeLineSpacing::read(StarZone &zone, int /*vers*/, long endPos, 
   m_lineSpaceRule=int(input->readULong(1));
   m_interLineSpaceRule=int(input->readULong(1));
 
-  printData(f);
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  return input->tell()<=endPos;
-}
-
-bool StarPAttributeLRSpace::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
-{
-  STOFFInputStreamPtr input=zone.input();
-  long pos=input->tell();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  // svx_frmitems.cxx: SvxLRSpaceItem::Create
-  for (int i=0; i<3; ++i) {
-    if (i<2)
-      m_margins[i]=int(input->readULong(2));
-    else
-      m_margins[i]=int(input->readLong(2));
-    m_propMargins[i]=int(input->readULong(vers>=1 ? 2 : 1));
-  }
-  if (vers>=2)
-    m_textLeft=int(input->readLong(2));
-  uint8_t autofirst=0;
-  if (vers>=3) {
-    *input >> autofirst;
-    m_autoFirst=(autofirst&1);
-    long marker=long(input->readULong(4));
-    if (marker==0x599401FE) {
-      m_margins[2]=int(input->readLong(2));
-      if (m_margins[2]<0)
-        m_margins[0]+=m_margins[2];
-    }
-    else
-      input->seek(-4, librevenge::RVNG_SEEK_CUR);
-  }
-  if (vers>=4 && (autofirst&0x80)) { // negative margin
-    int32_t nMargin;
-    *input >> nMargin;
-    m_margins[0]=nMargin;
-    *input >> nMargin;
-    m_margins[1]=nMargin;
-  }
-  //m_textLeft=(m_margins[2]>=0) ? m_margins[0] : m_margins[0]-m_margins[2];
   printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -1226,22 +936,6 @@ bool StarPAttributeTabStop::read(StarZone &zone, int /*vers*/, long endPos, Star
   return input->tell()<=endPos;
 }
 
-bool StarPAttributeULSpace::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
-{
-  STOFFInputStreamPtr input=zone.input();
-  long pos=input->tell();
-  libstoff::DebugFile &ascFile=zone.ascii();
-  libstoff::DebugStream f;
-  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  for (int i=0; i<2; ++i) {
-    m_margins[i]=int(input->readULong(2));
-    m_propMargins[i]=int(input->readULong(vers>=1 ? 2 : 1));
-  }
-  printData(f);
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
-  return input->tell()<=endPos;
-}
 }
 
 namespace StarParagraphAttribute
@@ -1258,15 +952,10 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeUInt(map, StarAttribute::ATTR_EE_PARA_BULLETSTATE,"para[bullet,state]",2,0);
   addAttributeUInt(map, StarAttribute::ATTR_EE_PARA_OUTLLEVEL,"para[outlevel]",2,0);
   addAttributeBool(map, StarAttribute::ATTR_EE_PARA_ASIANCJKSPACING,"para[asianCJKSpacing]",false);
-  addAttributeUInt(map, StarAttribute::ATTR_FRM_BREAK,"para[break]",1,0);
 
   map[StarAttribute::ATTR_PARA_ADJUST]=shared_ptr<StarAttribute>(new StarPAttributeAdjust(StarAttribute::ATTR_PARA_ADJUST,"parAtrAdjust"));
-  map[StarAttribute::ATTR_FRM_LR_SPACE]=shared_ptr<StarAttribute>(new StarPAttributeLRSpace(StarAttribute::ATTR_FRM_LR_SPACE,"lrSpace"));
-  map[StarAttribute::ATTR_FRM_UL_SPACE]=shared_ptr<StarAttribute>(new StarPAttributeULSpace(StarAttribute::ATTR_FRM_UL_SPACE,"ulSpace"));
-  map[StarAttribute::ATTR_FRM_LINENUMBER]=shared_ptr<StarAttribute>(new StarPAttributeLineNumbering(StarAttribute::ATTR_FRM_LINENUMBER,"lineNumbering"));
   map[StarAttribute::ATTR_PARA_LINESPACING]=shared_ptr<StarAttribute>(new StarPAttributeLineSpacing(StarAttribute::ATTR_PARA_LINESPACING,"parAtrLinespacing"));
   map[StarAttribute::ATTR_PARA_TABSTOP]=shared_ptr<StarAttribute>(new StarPAttributeTabStop(StarAttribute::ATTR_PARA_TABSTOP,"parAtrTabStop"));
-  map[StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE]=shared_ptr<StarAttribute>(new StarPAttributeLRSpace(StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE,"eeOutLrSpace"));
   map[StarAttribute::ATTR_EE_PARA_NUMBULLET]=shared_ptr<StarAttribute>(new StarPAttributeBulletNumeric(StarAttribute::ATTR_EE_PARA_NUMBULLET,"eeParaNumBullet"));
   map[StarAttribute::ATTR_EE_PARA_BULLET]=shared_ptr<StarAttribute>(new StarPAttributeBulletSimple(StarAttribute::ATTR_EE_PARA_BULLET,"paraBullet"));
   map[StarAttribute::ATTR_PARA_DROP]=shared_ptr<StarAttribute>(new StarPAttributeDrop(StarAttribute::ATTR_PARA_DROP,"parAtrDrop"));

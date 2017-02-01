@@ -109,6 +109,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarFileManager.hxx			\
 	StarFormatManager.cxx			\
 	StarFormatManager.hxx			\
+	StarFrameAttribute.cxx			\
+	StarFrameAttribute.hxx			\
 	StarGraphicAttribute.cxx		\
 	StarGraphicAttribute.hxx		\
 	StarGraphicStruct.cxx			\

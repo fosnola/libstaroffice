@@ -564,11 +564,13 @@ bool StarTableInternal::Table::send(STOFFListenerPtr listener, StarState &state)
     STOFF_DEBUG_MSG(("StarTableInternal::Table::send: call without listener\n"));
     return false;
   }
-  STOFFTable table;
   float percentMaxValue=0;
   StarState cState(state.m_global);
+  STOFFTable table;
   if (m_format) {
     m_format->updateState(cState);
+    table.m_propertyList=cState.m_cell.m_propertyList;
+
     m_minColWidth=cState.m_frameSize[0];
     // checkme sometime the width is 65535/20, ie. bigger than the page width...
     if (cState.m_frameSize[0]>=float(65535/20)) {

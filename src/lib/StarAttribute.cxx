@@ -45,6 +45,7 @@
 #include "StarBitmap.hxx"
 #include "StarCellAttribute.hxx"
 #include "StarCharAttribute.hxx"
+#include "StarFrameAttribute.hxx"
 #include "StarGraphicAttribute.hxx"
 #include "StarPageAttribute.hxx"
 #include "StarParagraphAttribute.hxx"
@@ -140,6 +141,7 @@ void State::initAttributeMap()
 {
   StarCellAttribute::addInitTo(m_whichToAttributeMap);
   StarCharAttribute::addInitTo(m_whichToAttributeMap);
+  StarFrameAttribute::addInitTo(m_whichToAttributeMap);
   StarGraphicAttribute::addInitTo(m_whichToAttributeMap);
   StarParagraphAttribute::addInitTo(m_whichToAttributeMap);
   StarPageAttribute::addInitTo(m_whichToAttributeMap);
@@ -153,7 +155,6 @@ void State::initAttributeMap()
   addAttributeBool(StarAttribute::ATTR_FRM_OPAQUE,"opaque",true);
   addAttributeBool(StarAttribute::ATTR_FRM_KEEP,"frm[keep]",false);
   addAttributeBool(StarAttribute::ATTR_FRM_EDIT_IN_READONLY,"edit[readOnly]",false);
-  addAttributeBool(StarAttribute::ATTR_FRM_LAYOUT_SPLIT,"layout[split]", true);
   addAttributeBool(StarAttribute::ATTR_FRM_COLUMNBALANCE,"col[noBalanced]", true);
   addAttributeUInt(StarAttribute::ATTR_FRM_FRAMEDIR,"frame[dir]",2,4); // frame environment
   addAttributeBool(StarAttribute::ATTR_FRM_HEADER_FOOTER_EAT_SPACING,"headFoot[eat,spacing]",false);
@@ -731,14 +732,6 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
     if (nVers>2) f << "bCont=" << input->readULong(1) << ",";
     if (nVers>3) f << "bOutside1=" << input->readULong(1) << ",";
     break;
-  case StarAttribute::ATTR_FRM_VERT_ORIENT:
-  case StarAttribute::ATTR_FRM_HORI_ORIENT:
-    f << (nWhich==StarAttribute::ATTR_FRM_VERT_ORIENT ? "vertOrient" : "horiOrient") << ",";
-    f << "nPos=" << input->readULong(4) << ",";
-    f << "nOrient=" << input->readULong(1) << ",";
-    f << "nRel=" << input->readULong(1) << ",";
-    if (nWhich==StarAttribute::ATTR_FRM_HORI_ORIENT && nVers>=1) f << "bToggle=" << input->readULong(1) << ",";
-    break;
   case StarAttribute::ATTR_FRM_ANCHOR:
     f << "anchor=" << input->readULong(1) << ",";
     if (nVers<1)
@@ -965,5 +958,4 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
   ascFile.addNote(f.str().c_str());
   return getDummyAttribute(nWhich); // fixme
 }
-
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
