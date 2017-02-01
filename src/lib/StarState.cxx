@@ -50,6 +50,7 @@ StarState::StarState(StarState const &orig) :
   m_styleName(orig.m_styleName),
   m_break(orig.m_break),
   m_cell(orig.m_cell),
+  m_frame(orig.m_frame),
   m_graphic(orig.m_graphic),
   m_paragraph(orig.m_paragraph),
   m_font(orig.m_font), m_content(orig.m_content), m_footnote(orig.m_footnote), m_link(orig.m_link), m_refMark(orig.m_refMark), m_field(orig.m_field)

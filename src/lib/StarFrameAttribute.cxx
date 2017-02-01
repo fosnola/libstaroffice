@@ -191,7 +191,7 @@ StarFAttributeVoid::~StarFAttributeVoid()
 void StarFAttributeBool::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==ATTR_FRM_LAYOUT_SPLIT)
-    state.m_cell.m_propertyList.insert("style:may-break-between-rows", m_value);
+    state.m_frame.m_propertyList.insert("style:may-break-between-rows", m_value);
 }
 
 void StarFAttributeInt::addTo(StarState &/*state*/, std::set<StarAttribute const *> &/*done*/) const
@@ -203,7 +203,7 @@ void StarFAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
   if (m_type==ATTR_FRM_BREAK) {
     if (m_value>0 && m_value<=6) state.m_break=int(m_value);
     else if (m_value) {
-      STOFF_DEBUG_MSG(("StarPAttributeUInt::addTo: unknown break value %d\n", int(m_value)));
+      STOFF_DEBUG_MSG(("StarFrameAttribute::StarFAttributeUInt::addTo: unknown break value %d\n", int(m_value)));
     }
   }
 }
@@ -652,12 +652,12 @@ void StarFAttributeBrush::addTo(StarState &state, std::set<StarAttribute const *
         state.m_font.m_propertyList.insert("fo:background-color", color.str().c_str());
       else {
         state.m_font.m_propertyList.insert("fo:background-color", "transparent");
-        STOFF_DEBUG_MSG(("StarFAttributeBrush::addTo: can not set a font background\n"));
+        STOFF_DEBUG_MSG(("StarFrameAttribute::StarFAttributeBrush::addTo: can not set a font background\n"));
       }
     }
   }
   // graphic|para
-  if (m_type==ATTR_FRM_BACKGROUND) {
+  else if (m_type==ATTR_FRM_BACKGROUND) {
     if (m_brush.m_transparency>0 && m_brush.m_transparency<=255)
       state.m_graphic.m_propertyList.insert("draw:opacity", 1.-double(m_brush.m_transparency)/255., librevenge::RVNG_PERCENT);
     else
@@ -699,13 +699,13 @@ void StarFAttributeBrush::addTo(StarState &state, std::set<StarAttribute const *
       if (m_brush.getColor(color))
         state.m_cell.m_propertyList.insert("fo:background-color", color.str().c_str());
       else {
-        STOFF_DEBUG_MSG(("StarFAttributeBrush::addTo: can not set a cell background\n"));
+        STOFF_DEBUG_MSG(("StarFrameAttribute::StarFAttributeBrush::addTo: can not set a cell background\n"));
         state.m_cell.m_propertyList.insert("fo:background-color", "transparent");
       }
     }
   }
   // cell
-  if (m_type == ATTR_SC_BACKGROUND) {
+  else if (m_type == ATTR_SC_BACKGROUND) {
     if (m_brush.isEmpty()) {
       state.m_cell.m_propertyList.insert("fo:background-color", "transparent");
       return;
@@ -717,7 +717,7 @@ void StarFAttributeBrush::addTo(StarState &state, std::set<StarAttribute const *
       state.m_cell.m_propertyList.insert("fo:background-color", color.str().c_str());
       return;
     }
-    STOFF_DEBUG_MSG(("StarFAttributeBrush::addTo: can not set a cell background\n"));
+    STOFF_DEBUG_MSG(("StarFrameAttribute::StarFAttributeBrush::addTo: can not set a cell background\n"));
     state.m_cell.m_propertyList.insert("fo:background-color", "transparent");
 #else
     /* checkme, is it possible to use style:background-image here ?
@@ -749,7 +749,7 @@ void StarFAttributeBrush::addTo(StarState &state, std::set<StarAttribute const *
       state.m_cell.m_propertyList.insert("librevenge:background-image", backgroundVector);
     }
     else {
-      STOFF_DEBUG_MSG(("StarFAttributeBrush::addTo: can not set a cell background\n"));
+      STOFF_DEBUG_MSG(("StarFrameAttribute::StarFAttributeBrush::addTo: can not set a cell background\n"));
     }
 #endif
   }
@@ -823,7 +823,7 @@ void StarFAttributeOrientation::addTo(StarState &state, std::set<StarAttribute c
     case 2:
     case 3: { // CHECKME
       char const *(wh[])= {"start", "center", "left"};
-      state.m_cell.m_propertyList.insert("fo:text-align", wh[m_orient-1]);
+      state.m_frame.m_propertyList.insert("fo:text-align", wh[m_orient-1]);
       break;
     }
     default: // TODO
@@ -838,7 +838,7 @@ void StarFAttributeOrientation::addTo(StarState &state, std::set<StarAttribute c
     case 2:
     case 3: {
       char const *(wh[])= {"top", "middle", "bottom"};
-      state.m_cell.m_propertyList.insert("style:vertical-align", wh[m_orient-1]);
+      state.m_frame.m_propertyList.insert("style:vertical-align", wh[m_orient-1]);
       break;
     }
     default: // TODO

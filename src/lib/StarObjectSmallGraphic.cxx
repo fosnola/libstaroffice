@@ -416,6 +416,7 @@ public:
   //! try to update the graphic style
   void updateStyle(StarState &state, STOFFListenerPtr /*listener*/) const
   {
+    state.m_frame.addTo(state.m_graphic.m_propertyList);
     if (m_flags[0] && m_flags[1])
       state.m_graphic.m_propertyList.insert("style:protect", "position size");
     else if (m_flags[0])

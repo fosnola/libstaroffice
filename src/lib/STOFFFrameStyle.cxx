@@ -50,7 +50,7 @@ std::ostream &operator<<(std::ostream &o, STOFFFrameStyle const &frameStyle)
 bool STOFFFrameStyle::operator==(STOFFFrameStyle const &frameStyle) const
 {
   return m_propertyList.getPropString() == frameStyle.m_propertyList.getPropString() &&
-    m_frameSize == frameStyle.m_frameSize;
+         m_frameSize == frameStyle.m_frameSize;
 }
 
 void STOFFFrameStyle::addTo(librevenge::RVNGPropertyList &pList) const

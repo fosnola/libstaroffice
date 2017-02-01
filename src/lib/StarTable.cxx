@@ -205,6 +205,7 @@ void TableBox::updatePosition(Table &table, StarState const &state, float xOrigi
       table.m_rowToBoxMap[row]=std::vector<StarTableInternal::TableBox *>();
     table.m_rowToBoxMap.find(row)->second.push_back(this);
     m_cellStyle=cState.m_cell;
+    cState.m_frame.addTo(m_cellStyle.m_propertyList);
     return;
   }
   for (size_t i=0; i< m_lineList.size(); ++i) {
@@ -570,6 +571,7 @@ bool StarTableInternal::Table::send(STOFFListenerPtr listener, StarState &state)
   if (m_format) {
     m_format->updateState(cState);
     table.m_propertyList=cState.m_cell.m_propertyList;
+    cState.m_frame.addTo(table.m_propertyList);
 
     m_minColWidth=cState.m_frame.m_frameSize[0];
     // checkme sometime the width is 65535/20, ie. bigger than the page width...

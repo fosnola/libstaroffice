@@ -2059,6 +2059,7 @@ void StarItemPool::defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVN
     return;
   }
   StarState state(this, object);
+  state.m_frame.addTo(state.m_graphic.m_propertyList);
   state.m_graphic.m_propertyList.insert("style:display-name", styleName);
   if (!style->m_names[1].empty()) {
     if (done.find(style->m_names[1])!=done.end()) {
