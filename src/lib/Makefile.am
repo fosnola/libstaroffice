@@ -35,6 +35,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFEntry.cxx				\
 	STOFFFont.cxx				\
 	STOFFFont.hxx				\
+	STOFFFrameStyle.cxx			\
+	STOFFFrameStyle.hxx			\
 	STOFFGraphicDecoder.cxx			\
 	STOFFGraphicDecoder.hxx			\
 	STOFFGraphicEncoder.cxx			\

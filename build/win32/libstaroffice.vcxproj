@@ -150,6 +150,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\..\src\lib\STOFFFrameStyle.cxx">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\src\lib\STOFFGraphicDecoder.cxx">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -411,6 +415,7 @@
     <ClInclude Include="..\..\src\lib\STOFFDebug.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFEntry.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFFont.hxx" />
+    <ClInclude Include="..\..\src\lib\STOFFFrameStyle.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFGraphicDecoder.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFGraphicEncoder.hxx" />
     <ClInclude Include="..\..\src\lib\STOFFGraphicListener.hxx" />

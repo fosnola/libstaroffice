@@ -614,11 +614,11 @@ protected:
 
 void StarFAttributeBorder::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
+  char const * (wh[])= {"top", "left", "right", "bottom"};
   if (m_type==ATTR_FRM_BOX) {
     // checkme what is m_distance
 
     // graphic
-    char const * (wh[])= {"top", "left", "right", "bottom"};
     for (int i=0; i<4; ++i) {
       if (!m_borders[i].isEmpty())
         m_borders[i].addTo(state.m_graphic.m_propertyList, wh[i]);
@@ -635,7 +635,6 @@ void StarFAttributeBorder::addTo(StarState &state, std::set<StarAttribute const 
   }
   else if (m_type==ATTR_SC_BORDER) {
     // checkme what is m_distance?
-    char const * (wh[])= {"top", "left", "right", "bottom"};
     for (int i=0; i<4; ++i)
       m_borders[i].addTo(state.m_cell.m_propertyList, wh[i]);
   }
@@ -760,12 +759,12 @@ void StarFAttributeFrameSize::addTo(StarState &state, std::set<StarAttribute con
 {
   if (m_type==ATTR_FRM_FRM_SIZE) {
     if (m_width>0) {
-      state.m_frameSize[0]=float(m_width)*0.05f;
-      state.m_global->m_page.m_propertiesList[0].insert("fo:page-width", double(state.m_frameSize[0]), librevenge::RVNG_POINT);
+      state.m_frame.m_frameSize[0]=float(m_width)*0.05f;
+      state.m_global->m_page.m_propertiesList[0].insert("fo:page-width", double(state.m_frame.m_frameSize[0]), librevenge::RVNG_POINT);
     }
     if (m_height>0) {
-      state.m_frameSize[1]=float(m_height)*0.05f;
-      state.m_global->m_page.m_propertiesList[0].insert("fo:page-height", double(state.m_frameSize[1]), librevenge::RVNG_POINT);
+      state.m_frame.m_frameSize[1]=float(m_height)*0.05f;
+      state.m_global->m_page.m_propertiesList[0].insert("fo:page-height", double(state.m_frame.m_frameSize[1]), librevenge::RVNG_POINT);
     }
   }
 }

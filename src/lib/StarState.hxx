@@ -44,6 +44,7 @@
 
 #include "STOFFCellStyle.hxx"
 #include "STOFFFont.hxx"
+#include "STOFFFrameStyle.hxx"
 #include "STOFFGraphicStyle.hxx"
 #include "STOFFParagraph.hxx"
 #include "STOFFPageSpan.hxx"
@@ -105,15 +106,15 @@ public:
     GlobalState &operator=(GlobalState const &);
   };
   //! constructor
-  StarState(StarItemPool const *pool, StarObject &object, double relUnit=0.05) :
-    m_global(new GlobalState(pool, object, relUnit)),
-    m_styleName(""),
-    m_break(0),
-    m_cell(),
-    m_graphic(),
-    m_paragraph(),
-    m_font(), m_content(false), m_footnote(false), m_link(""), m_refMark(""), m_field(),
-    m_frameSize()
+  StarState(StarItemPool const *pool, StarObject &object, double relUnit=0.05)
+    : m_global(new GlobalState(pool, object, relUnit))
+    , m_styleName("")
+    , m_break(0)
+    , m_cell()
+    , m_frame()
+    , m_graphic()
+    , m_paragraph()
+    , m_font(), m_content(false), m_footnote(false), m_link(""), m_refMark(""), m_field()
   {
   }
   //! constructor
@@ -122,10 +123,10 @@ public:
     m_styleName(""),
     m_break(0),
     m_cell(),
+    m_frame(),
     m_graphic(),
     m_paragraph(),
-    m_font(), m_content(false), m_footnote(false), m_link(""), m_refMark(""), m_field(),
-    m_frameSize()
+    m_font(), m_content(false), m_footnote(false), m_link(""), m_refMark(""), m_field()
   {
   }
   //! copy constructor
@@ -144,6 +145,8 @@ public:
 
   /// the cell style
   STOFFCellStyle m_cell;
+  /// the frame style
+  STOFFFrameStyle m_frame;
   /// the graphic style
   STOFFGraphicStyle m_graphic;
 
@@ -161,8 +164,6 @@ public:
   librevenge::RVNGString m_refMark;
   /** the field */
   shared_ptr<SWFieldManagerInternal::Field> m_field;
-  /** the last frame dimension */
-  STOFFVec2f m_frameSize;
 private:
   StarState &operator=(StarState const &);
 };

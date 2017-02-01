@@ -135,6 +135,10 @@ SOURCE=..\..\src\lib\STOFFFont.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\src\lib\STOFFFrameStyle.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\src\lib\STOFFGraphicDecoder.cxx
 # End Source File
 # Begin Source File
@@ -436,6 +440,10 @@ SOURCE=..\..\src\lib\STOFFEntry.hxx
 # Begin Source File
 
 SOURCE=..\..\src\lib\STOFFFont.hxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\src\lib\STOFFFrameStyle.hxx
 # End Source File
 # Begin Source File
 

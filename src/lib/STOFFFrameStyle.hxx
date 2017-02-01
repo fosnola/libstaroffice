@@ -31,47 +31,40 @@
 * instead of those above.
 */
 
-#include <sstream>
+#ifndef STOFF_FRAME_STYLE
+#  define STOFF_FRAME_STYLE
 
-#include <librevenge/librevenge.h>
+#include <string>
+#include <vector>
 
 #include "libstaroffice_internal.hxx"
 
-#include "STOFFCellStyle.hxx"
-
-// cell style function
-
-std::ostream &operator<<(std::ostream &o, STOFFCellStyle const &cellStyle)
+//! Class to store a frame style
+class STOFFFrameStyle
 {
-  o << cellStyle.m_propertyList.getPropString().cstr() << ",";
-  if (cellStyle.m_numberCellSpanned!=STOFFVec2i(1,1))
-    o << "span=" << cellStyle.m_numberCellSpanned << ",";
-  if (cellStyle.m_format)
-    o << "format=" << cellStyle.m_format << ",";
-  return o;
-}
-
-bool STOFFCellStyle::operator==(STOFFCellStyle const &cellStyle) const
-{
-  return m_propertyList.getPropString() == cellStyle.m_propertyList.getPropString() &&
-         m_numberCellSpanned==cellStyle.m_numberCellSpanned && m_format==cellStyle.m_format;
-}
-
-void STOFFCellStyle::addTo(librevenge::RVNGPropertyList &pList) const
-{
-  librevenge::RVNGPropertyList::Iter i(m_propertyList);
-  for (i.rewind(); i.next();) {
-    if (i.child()) {
-      if (std::string("librevenge:background-image") != i.key()) {
-        STOFF_DEBUG_MSG(("STOFFCellStyle::addTo: find unexpected property child\n"));
-      }
-      pList.insert(i.key(), *i.child());
-      continue;
-    }
-    pList.insert(i.key(), i()->clone());
+public:
+  /** constructor */
+  STOFFFrameStyle() : m_propertyList(), m_frameSize(0,0)
+  {
   }
-  pList.insert("table:number-columns-spanned", m_numberCellSpanned[0]);
-  pList.insert("table:number-rows-spanned", m_numberCellSpanned[1]);
-}
+  //! add to the propList
+  void addTo(librevenge::RVNGPropertyList &propList) const;
 
+  //! operator<<
+  friend std::ostream &operator<<(std::ostream &o, STOFFFrameStyle const &frameStyle);
+  //! operator==
+  bool operator==(STOFFFrameStyle const &frameStyle) const;
+  //! operator!=
+  bool operator!=(STOFFFrameStyle const &frameStyle) const
+  {
+    return !operator==(frameStyle);
+  }
+  /** the property list */
+  librevenge::RVNGPropertyList m_propertyList;
+  /** the last frame dimension */
+  STOFFVec2f m_frameSize;
+};
+
+
+#endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

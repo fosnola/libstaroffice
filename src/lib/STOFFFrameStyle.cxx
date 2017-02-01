@@ -37,41 +37,33 @@
 
 #include "libstaroffice_internal.hxx"
 
-#include "STOFFCellStyle.hxx"
+#include "STOFFFrameStyle.hxx"
 
-// cell style function
+// frame style function
 
-std::ostream &operator<<(std::ostream &o, STOFFCellStyle const &cellStyle)
+std::ostream &operator<<(std::ostream &o, STOFFFrameStyle const &frameStyle)
 {
-  o << cellStyle.m_propertyList.getPropString().cstr() << ",";
-  if (cellStyle.m_numberCellSpanned!=STOFFVec2i(1,1))
-    o << "span=" << cellStyle.m_numberCellSpanned << ",";
-  if (cellStyle.m_format)
-    o << "format=" << cellStyle.m_format << ",";
+  o << frameStyle.m_propertyList.getPropString().cstr() << ",";
   return o;
 }
 
-bool STOFFCellStyle::operator==(STOFFCellStyle const &cellStyle) const
+bool STOFFFrameStyle::operator==(STOFFFrameStyle const &frameStyle) const
 {
-  return m_propertyList.getPropString() == cellStyle.m_propertyList.getPropString() &&
-         m_numberCellSpanned==cellStyle.m_numberCellSpanned && m_format==cellStyle.m_format;
+  return m_propertyList.getPropString() == frameStyle.m_propertyList.getPropString() &&
+    m_frameSize == frameStyle.m_frameSize;
 }
 
-void STOFFCellStyle::addTo(librevenge::RVNGPropertyList &pList) const
+void STOFFFrameStyle::addTo(librevenge::RVNGPropertyList &pList) const
 {
   librevenge::RVNGPropertyList::Iter i(m_propertyList);
   for (i.rewind(); i.next();) {
     if (i.child()) {
-      if (std::string("librevenge:background-image") != i.key()) {
-        STOFF_DEBUG_MSG(("STOFFCellStyle::addTo: find unexpected property child\n"));
-      }
+      STOFF_DEBUG_MSG(("STOFFFrameStyle::addTo: find unexpected property child\n"));
       pList.insert(i.key(), *i.child());
       continue;
     }
     pList.insert(i.key(), i()->clone());
   }
-  pList.insert("table:number-columns-spanned", m_numberCellSpanned[0]);
-  pList.insert("table:number-rows-spanned", m_numberCellSpanned[1]);
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
