@@ -443,6 +443,8 @@ void STOFFTextListener::openLink(STOFFLink const &link)
     STOFF_DEBUG_MSG(("STOFFTextListener::openLink: a link is already opened\n"));
     return;
   }
+  _flushDeferredTabs();
+  _flushText();
   if (!m_ps->m_isSpanOpened) _openSpan();
   librevenge::RVNGPropertyList propList;
   link.addTo(propList);

@@ -401,6 +401,7 @@ void STOFFGraphicListener::openLink(STOFFLink const &link)
     STOFF_DEBUG_MSG(("STOFFGraphicListener::openLink: called inside a link\n"));
     return;
   }
+  _flushText();
   if (!m_ps->m_isSpanOpened) _openSpan();
   librevenge::RVNGPropertyList propList;
   link.addTo(propList);
