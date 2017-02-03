@@ -1832,7 +1832,7 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
     }
     long endDataPos=zone.getRecordLastPosition();
     switch (id) {
-    case 0x4241: {
+    case 0x4241: { // SCID_COLROWFLAGS
       f << "dim,";
       f << "col[width]=[";
       uint16_t rep;
@@ -1908,7 +1908,7 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
       }
       break;
     }
-    case 0x4242: {
+    case 0x4242: { // SCID_TABOPTIONS
       f << "tabOptions,";
       bool ok=true;
       bool bVal;
@@ -1964,10 +1964,11 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
           f << "pageStyle=" << table.m_pageStyle.cstr() << ",";
       }
       if (input->tell()<endDataPos) {
-        *input >> bVal;
-        if (bVal) f << "oneRange=" << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
-        for (int i=0; i<2; ++i)
+        for (int i=0; i<3; ++i) {
+          *input >> bVal;
+          if (!bVal) continue;
           f << "range" << i << "=" << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
+        }
       }
       if (input->tell()<endDataPos)
         f << "isVisible=" << input->readULong(1);

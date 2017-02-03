@@ -981,6 +981,11 @@ bool StarFileManager::readFont(StarZone &zone)
     if (vertical) f << "vertical,";
     if (emphasisMark) f << "emphasisMark=" << emphasisMark << ",";
   }
+  if (zone.getHeaderVersion() >= 3) {
+    int16_t overline;
+    *input>>overline;
+    if (overline) f << "overline=" << overline << ",";
+  }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 

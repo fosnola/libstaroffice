@@ -149,6 +149,25 @@ public:
   {
     return shared_ptr<StarAttribute>(new StarPAttributeUInt(*this));
   }
+  //! read a zone
+  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object)
+  {
+    STOFFInputStreamPtr input=zone.input();
+    long pos=input->tell();
+    if (pos+2==endPos && m_intSize==1 && (m_type==ATTR_PARA_WIDOWS || m_type==ATTR_PARA_ORPHANS)) {
+      // unsure, sometimes, I found an extra byte
+      libstoff::DebugFile &ascFile=zone.ascii();
+      libstoff::DebugStream f;
+      m_value=static_cast<unsigned int>(input->readULong(1));
+      f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
+      int tmp=int(input->readULong(1));
+      if (tmp) f << "#unkn=" << tmp << ",";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      return input->tell()<=endPos;
+    }
+    return StarAttributeUInt::read(zone, vers, endPos, object);
+  }
   //! add to a para
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
 protected:
