@@ -505,7 +505,6 @@ public:
         }
       }
     }
-
     for (size_t i=0; i<m_itemList.size(); ++i) {
       if (m_itemList[i] && m_itemList[i]->m_attribute)
         m_itemList[i]->m_attribute->addTo(state);
@@ -636,25 +635,27 @@ public:
   //! try to send the text zone to the listener
   bool sendTextZone(STOFFListenerPtr listener, StarObject &object)
   {
-    if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
-      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicText::send: can not send a shape\n"));
+    // for basic text zone, we use the real textbox, for other zones (text link to a shape) we use the shape box
+    STOFFBox2f const &box=(m_identifier!=3 && m_identifier!=16 && m_identifier!=17 && m_identifier!=20 && m_identifier!=21) ? m_bdbox : m_textRectangle;
+    if (!listener || box.size()[0]<=0 || box.size()[1]<=0) {
+      STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicText::sendTextZone: can not send a shape\n"));
       return false;
     }
     STOFFPosition position;
-    position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
-    position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
+    position.setOrigin(libstoff::convertMiniMToPointVect(box[0]), librevenge::RVNG_POINT);
+    position.setSize(libstoff::convertMiniMToPointVect(box.size()), librevenge::RVNG_POINT);
     position.setAnchor(STOFFPosition::Page);
     shared_ptr<StarItemPool> pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
     // if (!state.m_graphic.m_hasBackground) state.m_graphic.m_propertyList.insert("draw:fill", "none"); checkme
     state.m_graphic.m_propertyList.insert("draw:fill", "none");
+    state.m_graphic.m_propertyList.insert("draw:shadow", "hidden"); // the text is not shadowed
     if (m_textDrehWink) {
-      static bool isFirst=true;
-      if (isFirst) {
-        isFirst=false;
-        STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicText::send: text rotation is not taken in account\n"));
-      }
+      STOFFVec2f orig=libstoff::convertMiniMToPointVect(box[0]);
+      state.m_graphic.m_propertyList.insert("librevenge:rotate-cx", orig[0], librevenge::RVNG_POINT);
+      state.m_graphic.m_propertyList.insert("librevenge:rotate-cy", orig[1], librevenge::RVNG_POINT);
+      state.m_graphic.m_propertyList.insert("librevenge:rotate", -m_textDrehWink/100., librevenge::RVNG_GENERIC);
     }
     shared_ptr<SubDocument> doc(new SubDocument(m_outlinerParaObject));
     listener->insertTextBox(position, doc, state.m_graphic);

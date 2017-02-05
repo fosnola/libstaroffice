@@ -115,10 +115,10 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState
   for (it=m_itemSet.m_whichToItemMap.begin(); it!=m_itemSet.m_whichToItemMap.end(); ++it) {
     if (!it->second || !it->second->m_attribute) continue;
     it->second->m_attribute->addTo(editState);
-#if 0
-    std::cerr << "ItemSet:" << m_itemSet.printChild() << "\n";
-#endif
   }
+#if 0
+  std::cerr << "ItemSet:" << m_itemSet.printChild() << "\n";
+#endif
   STOFFFont mainFont=editState.m_font; // save font
   listener->setFont(mainFont);
   listener->setParagraph(editState.m_paragraph);
