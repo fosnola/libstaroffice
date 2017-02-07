@@ -111,7 +111,7 @@ public:
   shared_ptr<StarItemPool> getCurrentPool(bool onlyInside=true);
 
   //! try to read persist data
-  bool readPersistData(StarZone &zone, long endPos);
+  bool readPersistData(StarZone &zone, long endPos, bool inPersistElements=false);
   //! try to read a spreadshet style zone: SfxStyleSheets
   bool readSfxStyleSheets(STOFFInputStreamPtr input, std::string const &name);
   //! try to read a list of item

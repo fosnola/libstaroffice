@@ -328,7 +328,7 @@ bool StarObject::readPersistElements(STOFFInputStreamPtr input, std::string cons
   ascii.addNote(f.str().c_str());
   for (int i=0; i<N; ++i) {
     long pos=input->tell();
-    if (readPersistData(zone, endDataPos))
+    if (readPersistData(zone, endDataPos, true))
       continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     f.str("");
@@ -353,7 +353,7 @@ bool StarObject::readPersistElements(STOFFInputStreamPtr input, std::string cons
   return true;
 }
 
-bool StarObject::readPersistData(StarZone &zone, long lastPos)
+bool StarObject::readPersistData(StarZone &zone, long lastPos, bool inPersistElements)
 {
   // pstm.cxx SvPersistStream::ReadObj
   STOFFInputStreamPtr input=zone.input();
@@ -405,21 +405,35 @@ bool StarObject::readPersistData(StarZone &zone, long lastPos)
     lastPos=zone.getRecordLastPosition();
   }
   if (hdr&0x40) {
-    // app.cxx OfficeApplication::Init
+    // app.cxx OfficeApplication::Init, or SV_DECL_PERSIST1
     switch (classId) {
-    case 2: {
+    // case 1 SvxFieldData:: or SvInfoObject:: or SvClassElement::
+    case 2: { // SvEmbeddedObject(here)
       long actPos=input->tell();
-      uint8_t val;
-      *input>>val;
-      std::vector<uint32_t> text;
-      if (!zone.readString(text)||input->tell()>=lastPos) {
-        input->seek(actPos, librevenge::RVNG_SEEK_SET);
-        f << "##classId";
+      if (inPersistElements) {
+        uint8_t val;
+        *input>>val;
+        std::vector<uint32_t> text;
+        if (!zone.readString(text)||input->tell()>=lastPos) {
+          input->seek(actPos, librevenge::RVNG_SEEK_SET);
+          f << "##classId";
+          break;
+        }
+        f << "objData,";
+        if (val) f << "f0=" << int(val) << ","; // 0 or 1
+        f << libstoff::getString(text).cstr() << ",";
         break;
       }
-      f << "objData,";
-      if (val) f << "f0=" << int(val) << ","; // 0 or 1
-      f << libstoff::getString(text).cstr() << ",";
+      // SvxDateField::Load
+      if (input->tell()+8>lastPos) {
+        STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read date field\n"));
+        f << "###,";
+        break;
+      }
+      f << "date[field],";
+      f << "date=" << input->readULong(4) << ",";
+      f << "type=" << input->readULong(2) << ",";
+      f << "format=" << input->readULong(2) << ",";
       break;
     }
     case 3: { // flditem.cxx:void SvxURLField::Load
@@ -457,6 +471,81 @@ bool StarObject::readPersistData(StarZone &zone, long lastPos)
         input->seek(-4, librevenge::RVNG_SEEK_CUR);
         break;
       }
+      break;
+    }
+    case 50: // SdrMeasureField(unsure)
+      f << "measureField,";
+      if (input->tell()+2>lastPos) {
+        STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read measure field\n"));
+        f << "###,";
+        break;
+      }
+      f << "kind=" << input->readULong(2) << ",";
+      break;
+    case 100: // flditem.cxx
+      f << "pageField,";
+      break;
+    case 101:
+      f << "pagesField,";
+      break;
+    case 102:
+      f << "timeField,";
+      break;
+    case 103:
+      f << "fileField,";
+      break;
+    case 104:
+      f << "tableField,";
+      break;
+    case 105: {
+      f << "timeField[extended],";
+      if (input->tell()+12>lastPos) {
+        STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read extended time field\n"));
+        f << "###,";
+        break;
+      }
+      f << "time=" << std::hex << input->readULong(4);
+      f << input->readULong(4) << std::dec << ",";
+      f << "type=" << input->readULong(2) << ",";
+      f << "format=" << input->readULong(2) << ",";
+      break;
+    }
+    case 106: {
+      f << "fileField[extended],";
+      std::vector<uint32_t> text;
+      if (!zone.readString(text) || input->tell()+4>lastPos) {
+        STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read a string\n"));
+        f << "##string";
+        break;
+      }
+      else if (!text.empty())
+        f << libstoff::getString(text).cstr() << ",";
+      f << "type=" << input->readULong(2) << ",";
+      f << "format=" << input->readULong(2) << ",";
+      break;
+    }
+    case 107: {
+      f << "authorField,";
+      bool fieldOk=true;
+      for (int i=0; i<3; ++i) {
+        std::vector<uint32_t> text;
+        if (!zone.readString(text) || input->tell()>lastPos) {
+          STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read a string\n"));
+          f << "##string";
+          fieldOk=false;
+          break;
+        }
+        else if (!text.empty())
+          f << (i==0 ? "name" : i==1 ? "first[name]": "last[name]") << "=" << libstoff::getString(text).cstr() << ",";
+      }
+      if (!fieldOk) break;
+      if (input->tell()+4>lastPos) {
+        STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read author field\n"));
+        f << "###,";
+        break;
+      }
+      f << "type=" << input->readULong(2) << ",";
+      f << "format=" << input->readULong(2) << ",";
       break;
     }
     default:
