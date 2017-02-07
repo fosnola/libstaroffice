@@ -153,7 +153,7 @@ void State::initAttributeMap()
   addAttributeUInt(StarAttribute::ATTR_FRM_PAPER_BIN,"frm[paperBin]",1,0xFF); // settings
   addAttributeBool(StarAttribute::ATTR_FRM_PRINT,"print",true);
   addAttributeBool(StarAttribute::ATTR_FRM_OPAQUE,"opaque",true);
-  addAttributeBool(StarAttribute::ATTR_FRM_KEEP,"frm[keep]",false);
+  addAttributeBool(StarAttribute::ATTR_FRM_KEEP,"frm[keep]",false); // keep together?
   addAttributeBool(StarAttribute::ATTR_FRM_EDIT_IN_READONLY,"edit[readOnly]",false);
   addAttributeBool(StarAttribute::ATTR_FRM_COLUMNBALANCE,"col[noBalanced]", true);
   addAttributeUInt(StarAttribute::ATTR_FRM_FRAMEDIR,"frame[dir]",2,4); // frame environment

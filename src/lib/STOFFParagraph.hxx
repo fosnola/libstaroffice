@@ -48,7 +48,7 @@ class STOFFParagraph
 {
 public:
   //! constructor
-  STOFFParagraph() : m_propertyList(), m_bulletVisible(false), m_listLevelIndex(0), m_listId(-1), m_listStartValue(-1), m_listLevel()
+  STOFFParagraph() : m_propertyList(), m_outline(false), m_bulletVisible(false), m_listLevelIndex(0), m_listId(-1), m_listStartValue(-1), m_listLevel()
   {
   }
   //! add to the propList
@@ -64,6 +64,8 @@ public:
   friend std::ostream &operator<<(std::ostream &o, STOFFParagraph const &para);
   //! the properties
   librevenge::RVNGPropertyList m_propertyList;
+  /// flag to know if this is a outline level
+  bool m_outline;
   /// flag to know if the bullet is visible
   bool m_bulletVisible;
   /** the actual level index */

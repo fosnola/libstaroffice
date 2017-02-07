@@ -1908,25 +1908,102 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
       if (poolVersion==1) return true;
       continue;
     }
-    if (nSize==3) { // frequent
+    if (nSize>=3 && m_state->m_type==StarItemPool::T_WriterPool) {
+      // sw3style.cxx SwStyleSheet::Load
+      long dataPos=input->tell(), endDataPos=dataPos+long(nSize);
       libstoff::DebugStream f2;
-      f2 << "Entries(SfxBaseSheet):sz=" << nSize << ",";
-      f2 << "f0=" << std::hex << input->readULong(2) << std::dec << ",";
-      int val=int(input->readULong(1)); // often 0xc9
-      if (val!=0xc9) f2 << "f1=" << std::hex << val << std::dec << ",";
-      ascii.addPos(input->tell()-4);
+      f2 << "Entries(SwStyleSheet):sz=" << nSize << ",";
+      int nId=int(input->readULong(2));
+      if (nId) f2 << "id=" << nId << ",";
+      int level=int(input->readULong(1));
+      if (level!=201) {
+        // checkme: sometimes is more complicated
+        if (m_state->m_styleIdToStyleMap.find(styleId)!=m_state->m_styleIdToStyleMap.end())
+          m_state->m_styleIdToStyleMap.find(styleId)->second.m_outlineLevel=level;
+        f2 << "level=" << level << ",";
+      }
+      bool dataOk=true;
+      if (1<=nVer) {
+        if (nVer==1 && style.m_family==2 && nId==1)
+          nId=(1<<11)+1; // RES_POOLCOLL_TEXT
+        dataOk=input->tell()+2<=endDataPos;
+        int val=dataOk ? int(input->readULong(2)) : 0;
+        if (val==1) {
+          f2 << "condCol,";
+          dataOk=input->tell()+2<=endDataPos;
+          int N=dataOk ? int(input->readULong(2)) : 0;
+          if (N>255) N=255;
+          for (int n=0; dataOk && n<N; ++n) {
+            if (!zone.readString(text, charSet) || input->tell()+4>endDataPos) {
+              dataOk=false;
+              break;
+            }
+            f2 << "[" << libstoff::getString(text).cstr();
+            int cond=int(input->readULong(4));
+            if (cond) f2 << "cond=" << std::hex << cond << std::dec << ",";
+            if (cond & 0x8000) {
+              if (!zone.readString(text, charSet) || input->tell()>endDataPos) {
+                dataOk=false;
+                break;
+              }
+              f2 << libstoff::getString(text).cstr() << ",";
+            }
+            else if (input->tell()+4<=endDataPos)
+              f2 << "subCond=" << std::hex << input->readULong(4) << std::dec << ",";
+            else
+              dataOk=false;
+            f2 << "]";
+          }
+        }
+        int cFlag=0;
+        if (dataOk && 4<=nVer) {
+          dataOk=input->tell()+1<=endDataPos;
+          cFlag=dataOk ? int(input->readULong(1)) : 0;
+          if (cFlag) f2 << "cFlag=" << std::hex << cFlag << std::dec << ",";
+        }
+        if (nVer>=6 && (cFlag&2)) {
+          dataOk=input->tell()+4<=endDataPos;
+          long len=dataOk ? long(input->readULong(4)) : 0;
+          dataOk=input->tell()+len<=endDataPos;
+          if (dataOk && len>=2 && doc.getAttributeManager()) {
+            int nAttrVer=int(input->readULong(2));
+            shared_ptr<StarAttribute> attrib=doc.getAttributeManager()->readAttribute
+                                             (zone, StarAttribute::ATTR_FRM_LR_SPACE, nAttrVer, endDataPos, doc);
+            f2 << "LR,";
+            if (!attrib || input->tell()>endDataPos) {
+              STOFF_DEBUG_MSG(("StarItemPool::readStyles: reading relative LR is not implemented\n"));
+              f2 << "###";
+              dataOk=false;
+            }
+          }
+          else if (len)
+            dataOk=false;
+        }
+      }
+      if (!dataOk) {
+        f2 << "###";
+        STOFF_DEBUG_MSG(("StarItemPool::readStyles: can not read some final data\n"));
+      }
+      if (input->tell()!=endDataPos) {
+        if (!dataOk) {
+          STOFF_DEBUG_MSG(("StarItemPool::readStyles:  find extra final data\n"));
+          f << "###extra,";
+        }
+        ascii.addDelimiter(input->tell(),'|');
+      }
+      ascii.addPos(dataPos-4);
       ascii.addNote(f2.str().c_str());
+      input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
     }
-    else if (nSize) { // find also sz=6|8|10|27
+    else if (nSize) {
       f << "#size=" << nSize << ",";
       static bool first=true;
       if (first) {
         STOFF_DEBUG_MSG(("StarItemPool::readStyles: loading the base sheet data is not implemented\n"));
         first=false;
       }
-      // normally SfxStyleSheetBase::Load but no code
       libstoff::DebugStream f2;
-      f2 << "Entries(SfxBaseSheet):sz=" << nSize << ",##";
+      f2 << "Entries(SfxBaseSheet):sz=" << nSize << ",###unknown";
       ascii.addPos(input->tell()-4);
       ascii.addNote(f2.str().c_str());
       ascii.addDelimiter(input->tell(),'|');
@@ -2095,6 +2172,10 @@ void StarItemPool::defineParagraphStyle(STOFFListenerPtr listener, librevenge::R
     return;
   }
   StarState state(this, object);
+  if (style->m_outlineLevel>=0 && style->m_outlineLevel<20) {
+    state.m_paragraph.m_outline=true;
+    state.m_paragraph.m_listLevelIndex=style->m_outlineLevel+1;
+  }
   state.m_paragraph.m_propertyList.insert("style:display-name", styleName);
   if (!style->m_names[1].empty()) {
     if (done.find(style->m_names[1])!=done.end()) {

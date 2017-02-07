@@ -764,7 +764,7 @@ void StarPAttributeTabStop::addTo(StarState &state, std::set<StarAttribute const
         tab.insert("style:char", sDecimal);
       }
       break;
-    case 4: // default
+    case 4: // default: checkme: can we set "style:tab-stop-distance" here
       break;
     default:
       STOFF_DEBUG_MSG(("StarPAttributeTabStop::addTo: unknown attrib %d\n", int(tabStop.m_type)));

@@ -109,7 +109,7 @@ public:
     F_Char=1, F_Paragraph=2, F_Frame=4, F_Page=8, F_Pseudo=0x10, F_ALL=0xFE
   };
   //! constructor
-  StarItemStyle() : m_family(0), m_mask(0), m_itemSet(), m_helpId(0)
+  StarItemStyle() : m_family(0), m_mask(0), m_itemSet(), m_helpId(0), m_outlineLevel(-1)
   {
   }
   //! operator<<
@@ -124,6 +124,8 @@ public:
   StarItemSet m_itemSet;
   //! the help id
   unsigned m_helpId;
+  //! the outline level
+  int m_outlineLevel;
 };
 
 #endif

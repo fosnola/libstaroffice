@@ -307,10 +307,17 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
       StarItemStyle const *style=state.m_global->m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
       if (style) {
         StarItemSet const &itemSet=style->m_itemSet;
+        if (style->m_outlineLevel>=0 && style->m_outlineLevel<20) {
+          state.m_paragraph.m_outline=true;
+          state.m_paragraph.m_listLevelIndex=style->m_outlineLevel+1;
+        }
         for (it=itemSet.m_whichToItemMap.begin(); it!=itemSet.m_whichToItemMap.end(); ++it) {
           if (it->second && it->second->m_attribute)
             it->second->m_attribute->addTo(state);
         }
+#if 0
+        std::cerr << "Para[" << m_styleName.cstr() << "]:" << style->m_itemSet.printChild() << "\n";
+#endif
       }
       else {
         STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: can not find style %s\n", m_styleName.cstr()));
@@ -436,17 +443,19 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
           level=state.m_global->m_listLevel;
           lineState.m_paragraph.m_bulletVisible=true; // useMe
         }
-        if (level>=0 && (!state.m_global->m_list || state.m_global->m_list->numLevels()<=int(level))) {
-          STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: oops can not find the list\n"));
-          level=-1;
+        if (!lineState.m_paragraph.m_outline) {
+          if (level>=0 && (!state.m_global->m_list || state.m_global->m_list->numLevels()<=int(level))) {
+            STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: oops can not find the list\n"));
+            level=-1;
+          }
+          if (level>=0) {
+            lineState.m_paragraph.m_listLevel = state.m_global->m_list->getLevel(level);
+            lineState.m_paragraph.m_listId = state.m_global->m_list->getId();
+            lineState.m_paragraph.m_listLevelIndex = level+1;
+          }
+          else
+            lineState.m_paragraph.m_listLevelIndex=0;
         }
-        if (level>=0) {
-          lineState.m_paragraph.m_listLevel = state.m_global->m_list->getLevel(level);
-          lineState.m_paragraph.m_listId = state.m_global->m_list->getId();
-          lineState.m_paragraph.m_listLevelIndex = level+1;
-        }
-        else
-          lineState.m_paragraph.m_listLevelIndex=0;
         listener->setParagraph(lineState.m_paragraph);
       }
       if (c==0 && m_format) {

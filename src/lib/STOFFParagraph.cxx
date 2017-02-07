@@ -45,6 +45,7 @@
 bool STOFFParagraph::operator==(STOFFParagraph const &pp) const
 {
   return m_propertyList.getPropString() == pp.m_propertyList.getPropString() &&
+         m_outline==pp.m_outline &&  m_bulletVisible==pp. m_bulletVisible &&
          m_listLevelIndex==pp.m_listLevelIndex && m_listId==pp.m_listId && m_listStartValue==pp.m_listStartValue &&
          m_listLevel==pp.m_listLevel;
 }

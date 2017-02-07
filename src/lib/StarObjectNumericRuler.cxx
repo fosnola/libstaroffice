@@ -388,16 +388,16 @@ bool StarObjectNumericRuler::readList(StarZone &zone, shared_ptr<STOFFList> &lis
   val=int(input->readULong(1));
   // initialise list to default
   list.reset(new STOFFList(val==0));
-  list->m_name=name;
-  STOFFListLevel defLevel;
-  defLevel.m_type=STOFFListLevel::NUMBER;
-  defLevel.m_propertyList.insert("style:num-format", "1");
-  for (int i=0; i<10; ++i) list->set(i+1, defLevel);
   if (val==0) f << "outline,";  // OUTLINE_RULE, NUM_RULE
   else if (val!=1) {
     STOFF_DEBUG_MSG(("StarObjectNumericRuler::readList: unknown type\n"));
     f << "##eType=" << val << ",";
   }
+  list->m_name=name;
+  STOFFListLevel defLevel;
+  defLevel.m_type=STOFFListLevel::NUMBER;
+  defLevel.m_propertyList.insert("style:num-format", "1");
+  for (int i=0; i<10; ++i) list->set(i+1, defLevel);
   if (zone.isCompatibleWith(0x201))
     zone.closeFlagZone();
   int nFormat=int(input->readULong(1));

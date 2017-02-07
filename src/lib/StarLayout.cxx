@@ -284,6 +284,11 @@ bool StarLayout::readC2(StarZone &zone, StarObject &object)
       if (!object.getFormatManager()->readSWFormatDef(zone,'l', format, object))
         input->seek(pos, librevenge::RVNG_SEEK_SET);
     }
+    else if (pos!=lastPos && mainType==0xd7 && pos+4<=lastPos) {
+      ascFile.addPos(pos);
+      ascFile.addNote("StarLayout[D7-B]:");
+      input->seek(4, librevenge::RVNG_SEEK_CUR);
+    }
   }
   pos=input->tell();
   if (pos!=lastPos) {
