@@ -333,8 +333,9 @@ void TableLine::updatePosition(Table &table, StarState const &state, float xOrig
   if (m_formatId!=0xFFFF && !m_format) {
     if (m_formatId>=0 && m_formatId<int(table.m_formatList.size()))
       m_format=table.m_formatList[size_t(m_formatId)];
-    else
+    else {
       STOFF_DEBUG_MSG(("StarTableInternal::TableBox::updatePosition: oops, can not find format %d\n", m_formatId));
+    }
   }
   if (m_format)
     m_format->updateState(cState);
@@ -435,7 +436,8 @@ void Table::updateColumnsPosition()
   float minColWidth = m_minColWidth>10 ? 10 : m_minColWidth;
   float f=2.f/minColWidth;
   for (std::set<float>::const_iterator it=m_xPositionSet.begin(); it!=m_xPositionSet.end(); ++it) {
-    float xRounded=0.5f*std::round(f*(*it))*minColWidth;
+    // todo replace float(int(f*(*it)+0.5f)) by std::round(f*(*it)) when possible
+    float xRounded=0.5f*float(int(f*(*it)+0.5f))*minColWidth;
     if (xRoundedPositionSet.find(xRounded)!=xRoundedPositionSet.end())
       continue;
     xPositionSet.insert(*it);

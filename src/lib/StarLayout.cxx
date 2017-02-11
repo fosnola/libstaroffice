@@ -94,10 +94,16 @@ bool StarLayout::read(StarZone &zone, StarObject &object)
   f << "Entries(StarLayout)[" << zone.getRecordLevel() << "]:";
   int fl=zone.openFlagZone();
   if (fl&0xf0) f << "fl=" << (fl>>4) << ",";
-  *input>>m_version;
-  f << "vers=" << std::hex << m_version << std::dec << ",";
-  if (input->tell()!=zone.getFlagLastPosition()) // exists when m_version<0x201?
+  if (zone.getFlagLastPosition()-input->tell()==2) {
+    m_version=uint16_t(0x200+input->readULong(1));
+    f << "vers=" << std::hex << m_version << std::dec << ",";
+    f << "f1=" << input->readULong(1) << ",";
+  }
+  else {
+    *input>>m_version;
+    f << "vers=" << std::hex << m_version << std::dec << ",";
     f << "f1=" << input->readULong(2) << ",";
+  }
   zone.closeFlagZone();
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -151,7 +157,7 @@ bool StarLayout::readC1(StarZone &zone, StarObject &object)
     input->seek(dSize,librevenge::RVNG_SEEK_CUR);
     ascFile.addDelimiter(input->tell(),'|');
   }
-  if (m_version<0x201) {
+  if (m_version<0x200) {
     f << "block2=[";
     ok=readDataBlock(zone, f);
     f << "],";
@@ -163,7 +169,7 @@ bool StarLayout::readC1(StarZone &zone, StarObject &object)
   }
   unsigned long N=0;
   if (ok) {
-    if (m_version>=0x201) {
+    if (m_version>=0x200) {
       if (!input->readCompressedULong(N)) {
         f << "###N";
         ok=false;
@@ -217,7 +223,7 @@ bool StarLayout::readC2(StarZone &zone, StarObject &object)
                    mainType==0xc8 ? "C8" : mainType==0xc9 ? "C9" : mainType==0xce ? "CE" :
                    mainType==0xd2 ? "D2" : mainType==0xd3 ? "D3" : mainType==0xd4 ? "D4" :
                    mainType==0xd7 ? "D7" : mainType==0xe3 ? "E3" : "F2");
-  f << "StarLayout[" << what << "-" << zone.getRecordLevel() << "]:";
+  f << "StarLayout[" << what << "-" << zone.getRecordLevel() << "]:vers=" << m_version << ",";
   long lastPos=zone.getRecordLastPosition();
   int type1;
   bool ok=readHeader(zone, f, type1, (mainType<=0xc3||mainType==0xce || mainType>=0xd2) ? 2 : mainType==0xc9 ? 0 : 1);
@@ -235,7 +241,7 @@ bool StarLayout::readC2(StarZone &zone, StarObject &object)
     ascFile.addDelimiter(input->tell(),'|');
     input->seek(12, librevenge::RVNG_SEEK_CUR);
     ascFile.addDelimiter(input->tell(),'|');
-    int val=int(input->readULong(m_version>=0x201 ? 1 : 2)); // checkme: probably read long compressed
+    int val=int(input->readULong(m_version>=0x200 ? 1 : 2)); // checkme: probably read long compressed
     if (val) f << "g0=" << val << ",";
     ascFile.addDelimiter(input->tell(),'|');
     input->seek(8, librevenge::RVNG_SEEK_CUR);
@@ -251,17 +257,17 @@ bool StarLayout::readC2(StarZone &zone, StarObject &object)
     ascFile.addDelimiter(input->tell(),'|');
     input->seek(input->tell()+2, librevenge::RVNG_SEEK_SET);
     ascFile.addDelimiter(input->tell(),'|');
-    int N0=int(input->readULong(m_version<0x201 ? 2 : 1)); // checkme
+    int N0=int(input->readULong(m_version<0x200 ? 2 : 1)); // checkme
     if (N0) f << "N0=" << N0 << ",";
   }
   else if (mainType==0xd2 || mainType==0xd7) {
     ascFile.addDelimiter(input->tell(),'|');
     input->seek(input->tell()+1, librevenge::RVNG_SEEK_SET);
     ascFile.addDelimiter(input->tell(),'|');
-    int N0=readNumber(input,0x201);
+    int N0=readNumber(input,0x200);
     if (N0) f << "N0=" << N0 << ",";
   }
-  int N=readNumber(input, 0x201);
+  int N=readNumber(input, 0x200);
   f << "N=" << N << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -329,7 +335,7 @@ bool StarLayout::readC4(StarZone &zone, StarObject &/*object*/)
     zone.closeSWRecord(type, "StarLayout");
     return true;
   }
-  int val=mainType==0xc4 ? int(input->readULong(2)) : readNumber(input, 0x201); // c7: main two bytes if version<0x201
+  int val=mainType==0xc4 ? int(input->readULong(2)) : readNumber(input, 0x200); // c7: main two bytes if version<0x200
   if (val) f << "g0=" << val << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -357,7 +363,7 @@ bool StarLayout::readD0(StarZone &zone, StarObject &object)
     return false;
   }
   long lastPos=zone.getRecordLastPosition();
-  f << "StarLayout[D0-" << zone.getRecordLevel() << "]:";
+  f << "StarLayout[D0-" << zone.getRecordLevel() << "]:vers=" << m_version << ",";
   int type1;
   bool ok=readHeader(zone, f, type1);
   bool hasN=(type1&0xf0); // unsure
@@ -371,11 +377,11 @@ bool StarLayout::readD0(StarZone &zone, StarObject &object)
   }
   f << "g0=" << input->readULong(m_version<0xa ? 1 : 2) << ",";
   f << "idx1?=" << input->readULong(2) << ",";
-  f << "id=" << readNumber(input,0x201) << ",";
+  f << "id=" << readNumber(input,0x200) << ",";
   int N1=0;
   if (hasN) {
     // condition seems ok when version<=3 or version>=10, unsure when 3<version<0x10 :-~
-    N1=readNumber(input,0x201);
+    N1=readNumber(input,0x200);
     f << "N=" << N1 << ",";
   }
   ascFile.addPos(pos);
@@ -388,9 +394,9 @@ bool StarLayout::readD0(StarZone &zone, StarObject &object)
   }
 
   pos=input->tell();
-  if (ok && pos+(m_version>=0x201 ? 3:4)<=lastPos) {
+  if (ok && pos+(m_version>=0x200 ? 3:4)<=lastPos) {
     // vers<=0101 && vers>=201 ok, other?
-    int N2=readNumber(input,0x201);
+    int N2=readNumber(input,0x200);
     if (input->tell()+5*N2>lastPos)
       input->seek(pos, librevenge::RVNG_SEEK_SET);
     else {
@@ -438,13 +444,13 @@ bool StarLayout::readD8(StarZone &zone, StarObject &object)
     STOFF_DEBUG_MSG(("StarLayout::readD8: can not read a layout\n"));
     return false;
   }
-  f << "StarLayout[D8-" << zone.getRecordLevel() << "]:";
+  f << "StarLayout[D8-" << zone.getRecordLevel() << "]:vers=" << m_version << ",";
   long lastPos=zone.getRecordLastPosition();
   int type1;
   bool ok=readHeader(zone, f, type1);
   unsigned long N=0;
   if (ok && (type1&0xF0) && type1<0xc0) {
-    if (m_version>=0x201) {
+    if (m_version>=0x200) {
       if (!input->readCompressedULong(N)) {
         f << "###N";
         ok=false;
@@ -510,7 +516,7 @@ bool StarLayout::readHeader(StarZone &zone, libstoff::DebugStream &f, int &type,
     if (!ok) return false;
   }
   if ((type&0xc)) {
-    if ((type&0xc)==0xc && m_version<0x201)
+    if ((type&0xc)==0xc && m_version<0x200)
       f << "db[" << ((type&0xc) >> 2) << "]=" << std::hex << input->readULong(2) << ":" << input->readULong(2) << std::dec << ",";
     else
       f << "db[" << ((type&0xc) >> 2) << "]=" << std::hex << input->readULong(2) << std::dec << ",";
@@ -524,7 +530,7 @@ bool StarLayout::readHeader(StarZone &zone, libstoff::DebugStream &f, int &type,
     f << "val=[";
     for (int i=0; i<3; ++i) {
       unsigned long N;
-      if (m_version>=0x201) {
+      if (m_version>=0x200) {
         if (!input->readCompressedULong(N)) {
           STOFF_DEBUG_MSG(("StarLayout::readHeader: oops, can not read some value\n"));
           f << "###val";

@@ -573,7 +573,6 @@ try
   int32_t nLen;
 
   *input>>nId;
-  int type=0;
   if (nId==0x35465247 || nId==0x47524635) {
     if (nId==0x47524635)
       input->setReadInverted(!input->readInverted());
@@ -589,10 +588,8 @@ try
     int32_t sizeX, sizeY, nOffsX, nOffsY, nScaleNumX, nScaleDenomX, nScaleNumY, nScaleDenomY;
     bool mbSimple;
     *input >> nType >> nLen >> sizeX>> sizeY;
-    if (nType) {
+    if (nType)
       f << "type=" << nType << ",";
-      type=int(nType);
-    }
     f << "size=" << sizeX << "x" << sizeY << ",";
     // mapmod.cxx: operator>>(..., ImplMapMode& )
     if (!zone.openVersionCompatHeader()) {
@@ -618,10 +615,8 @@ try
       input->setReadInverted(!input->readInverted());
       *input>>nId;
     }
-    if (nId) {
+    if (nId)
       f << "type=" << nId << ",";
-      type=int(nId);
-    }
     int32_t nWidth, nHeight, nMapMode, nScaleNumX, nScaleDenomX, nScaleNumY, nScaleDenomY, nOffsX, nOffsY;
     *input >> nLen >> nWidth >> nHeight >> nMapMode;
     f << "size=" << nWidth << "x" << nHeight << ",";
