@@ -182,6 +182,54 @@ bool GraphZone::send(STOFFListenerPtr listener, StarState &/* state */) const
 }
 
 ////////////////////////////////////////
+//! Internal: a OLEZone of StarObjectTextInteral
+struct OLEZone : public Zone {
+  //! constructor
+  OLEZone() : Zone(), m_name(""), m_replaceText(""), m_oleParser()
+  {
+  }
+  //! try to send the data to a listener
+  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  //! the OLE name
+  librevenge::RVNGString m_name;
+  //! the replacement text
+  librevenge::RVNGString m_replaceText;
+  //! the ole parser
+  shared_ptr<STOFFOLEParser> m_oleParser;
+};
+
+bool OLEZone::send(STOFFListenerPtr listener, StarState &/*state*/) const
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: call without listener\n"));
+    return false;
+  }
+  if (m_name.empty()) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: call without object name\n"));
+    return false;
+  }
+  if (!m_oleParser) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: call without ole parser\n"));
+    return false;
+  }
+  STOFFEmbeddedObject localPicture;
+  shared_ptr<STOFFOLEParser::OleDirectory> dir=m_oleParser->getDirectory(m_name.cstr());
+  if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture) || localPicture.isEmpty()) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: sorry, can not find object %s\n", m_name.cstr()));
+    return false;
+  }
+  STOFFPosition position;
+  position.setAnchor(STOFFPosition::Paragraph);
+  //position.setOrigin(STOFFVec2i(0,0), librevenge::RVNG_POINT);
+  position.setSize(STOFFVec2i(100,100), librevenge::RVNG_POINT);
+  STOFFGraphicStyle style;
+  //updateStyle(style, object, listener);
+  listener->insertPicture(position, localPicture, style);
+
+  return true;
+}
+
+////////////////////////////////////////
 //! Internal: a sectionZone of StarObjectTextInteral
 struct SectionZone : public Zone {
   //! constructor
@@ -209,14 +257,14 @@ struct SectionZone : public Zone {
 bool SectionZone::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener) {
-    STOFF_DEBUG_MSG(("StarObjectTextInternal::FormatZone::send: call without listener\n"));
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::SectionZone::send: call without listener\n"));
     return false;
   }
   // checkme: do we need to create a new section here
   if (m_content)
     m_content->send(listener, state);
   else {
-    STOFF_DEBUG_MSG(("StarObjectTextInternal::FormatZone::send: call without content\n"));
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::SectionZone::send: call without content\n"));
   }
   return true;
 }
@@ -850,9 +898,13 @@ bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInte
         content->m_zoneList.push_back(section);
       break;
     }
-    case 'O':
-      done=readSWOLENode(zone);
+    case 'O': {
+      shared_ptr<StarObjectTextInternal::OLEZone> ole;
+      done=readSWOLENode(zone, ole);
+      if (done && ole)
+        content->m_zoneList.push_back(ole);
       break;
+    }
     case 'T': {
       shared_ptr<StarObjectTextInternal::TextZone> text;
       done=readSWTextZone(zone, text);
@@ -1134,7 +1186,7 @@ bool StarObjectText::readSWJobSetUp(StarZone &zone)
   return true;
 }
 
-bool StarObjectText::readSWOLENode(StarZone &zone)
+bool StarObjectText::readSWOLENode(StarZone &zone, shared_ptr<StarObjectTextInternal::OLEZone> &ole)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1157,8 +1209,12 @@ bool StarObjectText::readSWOLENode(StarZone &zone)
     zone.closeSWRecord('O', "SWOLENode");
     return true;
   }
-  if (!text.empty())
-    f << "objName=" << libstoff::getString(text).cstr() << ",";
+  ole.reset(new StarObjectTextInternal::OLEZone);
+  ole->m_oleParser=m_oleParser;
+  if (!text.empty()) {
+    ole->m_name=libstoff::getString(text);
+    f << "objName=" << ole->m_name.cstr() << ",";
+  }
   if (zone.isCompatibleWith(0x101)) {
     if (!zone.readString(text)) {
       STOFF_DEBUG_MSG(("StarObjectText::readSWOLENode: can not read a objName\n"));
@@ -1168,8 +1224,10 @@ bool StarObjectText::readSWOLENode(StarZone &zone)
       zone.closeSWRecord('O', "SWOLENode");
       return true;
     }
-    if (!text.empty())
-      f << "textRepl=" << libstoff::getString(text).cstr() << ",";
+    if (!text.empty()) {
+      ole->m_replaceText=libstoff::getString(text);
+      f << "textRepl=" << ole->m_replaceText.cstr() << ",";
+    }
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());

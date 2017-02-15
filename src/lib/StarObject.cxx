@@ -408,20 +408,58 @@ bool StarObject::readPersistData(StarZone &zone, long lastPos, bool inPersistEle
     // app.cxx OfficeApplication::Init, or SV_DECL_PERSIST1
     switch (classId) {
     // case 1 SvxFieldData:: or SvInfoObject:: or SvClassElement::
-    case 2: { // SvEmbeddedObject(here)
+    case 2: { // embobj.cxx SvEmbeddedInfoObject::Load
       long actPos=input->tell();
       if (inPersistElements) {
-        uint8_t val;
-        *input>>val;
-        std::vector<uint32_t> text;
-        if (!zone.readString(text)||input->tell()>=lastPos) {
+        // SvInfoObject::Load
+        uint8_t vers;
+        *input>>vers;
+        f << "objData,";
+        if (vers) f << "vers=" << int(vers) << ","; // 0 or 1
+        bool objOk=true;
+        for (int i=0; i<2; ++i) {
+          std::vector<uint32_t> text;
+          if (!zone.readString(text)||input->tell()+16>=lastPos) {
+            input->seek(actPos, librevenge::RVNG_SEEK_SET);
+            f << "##stringId" << i << ",";
+            objOk=false;
+            break;
+          }
+          f << libstoff::getString(text).cstr() << ",";
+        }
+        if (!objOk) break;
+        // SvGlobalName::operator<<
+        int val;
+        for (int i=0; i<3; ++i) {
+          val=int(input->readULong(i==0 ? 4 : 2));
+          if (val)
+            f << "data" << i << "=" << std::hex << val << std::dec << ",";
+        }
+        f << "data3=[";
+        for (int i=0; i<8; ++i) {
+          val=int (input->readULong(1));
+          if (val)
+            f<< std::hex << val << std::dec << ",";
+          else
+            f << "_,";
+        }
+        f << "],";
+        if (vers>0) {
+          val=int (input->readULong(1));
+          if (val) f << "deleted,";
+        }
+        if (input->readULong(1)!=2 || input->tell()+17>lastPos) {
+          STOFF_DEBUG_MSG(("StarObject::readPersistData: can not find the object info\n"));
           input->seek(actPos, librevenge::RVNG_SEEK_SET);
-          f << "##classId";
+          f << "##badInfo" << ",";
           break;
         }
-        f << "objData,";
-        if (val) f << "f0=" << int(val) << ","; // 0 or 1
-        f << libstoff::getString(text).cstr() << ",";
+        val=int (input->readULong(1));
+        if (val)
+          f << "isLink,";
+        f << "rect=[";
+        for (int i=0; i<4; ++i) f << input->readLong(4) << ",";
+        f << "],";
         break;
       }
       // SvxDateField::Load

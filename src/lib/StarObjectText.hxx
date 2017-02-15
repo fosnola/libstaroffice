@@ -82,6 +82,7 @@ struct Content {
 };
 
 struct GraphZone;
+struct OLEZone;
 struct SectionZone;
 struct TextZone;
 struct State;
@@ -134,7 +135,7 @@ protected:
   //! try to read a SW zone setup : 'J'
   bool readSWJobSetUp(StarZone &zone);
   //! try to read a OLE node : 'O'
-  bool readSWOLENode(StarZone &zone);
+  bool readSWOLENode(StarZone &zone, shared_ptr<StarObjectTextInternal::OLEZone> &ole);
   //! try to read a section : 'I'
   bool readSWSection(StarZone &zone, shared_ptr<StarObjectTextInternal::SectionZone> &section);
   //! try to read some content : 'T'
