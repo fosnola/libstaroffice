@@ -577,11 +577,11 @@ bool StarTableInternal::Table::send(STOFFListenerPtr listener, StarState &state)
 
     m_minColWidth=cState.m_frame.m_frameSize[0];
     // checkme sometime the width is 65535/20, ie. bigger than the page width...
-    if (cState.m_frame.m_frameSize[0]>=float(65535/20)) {
+    if (cState.m_frame.m_frameSize[0]>=float(int(65535/20))) {
       percentMaxValue=cState.m_frame.m_frameSize[0];
       table.m_propertyList.insert("style:width", 1., librevenge::RVNG_PERCENT);
     }
-    else if (cState.m_frame.m_frameSize[0]>=65535)
+    else if (cState.m_frame.m_frameSize[0]>0)
       table.m_propertyList.insert("style:width", double(cState.m_frame.m_frameSize[0]), librevenge::RVNG_POINT);
   }
   m_xPositionSet.insert(0);

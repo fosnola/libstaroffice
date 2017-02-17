@@ -1205,7 +1205,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
     case 11:
       f << (type==10 ? "polyline" : "polygon") << ",";
       *input >> nTmp;
-      if (nTmp<0 || input->tell()+8*nTmp>endDataPos) {
+      if (nTmp<0 || (endDataPos-input->tell())/8 < nTmp || input->tell()+8*nTmp>endDataPos) {
         STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad number of points\n"));
         f << "###nPts=" << nTmp << ",";
         break;
