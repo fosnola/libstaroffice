@@ -24,7 +24,7 @@
 </defs>
 <rect x="55.3606" y="55.3606" width="497.3669" height="709.6535" style="fill: url(#grad2); marker-start: url(#startMarker1); marker-end: url(#endMarker1); "/>
 <rect x="143.7165" y="87.1654" width="315.8362" height="59.0740" style="fill: none; filter:url(#shadow0); "/>
-<text x="143.7165" y="118.1197">
+<text x="143.7165" y="116.7024">
 <tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
 finden,</tspan>
 <tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
@@ -69,7 +69,7 @@ verschiedene Aufgaben</tspan>
   </radialGradient>
 </defs>
 <rect x="204.7465" y="358.4977" width="181.5023" height="34.4976" style="fill: url(#grad5); filter:url(#shadow0); "/>
-<text x="204.7465" y="378.5811">
+<text x="204.7465" y="375.7465">
 <tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
 Arbeit in Kleingruppen</tspan>
 </text>
@@ -114,7 +114,7 @@ style="marker-start: url(#startMarker6); "/>
 </marker>
 </defs>
 <rect x="204.7465" y="490.5071" width="181.5023" height="50.2299" style="stroke: #cccc00; stroke-dasharray: , 1.4173, 1.4173; fill: none; marker-start: url(#startMarker8); "/>
-<text x="204.7465" y="515.6221">
+<text x="204.7465" y="515.6220">
 <tspan font-family="Wingdings" font-weight="normal" font-size="23.9811" fill="#000000" >
 l</tspan>
 <tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
@@ -137,7 +137,7 @@ einlegen</tspan>
 </marker>
 </defs>
 <rect x="194.2583" y="578.2394" width="209.2535" height="36.7370" style="fill: url(#grad6); filter:url(#shadow0); marker-start: url(#startMarker9); "/>
-<text x="194.2583" y="598.0252">
+<text x="194.2583" y="596.6079">
 <tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
 Einzel- und Gruppenarbeit</tspan>
 </text>
@@ -174,7 +174,7 @@ style="marker-start: url(#startMarker12); "/>
 <line x1="345.7417"  y1="640.8850" x2="345.7417"  y2="623.6221"
 style="marker-start: url(#startMarker13); "/>
 <rect x="197.2630" y="645.7606" width="206.9858" height="18.0000" style="fill: none; "/>
-<text x="197.2630" y="654.7748">
+<text x="197.2630" y="654.7606">
 <tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
 Berichte, Arbeitsergebnisse</tspan>
 </text>
@@ -188,7 +188,7 @@ Berichte, Arbeitsergebnisse</tspan>
 style="marker-start: url(#startMarker14); "/>
 <defs>
 <filter filterUnits="userSpaceOnUse" id="shadow1"><feOffset in="SourceGraphic" result="offset" dx="2.8346" dy="2.8346" /><feColorMatrix in="offset" result="offset-color" type="matrix" values="0 0 0 0 0.0000 0 0 0 0 0.0000 0 0 0 0 0.0000 0 0 0 1.0000 0"/><feMerge><feMergeNode in="offset-color" /><feMergeNode in="SourceGraphic" /></feMerge></filter></defs><rect x="126.7654" y="697.4929" width="346.4787" height="62.2488" style="filter:url(#shadow1); "/>
-<text x="126.7654" y="730.0347">
+<text x="126.7654" y="728.6173">
 <tspan font-family="times" font-weight="normal" font-size="19.9843" fill="#000000" >
 Diskussion der Gruppenresultate &amp;</tspan>
 <tspan font-family="times" font-weight="normal" font-size="19.9843" fill="#000000" >

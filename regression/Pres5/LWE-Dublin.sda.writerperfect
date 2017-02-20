@@ -47,7 +47,7 @@
       <style:drawing-page-properties draw:fill="none"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_M1" style:parent-style-name="GraphicStyle_0">
-      <style:graphic-properties draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties/>
     </style:style>
     <style:style style:family="drawing-page" style:name="DP2">
       <style:drawing-page-properties draw:fill="none"/>

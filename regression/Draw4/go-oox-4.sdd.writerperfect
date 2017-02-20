@@ -49,7 +49,7 @@
       <style:drawing-page-properties draw:fill="none"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_M1" style:parent-style-name="GraphicStyle_0">
-      <style:graphic-properties draw:auto-grow-height="false" draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties draw:auto-grow-height="false"/>
     </style:style>
     <style:style style:family="text" style:name="Span0">
       <style:text-properties fo:color="#000000" fo:country="GB" fo:font-size="43.9937pt" fo:font-weight="normal" fo:language="en" fo:letter-spacing="0*" fo:text-shadow="none" style:country-asian="GB" style:country-complex="GB" style:font-name="Arial" style:font-name-asian="SimSun" style:font-name-complex="Tahoma" style:font-pitch-asian="variable" style:font-size-asian="43.9937pt" style:font-size-complex="43.9937pt" style:font-weight-asian="normal" style:font-weight-complex="normal" style:language-asian="en" style:language-complex="en" style:letter-kerning="true" style:text-line-through-type="none" style:text-outline="false" style:text-underline-type="none"/>
@@ -163,10 +163,10 @@
       <style:graphic-properties draw:auto-grow-height="false" draw:fill="none" draw:fill-color="#ffffff" draw:stroke="none" draw:textarea-vertical-align="middle" fo:min-height="99.3827pt" fo:min-width="1.0000in"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_5" style:parent-style-name="GraphicStyle_4">
-      <style:graphic-properties draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_6" style:parent-style-name="GraphicStyle_4">
-      <style:graphic-properties draw:auto-grow-height="false" draw:fill="none" draw:shadow="hidden" draw:stroke="none"/>
+      <style:graphic-properties draw:auto-grow-height="false" draw:fill="none" draw:stroke="none"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_7" style:parent-style-name="GraphicStyle_4">
       <style:graphic-properties draw:auto-grow-height="false" draw:fill="none" draw:fill-color="#ffffff" draw:stroke="none" draw:textarea-vertical-align="top" fo:min-height="27.2126pt" fo:min-width="1.0000in"/>
@@ -178,7 +178,7 @@
       <style:graphic-properties draw:auto-grow-height="false" draw:fill="none" draw:fill-color="#ffffff" draw:stroke="none" draw:textarea-vertical-align="top" fo:min-height="33.8457pt" fo:min-width="1.0000in"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_11" style:parent-style-name="GraphicStyle_4">
-      <style:graphic-properties draw:auto-grow-height="false" draw:fill="none" draw:marker-end="Marker_0" draw:marker-end-center="false" draw:marker-end-width="5.9528pt" draw:shadow="hidden" draw:stroke="solid" svg:stroke-color="#000000" svg:stroke-width="0.7370pt"/>
+      <style:graphic-properties draw:auto-grow-height="false" draw:fill="none" draw:marker-end="Marker_0" draw:marker-end-center="false" draw:marker-end-width="5.9528pt" draw:stroke="solid" svg:stroke-color="#000000" svg:stroke-width="0.7370pt"/>
     </style:style>
   </office:automatic-styles>
   <office:master-styles>

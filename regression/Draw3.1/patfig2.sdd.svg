@@ -3,7 +3,7 @@
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  >
 <rect x="99.2126" y="56.6929" width="439.3701" height="728.5039" style=""/>
 <rect x="127.5591" y="640.8567" width="555.8174" height="56.6929" style="stroke-width: 0.8504; fill: none; "/>
-<text x="126.7087" y="362.9480">
+<text x="127.5591" y="669.2031" transform="rotate(-90.0000, 405.4677, 669.2031)" >
 <tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
 Dokumenterstellung, z.B. Bericht</tspan>
 </text>
@@ -13,12 +13,12 @@ Dokumenterstellung, z.B. Bericht</tspan>
    x</tspan>
 </text>
 <rect x="477.6945" y="640.8567" width="555.8174" height="46.7150" style="stroke-width: 0.8504; fill: none; "/>
-<text x="476.8441" y="362.9480">
+<text x="477.6945" y="664.2142" transform="rotate(-90.0000, 755.6031, 664.2142)" >
 <tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
 Nutzung</tspan>
 </text>
 <rect x="323.1496" y="85.0394" width="116.2205" height="555.8173" style="stroke-width: 0.8504; fill: none; "/>
-<text x="322.7244" y="84.6142">
+<text x="323.1496" y="85.0394">
 <tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
 </tspan>
 <tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
@@ -92,11 +92,11 @@ Ebene 9</tspan>
 <tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
    x</tspan>
 </text>
-<text x="265.8898" y="368.0220">
+<text x="265.8898" y="538.1008" transform="rotate(-90.0000, 407.6221, 538.1008)" >
 <tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
 Füllen nach             Akzeptanz</tspan>
 </text>
-<text x="439.3701" y="396.1984">
+<text x="439.3701" y="552.1040" transform="rotate(-90.0000, 581.1024, 552.1040)" >
 <tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
 Anforderung nach           Bedarf</tspan>
 </text>
@@ -184,7 +184,7 @@ style=""/>
 </defs>
 <line x1="269.2913"  y1="423.6945" x2="319.1244"  y2="423.6945"
 style="stroke-width: 0.8504; marker-end: url(#endMarker7); "/>
-<text x="198.5953" y="547.3134">
+<text x="198.5953" y="572.4000" transform="rotate(-90.0000, 353.7354, 559.8567)" >
 <tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
 Füllvorschlag gemäß          Texterkennung</tspan>
 </text>

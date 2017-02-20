@@ -143,7 +143,7 @@
       <style:graphic-properties draw:auto-grow-height="false" draw:blue="0.0000%" draw:color-mode="standard" draw:contrast="0.0000%" draw:gamma="100.0000%" draw:green="0.0000%" draw:luminance="0.0000%" draw:ole-draw-aspect="1" draw:red="0.0000%" draw:shadow="hidden" draw:stroke="none" draw:textarea-vertical-align="top" fo:clip="auto" fo:min-width="1.0000in"/>
     </style:style>
     <style:style style:family="table" style:name="Table0">
-      <style:table-properties table:align="left" table:border-model="collapsing"/>
+      <style:table-properties style:width="432.0000pt" table:align="left" table:border-model="collapsing"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table0.Column1">
       <style:table-column-properties style:column-width="111.6500pt"/>
@@ -158,7 +158,7 @@
       <style:table-cell-properties fo:border-bottom="none" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:padding="0.0382in"/>
     </style:style>
     <style:style style:family="table" style:name="Table1">
-      <style:table-properties table:align="left" table:border-model="collapsing"/>
+      <style:table-properties style:width="432.0000pt" table:align="left" table:border-model="collapsing"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table1.Column1">
       <style:table-column-properties style:column-width="108.0000pt"/>
@@ -173,7 +173,7 @@
       <style:table-cell-properties fo:border-bottom="none" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:padding="0.0382in"/>
     </style:style>
     <style:style style:family="table" style:name="Table2">
-      <style:table-properties table:align="left" table:border-model="collapsing"/>
+      <style:table-properties style:width="432.0000pt" table:align="left" table:border-model="collapsing"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table2.Column1">
       <style:table-column-properties style:column-width="216.0000pt"/>
@@ -188,7 +188,7 @@
       <style:table-cell-properties fo:border-bottom="none" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:padding="0.0382in"/>
     </style:style>
     <style:style style:family="table" style:name="Table3">
-      <style:table-properties table:align="left" table:border-model="collapsing"/>
+      <style:table-properties style:width="432.0000pt" table:align="left" table:border-model="collapsing"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table3.Column1">
       <style:table-column-properties style:column-width="78.3500pt"/>
@@ -203,7 +203,7 @@
       <style:table-cell-properties fo:border-bottom="none" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:padding="0.0382in"/>
     </style:style>
     <style:style style:family="table" style:name="Table4">
-      <style:table-properties table:align="left" table:border-model="collapsing"/>
+      <style:table-properties style:width="432.0000pt" table:align="left" table:border-model="collapsing"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table4.Column1">
       <style:table-column-properties style:column-width="77.6000pt"/>
@@ -224,7 +224,7 @@
       <style:table-cell-properties fo:border-bottom="none" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:padding="0.0382in"/>
     </style:style>
     <style:style style:family="table" style:name="Table5">
-      <style:table-properties fo:margin-left="0.0000pt" table:align="left" table:border-model="collapsing"/>
+      <style:table-properties fo:margin-left="0.0000pt" style:width="432.0000pt" table:align="left" table:border-model="collapsing"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table5.Column1">
       <style:table-column-properties style:column-width="108.0000pt"/>
@@ -239,7 +239,7 @@
       <style:table-cell-properties fo:border-bottom="none" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:padding="0.0382in"/>
     </style:style>
     <style:style style:family="table" style:name="Table6">
-      <style:table-properties table:align="left" table:border-model="collapsing"/>
+      <style:table-properties style:width="432.0000pt" table:align="left" table:border-model="collapsing"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table6.Column1">
       <style:table-column-properties style:column-width="108.0000pt"/>
@@ -254,7 +254,7 @@
       <style:table-cell-properties fo:border-bottom="none" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:padding="0.0382in"/>
     </style:style>
     <style:style style:family="table" style:name="Table7">
-      <style:table-properties table:align="left" table:border-model="collapsing"/>
+      <style:table-properties style:width="432.0000pt" table:align="left" table:border-model="collapsing"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table7.Column1">
       <style:table-column-properties style:column-width="274.5500pt"/>
@@ -272,7 +272,7 @@
       <style:table-cell-properties fo:border-bottom="none" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:padding="0.0382in"/>
     </style:style>
     <style:style style:family="table" style:name="Table8">
-      <style:table-properties table:align="left" table:border-model="collapsing"/>
+      <style:table-properties style:width="432.0000pt" table:align="left" table:border-model="collapsing"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table8.Column1">
       <style:table-column-properties style:column-width="274.5500pt"/>
@@ -290,7 +290,7 @@
       <style:table-cell-properties fo:border-bottom="none" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:padding="0.0382in"/>
     </style:style>
     <style:style style:family="table" style:name="Table9">
-      <style:table-properties table:align="left" table:border-model="collapsing"/>
+      <style:table-properties style:width="432.0000pt" table:align="left" table:border-model="collapsing"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table9.Column1">
       <style:table-column-properties style:column-width="274.5500pt"/>
@@ -308,7 +308,7 @@
       <style:table-cell-properties fo:border-bottom="none" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:padding="0.0382in"/>
     </style:style>
     <style:style style:family="table" style:name="Table10">
-      <style:table-properties table:align="left" table:border-model="collapsing"/>
+      <style:table-properties style:width="432.0000pt" table:align="left" table:border-model="collapsing"/>
     </style:style>
     <style:style style:family="table-column" style:name="Table10.Column1">
       <style:table-column-properties style:column-width="274.5500pt"/>

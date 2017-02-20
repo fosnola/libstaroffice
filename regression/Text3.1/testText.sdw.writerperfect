@@ -146,7 +146,7 @@
       </style:paragraph-properties>
     </style:style>
     <style:style style:family="graphic" style:name="gr_0" style:parent-style-name="standard">
-      <style:graphic-properties draw:fill="none" draw:shadow="hidden" draw:stroke="solid" svg:stroke-color="#000000"/>
+      <style:graphic-properties draw:fill="none" draw:stroke="solid" svg:stroke-color="#000000"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_2" style:parent-style-name="GraphicStyle_1">
       <style:graphic-properties draw:ole-draw-aspect="1" draw:shadow="hidden" fo:min-width="1.0000in"/>

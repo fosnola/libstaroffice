@@ -45,7 +45,7 @@
       <style:drawing-page-properties draw:fill="none"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_M1" style:parent-style-name="GraphicStyle_0">
-      <style:graphic-properties draw:auto-grow-height="false" draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties draw:auto-grow-height="false"/>
     </style:style>
     <style:style style:family="text" style:name="Span0">
       <style:text-properties fo:color="#000000" fo:font-size="13.9748pt" fo:font-style="italic" fo:font-weight="normal" fo:text-shadow="none" style:font-name="times" style:font-name-asian="times" style:font-name-complex="times" style:font-pitch="variable" style:font-size-asian="13.9748pt" style:font-size-complex="13.9748pt" style:font-style-asian="italic" style:font-style-complex="italic" style:font-weight-asian="normal" style:font-weight-complex="normal" style:text-line-through-type="none" style:text-outline="false" style:text-underline-type="none"/>
@@ -96,7 +96,7 @@
       <style:graphic-properties draw:fill="none" draw:fill-color="#ffffff" draw:stroke="none" fo:min-height="28.3465pt" fo:min-width="1.0000in"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_5" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_6" style:parent-style-name="GraphicStyle_2">
       <style:graphic-properties draw:fill="none" draw:stroke="none" draw:textarea-vertical-align="middle" fo:min-width="1.0000in"/>

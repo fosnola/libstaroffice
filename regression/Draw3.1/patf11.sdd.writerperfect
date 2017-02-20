@@ -46,7 +46,7 @@
       <style:drawing-page-properties draw:fill="none"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_M1" style:parent-style-name="GraphicStyle_0">
-      <style:graphic-properties draw:auto-grow-height="false" draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties draw:auto-grow-height="false"/>
     </style:style>
     <style:style style:family="text" style:name="Span0">
       <style:text-properties fo:color="#000000" fo:font-size="23.9811pt" fo:font-weight="normal" fo:text-shadow="none" style:font-name="times" style:font-name-asian="times" style:font-name-complex="times" style:font-pitch="variable" style:font-size-asian="23.9811pt" style:font-size-complex="23.9811pt" style:font-weight-asian="normal" style:font-weight-complex="normal" style:text-line-through-type="none" style:text-outline="false" style:text-underline-type="none"/>
@@ -70,10 +70,10 @@
       <style:paragraph-properties fo:line-height="100.0000%" fo:margin-bottom="0.0000in" fo:margin-left="0.0000pt" fo:margin-right="0.0000pt" fo:margin-top="0.0000pt" fo:text-align="center" fo:text-indent="0.0000pt" style:auto-text-indent="false" style:justify-single-word="false"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_3" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:marker-start="Marker_0" draw:marker-start-width="11.3386pt" draw:shadow="hidden" draw:stroke="solid" svg:stroke-width="0.8504pt"/>
+      <style:graphic-properties draw:marker-start="Marker_0" draw:marker-start-width="11.3386pt" svg:stroke-width="0.8504pt"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_4" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:marker-end="Marker_0" draw:marker-end-width="11.3386pt" draw:shadow="hidden" draw:stroke="solid" svg:stroke-width="0.8504pt"/>
+      <style:graphic-properties draw:marker-end="Marker_0" draw:marker-end-width="11.3386pt" svg:stroke-width="0.8504pt"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_5" style:parent-style-name="GraphicStyle_2">
       <style:graphic-properties draw:fill="none" draw:fill-color="#ffffff" draw:stroke="none" fo:min-height="39.7417pt" fo:min-width="1.0000in"/>
@@ -82,13 +82,13 @@
       <style:graphic-properties draw:fill="none" draw:fill-color="#ffffff" draw:stroke="none" fo:min-height="21.4016pt" fo:min-width="1.0000in"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_7" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:shadow="hidden" draw:stroke="solid" svg:stroke-width="1.1339pt"/>
+      <style:graphic-properties svg:stroke-width="1.1339pt"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_8" style:parent-style-name="GraphicStyle_2">
       <style:graphic-properties draw:fill="none" draw:fill-color="#ffffff" draw:stroke="none" fo:min-height="23.8394pt" fo:min-width="1.0000in"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_9" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:shadow="hidden" draw:stroke="solid" svg:stroke-width="0.8504pt"/>
+      <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" svg:stroke-width="0.8504pt"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_10" style:parent-style-name="GraphicStyle_2">
       <style:graphic-properties draw:fill="none" draw:fill-color="#ffffff" draw:stroke="none" draw:textarea-vertical-align="middle" fo:min-width="1.0000in"/>
@@ -103,7 +103,7 @@
       <style:graphic-properties draw:fill="none" draw:fill-color="#ffffff" draw:stroke="none" fo:min-height="26.9008pt" fo:min-width="1.0000in"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_14" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:marker-end="Marker_0" draw:marker-end-width="11.3386pt" draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties draw:marker-end="Marker_0" draw:marker-end-width="11.3386pt"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_15" style:parent-style-name="GraphicStyle_2">
       <style:graphic-properties draw:fill="none" draw:fill-color="#ffffff" draw:stroke="none" fo:min-height="48.6709pt" fo:min-width="1.0000in"/>
@@ -142,10 +142,10 @@
       <style:graphic-properties draw:fill="none" draw:fill-color="#ffffff" draw:marker-end-width="11.3386pt" draw:stroke="none" fo:min-height="23.6976pt" fo:min-width="1.0000in"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_27" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:shadow="hidden" draw:stroke="solid" svg:stroke-width="0.8504pt"/>
+      <style:graphic-properties svg:stroke-width="0.8504pt"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_28" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties/>
     </style:style>
   </office:automatic-styles>
   <office:master-styles>
@@ -158,7 +158,7 @@
       <draw:page draw:master-page-name="PM0" draw:name="page1" draw:style-name="DP1">
         <draw:line draw:layer="layout" draw:style-name="gr_3" svg:x1="104.2016pt" svg:x2="104.2016pt" svg:y1="83.0268pt" svg:y2="172.4032pt" text:anchor-page-number="2" text:anchor-type="page"/>
         <draw:line draw:layer="layout" draw:style-name="gr_4" svg:x1="104.7402pt" svg:x2="489.6000pt" svg:y1="174.0756pt" svg:y2="174.0756pt" text:anchor-page-number="2" text:anchor-type="page"/>
-        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_5" fo:min-height="39.7417pt" svg:height="123.6756pt" svg:width="40.7339pt" svg:x="1.0118in" svg:y="0.7169in">
+        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_5" draw:transform="rotate (1.5790) translate(1.0260in, 2.4346in)" fo:min-height="39.7417pt" svg:height="39.7417pt" svg:width="123.3354pt">
           <draw:text-box>
             <text:p text:style-name="S0">
               <text:span text:style-name="Span0"> </text:span>
@@ -183,7 +183,7 @@
           </draw:text-box>
         </draw:frame>
         <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_9" svg:height="27.5244pt" svg:width="250.9795pt" svg:x="201.9969pt" svg:y="254.5795pt" text:anchor-page-number="2" text:anchor-type="page"/>
-        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_10" draw:textarea-vertical-align="middle" svg:height="28.3748pt" svg:width="251.8299pt" svg:x="2.7996in" svg:y="3.5299in">
+        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_10" draw:textarea-vertical-align="middle" svg:height="27.5244pt" svg:width="250.9795pt" svg:x="2.8055in" svg:y="3.5358in">
           <draw:text-box>
             <text:p text:style-name="S1">
               <text:span text:style-name="Span2">Datenpool für Produkt</text:span>
@@ -199,7 +199,7 @@
           </draw:text-box>
         </draw:frame>
         <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_9" svg:height="40.9890pt" svg:width="146.8630pt" svg:x="248.7968pt" svg:y="334.4031pt" text:anchor-page-number="2" text:anchor-type="page"/>
-        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_10" draw:textarea-vertical-align="middle" svg:height="41.8394pt" svg:width="147.7134pt" svg:x="3.4496in" svg:y="4.6386in">
+        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_10" draw:textarea-vertical-align="middle" svg:height="40.9890pt" svg:width="146.8630pt" svg:x="3.4555in" svg:y="4.6445in">
           <draw:text-box>
             <text:p text:style-name="S1">
               <text:span text:style-name="Span2">benötigte</text:span>
@@ -209,7 +209,7 @@
             </text:p>
           </draw:text-box>
         </draw:frame>
-        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_12" fo:min-height="35.4614pt" svg:height="320.5417pt" svg:width="36.6803pt" svg:x="1.5122in" svg:y="2.9736in">
+        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_12" draw:transform="rotate (1.5746) translate(1.5295in, 7.4256in)" fo:min-height="35.4614pt" svg:height="35.4614pt" svg:width="320.4000pt">
           <draw:text-box>
             <text:p text:style-name="S0">
               <text:span text:style-name="Span0"> </text:span>
@@ -227,7 +227,7 @@
           </draw:text-box>
         </draw:frame>
         <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_9" svg:height="48.9260pt" svg:width="174.7559pt" svg:x="233.5181pt" svg:y="429.1087pt" text:anchor-page-number="2" text:anchor-type="page"/>
-        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_10" draw:textarea-vertical-align="middle" svg:height="49.7764pt" svg:width="175.6063pt" svg:x="3.2374in" svg:y="5.9539in">
+        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_10" draw:textarea-vertical-align="middle" svg:height="48.9260pt" svg:width="174.7559pt" svg:x="3.2433in" svg:y="5.9598in">
           <draw:text-box>
             <text:p text:style-name="S1">
               <text:span text:style-name="Span2">verknüpfte</text:span>
@@ -248,7 +248,7 @@
           </draw:text-box>
         </draw:frame>
         <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_9" svg:height="46.6866pt" svg:width="175.3795pt" svg:x="233.2346pt" svg:y="543.3449pt" text:anchor-page-number="2" text:anchor-type="page"/>
-        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_10" draw:textarea-vertical-align="middle" svg:height="47.5370pt" svg:width="176.2299pt" svg:x="3.2335in" svg:y="7.5406in">
+        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_10" draw:textarea-vertical-align="middle" svg:height="46.6866pt" svg:width="175.3795pt" svg:x="3.2394in" svg:y="7.5465in">
           <draw:text-box>
             <text:p text:style-name="S1">
               <text:span text:style-name="Span2">benötigtes</text:span>
@@ -259,7 +259,7 @@
           </draw:text-box>
         </draw:frame>
         <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_9" svg:height="46.6866pt" svg:width="177.5055pt" svg:x="228.1323pt" svg:y="648.7654pt" text:anchor-page-number="2" text:anchor-type="page"/>
-        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_10" draw:textarea-vertical-align="middle" svg:height="47.5370pt" svg:width="178.3559pt" svg:x="3.1626in" svg:y="9.0047in">
+        <draw:frame draw:fill="none" draw:fill-color="#ffffff" draw:layer="layout" draw:style-name="gr_10" draw:textarea-vertical-align="middle" svg:height="46.6866pt" svg:width="177.5055pt" svg:x="3.1685in" svg:y="9.0106in">
           <draw:text-box>
             <text:p text:style-name="S1">
               <text:span text:style-name="Span2">kundenspezifisches</text:span>

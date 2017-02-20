@@ -57,28 +57,28 @@
       <style:drawing-page-properties draw:fill="none"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_M1" style:parent-style-name="GraphicStyle_0">
-      <style:graphic-properties draw:auto-grow-height="false" draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties draw:auto-grow-height="false"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_3" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:fill="bitmap" draw:fill-image-name="Bitmap_1" draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties draw:fill="bitmap" draw:fill-image-name="Bitmap_1"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_4" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:marker-end="Marker_1" draw:marker-end-width="11.3386pt" draw:marker-start="Marker_0" draw:marker-start-width="11.3386pt" draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties draw:marker-end="Marker_1" draw:marker-end-width="11.3386pt" draw:marker-start="Marker_0" draw:marker-start-width="11.3386pt"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_5" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:fill="hatch" draw:fill-hatch-name="Hatch_1" draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties draw:fill="hatch" draw:fill-hatch-name="Hatch_1"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_6" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:fill-hatch-name="Hatch_2" draw:shadow="hidden" draw:stroke="dash" draw:stroke-dash="Dash_0"/>
+      <style:graphic-properties draw:fill-hatch-name="Hatch_2" draw:stroke="dash" draw:stroke-dash="Dash_0"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_7" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:fill-hatch-name="Hatch_3" draw:shadow="hidden" draw:stroke="dash" draw:stroke-dash="Dash_1"/>
+      <style:graphic-properties draw:fill-hatch-name="Hatch_3" draw:stroke="dash" draw:stroke-dash="Dash_1"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_8" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:fill-hatch-name="Hatch_4" draw:shadow="hidden" draw:stroke="dash" draw:stroke-dash="Dash_2"/>
+      <style:graphic-properties draw:fill-hatch-name="Hatch_4" draw:stroke="dash" draw:stroke-dash="Dash_2"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_9" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:fill="gradient" draw:fill-gradient-name="Gradient_1" draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties draw:fill="gradient" draw:fill-gradient-name="Gradient_1"/>
     </style:style>
   </office:automatic-styles>
   <office:master-styles>

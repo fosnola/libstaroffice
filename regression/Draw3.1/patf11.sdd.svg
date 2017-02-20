@@ -18,7 +18,7 @@ style="stroke-width: 0.8504; marker-start: url(#startMarker1); "/>
 </defs>
 <line x1="104.7402"  y1="174.0756" x2="489.6000"  y2="174.0756"
 style="stroke-width: 0.8504; marker-end: url(#endMarker1); "/>
-<text x="72.8504" y="175.2945">
+<text x="73.8709" y="215.0362" transform="rotate(-90.4700, 135.5386, 195.1654)" >
 <tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
  </tspan>
 <tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
@@ -36,7 +36,7 @@ Menge Daten D</tspan>
 Füllen gemäß          Lebenslauf</tspan>
 </text>
 <rect x="201.9969" y="254.5795" width="250.9795" height="27.5244" style="stroke-width: 0.8504; fill: #ffffff; "/>
-<text x="201.5717" y="268.3417">
+<text x="201.9969" y="268.3417">
 <tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
 Datenpool für Produkt</tspan>
 </text>
@@ -47,13 +47,13 @@ Datenpool für Produkt</tspan>
 Selektions -      Regel</tspan>
 </text>
 <rect x="248.7968" y="334.4031" width="146.8630" height="40.9890" style="stroke-width: 0.8504; fill: #ffffff; "/>
-<text x="248.3717" y="354.8977">
+<text x="248.7968" y="354.8976">
 <tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
 benötigte</tspan>
 <tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
 Datenelemente</tspan>
 </text>
-<text x="108.8787" y="534.6425">
+<text x="110.1260" y="570.1039" transform="rotate(-90.2200, 270.3260, 552.3732)" >
 <tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
  </tspan>
 <tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
@@ -68,7 +68,7 @@ Regeln zur Nutzung  (10)</tspan>
 Strukturie -       rungs - Regel</tspan>
 </text>
 <rect x="233.5181" y="429.1087" width="174.7559" height="48.9260" style="stroke-width: 0.8504; fill: #ffffff; "/>
-<text x="233.0929" y="453.5717">
+<text x="233.5181" y="453.5717">
 <tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
 verknüpfte</tspan>
 <tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
@@ -91,14 +91,14 @@ style="marker-end: url(#endMarker2); "/>
 Darstellungs  -     Regel</tspan>
 </text>
 <rect x="233.2346" y="543.3449" width="175.3795" height="46.6866" style="stroke-width: 0.8504; fill: #ffffff; "/>
-<text x="232.8094" y="566.6882">
+<text x="233.2346" y="566.6882">
 <tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
 benötigtes</tspan>
 <tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
 Dokument</tspan>
 </text>
 <rect x="228.1323" y="648.7654" width="177.5055" height="46.6866" style="stroke-width: 0.8504; fill: #ffffff; "/>
-<text x="227.7071" y="672.1087">
+<text x="228.1323" y="672.1087">
 <tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >
 kundenspezifisches</tspan>
 <tspan font-family="times" font-weight="normal" font-size="18.0000" fill="#000000" >

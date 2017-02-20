@@ -61,16 +61,16 @@
       <style:drawing-page-properties draw:fill="none"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_M1" style:parent-style-name="GraphicStyle_0">
-      <style:graphic-properties draw:auto-grow-height="false" draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties draw:auto-grow-height="false"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_M3" style:parent-style-name="GraphicStyle_2">
-      <style:graphic-properties draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_M5" style:parent-style-name="GraphicStyle_4">
-      <style:graphic-properties draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_M7" style:parent-style-name="GraphicStyle_6">
-      <style:graphic-properties draw:shadow="hidden" draw:stroke="solid"/>
+      <style:graphic-properties/>
     </style:style>
     <style:style style:family="text" style:name="Span0">
       <style:text-properties fo:color="#ffffff" fo:font-size="31.9748pt" fo:font-weight="normal" fo:text-shadow="1pt 1pt" style:font-name="Times" style:font-name-asian="Times" style:font-name-complex="Times" style:font-size-asian="31.9748pt" style:font-size-complex="31.9748pt" style:font-weight-asian="normal" style:font-weight-complex="normal" style:text-line-through-type="none" style:text-outline="false" style:text-underline-type="none"/>
@@ -85,10 +85,10 @@
       <style:graphic-properties draw:shadow="hidden" draw:stroke="solid" style:mirror="none"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_11" style:parent-style-name="standard">
-      <style:graphic-properties draw:fill="none" draw:shadow="hidden" draw:stroke="solid" svg:stroke-color="#000000"/>
+      <style:graphic-properties draw:fill="none" draw:stroke="solid" svg:stroke-color="#000000"/>
     </style:style>
     <style:style style:family="graphic" style:name="gr_12" style:parent-style-name="standard">
-      <style:graphic-properties draw:fill="none" draw:shadow="hidden" draw:stroke="dash" draw:stroke-dash="Dash_0" svg:stroke-color="#800000" svg:stroke-opacity="50.0000%" svg:stroke-width="4.2520pt"/>
+      <style:graphic-properties draw:fill="none" draw:stroke="dash" draw:stroke-dash="Dash_0" svg:stroke-color="#800000" svg:stroke-opacity="50.0000%" svg:stroke-width="4.2520pt"/>
     </style:style>
   </office:automatic-styles>
   <office:master-styles>

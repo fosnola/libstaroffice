@@ -112,10 +112,10 @@
     <style:style style:family="paragraph" style:name="S3" style:parent-style-name="Standard">
       <style:paragraph-properties style:justify-single-word="false"/>
     </style:style>
-    <style:style style:family="paragraph" style:name="S4" style:parent-style-name="Standard">
+    <style:style style:default-outline-level="2" style:family="paragraph" style:name="S4" style:parent-style-name="Standard">
       <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-top="12.0000pt" fo:text-align="center" style:justify-single-word="false"/>
     </style:style>
-    <style:style style:family="paragraph" style:name="S5" style:parent-style-name="Standard">
+    <style:style style:default-outline-level="3" style:family="paragraph" style:name="S5" style:parent-style-name="Standard">
       <style:paragraph-properties fo:margin-bottom="6.0000pt" fo:margin-left="14.1500pt" fo:margin-right="0.0000pt" fo:margin-top="12.0000pt" fo:text-indent="-14.1500pt" style:auto-text-indent="false" style:justify-single-word="false"/>
     </style:style>
     <style:style style:family="paragraph" style:name="S6" style:parent-style-name="Standard">
@@ -159,15 +159,15 @@
       <text:p text:style-name="S3">
         <text:span text:style-name="Span0"/>
       </text:p>
-      <text:p text:style-name="S4">
+      <text:h text:outline-level="2" text:style-name="S4">
         <text:span text:style-name="Span2">Luther und Karl V. am Reichtag zu Worms 1521</text:span>
-      </text:p>
+      </text:h>
       <text:p text:style-name="S3">
         <text:span text:style-name="Span0"/>
       </text:p>
-      <text:p text:style-name="S5">
+      <text:h text:outline-level="3" text:style-name="S5">
         <text:span text:style-name="Span3">1. Allgemeines zum Wormser Reichstag</text:span>
-      </text:p>
+      </text:h>
       <text:list text:style-name="UL0">
         <text:list-item>
           <text:p text:style-name="S6">
@@ -195,9 +195,9 @@
           </text:p>
         </text:list-item>
       </text:list>
-      <text:p text:style-name="S5">
+      <text:h text:outline-level="3" text:style-name="S5">
         <text:span text:style-name="Span3">2. Vorlauf des Reichstages</text:span>
-      </text:p>
+      </text:h>
       <text:p text:style-name="S3">
         <text:span text:style-name="Span0"/>
       </text:p>
@@ -282,9 +282,9 @@
       <text:p text:style-name="S3">
         <text:span text:style-name="Span0"/>
       </text:p>
-      <text:p text:style-name="S5">
+      <text:h text:outline-level="3" text:style-name="S5">
         <text:span text:style-name="Span3">3. Beratungen innerhalb der eigentlichen Tagesordnung</text:span>
-      </text:p>
+      </text:h>
       <text:p text:style-name="S3">
         <text:span text:style-name="Span0"/>
       </text:p>
@@ -334,9 +334,9 @@
       <text:p text:style-name="S3">
         <text:span text:style-name="Span0"/>
       </text:p>
-      <text:p text:style-name="S5">
+      <text:h text:outline-level="3" text:style-name="S5">
         <text:span text:style-name="Span3">4. Die 'Causa Lutheri' auf dem Reichstag</text:span>
-      </text:p>
+      </text:h>
       <text:p text:style-name="S3">
         <text:span text:style-name="Span0"/>
       </text:p>
