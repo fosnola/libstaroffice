@@ -35,8 +35,11 @@
 #define STOFF_GRAPHIC_VERSION 2
 /** Defines the math possible conversion (actually none) */
 #define STOFF_MATH_VERSION 0
-/** Defines the presentation possible conversion (actually none) */
-#define STOFF_PRESENTATION_VERSION 0
+/** Defines the presentation possible conversion
+    - 1: begin to convert the files created by StarImpress
+         in presentation(from libstoff-0.0.3)
+ */
+#define STOFF_PRESENTATION_VERSION 1
 /** Defines the spreadsheet processing possible conversion:
     - 1: can convert some basic document(from libstoff-0.0.0)
     - 2: can generate some spreadsheet OLE(from libstoff-0.0.2)

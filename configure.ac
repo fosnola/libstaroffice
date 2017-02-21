@@ -7,7 +7,7 @@ AC_PREREQ([2.65])
 # ====================
 m4_define([libstaroffice_version_major],[0])
 m4_define([libstaroffice_version_minor],[0])
-m4_define([libstaroffice_version_micro],[2])
+m4_define([libstaroffice_version_micro],[3])
 m4_define([libstaroffice_version],[libstaroffice_version_major.libstaroffice_version_minor.libstaroffice_version_micro])
 
 # =============

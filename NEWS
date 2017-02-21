@@ -1,3 +1,11 @@
+0.0.3:
+- 20/02/2017:
+   - tests if the file is created by StarImpress, if yes, converts it
+     in a presentation file,
+   - .sdw: try to retrieve more table's formattings and some outline levels,
+   - graphics: try to retrieve more embedded pictures and the textbox
+     rotations.
+
 0.0.2:
 - 08/10/2016
    - begin to convert .sdw files ; but the mark, the outline, the tables,
