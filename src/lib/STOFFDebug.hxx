@@ -215,7 +215,7 @@ public:
   static void write() {}
   static void reset() { }
 
-  static void skipZone(long , long) {}
+  static void skipZone(long, long) {}
 };
 }
 #  endif

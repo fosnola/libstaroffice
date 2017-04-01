@@ -171,7 +171,7 @@ public:
     ATTR_FRM_LAYOUT_SPLIT,                         	// 100
     ATTR_FRM_CHAIN,                                	// 101
     ATTR_FRM_TEXTGRID,                             	// 102
-    ATTR_FRM_LINENUMBER  ,                         	// 103
+    ATTR_FRM_LINENUMBER,                         	// 103
     ATTR_FRM_FTN_AT_TXTEND,                        	// 104
     ATTR_FRM_END_AT_TXTEND,                        	// 105
     ATTR_FRM_COLUMNBALANCE,                        	// 106
