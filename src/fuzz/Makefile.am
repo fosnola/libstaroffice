@@ -1,4 +1,4 @@
-noinst_PROGRAMS = sdcfuzzer
+noinst_PROGRAMS = sdafuzzer sdcfuzzer
 
 AM_CXXFLAGS = -I$(top_srcdir)/inc \
 	$(REVENGE_GENERATORS_CFLAGS) \
@@ -6,12 +6,19 @@ AM_CXXFLAGS = -I$(top_srcdir)/inc \
 	$(REVENGE_STREAM_CFLAGS) \
 	$(DEBUG_CXXFLAGS)
 
-sdcfuzzer_LDADD = \
+commonfuzzer_ldadd = \
 	$(top_builddir)/src/lib/libstaroffice-@STAROFFICE_MAJOR_VERSION@.@STAROFFICE_MINOR_VERSION@.la \
 	$(REVENGE_GENERATORS_LIBS) \
 	$(REVENGE_LIBS) \
 	$(REVENGE_STREAM_LIBS) \
 	-lFuzzingEngine
+
+sdafuzzer_LDADD = $(commonfuzzer_ldadd)
+
+sdafuzzer_SOURCES = \
+	sdafuzzer.cpp
+
+sdcfuzzer_LDADD = $(commonfuzzer_ldadd)
 
 sdcfuzzer_SOURCES = \
 	sdcfuzzer.cpp
