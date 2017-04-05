@@ -315,6 +315,7 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+      (void)inflateEnd(&strm);
       return true;
     default:
       break;
