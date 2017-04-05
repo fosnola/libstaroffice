@@ -1,4 +1,4 @@
-noinst_PROGRAMS = sdafuzzer sdcfuzzer sddfuzzer
+noinst_PROGRAMS = sdafuzzer sdcfuzzer sddfuzzer sdwfuzzer
 
 AM_CXXFLAGS = -I$(top_srcdir)/inc \
 	$(REVENGE_GENERATORS_CFLAGS) \
@@ -27,3 +27,8 @@ sddfuzzer_LDADD = $(commonfuzzer_ldadd)
 
 sddfuzzer_SOURCES = \
 	sddfuzzer.cpp
+
+sdwfuzzer_LDADD = $(commonfuzzer_ldadd)
+
+sdwfuzzer_SOURCES = \
+	sdwfuzzer.cpp
