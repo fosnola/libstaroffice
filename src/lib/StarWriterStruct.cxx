@@ -327,7 +327,7 @@ bool DatabaseName::read(StarZone &zone)
         }
         data.m_name=libstoff::getString(text);
         int positions[2];
-        for (int j=0; j<2; ++j) positions[i]=int(input->readULong(4));
+        for (int j=0; j<2; ++j) positions[j]=int(input->readULong(4));
         data.m_selection=STOFFVec2i(positions[0],positions[1]);
         m_dataList.push_back(data);
       }
