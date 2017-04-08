@@ -36,6 +36,7 @@
 #include <iostream>
 #include <limits>
 #include <sstream>
+#include <utility>
 
 #ifdef USE_ZIP
 #  include <zlib.h>
@@ -344,7 +345,13 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
   if (offset)
     dataPos=beginPos+offset;
   int const bitCount=bitmap.m_bitCount<=1 ? 1 : bitmap.m_bitCount<=4 ? 4 : bitmap.m_bitCount<=8 ? 8 : 24;
-  int const nColors=(bitCount>8) ? 0 : bitmap.m_numColors[0] ? int(bitmap.m_numColors[0]) : int(1 << bitCount);
+  int nColors=0;
+  if (bitCount <= 8) {
+    if (bitmap.m_numColors[0] > 0 && bitmap.m_numColors[0] < 1 << bitCount)
+      nColors = int(bitmap.m_numColors[0]);
+    else
+      nColors = int(1 << bitCount);
+  }
   int const numComponent=bitmap.m_hasAlphaColor ? 4 : 3;
   if ((endDataPos-dInput->tell())/numComponent<nColors || dInput->tell()+numComponent*nColors > endDataPos) {
     STOFF_DEBUG_MSG(("StarBitmap::readBitmap: can not read the color\n"));
