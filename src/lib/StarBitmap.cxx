@@ -520,9 +520,9 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
       RGBMask[0]= bitmap.m_bitCount == 16 ? 0x00007c00UL : 0x00ff0000UL;
       RGBMask[1]= bitmap.m_bitCount == 16 ? 0x000003e0UL : 0x0000ff00UL;
       RGBMask[2]= bitmap.m_bitCount == 16 ? 0x0000001fUL : 0x000000ffUL;
-      RGBShift[0]= bitmap.m_bitCount == 16 ? 7 : 16;
-      RGBShift[1]= bitmap.m_bitCount == 16 ? 2 : 8;
-      RGBShift[2]= bitmap.m_bitCount == 16 ? -3 : 0;
+      RGBShift[0]= bitmap.m_bitCount == 16 ? 10 : 16;
+      RGBShift[1]= bitmap.m_bitCount == 16 ? 5 : 8;
+      RGBShift[2]= bitmap.m_bitCount == 16 ? 0 : 0;
     }
   }
 
