@@ -85,7 +85,7 @@ struct Bitmap {
       }
       return true;
     }
-    if (m_indexDataList.size()!=size_t(m_width*m_height)) {
+    if (m_indexDataList.size()/m_width!=m_height || m_indexDataList.size()%m_width!=0) {
       STOFF_DEBUG_MSG(("StarBitmapInternal::Bitmap::getPPMData: index data list's size is bad\n"));
       return false;
     }
