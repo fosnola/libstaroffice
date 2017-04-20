@@ -509,7 +509,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
       for (int i=0; i<3; ++i) {
         *input >> RGBMask[i];
         uint32_t decal=0x80000000ul;
-        for (int j=31; j>=0; --j, decal>>=1) {
+        for (int j=31; j>=7; --j, decal>>=1) {
           if ((RGBMask[i]&decal)==0) continue;
           RGBShift[i]=j-7;
           break;
