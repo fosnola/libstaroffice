@@ -347,7 +347,7 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
   int const bitCount=bitmap.m_bitCount<=1 ? 1 : bitmap.m_bitCount<=4 ? 4 : bitmap.m_bitCount<=8 ? 8 : 24;
   int nColors=0;
   if (bitCount <= 8) {
-    if (bitmap.m_numColors[0] > 0 && bitmap.m_numColors[0] < 1 << bitCount)
+    if (bitmap.m_numColors[0] > 0 && bitmap.m_numColors[0] < (1u << bitCount))
       nColors = int(bitmap.m_numColors[0]);
     else
       nColors = int(1 << bitCount);
