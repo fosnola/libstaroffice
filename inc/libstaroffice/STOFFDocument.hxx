@@ -25,7 +25,7 @@
 #ifndef STOFFDOCUMENT_HXX
 #define STOFFDOCUMENT_HXX
 
-#ifdef DLL_EXPORT
+#ifdef _WINDLL
 #ifdef BUILD_STOFF
 #define STOFFLIB __declspec(dllexport)
 #else
