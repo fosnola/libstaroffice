@@ -62,7 +62,7 @@ bool StarEncodingChinese::readChinese1
   }
   bool gbkOr936=encoding==StarEncoding::E_GBK || encoding==StarEncoding::E_MS_936;
   bool gbt=encoding==StarEncoding::E_GBT_12345;
-  bool gbkOff=gbkOr936 ? 0 : 0x61;
+  int gbkOff=gbkOr936 ? 0 : 0x61;
   if (pos>=src.size()) return false;
   int c=int(src[pos++]), c2=0;
   if (c>=(encoding==StarEncoding::E_APPLE_CHINSIMP ? 0x83 : 0x81) &&
