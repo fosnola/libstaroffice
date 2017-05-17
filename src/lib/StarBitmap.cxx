@@ -537,6 +537,10 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
     bitmap.m_indexDataList.resize(size_t(lastWPos),0);
     uint32_t x=0, y=0;
     while (true) {
+      if (input->tell() > lastPos - 1) {
+        STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: at the end of the bitmap record already\n"));
+        return false;
+      }
       if (y>=bitmap.m_height) break;
       int nCount=int(input->readULong(1));
       if (!nCount) {
