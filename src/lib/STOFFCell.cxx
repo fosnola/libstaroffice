@@ -105,12 +105,14 @@ bool STOFFCell::Format::convertDTFormat(std::string const &dtFormat, librevenge:
     switch (ch) {
     case 'Y':
       list.insert("number:style", "long");
+      FALLTHROUGH;
     case 'y':
       list.insert("librevenge:value-type", "year");
       propVect.append(list);
       break;
     case 'B':
       list.insert("number:style", "long");
+      FALLTHROUGH;
     case 'b':
     case 'h':
       list.insert("librevenge:value-type", "month");
@@ -123,13 +125,14 @@ bool STOFFCell::Format::convertDTFormat(std::string const &dtFormat, librevenge:
       break;
     case 'e':
       list.insert("number:style", "long");
-    // fall-through intended
+      FALLTHROUGH;
     case 'd':
       list.insert("librevenge:value-type", "day");
       propVect.append(list);
       break;
     case 'A':
       list.insert("number:style", "long");
+      FALLTHROUGH;
     case 'a':
       list.insert("librevenge:value-type", "day-of-week");
       propVect.append(list);
@@ -137,7 +140,7 @@ bool STOFFCell::Format::convertDTFormat(std::string const &dtFormat, librevenge:
 
     case 'H':
       list.insert("number:style", "long");
-    // fall-through intended
+      FALLTHROUGH;
     case 'I':
       list.insert("librevenge:value-type", "hours");
       propVect.append(list);

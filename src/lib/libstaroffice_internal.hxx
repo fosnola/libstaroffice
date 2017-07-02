@@ -110,6 +110,22 @@ struct STOFF_shared_ptr_noop_deleter {
   void operator()(T *) {}
 };
 
+#if defined(__clang__)
+#  if __has_cpp_attribute(clang::fallthrough)
+#    define FALLTHROUGH [[clang::fallthrough]]
+#  else
+#    define FALLTHROUGH
+#  endif
+#elif defined(__GNUC__)
+#  if __GNUC__>=7
+#    define FALLTHROUGH [[fallthrough]]
+#  else
+#    define FALLTHROUGH
+#  endif
+#else
+#  define FALLTHROUGH
+#endif
+
 #if defined(__clang__) || defined(__GNUC__)
 #  define LIBSTOFF_ATTRIBUTE_PRINTF(fmt, arg) __attribute__((__format__(__printf__, fmt, arg)))
 #else
