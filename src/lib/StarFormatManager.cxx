@@ -372,7 +372,7 @@ bool NumberFormatter::FormatItem::updateNumberingProperties(librevenge::RVNGProp
   case 26: // nnn
   case 41: // aaa
     list.insert("number:style", "long");
-    FALLTHROUGH;
+    STOFF_FALLTHROUGH;
   case 19: // dddd
   case 22: // nn
   case 40: // aa
@@ -1085,7 +1085,7 @@ bool StarFormatManager::readSWPatternLCL(StarZone &zone)
         break;
       }
       // #92986# some older versions created a wrong content index entry definition
-      FALLTHROUGH;
+      STOFF_FALLTHROUGH;
     case 4: {
       f << "tknText,";
       if (!zone.readString(string)) {

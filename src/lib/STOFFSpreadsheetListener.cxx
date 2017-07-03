@@ -1159,7 +1159,7 @@ bool STOFFSpreadsheetListener::openFrame(STOFFPosition const &pos, STOFFGraphicS
     break;
   case STOFFPosition::Unknown:
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame: UNKNOWN position, insert as char position\n"));
-    FALLTHROUGH;
+    STOFF_FALLTHROUGH;
   case STOFFPosition::CharBaseLine:
   case STOFFPosition::Char:
     if (m_ps->m_isSpanOpened)
@@ -1477,7 +1477,7 @@ void STOFFSpreadsheetListener::openSheetCell(STOFFCell const &cell, STOFFCellCon
       if (format.m_format==STOFFCell::F_DATE)
         break;
     }
-    FALLTHROUGH;
+    STOFF_FALLTHROUGH;
     case STOFFCell::F_TIME: {
       if (format.m_format==STOFFCell::F_TIME)
         propList.insert("librevenge:value-type", "time");

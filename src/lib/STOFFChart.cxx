@@ -604,7 +604,7 @@ std::ostream &operator<<(std::ostream &o, STOFFChart::TextZone const &zone)
   switch (zone.m_type) {
   case STOFFChart::TextZone::T_SubTitle:
     o << "sub";
-    FALLTHROUGH;
+    STOFF_FALLTHROUGH;
   case STOFFChart::TextZone::T_Title:
     o << "title";
     if (zone.m_contentType==STOFFChart::TextZone::C_Cell)

@@ -1161,7 +1161,7 @@ void STOFFTextListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphic
   default:
 #endif
     STOFF_DEBUG_MSG(("STOFFTextListener::insertShape: UNKNOWN position, insert as char position\n"));
-    FALLTHROUGH;
+    STOFF_FALLTHROUGH;
   case STOFFPosition::CharBaseLine:
   case STOFFPosition::Char:
     if (m_ps->m_isSpanOpened)
@@ -1245,7 +1245,7 @@ bool STOFFTextListener::openFrame(STOFFPosition const &pos, STOFFGraphicStyle co
     break;
   case STOFFPosition::Unknown:
     STOFF_DEBUG_MSG(("STOFFTextListener::openFrame: UNKNOWN position, insert as char position\n"));
-    FALLTHROUGH;
+    STOFF_FALLTHROUGH;
   case STOFFPosition::CharBaseLine:
   case STOFFPosition::Char:
     if (m_ps->m_isSpanOpened)
@@ -1328,7 +1328,7 @@ bool STOFFTextListener::openGroup(STOFFPosition const &pos)
   default:
 #endif
     STOFF_DEBUG_MSG(("STOFFTextListener::openGroup: UNKNOWN position, insert as char position\n"));
-    FALLTHROUGH;
+    STOFF_FALLTHROUGH;
   case STOFFPosition::CharBaseLine:
   case STOFFPosition::Char:
     if (m_ps->m_isSpanOpened)
