@@ -1,5 +1,9 @@
+0.0.4:
+- 07/15/2017:
+   - correct many errors detected by fuzzing
+   
 0.0.3:
-- 20/02/2017:
+- 02/20/2017:
    - tests if the file is created by StarImpress, if yes, converts it
      in a presentation file,
    - .sdw: try to retrieve more table's formattings and some outline levels,

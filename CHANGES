@@ -1,5 +1,14 @@
 CHANGES:
 
+07/15/2017:
+   - correct many problems detected with fuzzing...
+   
+02/20/2017:
+   - files created by StarImpress are converted as presentation,
+   - .sdw: retrieve table's formattings and some outline's level,
+   - graphics: retrieve more embedded pictures and the text-boxes'
+     rotations
+     
 08/04/2016:
    - begin to convert .sdw files ; but the mark, the outline, the tables, the embedded
      shapes/pictures/... are not correctly retrieved, 
