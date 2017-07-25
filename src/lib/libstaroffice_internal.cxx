@@ -107,14 +107,15 @@ void appendUnicode(uint32_t val, librevenge::RVNGString &buffer)
     len = 6;
   }
 
-  uint8_t outbuf[6] = { 0, 0, 0, 0, 0, 0 };
+  char outbuf[7];
   int i;
   for (i = len - 1; i > 0; --i) {
-    outbuf[i] = uint8_t((val & 0x3f) | 0x80);
+    outbuf[i] = char((val & 0x3f) | 0x80);
     val >>= 6;
   }
-  outbuf[0] = uint8_t(val | first);
-  for (i = 0; i < len; i++) buffer.append(char(outbuf[i]));
+  outbuf[0] = char(val | first);
+  outbuf[len] = 0;
+  buffer.append(outbuf);
 }
 }
 

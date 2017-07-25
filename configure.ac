@@ -33,6 +33,8 @@ AC_PROG_MAKE_SET
 LT_INIT([win32-dll disable-static pic-only])
 AC_CANONICAL_HOST
 
+AX_CXX_COMPILE_STDCXX_11
+
 PKG_PROG_PKG_CONFIG([0.20])
 
 # =================================
@@ -287,8 +289,6 @@ AS_CASE([$with_sharedptr],
 
 AS_IF([test "x$with_sharedptr" = "xc++11"], [
 	AC_MSG_CHECKING([for c++11 shared ptr])
-	save_CXXFLAGS="$CXXFLAGS"
-	CXXFLAGS="-std=c++11 $CXXFLAGS"
 	AC_COMPILE_IFELSE([
 		AC_LANG_PROGRAM(
 			[[#include <memory>]],
@@ -302,19 +302,6 @@ AS_IF([test "x$with_sharedptr" = "xc++11"], [
 		AC_MSG_ERROR([Could not find C++11 implementation of shared_ptr])
 	], [
 		[#include <memory>]
-	])
-	CXXFLAGS="$save_CXXFLAGS"
-	AC_MSG_CHECKING([whether the compiler needs -std=c++11])
-	AC_COMPILE_IFELSE([
-		AC_LANG_PROGRAM(
-			[[#include <memory>]],
-			[[std::shared_ptr<int> p;]]
-		)
-	], [
-		AC_MSG_RESULT([no])
-	], [
-		AC_MSG_RESULT([yes])
-		CXXFLAGS="-std=c++11 $CXXFLAGS"
 	])
 ])
 AS_IF([test "x$with_sharedptr" = "xtr1"], [
@@ -450,7 +437,6 @@ Build configuration:
 	full-debug:      ${enable_full_debug}
 	docs:            ${build_docs}
 	fuzzers:         ${enable_fuzzers}
-	shared_ptr:      ${with_sharedptr}
 	zip:             ${with_zip}
 	static-tools:    ${enable_static_tools}
 	werror:          ${enable_werror}
