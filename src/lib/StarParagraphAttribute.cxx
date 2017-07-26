@@ -59,9 +59,9 @@ public:
   //! destructor
   ~StarPAttributeBool();
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeBool(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeBool(*this));
   }
   //! add to a para
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -88,9 +88,9 @@ public:
   //! destructor
   ~StarPAttributeColor();
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeColor(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeColor(*this));
   }
   //! add to a para
   // virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -118,9 +118,9 @@ public:
   //! add to a para
   // virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeInt(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeInt(*this));
   }
 protected:
   //! copy constructor
@@ -145,9 +145,9 @@ public:
   //! destructor
   ~StarPAttributeUInt();
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeUInt(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeUInt(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object)
@@ -193,9 +193,9 @@ public:
   //! add to a para
   // virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeVoid(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeVoid(*this));
   }
 protected:
   //! copy constructor
@@ -244,29 +244,29 @@ void StarPAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
 }
 
 //! add a bool attribute
-inline void addAttributeBool(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
+inline void addAttributeBool(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarPAttributeBool(type,debugName, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarPAttributeBool(type,debugName, defValue));
 }
 //! add a color attribute
-inline void addAttributeColor(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, STOFFColor const &defValue)
+inline void addAttributeColor(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, STOFFColor const &defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarPAttributeColor(type,debugName, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarPAttributeColor(type,debugName, defValue));
 }
 //! add a int attribute
-inline void addAttributeInt(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
+inline void addAttributeInt(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarPAttributeInt(type,debugName, numBytes, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarPAttributeInt(type,debugName, numBytes, defValue));
 }
 //! add a unsigned int attribute
-inline void addAttributeUInt(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, unsigned int defValue)
+inline void addAttributeUInt(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, unsigned int defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarPAttributeUInt(type,debugName, numBytes, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarPAttributeUInt(type,debugName, numBytes, defValue));
 }
 //! add a void attribute
-inline void addAttributeVoid(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
+inline void addAttributeVoid(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarPAttributeVoid(type,debugName));
+  map[type]=std::shared_ptr<StarAttribute>(new StarPAttributeVoid(type,debugName));
 }
 
 }
@@ -283,9 +283,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeAdjust(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeAdjust(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -320,9 +320,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeBulletNumeric(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeBulletNumeric(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -364,9 +364,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeBulletSimple(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeBulletSimple(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -396,9 +396,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeDrop(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeDrop(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -447,9 +447,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeHyphen(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeHyphen(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -492,9 +492,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeLineSpacing(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeLineSpacing(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -537,9 +537,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeNumericRuler(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeNumericRuler(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -602,9 +602,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeTabStop(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeTabStop(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -959,7 +959,7 @@ bool StarPAttributeTabStop::read(StarZone &zone, int /*vers*/, long endPos, Star
 
 namespace StarParagraphAttribute
 {
-void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
+void addInitTo(std::map<int, std::shared_ptr<StarAttribute> > &map)
 {
   addAttributeBool(map,StarAttribute::ATTR_PARA_SPLIT,"para[split]",true);
   addAttributeUInt(map,StarAttribute::ATTR_PARA_WIDOWS,"para[widows]",1,0); // numlines
@@ -972,12 +972,12 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeUInt(map, StarAttribute::ATTR_EE_PARA_OUTLLEVEL,"para[outlevel]",2,0);
   addAttributeBool(map, StarAttribute::ATTR_EE_PARA_ASIANCJKSPACING,"para[asianCJKSpacing]",false);
 
-  map[StarAttribute::ATTR_PARA_ADJUST]=shared_ptr<StarAttribute>(new StarPAttributeAdjust(StarAttribute::ATTR_PARA_ADJUST,"parAtrAdjust"));
-  map[StarAttribute::ATTR_PARA_LINESPACING]=shared_ptr<StarAttribute>(new StarPAttributeLineSpacing(StarAttribute::ATTR_PARA_LINESPACING,"parAtrLinespacing"));
-  map[StarAttribute::ATTR_PARA_TABSTOP]=shared_ptr<StarAttribute>(new StarPAttributeTabStop(StarAttribute::ATTR_PARA_TABSTOP,"parAtrTabStop"));
-  map[StarAttribute::ATTR_EE_PARA_NUMBULLET]=shared_ptr<StarAttribute>(new StarPAttributeBulletNumeric(StarAttribute::ATTR_EE_PARA_NUMBULLET,"eeParaNumBullet"));
-  map[StarAttribute::ATTR_EE_PARA_BULLET]=shared_ptr<StarAttribute>(new StarPAttributeBulletSimple(StarAttribute::ATTR_EE_PARA_BULLET,"paraBullet"));
-  map[StarAttribute::ATTR_PARA_DROP]=shared_ptr<StarAttribute>(new StarPAttributeDrop(StarAttribute::ATTR_PARA_DROP,"parAtrDrop"));
+  map[StarAttribute::ATTR_PARA_ADJUST]=std::shared_ptr<StarAttribute>(new StarPAttributeAdjust(StarAttribute::ATTR_PARA_ADJUST,"parAtrAdjust"));
+  map[StarAttribute::ATTR_PARA_LINESPACING]=std::shared_ptr<StarAttribute>(new StarPAttributeLineSpacing(StarAttribute::ATTR_PARA_LINESPACING,"parAtrLinespacing"));
+  map[StarAttribute::ATTR_PARA_TABSTOP]=std::shared_ptr<StarAttribute>(new StarPAttributeTabStop(StarAttribute::ATTR_PARA_TABSTOP,"parAtrTabStop"));
+  map[StarAttribute::ATTR_EE_PARA_NUMBULLET]=std::shared_ptr<StarAttribute>(new StarPAttributeBulletNumeric(StarAttribute::ATTR_EE_PARA_NUMBULLET,"eeParaNumBullet"));
+  map[StarAttribute::ATTR_EE_PARA_BULLET]=std::shared_ptr<StarAttribute>(new StarPAttributeBulletSimple(StarAttribute::ATTR_EE_PARA_BULLET,"paraBullet"));
+  map[StarAttribute::ATTR_PARA_DROP]=std::shared_ptr<StarAttribute>(new StarPAttributeDrop(StarAttribute::ATTR_PARA_DROP,"parAtrDrop"));
 
   // seems safe to ignore
   addAttributeBool(map,StarAttribute::ATTR_PARA_SCRIPTSPACE,"para[scriptSpace]",false); // script type, use by ui
@@ -992,8 +992,8 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   // can we retrieve the following attribute ?
   addAttributeBool(map,StarAttribute::ATTR_PARA_REGISTER,"para[register]",false);
   addAttributeBool(map,StarAttribute::ATTR_PARA_FORBIDDEN_RULES,"para[forbiddenRules]",true); // If the forbidden characters rules are to be applied or not.
-  map[StarAttribute::ATTR_PARA_HYPHENZONE]=shared_ptr<StarAttribute>(new StarPAttributeHyphen(StarAttribute::ATTR_PARA_HYPHENZONE,"parAtrHyphenZone"));
-  map[StarAttribute::ATTR_PARA_NUMRULE]=shared_ptr<StarAttribute>(new StarPAttributeNumericRuler(StarAttribute::ATTR_PARA_NUMRULE,"parAtrNumRule"));
+  map[StarAttribute::ATTR_PARA_HYPHENZONE]=std::shared_ptr<StarAttribute>(new StarPAttributeHyphen(StarAttribute::ATTR_PARA_HYPHENZONE,"parAtrHyphenZone"));
+  map[StarAttribute::ATTR_PARA_NUMRULE]=std::shared_ptr<StarAttribute>(new StarPAttributeNumericRuler(StarAttribute::ATTR_PARA_NUMRULE,"parAtrNumRule"));
 
   // TODO
 }

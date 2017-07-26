@@ -179,7 +179,7 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
     STOFF_DEBUG_MSG(("STOFFChart::sendChart: can not find the series\n"));
     return;
   }
-  shared_ptr<STOFFListener> genericListener=listener;
+  std::shared_ptr<STOFFListener> genericListener=listener;
   int styleId=0;
 
   librevenge::RVNGPropertyList style;
@@ -226,7 +226,7 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
     textZone.insert("librevenge:zone-type", zone.m_type==TextZone::T_Title ? "title":"subtitle");
     interface->openChartTextObject(textZone);
     if (zone.m_contentType==TextZone::C_Text) {
-      shared_ptr<STOFFSubDocument> doc(new STOFFChartInternal::SubDocument(this, zone.m_type));
+      std::shared_ptr<STOFFSubDocument> doc(new STOFFChartInternal::SubDocument(this, zone.m_type));
       listener->handleSubDocument(doc, libstoff::DOC_CHART_ZONE);
     }
     interface->closeChartTextObject();
@@ -301,7 +301,7 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
     textZone.insert("librevenge:zone-type", "label");
     interface->openChartTextObject(textZone);
     if (zone.m_contentType==TextZone::C_Text) {
-      shared_ptr<STOFFSubDocument> doc(new STOFFChartInternal::SubDocument(this, zone.m_type));
+      std::shared_ptr<STOFFSubDocument> doc(new STOFFChartInternal::SubDocument(this, zone.m_type));
       listener->handleSubDocument(doc, libstoff::DOC_CHART_ZONE);
     }
     interface->closeChartTextObject();

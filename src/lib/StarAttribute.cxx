@@ -73,9 +73,9 @@ public:
   //! destructor
   ~StarAttributeXML();
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarAttributeXML(*this));
+    return std::shared_ptr<StarAttribute>(new StarAttributeXML(*this));
   }
 };
 
@@ -93,47 +93,47 @@ struct State {
   //! init the attribute map list
   void initAttributeMap();
   //! a map which to an attribute
-  std::map<int, shared_ptr<StarAttribute> > m_whichToAttributeMap;
+  std::map<int, std::shared_ptr<StarAttribute> > m_whichToAttributeMap;
 protected:
   //! add a void attribute
   void addAttributeVoid(StarAttribute::Type type, std::string const &debugName)
   {
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeVoid(type,debugName));
+    m_whichToAttributeMap[type]=std::shared_ptr<StarAttribute>(new StarAttributeVoid(type,debugName));
   }
   //! add a XML attribute
   void addAttributeXML(StarAttribute::Type type, std::string const &debugName)
   {
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeXML(type,debugName));
+    m_whichToAttributeMap[type]=std::shared_ptr<StarAttribute>(new StarAttributeXML(type,debugName));
   }
   //! add a bool attribute
   void addAttributeBool(StarAttribute::Type type, std::string const &debugName, bool defValue)
   {
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeBool(type,debugName, defValue));
+    m_whichToAttributeMap[type]=std::shared_ptr<StarAttribute>(new StarAttributeBool(type,debugName, defValue));
   }
   //! add a int attribute
   void addAttributeInt(StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
   {
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeInt(type,debugName, numBytes, defValue));
+    m_whichToAttributeMap[type]=std::shared_ptr<StarAttribute>(new StarAttributeInt(type,debugName, numBytes, defValue));
   }
   //! add a unsigned int attribute
   void addAttributeUInt(StarAttribute::Type type, std::string const &debugName, int numBytes, unsigned int defValue)
   {
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeUInt(type,debugName, numBytes, defValue));
+    m_whichToAttributeMap[type]=std::shared_ptr<StarAttribute>(new StarAttributeUInt(type,debugName, numBytes, defValue));
   }
   //! add a double attribute
   void addAttributeDouble(StarAttribute::Type type, std::string const &debugName, double defValue)
   {
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeDouble(type,debugName, defValue));
+    m_whichToAttributeMap[type]=std::shared_ptr<StarAttribute>(new StarAttributeDouble(type,debugName, defValue));
   }
   //! add a color attribute
   void addAttributeColor(StarAttribute::Type type, std::string const &debugName, STOFFColor const &defValue)
   {
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeColor(type,debugName, defValue));
+    m_whichToAttributeMap[type]=std::shared_ptr<StarAttribute>(new StarAttributeColor(type,debugName, defValue));
   }
   //! add a itemSet attribute
   void addAttributeItemSet(StarAttribute::Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits)
   {
-    m_whichToAttributeMap[type]=shared_ptr<StarAttribute>(new StarAttributeItemSet(type,debugName, limits));
+    m_whichToAttributeMap[type]=std::shared_ptr<StarAttribute>(new StarAttributeItemSet(type,debugName, limits));
   }
 };
 
@@ -389,7 +389,7 @@ void StarAttributeItemSet::addTo(StarState &state, std::set<StarAttribute const 
     newSet=true;
   }
   StarItemSet const &set=newSet ? finalSet : m_itemSet;
-  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
+  for (std::map<int, std::shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
        it!=set.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
       it->second->m_attribute->addTo(state, done);
@@ -407,7 +407,7 @@ void StarAttributeItemSet::print(libstoff::DebugStream &o, std::set<StarAttribut
   o << m_debugName;
   if (!m_itemSet.empty()) {
     o << "[";
-    for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
+    for (std::map<int, std::shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
          it!=m_itemSet.m_whichToItemMap.end(); ++it) {
       if (it->second && it->second->m_attribute)
         it->second->m_attribute->print(o, done);
@@ -546,7 +546,7 @@ bool StarAttributeItemSet::send(STOFFListenerPtr listener, StarState &state, std
     return false;
   }
   done.insert(this);
-  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
+  for (std::map<int, std::shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
        it!=m_itemSet.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
       it->second->m_attribute->send(listener, state, done);
@@ -566,16 +566,16 @@ StarAttributeManager::~StarAttributeManager()
 {
 }
 
-shared_ptr<StarAttribute> StarAttributeManager::getDummyAttribute(int id)
+std::shared_ptr<StarAttribute> StarAttributeManager::getDummyAttribute(int id)
 {
   if (id<=0)
-    return shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::ATTR_CHR_DUMMY1, "unknownAttribute"));
+    return std::shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::ATTR_CHR_DUMMY1, "unknownAttribute"));
   std::stringstream s;
   s << "attrib" << id;
-  return shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::ATTR_CHR_DUMMY1, s.str()));
+  return std::shared_ptr<StarAttribute>(new StarAttributeVoid(StarAttribute::ATTR_CHR_DUMMY1, s.str()));
 }
 
-shared_ptr<StarAttribute> StarAttributeManager::getDefaultAttribute(int nWhich)
+std::shared_ptr<StarAttribute> StarAttributeManager::getDefaultAttribute(int nWhich)
 {
   if (m_state->m_whichToAttributeMap.find(nWhich)!=m_state->m_whichToAttributeMap.end() &&
       m_state->m_whichToAttributeMap.find(nWhich)->second)
@@ -583,7 +583,7 @@ shared_ptr<StarAttribute> StarAttributeManager::getDefaultAttribute(int nWhich)
   return getDummyAttribute();
 }
 
-shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, long lastPos, StarObject &object)
+std::shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, int nWhich, int nVers, long lastPos, StarObject &object)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -593,13 +593,13 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
   long pos=input->tell();
   if (m_state->m_whichToAttributeMap.find(nWhich)!=m_state->m_whichToAttributeMap.end() &&
       m_state->m_whichToAttributeMap.find(nWhich)->second) {
-    shared_ptr<StarAttribute> attrib=m_state->m_whichToAttributeMap.find(nWhich)->second->create();
+    std::shared_ptr<StarAttribute> attrib=m_state->m_whichToAttributeMap.find(nWhich)->second->create();
     if (!attrib || !attrib->read(zone, nVers, lastPos, object)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read an attribute\n"));
       f << "###bad";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
-      return shared_ptr<StarAttribute>();
+      return std::shared_ptr<StarAttribute>();
     }
     return attrib;
   }
@@ -705,7 +705,7 @@ shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zone, in
 
   case StarAttribute::ATTR_TXT_FLYCNT: {
     f << "textAtrFlycnt,";
-    shared_ptr<StarFormatManagerInternal::FormatDef> format;
+    std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
     if (input->peek()=='o')
       object.getFormatManager()->readSWFormatDef(zone,'o', format, object);
     else

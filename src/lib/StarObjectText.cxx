@@ -114,13 +114,13 @@ bool Content::send(STOFFListenerPtr listener, StarState &state) const
 //! Internal: a formatZone of StarObjectTextInteral
 struct FormatZone : public Zone {
   //! constructor
-  explicit FormatZone(shared_ptr<StarFormatManagerInternal::FormatDef> format) : Zone(), m_format(format)
+  explicit FormatZone(std::shared_ptr<StarFormatManagerInternal::FormatDef> format) : Zone(), m_format(format)
   {
   }
   //! try to send the data to a listener
   virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! the format
-  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+  std::shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
 };
 
 bool FormatZone::send(STOFFListenerPtr listener, StarState &state) const
@@ -141,13 +141,13 @@ bool FormatZone::send(STOFFListenerPtr listener, StarState &state) const
 //! Internal: a graphZone of StarObjectTextInteral
 struct GraphZone : public Zone {
   //! constructor
-  explicit GraphZone(shared_ptr<STOFFOLEParser> oleParser) : Zone(), m_oleParser(oleParser), m_attributeList(), m_contour()
+  explicit GraphZone(std::shared_ptr<STOFFOLEParser> oleParser) : Zone(), m_oleParser(oleParser), m_attributeList(), m_contour()
   {
   }
   //! try to send the data to a listener
   virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! the ole parser
-  shared_ptr<STOFFOLEParser> m_oleParser;
+  std::shared_ptr<STOFFOLEParser> m_oleParser;
   //! the graph name, the fltName, the replace text
   librevenge::RVNGString m_names[3];
   //! the attributes list
@@ -195,7 +195,7 @@ struct OLEZone : public Zone {
   //! the replacement text
   librevenge::RVNGString m_replaceText;
   //! the ole parser
-  shared_ptr<STOFFOLEParser> m_oleParser;
+  std::shared_ptr<STOFFOLEParser> m_oleParser;
 };
 
 bool OLEZone::send(STOFFListenerPtr listener, StarState &/*state*/) const
@@ -213,7 +213,7 @@ bool OLEZone::send(STOFFListenerPtr listener, StarState &/*state*/) const
     return false;
   }
   STOFFEmbeddedObject localPicture;
-  shared_ptr<STOFFOLEParser::OleDirectory> dir=m_oleParser->getDirectory(m_name.cstr());
+  std::shared_ptr<STOFFOLEParser::OleDirectory> dir=m_oleParser->getDirectory(m_name.cstr());
   if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture) || localPicture.isEmpty()) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: sorry, can not find object %s\n", m_name.cstr()));
     return false;
@@ -249,9 +249,9 @@ struct SectionZone : public Zone {
   //! the section flag
   int m_flags;
   //! the format
-  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+  std::shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
   //! the content
-  shared_ptr<Content> m_content;
+  std::shared_ptr<Content> m_content;
 };
 
 bool SectionZone::send(STOFFListenerPtr listener, StarState &state) const
@@ -291,16 +291,16 @@ struct TextZone : public Zone {
   //! the character item list
   std::vector<StarWriterStruct::Attribute> m_charAttributeList;
   //! the format
-  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+  std::shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
   //! the list (if defined)
-  shared_ptr<STOFFList> m_list;
+  std::shared_ptr<STOFFList> m_list;
   //! the mark
   std::vector<StarWriterStruct::Mark> m_markList;
 };
 
 void TextZone::inventoryPage(StarState &state) const
 {
-  std::map<int, shared_ptr<StarItem> >::const_iterator it;
+  std::map<int, std::shared_ptr<StarItem> >::const_iterator it;
   size_t numPages=state.m_global->m_pageNameList.size();
   if (state.m_styleName!=m_styleName) {
     state.reinitializeLineData();
@@ -346,7 +346,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
 
   if (m_list) state.m_global->m_list=listener->getListManager()->addList(m_list);
   size_t numPages=state.m_global->m_pageNameList.size();
-  std::map<int, shared_ptr<StarItem> >::const_iterator it;
+  std::map<int, std::shared_ptr<StarItem> >::const_iterator it;
   if (state.m_styleName!=m_styleName) {
     state.reinitializeLineData();
     state.m_paragraph=STOFFParagraph();
@@ -415,8 +415,8 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
       ++posSetIt;
       fontChange=true;
     }
-    shared_ptr<StarAttribute> footnote;
-    shared_ptr<SWFieldManagerInternal::Field> field;
+    std::shared_ptr<StarAttribute> footnote;
+    std::shared_ptr<SWFieldManagerInternal::Field> field;
     librevenge::RVNGString linkString;
     bool startRefMark=false;
     bool softHyphen=false;
@@ -581,7 +581,7 @@ struct Table : public Zone {
   //! try to send the data to a listener
   virtual bool send(STOFFListenerPtr listener, StarState &state) const;
   //! the table
-  shared_ptr<StarTable> m_table;
+  std::shared_ptr<StarTable> m_table;
 };
 
 bool Table::send(STOFFListenerPtr listener, StarState &state) const
@@ -609,13 +609,13 @@ struct State {
   //! the graphic number of pages
   int m_numGraphicPages;
   //! the main content
-  shared_ptr<Content> m_mainContent;
+  std::shared_ptr<Content> m_mainContent;
   //! the numeric ruler
-  shared_ptr<StarObjectNumericRuler> m_numericRuler;
+  std::shared_ptr<StarObjectNumericRuler> m_numericRuler;
   //! the page style
-  shared_ptr<StarObjectPageStyle> m_pageStyle;
+  std::shared_ptr<StarObjectPageStyle> m_pageStyle;
   //! the drawing model
-  shared_ptr<StarObjectModel> m_model;
+  std::shared_ptr<StarObjectModel> m_model;
 };
 
 }
@@ -639,7 +639,7 @@ bool StarObjectText::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &
 {
   numPages=0;
 
-  shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
+  std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
   StarState state(pool.get(), *this);
   if (m_textState->m_mainContent)
     m_textState->m_mainContent->inventoryPages(state);
@@ -675,7 +675,7 @@ bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
     for (int i=0; i<=m_textState->m_numGraphicPages; ++i)
       m_textState->m_model->sendPage(i, listener);
   }
-  shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
+  std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
   StarState state(pool.get(), *this);
   state.m_global->m_numericRuler=m_textState->m_numericRuler;
   m_textState->m_mainContent->send(listener, state);
@@ -717,7 +717,7 @@ bool StarObjectText::parse()
     if (base=="SwNumRules") {
       try {
         StarZone zone(ole, name, "StarNumericList", getPassword());
-        shared_ptr<StarObjectNumericRuler> numericRuler(new StarObjectNumericRuler(*this,true));
+        std::shared_ptr<StarObjectNumericRuler> numericRuler(new StarObjectNumericRuler(*this,true));
         if (numericRuler->read(zone))
           m_textState->m_numericRuler=numericRuler;
       }
@@ -728,7 +728,7 @@ bool StarObjectText::parse()
     if (base=="SwPageStyleSheets") {
       try {
         StarZone zone(ole, name, "StarPageStyleSheets", getPassword());
-        shared_ptr<StarObjectPageStyle> pageStyle(new StarObjectPageStyle(*this,true));
+        std::shared_ptr<StarObjectPageStyle> pageStyle(new StarObjectPageStyle(*this,true));
         if (pageStyle->read(zone))
           m_textState->m_pageStyle=pageStyle;
       }
@@ -786,8 +786,8 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
   }
   // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
   // chart sch_docshell.cxx SchChartDocShell::Load
-  shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_WriterPool);
-  shared_ptr<StarItemPool> mainPool=pool;
+  std::shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_WriterPool);
+  std::shared_ptr<StarItemPool> mainPool=pool;
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
     long pos=input->tell();
@@ -827,7 +827,7 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
 // Intermediate level
 //
 ////////////////////////////////////////////////////////////
-bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInternal::Content> &content)
+bool StarObjectText::readSWContent(StarZone &zone, std::shared_ptr<StarObjectTextInternal::Content> &content)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -875,38 +875,38 @@ bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInte
     bool done=false;
     switch (cType) {
     case 'E': {
-      shared_ptr<StarTable> table(new StarTable);
+      std::shared_ptr<StarTable> table(new StarTable);
       done=table->read(zone, *this);
       if (done) {
-        shared_ptr<StarObjectTextInternal::Table> tableZone(new StarObjectTextInternal::Table);
+        std::shared_ptr<StarObjectTextInternal::Table> tableZone(new StarObjectTextInternal::Table);
         tableZone->m_table=table;
         content->m_zoneList.push_back(tableZone);
       }
       break;
     }
     case 'G': {
-      shared_ptr<StarObjectTextInternal::GraphZone> graph;
+      std::shared_ptr<StarObjectTextInternal::GraphZone> graph;
       done=readSWGraphNode(zone, graph);
       if (done && graph)
         content->m_zoneList.push_back(graph);
       break;
     }
     case 'I': {
-      shared_ptr<StarObjectTextInternal::SectionZone> section;
+      std::shared_ptr<StarObjectTextInternal::SectionZone> section;
       done=readSWSection(zone, section);
       if (done && section)
         content->m_zoneList.push_back(section);
       break;
     }
     case 'O': {
-      shared_ptr<StarObjectTextInternal::OLEZone> ole;
+      std::shared_ptr<StarObjectTextInternal::OLEZone> ole;
       done=readSWOLENode(zone, ole);
       if (done && ole)
         content->m_zoneList.push_back(ole);
       break;
     }
     case 'T': {
-      shared_ptr<StarObjectTextInternal::TextZone> text;
+      std::shared_ptr<StarObjectTextInternal::TextZone> text;
       done=readSWTextZone(zone, text);
       if (done && text)
         content->m_zoneList.push_back(text);
@@ -914,10 +914,10 @@ bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInte
     }
     case 'l': // related to link
     case 'o': { // format: safe to ignore
-      shared_ptr<StarFormatManagerInternal::FormatDef> format;
+      std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
       done=getFormatManager()->readSWFormatDef(zone,char(cType),format, *this);
       if (done && format) {
-        shared_ptr<StarObjectTextInternal::FormatZone> formatZone;
+        std::shared_ptr<StarObjectTextInternal::FormatZone> formatZone;
         formatZone.reset(new StarObjectTextInternal::FormatZone(format));
         content->m_zoneList.push_back(formatZone);
       }
@@ -957,7 +957,7 @@ bool StarObjectText::readSWContent(StarZone &zone, shared_ptr<StarObjectTextInte
   return true;
 }
 
-bool StarObjectText::readSWGraphNode(StarZone &zone, shared_ptr<StarObjectTextInternal::GraphZone> &graphZone)
+bool StarObjectText::readSWGraphNode(StarZone &zone, std::shared_ptr<StarObjectTextInternal::GraphZone> &graphZone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1186,7 +1186,7 @@ bool StarObjectText::readSWJobSetUp(StarZone &zone)
   return true;
 }
 
-bool StarObjectText::readSWOLENode(StarZone &zone, shared_ptr<StarObjectTextInternal::OLEZone> &ole)
+bool StarObjectText::readSWOLENode(StarZone &zone, std::shared_ptr<StarObjectTextInternal::OLEZone> &ole)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1235,7 +1235,7 @@ bool StarObjectText::readSWOLENode(StarZone &zone, shared_ptr<StarObjectTextInte
   return true;
 }
 
-bool StarObjectText::readSWSection(StarZone &zone, shared_ptr<StarObjectTextInternal::SectionZone> &section)
+bool StarObjectText::readSWSection(StarZone &zone, std::shared_ptr<StarObjectTextInternal::SectionZone> &section)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1314,7 +1314,7 @@ bool StarObjectText::readSWSection(StarZone &zone, shared_ptr<StarObjectTextInte
   return true;
 }
 
-bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInternal::TextZone> &textZone)
+bool StarObjectText::readSWTextZone(StarZone &zone, std::shared_ptr<StarObjectTextInternal::TextZone> &textZone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1362,7 +1362,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInt
   ascFile.addNote(f.str().c_str());
 
   long lastPos=zone.getRecordLastPosition();
-  std::vector<shared_ptr<StarAttribute> > attributeList;
+  std::vector<std::shared_ptr<StarAttribute> > attributeList;
   std::vector<STOFFVec2i> limitsList;
   while (input->tell()<lastPos) {
     pos=input->tell();
@@ -1386,7 +1386,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInt
     }
     case '0':
     case 'R': {
-      shared_ptr<STOFFList> list;
+      std::shared_ptr<STOFFList> list;
       done=StarObjectNumericRuler::readList(zone,list);
       if (done && list) textZone->m_list=list;
       break;
@@ -1398,7 +1398,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInt
       done=getFormatManager()->readSWFormatDef(zone,'l', textZone->m_format, *this);
       break;
     case 'o': { // format: safe to ignore
-      shared_ptr<StarFormatManagerInternal::FormatDef> format;
+      std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
       done=getFormatManager()->readSWFormatDef(zone,'o', format, *this);
       break;
     }
@@ -1489,7 +1489,7 @@ try
   // sw_sw3imp.cxx Sw3IoImp::LoadDrawingLayer
 
   // create this pool from the main's SWG pool
-  shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
+  std::shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
   pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
 
   while (!input->isEnd()) {
@@ -1512,7 +1512,7 @@ try
     break;
   }
   long pos=input->tell();
-  shared_ptr<StarObjectModel> model(new StarObjectModel(*this, true));
+  std::shared_ptr<StarObjectModel> model(new StarObjectModel(*this, true));
   if (!model->read(zone)) {
     STOFF_DEBUG_MSG(("StarObjectText::readDrawingLayer: can not read the drawing model\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1588,7 +1588,7 @@ try
       break;
     case 'R':
     case '0': { // Outline
-      shared_ptr<STOFFList> list;
+      std::shared_ptr<STOFFList> list;
       done=StarObjectNumericRuler::readList(zone,list);
       break;
     }

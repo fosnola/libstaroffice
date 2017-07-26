@@ -39,7 +39,7 @@
 
 #include "StarItem.hxx"
 
-bool StarItemSet::add(shared_ptr<StarItem> item)
+bool StarItemSet::add(std::shared_ptr<StarItem> item)
 {
   if (!item) return false;
   if (m_whichToItemMap.find(item->m_which)!=m_whichToItemMap.end()) {
@@ -54,7 +54,7 @@ std::string StarItemSet::printChild() const
   if (m_whichToItemMap.empty()) return "";
   libstoff::DebugStream o;
   o << "Attrib=[";
-  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=m_whichToItemMap.begin();
+  for (std::map<int, std::shared_ptr<StarItem> >::const_iterator it=m_whichToItemMap.begin();
        it!=m_whichToItemMap.end(); ++it) {
     if (!it->second || !it->second->m_attribute) {
       o << "_,";

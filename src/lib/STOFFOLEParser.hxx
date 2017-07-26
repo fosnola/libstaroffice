@@ -99,9 +99,9 @@ public:
   bool parse(STOFFInputStreamPtr fileInput);
 
   //! returns the list of directory ole
-  std::vector<shared_ptr<OleDirectory> > &getDirectoryList();
+  std::vector<std::shared_ptr<OleDirectory> > &getDirectoryList();
   //! returns a OleDirectory corresponding to a dir if found
-  shared_ptr<OleDirectory> getDirectory(std::string const &dir);
+  std::shared_ptr<OleDirectory> getDirectory(std::string const &dir);
   //! returns the main compobj program name
   bool getCompObjName(STOFFInputStreamPtr fileInput, std::string &programName);
 
@@ -264,7 +264,7 @@ protected:
   //
 
   //! the class state
-  shared_ptr<STOFFOLEParserInternal::State> m_state;
+  std::shared_ptr<STOFFOLEParserInternal::State> m_state;
 };
 
 #endif

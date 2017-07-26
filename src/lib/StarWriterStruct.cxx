@@ -988,7 +988,7 @@ bool TOX::read(StarZone &zone, StarObject &object)
 
   if ((fl&0x10)) {
     while (input->tell()<lastRecordPos && input->peek()=='s') {
-      shared_ptr<StarFormatManagerInternal::FormatDef> format;
+      std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
       if (!object.getFormatManager()->readSWFormatDef(zone,'s', format, object)) {
         STOFF_DEBUG_MSG(("StarWriterStruct::TOX::read: can not read some format\n"));
         f << "###format,";

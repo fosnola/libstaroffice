@@ -285,7 +285,7 @@ StarFileManager::~StarFileManager()
 {
 }
 
-bool StarFileManager::readOLEDirectory(shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> ole, STOFFEmbeddedObject &image)
+bool StarFileManager::readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser, std::shared_ptr<STOFFOLEParser::OleDirectory> ole, STOFFEmbeddedObject &image)
 {
   image=STOFFEmbeddedObject();
   if (!oleParser || !ole || ole->m_inUse) {
@@ -414,13 +414,13 @@ bool StarFileManager::readOLEDirectory(shared_ptr<STOFFOLEParser> oleParser, sha
   return !image.isEmpty();
 }
 
-void StarFileManager::checkUnparsed(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, char const *password)
+void StarFileManager::checkUnparsed(STOFFInputStreamPtr input, std::shared_ptr<STOFFOLEParser> oleParser, char const *password)
 {
   if (!input || !oleParser) {
     STOFF_DEBUG_MSG(("StarFileManager::readOLEDirectory: can not find the input/ole parser\n"));
     return;
   }
-  std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > listDir=oleParser->getDirectoryList();
+  std::vector<std::shared_ptr<STOFFOLEParser::OleDirectory> > listDir=oleParser->getDirectoryList();
   for (size_t d=0; d<listDir.size(); ++d) {
     if (!listDir[d] || listDir[d]->m_parsed) continue;
     listDir[d]->m_parsed=true;
@@ -528,13 +528,13 @@ bool StarFileManager::readImageDocument(STOFFInputStreamPtr input, librevenge::R
   return true;
 }
 
-bool StarFileManager::readEmbeddedPicture(shared_ptr<STOFFOLEParser> oleParser, std::string const &fileName, STOFFEmbeddedObject &image)
+bool StarFileManager::readEmbeddedPicture(std::shared_ptr<STOFFOLEParser> oleParser, std::string const &fileName, STOFFEmbeddedObject &image)
 {
   if (!oleParser) {
     STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: called without OLE parser\n"));
     return false;
   }
-  shared_ptr<STOFFOLEParser::OleDirectory> dir=oleParser->getDirectory("EmbeddedPictures");
+  std::shared_ptr<STOFFOLEParser::OleDirectory> dir=oleParser->getDirectory("EmbeddedPictures");
   if (!dir || !dir->m_input || !dir->m_input->isStructured()) {
     STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: can not find the embedded picture directory\n"));
     return false;

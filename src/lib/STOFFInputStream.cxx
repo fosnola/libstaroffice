@@ -44,7 +44,7 @@
 
 #include "STOFFInputStream.hxx"
 
-STOFFInputStream::STOFFInputStream(shared_ptr<librevenge::RVNGInputStream> inp, bool inverted)
+STOFFInputStream::STOFFInputStream(std::shared_ptr<librevenge::RVNGInputStream> inp, bool inverted)
   : m_stream(inp), m_streamSize(0), m_inverseRead(inverted), m_readLimit(-1), m_prevLimits()
 {
   updateStreamSize();
@@ -55,7 +55,7 @@ STOFFInputStream::STOFFInputStream(librevenge::RVNGInputStream *inp, bool invert
 {
   if (!inp) return;
 
-  m_stream = shared_ptr<librevenge::RVNGInputStream>(inp, STOFF_shared_ptr_noop_deleter<librevenge::RVNGInputStream>());
+  m_stream = std::shared_ptr<librevenge::RVNGInputStream>(inp, STOFF_shared_ptr_noop_deleter<librevenge::RVNGInputStream>());
   updateStreamSize();
   if (m_stream)
     seek(0, librevenge::RVNG_SEEK_SET);
@@ -65,9 +65,9 @@ STOFFInputStream::~STOFFInputStream()
 {
 }
 
-shared_ptr<STOFFInputStream> STOFFInputStream::get(librevenge::RVNGBinaryData const &data, bool inverted)
+std::shared_ptr<STOFFInputStream> STOFFInputStream::get(librevenge::RVNGBinaryData const &data, bool inverted)
 {
-  shared_ptr<STOFFInputStream> res;
+  std::shared_ptr<STOFFInputStream> res;
   if (!data.size())
     return res;
   librevenge::RVNGInputStream *dataStream = const_cast<librevenge::RVNGInputStream *>(data.getDataStream());
@@ -526,9 +526,9 @@ std::string STOFFInputStream::subStreamName(unsigned id)
   return std::string(nm);
 }
 
-shared_ptr<STOFFInputStream> STOFFInputStream::getSubStreamByName(std::string const &name)
+std::shared_ptr<STOFFInputStream> STOFFInputStream::getSubStreamByName(std::string const &name)
 {
-  shared_ptr<STOFFInputStream> empty;
+  std::shared_ptr<STOFFInputStream> empty;
   if (!m_stream || !m_stream->isStructured() || name.empty()) {
     STOFF_DEBUG_MSG(("STOFFInputStream::getSubStreamByName: called on unstructured file\n"));
     return empty;
@@ -536,19 +536,19 @@ shared_ptr<STOFFInputStream> STOFFInputStream::getSubStreamByName(std::string co
 
   long actPos = tell();
   seek(0, librevenge::RVNG_SEEK_SET);
-  shared_ptr<librevenge::RVNGInputStream> res(m_stream->getSubStreamByName(name.c_str()));
+  std::shared_ptr<librevenge::RVNGInputStream> res(m_stream->getSubStreamByName(name.c_str()));
   seek(actPos, librevenge::RVNG_SEEK_SET);
 
   if (!res)
     return empty;
-  shared_ptr<STOFFInputStream> inp(new STOFFInputStream(res,m_inverseRead));
+  std::shared_ptr<STOFFInputStream> inp(new STOFFInputStream(res,m_inverseRead));
   inp->seek(0, librevenge::RVNG_SEEK_SET);
   return inp;
 }
 
-shared_ptr<STOFFInputStream> STOFFInputStream::getSubStreamById(unsigned id)
+std::shared_ptr<STOFFInputStream> STOFFInputStream::getSubStreamById(unsigned id)
 {
-  shared_ptr<STOFFInputStream> empty;
+  std::shared_ptr<STOFFInputStream> empty;
   if (!m_stream || !m_stream->isStructured()) {
     STOFF_DEBUG_MSG(("STOFFInputStream::getSubStreamById: called on unstructured file\n"));
     return empty;
@@ -556,12 +556,12 @@ shared_ptr<STOFFInputStream> STOFFInputStream::getSubStreamById(unsigned id)
 
   long actPos = tell();
   seek(0, librevenge::RVNG_SEEK_SET);
-  shared_ptr<librevenge::RVNGInputStream> res(m_stream->getSubStreamById(id));
+  std::shared_ptr<librevenge::RVNGInputStream> res(m_stream->getSubStreamById(id));
   seek(actPos, librevenge::RVNG_SEEK_SET);
 
   if (!res)
     return empty;
-  shared_ptr<STOFFInputStream> inp(new STOFFInputStream(res,m_inverseRead));
+  std::shared_ptr<STOFFInputStream> inp(new STOFFInputStream(res,m_inverseRead));
   inp->seek(0, librevenge::RVNG_SEEK_SET);
   return inp;
 }

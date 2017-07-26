@@ -102,7 +102,7 @@ protected:
   //! the password
   char const *m_password;
   //! the state
-  shared_ptr<SDGParserInternal::State> m_state;
+  std::shared_ptr<SDGParserInternal::State> m_state;
 private:
   SDGParser(SDGParser const &orig);
   SDGParser &operator=(SDGParser const &orig);

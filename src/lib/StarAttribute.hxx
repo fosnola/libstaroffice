@@ -739,7 +739,7 @@ public:
     return m_type;
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const=0;
+  virtual std::shared_ptr<StarAttribute> create() const=0;
   //! read an attribute zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &document)=0;
   //! add to a state
@@ -815,9 +815,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarAttributeBool(*this));
+    return std::shared_ptr<StarAttribute>(new StarAttributeBool(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int ver, long endPos, StarObject &object);
@@ -846,9 +846,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarAttributeColor(*this));
+    return std::shared_ptr<StarAttribute>(new StarAttributeColor(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -877,9 +877,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarAttributeDouble(*this));
+    return std::shared_ptr<StarAttribute>(new StarAttributeDouble(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -913,9 +913,9 @@ public:
     }
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarAttributeInt(*this));
+    return std::shared_ptr<StarAttribute>(new StarAttributeInt(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -951,9 +951,9 @@ public:
     }
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarAttributeUInt(*this));
+    return std::shared_ptr<StarAttribute>(new StarAttributeUInt(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -988,9 +988,9 @@ public:
     }
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarAttributeVec2i(*this));
+    return std::shared_ptr<StarAttribute>(new StarAttributeVec2i(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -1023,9 +1023,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarAttributeItemSet(*this));
+    return std::shared_ptr<StarAttribute>(new StarAttributeItemSet(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -1057,9 +1057,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarAttributeVoid(*this));
+    return std::shared_ptr<StarAttribute>(new StarAttributeVoid(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -1080,11 +1080,11 @@ public:
 
 
   //! try to read an attribute and return it
-  shared_ptr<StarAttribute> readAttribute(StarZone &zone, int which, int vers, long endPos, StarObject &document);
+  std::shared_ptr<StarAttribute> readAttribute(StarZone &zone, int which, int vers, long endPos, StarObject &document);
   //! try to return the default attribute
-  shared_ptr<StarAttribute> getDefaultAttribute(int which);
+  std::shared_ptr<StarAttribute> getDefaultAttribute(int which);
   //! return a dummy attribute
-  static shared_ptr<StarAttribute> getDummyAttribute(int type=-1);
+  static std::shared_ptr<StarAttribute> getDummyAttribute(int type=-1);
 
 protected:
   //
@@ -1092,7 +1092,7 @@ protected:
   //
 private:
   //! the state
-  shared_ptr<StarAttributeInternal::State> m_state;
+  std::shared_ptr<StarAttributeInternal::State> m_state;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

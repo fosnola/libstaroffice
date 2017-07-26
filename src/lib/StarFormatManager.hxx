@@ -95,11 +95,11 @@ public:
   virtual ~StarFormatManager();
 
   //! try to read a format zone : 'f' or 'l' or 'o' or 'r' or 's'(in TOCX)
-  bool readSWFormatDef(StarZone &zone, char kind, shared_ptr<StarFormatManagerInternal::FormatDef> &format, StarObject &doc);
+  bool readSWFormatDef(StarZone &zone, char kind, std::shared_ptr<StarFormatManagerInternal::FormatDef> &format, StarObject &doc);
   //! store a named format zone
-  void storeSWFormatDef(librevenge::RVNGString const &name, shared_ptr<StarFormatManagerInternal::FormatDef> &format);
+  void storeSWFormatDef(librevenge::RVNGString const &name, std::shared_ptr<StarFormatManagerInternal::FormatDef> &format);
   //! try to return a named format zone(if possible)
-  shared_ptr<StarFormatManagerInternal::FormatDef> getSWFormatDef(librevenge::RVNGString const &name) const;
+  std::shared_ptr<StarFormatManagerInternal::FormatDef> getSWFormatDef(librevenge::RVNGString const &name) const;
   //! try to read a number formatter type : 'q'
   bool readSWNumberFormatterList(StarZone &zone);
   //! try to read a fly frame list : 'F' (list of 'l' or 'o')
@@ -120,7 +120,7 @@ public:
   //
 private:
   //! the state
-  shared_ptr<StarFormatManagerInternal::State> m_state;
+  std::shared_ptr<StarFormatManagerInternal::State> m_state;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

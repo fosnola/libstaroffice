@@ -86,9 +86,9 @@ public:
   //! add a header on some page: occurrence must be odd|right, even|left, first, last or all
   void addHeaderFooter(bool header, std::string const &occurrence, STOFFHeaderFooter const &hf);
   //! operator==
-  bool operator==(shared_ptr<STOFFPageSpan> const &pageSpan) const;
+  bool operator==(std::shared_ptr<STOFFPageSpan> const &pageSpan) const;
   //! operator!=
-  bool operator!=(shared_ptr<STOFFPageSpan> const &pageSpan) const
+  bool operator!=(std::shared_ptr<STOFFPageSpan> const &pageSpan) const
   {
     return !operator==(pageSpan);
   }

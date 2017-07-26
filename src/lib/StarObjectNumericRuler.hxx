@@ -72,11 +72,11 @@ public:
   //! try to read a attribute format : ATTR_EE_PARA_BULLET
   static bool readAttributeLevel(StarZone &zone, int vers, long lastPos, STOFFListLevel &level);
   //! try to read a list : '0' or 'R'
-  static bool readList(StarZone &zone, shared_ptr<STOFFList> &list);
+  static bool readList(StarZone &zone, std::shared_ptr<STOFFList> &list);
   //! try to read a SwNumRules zone
   bool read(StarZone &zone);
   //! try to return the list corresponding to a name
-  shared_ptr<STOFFList> getList(librevenge::RVNGString const &name) const;
+  std::shared_ptr<STOFFList> getList(librevenge::RVNGString const &name) const;
   //
   // low level
   //
@@ -87,7 +87,7 @@ protected:
   //
 
   //! the state
-  shared_ptr<StarObjectNumericRulerInternal::State> m_numericRulerState;
+  std::shared_ptr<StarObjectNumericRulerInternal::State> m_numericRulerState;
 private:
   StarObjectNumericRuler &operator=(StarObjectNumericRuler const &orig);
 };

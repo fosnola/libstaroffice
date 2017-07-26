@@ -917,7 +917,7 @@ bool FieldPostIt::send(STOFFListenerPtr listener, StarState &state) const
     return false;
   }
   if (m_type==14) {
-    shared_ptr<STOFFSubDocument> doc(new SubDocument(m_content));
+    std::shared_ptr<STOFFSubDocument> doc(new SubDocument(m_content));
     librevenge::RVNGString date;
     if (m_date)
       date.sprintf("%d/%d/%d", int((m_date/100)%100), int(m_date%100), int(m_date/10000));
@@ -940,13 +940,13 @@ SWFieldManager::~SWFieldManager()
 {
 }
 
-shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zone, char cKind)
+std::shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zone, char cKind)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
   char type;
   long pos=input->tell();
-  shared_ptr<SWFieldManagerInternal::Field> field;
+  std::shared_ptr<SWFieldManagerInternal::Field> field;
   if (cKind!='_' && (input->peek()!=cKind || !zone.openSWRecord(type))) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return field;
@@ -976,7 +976,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
   long lastPos=zone.getRecordLastPosition();
   switch (field->m_type) {
   case 0: { // dbfld: cKind=='Y' call lcl_sw3io_InDBFieldType
-    shared_ptr<SWFieldManagerInternal::FieldDBField> dBField(new SWFieldManagerInternal::FieldDBField(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldDBField> dBField(new SWFieldManagerInternal::FieldDBField(*field));
     field=dBField;
     if (cKind=='Y' || !zone.isCompatibleWith(0x202)) {
       if (!zone.isCompatibleWith(0xa)) {
@@ -1118,7 +1118,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
     field.reset(new SWFieldManagerInternal::FieldDateTime(*field));
     break;
   case 6: {
-    shared_ptr<SWFieldManagerInternal::FieldPageNumber> pageNumber(new SWFieldManagerInternal::FieldPageNumber(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldPageNumber> pageNumber(new SWFieldManagerInternal::FieldPageNumber(*field));
     field=pageNumber;
     if (cKind=='Y') break;
     // lcl_sw3io_InPageNumberField40 && lcl_sw3io_InPageNumberField
@@ -1189,7 +1189,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
     }
     break;
   case 11: { // setexpfield: ckind=y call lcl_sw3io_InSetExpFieldType
-    shared_ptr<SWFieldManagerInternal::FieldSetExp> setExp(new SWFieldManagerInternal::FieldSetExp(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldSetExp> setExp(new SWFieldManagerInternal::FieldSetExp(*field));
     field=setExp;
     if (cKind!='Y' && zone.isCompatibleWith(0x202)) {
       // lcl_sw3io_InSetExpField
@@ -1309,7 +1309,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
     f << "nSeqNo=" << input->readULong(2) << ",";
     break;
   case 13: {
-    shared_ptr<SWFieldManagerInternal::FieldHiddenText> hiddenText(new SWFieldManagerInternal::FieldHiddenText(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldHiddenText> hiddenText(new SWFieldManagerInternal::FieldHiddenText(*field));
     field=hiddenText;
     if (cKind=='Y') break;
     // lcl_sw3io_InHiddenTxtField40 or lcl_sw3io_InHiddenTxtField
@@ -1333,7 +1333,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
     break;
   }
   case 14: {
-    shared_ptr<SWFieldManagerInternal::FieldPostIt> postIt(new SWFieldManagerInternal::FieldPostIt(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldPostIt> postIt(new SWFieldManagerInternal::FieldPostIt(*field));
     field=postIt;
     if (cKind=='Y') break;
     // lcl_sw3io_InPostItField
@@ -1356,7 +1356,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
   }
   case 15: // date
   case 16: { // time
-    shared_ptr<SWFieldManagerInternal::FieldDateTime> dateTime(new SWFieldManagerInternal::FieldDateTime(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldDateTime> dateTime(new SWFieldManagerInternal::FieldDateTime(*field));
     field=dateTime;
     if (cKind=='Y' || zone.isCompatibleWith(0x202)) break;
     // lcl_sw3io_InFixDateField40 or lcl_sw3io_InFixTimeField40
@@ -1464,7 +1464,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
       field->m_subType=int(input->readULong(2));
     break;
   case 24: {
-    shared_ptr<SWFieldManagerInternal::FieldHiddenText> hiddenPara(new SWFieldManagerInternal::FieldHiddenText(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldHiddenText> hiddenPara(new SWFieldManagerInternal::FieldHiddenText(*field));
     field=hiddenPara;
     if (cKind=='Y') break;
     // lcl_sw3io_InHiddenParaField
@@ -1506,7 +1506,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
     // lcl_sw3io_InTemplNameField
     break;
   case 27: {
-    shared_ptr<SWFieldManagerInternal::FieldSetField> setField(new SWFieldManagerInternal::FieldSetField(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldSetField> setField(new SWFieldManagerInternal::FieldSetField(*field));
     field=setField;
     if (cKind=='Y') break;
     // lcl_sw3io_InDBNextSetField
@@ -1532,7 +1532,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
     break;
   }
   case 28: {
-    shared_ptr<SWFieldManagerInternal::FieldSetField> setField(new SWFieldManagerInternal::FieldSetField(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldSetField> setField(new SWFieldManagerInternal::FieldSetField(*field));
     field=setField;
     if (cKind=='Y') break;
     // lcl_sw3io_InDBNumSetField
@@ -1563,7 +1563,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
     break;
   }
   case 29: {
-    shared_ptr<SWFieldManagerInternal::FieldSetField> setField(new SWFieldManagerInternal::FieldSetField(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldSetField> setField(new SWFieldManagerInternal::FieldSetField(*field));
     field=setField;
     if (cKind=='Y') break;
     // lcl_sw3io_InDBSetNumberField
@@ -1598,7 +1598,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
     }
     break;
   case 31: {
-    shared_ptr<SWFieldManagerInternal::FieldPageNumber> pageNumber(new SWFieldManagerInternal::FieldPageNumber(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldPageNumber> pageNumber(new SWFieldManagerInternal::FieldPageNumber(*field));
     field=pageNumber;
     if (cKind=='Y') break;
     // lcl_sw3io_InRefPageSetField
@@ -1618,7 +1618,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
       field->m_content=libstoff::getString(name);
     break;
   case 33: {
-    shared_ptr<SWFieldManagerInternal::FieldINet> iNet(new SWFieldManagerInternal::FieldINet(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldINet> iNet(new SWFieldManagerInternal::FieldINet(*field));
     field=iNet;
     if (cKind=='Y' || zone.isCompatibleWith(0x202)) break;
     // lcl_sw3io_InINetField31
@@ -1672,7 +1672,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
     break;
   }
   case 34: {
-    shared_ptr<SWFieldManagerInternal::FieldJumpEdit> jumpEdit(new SWFieldManagerInternal::FieldJumpEdit(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldJumpEdit> jumpEdit(new SWFieldManagerInternal::FieldJumpEdit(*field));
     field=jumpEdit;
     if (cKind=='Y') break;
     // lcl_sw3io_InJumpEditField
@@ -1693,7 +1693,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
     break;
   }
   case 35: {
-    shared_ptr<SWFieldManagerInternal::FieldScript> script(new SWFieldManagerInternal::FieldScript(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldScript> script(new SWFieldManagerInternal::FieldScript(*field));
     field=script;
     if (cKind=='Y') break;
     // lcl_sw3io_InScriptField40 or lcl_sw3io_InScriptField
@@ -1716,7 +1716,7 @@ shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zo
     break;
   }
   case 36: {
-    shared_ptr<SWFieldManagerInternal::FieldDateTime> dateTime(new SWFieldManagerInternal::FieldDateTime(*field));
+    std::shared_ptr<SWFieldManagerInternal::FieldDateTime> dateTime(new SWFieldManagerInternal::FieldDateTime(*field));
     field=dateTime;
     if (cKind=='Y' || !zone.isCompatibleWith(0x202)) break;
     // lcl_sw3io_InDateTimeField

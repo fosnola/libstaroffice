@@ -66,7 +66,7 @@ struct State {
   {
   }
   //! the model
-  shared_ptr<StarObjectModel> m_model;
+  std::shared_ptr<StarObjectModel> m_model;
   //! the list of pages number
   int m_numPages;
 };
@@ -204,7 +204,7 @@ try
     }
   }
   input->seek(0, librevenge::RVNG_SEEK_SET);
-  shared_ptr<StarObjectModel> model(new StarObjectModel(*this, true));
+  std::shared_ptr<StarObjectModel> model(new StarObjectModel(*this, true));
   if (!model->read(zone)) {
     STOFF_DEBUG_MSG(("StarObjectDraw::readDrawDocument: can not read the main zone\n"));
     ascFile.addPos(0);
@@ -438,9 +438,9 @@ bool StarObjectDraw::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
   }
   // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
   // chart sch_docshell.cxx SchChartDocShell::Load
-  shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
+  std::shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
   pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
-  shared_ptr<StarItemPool> mainPool=pool;
+  std::shared_ptr<StarItemPool> mainPool=pool;
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
     long pos=input->tell();

@@ -33,16 +33,18 @@
 
 #ifndef LIBSTAROFFICE_INTERNAL_H
 #define LIBSTAROFFICE_INTERNAL_H
+
 #include <assert.h>
+#include <math.h>
 #ifdef DEBUG
 #include <stdio.h>
 #endif
 
 #include <cmath>
 #include <map>
+#include <memory>
 #include <ostream>
 #include <string>
-#include <math.h>
 #include <vector>
 
 #ifndef M_PI
@@ -92,19 +94,7 @@ typedef __int64 int64_t;
 #  define localtime_r(tp,tmp) (localtime(tp)?(*(tmp)=*localtime(tp),(tmp)):0)
 #endif
 
-/* ---------- memory  --------------- */
-#if defined(SHAREDPTR_TR1)
-#include <tr1/memory>
-using std::tr1::shared_ptr;
-#elif defined(SHAREDPTR_STD)
-#include <memory>
-using std::shared_ptr;
-#else
-#include <boost/shared_ptr.hpp>
-using boost::shared_ptr;
-#endif
-
-/** an noop deleter used to transform a libwpd pointer in a false shared_ptr */
+/** an noop deleter used to transform a libwpd pointer in a false std::shared_ptr */
 template <class T>
 struct STOFF_shared_ptr_noop_deleter {
   void operator()(T *) {}
@@ -485,21 +475,21 @@ class STOFFSpreadsheetListener;
 class STOFFSubDocument;
 class STOFFTextListener;
 //! a smart pointer of STOFFGraphicListener
-typedef shared_ptr<STOFFGraphicListener> STOFFGraphicListenerPtr;
+typedef std::shared_ptr<STOFFGraphicListener> STOFFGraphicListenerPtr;
 //! a smart pointer of STOFFInputStream
-typedef shared_ptr<STOFFInputStream> STOFFInputStreamPtr;
+typedef std::shared_ptr<STOFFInputStream> STOFFInputStreamPtr;
 //! a smart pointer of STOFFListener
-typedef shared_ptr<STOFFListener> STOFFListenerPtr;
+typedef std::shared_ptr<STOFFListener> STOFFListenerPtr;
 //! a smart pointer of STOFFListManager
-typedef shared_ptr<STOFFListManager> STOFFListManagerPtr;
+typedef std::shared_ptr<STOFFListManager> STOFFListManagerPtr;
 //! a smart pointer of STOFFParserState
-typedef shared_ptr<STOFFParserState> STOFFParserStatePtr;
+typedef std::shared_ptr<STOFFParserState> STOFFParserStatePtr;
 //! a smart pointer of STOFFSpreadsheetListener
-typedef shared_ptr<STOFFSpreadsheetListener> STOFFSpreadsheetListenerPtr;
+typedef std::shared_ptr<STOFFSpreadsheetListener> STOFFSpreadsheetListenerPtr;
 //! a smart pointer of STOFFSubDocument
-typedef shared_ptr<STOFFSubDocument> STOFFSubDocumentPtr;
+typedef std::shared_ptr<STOFFSubDocument> STOFFSubDocumentPtr;
 //! a smart pointer of STOFFTextListener
-typedef shared_ptr<STOFFTextListener> STOFFTextListenerPtr;
+typedef std::shared_ptr<STOFFTextListener> STOFFTextListenerPtr;
 
 /** a generic variable template: value + flag to know if the variable is set
 

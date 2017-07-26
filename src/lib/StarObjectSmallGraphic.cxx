@@ -111,7 +111,7 @@ public:
       return o;
     }
     //! the text
-    shared_ptr<StarObjectSmallText> m_text;
+    std::shared_ptr<StarObjectSmallText> m_text;
     //! the depth
     int m_depth;
     //! the background color
@@ -168,7 +168,7 @@ public:
   //! the list of zones: version<=3
   std::vector<Zone> m_zones;
   //! list of text zone: version==4
-  shared_ptr<StarObjectSmallText> m_textZone;
+  std::shared_ptr<StarObjectSmallText> m_textZone;
   //! list of depth data
   std::vector<int> m_depthList;
   //! true if the object is a edit document
@@ -180,7 +180,7 @@ public:
 class SubDocument : public STOFFSubDocument
 {
 public:
-  explicit SubDocument(shared_ptr<OutlinerParaObject> text) :
+  explicit SubDocument(std::shared_ptr<OutlinerParaObject> text) :
     STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_text(text) {}
 
   //! destructor
@@ -207,7 +207,7 @@ public:
 
 protected:
   //! the text
-  shared_ptr<OutlinerParaObject> m_text;
+  std::shared_ptr<OutlinerParaObject> m_text;
 };
 
 void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*type*/)
@@ -409,7 +409,7 @@ public:
     return s.str();
   }
   //! return a pool corresponding to an object
-  static shared_ptr<StarItemPool> getPool(StarObject &object)
+  static std::shared_ptr<StarItemPool> getPool(StarObject &object)
   {
     return object.findItemPool(StarItemPool::T_XOutdevPool, false);
   }
@@ -498,7 +498,7 @@ public:
         state.m_graphic.m_propertyList.insert("librevenge:parent-display-name", mStyle->m_names[0]);
       }
       else if (mStyle) {
-        std::map<int, shared_ptr<StarItem> >::const_iterator it;
+        std::map<int, std::shared_ptr<StarItem> >::const_iterator it;
         for (it=mStyle->m_itemSet.m_whichToItemMap.begin(); it!=mStyle->m_itemSet.m_whichToItemMap.end(); ++it) {
           if (it->second && it->second->m_attribute)
             it->second->m_attribute->addTo(state);
@@ -524,7 +524,7 @@ public:
     return o;
   }
   //! the list of star item
-  std::vector<shared_ptr<StarItem> > m_itemList;
+  std::vector<std::shared_ptr<StarItem> > m_itemList;
   //! the sheet style name
   librevenge::RVNGString m_sheetStyle;
 };
@@ -580,7 +580,7 @@ public:
   //! the group name
   librevenge::RVNGString m_groupName;
   //! the child
-  std::vector<shared_ptr<StarObjectSmallGraphic> > m_child;
+  std::vector<std::shared_ptr<StarObjectSmallGraphic> > m_child;
   //! the ref point
   STOFFVec2i m_refPoint;
   //! flag to know if we use the ref point
@@ -645,7 +645,7 @@ public:
     position.setOrigin(libstoff::convertMiniMToPointVect(box[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(box.size()), librevenge::RVNG_POINT);
     position.setAnchor(STOFFPosition::Page);
-    shared_ptr<StarItemPool> pool=getPool(object);
+    std::shared_ptr<StarItemPool> pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
     // if (!state.m_graphic.m_hasBackground) state.m_graphic.m_propertyList.insert("draw:fill", "none"); checkme
@@ -657,7 +657,7 @@ public:
       state.m_graphic.m_propertyList.insert("librevenge:rotate-cy", orig[1], librevenge::RVNG_POINT);
       state.m_graphic.m_propertyList.insert("librevenge:rotate", -m_textDrehWink/100., librevenge::RVNG_GENERIC);
     }
-    shared_ptr<SubDocument> doc(new SubDocument(m_outlinerParaObject));
+    std::shared_ptr<SubDocument> doc(new SubDocument(m_outlinerParaObject));
     listener->insertTextBox(position, doc, state.m_graphic);
     return true;
   }
@@ -682,7 +682,7 @@ public:
   //! the shear wink
   int m_textShearWink;
   //! the outliner object
-  shared_ptr<OutlinerParaObject> m_outlinerParaObject;
+  std::shared_ptr<OutlinerParaObject> m_outlinerParaObject;
   //! the text bound
   STOFFBox2i m_textBound;
 };
@@ -716,7 +716,7 @@ public:
       shape.m_command=STOFFGraphicShape::C_Rectangle;
       shape.m_bdbox=STOFFBox2f(libstoff::convertMiniMToPointVect(m_textRectangle[0]), libstoff::convertMiniMToPointVect(m_textRectangle[1]));
       updateTransformProperties(shape.m_propertyList);
-      shared_ptr<StarItemPool> pool=getPool(object);
+      std::shared_ptr<StarItemPool> pool=getPool(object);
       StarState state(pool.get(), object);
       updateStyle(state, listener);
       listener->insertShape(shape, state.m_graphic, pos);
@@ -801,7 +801,7 @@ public:
     polygon.addToPath(path, false);
     shape.m_propertyList.insert("svg:d", path);
     updateTransformProperties(shape.m_propertyList);
-    shared_ptr<StarItemPool> pool=getPool(object);
+    std::shared_ptr<StarItemPool> pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
     listener->insertShape(shape, state.m_graphic, pos);
@@ -810,7 +810,7 @@ public:
   //! a polygon
   std::vector<STOFFVec2i> m_captionPolygon;
   //! the caption attributes
-  shared_ptr<StarItem> m_captionItem;
+  std::shared_ptr<StarItem> m_captionItem;
 };
 
 SdrGraphicCaption::~SdrGraphicCaption()
@@ -859,7 +859,7 @@ public:
       shape.m_propertyList.insert("draw:kind", wh[m_identifier-4]);
     }
     updateTransformProperties(shape.m_propertyList);
-    shared_ptr<StarItemPool> pool=getPool(object);
+    std::shared_ptr<StarItemPool> pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
     listener->insertShape(shape, state.m_graphic, pos);
@@ -890,7 +890,7 @@ public:
   //! the two angles
   float m_angles[2];
   //! the circle attributes
-  shared_ptr<StarItem> m_circleItem;
+  std::shared_ptr<StarItem> m_circleItem;
 };
 
 SdrGraphicCircle::~SdrGraphicCircle()
@@ -984,7 +984,7 @@ public:
     polygon.addToPath(path, false);
     shape.m_propertyList.insert("svg:d", path);
     updateTransformProperties(shape.m_propertyList);
-    shared_ptr<StarItemPool> pool=getPool(object);
+    std::shared_ptr<StarItemPool> pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
     listener->insertShape(shape, state.m_graphic, pos);
@@ -996,7 +996,7 @@ public:
   std::vector<int> m_edgePolygonFlags;
   // TODO: store the connector
   //! the edge attributes
-  shared_ptr<StarItem> m_edgeItem;
+  std::shared_ptr<StarItem> m_edgeItem;
   //! the information record
   Information m_info;
 };
@@ -1041,7 +1041,7 @@ public:
     position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
     position.setAnchor(pos.m_anchorTo);
-    shared_ptr<StarItemPool> pool=getPool(object);
+    std::shared_ptr<StarItemPool> pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
     if (!m_graphic || m_graphic->m_object.isEmpty()) {
@@ -1087,7 +1087,7 @@ public:
     return o;
   }
   //! the graphic
-  shared_ptr<StarGraphicStruct::StarGraphic> m_graphic;
+  std::shared_ptr<StarGraphicStruct::StarGraphic> m_graphic;
   //! the rectangle
   STOFFBox2i m_graphRectangle;
   //! the name, filename, the filtername
@@ -1097,7 +1097,7 @@ public:
   //! flag to know if the image has a graphic link
   bool m_hasGraphicLink;
   //! the graph attributes
-  shared_ptr<StarItem> m_graphItem;
+  std::shared_ptr<StarItem> m_graphItem;
 };
 
 SdrGraphicGraph::~SdrGraphicGraph()
@@ -1126,7 +1126,7 @@ public:
   bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/)
   {
     STOFFGraphicShape shape;
-    shared_ptr<StarItemPool> pool=getPool(object);
+    std::shared_ptr<StarItemPool> pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
     librevenge::RVNGPropertyListVector vect;
@@ -1170,7 +1170,7 @@ public:
   //! overwritten flag
   bool m_overwritten;
   //! the measure attributes
-  shared_ptr<StarItem> m_measureItem;
+  std::shared_ptr<StarItem> m_measureItem;
 };
 
 SdrGraphicMeasure::~SdrGraphicMeasure()
@@ -1203,7 +1203,7 @@ public:
     }
     STOFFEmbeddedObject localPicture;
     if (!m_oleNames[0].empty() && m_oleParser) {
-      shared_ptr<STOFFOLEParser::OleDirectory> dir=m_oleParser->getDirectory(m_oleNames[0].cstr());
+      std::shared_ptr<STOFFOLEParser::OleDirectory> dir=m_oleParser->getDirectory(m_oleNames[0].cstr());
       if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture) || localPicture.isEmpty()) {
         STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: sorry, can not find object %s\n", m_oleNames[0].cstr()));
       }
@@ -1227,7 +1227,7 @@ public:
     position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
     position.setAnchor(pos.m_anchorTo);
-    shared_ptr<StarItemPool> pool=getPool(object);
+    std::shared_ptr<StarItemPool> pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
     listener->insertPicture(position, localPicture, state.m_graphic);
@@ -1253,9 +1253,9 @@ public:
   //! the persist and the program name
   librevenge::RVNGString m_oleNames[2];
   //! the graphic
-  shared_ptr<StarGraphicStruct::StarGraphic> m_graphic;
+  std::shared_ptr<StarGraphicStruct::StarGraphic> m_graphic;
   //! the ole parser
-  shared_ptr<STOFFOLEParser> m_oleParser;
+  std::shared_ptr<STOFFOLEParser> m_oleParser;
 };
 
 SdrGraphicOLE::~SdrGraphicOLE()
@@ -1338,7 +1338,7 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFPosition const &pos, S
   }
 
   STOFFGraphicShape shape;
-  shared_ptr<StarItemPool> pool=getPool(object);
+  std::shared_ptr<StarItemPool> pool=getPool(object);
   StarState state(pool.get(), object);
   updateStyle(state, listener);
   librevenge::RVNGPropertyListVector vect;
@@ -1551,7 +1551,7 @@ struct State {
   {
   }
   //! the graphic object
-  shared_ptr<Graphic> m_graphic;
+  std::shared_ptr<Graphic> m_graphic;
 };
 
 }
@@ -1631,7 +1631,7 @@ bool StarObjectSmallGraphic::readSdrObject(StarZone &zone)
   *input>>identifier;
   f << magic << ", ident=" << std::hex << identifier << std::dec << ",";
   bool ok=true;
-  shared_ptr<StarObjectSmallGraphicInternal::Graphic> graphic;
+  std::shared_ptr<StarObjectSmallGraphicInternal::Graphic> graphic;
   if (magic=="SVDr")
     graphic=readSVDRObject(zone, int(identifier));
   else if (magic=="SCHU")
@@ -1674,7 +1674,7 @@ bool StarObjectSmallGraphic::readSdrObject(StarZone &zone)
 ////////////////////////////////////////////////////////////
 //  SVDR
 ////////////////////////////////////////////////////////////
-shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> StarObjectSmallGraphic::readSVDRObject(StarZone &zone, int identifier)
+std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> StarObjectSmallGraphic::readSVDRObject(StarZone &zone, int identifier)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos;
@@ -1684,10 +1684,10 @@ shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> StarObjectSmallGraphic::r
   libstoff::DebugStream f;
 
   bool ok=true;
-  shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> graphic;
+  std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> graphic;
   switch (identifier) {
   case 1: { // group
-    shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicGroup> graphicGroup(new StarObjectSmallGraphicInternal::SdrGraphicGroup(identifier));
+    std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicGroup> graphicGroup(new StarObjectSmallGraphicInternal::SdrGraphicGroup(identifier));
     graphic=graphicGroup;
     ok=readSVDRObjectGroup(zone, *graphicGroup);
     break;
@@ -1701,7 +1701,7 @@ shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> StarObjectSmallGraphic::r
   case 13: // freefill
   case 26: // pathpoly
   case 27: { // pathline
-    shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicPath> graphicPath(new StarObjectSmallGraphicInternal::SdrGraphicPath(identifier));
+    std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicPath> graphicPath(new StarObjectSmallGraphicInternal::SdrGraphicPath(identifier));
     graphic=graphicPath;
     ok=readSVDRObjectPath(zone, *graphicPath);
     break;
@@ -1710,7 +1710,7 @@ shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> StarObjectSmallGraphic::r
   case 5: // sector
   case 6: // arc
   case 7: { // cut
-    shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicCircle> graphicCircle(new StarObjectSmallGraphicInternal::SdrGraphicCircle(identifier));
+    std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicCircle> graphicCircle(new StarObjectSmallGraphicInternal::SdrGraphicCircle(identifier));
     graphic=graphicCircle;
     ok=readSVDRObjectCircle(zone, *graphicCircle);
     break;
@@ -1720,38 +1720,38 @@ shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> StarObjectSmallGraphic::r
   case 17: // textextended
   case 20: // title text
   case 21: { // outline text
-    shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicRect> graphicRect(new StarObjectSmallGraphicInternal::SdrGraphicRect(identifier));
+    std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicRect> graphicRect(new StarObjectSmallGraphicInternal::SdrGraphicRect(identifier));
     graphic=graphicRect;
     ok=readSVDRObjectRect(zone, *graphicRect);
     break;
   }
   case 24: { // edge
-    shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicEdge> graphicEdge(new StarObjectSmallGraphicInternal::SdrGraphicEdge());
+    std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicEdge> graphicEdge(new StarObjectSmallGraphicInternal::SdrGraphicEdge());
     graphic=graphicEdge;
     ok=readSVDRObjectEdge(zone, *graphicEdge);
     break;
   }
   case 22: { // graph
-    shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicGraph> graphicGraph(new StarObjectSmallGraphicInternal::SdrGraphicGraph());
+    std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicGraph> graphicGraph(new StarObjectSmallGraphicInternal::SdrGraphicGraph());
     graphic=graphicGraph;
     ok=readSVDRObjectGraph(zone, *graphicGraph);
     break;
   }
   case 23: // ole
   case 31: { // frame
-    shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicOLE> graphicOLE(new StarObjectSmallGraphicInternal::SdrGraphicOLE(identifier));
+    std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicOLE> graphicOLE(new StarObjectSmallGraphicInternal::SdrGraphicOLE(identifier));
     graphic=graphicOLE;
     ok=readSVDRObjectOLE(zone, *graphicOLE);
     break;
   }
   case 25: { // caption
-    shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicCaption> graphicCaption(new StarObjectSmallGraphicInternal::SdrGraphicCaption());
+    std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicCaption> graphicCaption(new StarObjectSmallGraphicInternal::SdrGraphicCaption());
     graphic=graphicCaption;
     ok=readSVDRObjectCaption(zone, *graphicCaption);
     break;
   }
   case 28: { // page
-    shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicPage> graphicPage(new StarObjectSmallGraphicInternal::SdrGraphicPage());
+    std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicPage> graphicPage(new StarObjectSmallGraphicInternal::SdrGraphicPage());
     graphic=graphicPage;
     ok=readSVDRObjectHeader(zone, *graphicPage);
     if (!ok) break;
@@ -1773,13 +1773,13 @@ shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> StarObjectSmallGraphic::r
     break;
   }
   case 29: { // measure
-    shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicMeasure> graphicMeasure(new StarObjectSmallGraphicInternal::SdrGraphicMeasure());
+    std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicMeasure> graphicMeasure(new StarObjectSmallGraphicInternal::SdrGraphicMeasure());
     graphic=graphicMeasure;
     ok=readSVDRObjectMeasure(zone, *graphicMeasure);
     break;
   }
   case 32: { // uno
-    shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicUno> graphicUno(new StarObjectSmallGraphicInternal::SdrGraphicUno());
+    std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicUno> graphicUno(new StarObjectSmallGraphicInternal::SdrGraphicUno());
     graphic=graphicUno;
     ok=readSVDRObjectRect(zone, *graphicUno);
     pos=input->tell();
@@ -1869,7 +1869,7 @@ bool StarObjectSmallGraphic::readSVDRObjectAttrib(StarZone &zone, StarObjectSmal
   }
 
   long lastPos=zone.getRecordLastPosition();
-  shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
+  std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
   if (!pool)
     pool=getNewItemPool(StarItemPool::T_VCControlPool);
   int vers=zone.getHeaderVersion();
@@ -1882,7 +1882,7 @@ bool StarObjectSmallGraphic::readSVDRObjectAttrib(StarZone &zone, StarObjectSmal
                              1096 /*SDRATTRSET_OUTLINER*/, 1126 /*SDRATTRSET_MISC*/
                             };
     uint16_t nWhich=what[i];
-    shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
+    std::shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
     if (input->tell()>lastPos) { // null is ok
       f << "###";
       ok=false;
@@ -1956,11 +1956,11 @@ bool StarObjectSmallGraphic::readSVDRObjectCaption(StarZone &zone, StarObjectSma
     graphic.m_captionPolygon.push_back(STOFFVec2i(dim[0],dim[1]));
   }
   if (ok) {
-    shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
+    std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
     if (!pool)
       pool=getNewItemPool(StarItemPool::T_XOutdevPool);
     uint16_t nWhich=1195; // SDRATTRSET_CAPTION
-    shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
+    std::shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
     if (!item || input->tell()>lastPos)
       f << "###";
     else
@@ -1999,11 +1999,11 @@ bool StarObjectSmallGraphic::readSVDRObjectCircle(StarZone &zone, StarObjectSmal
       graphic.m_angles[i]=float(input->readLong(4))/100.f;
   }
   if (input->tell()!=lastPos) {
-    shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
+    std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
     if (!pool)
       pool=getNewItemPool(StarItemPool::T_XOutdevPool);
     uint16_t nWhich=1179; // SDRATTRSET_CIRC
-    shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
+    std::shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
     if (!item || input->tell()>lastPos) {
       f << "###";
     }
@@ -2093,11 +2093,11 @@ bool StarObjectSmallGraphic::readSVDRObjectEdge(StarZone &zone, StarObjectSmallG
     }
   }
   if (ok && input->tell()<lastPos) {
-    shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
+    std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
     if (!pool)
       pool=getNewItemPool(StarItemPool::T_XOutdevPool);
     uint16_t nWhich=1146; // SDRATTRSET_EDGE
-    shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
+    std::shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
     if (!item || input->tell()>lastPos) {
       f << "###";
     }
@@ -2260,7 +2260,7 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
   bool ok=true;
   if (vers<11) {
     // ReadDataTilV10
-    shared_ptr<StarGraphicStruct::StarGraphic> smallGraphic(new StarGraphicStruct::StarGraphic);
+    std::shared_ptr<StarGraphicStruct::StarGraphic> smallGraphic(new StarGraphicStruct::StarGraphic);
     long begPictPos=input->tell();
     if (!smallGraphic->read(zone) || input->tell()>lastPos) {
       f << "###graphic";
@@ -2323,7 +2323,7 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
         f << "graf,";
         ascFile.addPos(pos);
         ascFile.addNote(f.str().c_str());
-        shared_ptr<StarGraphicStruct::StarGraphic> smallGraphic(new StarGraphicStruct::StarGraphic);
+        std::shared_ptr<StarGraphicStruct::StarGraphic> smallGraphic(new StarGraphicStruct::StarGraphic);
         if (!smallGraphic->read(zone, zone.getRecordLastPosition()) || input->tell()>zone.getRecordLastPosition()) {
           ascFile.addPos(pos);
           ascFile.addNote("SVDR[graph]:##graphic");
@@ -2356,11 +2356,11 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
     if (ok)
       *input >> graphic.m_hasGraphicLink;
     if (ok && input->tell()<lastPos) {
-      shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
+      std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
       if (!pool)
         pool=getNewItemPool(StarItemPool::T_XOutdevPool);
       uint16_t nWhich=1243; // SDRATTRSET_GRAF
-      shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
+      std::shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
       if (!item || input->tell()>lastPos) {
         f << "###";
       }
@@ -2439,7 +2439,7 @@ bool StarObjectSmallGraphic::readSVDRObjectGroup(StarZone &zone, StarObjectSmall
     }
     if (magic!="DrOb")
       break;
-    shared_ptr<StarObjectSmallGraphic> child(new StarObjectSmallGraphic(*this, true));
+    std::shared_ptr<StarObjectSmallGraphic> child(new StarObjectSmallGraphic(*this, true));
     if (!child->readSdrObject(zone)) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSVDRObjectGroup: can not read an object\n"));
       f << "###object";
@@ -2495,11 +2495,11 @@ bool StarObjectSmallGraphic::readSVDRObjectMeasure(StarZone &zone, StarObjectSma
     graphic.m_measurePoints[pt]=STOFFVec2i(dim[0],dim[1]);
   }
   *input >> graphic.m_overwritten;
-  shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
+  std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
   if (!pool)
     pool=getNewItemPool(StarItemPool::T_XOutdevPool);
   uint16_t nWhich=1171; // SDRATTRSET_MEASURE
-  shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
+  std::shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
   if (!item || input->tell()>lastPos) {
     f << "###";
   }
@@ -2549,7 +2549,7 @@ bool StarObjectSmallGraphic::readSVDRObjectOLE(StarZone &zone, StarObjectSmallGr
     *input >> objValid >> hasGraphic;
     if (objValid) f << "obj[refValid],";
     if (hasGraphic) {
-      shared_ptr<StarGraphicStruct::StarGraphic> smallGraphic(new StarGraphicStruct::StarGraphic);
+      std::shared_ptr<StarGraphicStruct::StarGraphic> smallGraphic(new StarGraphicStruct::StarGraphic);
       long beginPos=input->tell();
       if (!smallGraphic->read(zone, lastPos) || input->tell()>lastPos || smallGraphic->m_object.isEmpty()) {
         // try to recover can recover here the unknown graphic
@@ -2751,7 +2751,7 @@ bool StarObjectSmallGraphic::readSVDRObjectText(StarZone &zone, StarObjectSmallG
       f << "##paraObject";
     }
     else {
-      shared_ptr<StarObjectSmallGraphicInternal::OutlinerParaObject> paraObject(new StarObjectSmallGraphicInternal::OutlinerParaObject);
+      std::shared_ptr<StarObjectSmallGraphicInternal::OutlinerParaObject> paraObject(new StarObjectSmallGraphicInternal::OutlinerParaObject);
       if (!readSDROutlinerParaObject(zone, *paraObject)) {
         ok=false;
         f << "##paraObject";
@@ -2927,7 +2927,7 @@ bool StarObjectSmallGraphic::readSDROutlinerParaObject(StarZone &zone, StarObjec
       pos=input->tell();
       f.str("");
       f << "SdrParaObject:";
-      shared_ptr<StarObjectSmallText> smallText(new StarObjectSmallText(*this, true));
+      std::shared_ptr<StarObjectSmallText> smallText(new StarObjectSmallText(*this, true));
       if (!smallText->read(zone, lastPos) || input->tell()>lastPos) {
         f << "###editTextObject";
         input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -2999,7 +2999,7 @@ bool StarObjectSmallGraphic::readSDROutlinerParaObject(StarZone &zone, StarObjec
     pos=input->tell();
     f.str("");
     f << "SdrParaObject:";
-    shared_ptr<StarObjectSmallText> smallText(new StarObjectSmallText(*this, true)); // checkme, we must use the text edit pool here
+    std::shared_ptr<StarObjectSmallText> smallText(new StarObjectSmallText(*this, true)); // checkme, we must use the text edit pool here
     if (!smallText->read(zone, lastPos) || N>(lastPos-input->tell())/2 || input->tell()+N*2>lastPos) {
       f << "###editTextObject";
       input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -3181,7 +3181,7 @@ bool StarObjectSmallGraphic::readSDRUserDataList(StarZone &zone, bool inRecord)
 ////////////////////////////////////////////////////////////
 // FM01 object
 ////////////////////////////////////////////////////////////
-shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic::readFmFormObject(StarZone &zone, int identifier)
+std::shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic::readFmFormObject(StarZone &zone, int identifier)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -3195,18 +3195,18 @@ shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic::read
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
 
-    return shared_ptr<StarObjectSmallGraphicInternal::Graphic>();
+    return std::shared_ptr<StarObjectSmallGraphicInternal::Graphic>();
   }
   // svx_fmobj.cxx FmFormObj::ReadData
   // fixme: same code as SdrUnoObj::ReadData
-  shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicUno> graphic(new StarObjectSmallGraphicInternal::SdrGraphicUno());
+  std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicUno> graphic(new StarObjectSmallGraphicInternal::SdrGraphicUno());
   if (!readSVDRObjectRect(zone, *graphic)) {
     STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readFmFormObject: can not read rect data\n"));
     f << "###id=" << identifier << ",";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
 
-    return shared_ptr<StarObjectSmallGraphicInternal::Graphic>();
+    return std::shared_ptr<StarObjectSmallGraphicInternal::Graphic>();
   }
   pos=input->tell();
   if (!zone.openRecord()) {
@@ -3216,7 +3216,7 @@ shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic::read
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
 
-    return shared_ptr<StarObjectSmallGraphicInternal::Graphic>();
+    return std::shared_ptr<StarObjectSmallGraphicInternal::Graphic>();
   }
   f << "FM01[uno]:";
   // + SdrUnoObj::ReadData (checkme)
@@ -3241,10 +3241,10 @@ shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic::read
 ////////////////////////////////////////////////////////////
 // SCHU object
 ////////////////////////////////////////////////////////////
-shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic::readSCHUObject(StarZone &zone, int identifier)
+std::shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic::readSCHUObject(StarZone &zone, int identifier)
 {
   if (identifier==1) {
-    shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicGroup> group(new StarObjectSmallGraphicInternal::SdrGraphicGroup(1));
+    std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphicGroup> group(new StarObjectSmallGraphicInternal::SdrGraphicGroup(1));
     if (readSVDRObjectGroup(zone, *group))
       return group;
   }
@@ -3260,9 +3260,9 @@ shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic::read
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
 
-    return shared_ptr<StarObjectSmallGraphicInternal::Graphic>();
+    return std::shared_ptr<StarObjectSmallGraphicInternal::Graphic>();
   }
-  shared_ptr<StarObjectSmallGraphicInternal::SCHUGraphic> graphic(new StarObjectSmallGraphicInternal::SCHUGraphic(identifier));
+  std::shared_ptr<StarObjectSmallGraphicInternal::SCHUGraphic> graphic(new StarObjectSmallGraphicInternal::SCHUGraphic(identifier));
   // sch_objfac.xx : SchObjFactory::MakeUserData
   int vers=int(input->readULong(2));
   switch (identifier) {
@@ -3298,7 +3298,7 @@ shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic::read
 ////////////////////////////////////////////////////////////
 // SCHU object
 ////////////////////////////////////////////////////////////
-shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic::readSDUDObject(StarZone &zone, int identifier)
+std::shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic::readSDUDObject(StarZone &zone, int identifier)
 {
   STOFFInputStreamPtr input=zone.input();
   long pos=input->tell();
@@ -3311,7 +3311,7 @@ shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic::read
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
 
-    return shared_ptr<StarObjectSmallGraphicInternal::Graphic>();
+    return std::shared_ptr<StarObjectSmallGraphicInternal::Graphic>();
   }
   // sd_sdobjfac.cxx : SchObjFactory::MakeUserData
   int vers=int(input->readULong(2));
@@ -3321,14 +3321,14 @@ shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic::read
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
 
-    return shared_ptr<StarObjectSmallGraphicInternal::Graphic>();
+    return std::shared_ptr<StarObjectSmallGraphicInternal::Graphic>();
   }
   vers=zone.getHeaderVersion();
   long endPos=zone.getRecordLastPosition();
-  shared_ptr<StarObjectSmallGraphicInternal::SDUDGraphic> res;
+  std::shared_ptr<StarObjectSmallGraphicInternal::SDUDGraphic> res;
   if (identifier==1) {
     // sd_anminfo.cxx SdAnimationInfo::ReadData
-    shared_ptr<StarObjectSmallGraphicInternal::SDUDGraphicAnimation> graphic(new StarObjectSmallGraphicInternal::SDUDGraphicAnimation);
+    std::shared_ptr<StarObjectSmallGraphicInternal::SDUDGraphicAnimation> graphic(new StarObjectSmallGraphicInternal::SDUDGraphicAnimation);
     res=graphic;
     bool ok=true;
     if (input->readULong(2)) {

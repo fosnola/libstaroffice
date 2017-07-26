@@ -83,7 +83,7 @@ public:
     /** the object */
     StarObject &m_object;
     /// the numeric ruler manager
-    shared_ptr<StarObjectNumericRuler> m_numericRuler;
+    std::shared_ptr<StarObjectNumericRuler> m_numericRuler;
     /// the page
     STOFFPageSpan m_page;
     /// the page name
@@ -95,7 +95,7 @@ public:
     /// the page occurence: all, first, left, right
     std::string m_pageOccurence;
     /// the current list
-    shared_ptr<STOFFList> m_list;
+    std::shared_ptr<STOFFList> m_list;
     /// the current list level
     int m_listLevel;
     /** the relative unit uses to transform rel font height in point, default 1/20 */
@@ -118,7 +118,7 @@ public:
   {
   }
   //! constructor
-  explicit StarState(shared_ptr<GlobalState> global) :
+  explicit StarState(std::shared_ptr<GlobalState> global) :
     m_global(global),
     m_styleName(""),
     m_break(0),
@@ -136,7 +136,7 @@ public:
   //! reinit the local data: break, font, content, footnote, ...
   void reinitializeLineData();
   //! global state
-  shared_ptr<GlobalState> m_global;
+  std::shared_ptr<GlobalState> m_global;
   /// the style name
   librevenge::RVNGString m_styleName;
 
@@ -163,7 +163,7 @@ public:
   /// the ref mark
   librevenge::RVNGString m_refMark;
   /** the field */
-  shared_ptr<SWFieldManagerInternal::Field> m_field;
+  std::shared_ptr<SWFieldManagerInternal::Field> m_field;
 private:
   StarState &operator=(StarState const &);
 };

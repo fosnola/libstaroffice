@@ -181,7 +181,7 @@ public:
 
 protected:
   //! the actual state
-  shared_ptr<STOFFSpreadsheetEncoderInternal::State> m_state;
+  std::shared_ptr<STOFFSpreadsheetEncoderInternal::State> m_state;
 };
 
 #endif

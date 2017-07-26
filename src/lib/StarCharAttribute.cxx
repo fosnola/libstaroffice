@@ -59,9 +59,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeBool(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeBool(*this));
   }
   //! add to a font
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -82,9 +82,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeColor(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeColor(*this));
   }
   //! add to a font
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -107,9 +107,9 @@ public:
   //! add to a font
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeInt(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeInt(*this));
   }
 protected:
   //! copy constructor
@@ -128,9 +128,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeUInt(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeUInt(*this));
   }
   //! add to a font
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -152,9 +152,9 @@ public:
   //! add to a font
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeVoid(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeVoid(*this));
   }
 protected:
   //! copy constructor
@@ -164,29 +164,29 @@ protected:
 };
 
 //! add a bool attribute
-inline void addAttributeBool(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
+inline void addAttributeBool(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarCAttributeBool(type,debugName, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarCAttributeBool(type,debugName, defValue));
 }
 //! add a color attribute
-inline void addAttributeColor(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, STOFFColor const &defValue)
+inline void addAttributeColor(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, STOFFColor const &defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarCAttributeColor(type,debugName, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarCAttributeColor(type,debugName, defValue));
 }
 //! add a int attribute
-inline void addAttributeInt(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
+inline void addAttributeInt(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarCAttributeInt(type,debugName, numBytes, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarCAttributeInt(type,debugName, numBytes, defValue));
 }
 //! add a unsigned int attribute
-inline void addAttributeUInt(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, unsigned int defValue)
+inline void addAttributeUInt(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, unsigned int defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarCAttributeUInt(type,debugName, numBytes, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarCAttributeUInt(type,debugName, numBytes, defValue));
 }
 //! add a void attribute
-inline void addAttributeVoid(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
+inline void addAttributeVoid(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarCAttributeVoid(type,debugName));
+  map[type]=std::shared_ptr<StarAttribute>(new StarCAttributeVoid(type,debugName));
 }
 
 void StarCAttributeBool::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
@@ -394,7 +394,7 @@ namespace StarCharAttribute
 class SubDocument : public STOFFSubDocument
 {
 public:
-  explicit SubDocument(shared_ptr<StarObjectTextInternal::Content> content, StarItemPool const *pool, StarObject &object) :
+  explicit SubDocument(std::shared_ptr<StarObjectTextInternal::Content> content, StarItemPool const *pool, StarObject &object) :
     STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_content(content), m_pool(pool), m_object(object) {}
 
   //! destructor
@@ -423,7 +423,7 @@ public:
 
 protected:
   //! the content
-  shared_ptr<StarObjectTextInternal::Content> m_content;
+  std::shared_ptr<StarObjectTextInternal::Content> m_content;
   //! the pool
   StarItemPool const *m_pool;
   //! the object
@@ -454,9 +454,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeEscapement(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeEscapement(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -491,9 +491,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeFont(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeFont(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -577,9 +577,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeFontSize(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeFontSize(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -626,9 +626,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeCharFormat(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeCharFormat(*this));
   }
   //! debug function to print the data
   virtual void printData(libstoff::DebugStream &o) const
@@ -659,9 +659,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeContent(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeContent(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -682,7 +682,7 @@ protected:
   {
   }
   //! the content
-  shared_ptr<StarObjectTextInternal::Content> m_content;
+  std::shared_ptr<StarObjectTextInternal::Content> m_content;
 };
 
 //! a field attribute
@@ -694,9 +694,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeField(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeField(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -708,7 +708,7 @@ protected:
   {
   }
   //! the field
-  shared_ptr<SWFieldManagerInternal::Field> m_field;
+  std::shared_ptr<SWFieldManagerInternal::Field> m_field;
 };
 
 //! a footnote attribute
@@ -720,9 +720,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeFootnote(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeFootnote(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -751,7 +751,7 @@ protected:
   //! the label
   librevenge::RVNGString m_label;
   //! the content
-  shared_ptr<StarObjectTextInternal::Content> m_content;
+  std::shared_ptr<StarObjectTextInternal::Content> m_content;
   //! the sequential number
   int m_numSeq;
   //! the flags
@@ -768,9 +768,9 @@ public:
     for (int i=0; i<2; ++i) m_indices[i]=0xFFFF;
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeINetFmt(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeINetFmt(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -822,9 +822,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeRefMark(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeRefMark(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -937,7 +937,7 @@ void StarCAttributeCharFormat::addTo(StarState &state, std::set<StarAttribute co
     if (style) {
       state.m_font=STOFFFont();
       StarItemSet const &itemSet=style->m_itemSet;
-      std::map<int, shared_ptr<StarItem> >::const_iterator it;
+      std::map<int, std::shared_ptr<StarItem> >::const_iterator it;
       for (it=itemSet.m_whichToItemMap.begin(); it!=itemSet.m_whichToItemMap.end(); ++it) {
         if (it->second && it->second->m_attribute)
           it->second->m_attribute->addTo(state, done);
@@ -1315,14 +1315,14 @@ bool StarCAttributeFootnote::send(STOFFListenerPtr listener, StarState &state, s
 
 namespace StarCharAttribute
 {
-void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
+void addInitTo(std::map<int, std::shared_ptr<StarAttribute> > &map)
 {
-  map[StarAttribute::ATTR_CHR_FONT]=shared_ptr<StarAttribute>(new StarCAttributeFont(StarAttribute::ATTR_CHR_FONT,"chrAtrFont"));
-  map[StarAttribute::ATTR_CHR_CJK_FONT]=shared_ptr<StarAttribute>(new StarCAttributeFont(StarAttribute::ATTR_CHR_CJK_FONT,"chrAtrCJKFont"));
-  map[StarAttribute::ATTR_CHR_CTL_FONT]=shared_ptr<StarAttribute>(new StarCAttributeFont(StarAttribute::ATTR_CHR_CTL_FONT,"chrAtrCTLFont"));
-  map[StarAttribute::ATTR_CHR_FONTSIZE]=shared_ptr<StarAttribute>(new StarCAttributeFontSize(StarAttribute::ATTR_CHR_FONTSIZE,"chrAtrFontsize"));
-  map[StarAttribute::ATTR_CHR_CJK_FONTSIZE]=shared_ptr<StarAttribute>(new StarCAttributeFontSize(StarAttribute::ATTR_CHR_CJK_FONTSIZE,"chrAtrCJKFontsize"));
-  map[StarAttribute::ATTR_CHR_CTL_FONTSIZE]=shared_ptr<StarAttribute>(new StarCAttributeFontSize(StarAttribute::ATTR_CHR_CTL_FONTSIZE,"chrAtrCTLFontsize"));
+  map[StarAttribute::ATTR_CHR_FONT]=std::shared_ptr<StarAttribute>(new StarCAttributeFont(StarAttribute::ATTR_CHR_FONT,"chrAtrFont"));
+  map[StarAttribute::ATTR_CHR_CJK_FONT]=std::shared_ptr<StarAttribute>(new StarCAttributeFont(StarAttribute::ATTR_CHR_CJK_FONT,"chrAtrCJKFont"));
+  map[StarAttribute::ATTR_CHR_CTL_FONT]=std::shared_ptr<StarAttribute>(new StarCAttributeFont(StarAttribute::ATTR_CHR_CTL_FONT,"chrAtrCTLFont"));
+  map[StarAttribute::ATTR_CHR_FONTSIZE]=std::shared_ptr<StarAttribute>(new StarCAttributeFontSize(StarAttribute::ATTR_CHR_FONTSIZE,"chrAtrFontsize"));
+  map[StarAttribute::ATTR_CHR_CJK_FONTSIZE]=std::shared_ptr<StarAttribute>(new StarCAttributeFontSize(StarAttribute::ATTR_CHR_CJK_FONTSIZE,"chrAtrCJKFontsize"));
+  map[StarAttribute::ATTR_CHR_CTL_FONTSIZE]=std::shared_ptr<StarAttribute>(new StarCAttributeFontSize(StarAttribute::ATTR_CHR_CTL_FONTSIZE,"chrAtrCTLFontsize"));
   addAttributeColor(map, StarAttribute::ATTR_CHR_COLOR,"char[color]",STOFFColor::black());
   // bold
   addAttributeUInt(map,StarAttribute::ATTR_CHR_WEIGHT,"char[weight]",1,5); // normal
@@ -1345,7 +1345,7 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeBool(map,StarAttribute::ATTR_CHR_WORDLINEMODE,"char[word,linemode]",false);
   addAttributeBool(map,StarAttribute::ATTR_CHR_AUTOKERN,"char[autoKern]",false);
   addAttributeInt(map,StarAttribute::ATTR_CHR_KERNING,"char[kerning]",2,0);
-  map[StarAttribute::ATTR_CHR_ESCAPEMENT]=shared_ptr<StarAttribute>(new StarCAttributeEscapement(StarAttribute::ATTR_CHR_ESCAPEMENT,"chrAtrEscapement"));
+  map[StarAttribute::ATTR_CHR_ESCAPEMENT]=std::shared_ptr<StarAttribute>(new StarCAttributeEscapement(StarAttribute::ATTR_CHR_ESCAPEMENT,"chrAtrEscapement"));
   addAttributeUInt(map,StarAttribute::ATTR_CHR_PROPORTIONALFONTSIZE,"char[proportionalfontsize]",2,100); // 100%
 
   addAttributeUInt(map,StarAttribute::ATTR_CHR_LANGUAGE,"char[language]",2,0x3ff); // unknown
@@ -1355,11 +1355,11 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
 
   addAttributeBool(map,StarAttribute::ATTR_CHR_NOHYPHEN,"char[noHyphen]",true);
   addAttributeVoid(map,StarAttribute::ATTR_TXT_SOFTHYPH,"text[softHyphen]");
-  map[StarAttribute::ATTR_TXT_CHARFMT]=shared_ptr<StarAttribute>(new StarCAttributeCharFormat(StarAttribute::ATTR_TXT_CHARFMT,"textAtrCharFmt"));
-  map[StarAttribute::ATTR_TXT_FTN]=shared_ptr<StarAttribute>(new StarCAttributeFootnote(StarAttribute::ATTR_TXT_FTN,"textAtrFtn"));
-  map[StarAttribute::ATTR_TXT_FIELD]=shared_ptr<StarAttribute>(new StarCAttributeField(StarAttribute::ATTR_TXT_FIELD,"textAtrField"));
-  map[StarAttribute::ATTR_TXT_INETFMT]=shared_ptr<StarAttribute>(new StarCAttributeINetFmt(StarAttribute::ATTR_TXT_INETFMT,"textAtrInetFmt"));
-  map[StarAttribute::ATTR_TXT_REFMARK]=shared_ptr<StarAttribute>(new StarCAttributeRefMark(StarAttribute::ATTR_TXT_REFMARK,"textAtrRefMark"));
+  map[StarAttribute::ATTR_TXT_CHARFMT]=std::shared_ptr<StarAttribute>(new StarCAttributeCharFormat(StarAttribute::ATTR_TXT_CHARFMT,"textAtrCharFmt"));
+  map[StarAttribute::ATTR_TXT_FTN]=std::shared_ptr<StarAttribute>(new StarCAttributeFootnote(StarAttribute::ATTR_TXT_FTN,"textAtrFtn"));
+  map[StarAttribute::ATTR_TXT_FIELD]=std::shared_ptr<StarAttribute>(new StarCAttributeField(StarAttribute::ATTR_TXT_FIELD,"textAtrField"));
+  map[StarAttribute::ATTR_TXT_INETFMT]=std::shared_ptr<StarAttribute>(new StarCAttributeINetFmt(StarAttribute::ATTR_TXT_INETFMT,"textAtrInetFmt"));
+  map[StarAttribute::ATTR_TXT_REFMARK]=std::shared_ptr<StarAttribute>(new StarCAttributeRefMark(StarAttribute::ATTR_TXT_REFMARK,"textAtrRefMark"));
   addAttributeBool(map,StarAttribute::ATTR_CHR_NOLINEBREAK,"char[nolineBreak]",true);
   addAttributeBool(map,StarAttribute::ATTR_SC_HYPHENATE,"hyphenate", false);
 
@@ -1372,7 +1372,7 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeBool(map,StarAttribute::ATTR_TXT_DUMMY7,"text[dummy7]",false);
   addAttributeVoid(map,StarAttribute::ATTR_TXT_UNKNOWN_CONTAINER, "text[unknContainer]"); // XML attrib
 
-  map[StarAttribute::ATTR_FRM_CNTNT]=shared_ptr<StarAttribute>(new StarCAttributeContent(StarAttribute::ATTR_FRM_CNTNT,"pageCntnt"));
+  map[StarAttribute::ATTR_FRM_CNTNT]=std::shared_ptr<StarAttribute>(new StarCAttributeContent(StarAttribute::ATTR_FRM_CNTNT,"pageCntnt"));
 
   // do we need to retrieve these attribute
   addAttributeVoid(map, StarAttribute::ATTR_EE_FEATURE_TAB, "feature[tab]"); // feature tab ?

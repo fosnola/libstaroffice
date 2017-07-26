@@ -260,7 +260,7 @@ public:
   //! the cell content
   STOFFCellContent m_content;
   //! the text zone(if set)
-  shared_ptr<StarObjectSmallText> m_textZone;
+  std::shared_ptr<StarObjectSmallText> m_textZone;
   //! flag to know if the cell has some note
   bool m_hasNote;
   //! the notes text, date, author
@@ -282,15 +282,15 @@ public:
   //! try to compress the item list and create a attribute list
   void compressItemList()
   {
-    std::map<STOFFVec2i,shared_ptr<StarAttribute> > oldMap=m_colToAttributeMap;
-    std::map<STOFFVec2i,shared_ptr<StarAttribute> >::const_iterator it=oldMap.begin();
+    std::map<STOFFVec2i,std::shared_ptr<StarAttribute> > oldMap=m_colToAttributeMap;
+    std::map<STOFFVec2i,std::shared_ptr<StarAttribute> >::const_iterator it=oldMap.begin();
     m_colToAttributeMap.clear();
 
-    shared_ptr<StarAttribute> actAttribute;
+    std::shared_ptr<StarAttribute> actAttribute;
     STOFFVec2i actPos(0,-1);
     while (it!=oldMap.end()) {
       // first check for not filled row
-      shared_ptr<StarAttribute> newAttrib=it->second;
+      std::shared_ptr<StarAttribute> newAttrib=it->second;
       if (it->first[0]!=actPos[1]+1 || newAttrib.get()!=actAttribute.get()) {
         if (actAttribute)
           m_colToAttributeMap[actPos]=actAttribute;
@@ -304,9 +304,9 @@ public:
       m_colToAttributeMap[actPos]=actAttribute;
   }
   //! map col -> cell
-  std::map<int, shared_ptr<Cell> > m_colToCellMap;
+  std::map<int, std::shared_ptr<Cell> > m_colToCellMap;
   //! map col -> attribute
-  std::map<STOFFVec2i, shared_ptr<StarAttribute> > m_colToAttributeMap;
+  std::map<STOFFVec2i, std::shared_ptr<StarAttribute> > m_colToAttributeMap;
 };
 
 ////////////////////////////////////////
@@ -423,8 +423,8 @@ public:
     updateRowsBlocks(STOFFVec2i(pos[1],pos[1]));
     RowContent *row=getRow(pos[1]);
     if (row->m_colToCellMap.find(pos[0]) == row->m_colToCellMap.end() || !row->m_colToCellMap.find(pos[0])->second) {
-      shared_ptr<Cell> newCell(new Cell(pos));
-      row->m_colToCellMap.insert(std::map<int, shared_ptr<Cell> >::value_type(pos[0],newCell));
+      std::shared_ptr<Cell> newCell(new Cell(pos));
+      row->m_colToCellMap.insert(std::map<int, std::shared_ptr<Cell> >::value_type(pos[0],newCell));
       return *newCell;
     }
     return *(row->m_colToCellMap.find(pos[0])->second);
@@ -460,9 +460,9 @@ struct State {
   {
   }
   //! the model
-  shared_ptr<StarObjectModel> m_model;
+  std::shared_ptr<StarObjectModel> m_model;
   //! the actual table
-  std::vector<shared_ptr<Table> > m_tableList;
+  std::vector<std::shared_ptr<Table> > m_tableList;
   //! the sheet names
   std::vector<librevenge::RVNGString> m_sheetNames;
   //! the main page style
@@ -542,7 +542,7 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
 
   librevenge::RVNGString styleName("");
   int nPages=0;
-  shared_ptr<StarItemPool> pool=const_cast<StarObjectSpreadsheet *>(this)->findItemPool(StarItemPool::T_SpreadsheetPool, false);
+  std::shared_ptr<StarItemPool> pool=const_cast<StarObjectSpreadsheet *>(this)->findItemPool(StarItemPool::T_SpreadsheetPool, false);
   StarState state(pool.get(), *this);
   for (size_t i=0; i<=m_spreadsheetState->m_tableList.size(); ++i) {
     bool isEnd=(i==m_spreadsheetState->m_tableList.size());
@@ -557,7 +557,7 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
       state.m_global->m_page=STOFFPageSpan();
       state.m_global->m_page.m_pageSpan=nPages;
       if (style) {
-        for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
+        for (std::map<int, std::shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
              it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
           if (it->second && it->second->m_attribute)
             it->second->m_attribute->addTo(state);
@@ -649,14 +649,14 @@ bool StarObjectSpreadsheet::sendRow(int table, int row, STOFFSpreadsheetListener
   // we need to go through the row style list and the cell list in parallel
   bool checkStyle=false;
   int actStyleCol=0;
-  std::map<STOFFVec2i, shared_ptr<StarAttribute> >::const_iterator sIt;
+  std::map<STOFFVec2i, std::shared_ptr<StarAttribute> >::const_iterator sIt;
   if (!rowC->m_colToAttributeMap.empty()) {
     checkStyle=true;
     sIt=rowC->m_colToAttributeMap.begin();
     actStyleCol=sIt->first[0];
   }
   bool checkCell=false;
-  std::map<int, shared_ptr<StarObjectSpreadsheetInternal::Cell> >::iterator cIt;
+  std::map<int, std::shared_ptr<StarObjectSpreadsheetInternal::Cell> >::iterator cIt;
   if (!rowC->m_colToCellMap.empty()) {
     checkCell=true;
     cIt=rowC->m_colToCellMap.begin();
@@ -698,7 +698,7 @@ bool StarObjectSpreadsheet::sendCell(StarObjectSpreadsheetInternal::Cell &cell, 
     return false;
   }
   if (attrib) {
-    shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_SpreadsheetPool, false);
+    std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_SpreadsheetPool, false);
     StarState state(pool.get(), *this);
     attrib->addTo(state);
     cell.setFont(state.m_font);
@@ -715,7 +715,7 @@ bool StarObjectSpreadsheet::sendCell(StarObjectSpreadsheetInternal::Cell &cell, 
   else if (cell.m_content.m_contentType==STOFFCellContent::C_TEXT && cell.m_textZone)
     cell.m_textZone->send(listener);
   if (cell.m_hasNote) {
-    shared_ptr<STOFFSubDocument> subDoc(new StarObjectSpreadsheetInternal::SubDocument(cell.m_notes[0]));
+    std::shared_ptr<STOFFSubDocument> subDoc(new StarObjectSpreadsheetInternal::SubDocument(cell.m_notes[0]));
     listener->insertComment(subDoc, cell.m_notes[2], cell.m_notes[1]);
   }
   listener->closeSheetCell();
@@ -830,7 +830,7 @@ try
     switch (subId) {
     case 0x4222: {
       f << "table,";
-      shared_ptr<StarObjectSpreadsheetInternal::Table> table;
+      std::shared_ptr<StarObjectSpreadsheetInternal::Table> table;
       table.reset(new StarObjectSpreadsheetInternal::Table(version, maxRow));
       m_spreadsheetState->m_tableList.push_back(table);
       ok=readSCTable(zone, *table);
@@ -1345,7 +1345,7 @@ try
         switch (nId) {
         case 0x4260: {
           f << "pool,";
-          shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
+          std::shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
           pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
           if (!pool->read(zone))
             input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1353,7 +1353,7 @@ try
         }
         case 0x4261: {
           f << "sdrModel,";
-          shared_ptr<StarObjectModel> model(new StarObjectModel(*this, true));
+          std::shared_ptr<StarObjectModel> model(new StarObjectModel(*this, true));
           if (model->read(zone)) {
             if (m_spreadsheetState->m_model) {
               STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readCalcDocument: the model is already set\n"));
@@ -1660,7 +1660,7 @@ bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::s
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
 
-  shared_ptr<StarItemPool> mainPool;
+  std::shared_ptr<StarItemPool> mainPool;
   // sc_docsh.cxx ScDocShell::LoadCalc and sc_document.cxx: ScDocument::LoadPool
   long pos=0;
   libstoff::DebugStream f;
@@ -1693,7 +1693,7 @@ bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::s
     case 0x4211:
     case 0x4214: {
       f << (nId==0x4211 ? "pool" : "pool[edit]") << ",";
-      shared_ptr<StarItemPool> pool=getNewItemPool(nId==0x4211 ? StarItemPool::T_SpreadsheetPool : StarItemPool::T_EditEnginePool);
+      std::shared_ptr<StarItemPool> pool=getNewItemPool(nId==0x4211 ? StarItemPool::T_SpreadsheetPool : StarItemPool::T_EditEnginePool);
       if (pool && pool->read(zone)) {
         if (nId==0x4214 || !mainPool) mainPool=pool;
       }
@@ -2111,7 +2111,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
       uint16_t nCount;
       *input >> nCount;
       f << "n=" << nCount << ",";
-      shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_SpreadsheetPool, false);
+      std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_SpreadsheetPool, false);
       if (!pool) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCColumn:can not read the spreadsheet pool, create a new one\n"));
         pool=getNewItemPool(StarItemPool::T_SpreadsheetPool);
@@ -2124,7 +2124,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
         int newRow=int(input->readULong(2));
         f << newRow << ":";
         uint16_t nWhich=149;//StarAttribute::ATTR_SC_PATTERN-3;
-        shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
+        std::shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
         if (!item || input->tell()>endDataPos) {
           STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCColumn:can not read a attrib\n"));
           f << "###attrib";
@@ -2342,7 +2342,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
         *input>>unkn;
         if (unkn&0xf) input->seek((unkn&0xf), librevenge::RVNG_SEEK_CUR);
       }
-      shared_ptr<StarObjectSmallText> textZone(new StarObjectSmallText(*this, true));
+      std::shared_ptr<StarObjectSmallText> textZone(new StarObjectSmallText(*this, true));
       if (!textZone->read(zone, lastPos) || input->tell()>lastPos) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCData: can not open some edit text \n"));
         f << "###edit";

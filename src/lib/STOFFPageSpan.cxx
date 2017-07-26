@@ -129,7 +129,7 @@ void STOFFPageSpan::getPageProperty(librevenge::RVNGPropertyList &propList) cons
 }
 
 
-bool STOFFPageSpan::operator==(shared_ptr<STOFFPageSpan> const &page2) const
+bool STOFFPageSpan::operator==(std::shared_ptr<STOFFPageSpan> const &page2) const
 {
   if (!page2) return false;
   if (page2.get() == this) return true;

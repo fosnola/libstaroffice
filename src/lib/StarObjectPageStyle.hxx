@@ -84,7 +84,7 @@ protected:
   //
 
   //! the state
-  shared_ptr<StarObjectPageStyleInternal::State> m_pageStyleState;
+  std::shared_ptr<StarObjectPageStyleInternal::State> m_pageStyleState;
 private:
   StarObjectPageStyle &operator=(StarObjectPageStyle const &orig);
 };

@@ -67,7 +67,7 @@ public:
   bool send(STOFFListenerPtr listener, StarState &state) const;
 
   //! the table
-  shared_ptr<StarTableInternal::Table> m_table;
+  std::shared_ptr<StarTableInternal::Table> m_table;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

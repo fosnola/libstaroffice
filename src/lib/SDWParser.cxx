@@ -61,7 +61,7 @@ struct State {
 
   int m_actPage /** the actual page */, m_numPages /** the number of page of the final document */;
   //! the main graphic document
-  shared_ptr<StarObjectText> m_mainText;
+  std::shared_ptr<StarObjectText> m_mainText;
 };
 
 }
@@ -113,7 +113,7 @@ bool SDWParser::createZones()
 {
   m_oleParser.reset(new STOFFOLEParser);
   m_oleParser->parse(getInput());
-  shared_ptr<STOFFOLEParser::OleDirectory> mainOle=m_oleParser->getDirectory("/");
+  std::shared_ptr<STOFFOLEParser::OleDirectory> mainOle=m_oleParser->getDirectory("/");
   if (!mainOle) {
     STOFF_DEBUG_MSG(("SDWParser::parse: can not find the main ole\n"));
     return false;

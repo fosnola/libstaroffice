@@ -107,7 +107,7 @@ struct State {
     return m_mapCls.find(id)->second;
   }
   //! the ole list
-  std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > m_oleList;
+  std::vector<std::shared_ptr<STOFFOLEParser::OleDirectory> > m_oleList;
   //! list of ole which can not be parsed
   std::vector<std::string> m_unknownOLEs;
 protected:
@@ -238,12 +238,12 @@ STOFFOLEParser::~STOFFOLEParser()
 {
 }
 
-std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > &STOFFOLEParser::getDirectoryList()
+std::vector<std::shared_ptr<STOFFOLEParser::OleDirectory> > &STOFFOLEParser::getDirectoryList()
 {
   return m_state->m_oleList;
 }
 
-shared_ptr<STOFFOLEParser::OleDirectory> STOFFOLEParser::getDirectory(std::string const &dir)
+std::shared_ptr<STOFFOLEParser::OleDirectory> STOFFOLEParser::getDirectory(std::string const &dir)
 {
   std::string dirName(dir);
   if (!dir.empty() && *dir.rbegin()=='/')
@@ -252,7 +252,7 @@ shared_ptr<STOFFOLEParser::OleDirectory> STOFFOLEParser::getDirectory(std::strin
     if (m_state->m_oleList[i] && m_state->m_oleList[i]->m_dir==dirName)
       return m_state->m_oleList[i];
   }
-  return shared_ptr<STOFFOLEParser::OleDirectory>();
+  return std::shared_ptr<STOFFOLEParser::OleDirectory>();
 }
 
 // parsing
@@ -268,7 +268,7 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
   //
   // we begin by grouping the Ole by their potential main id
   //
-  std::map<std::string, shared_ptr<STOFFOLEParser::OleDirectory> > listsByDir;
+  std::map<std::string, std::shared_ptr<STOFFOLEParser::OleDirectory> > listsByDir;
   for (unsigned i = 0; i < numSubStreams; ++i) {
     std::string const &name = file->subStreamName(i);
     if (name.empty() || name[name.length()-1]=='/') continue;
@@ -291,7 +291,7 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
     STOFF_DEBUG_MSG(("OLEName=%s\n", name.c_str()));
 #endif
     if (listsByDir.find(dir)==listsByDir.end() || !listsByDir.find(dir)->second) {
-      shared_ptr<STOFFOLEParser::OleDirectory> newDir(new STOFFOLEParser::OleDirectory(file, dir));
+      std::shared_ptr<STOFFOLEParser::OleDirectory> newDir(new STOFFOLEParser::OleDirectory(file, dir));
       listsByDir[dir]=newDir;
       m_state->m_oleList.push_back(newDir);
     }

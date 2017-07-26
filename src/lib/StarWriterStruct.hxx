@@ -73,7 +73,7 @@ public:
   //! try to read a list of attribute: 'S'
   static bool readList(StarZone &zone, std::vector<Attribute> &attributeList, StarObject &object);
   //! the attribute
-  shared_ptr<StarAttribute> m_attribute;
+  std::shared_ptr<StarAttribute> m_attribute;
   //! the begin/end position
   STOFFVec2i m_position;
 };
@@ -412,7 +412,7 @@ public:
   //! the title length
   long m_titleLength;
   //! the format
-  std::vector<shared_ptr<StarFormatManagerInternal::FormatDef> > m_formatList;
+  std::vector<std::shared_ptr<StarFormatManagerInternal::FormatDef> > m_formatList;
 };
 
 /** \brief structure to store a TOX51 in a text zone

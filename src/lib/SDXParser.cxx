@@ -121,7 +121,7 @@ bool SDXParser::createZones()
   m_oleParser->parse(getInput());
 
   // send the final data
-  std::vector<shared_ptr<STOFFOLEParser::OleDirectory> > listDir=m_oleParser->getDirectoryList();
+  std::vector<std::shared_ptr<STOFFOLEParser::OleDirectory> > listDir=m_oleParser->getDirectoryList();
   for (size_t d=0; d<listDir.size(); ++d) {
     if (!listDir[d] || listDir[d]->m_parsed) continue;
     listDir[d]->m_parsed=true;

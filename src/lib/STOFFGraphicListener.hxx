@@ -289,17 +289,17 @@ protected:
   /** creates a new parsing state (copy of the actual state)
    *
    * \return the old one */
-  shared_ptr<STOFFGraphicListenerInternal::State> _pushParsingState();
+  std::shared_ptr<STOFFGraphicListenerInternal::State> _pushParsingState();
   //! resets the previous parsing state
   void _popParsingState();
 
 protected:
   //! the actual global state
-  shared_ptr<STOFFGraphicListenerInternal::GraphicState> m_ds;
+  std::shared_ptr<STOFFGraphicListenerInternal::GraphicState> m_ds;
   //! the actual local parse state
-  shared_ptr<STOFFGraphicListenerInternal::State> m_ps;
+  std::shared_ptr<STOFFGraphicListenerInternal::State> m_ps;
   //! stack of local state
-  std::vector<shared_ptr<STOFFGraphicListenerInternal::State> > m_psStack;
+  std::vector<std::shared_ptr<STOFFGraphicListenerInternal::State> > m_psStack;
   //! the drawing interface
   librevenge::RVNGDrawingInterface *m_drawingInterface;
   //! the presentation interface

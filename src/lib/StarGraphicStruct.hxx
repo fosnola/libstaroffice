@@ -105,7 +105,7 @@ public:
   //! the embedded object
   STOFFEmbeddedObject m_object;
   //! the bitmap
-  shared_ptr<StarBitmap> m_bitmap;
+  std::shared_ptr<StarBitmap> m_bitmap;
 };
 
 //! Class to store a polygon

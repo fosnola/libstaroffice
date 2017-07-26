@@ -111,14 +111,14 @@ public:
 
 
   //! try to read a field type
-  shared_ptr<SWFieldManagerInternal::Field> readField(StarZone &zone, char cKind='_');
+  std::shared_ptr<SWFieldManagerInternal::Field> readField(StarZone &zone, char cKind='_');
 
   //
   // data
   //
 private:
   //! the state
-  shared_ptr<SWFieldManagerInternal::State> m_state;
+  std::shared_ptr<SWFieldManagerInternal::State> m_state;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

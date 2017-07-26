@@ -65,7 +65,7 @@ class StarObject
 {
 public:
   //! constructor
-  StarObject(char const *passwd, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory);
+  StarObject(char const *passwd, std::shared_ptr<STOFFOLEParser> oleParser, std::shared_ptr<STOFFOLEParser::OleDirectory> directory);
   //! destructor
   virtual ~StarObject();
 
@@ -83,14 +83,14 @@ public:
     return m_password;
   }
   //! returns the object directory
-  shared_ptr<STOFFOLEParser::OleDirectory> getOLEDirectory()
+  std::shared_ptr<STOFFOLEParser::OleDirectory> getOLEDirectory()
   {
     return m_directory;
   }
   //! returns the attribute manager
-  shared_ptr<StarAttributeManager> getAttributeManager();
+  std::shared_ptr<StarAttributeManager> getAttributeManager();
   //! returns the format manager
-  shared_ptr<StarFormatManager> getFormatManager();
+  std::shared_ptr<StarFormatManager> getFormatManager();
   //! returns the meta data (filled by readSfxDocumentInformation)
   librevenge::RVNGPropertyList const &getMetaData() const
   {
@@ -102,13 +102,13 @@ public:
   //! clean each pool
   void cleanPools();
   //! returns a new item pool for this document
-  shared_ptr<StarItemPool> getNewItemPool(StarItemPool::Type type);
+  std::shared_ptr<StarItemPool> getNewItemPool(StarItemPool::Type type);
   /** check if a pool corresponding to a given type is opened if so returned it.
       \note if isInside is set only look for inside pool
    */
-  shared_ptr<StarItemPool> findItemPool(StarItemPool::Type type, bool isInside);
+  std::shared_ptr<StarItemPool> findItemPool(StarItemPool::Type type, bool isInside);
   //! returns the current all/inside pool
-  shared_ptr<StarItemPool> getCurrentPool(bool onlyInside=true);
+  std::shared_ptr<StarItemPool> getCurrentPool(bool onlyInside=true);
 
   //! try to read persist data
   bool readPersistData(StarZone &zone, long endPos, bool inPersistElements=false);
@@ -140,12 +140,12 @@ protected:
   //! the document password
   char const *m_password;
   //! the ole parser
-  shared_ptr<STOFFOLEParser> m_oleParser;
+  std::shared_ptr<STOFFOLEParser> m_oleParser;
   //! the directory
-  shared_ptr<STOFFOLEParser::OleDirectory> m_directory;
+  std::shared_ptr<STOFFOLEParser::OleDirectory> m_directory;
 
   //! the state
-  shared_ptr<StarObjectInternal::State> m_state;
+  std::shared_ptr<StarObjectInternal::State> m_state;
   //! the meta data
   librevenge::RVNGPropertyList m_metaData;
 

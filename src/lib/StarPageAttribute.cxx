@@ -57,9 +57,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeBool(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeBool(*this));
   }
   //! add to a page
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -82,9 +82,9 @@ public:
   //! destructor
   ~StarPAttributeColor();
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeColor(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeColor(*this));
   }
   //! add to a page
   // virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -112,9 +112,9 @@ public:
   //! add to a page
   // virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeInt(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeInt(*this));
   }
 protected:
   //! copy constructor
@@ -137,9 +137,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeUInt(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeUInt(*this));
   }
   //! add to a page
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -163,9 +163,9 @@ public:
   //! add to a page
   // virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeVoid(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeVoid(*this));
   }
 protected:
   //! copy constructor
@@ -188,9 +188,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeItemSet(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeItemSet(*this));
   }
   //! add to a pageSpan
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &done) const;
@@ -211,9 +211,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeVec2i(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeVec2i(*this));
   }
   //! add to a pageSpan
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -324,29 +324,29 @@ void StarPAttributeItemSet::addTo(StarState &state, std::set<StarAttribute const
 }
 
 //! add a bool attribute
-inline void addAttributeBool(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
+inline void addAttributeBool(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarPAttributeBool(type,debugName, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarPAttributeBool(type,debugName, defValue));
 }
 //! add a color attribute
-inline void addAttributeColor(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, STOFFColor const &defValue)
+inline void addAttributeColor(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, STOFFColor const &defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarPAttributeColor(type,debugName, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarPAttributeColor(type,debugName, defValue));
 }
 //! add a int attribute
-inline void addAttributeInt(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
+inline void addAttributeInt(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarPAttributeInt(type,debugName, numBytes, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarPAttributeInt(type,debugName, numBytes, defValue));
 }
 //! add a unsigned int attribute
-inline void addAttributeUInt(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, unsigned int defValue)
+inline void addAttributeUInt(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, unsigned int defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarPAttributeUInt(type,debugName, numBytes, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarPAttributeUInt(type,debugName, numBytes, defValue));
 }
 //! add a void attribute
-inline void addAttributeVoid(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
+inline void addAttributeVoid(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarPAttributeVoid(type,debugName));
+  map[type]=std::shared_ptr<StarAttribute>(new StarPAttributeVoid(type,debugName));
 }
 
 }
@@ -358,9 +358,9 @@ namespace StarPageAttribute
 class SubDocument : public STOFFSubDocument
 {
 public:
-  explicit SubDocument(shared_ptr<StarObjectSmallText> text) :
+  explicit SubDocument(std::shared_ptr<StarObjectSmallText> text) :
     STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_smallText(text), m_format(), m_object(0), m_pool(0) {}
-  SubDocument(shared_ptr<StarFormatManagerInternal::FormatDef> format, StarItemPool const *pool, StarObject *object) :
+  SubDocument(std::shared_ptr<StarFormatManagerInternal::FormatDef> format, StarItemPool const *pool, StarObject *object) :
     STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_smallText(), m_format(format), m_object(object), m_pool(pool) {}
 
   //! destructor
@@ -390,9 +390,9 @@ public:
 
 protected:
   //! the note text
-  shared_ptr<StarObjectSmallText> m_smallText;
+  std::shared_ptr<StarObjectSmallText> m_smallText;
   //! the format
-  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+  std::shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
   //! the original object
   StarObject *m_object;
   //! the pool
@@ -462,9 +462,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeColumns(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeColumns(*this));
   }
   //! add to a page
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -532,9 +532,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeFrameHF(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeFrameHF(*this));
   }
   //! add to a page
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -557,7 +557,7 @@ protected:
   //! active flag
   bool m_active;
   //! the format
-  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+  std::shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
   //! the original object
   StarObject *m_object;
 private:
@@ -574,9 +574,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributePage(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributePage(*this));
   }
   //! add to a page
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -627,9 +627,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributePageDesc(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributePageDesc(*this));
   }
   //! add to a page
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -667,9 +667,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributePageHF(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributePageHF(*this));
   }
   //! add to a page
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -688,7 +688,7 @@ protected:
     for (int i=0; i<3; ++i) m_zones[i]=orig.m_zones[i];
   }
   //! the left/middle/right zones
-  shared_ptr<StarObjectSmallText> m_zones[3];
+  std::shared_ptr<StarObjectSmallText> m_zones[3];
 };
 
 //! a print attribute
@@ -700,9 +700,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributePrint(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributePrint(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -734,9 +734,9 @@ public:
     for (int i=0; i<2; ++i) m_flags[i]=false;
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeRangeItem(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeRangeItem(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -777,9 +777,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarPAttributeViewMode(*this));
+    return std::shared_ptr<StarAttribute>(new StarPAttributeViewMode(*this));
   }
   //! add to a page
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -981,7 +981,7 @@ bool StarPAttributeFrameHF::read(StarZone &zone, int /*vers*/, long endPos, Star
   m_object=&object;
   *input >> m_active;
   if (input->tell()<endPos) {
-    shared_ptr<StarFormatManagerInternal::FormatDef> format;
+    std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
     if (object.getFormatManager()->readSWFormatDef(zone,'r',format, object))
       m_format=format;
   }
@@ -1036,7 +1036,7 @@ bool StarPAttributePageHF::read(StarZone &zone, int /*vers*/, long endPos, StarO
   bool ok=true;
   for (int i=0; i<3; ++i) {
     long actPos=input->tell();
-    shared_ptr<StarObjectSmallText> smallText(new StarObjectSmallText(object, true));
+    std::shared_ptr<StarObjectSmallText> smallText(new StarObjectSmallText(object, true));
     if (!smallText->read(zone, endPos) || input->tell()>endPos) {
       f << "###editTextObject";
       input->seek(actPos, librevenge::RVNG_SEEK_SET);
@@ -1104,7 +1104,7 @@ bool StarPAttributeRangeItem::read(StarZone &zone, int vers, long endPos, StarOb
 
 namespace StarPageAttribute
 {
-void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
+void addInitTo(std::map<int, std::shared_ptr<StarAttribute> > &map)
 {
   addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_HORCENTER,"page[horizontal,center]", false);
   addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_VERCENTER,"page[vertical,center]", false);
@@ -1118,28 +1118,28 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeUInt(map, StarAttribute::ATTR_SC_PAGE_FIRSTPAGENO,"page[first,pageNo]",2,1);
   addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_TOPDOWN,"page[topdown]", true);
 
-  map[StarAttribute::ATTR_FRM_PAGEDESC]=shared_ptr<StarAttribute>(new StarPAttributePageDesc(StarAttribute::ATTR_FRM_PAGEDESC, "pageDesc"));
-  map[StarAttribute::ATTR_FRM_HEADER]=shared_ptr<StarAttribute>(new StarPAttributeFrameHF(StarAttribute::ATTR_FRM_HEADER, "header"));
-  map[StarAttribute::ATTR_FRM_FOOTER]=shared_ptr<StarAttribute>(new StarPAttributeFrameHF(StarAttribute::ATTR_FRM_FOOTER, "footer"));
-  map[StarAttribute::ATTR_FRM_COL]=shared_ptr<StarAttribute>(new StarPAttributeColumns(StarAttribute::ATTR_FRM_COL, "col"));
-  map[StarAttribute::ATTR_SC_PAGE_SIZE]=shared_ptr<StarAttribute>(new StarPAttributeVec2i(StarAttribute::ATTR_SC_PAGE_SIZE, "page[size]", 4));
+  map[StarAttribute::ATTR_FRM_PAGEDESC]=std::shared_ptr<StarAttribute>(new StarPAttributePageDesc(StarAttribute::ATTR_FRM_PAGEDESC, "pageDesc"));
+  map[StarAttribute::ATTR_FRM_HEADER]=std::shared_ptr<StarAttribute>(new StarPAttributeFrameHF(StarAttribute::ATTR_FRM_HEADER, "header"));
+  map[StarAttribute::ATTR_FRM_FOOTER]=std::shared_ptr<StarAttribute>(new StarPAttributeFrameHF(StarAttribute::ATTR_FRM_FOOTER, "footer"));
+  map[StarAttribute::ATTR_FRM_COL]=std::shared_ptr<StarAttribute>(new StarPAttributeColumns(StarAttribute::ATTR_FRM_COL, "col"));
+  map[StarAttribute::ATTR_SC_PAGE_SIZE]=std::shared_ptr<StarAttribute>(new StarPAttributeVec2i(StarAttribute::ATTR_SC_PAGE_SIZE, "page[size]", 4));
 
-  map[StarAttribute::ATTR_SC_PAGE]=shared_ptr<StarAttribute>(new StarPAttributePage(StarAttribute::ATTR_SC_PAGE, "page"));
-  map[StarAttribute::ATTR_SC_PAGE_HEADERLEFT]=shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_HEADERLEFT, "header[left]"));
-  map[StarAttribute::ATTR_SC_PAGE_HEADERRIGHT]=shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_HEADERRIGHT, "header[right]"));
-  map[StarAttribute::ATTR_SC_PAGE_FOOTERLEFT]=shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_FOOTERLEFT, "footer[left]"));
-  map[StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT]=shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT, "footer[right]"));
-  map[StarAttribute::ATTR_SC_PAGE_CHARTS]=shared_ptr<StarAttribute>(new StarPAttributeViewMode(StarAttribute::ATTR_SC_PAGE_CHARTS, "page[charts]"));
-  map[StarAttribute::ATTR_SC_PAGE_OBJECTS]=shared_ptr<StarAttribute>(new StarPAttributeViewMode(StarAttribute::ATTR_SC_PAGE_OBJECTS, "page[objects]"));
-  map[StarAttribute::ATTR_SC_PAGE_DRAWINGS]=shared_ptr<StarAttribute>(new StarPAttributeViewMode(StarAttribute::ATTR_SC_PAGE_DRAWINGS, "page[drawings]"));
+  map[StarAttribute::ATTR_SC_PAGE]=std::shared_ptr<StarAttribute>(new StarPAttributePage(StarAttribute::ATTR_SC_PAGE, "page"));
+  map[StarAttribute::ATTR_SC_PAGE_HEADERLEFT]=std::shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_HEADERLEFT, "header[left]"));
+  map[StarAttribute::ATTR_SC_PAGE_HEADERRIGHT]=std::shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_HEADERRIGHT, "header[right]"));
+  map[StarAttribute::ATTR_SC_PAGE_FOOTERLEFT]=std::shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_FOOTERLEFT, "footer[left]"));
+  map[StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT]=std::shared_ptr<StarAttribute>(new StarPAttributePageHF(StarAttribute::ATTR_SC_PAGE_FOOTERRIGHT, "footer[right]"));
+  map[StarAttribute::ATTR_SC_PAGE_CHARTS]=std::shared_ptr<StarAttribute>(new StarPAttributeViewMode(StarAttribute::ATTR_SC_PAGE_CHARTS, "page[charts]"));
+  map[StarAttribute::ATTR_SC_PAGE_OBJECTS]=std::shared_ptr<StarAttribute>(new StarPAttributeViewMode(StarAttribute::ATTR_SC_PAGE_OBJECTS, "page[objects]"));
+  map[StarAttribute::ATTR_SC_PAGE_DRAWINGS]=std::shared_ptr<StarAttribute>(new StarPAttributeViewMode(StarAttribute::ATTR_SC_PAGE_DRAWINGS, "page[drawings]"));
   std::vector<STOFFVec2i> limits;
   limits.push_back(STOFFVec2i(142,142)); // BACKGROUND
   limits.push_back(STOFFVec2i(144,146)); // BORDER->SHADOW
   limits.push_back(STOFFVec2i(150,151)); // LRSPACE->ULSPACE
   limits.push_back(STOFFVec2i(155,155)); // PAGESIZE
   limits.push_back(STOFFVec2i(159,161)); // ON -> SHARED
-  map[StarAttribute::ATTR_SC_PAGE_HEADERSET]=shared_ptr<StarAttribute>(new StarPAttributeItemSet(StarAttribute::ATTR_SC_PAGE_HEADERSET, "setPageHeader", limits));
-  map[StarAttribute::ATTR_SC_PAGE_FOOTERSET]=shared_ptr<StarAttribute>(new StarPAttributeItemSet(StarAttribute::ATTR_SC_PAGE_FOOTERSET, "setPageFooter", limits));
+  map[StarAttribute::ATTR_SC_PAGE_HEADERSET]=std::shared_ptr<StarAttribute>(new StarPAttributeItemSet(StarAttribute::ATTR_SC_PAGE_HEADERSET, "setPageHeader", limits));
+  map[StarAttribute::ATTR_SC_PAGE_FOOTERSET]=std::shared_ptr<StarAttribute>(new StarPAttributeItemSet(StarAttribute::ATTR_SC_PAGE_FOOTERSET, "setPageFooter", limits));
 
   // TODO
   addAttributeUInt(map, StarAttribute::ATTR_SC_PAGE_PAPERTRAY,"page[papertray]",2,0);
@@ -1147,11 +1147,11 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_DYNAMIC,"page[dynamic]", true);
   addAttributeBool(map, StarAttribute::ATTR_SC_PAGE_SHARED,"page[shared]", true);
 
-  map[StarAttribute::ATTR_SC_PAGE_PRINTTABLES]=shared_ptr<StarAttribute>(new StarPAttributePrint(StarAttribute::ATTR_SC_PAGE_PRINTTABLES, "page[printtables]"));
-  map[StarAttribute::ATTR_SC_PAGE_MAXSIZE]=shared_ptr<StarAttribute>(new StarPAttributeVec2i(StarAttribute::ATTR_SC_PAGE_MAXSIZE, "page[maxsize]", 4));
-  map[StarAttribute::ATTR_SC_PAGE_PRINTAREA]=shared_ptr<StarAttribute>(new StarPAttributeRangeItem(StarAttribute::ATTR_SC_PAGE_PRINTAREA, "page[printArea]"));
-  map[StarAttribute::ATTR_SC_PAGE_REPEATCOL]=shared_ptr<StarAttribute>(new StarPAttributeRangeItem(StarAttribute::ATTR_SC_PAGE_REPEATCOL, "page[repeatCol]"));
-  map[StarAttribute::ATTR_SC_PAGE_REPEATROW]=shared_ptr<StarAttribute>(new StarPAttributeRangeItem(StarAttribute::ATTR_SC_PAGE_REPEATROW, "page[repeatRow]"));
+  map[StarAttribute::ATTR_SC_PAGE_PRINTTABLES]=std::shared_ptr<StarAttribute>(new StarPAttributePrint(StarAttribute::ATTR_SC_PAGE_PRINTTABLES, "page[printtables]"));
+  map[StarAttribute::ATTR_SC_PAGE_MAXSIZE]=std::shared_ptr<StarAttribute>(new StarPAttributeVec2i(StarAttribute::ATTR_SC_PAGE_MAXSIZE, "page[maxsize]", 4));
+  map[StarAttribute::ATTR_SC_PAGE_PRINTAREA]=std::shared_ptr<StarAttribute>(new StarPAttributeRangeItem(StarAttribute::ATTR_SC_PAGE_PRINTAREA, "page[printArea]"));
+  map[StarAttribute::ATTR_SC_PAGE_REPEATCOL]=std::shared_ptr<StarAttribute>(new StarPAttributeRangeItem(StarAttribute::ATTR_SC_PAGE_REPEATCOL, "page[repeatCol]"));
+  map[StarAttribute::ATTR_SC_PAGE_REPEATROW]=std::shared_ptr<StarAttribute>(new StarPAttributeRangeItem(StarAttribute::ATTR_SC_PAGE_REPEATROW, "page[repeatRow]"));
 }
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

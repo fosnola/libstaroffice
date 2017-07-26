@@ -258,9 +258,9 @@ bool STOFFListManager::needToSend(int index, std::vector<int> &idMarkerList) con
   return true;
 }
 
-shared_ptr<STOFFList> STOFFListManager::getList(int index) const
+std::shared_ptr<STOFFList> STOFFListManager::getList(int index) const
 {
-  shared_ptr<STOFFList> res;
+  std::shared_ptr<STOFFList> res;
   if (index <= 0) return res;
   size_t mainId=size_t(index-1)/2;
   if (mainId < m_listList.size()) {
@@ -271,7 +271,7 @@ shared_ptr<STOFFList> STOFFListManager::getList(int index) const
   return res;
 }
 
-shared_ptr<STOFFList> STOFFListManager::addList(shared_ptr<STOFFList> actList)
+std::shared_ptr<STOFFList> STOFFListManager::addList(std::shared_ptr<STOFFList> actList)
 {
   if (!actList) return actList;
   if (actList->getId()>=0) return actList;
@@ -288,7 +288,7 @@ shared_ptr<STOFFList> STOFFListManager::addList(shared_ptr<STOFFList> actList)
   return actList;
 }
 
-shared_ptr<STOFFList> STOFFListManager::getNewList(shared_ptr<STOFFList> actList, int levl, STOFFListLevel const &level)
+std::shared_ptr<STOFFList> STOFFListManager::getNewList(std::shared_ptr<STOFFList> actList, int levl, STOFFListLevel const &level)
 {
   if (actList && actList->getId()>=0 && actList->isCompatibleWith(levl, level)) {
     actList->set(levl, level);
@@ -311,12 +311,12 @@ shared_ptr<STOFFList> STOFFListManager::getNewList(shared_ptr<STOFFList> actList
       continue;
     if (m_listList[l].numLevels() < levl)
       m_listList[l].set(levl, level);
-    shared_ptr<STOFFList> copy(new STOFFList(m_listList[l]));
+    std::shared_ptr<STOFFList> copy(new STOFFList(m_listList[l]));
     copy->updateIndicesFrom(res);
     return copy;
   }
   m_listList.push_back(res);
-  return shared_ptr<STOFFList>(new STOFFList(res));
+  return std::shared_ptr<STOFFList>(new STOFFList(res));
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

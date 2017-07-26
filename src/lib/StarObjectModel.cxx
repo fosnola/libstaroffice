@@ -226,9 +226,9 @@ public:
   //! the layer set
   LayerSet m_layerSet;
   //! the list of object
-  std::vector<shared_ptr<StarObjectSmallGraphic> > m_objectList;
+  std::vector<std::shared_ptr<StarObjectSmallGraphic> > m_objectList;
   //! the background object
-  shared_ptr<StarObjectSmallGraphic> m_background;
+  std::shared_ptr<StarObjectSmallGraphic> m_background;
 };
 
 ////////////////////////////////////////
@@ -286,7 +286,7 @@ struct State {
        page 2*i+2(master 2*k+2): a page graphic+a text zone(double click to add note)
    */
   //! list of pages
-  std::vector<shared_ptr<Page> > m_pageList;
+  std::vector<std::shared_ptr<Page> > m_pageList;
   /*
     in general: master0 contains 4 small box associated with a page graphic 1,3,5,7
     after by pair:
@@ -294,7 +294,7 @@ struct State {
         master 2*i+2: a title text+text: maybe default text
    */
   //! list of master pages
-  std::vector<shared_ptr<Page> > m_masterPageList;
+  std::vector<std::shared_ptr<Page> > m_masterPageList;
   //! a map layerId to layer
   std::map<int, Layer> m_idToLayerMap;
   //! the list of layer set
@@ -401,7 +401,7 @@ bool StarObjectModel::sendPage(int pageId, STOFFListenerPtr listener, bool maste
     STOFF_DEBUG_MSG(("StarObjectModel::sendPage: can not find the listener\n"));
     return false;
   }
-  std::vector<shared_ptr<StarObjectModelInternal::Page> > const &pageList=
+  std::vector<std::shared_ptr<StarObjectModelInternal::Page> > const &pageList=
     masterPage ? m_modelState->m_masterPageList : m_modelState->m_pageList;
   if (pageId<0) {
     STOFF_DEBUG_MSG(("StarObjectModel::sendPage: can not find page %d\n", pageId));
@@ -659,7 +659,7 @@ bool StarObjectModel::read(StarZone &zone)
       }
     }
     if ((magic=="DrPg" || magic=="DrMP")) {
-      shared_ptr<StarObjectModelInternal::Page> page=readSdrPage(zone);
+      std::shared_ptr<StarObjectModelInternal::Page> page=readSdrPage(zone);
       if (page) {
         if (magic=="DrPg")
           m_modelState->m_pageList.push_back(page);
@@ -810,7 +810,7 @@ bool StarObjectModel::readSdrLayerSet(StarZone &zone, StarObjectModelInternal::L
   return true;
 }
 
-shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone &zone)
+std::shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   // first check magic
@@ -818,7 +818,7 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
   long pos=input->tell();
   for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
   input->seek(pos, librevenge::RVNG_SEEK_SET);
-  if (magic!="DrPg" && magic!="DrMP") return shared_ptr<StarObjectModelInternal::Page>();
+  if (magic!="DrPg" && magic!="DrMP") return std::shared_ptr<StarObjectModelInternal::Page>();
 
   // svdpage.cxx operator>>
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -831,7 +831,7 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
     f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    return shared_ptr<StarObjectModelInternal::Page>();
+    return std::shared_ptr<StarObjectModelInternal::Page>();
   }
   int version=zone.getHeaderVersion();
   f << magic << ",nVers=" << version << ",";
@@ -842,13 +842,13 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
     f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    return shared_ptr<StarObjectModelInternal::Page>();
+    return std::shared_ptr<StarObjectModelInternal::Page>();
   }
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   pos=input->tell();
 
-  shared_ptr<StarObjectModelInternal::Page> page(new StarObjectModelInternal::Page);
+  std::shared_ptr<StarObjectModelInternal::Page> page(new StarObjectModelInternal::Page);
   page->m_masterPage=magic=="DrMP";
   f.str("");
   f << "SdrPageDefA[" << zone.getRecordLevel() << "]:";
@@ -864,7 +864,7 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
       zone.closeSDRHeader("SdrPageDef");
-      return shared_ptr<StarObjectModelInternal::Page>();
+      return std::shared_ptr<StarObjectModelInternal::Page>();
     }
     if (tr==1 || zone.getRecordLastPosition()==lastPos)
       break;
@@ -893,7 +893,7 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
     }
     if (ok && n==1) {
       long actPos=input->tell();
-      shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_VCControlPool);
+      std::shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_VCControlPool);
       if (!pool || !pool->read(zone))
         input->seek(actPos, librevenge::RVNG_SEEK_SET);
     }
@@ -922,7 +922,7 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
       ascFile.addNote(f.str().c_str());
       zone.closeRecord("SdrPageDefA1");
       zone.closeSDRHeader("SdrPageDef");
-      return shared_ptr<StarObjectModelInternal::Page>();
+      return std::shared_ptr<StarObjectModelInternal::Page>();
     }
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -993,7 +993,7 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
     pos=input->tell();
     if (pos+4>lastPos)
       break;
-    shared_ptr<StarObjectSmallGraphic> smallGraphic(new StarObjectSmallGraphic(*this, true));
+    std::shared_ptr<StarObjectSmallGraphic> smallGraphic(new StarObjectSmallGraphic(*this, true));
     if (smallGraphic->readSdrObject(zone)) {
       page->m_objectList.push_back(smallGraphic);
       continue;
@@ -1025,7 +1025,7 @@ shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(StarZone 
     ascFile.addNote(f.str().c_str());
 
     if (background) {
-      shared_ptr<StarObjectSmallGraphic> smallGraphic(new StarObjectSmallGraphic(*this, true));
+      std::shared_ptr<StarObjectSmallGraphic> smallGraphic(new StarObjectSmallGraphic(*this, true));
       if (smallGraphic->readSdrObject(zone))
         page->m_background=smallGraphic;
       else {

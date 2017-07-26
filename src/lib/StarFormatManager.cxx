@@ -545,7 +545,7 @@ struct State {
   //! a map id to number format
   std::map<unsigned, NumberFormatter> m_idNumberFormatMap;
   //! a map name to format definition
-  std::map<librevenge::RVNGString, shared_ptr<StarFormatManagerInternal::FormatDef> > m_nameToFormatDefMap;
+  std::map<librevenge::RVNGString, std::shared_ptr<StarFormatManagerInternal::FormatDef> > m_nameToFormatDefMap;
 };
 }
 
@@ -560,7 +560,7 @@ StarFormatManager::~StarFormatManager()
 {
 }
 
-void StarFormatManager::storeSWFormatDef(librevenge::RVNGString const &name, shared_ptr<StarFormatManagerInternal::FormatDef> &format)
+void StarFormatManager::storeSWFormatDef(librevenge::RVNGString const &name, std::shared_ptr<StarFormatManagerInternal::FormatDef> &format)
 {
   if (m_state->m_nameToFormatDefMap.find(name)!=m_state->m_nameToFormatDefMap.end()) {
     STOFF_DEBUG_MSG(("StarFormatManager::getSWFormatDef: a format with name %s is already defined\n", name.cstr()));
@@ -569,14 +569,14 @@ void StarFormatManager::storeSWFormatDef(librevenge::RVNGString const &name, sha
     m_state->m_nameToFormatDefMap[name]=format;
 }
 
-shared_ptr<StarFormatManagerInternal::FormatDef> StarFormatManager::getSWFormatDef(librevenge::RVNGString const &name) const
+std::shared_ptr<StarFormatManagerInternal::FormatDef> StarFormatManager::getSWFormatDef(librevenge::RVNGString const &name) const
 {
   if (m_state->m_nameToFormatDefMap.find(name)!=m_state->m_nameToFormatDefMap.end())
     return m_state->m_nameToFormatDefMap.find(name)->second;
   STOFF_DEBUG_MSG(("StarFormatManager::getSWFormatDef: can not find any format corresponding to %s\n", name.cstr()));
-  return shared_ptr<StarFormatManagerInternal::FormatDef>();
+  return std::shared_ptr<StarFormatManagerInternal::FormatDef>();
 }
-bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, shared_ptr<StarFormatManagerInternal::FormatDef> &format, StarObject &doc)
+bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, std::shared_ptr<StarFormatManagerInternal::FormatDef> &format, StarObject &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1017,7 +1017,7 @@ bool StarFormatManager::readSWFlyFrameList(StarZone &zone, StarObject &doc)
   while (input->tell()<lastPos) {
     pos=input->tell();
     int rType=input->peek();
-    shared_ptr<StarFormatManagerInternal::FormatDef> format;
+    std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
     if ((rType=='o' || rType=='l') && readSWFormatDef(zone, char(rType), format, doc))
       continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);

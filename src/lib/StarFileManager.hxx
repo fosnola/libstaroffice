@@ -69,10 +69,10 @@ public:
   //! low level
 
   //! check for unparsed zone
-  static void checkUnparsed(STOFFInputStreamPtr input, shared_ptr<STOFFOLEParser> oleParser, char const *password);
+  static void checkUnparsed(STOFFInputStreamPtr input, std::shared_ptr<STOFFOLEParser> oleParser, char const *password);
 
   //! try to read a Ole directory
-  static bool readOLEDirectory(shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> ole, STOFFEmbeddedObject &image);
+  static bool readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser, std::shared_ptr<STOFFOLEParser::OleDirectory> ole, STOFFEmbeddedObject &image);
 
   //! try to read a image zone: "StarImageDocument" or "StarImageDocument 4.0
   static bool readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName);
@@ -80,7 +80,7 @@ public:
   static bool readMathDocument(STOFFInputStreamPtr input, std::string const &fileName, StarObject &doc);
 
   //! try to read a embedded picture file: Embedded/PicXXXXXX
-  static bool readEmbeddedPicture(shared_ptr<STOFFOLEParser> oleParser, std::string const &fileName, STOFFEmbeddedObject &image);
+  static bool readEmbeddedPicture(std::shared_ptr<STOFFOLEParser> oleParser, std::string const &fileName, STOFFEmbeddedObject &image);
   //! try to read a embedded picture file: Embedded/PicXXXXXX
   static bool readEmbeddedPicture(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string &dataType, std::string const &fileName);
 
@@ -105,7 +105,7 @@ protected:
   //
 private:
   //! the state
-  shared_ptr<StarFileManagerInternal::State> m_state;
+  std::shared_ptr<StarFileManagerInternal::State> m_state;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

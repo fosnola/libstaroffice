@@ -291,17 +291,17 @@ protected:
   /** creates a new parsing state (copy of the actual state)
    *
    * \return the old one */
-  shared_ptr<STOFFTextListenerInternal::State> _pushParsingState();
+  std::shared_ptr<STOFFTextListenerInternal::State> _pushParsingState();
   //! resets the previous parsing state
   void _popParsingState();
 
 protected:
   //! the actual global state
-  shared_ptr<STOFFTextListenerInternal::TextState> m_ds;
+  std::shared_ptr<STOFFTextListenerInternal::TextState> m_ds;
   //! the actual local parse state
-  shared_ptr<STOFFTextListenerInternal::State> m_ps;
+  std::shared_ptr<STOFFTextListenerInternal::State> m_ps;
   //! stack of local state
-  std::vector<shared_ptr<STOFFTextListenerInternal::State> > m_psStack;
+  std::vector<std::shared_ptr<STOFFTextListenerInternal::State> > m_psStack;
   //! the document interface
   librevenge::RVNGTextInterface *m_documentInterface;
 

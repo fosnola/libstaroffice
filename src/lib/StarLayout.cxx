@@ -286,7 +286,7 @@ bool StarLayout::readC2(StarZone &zone, StarObject &object)
   }
   else if ((mainType==0xd2 || mainType==0xd7) && m_version>=0x101) {
     if (pos!=lastPos && input->peek()=='l') {
-      shared_ptr<StarFormatManagerInternal::FormatDef> format;
+      std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
       if (!object.getFormatManager()->readSWFormatDef(zone,'l', format, object))
         input->seek(pos, librevenge::RVNG_SEEK_SET);
     }

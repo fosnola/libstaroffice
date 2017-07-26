@@ -127,7 +127,7 @@ public:
 
 protected:
   //! the actual state
-  shared_ptr<STOFFGraphicEncoderInternal::State> m_state;
+  std::shared_ptr<STOFFGraphicEncoderInternal::State> m_state;
 };
 
 #endif

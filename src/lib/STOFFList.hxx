@@ -93,7 +93,7 @@ struct STOFFListLevel {
   //! the propertyList
   librevenge::RVNGPropertyList m_propertyList;
   /// the font
-  shared_ptr<STOFFFont> m_font;
+  std::shared_ptr<STOFFFont> m_font;
   /** the actual value (if this is an ordered level ) */
   int m_startValue;
 };
@@ -203,11 +203,11 @@ public:
   /** check if a list need to be send/resend to the interface */
   bool needToSend(int index, std::vector<int> &idMarkerList) const;
   //! returns a list with given index ( if found )
-  shared_ptr<STOFFList> getList(int index) const;
+  std::shared_ptr<STOFFList> getList(int index) const;
   //! returns a new list corresponding to a list where we have a new level
-  shared_ptr<STOFFList> getNewList(shared_ptr<STOFFList> actList, int levl, STOFFListLevel const &level);
+  std::shared_ptr<STOFFList> getNewList(std::shared_ptr<STOFFList> actList, int levl, STOFFListLevel const &level);
   //! add a new list
-  shared_ptr<STOFFList> addList(shared_ptr<STOFFList> actList);
+  std::shared_ptr<STOFFList> addList(std::shared_ptr<STOFFList> actList);
 protected:
   //! the list of created list
   std::vector<STOFFList> m_listList;

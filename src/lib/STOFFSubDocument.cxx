@@ -67,7 +67,7 @@ bool STOFFSubDocument::operator!=(STOFFSubDocument const &doc) const
   return false;
 }
 
-bool STOFFSubDocument::operator!=(shared_ptr<STOFFSubDocument> const &doc) const
+bool STOFFSubDocument::operator!=(std::shared_ptr<STOFFSubDocument> const &doc) const
 {
   if (!doc) return true;
   return operator!=(*doc.get());

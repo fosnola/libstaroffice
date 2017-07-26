@@ -61,9 +61,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeBool(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeBool(*this));
   }
   //! add to a graphic style
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -86,9 +86,9 @@ public:
   //! destructor
   ~StarGAttributeColor();
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeColor(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeColor(*this));
   }
   //! add to a graphic style
   //virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -112,9 +112,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeFraction(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeFraction(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -165,9 +165,9 @@ public:
   //! add to a graphic style
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeInt(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeInt(*this));
   }
 protected:
   //! copy constructor
@@ -186,9 +186,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeUInt(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeUInt(*this));
   }
   //! add to a graphic style
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -210,9 +210,9 @@ public:
   //! destructor
   ~StarGAttributeVoid();
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeVoid(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeVoid(*this));
   }
   //! add to a graphic style
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -239,9 +239,9 @@ public:
   //! destructor
   ~StarGAttributeItemSet();
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeItemSet(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeItemSet(*this));
   }
 
 protected:
@@ -481,34 +481,34 @@ void StarGAttributeVoid::addTo(StarState &state, std::set<StarAttribute const *>
 }
 
 //! add a bool attribute
-inline void addAttributeBool(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
+inline void addAttributeBool(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarGAttributeBool(type,debugName, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarGAttributeBool(type,debugName, defValue));
 }
 //! add a color attribute
-inline void addAttributeColor(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, STOFFColor const &defValue)
+inline void addAttributeColor(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, STOFFColor const &defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarGAttributeColor(type,debugName, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarGAttributeColor(type,debugName, defValue));
 }
 //! add a fraction attribute
-inline void addAttributeFraction(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
+inline void addAttributeFraction(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarGAttributeFraction(type,debugName));
+  map[type]=std::shared_ptr<StarAttribute>(new StarGAttributeFraction(type,debugName));
 }
 //! add a int attribute
-inline void addAttributeInt(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
+inline void addAttributeInt(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarGAttributeInt(type,debugName, numBytes, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarGAttributeInt(type,debugName, numBytes, defValue));
 }
 //! add a unsigned int attribute
-inline void addAttributeUInt(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, unsigned int defValue)
+inline void addAttributeUInt(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, unsigned int defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarGAttributeUInt(type,debugName, numBytes, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarGAttributeUInt(type,debugName, numBytes, defValue));
 }
 //! add a void attribute
-inline void addAttributeVoid(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
+inline void addAttributeVoid(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarGAttributeVoid(type,debugName));
+  map[type]=std::shared_ptr<StarAttribute>(new StarGAttributeVoid(type,debugName));
 }
 
 }
@@ -527,9 +527,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeBoxInfo(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeBoxInfo(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -570,9 +570,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeCrop(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeCrop(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -636,9 +636,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeNamedArrow(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeNamedArrow(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -670,9 +670,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeNamedBitmap(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeNamedBitmap(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -705,9 +705,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeNamedColor(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeNamedColor(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -741,9 +741,9 @@ public:
     for (int i=0; i<2; ++i) m_lengths[i]=20;
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeNamedDash(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeNamedDash(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -793,9 +793,9 @@ public:
     }
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeNamedGradient(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeNamedGradient(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -854,9 +854,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarGAttributeNamedHatch(*this));
+    return std::shared_ptr<StarAttribute>(new StarGAttributeNamedHatch(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -1303,7 +1303,7 @@ bool StarGAttributeNamedHatch::read(StarZone &zone, int nVers, long endPos, Star
 
 namespace StarGraphicAttribute
 {
-void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
+void addInitTo(std::map<int, std::shared_ptr<StarAttribute> > &map)
 {
   // --- xattr --- svx_xpool.cxx
   addAttributeUInt(map, StarAttribute::XATTR_LINESTYLE,"line[style]",2,1); // solid
@@ -1379,51 +1379,51 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeBool(map, StarAttribute::SDRATTR_GRAFINVERT,"graf[invert]", false); // onOff
   addAttributeUInt(map, StarAttribute::SDRATTR_GRAFMODE, "graf[mode]",2,0);  // standard
 
-  map[StarAttribute::XATTR_LINECOLOR]=shared_ptr<StarAttribute>
+  map[StarAttribute::XATTR_LINECOLOR]=std::shared_ptr<StarAttribute>
                                       (new StarGAttributeNamedColor(StarAttribute::XATTR_LINECOLOR,"line[color]",STOFFColor::black()));
-  map[StarAttribute::XATTR_LINESTART]=shared_ptr<StarAttribute>
+  map[StarAttribute::XATTR_LINESTART]=std::shared_ptr<StarAttribute>
                                       (new StarGAttributeNamedArrow(StarAttribute::XATTR_LINESTART,"line[start]"));
-  map[StarAttribute::XATTR_LINEEND]=shared_ptr<StarAttribute>
+  map[StarAttribute::XATTR_LINEEND]=std::shared_ptr<StarAttribute>
                                     (new StarGAttributeNamedArrow(StarAttribute::XATTR_LINEEND,"line[end]"));
-  map[StarAttribute::XATTR_LINEDASH]=shared_ptr<StarAttribute>
+  map[StarAttribute::XATTR_LINEDASH]=std::shared_ptr<StarAttribute>
                                      (new StarGAttributeNamedDash(StarAttribute::XATTR_LINEDASH,"line[dash]"));
-  map[StarAttribute::XATTR_FILLCOLOR]=shared_ptr<StarAttribute>
+  map[StarAttribute::XATTR_FILLCOLOR]=std::shared_ptr<StarAttribute>
                                       (new StarGAttributeNamedColor(StarAttribute::XATTR_FILLCOLOR,"fill[color]",STOFFColor::white()));
-  map[StarAttribute::XATTR_FILLGRADIENT]=shared_ptr<StarAttribute>
+  map[StarAttribute::XATTR_FILLGRADIENT]=std::shared_ptr<StarAttribute>
                                          (new StarGAttributeNamedGradient(StarAttribute::XATTR_FILLGRADIENT,"gradient[fill]"));
-  map[StarAttribute::XATTR_FILLHATCH]=shared_ptr<StarAttribute>
+  map[StarAttribute::XATTR_FILLHATCH]=std::shared_ptr<StarAttribute>
                                       (new StarGAttributeNamedHatch(StarAttribute::XATTR_FILLHATCH,"hatch[fill]"));
-  map[StarAttribute::XATTR_FILLBITMAP]=shared_ptr<StarAttribute>
+  map[StarAttribute::XATTR_FILLBITMAP]=std::shared_ptr<StarAttribute>
                                        (new StarGAttributeNamedBitmap(StarAttribute::XATTR_FILLBITMAP,"bitmap[fill]"));
-  map[StarAttribute::XATTR_FORMTXTSHDWCOLOR]=shared_ptr<StarAttribute>
+  map[StarAttribute::XATTR_FORMTXTSHDWCOLOR]=std::shared_ptr<StarAttribute>
       (new StarGAttributeNamedColor(StarAttribute::XATTR_FORMTXTSHDWCOLOR,"shadow[form,color]",STOFFColor::black()));
-  map[StarAttribute::SDRATTR_SHADOWCOLOR]=shared_ptr<StarAttribute>
+  map[StarAttribute::SDRATTR_SHADOWCOLOR]=std::shared_ptr<StarAttribute>
                                           (new StarGAttributeNamedColor(StarAttribute::SDRATTR_SHADOWCOLOR,"sdrShadow[color]",STOFFColor::black()));
-  map[StarAttribute::SDRATTR_GRAFCROP]=shared_ptr<StarAttribute>
+  map[StarAttribute::SDRATTR_GRAFCROP]=std::shared_ptr<StarAttribute>
                                        (new StarGAttributeCrop(StarAttribute::SDRATTR_GRAFCROP, "graf[crop],"));
 
   std::vector<STOFFVec2i> limits;
   limits.resize(1);
   limits[0]=STOFFVec2i(1000,1016);
-  map[StarAttribute::XATTR_SET_LINE]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::XATTR_SET_LINE,"setLine",limits));
+  map[StarAttribute::XATTR_SET_LINE]=std::shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::XATTR_SET_LINE,"setLine",limits));
   limits[0]=STOFFVec2i(1018,1046);
-  map[StarAttribute::XATTR_SET_FILL]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::XATTR_SET_FILL,"setFill",limits));
+  map[StarAttribute::XATTR_SET_FILL]=std::shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::XATTR_SET_FILL,"setFill",limits));
   limits[0]=STOFFVec2i(1048,1064);
-  map[StarAttribute::XATTR_SET_TEXT]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::XATTR_SET_TEXT,"setText",limits));
+  map[StarAttribute::XATTR_SET_TEXT]=std::shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::XATTR_SET_TEXT,"setText",limits));
   limits[0]=STOFFVec2i(1067,1078);
-  map[StarAttribute::SDRATTR_SET_SHADOW]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_SHADOW,"setShadow",limits));
+  map[StarAttribute::SDRATTR_SET_SHADOW]=std::shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_SHADOW,"setShadow",limits));
   limits[0]=STOFFVec2i(1080,1094);
-  map[StarAttribute::SDRATTR_SET_CAPTION]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_CAPTION,"setCaption",limits));
+  map[StarAttribute::SDRATTR_SET_CAPTION]=std::shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_CAPTION,"setCaption",limits));
   limits[0]=STOFFVec2i(1097,1125);
-  map[StarAttribute::SDRATTR_SET_MISC]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_MISC,"setMisc",limits));
+  map[StarAttribute::SDRATTR_SET_MISC]=std::shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_MISC,"setMisc",limits));
   limits[0]=STOFFVec2i(1127,1145);
-  map[StarAttribute::SDRATTR_SET_EDGE]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_EDGE,"setEdge",limits));
+  map[StarAttribute::SDRATTR_SET_EDGE]=std::shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_EDGE,"setEdge",limits));
   limits[0]=STOFFVec2i(1147,1170);
-  map[StarAttribute::SDRATTR_SET_MEASURE]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_MEASURE,"setMeasure",limits));
+  map[StarAttribute::SDRATTR_SET_MEASURE]=std::shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_MEASURE,"setMeasure",limits));
   limits[0]=STOFFVec2i(1172,1178);
-  map[StarAttribute::SDRATTR_SET_CIRC]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_CIRC,"setCircle",limits));
+  map[StarAttribute::SDRATTR_SET_CIRC]=std::shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_CIRC,"setCircle",limits));
   limits[0]=STOFFVec2i(1180,1242);
-  map[StarAttribute::SDRATTR_SET_GRAF]=shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_GRAF,"setGraf",limits));
+  map[StarAttribute::SDRATTR_SET_GRAF]=std::shared_ptr<StarAttribute>(new StarGAttributeItemSet(StarAttribute::SDRATTR_SET_GRAF,"setGraf",limits));
 
   // probably ok to ignore as we have the path
   addAttributeUInt(map, StarAttribute::SDRATTR_EDGEKIND, "edge[kind]",2,0); // ortholine
@@ -1551,12 +1551,12 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
 
   addAttributeBool(map, StarAttribute::XATTR_FILLBMP_SIZELOG,"fill[bmp,sizeLog]", true);
 
-  map[StarAttribute::XATTR_FILLFLOATTRANSPARENCE]=shared_ptr<StarAttribute>
+  map[StarAttribute::XATTR_FILLFLOATTRANSPARENCE]=std::shared_ptr<StarAttribute>
       (new StarGAttributeNamedGradient(StarAttribute::XATTR_FILLFLOATTRANSPARENCE,"gradient[trans,fill]"));
 
 
   // TOUSE
-  map[StarAttribute::ATTR_SC_BORDER_INNER]=shared_ptr<StarAttribute>(new StarGAttributeBoxInfo(StarAttribute::ATTR_SC_BORDER_INNER,"scBorder[inner]"));
+  map[StarAttribute::ATTR_SC_BORDER_INNER]=std::shared_ptr<StarAttribute>(new StarGAttributeBoxInfo(StarAttribute::ATTR_SC_BORDER_INNER,"scBorder[inner]"));
 
 }
 }

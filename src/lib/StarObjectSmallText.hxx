@@ -67,7 +67,7 @@ public:
   bool read(StarZone &zone, long lastPos);
 
   //! try to send a small text zone
-  bool send(shared_ptr<STOFFListener> listener, int level=-1);
+  bool send(std::shared_ptr<STOFFListener> listener, int level=-1);
 protected:
   //
   // low level
@@ -79,7 +79,7 @@ protected:
   //
 
   //! the state
-  shared_ptr<StarObjectSmallTextInternal::State> m_textState;
+  std::shared_ptr<StarObjectSmallTextInternal::State> m_textState;
 private:
   StarObjectSmallText &operator=(StarObjectSmallText const &orig);
 };

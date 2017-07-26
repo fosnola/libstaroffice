@@ -78,7 +78,7 @@ struct Content {
   //! the section name
   librevenge::RVNGString m_sectionName;
   //! the list of text zone
-  std::vector<shared_ptr<Zone> > m_zoneList;
+  std::vector<std::shared_ptr<Zone> > m_zoneList;
 };
 
 struct GraphZone;
@@ -115,7 +115,7 @@ public:
   static bool readSWImageMap(StarZone &zone);
 
   //! try to read some content : 'N'
-  bool readSWContent(StarZone &zone, shared_ptr<StarObjectTextInternal::Content> &content);
+  bool readSWContent(StarZone &zone, std::shared_ptr<StarObjectTextInternal::Content> &content);
 protected:
   //
   // low level
@@ -131,21 +131,21 @@ protected:
 
 protected:
   //! try to read a OLE node : 'g'
-  bool readSWGraphNode(StarZone &zone, shared_ptr<StarObjectTextInternal::GraphZone> &graphZone);
+  bool readSWGraphNode(StarZone &zone, std::shared_ptr<StarObjectTextInternal::GraphZone> &graphZone);
   //! try to read a SW zone setup : 'J'
   bool readSWJobSetUp(StarZone &zone);
   //! try to read a OLE node : 'O'
-  bool readSWOLENode(StarZone &zone, shared_ptr<StarObjectTextInternal::OLEZone> &ole);
+  bool readSWOLENode(StarZone &zone, std::shared_ptr<StarObjectTextInternal::OLEZone> &ole);
   //! try to read a section : 'I'
-  bool readSWSection(StarZone &zone, shared_ptr<StarObjectTextInternal::SectionZone> &section);
+  bool readSWSection(StarZone &zone, std::shared_ptr<StarObjectTextInternal::SectionZone> &section);
   //! try to read some content : 'T'
-  bool readSWTextZone(StarZone &zone, shared_ptr<StarObjectTextInternal::TextZone> &textZone);
+  bool readSWTextZone(StarZone &zone, std::shared_ptr<StarObjectTextInternal::TextZone> &textZone);
   //
   // data
   //
 
   //! the state
-  shared_ptr<StarObjectTextInternal::State> m_textState;
+  std::shared_ptr<StarObjectTextInternal::State> m_textState;
 private:
   StarObjectText &operator=(StarObjectText const &orig);
 };

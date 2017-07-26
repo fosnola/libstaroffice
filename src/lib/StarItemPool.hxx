@@ -81,7 +81,7 @@ public:
   //! clean the pool's list of attributes, ...
   void clean();
   //! add a secondary pool
-  void addSecondaryPool(shared_ptr<StarItemPool> secondary);
+  void addSecondaryPool(std::shared_ptr<StarItemPool> secondary);
   //! returns true if a pool is a secondary pool
   bool isSecondaryPool() const;
   //! try to read a "ItemPool" zone
@@ -118,11 +118,11 @@ public:
   /** try to find a style with a name and a family style */
   StarItemStyle const *findStyleWithFamily(librevenge::RVNGString const &style, int family) const;
   //! try to read an attribute
-  shared_ptr<StarAttribute> readAttribute(StarZone &zone, int which, int vers, long endPos);
+  std::shared_ptr<StarAttribute> readAttribute(StarZone &zone, int which, int vers, long endPos);
   //! read a item
-  shared_ptr<StarItem> readItem(StarZone &zone, bool isDirect, long endPos);
+  std::shared_ptr<StarItem> readItem(StarZone &zone, bool isDirect, long endPos);
   //! try to load a surrogate
-  shared_ptr<StarItem> loadSurrogate(StarZone &zone, uint16_t &nWhich, bool localId, libstoff::DebugStream &f);
+  std::shared_ptr<StarItem> loadSurrogate(StarZone &zone, uint16_t &nWhich, bool localId, libstoff::DebugStream &f);
   //! try to load a surrogate
   bool loadSurrogate(StarItem &item);
 
@@ -137,7 +137,7 @@ protected:
   bool readV2(StarZone &zone, StarItemPool *master);
 
   //! create an item for futher reading
-  shared_ptr<StarItem> createItem(int which, int surrogateId, bool localId);
+  std::shared_ptr<StarItem> createItem(int which, int surrogateId, bool localId);
 
   //
   // data
@@ -146,7 +146,7 @@ private:
   //! true if the pool is open
   bool m_isInside;
   //! the state
-  shared_ptr<StarItemPoolInternal::State> m_state;
+  std::shared_ptr<StarItemPoolInternal::State> m_state;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

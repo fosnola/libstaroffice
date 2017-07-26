@@ -48,7 +48,7 @@ class StarAttribute;
 namespace StarPageAttribute
 {
 //! adds character attribute to the general it to attribute map
-void addInitTo(std::map<int, shared_ptr<StarAttribute> > &whichToAttributeMap);
+void addInitTo(std::map<int, std::shared_ptr<StarAttribute> > &whichToAttributeMap);
 }
 
 #endif

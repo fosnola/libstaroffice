@@ -129,7 +129,7 @@ struct State {
   //! a sequence of bit used to know if we need page/column break
   int m_paragraphNeedBreak;
 
-  shared_ptr<STOFFList> m_list;
+  std::shared_ptr<STOFFList> m_list;
 
   bool m_isPageSpanOpened;
   bool m_isSectionOpened;
@@ -899,8 +899,8 @@ int STOFFTextListener::_getListId() const
     STOFF_DEBUG_MSG(("STOFFTextListener::_getListId: the list id is not set, try to find a new one\n"));
     first = false;
   }
-  shared_ptr<STOFFList> list=m_listManager->getNewList
-                             (m_ps->m_list, int(newLevel), m_ps->m_paragraph.m_listLevel);
+  std::shared_ptr<STOFFList> list=m_listManager->getNewList
+                                  (m_ps->m_list, int(newLevel), m_ps->m_paragraph.m_listLevel);
   if (!list) return -1;
   return list->getId();
 }
@@ -932,7 +932,7 @@ void STOFFTextListener::_changeList()
   }
 
   if (newLevel) {
-    shared_ptr<STOFFList> theList;
+    std::shared_ptr<STOFFList> theList;
 
     theList=m_listManager->getList(newListId);
     if (!theList) {
@@ -1420,7 +1420,7 @@ void STOFFTextListener::handleSubDocument(STOFFSubDocumentPtr subDocument, libst
   if (sendDoc) {
     if (subDocument) {
       m_ds->m_subDocuments.push_back(subDocument);
-      shared_ptr<STOFFListener> listen(this, STOFF_shared_ptr_noop_deleter<STOFFTextListener>());
+      std::shared_ptr<STOFFListener> listen(this, STOFF_shared_ptr_noop_deleter<STOFFTextListener>());
       try {
         subDocument->parse(listen, subDocumentType);
       }
@@ -1625,9 +1625,9 @@ void STOFFTextListener::closeTableCell()
 ///////////////////
 
 // ---------- state stack ------------------
-shared_ptr<STOFFTextListenerInternal::State> STOFFTextListener::_pushParsingState()
+std::shared_ptr<STOFFTextListenerInternal::State> STOFFTextListener::_pushParsingState()
 {
-  shared_ptr<STOFFTextListenerInternal::State> actual = m_ps;
+  std::shared_ptr<STOFFTextListenerInternal::State> actual = m_ps;
   m_psStack.push_back(actual);
   m_ps.reset(new STOFFTextListenerInternal::State);
 

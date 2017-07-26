@@ -170,7 +170,7 @@ void SDGParser::parse(librevenge::RVNGDrawingInterface *docInterface)
           position.setSize(size, librevenge::RVNG_POINT);
           listener->insertPicture(position, image.m_object, style);
           if (!image.m_link.empty()) {
-            shared_ptr<SDGParserInternal::SubDocument> doc(new SDGParserInternal::SubDocument(image.m_link));
+            std::shared_ptr<SDGParserInternal::SubDocument> doc(new SDGParserInternal::SubDocument(image.m_link));
             position.setOrigin(STOFFVec2f(20,30+size[1]), librevenge::RVNG_POINT);
             position.setSize(STOFFVec2f(600,200), librevenge::RVNG_POINT);
             listener->insertTextBox(position, doc, style);

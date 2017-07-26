@@ -89,7 +89,7 @@ protected:
   //
 private:
   //! the state
-  shared_ptr<StarBitmapInternal::State> m_state;
+  std::shared_ptr<StarBitmapInternal::State> m_state;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

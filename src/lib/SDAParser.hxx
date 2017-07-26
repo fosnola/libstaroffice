@@ -101,9 +101,9 @@ protected:
   //! the password
   char const *m_password;
   //! the ole parser
-  shared_ptr<STOFFOLEParser> m_oleParser;
+  std::shared_ptr<STOFFOLEParser> m_oleParser;
   //! the state
-  shared_ptr<SDAParserInternal::State> m_state;
+  std::shared_ptr<SDAParserInternal::State> m_state;
 private:
   SDAParser(SDAParser const &orig);
   SDAParser &operator=(SDAParser const &orig);

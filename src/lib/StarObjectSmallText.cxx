@@ -74,7 +74,7 @@ struct Paragraph {
   //! the main item list
   StarItemSet m_itemSet;
   //! the character item list
-  std::vector<shared_ptr<StarItem> > m_charItemList;
+  std::vector<std::shared_ptr<StarItem> > m_charItemList;
   //! the character limit
   std::vector<STOFFVec2i> m_charLimitList;
 };
@@ -86,7 +86,7 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState
     return false;
   }
 
-  std::map<int, shared_ptr<StarItem> >::const_iterator it;
+  std::map<int, std::shared_ptr<StarItem> >::const_iterator it;
   mainState.m_break=0;
   mainState.m_paragraph=STOFFParagraph();
   if (mainState.m_global->m_pool && !m_styleName.empty()) { // checkme
@@ -195,15 +195,15 @@ StarObjectSmallText::~StarObjectSmallText()
 {
 }
 
-bool StarObjectSmallText::send(shared_ptr<STOFFListener> listener, int level)
+bool StarObjectSmallText::send(std::shared_ptr<STOFFListener> listener, int level)
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("StarObjectSmallText::send: call without listener\n"));
     return false;
   }
   // fixme: this works almost alway, but ...
-  shared_ptr<StarItemPool> editPool=findItemPool(StarItemPool::T_EditEnginePool, false);
-  shared_ptr<StarItemPool> mainPool=findItemPool(StarItemPool::T_XOutdevPool, false);
+  std::shared_ptr<StarItemPool> editPool=findItemPool(StarItemPool::T_EditEnginePool, false);
+  std::shared_ptr<StarItemPool> mainPool=findItemPool(StarItemPool::T_XOutdevPool, false);
   StarState mainState(mainPool.get(), *this, 0.028346457);
   StarState editState(editPool.get(), *this, 0.028346457);
   for (size_t p=0; p<m_textState->m_paragraphList.size(); ++p) {
@@ -252,7 +252,7 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
   ascFile.addNote(f.str().c_str());
 
   pos=input->tell();
-  shared_ptr<StarItemPool> pool;
+  std::shared_ptr<StarItemPool> pool;
   if (!ownPool) {
     pool=findItemPool(StarItemPool::T_EditEnginePool, false);
     if (!pool) {
@@ -352,7 +352,7 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
     for (int j=0; j<int(nAttr); ++j) { // checkme, probably bad
       uint16_t which, start, end;
       *input >> which;
-      shared_ptr<StarItem> item=pool->loadSurrogate(zone, which, true, f);
+      std::shared_ptr<StarItem> item=pool->loadSurrogate(zone, which, true, f);
       if (!item) {
         STOFF_DEBUG_MSG(("StarObjectSmallText::read: can not find an item\n"));
         f << "###attrib,";

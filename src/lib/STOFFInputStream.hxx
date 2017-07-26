@@ -57,7 +57,7 @@ public:
    * \param input the given input
    * \param inverted must be set to true for pc doc and ole part and to false for mac doc
    */
-  STOFFInputStream(shared_ptr<librevenge::RVNGInputStream> input, bool inverted);
+  STOFFInputStream(std::shared_ptr<librevenge::RVNGInputStream> input, bool inverted);
 
   /*!\brief creates a stream with given endian from an existing input
    *
@@ -68,12 +68,12 @@ public:
   ~STOFFInputStream();
 
   //! returns the basic librevenge::RVNGInputStream
-  shared_ptr<librevenge::RVNGInputStream> input()
+  std::shared_ptr<librevenge::RVNGInputStream> input()
   {
     return m_stream;
   }
   //! returns a new input stream corresponding to a librevenge::RVNGBinaryData
-  static shared_ptr<STOFFInputStream> get(librevenge::RVNGBinaryData const &data, bool inverted);
+  static std::shared_ptr<STOFFInputStream> get(librevenge::RVNGBinaryData const &data, bool inverted);
 
   //! returns the endian mode (see constructor)
   bool readInverted() const
@@ -234,9 +234,9 @@ public:
   std::string subStreamName(unsigned id);
 
   //! return a new stream for a ole zone
-  shared_ptr<STOFFInputStream> getSubStreamByName(std::string const &name);
+  std::shared_ptr<STOFFInputStream> getSubStreamByName(std::string const &name);
   //! return a new stream for a ole zone
-  shared_ptr<STOFFInputStream> getSubStreamById(unsigned id);
+  std::shared_ptr<STOFFInputStream> getSubStreamById(unsigned id);
 
   //
   // Resource Fork access
@@ -260,7 +260,7 @@ private:
 
 protected:
   //! the initial input
-  shared_ptr<librevenge::RVNGInputStream> m_stream;
+  std::shared_ptr<librevenge::RVNGInputStream> m_stream;
   //! the stream size
   long m_streamSize;
 

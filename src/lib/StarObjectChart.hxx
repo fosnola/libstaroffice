@@ -81,7 +81,7 @@ protected:
   bool readSCHMemChart(StarZone &zone);
 
   //! the state
-  shared_ptr<StarObjectChartInternal::State> m_chartState;
+  std::shared_ptr<StarObjectChartInternal::State> m_chartState;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

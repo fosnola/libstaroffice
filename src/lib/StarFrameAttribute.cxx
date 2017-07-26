@@ -55,9 +55,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarFAttributeBool(*this));
+    return std::shared_ptr<StarAttribute>(new StarFAttributeBool(*this));
   }
   //! add to a frame style
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -80,9 +80,9 @@ public:
   //! destructor
   ~StarFAttributeColor();
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarFAttributeColor(*this));
+    return std::shared_ptr<StarAttribute>(new StarFAttributeColor(*this));
   }
   //! add to a frame style
   //virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -108,9 +108,9 @@ public:
   //! add to a frame style
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarFAttributeInt(*this));
+    return std::shared_ptr<StarAttribute>(new StarFAttributeInt(*this));
   }
 protected:
   //! copy constructor
@@ -147,9 +147,9 @@ public:
     return StarAttributeUInt::read(zone, vers, endPos, object);
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarFAttributeUInt(*this));
+    return std::shared_ptr<StarAttribute>(new StarFAttributeUInt(*this));
   }
   //! add to a frame style
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -171,9 +171,9 @@ public:
   //! destructor
   ~StarFAttributeVoid();
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarFAttributeVoid(*this));
+    return std::shared_ptr<StarAttribute>(new StarFAttributeVoid(*this));
   }
   //! add to a frame style
   //virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -209,29 +209,29 @@ void StarFAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
 }
 
 //! add a bool attribute
-inline void addAttributeBool(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
+inline void addAttributeBool(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarFAttributeBool(type,debugName, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarFAttributeBool(type,debugName, defValue));
 }
 //! add a color attribute
-inline void addAttributeColor(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, STOFFColor const &defValue)
+inline void addAttributeColor(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, STOFFColor const &defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarFAttributeColor(type,debugName, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarFAttributeColor(type,debugName, defValue));
 }
 //! add a int attribute
-inline void addAttributeInt(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
+inline void addAttributeInt(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarFAttributeInt(type,debugName, numBytes, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarFAttributeInt(type,debugName, numBytes, defValue));
 }
 //! add a unsigned int attribute
-inline void addAttributeUInt(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, unsigned int defValue)
+inline void addAttributeUInt(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, unsigned int defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarFAttributeUInt(type,debugName, numBytes, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarFAttributeUInt(type,debugName, numBytes, defValue));
 }
 //! add a void attribute
-inline void addAttributeVoid(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
+inline void addAttributeVoid(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarFAttributeVoid(type,debugName));
+  map[type]=std::shared_ptr<StarAttribute>(new StarFAttributeVoid(type,debugName));
 }
 
 }
@@ -249,9 +249,9 @@ public:
     for (int i=0; i<4; ++i) m_distances[i]=0;
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarFAttributeBorder(*this));
+    return std::shared_ptr<StarAttribute>(new StarFAttributeBorder(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -308,9 +308,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarFAttributeBrush(*this));
+    return std::shared_ptr<StarAttribute>(new StarFAttributeBrush(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -340,9 +340,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarFAttributeFrameSize(*this));
+    return std::shared_ptr<StarAttribute>(new StarFAttributeFrameSize(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -389,9 +389,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarFAttributeLineNumbering(*this));
+    return std::shared_ptr<StarAttribute>(new StarFAttributeLineNumbering(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -428,9 +428,9 @@ public:
     for (int i=0; i<3; ++i) m_propMargins[i]=100;
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarFAttributeLRSpace(*this));
+    return std::shared_ptr<StarAttribute>(new StarFAttributeLRSpace(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -477,9 +477,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarFAttributeOrientation(*this));
+    return std::shared_ptr<StarAttribute>(new StarFAttributeOrientation(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -525,9 +525,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarFAttributeShadow(*this));
+    return std::shared_ptr<StarAttribute>(new StarFAttributeShadow(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -578,9 +578,9 @@ public:
     for (int i=0; i<2; ++i) m_propMargins[i]=100;
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarFAttributeULSpace(*this));
+    return std::shared_ptr<StarAttribute>(new StarFAttributeULSpace(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -1111,26 +1111,26 @@ bool StarFAttributeULSpace::read(StarZone &zone, int vers, long endPos, StarObje
 
 namespace StarFrameAttribute
 {
-void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
+void addInitTo(std::map<int, std::shared_ptr<StarAttribute> > &map)
 {
   addAttributeBool(map, StarAttribute::ATTR_FRM_LAYOUT_SPLIT,"layout[split]", true);
   addAttributeUInt(map, StarAttribute::ATTR_FRM_BREAK,"para[break]",1,0);
 
-  map[StarAttribute::ATTR_FRM_LINENUMBER]=shared_ptr<StarAttribute>(new StarFAttributeLineNumbering(StarAttribute::ATTR_FRM_LINENUMBER,"lineNumbering"));
-  map[StarAttribute::ATTR_FRM_LR_SPACE]=shared_ptr<StarAttribute>(new StarFAttributeLRSpace(StarAttribute::ATTR_FRM_LR_SPACE,"lrSpace"));
-  map[StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE]=shared_ptr<StarAttribute>(new StarFAttributeLRSpace(StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE,"eeOutLrSpace"));
-  map[StarAttribute::ATTR_FRM_UL_SPACE]=shared_ptr<StarAttribute>(new StarFAttributeULSpace(StarAttribute::ATTR_FRM_UL_SPACE,"ulSpace"));
-  map[StarAttribute::ATTR_FRM_HORI_ORIENT]=shared_ptr<StarAttribute>(new StarFAttributeOrientation(StarAttribute::ATTR_FRM_HORI_ORIENT,"horiOrient"));
-  map[StarAttribute::ATTR_FRM_VERT_ORIENT]=shared_ptr<StarAttribute>(new StarFAttributeOrientation(StarAttribute::ATTR_FRM_VERT_ORIENT,"vertOrient"));
-  map[StarAttribute::ATTR_FRM_FRM_SIZE]=shared_ptr<StarAttribute>(new StarFAttributeFrameSize(StarAttribute::ATTR_FRM_FRM_SIZE,"frmSize"));
-  map[StarAttribute::ATTR_FRM_BOX]=shared_ptr<StarAttribute>(new StarFAttributeBorder(StarAttribute::ATTR_FRM_BOX,"box"));
-  map[StarAttribute::ATTR_SC_BORDER]=shared_ptr<StarAttribute>(new StarFAttributeBorder(StarAttribute::ATTR_SC_BORDER,"scBorder"));
-  map[StarAttribute::ATTR_FRM_SHADOW]=shared_ptr<StarAttribute>(new StarFAttributeShadow(StarAttribute::ATTR_FRM_SHADOW,"shadow"));
-  map[StarAttribute::ATTR_SC_SHADOW]=shared_ptr<StarAttribute>(new StarFAttributeShadow(StarAttribute::ATTR_SC_SHADOW,"shadow"));
-  map[StarAttribute::ATTR_CHR_BACKGROUND]=shared_ptr<StarAttribute>(new StarFAttributeBrush(StarAttribute::ATTR_CHR_BACKGROUND,"chrBackground"));
-  map[StarAttribute::ATTR_FRM_BACKGROUND]=shared_ptr<StarAttribute>(new StarFAttributeBrush(StarAttribute::ATTR_FRM_BACKGROUND,"frmBackground"));
-  map[StarAttribute::ATTR_SC_BACKGROUND]=shared_ptr<StarAttribute>(new StarFAttributeBrush(StarAttribute::ATTR_SC_BACKGROUND,"scBackground"));
-  map[StarAttribute::ATTR_SCH_SYMBOL_BRUSH]=shared_ptr<StarAttribute>(new StarFAttributeBrush(StarAttribute::ATTR_SCH_SYMBOL_BRUSH,"symbold[brush]"));
+  map[StarAttribute::ATTR_FRM_LINENUMBER]=std::shared_ptr<StarAttribute>(new StarFAttributeLineNumbering(StarAttribute::ATTR_FRM_LINENUMBER,"lineNumbering"));
+  map[StarAttribute::ATTR_FRM_LR_SPACE]=std::shared_ptr<StarAttribute>(new StarFAttributeLRSpace(StarAttribute::ATTR_FRM_LR_SPACE,"lrSpace"));
+  map[StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE]=std::shared_ptr<StarAttribute>(new StarFAttributeLRSpace(StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE,"eeOutLrSpace"));
+  map[StarAttribute::ATTR_FRM_UL_SPACE]=std::shared_ptr<StarAttribute>(new StarFAttributeULSpace(StarAttribute::ATTR_FRM_UL_SPACE,"ulSpace"));
+  map[StarAttribute::ATTR_FRM_HORI_ORIENT]=std::shared_ptr<StarAttribute>(new StarFAttributeOrientation(StarAttribute::ATTR_FRM_HORI_ORIENT,"horiOrient"));
+  map[StarAttribute::ATTR_FRM_VERT_ORIENT]=std::shared_ptr<StarAttribute>(new StarFAttributeOrientation(StarAttribute::ATTR_FRM_VERT_ORIENT,"vertOrient"));
+  map[StarAttribute::ATTR_FRM_FRM_SIZE]=std::shared_ptr<StarAttribute>(new StarFAttributeFrameSize(StarAttribute::ATTR_FRM_FRM_SIZE,"frmSize"));
+  map[StarAttribute::ATTR_FRM_BOX]=std::shared_ptr<StarAttribute>(new StarFAttributeBorder(StarAttribute::ATTR_FRM_BOX,"box"));
+  map[StarAttribute::ATTR_SC_BORDER]=std::shared_ptr<StarAttribute>(new StarFAttributeBorder(StarAttribute::ATTR_SC_BORDER,"scBorder"));
+  map[StarAttribute::ATTR_FRM_SHADOW]=std::shared_ptr<StarAttribute>(new StarFAttributeShadow(StarAttribute::ATTR_FRM_SHADOW,"shadow"));
+  map[StarAttribute::ATTR_SC_SHADOW]=std::shared_ptr<StarAttribute>(new StarFAttributeShadow(StarAttribute::ATTR_SC_SHADOW,"shadow"));
+  map[StarAttribute::ATTR_CHR_BACKGROUND]=std::shared_ptr<StarAttribute>(new StarFAttributeBrush(StarAttribute::ATTR_CHR_BACKGROUND,"chrBackground"));
+  map[StarAttribute::ATTR_FRM_BACKGROUND]=std::shared_ptr<StarAttribute>(new StarFAttributeBrush(StarAttribute::ATTR_FRM_BACKGROUND,"frmBackground"));
+  map[StarAttribute::ATTR_SC_BACKGROUND]=std::shared_ptr<StarAttribute>(new StarFAttributeBrush(StarAttribute::ATTR_SC_BACKGROUND,"scBackground"));
+  map[StarAttribute::ATTR_SCH_SYMBOL_BRUSH]=std::shared_ptr<StarAttribute>(new StarFAttributeBrush(StarAttribute::ATTR_SCH_SYMBOL_BRUSH,"symbold[brush]"));
 }
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

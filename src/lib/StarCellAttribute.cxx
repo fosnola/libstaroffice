@@ -56,9 +56,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeBool(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeBool(*this));
   }
   //! add to a cell style
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -81,9 +81,9 @@ public:
   //! destructor
   ~StarCAttributeColor();
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeColor(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeColor(*this));
   }
   //! add to a cell style
   //virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -109,9 +109,9 @@ public:
   //! add to a cell style
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeInt(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeInt(*this));
   }
 protected:
   //! copy constructor
@@ -130,9 +130,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeUInt(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeUInt(*this));
   }
   //! add to a cell style
   virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -154,9 +154,9 @@ public:
   //! destructor
   ~StarCAttributeVoid();
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeVoid(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeVoid(*this));
   }
   //! add to a cell style
   //virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
@@ -274,29 +274,29 @@ void StarCAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
 }
 
 //! add a bool attribute
-inline void addAttributeBool(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
+inline void addAttributeBool(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, bool defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarCAttributeBool(type,debugName, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarCAttributeBool(type,debugName, defValue));
 }
 //! add a color attribute
-inline void addAttributeColor(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, STOFFColor const &defValue)
+inline void addAttributeColor(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, STOFFColor const &defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarCAttributeColor(type,debugName, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarCAttributeColor(type,debugName, defValue));
 }
 //! add a int attribute
-inline void addAttributeInt(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
+inline void addAttributeInt(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, int defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarCAttributeInt(type,debugName, numBytes, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarCAttributeInt(type,debugName, numBytes, defValue));
 }
 //! add a unsigned int attribute
-inline void addAttributeUInt(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, unsigned int defValue)
+inline void addAttributeUInt(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName, int numBytes, unsigned int defValue)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarCAttributeUInt(type,debugName, numBytes, defValue));
+  map[type]=std::shared_ptr<StarAttribute>(new StarCAttributeUInt(type,debugName, numBytes, defValue));
 }
 //! add a void attribute
-inline void addAttributeVoid(std::map<int, shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
+inline void addAttributeVoid(std::map<int, std::shared_ptr<StarAttribute> > &map, StarAttribute::Type type, std::string const &debugName)
 {
-  map[type]=shared_ptr<StarAttribute>(new StarCAttributeVoid(type,debugName));
+  map[type]=std::shared_ptr<StarAttribute>(new StarCAttributeVoid(type,debugName));
 }
 
 }
@@ -313,9 +313,9 @@ public:
     for (int i=0; i<4; ++i) m_margins[i]=20;
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeMargins(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeMargins(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -351,9 +351,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeMerge(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeMerge(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -389,9 +389,9 @@ public:
   //! destructor
   ~StarCAttributePattern();
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributePattern(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributePattern(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &object)
@@ -460,9 +460,9 @@ public:
   {
   }
   //! create a new attribute
-  virtual shared_ptr<StarAttribute> create() const
+  virtual std::shared_ptr<StarAttribute> create() const
   {
-    return shared_ptr<StarAttribute>(new StarCAttributeProtection(*this));
+    return std::shared_ptr<StarAttribute>(new StarCAttributeProtection(*this));
   }
   //! read a zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
@@ -588,7 +588,7 @@ bool StarCAttributeProtection::read(StarZone &zone, int /*vers*/, long endPos, S
 
 namespace StarCellAttribute
 {
-void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
+void addInitTo(std::map<int, std::shared_ptr<StarAttribute> > &map)
 {
   // --- sc --- sc_docpool.cxx
   addAttributeVoid(map, StarAttribute::ATTR_SC_USERDEF, "sc[userDef]");
@@ -602,10 +602,10 @@ void addInitTo(std::map<int, shared_ptr<StarAttribute> > &map)
   addAttributeUInt(map, StarAttribute::ATTR_SC_ROTATE_MODE,"rotate[mode]",2,0); // normal
   addAttributeUInt(map, StarAttribute::ATTR_SC_WRITINGDIR,"writing[dir]",2,4); // frame environment
 
-  map[StarAttribute::ATTR_SC_PATTERN]=shared_ptr<StarAttribute>(new StarCAttributePattern());
-  map[StarAttribute::ATTR_SC_MARGIN]=shared_ptr<StarAttribute>(new StarCAttributeMargins(StarAttribute::ATTR_SC_MARGIN,"scMargins"));
-  map[StarAttribute::ATTR_SC_MERGE]=shared_ptr<StarAttribute>(new StarCAttributeMerge(StarAttribute::ATTR_SC_MERGE,"scMerge"));
-  map[StarAttribute::ATTR_SC_PROTECTION]=shared_ptr<StarAttribute>(new StarCAttributeProtection(StarAttribute::ATTR_SC_PROTECTION,"scProtection"));
+  map[StarAttribute::ATTR_SC_PATTERN]=std::shared_ptr<StarAttribute>(new StarCAttributePattern());
+  map[StarAttribute::ATTR_SC_MARGIN]=std::shared_ptr<StarAttribute>(new StarCAttributeMargins(StarAttribute::ATTR_SC_MARGIN,"scMargins"));
+  map[StarAttribute::ATTR_SC_MERGE]=std::shared_ptr<StarAttribute>(new StarCAttributeMerge(StarAttribute::ATTR_SC_MERGE,"scMerge"));
+  map[StarAttribute::ATTR_SC_PROTECTION]=std::shared_ptr<StarAttribute>(new StarCAttributeProtection(StarAttribute::ATTR_SC_PROTECTION,"scProtection"));
 
   // TOUSE
   addAttributeBool(map, StarAttribute::ATTR_SC_VERTICAL_ASIAN,"vertical[asian]", false);

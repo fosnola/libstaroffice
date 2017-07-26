@@ -58,11 +58,11 @@ public:
   {
   }
   //! constructor from attribute
-  StarItem(shared_ptr<StarAttribute> attribute, int which) : m_attribute(attribute), m_which(which), m_surrogateId(0), m_localId(false)
+  StarItem(std::shared_ptr<StarAttribute> attribute, int which) : m_attribute(attribute), m_which(which), m_surrogateId(0), m_localId(false)
   {
   }
   /** the attribute if loaded */
-  shared_ptr<StarAttribute> m_attribute;
+  std::shared_ptr<StarAttribute> m_attribute;
   //! the which id
   int m_which;
   //! the surrogate id
@@ -89,7 +89,7 @@ public:
     return m_whichToItemMap.empty();
   }
   //! try to add a item
-  bool add(shared_ptr<StarItem> item);
+  bool add(std::shared_ptr<StarItem> item);
   //! debug function to print the child field
   std::string printChild() const;
   //! item set name
@@ -97,7 +97,7 @@ public:
   //! the family
   int m_family;
   //! the list of item
-  std::map<int, shared_ptr<StarItem> > m_whichToItemMap;
+  std::map<int, std::shared_ptr<StarItem> > m_whichToItemMap;
 };
 
 //! brief class used to stored the style

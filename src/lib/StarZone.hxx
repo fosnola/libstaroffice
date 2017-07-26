@@ -289,7 +289,7 @@ protected:
   //! the zone GUI type
   int m_guiType;
   //! the encryption
-  shared_ptr<StarEncryption> m_encryption;
+  std::shared_ptr<StarEncryption> m_encryption;
   //! the file ascii name
   std::string m_asciiName;
   //! the zone name

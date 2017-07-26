@@ -66,9 +66,9 @@ struct State {
   {
   }
   //! a map list name to list
-  std::map<librevenge::RVNGString, shared_ptr<STOFFList> > m_nameToListMap;
+  std::map<librevenge::RVNGString, std::shared_ptr<STOFFList> > m_nameToListMap;
   //! a map list simpl name to list
-  std::map<librevenge::RVNGString, shared_ptr<STOFFList> > m_simplifyNameToListMap;
+  std::map<librevenge::RVNGString, std::shared_ptr<STOFFList> > m_simplifyNameToListMap;
 };
 
 }
@@ -87,17 +87,17 @@ StarObjectNumericRuler::~StarObjectNumericRuler()
 ////////////////////////////////////////////////////////////
 // send data
 ////////////////////////////////////////////////////////////
-shared_ptr<STOFFList> StarObjectNumericRuler::getList(librevenge::RVNGString const &name) const
+std::shared_ptr<STOFFList> StarObjectNumericRuler::getList(librevenge::RVNGString const &name) const
 {
   if (name.empty())
-    return shared_ptr<STOFFList>();
+    return std::shared_ptr<STOFFList>();
   if (m_numericRulerState->m_nameToListMap.find(name)!=m_numericRulerState->m_nameToListMap.end())
     return m_numericRulerState->m_nameToListMap.find(name)->second;
   librevenge::RVNGString simpName=libstoff::simplifyString(name);
   if (m_numericRulerState->m_simplifyNameToListMap.find(simpName)!=m_numericRulerState->m_simplifyNameToListMap.end())
     return m_numericRulerState->m_simplifyNameToListMap.find(simpName)->second;
   STOFF_DEBUG_MSG(("StarObjectNumericRuler::getList: can not find list with name %s\n", name.cstr()));
-  return shared_ptr<STOFFList>();
+  return std::shared_ptr<STOFFList>();
 }
 
 ////////////////////////////////////////////////////////////
@@ -120,7 +120,7 @@ try
     switch (input->peek()) {
     case '0':
     case 'R': {
-      shared_ptr<STOFFList> list;
+      std::shared_ptr<STOFFList> list;
       done=StarObjectNumericRuler::readList(zone,list);
       if (!done || !list) break;
       if (list->m_name.empty()) {
@@ -349,7 +349,7 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
   return true;
 }
 
-bool StarObjectNumericRuler::readList(StarZone &zone, shared_ptr<STOFFList> &list)
+bool StarObjectNumericRuler::readList(StarZone &zone, std::shared_ptr<STOFFList> &list)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();

@@ -80,11 +80,11 @@ struct TableBox {
   //! the number of lines
   int m_numLines;
   //! the content
-  shared_ptr<StarObjectTextInternal::Content> m_content;
+  std::shared_ptr<StarObjectTextInternal::Content> m_content;
   //! a list of line
-  std::vector<shared_ptr<TableLine> > m_lineList;
+  std::vector<std::shared_ptr<TableLine> > m_lineList;
   //! the format
-  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+  std::shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
   /// the cell style
   STOFFCellStyle m_cellStyle;
   //! the x position
@@ -108,9 +108,9 @@ struct TableLine {
   //! the number of boxes
   int m_numBoxes;
   //! a list of box
-  std::vector<shared_ptr<TableBox> > m_boxList;
+  std::vector<std::shared_ptr<TableBox> > m_boxList;
   //! the format
-  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+  std::shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
 };
 
 /** \brief class to store a table data in a sdw file
@@ -144,11 +144,11 @@ public:
   //! the minimal col width
   float m_minColWidth;
   //! the table format
-  shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+  std::shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
   //! map format id to format def
-  std::vector<shared_ptr<StarFormatManagerInternal::FormatDef> > m_formatList;
+  std::vector<std::shared_ptr<StarFormatManagerInternal::FormatDef> > m_formatList;
   //! the list of line
-  std::vector<shared_ptr<StarTableInternal::TableLine> > m_lineList;
+  std::vector<std::shared_ptr<StarTableInternal::TableLine> > m_lineList;
   //! the list of x position
   std::set<float> m_xPositionSet;
   //! the column width
@@ -272,7 +272,7 @@ bool TableBox::read(Table &table, StarZone &zone, StarObjectText &object, STOFFB
   STOFFVec2i maxPos=cPos[0]+STOFFVec2i(1,1);
   while (input->tell()<lastPos) {
     pos=input->tell();
-    shared_ptr<TableLine> line(new TableLine);
+    std::shared_ptr<TableLine> line(new TableLine);
     boxCPos.min()[0]=cPos.min()[0];
     boxCPos.max()[0]=cPos.max()[0];
     if (line->read(table, zone, object, boxCPos) && input->tell()<=lastPos) {
@@ -399,7 +399,7 @@ bool TableLine::read(Table &table, StarZone &zone, StarObjectText &object, STOFF
   STOFFBox2i boxCPos(cPos);
   while (input->tell()<lastPos) {
     pos=input->tell();
-    shared_ptr<TableBox> box(new TableBox);
+    std::shared_ptr<TableBox> box(new TableBox);
     boxCPos.min()[1]=cPos.min()[1];
     boxCPos.max()[1]=cPos.max()[1];
     if (box->read(table, zone, object, boxCPos) && input->tell()<=lastPos) {
@@ -544,7 +544,7 @@ bool Table::read(StarZone &zone, StarObjectText &object)
   int maxCol=0;
   while (input->tell()<lastPos && input->peek()=='L') {
     pos=input->tell();
-    shared_ptr<StarTableInternal::TableLine> line(new StarTableInternal::TableLine);
+    std::shared_ptr<StarTableInternal::TableLine> line(new StarTableInternal::TableLine);
     cPos.min()[0]=0;
     cPos.max()[0]=200;
     if (line->read(*this, zone, object, cPos)) {

@@ -167,7 +167,7 @@ try
   ascFile.addPos(0);
   ascFile.addNote(f.str().c_str());
   long pos=input->tell(), lastPos= zone.getRecordLastPosition();
-  shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_VCControlPool);
+  std::shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_VCControlPool);
   if (!pool || !pool->read(zone))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
 
@@ -184,7 +184,7 @@ try
   }
 
   pos=input->tell();
-  shared_ptr<StarObjectModel> model(new StarObjectModel(*this, true));
+  std::shared_ptr<StarObjectModel> model(new StarObjectModel(*this, true));
   if (!model->read(zone)) {
     STOFF_DEBUG_MSG(("StarObjectChart::readChartDocument: can not find the SdrModel\n"));
     ascFile.addPos(pos);
@@ -244,11 +244,11 @@ bool StarObjectChart::readSfxStyleSheets(STOFFInputStreamPtr input, std::string 
 
   // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
   // chart sch_docshell.cxx SchChartDocShell::Load
-  shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
+  std::shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
   pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
   pool->addSecondaryPool(getNewItemPool(StarItemPool::T_ChartPool));
 
-  shared_ptr<StarItemPool> mainPool=pool;
+  std::shared_ptr<StarItemPool> mainPool=pool;
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
     long pos=input->tell();
@@ -449,7 +449,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  shared_ptr<StarItemPool> pool=getCurrentPool();
+  std::shared_ptr<StarItemPool> pool=getCurrentPool();
   if (!pool) {
     // CHANGEME
     static bool first=true;

@@ -58,9 +58,9 @@ public:
     return !operator!=(doc);
   }
   //! comparison operator!=
-  bool operator!=(shared_ptr<STOFFSubDocument> const &doc) const;
+  bool operator!=(std::shared_ptr<STOFFSubDocument> const &doc) const;
   //! comparison operator==
-  bool operator==(shared_ptr<STOFFSubDocument> const &doc) const
+  bool operator==(std::shared_ptr<STOFFSubDocument> const &doc) const
   {
     return !operator!=(doc);
   }
@@ -74,7 +74,7 @@ protected:
   //! the main zone parser
   STOFFParser *m_parser;
   //! the input
-  shared_ptr<STOFFInputStream> m_input;
+  std::shared_ptr<STOFFInputStream> m_input;
   //! if valid the zone to parse
   STOFFEntry m_zone;
 };

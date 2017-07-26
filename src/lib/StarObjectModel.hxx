@@ -88,7 +88,7 @@ protected:
   //! try to read a SdrLayerSet zone: "DrLS'
   bool readSdrLayerSet(StarZone &zone, StarObjectModelInternal::LayerSet &layers);
   //! try to read a Page/MasterPage zone: "DrPg'
-  shared_ptr<StarObjectModelInternal::Page> readSdrPage(StarZone &zone);
+  std::shared_ptr<StarObjectModelInternal::Page> readSdrPage(StarZone &zone);
   /* try to read a Master Page descriptor zone: "DrMP' and add it the master page descriptor */
   bool readSdrMPageDesc(StarZone &zone, StarObjectModelInternal::Page &page);
   /* try to read a list of Master Page zone: "DrML' and add them in the master page descriptors */
@@ -103,7 +103,7 @@ protected:
   //
 
   //! the state
-  shared_ptr<StarObjectModelInternal::State> m_modelState;
+  std::shared_ptr<StarObjectModelInternal::State> m_modelState;
 private:
   StarObjectModel &operator=(StarObjectModel const &orig);
 };

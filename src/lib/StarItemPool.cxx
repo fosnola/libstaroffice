@@ -295,9 +295,9 @@ struct Values {
   {
   }
   //! the default values
-  shared_ptr<StarAttribute> m_default;
+  std::shared_ptr<StarAttribute> m_default;
   //! the list of attribute
-  std::map<int,shared_ptr<StarAttribute> > m_idValueMap;
+  std::map<int,std::shared_ptr<StarAttribute> > m_idValueMap;
 };
 
 ////////////////////////////////////////
@@ -452,11 +452,11 @@ struct State {
     return &m_slotIdToValuesMap.find(id)->second;
   }
   //! try to return a default attribute corresponding to which
-  shared_ptr<StarAttribute> getDefaultAttribute(int which)
+  std::shared_ptr<StarAttribute> getDefaultAttribute(int which)
   {
     if (m_idToDefaultMap.find(which)!=m_idToDefaultMap.end() && m_idToDefaultMap.find(which)->second)
       return m_idToDefaultMap.find(which)->second;
-    shared_ptr<StarAttribute> res;
+    std::shared_ptr<StarAttribute> res;
     StarItemPoolInternal::State *state=getPoolStateFor(which);
     if (!state || which<state->m_verStart || which>=state->m_verStart+int(state->m_idToAttributeList.size()) ||
         !state->m_document.getAttributeManager()) {
@@ -483,7 +483,7 @@ struct State {
   //! a flag to know if a pool is a secondary pool
   bool m_isSecondaryPool;
   //! the secondary pool
-  shared_ptr<StarItemPool> m_secondaryPool;
+  std::shared_ptr<StarItemPool> m_secondaryPool;
   //! the current version
   int m_currentVersion;
   //! the minimum version
@@ -501,9 +501,9 @@ struct State {
   //! map simplify style name to style name
   std::map<librevenge::RVNGString, librevenge::RVNGString> m_simplifyNameToStyleNameMap;
   //! map of created default attribute
-  std::map<int,shared_ptr<StarAttribute> > m_idToDefaultMap;
+  std::map<int,std::shared_ptr<StarAttribute> > m_idToDefaultMap;
   //! list of item which need to be read
-  std::vector<shared_ptr<StarItem> > m_delayedItemList;
+  std::vector<std::shared_ptr<StarItem> > m_delayedItemList;
 private:
   State(State const &orig);
   State operator=(State const &orig);
@@ -885,7 +885,7 @@ bool StarItemPool::isSecondaryPool() const
   return m_state->m_isSecondaryPool;
 }
 
-void StarItemPool::addSecondaryPool(shared_ptr<StarItemPool> secondary)
+void StarItemPool::addSecondaryPool(std::shared_ptr<StarItemPool> secondary)
 {
   if (!secondary) {
     STOFF_DEBUG_MSG(("StarItemPool::addSecondaryPool: called without pool\n"));
@@ -908,16 +908,16 @@ StarItemPool::Type StarItemPool::getType() const
   return m_state->m_type;
 }
 
-shared_ptr<StarItem> StarItemPool::createItem(int which, int surrogateId, bool localId)
+std::shared_ptr<StarItem> StarItemPool::createItem(int which, int surrogateId, bool localId)
 {
-  shared_ptr<StarItem> res(new StarItem(which));
+  std::shared_ptr<StarItem> res(new StarItem(which));
   res->m_surrogateId=surrogateId;
   res->m_localId=localId;
   m_state->m_delayedItemList.push_back(res);
   return res;
 }
 
-shared_ptr<StarAttribute> StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPos)
+std::shared_ptr<StarAttribute> StarItemPool::readAttribute(StarZone &zone, int which, int vers, long endPos)
 {
   if (m_state->m_currentVersion!=m_state->m_loadingVersion)
     which=m_state->getWhich(which);
@@ -937,8 +937,8 @@ shared_ptr<StarAttribute> StarItemPool::readAttribute(StarZone &zone, int which,
     return StarAttributeManager::getDummyAttribute();
   }
   zone.openDummyRecord();
-  shared_ptr<StarAttribute> attribute=state->m_document.getAttributeManager()->readAttribute
-                                      (zone, state->m_idToAttributeList[size_t(which-state->m_verStart)], vers, endPos, state->m_document);
+  std::shared_ptr<StarAttribute> attribute=state->m_document.getAttributeManager()->readAttribute
+      (zone, state->m_idToAttributeList[size_t(which-state->m_verStart)], vers, endPos, state->m_document);
   zone.closeDummyRecord();
   return attribute;
 }
@@ -992,7 +992,7 @@ bool StarItemPool::read(StarZone &zone)
   return ok;
 }
 
-shared_ptr<StarItem> StarItemPool::readItem(StarZone &zone, bool isDirect, long endPos)
+std::shared_ptr<StarItem> StarItemPool::readItem(StarZone &zone, bool isDirect, long endPos)
 {
   // polio.cxx SfxItemPool::LoadItem
   STOFFInputStreamPtr input=zone.input();
@@ -1002,13 +1002,13 @@ shared_ptr<StarItem> StarItemPool::readItem(StarZone &zone, bool isDirect, long 
   long pos=input->tell();
   if (pos+4>endPos) {
     STOFF_DEBUG_MSG(("StarItemPool::readItem: the zone seems too short\n"));
-    return shared_ptr<StarItem>();
+    return std::shared_ptr<StarItem>();
   }
   uint16_t nWhich, nSlot;
   *input>>nWhich >> nSlot;
   f << "which=" << nWhich << ",";
   if (nSlot) f << "slot=" << nSlot << ",";
-  shared_ptr<StarItem> pItem;
+  std::shared_ptr<StarItem> pItem;
   if (!m_state->isInRange(nWhich)) {
     uint16_t nSurro;
     *input >> nSurro;
@@ -1060,7 +1060,7 @@ shared_ptr<StarItem> StarItemPool::readItem(StarZone &zone, bool isDirect, long 
     }
     else if (nLength) {
       long endAttrPos=input->tell()+long(nLength);
-      shared_ptr<StarAttribute> attribute=readAttribute(zone, int(nWhich), int(nVersion), endAttrPos);
+      std::shared_ptr<StarAttribute> attribute=readAttribute(zone, int(nWhich), int(nVersion), endAttrPos);
       pItem.reset(new StarItem(attribute, nWhich));
       if (!attribute) {
         STOFF_DEBUG_MSG(("StarItemPool::readItem: can not read an attribute\n"));
@@ -1113,7 +1113,7 @@ bool StarItemPool::loadSurrogate(StarItem &item)
   return true;
 }
 
-shared_ptr<StarItem> StarItemPool::loadSurrogate(StarZone &zone, uint16_t &nWhich, bool localId, libstoff::DebugStream &f)
+std::shared_ptr<StarItem> StarItemPool::loadSurrogate(StarZone &zone, uint16_t &nWhich, bool localId, libstoff::DebugStream &f)
 {
   if ((nWhich<m_state->m_verStart||nWhich>m_state->m_verEnd)&&m_state->m_secondaryPool)
     return m_state->m_secondaryPool->loadSurrogate(zone, nWhich, localId, f);
@@ -1122,16 +1122,16 @@ shared_ptr<StarItem> StarItemPool::loadSurrogate(StarZone &zone, uint16_t &nWhic
   *zone.input()>>nSurrog;
   if (nSurrog==0xffff) {
     f << "direct,";
-    return shared_ptr<StarItem>();
+    return std::shared_ptr<StarItem>();
   }
   if (nSurrog==0xfff0) {
     f << "null,";
     nWhich=0;
-    return shared_ptr<StarItem>();
+    return std::shared_ptr<StarItem>();
   }
   if (m_state->m_loadingVersion<0) // the pool is not read, so we wait
     return createItem(int(nWhich), int(nSurrog), localId);
-  shared_ptr<StarItem> res(new StarItem(int(nWhich)));
+  std::shared_ptr<StarItem> res(new StarItem(int(nWhich)));
   int aWhich=(localId && m_state->m_currentVersion!=m_state->m_loadingVersion) ?
              m_state->getWhich(nWhich) : nWhich;
   StarItemPoolInternal::Values *values=m_state->getValues(aWhich);
@@ -1343,7 +1343,7 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
       ascii.addPos(pos);
       ascii.addNote(f.str().c_str());
       pos=input->tell();
-      shared_ptr<StarAttribute> attribute;
+      std::shared_ptr<StarAttribute> attribute;
       int aWhich=m_state->m_currentVersion!=m_state->m_loadingVersion ? m_state->getWhich(which) : which;
       StarItemPoolInternal::Values *values=m_state->getValues(aWhich, true);
       if (step==0) {
@@ -1688,7 +1688,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool * /*master*/)
           break;
         }
         long endAttPos=debAttPos+long(sizeAttr[n]);
-        shared_ptr<StarAttribute> attribute;
+        std::shared_ptr<StarAttribute> attribute;
         if (input->tell()==endAttPos) {
           ascii.addPos(pos);
           ascii.addNote(f.str().c_str());
@@ -1967,8 +1967,8 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
           dataOk=input->tell()+len<=endDataPos;
           if (dataOk && len>=2 && doc.getAttributeManager()) {
             int nAttrVer=int(input->readULong(2));
-            shared_ptr<StarAttribute> attrib=doc.getAttributeManager()->readAttribute
-                                             (zone, StarAttribute::ATTR_FRM_LR_SPACE, nAttrVer, endDataPos, doc);
+            std::shared_ptr<StarAttribute> attrib=doc.getAttributeManager()->readAttribute
+                                                  (zone, StarAttribute::ATTR_FRM_LR_SPACE, nAttrVer, endDataPos, doc);
             f2 << "LR,";
             if (!attrib || input->tell()>endDataPos) {
               STOFF_DEBUG_MSG(("StarItemPool::readStyles: reading relative LR is not implemented\n"));
@@ -2026,7 +2026,7 @@ void StarItemPool::updateStyles()
   std::multimap<StarItemPoolInternal::StyleId, StarItemPoolInternal::StyleId> childMap;
   std::map<StarItemPoolInternal::StyleId,StarItemStyle>::iterator it;
   std::multimap<StarItemPoolInternal::StyleId, StarItemPoolInternal::StyleId>::iterator cIt;
-  std::map<int, shared_ptr<StarItem> >::const_iterator iIt;
+  std::map<int, std::shared_ptr<StarItem> >::const_iterator iIt;
   for (it=m_state->m_styleIdToStyleMap.begin(); it!=m_state->m_styleIdToStyleMap.end(); ++it) {
     if (it->second.m_names[1].empty())
       toDo.insert(it->first);
@@ -2147,7 +2147,7 @@ void StarItemPool::defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVN
       state.m_graphic.m_propertyList.insert("librevenge:parent-display-name", style->m_names[1]);
     }
   }
-  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
+  for (std::map<int, std::shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
        it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
       it->second->m_attribute->addTo(state);
@@ -2186,7 +2186,7 @@ void StarItemPool::defineParagraphStyle(STOFFListenerPtr listener, librevenge::R
       state.m_paragraph.m_propertyList.insert("librevenge:parent-display-name", style->m_names[1]);
     }
   }
-  for (std::map<int, shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
+  for (std::map<int, std::shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
        it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
     if (it->second && it->second->m_attribute)
       it->second->m_attribute->addTo(state);
@@ -2199,7 +2199,7 @@ void StarItemPool::updateUsingStyles(StarItemSet &itemSet) const
   StarItemStyle const *style=findStyleWithFamily(itemSet.m_style, itemSet.m_family);
   if (!style) return;
   StarItemSet const &parentItemSet=style->m_itemSet;
-  std::map<int, shared_ptr<StarItem> >::const_iterator iIt;
+  std::map<int, std::shared_ptr<StarItem> >::const_iterator iIt;
   for (iIt=parentItemSet.m_whichToItemMap.begin(); iIt!=parentItemSet.m_whichToItemMap.end(); ++iIt) {
     if (!iIt->second || itemSet.m_whichToItemMap.find(iIt->first)!=itemSet.m_whichToItemMap.end())
       continue;

@@ -129,7 +129,7 @@ struct State {
   //! the paragraph
   STOFFParagraph m_paragraph;
   //! the list of list
-  shared_ptr<STOFFList> m_list;
+  std::shared_ptr<STOFFList> m_list;
 
   //! a flag to know if openFrame was called
   bool m_isFrameOpened;
@@ -744,8 +744,8 @@ int STOFFGraphicListener::_getListId() const
     STOFF_DEBUG_MSG(("STOFFGraphicListener::_getListId: the list id is not set, try to find a new one\n"));
     first = false;
   }
-  shared_ptr<STOFFList> list=m_listManager->getNewList
-                             (m_ps->m_list, int(newLevel), m_ps->m_paragraph.m_listLevel);
+  std::shared_ptr<STOFFList> list=m_listManager->getNewList
+                                  (m_ps->m_list, int(newLevel), m_ps->m_paragraph.m_listLevel);
   if (!list) return -1;
   return list->getId();
 }
@@ -781,7 +781,7 @@ void STOFFGraphicListener::_changeList()
   }
 
   if (newLevel) {
-    shared_ptr<STOFFList> theList;
+    std::shared_ptr<STOFFList> theList;
 
     theList=m_listManager->getList(newListId);
     if (!theList) {
@@ -1602,7 +1602,7 @@ void STOFFGraphicListener::handleSubDocument(STOFFSubDocumentPtr subDocument, li
   if (sendDoc) {
     if (subDocument) {
       m_ds->m_subDocuments.push_back(subDocument);
-      shared_ptr<STOFFListener> listen(this, STOFF_shared_ptr_noop_deleter<STOFFListener>());
+      std::shared_ptr<STOFFListener> listen(this, STOFF_shared_ptr_noop_deleter<STOFFListener>());
       try {
         subDocument->parse(listen, subDocumentType);
       }
@@ -1652,9 +1652,9 @@ void STOFFGraphicListener::_endSubDocument()
 ///////////////////
 
 // ---------- state stack ------------------
-shared_ptr<STOFFGraphicListenerInternal::State> STOFFGraphicListener::_pushParsingState()
+std::shared_ptr<STOFFGraphicListenerInternal::State> STOFFGraphicListener::_pushParsingState()
 {
-  shared_ptr<STOFFGraphicListenerInternal::State> actual = m_ps;
+  std::shared_ptr<STOFFGraphicListenerInternal::State> actual = m_ps;
   m_psStack.push_back(actual);
   m_ps.reset(new STOFFGraphicListenerInternal::State);
   return actual;

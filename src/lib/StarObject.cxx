@@ -63,11 +63,11 @@ struct State {
       m_userMetaNames[i]=orig.m_userMetaNames[i];
   }
   //! the list of pool
-  std::vector<shared_ptr<StarItemPool> > m_poolList;
+  std::vector<std::shared_ptr<StarItemPool> > m_poolList;
   //! the attribute manager
-  shared_ptr<StarAttributeManager> m_attributeManager;
+  std::shared_ptr<StarAttributeManager> m_attributeManager;
   //! the format manager
-  shared_ptr<StarFormatManager> m_formatManager;
+  std::shared_ptr<StarFormatManager> m_formatManager;
   //! the list of user name
   librevenge::RVNGString m_userMetaNames[4];
 private:
@@ -78,7 +78,7 @@ private:
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObject::StarObject(char const *passwd, shared_ptr<STOFFOLEParser> oleParser, shared_ptr<STOFFOLEParser::OleDirectory> directory) :
+StarObject::StarObject(char const *passwd, std::shared_ptr<STOFFOLEParser> oleParser, std::shared_ptr<STOFFOLEParser::OleDirectory> directory) :
   m_password(passwd), m_oleParser(oleParser), m_directory(directory), m_state(new StarObjectInternal::State()), m_metaData()
 {
 }
@@ -109,12 +109,12 @@ STOFFDocument::Kind StarObject::getDocumentKind() const
   return m_directory ? m_directory->m_kind : STOFFDocument::STOFF_K_UNKNOWN;
 }
 
-shared_ptr<StarAttributeManager> StarObject::getAttributeManager()
+std::shared_ptr<StarAttributeManager> StarObject::getAttributeManager()
 {
   return m_state->m_attributeManager;
 }
 
-shared_ptr<StarFormatManager> StarObject::getFormatManager()
+std::shared_ptr<StarFormatManager> StarObject::getFormatManager()
 {
   return m_state->m_formatManager;
 }
@@ -131,32 +131,32 @@ librevenge::RVNGString StarObject::getUserNameMetaData(int i) const
   return res;
 }
 
-shared_ptr<StarItemPool> StarObject::getNewItemPool(StarItemPool::Type type)
+std::shared_ptr<StarItemPool> StarObject::getNewItemPool(StarItemPool::Type type)
 {
-  shared_ptr<StarItemPool> pool(new StarItemPool(*this, type));
+  std::shared_ptr<StarItemPool> pool(new StarItemPool(*this, type));
   m_state->m_poolList.push_back(pool);
   return pool;
 }
 
-shared_ptr<StarItemPool> StarObject::getCurrentPool(bool onlyInside)
+std::shared_ptr<StarItemPool> StarObject::getCurrentPool(bool onlyInside)
 {
   for (size_t i=m_state->m_poolList.size(); i>0;) {
-    shared_ptr<StarItemPool> pool=m_state->m_poolList[--i];
+    std::shared_ptr<StarItemPool> pool=m_state->m_poolList[--i];
     if (pool && !pool->isSecondaryPool() && (!onlyInside || pool->isInside()))
       return pool;
   }
-  return shared_ptr<StarItemPool>();
+  return std::shared_ptr<StarItemPool>();
 }
 
-shared_ptr<StarItemPool> StarObject::findItemPool(StarItemPool::Type type, bool isInside)
+std::shared_ptr<StarItemPool> StarObject::findItemPool(StarItemPool::Type type, bool isInside)
 {
   for (size_t i=m_state->m_poolList.size(); i>0;) {
-    shared_ptr<StarItemPool> pool=m_state->m_poolList[--i];
+    std::shared_ptr<StarItemPool> pool=m_state->m_poolList[--i];
     if (!pool || pool->getType()!=type) continue;
     if (isInside && !pool->isInside()) continue;
     return pool;
   }
-  return shared_ptr<StarItemPool>();
+  return std::shared_ptr<StarItemPool>();
 }
 
 bool StarObject::parse()
@@ -264,7 +264,7 @@ bool StarObject::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*li
   ascFile.addNote(f.str().c_str());
   for (int i=0; i<int(n); ++i) {
     pos=input->tell();
-    shared_ptr<StarItem> item=pool->readItem(zone, isDirect, lastPos);
+    std::shared_ptr<StarItem> item=pool->readItem(zone, isDirect, lastPos);
     if (item && input->tell()<=lastPos) {
       itemSet.add(item);
       continue;
@@ -762,12 +762,12 @@ bool StarObject::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const
 
   // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
   // chart sch_docshell.cxx SchChartDocShell::Load
-  shared_ptr<StarItemPool> pool;
+  std::shared_ptr<StarItemPool> pool;
   if (getDocumentKind()==STOFFDocument::STOFF_K_DRAW) {
     pool=getNewItemPool(StarItemPool::T_XOutdevPool);
     pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
   }
-  shared_ptr<StarItemPool>  mainPool=pool;
+  std::shared_ptr<StarItemPool>  mainPool=pool;
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
     long pos=input->tell();

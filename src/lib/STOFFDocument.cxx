@@ -52,10 +52,10 @@
 /** small namespace use to define private class/method used by STOFFDocument */
 namespace STOFFDocumentInternal
 {
-shared_ptr<STOFFGraphicParser> getGraphicParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
-shared_ptr<STOFFGraphicParser> getPresentationParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
-shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
-shared_ptr<STOFFSpreadsheetParser> getSpreadsheetParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
+std::shared_ptr<STOFFGraphicParser> getGraphicParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
+std::shared_ptr<STOFFGraphicParser> getPresentationParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
+std::shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
+std::shared_ptr<STOFFSpreadsheetParser> getSpreadsheetParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd);
 STOFFHeader *getHeader(STOFFInputStreamPtr &input, bool strict);
 bool checkHeader(STOFFInputStreamPtr &input, STOFFHeader &header, bool strict);
 }
@@ -71,7 +71,7 @@ try
   }
 
   STOFFInputStreamPtr ip(new STOFFInputStream(input, false));
-  shared_ptr<STOFFHeader> header;
+  std::shared_ptr<STOFFHeader> header;
 #ifdef DEBUG
   header.reset(STOFFDocumentInternal::getHeader(ip, false));
 #else
@@ -97,10 +97,10 @@ try
     return STOFF_R_UNKNOWN_ERROR;
 
   STOFFInputStreamPtr ip(new STOFFInputStream(input, false));
-  shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
+  std::shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
 
   if (!header.get()) return STOFF_R_UNKNOWN_ERROR;
-  shared_ptr<STOFFGraphicParser> parser=STOFFDocumentInternal::getGraphicParserFromHeader(ip, header.get(), password);
+  std::shared_ptr<STOFFGraphicParser> parser=STOFFDocumentInternal::getGraphicParserFromHeader(ip, header.get(), password);
   if (!parser) return STOFF_R_UNKNOWN_ERROR;
   parser->parse(documentInterface);
   return STOFF_R_OK;
@@ -134,10 +134,10 @@ try
     return STOFF_R_UNKNOWN_ERROR;
 
   STOFFInputStreamPtr ip(new STOFFInputStream(input, false));
-  shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
+  std::shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
 
   if (!header.get()) return STOFF_R_UNKNOWN_ERROR;
-  shared_ptr<STOFFGraphicParser> parser=STOFFDocumentInternal::getPresentationParserFromHeader(ip, header.get(), password);
+  std::shared_ptr<STOFFGraphicParser> parser=STOFFDocumentInternal::getPresentationParserFromHeader(ip, header.get(), password);
   if (!parser) return STOFF_R_UNKNOWN_ERROR;
   parser->parse(documentInterface);
   return STOFF_R_OK;
@@ -171,10 +171,10 @@ try
     return STOFF_R_UNKNOWN_ERROR;
 
   STOFFInputStreamPtr ip(new STOFFInputStream(input, false));
-  shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
+  std::shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
 
   if (!header.get()) return STOFF_R_UNKNOWN_ERROR;
-  shared_ptr<STOFFSpreadsheetParser> parser=STOFFDocumentInternal::getSpreadsheetParserFromHeader(ip, header.get(), password);
+  std::shared_ptr<STOFFSpreadsheetParser> parser=STOFFDocumentInternal::getSpreadsheetParserFromHeader(ip, header.get(), password);
   if (!parser) return STOFF_R_UNKNOWN_ERROR;
   parser->parse(documentInterface);
   return STOFF_R_OK;
@@ -208,10 +208,10 @@ try
     return STOFF_R_UNKNOWN_ERROR;
 
   STOFFInputStreamPtr ip(new STOFFInputStream(input, false));
-  shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
+  std::shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
 
   if (!header.get()) return STOFF_R_UNKNOWN_ERROR;
-  shared_ptr<STOFFTextParser> parser=STOFFDocumentInternal::getTextParserFromHeader(ip, header.get(), password);
+  std::shared_ptr<STOFFTextParser> parser=STOFFDocumentInternal::getTextParserFromHeader(ip, header.get(), password);
   if (!parser) return STOFF_R_UNKNOWN_ERROR;
   parser->parse(documentInterface);
 
@@ -323,9 +323,9 @@ catch (...)
 }
 
 /** Factory wrapper to construct a parser corresponding to an graphic header */
-shared_ptr<STOFFGraphicParser> getGraphicParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd)
+std::shared_ptr<STOFFGraphicParser> getGraphicParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd)
 {
-  shared_ptr<STOFFGraphicParser> parser;
+  std::shared_ptr<STOFFGraphicParser> parser;
   if (!header || (header->getKind()!=STOFFDocument::STOFF_K_DRAW && header->getKind()!=STOFFDocument::STOFF_K_GRAPHIC))
     return parser;
   try {
@@ -346,9 +346,9 @@ shared_ptr<STOFFGraphicParser> getGraphicParserFromHeader(STOFFInputStreamPtr &i
 }
 
 /** Factory wrapper to construct a parser corresponding to an presentation header */
-shared_ptr<STOFFGraphicParser> getPresentationParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd)
+std::shared_ptr<STOFFGraphicParser> getPresentationParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd)
 {
-  shared_ptr<STOFFGraphicParser> parser;
+  std::shared_ptr<STOFFGraphicParser> parser;
   if (!header || header->getKind()!=STOFFDocument::STOFF_K_PRESENTATION)
     return parser;
   try {
@@ -362,9 +362,9 @@ shared_ptr<STOFFGraphicParser> getPresentationParserFromHeader(STOFFInputStreamP
 }
 
 /** Factory wrapper to construct a parser corresponding to an text header */
-shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd)
+std::shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd)
 {
-  shared_ptr<STOFFTextParser> parser;
+  std::shared_ptr<STOFFTextParser> parser;
   if (!header)
     return parser;
   if (header->getKind()==STOFFDocument::STOFF_K_TEXT) {
@@ -392,9 +392,9 @@ shared_ptr<STOFFTextParser> getTextParserFromHeader(STOFFInputStreamPtr &input, 
 }
 
 /** Factory wrapper to construct a parser corresponding to an spreadsheet header */
-shared_ptr<STOFFSpreadsheetParser> getSpreadsheetParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd)
+std::shared_ptr<STOFFSpreadsheetParser> getSpreadsheetParserFromHeader(STOFFInputStreamPtr &input, STOFFHeader *header, char const *passwd)
 {
-  shared_ptr<STOFFSpreadsheetParser> parser;
+  std::shared_ptr<STOFFSpreadsheetParser> parser;
   if (!header || header->getKind()!=STOFFDocument::STOFF_K_SPREADSHEET)
     return parser;
   try {
@@ -411,7 +411,7 @@ shared_ptr<STOFFSpreadsheetParser> getSpreadsheetParserFromHeader(STOFFInputStre
 bool checkHeader(STOFFInputStreamPtr &input, STOFFHeader &header, bool strict)
 try
 {
-  shared_ptr<STOFFParser> parser=getTextParserFromHeader(input, &header, 0);
+  std::shared_ptr<STOFFParser> parser=getTextParserFromHeader(input, &header, 0);
   if (!parser) parser=getSpreadsheetParserFromHeader(input, &header, 0);
   if (!parser) parser=getGraphicParserFromHeader(input, &header, 0);
   if (!parser) return false;

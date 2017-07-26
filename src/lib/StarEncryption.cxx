@@ -207,7 +207,7 @@ STOFFInputStreamPtr StarEncryption::decodeStream(STOFFInputStreamPtr input, uint
   uint8_t *finalDataPtr=finalData;
   for (long l=0; l<dataSize; ++l, ++data)
     *(finalDataPtr++) = uint8_t((*data>>4)|(*data<<4))^mask;
-  shared_ptr<STOFFStringStream> stream(new STOFFStringStream(reinterpret_cast<const unsigned char *>(finalData),static_cast<unsigned int>(dataSize)));
+  std::shared_ptr<STOFFStringStream> stream(new STOFFStringStream(reinterpret_cast<const unsigned char *>(finalData),static_cast<unsigned int>(dataSize)));
   delete[] finalData;
   if (!stream) return res;
   res.reset(new STOFFInputStream(stream, input->readInverted()));

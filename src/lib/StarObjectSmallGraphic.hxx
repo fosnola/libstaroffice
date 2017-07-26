@@ -92,7 +92,7 @@ protected:
   // low level
   //
   //! try to read a SVDr object
-  shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> readSVDRObject(StarZone &zone, int identifier);
+  std::shared_ptr<StarObjectSmallGraphicInternal::SdrGraphic> readSVDRObject(StarZone &zone, int identifier);
   //! try to read the first zone of SVDr object
   bool readSVDRObjectHeader(StarZone &zone, StarObjectSmallGraphicInternal::SdrGraphic &graphic);
   //! try to read the object attrib zone
@@ -134,13 +134,13 @@ protected:
   bool readSDRUserDataList(StarZone &zone, bool inRecord);
 
   //! try to read a FM01 object
-  shared_ptr<StarObjectSmallGraphicInternal::Graphic> readFmFormObject(StarZone &zone, int identifier);
+  std::shared_ptr<StarObjectSmallGraphicInternal::Graphic> readFmFormObject(StarZone &zone, int identifier);
 
   //! try to read a SCHU object
-  shared_ptr<StarObjectSmallGraphicInternal::Graphic> readSCHUObject(StarZone &zone, int identifier);
+  std::shared_ptr<StarObjectSmallGraphicInternal::Graphic> readSCHUObject(StarZone &zone, int identifier);
 
   //! try to read a SDDU object
-  shared_ptr<StarObjectSmallGraphicInternal::Graphic> readSDUDObject(StarZone &zone, int identifier);
+  std::shared_ptr<StarObjectSmallGraphicInternal::Graphic> readSDUDObject(StarZone &zone, int identifier);
 
 protected:
   //
@@ -148,7 +148,7 @@ protected:
   //
 
   //! the state
-  shared_ptr<StarObjectSmallGraphicInternal::State> m_graphicState;
+  std::shared_ptr<StarObjectSmallGraphicInternal::State> m_graphicState;
 private:
   StarObjectSmallGraphic &operator=(StarObjectSmallGraphic const &orig);
 };

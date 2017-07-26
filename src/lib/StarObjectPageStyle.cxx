@@ -169,7 +169,7 @@ public:
   //! the coll idx
   int m_regCollIdx;
   //! the foot and page foot desc
-  shared_ptr<NoteDesc> m_noteDesc[2];
+  std::shared_ptr<NoteDesc> m_noteDesc[2];
   //! the master and left attributes lists
   std::vector<StarWriterStruct::Attribute> m_attributes[2];
 };
@@ -256,7 +256,7 @@ bool PageDesc::read(StarZone &zone, StarObject &object)
     }
     case '1': // foot info
     case '2': { // page foot info
-      shared_ptr<NoteDesc> desc(new NoteDesc(rType=='1'));
+      std::shared_ptr<NoteDesc> desc(new NoteDesc(rType=='1'));
       done=desc->read(zone);
       if (done)
         m_noteDesc[rType=='1' ? 0 : 1]=desc;
@@ -407,7 +407,7 @@ bool StarObjectPageStyle::updatePageSpans
   librevenge::RVNGString lastPageName("");
   int numPage=0;
   number=0;
-  shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
+  std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
   StarState state(pool.get(), *this);
   STOFFPageSpan &ps=state.m_global->m_page;
   for (size_t i=0; i<=listNames.size(); ++i) {

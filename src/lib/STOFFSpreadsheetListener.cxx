@@ -143,7 +143,7 @@ struct State {
   //! the paragraph
   STOFFParagraph m_paragraph;
 
-  shared_ptr<STOFFList> m_list;
+  std::shared_ptr<STOFFList> m_list;
 
   bool m_isPageSpanOpened;
   bool m_isHeaderFooterOpened /** a flag to know if the header footer is started */;
@@ -809,8 +809,8 @@ int STOFFSpreadsheetListener::_getListId() const
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::_getListId: the list id is not set, try to find a new one\n"));
     first = false;
   }
-  shared_ptr<STOFFList> list=m_listManager->getNewList
-                             (m_ps->m_list, int(newLevel), m_ps->m_paragraph.m_listLevel);
+  std::shared_ptr<STOFFList> list=m_listManager->getNewList
+                                  (m_ps->m_list, int(newLevel), m_ps->m_paragraph.m_listLevel);
   if (!list) return -1;
   return list->getId();
 }
@@ -837,7 +837,7 @@ void STOFFSpreadsheetListener::_changeList()
   }
 
   if (newLevel) {
-    shared_ptr<STOFFList> theList;
+    std::shared_ptr<STOFFList> theList;
 
     theList=m_listManager->getList(newListId);
     if (!theList) {
@@ -1270,7 +1270,7 @@ void STOFFSpreadsheetListener::handleSubDocument(STOFFSubDocumentPtr subDocument
   if (sendDoc) {
     if (subDocument) {
       m_ds->m_subDocuments.push_back(subDocument);
-      shared_ptr<STOFFListener> listen(this, STOFF_shared_ptr_noop_deleter<STOFFSpreadsheetListener>());
+      std::shared_ptr<STOFFListener> listen(this, STOFF_shared_ptr_noop_deleter<STOFFSpreadsheetListener>());
       try {
         subDocument->parse(listen, subDocumentType);
       }
@@ -1535,7 +1535,7 @@ void STOFFSpreadsheetListener::insertChart
   _startSubDocument();
   m_ps->m_subDocumentType = libstoff::DOC_CHART;
 
-  shared_ptr<STOFFSpreadsheetListener> listen(this, STOFF_shared_ptr_noop_deleter<STOFFSpreadsheetListener>());
+  std::shared_ptr<STOFFSpreadsheetListener> listen(this, STOFF_shared_ptr_noop_deleter<STOFFSpreadsheetListener>());
   try {
     chart.sendChart(listen, m_documentInterface);
   }
@@ -1690,9 +1690,9 @@ void STOFFSpreadsheetListener::closeTableCell()
 ///////////////////
 
 // ---------- state stack ------------------
-shared_ptr<STOFFSpreadsheetListenerInternal::State> STOFFSpreadsheetListener::_pushParsingState()
+std::shared_ptr<STOFFSpreadsheetListenerInternal::State> STOFFSpreadsheetListener::_pushParsingState()
 {
-  shared_ptr<STOFFSpreadsheetListenerInternal::State> actual = m_ps;
+  std::shared_ptr<STOFFSpreadsheetListenerInternal::State> actual = m_ps;
   m_psStack.push_back(actual);
   m_ps.reset(new STOFFSpreadsheetListenerInternal::State);
 
