@@ -17,7 +17,6 @@ libtool
 libstaroffice.spec
 libstaroffice-zip
 ltmain.sh
-m4
 missing
 mkinstalldirs
 stamp-h1

@@ -101,23 +101,16 @@ struct STOFF_shared_ptr_noop_deleter {
 };
 
 /** fall through attributes */
-#define STOFF_FALLTHROUGH
-#if defined(__clang__)
-#  if defined(__has_cpp_attribute)
-#    if __has_cpp_attribute(clang::fallthrough)
-#      undef STOFF_FALLTHROUGH
-#      define STOFF_FALLTHROUGH [[clang::fallthrough]]
-#    endif
-#  endif
-#elif defined(__GNUC__)
-#  if __GNUC__>=7
-#    undef STOFF_FALLTHROUGH
-#    define STOFF_FALLTHROUGH __attribute__ ((fallthrough))
-#  endif
+#if defined(HAVE_CLANG_ATTRIBUTE_FALLTHROUGH)
+#  define STOFF_FALLTHROUGH [[clang::fallthrough]]
+#elif defined(HAVE_GCC_ATTRIBUTE_FALLTHROUGH)
+#  define STOFF_FALLTHROUGH __attribute__((fallthrough))
+#else
+#  define STOFF_FALLTHROUGH ((void) 0)
 #endif
 
-#if defined(__clang__) || defined(__GNUC__)
-#  define LIBSTOFF_ATTRIBUTE_PRINTF(fmt, arg) __attribute__((__format__(__printf__, fmt, arg)))
+#if defined(HAVE_FUNC_ATTRIBUTE_FORMAT)
+#  define LIBSTOFF_ATTRIBUTE_PRINTF(fmt, arg) __attribute__((format(printf, fmt, arg)))
 #else
 #  define LIBSTOFF_ATTRIBUTE_PRINTF(fmt, arg)
 #endif
