@@ -60,7 +60,9 @@ public:
   /** a structure uses to define the format of a cell content */
   struct Format {
     //! constructor
-    Format() : m_format(F_UNKNOWN), m_numberFormat(F_NUMBER_UNKNOWN)
+    Format()
+      : m_format(F_UNKNOWN)
+      , m_numberFormat(F_NUMBER_UNKNOWN)
     {
     }
     //! destructor
@@ -83,8 +85,14 @@ public:
     NumberType m_numberFormat;
   };
   //! constructor
-  STOFFCell() : m_position(0,0),m_bdBox(),  m_bdSize(),
-    m_format(), m_font(), m_cellStyle(), m_numberingStyle() { }
+  STOFFCell()
+    : m_position(0,0)
+    , m_bdBox()
+    , m_bdSize()
+    , m_format()
+    , m_font()
+    , m_cellStyle()
+    , m_numberingStyle() { }
 
   //! destructor
   virtual ~STOFFCell() {}

@@ -358,8 +358,8 @@ int STOFFEmbeddedObject::cmp(STOFFEmbeddedObject const &pict) const
     if (m_dataList[i].size() < pict.m_dataList[i].size()) return 1;
     if (m_dataList[i].size() > pict.m_dataList[i].size()) return -1;
 
-    const unsigned char *ptr=m_dataList[i].getDataBuffer();
-    const unsigned char *aPtr=pict.m_dataList[i].getDataBuffer();
+    auto const *ptr=m_dataList[i].getDataBuffer();
+    auto const *aPtr=pict.m_dataList[i].getDataBuffer();
     if (!ptr || !aPtr) continue; // must only appear if the two buffers are empty
     for (unsigned long h=0; h < m_dataList[i].size(); ++h, ++ptr, ++aPtr) {
       if (*ptr < *aPtr) return 1;
@@ -373,11 +373,11 @@ std::ostream &operator<<(std::ostream &o, STOFFEmbeddedObject const &pict)
 {
   if (pict.isEmpty()) return o;
   o << "[";
-  for (size_t i=0; i<pict.m_typeList.size(); ++i) {
-    if (pict.m_typeList[i].empty())
+  for (auto const &t : pict.m_typeList) {
+    if (t.empty())
       o << "_,";
     else
-      o << pict.m_typeList[i] << ",";
+      o << t << ",";
   }
   o << "],";
   return o;

@@ -57,7 +57,7 @@ namespace STOFFChartInternal
 {
 ////////////////////////////////////////
 //! Internal: the subdocument of a STOFFChart
-class SubDocument : public STOFFSubDocument
+class SubDocument final : public STOFFSubDocument
 {
 public:
   SubDocument(STOFFChart *chart, STOFFChart::TextZone::Type textZone) :
@@ -66,10 +66,10 @@ public:
   }
 
   //! destructor
-  virtual ~SubDocument() {}
+  ~SubDocument() final {}
 
   //! operator!=
-  virtual bool operator!=(STOFFSubDocument const &doc) const
+  bool operator!=(STOFFSubDocument const &doc) const final
   {
     if (STOFFSubDocument::operator!=(doc))
       return true;
@@ -77,14 +77,14 @@ public:
     if (!subDoc) return true;
     return m_chart!=subDoc->m_chart || m_textZone!=subDoc->m_textZone;
   }
-  //! operator!==
-  virtual bool operator==(STOFFSubDocument const &doc) const
+  //! operator==
+  bool operator==(STOFFSubDocument const &doc) const
   {
     return !operator!=(doc);
   }
 
   //! the parser function
-  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type);
+  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type) final;
 protected:
   //! the chart
   STOFFChart *m_chart;
@@ -179,7 +179,7 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
     STOFF_DEBUG_MSG(("STOFFChart::sendChart: can not find the series\n"));
     return;
   }
-  std::shared_ptr<STOFFListener> genericListener=listener;
+  auto genericListener=listener;
   int styleId=0;
 
   librevenge::RVNGPropertyList style;
@@ -211,9 +211,8 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
     interface->openChartTextObject(legend);
     interface->closeChartTextObject();
   }
-  std::map<TextZone::Type, TextZone>::const_iterator textIt;
-  for (textIt=m_textZoneMap.begin(); textIt!=m_textZoneMap.end();) {
-    TextZone const &zone= textIt++->second;
+  for (auto const &textIt : m_textZoneMap) {
+    auto const &zone= textIt.second;
     if (zone.m_type != TextZone::T_Title && zone.m_type != TextZone::T_SubTitle)
       continue;
     style=librevenge::RVNGPropertyList();
@@ -287,8 +286,8 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
     interface->insertChartAxis(axis);
   }
   // label
-  for (textIt=m_textZoneMap.begin(); textIt!=m_textZoneMap.end();) {
-    TextZone const &zone= textIt++->second;
+  for (auto const &textIt : m_textZoneMap) {
+    TextZone const &zone= textIt.second;
     if (zone.m_type == TextZone::T_Title || zone.m_type == TextZone::T_SubTitle)
       continue;
     style=librevenge::RVNGPropertyList();
@@ -307,13 +306,13 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
     interface->closeChartTextObject();
   }
   // series
-  for (size_t i=0; i < m_seriesList.size(); ++i) {
+  for (auto &ser : m_seriesList) {
     style=librevenge::RVNGPropertyList();
-    m_seriesList[i].addStyleTo(style);
+    ser.addStyleTo(style);
     style.insert("librevenge:chart-id", styleId);
     interface->defineChartStyle(style);
     librevenge::RVNGPropertyList series;
-    m_seriesList[i].addContentTo(m_sheetName, series);
+    ser.addContentTo(m_sheetName, series);
     series.insert("librevenge:chart-id", styleId++);
     interface->openChartSerie(series);
     interface->closeChartSerie();
@@ -459,7 +458,9 @@ std::ostream &operator<<(std::ostream &o, STOFFChart::Legend const &legend)
 ////////////////////////////////////////////////////////////
 // Serie
 ////////////////////////////////////////////////////////////
-STOFFChart::Series::Series() : m_type(STOFFChart::Series::S_Bar), m_range()
+STOFFChart::Series::Series()
+  : m_type(STOFFChart::Series::S_Bar)
+  , m_range()
 {
 }
 
@@ -551,9 +552,13 @@ std::ostream &operator<<(std::ostream &o, STOFFChart::Series const &series)
 ////////////////////////////////////////////////////////////
 // TextZone
 ////////////////////////////////////////////////////////////
-STOFFChart::TextZone::TextZone() :
-  m_type(STOFFChart::TextZone::T_Title), m_contentType(STOFFChart::TextZone::C_Cell),
-  m_position(-1,-1), m_cell(), m_textEntry(), m_font()
+STOFFChart::TextZone::TextZone()
+  : m_type(STOFFChart::TextZone::T_Title)
+  , m_contentType(STOFFChart::TextZone::C_Cell)
+  , m_position(-1,-1)
+  , m_cell()
+  , m_textEntry()
+  , m_font()
 {
 }
 
