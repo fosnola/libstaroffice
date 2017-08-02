@@ -63,7 +63,9 @@ struct State {
 
 }
 
-STOFFGraphicEncoder::STOFFGraphicEncoder() : librevenge::RVNGDrawingInterface(), m_state(new STOFFGraphicEncoderInternal::State)
+STOFFGraphicEncoder::STOFFGraphicEncoder()
+  : librevenge::RVNGDrawingInterface()
+  , m_state(new STOFFGraphicEncoderInternal::State)
 {
 }
 

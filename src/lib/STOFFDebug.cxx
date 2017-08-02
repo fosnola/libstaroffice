@@ -94,9 +94,8 @@ void DebugFile::sort()
     set.insert(m_notes[i]);
 
   size_t i = 0;
-  for (std::set<NotePos, NotePos::NotePosLt>::const_iterator it = set.begin();
-       it != set.end(); ++i)
-    m_notes[i] = *(it++);
+  for (auto const &notePos : set)
+    m_notes[i] = notePos;
   if (i != numNotes) m_notes.resize(i);
 
   STOFFVec2i::MapX sMap;
@@ -104,8 +103,8 @@ void DebugFile::sort()
   for (i = 0; i < numSkip; i++) sMap[m_skipZones[i]] = 0;
 
   i = 0;
-  for (STOFFVec2i::MapX::iterator it = sMap.begin(); it != sMap.end(); ++it)
-    m_skipZones[i++] = it->first;
+  for (auto &skipIt : sMap)
+    m_skipZones[i++] = skipIt.first;
   if (i < numSkip) m_skipZones.resize(i);
 }
 
@@ -113,7 +112,7 @@ void DebugFile::write()
 {
   if (!m_on || m_input.get() == 0) return;
 
-  std::string name=Debug::flattenFileName(m_fileName);
+  auto name=Debug::flattenFileName(m_fileName);
   if (name.empty()) return;
   name += ".ascii";
   m_file.open(name.c_str());
@@ -122,7 +121,7 @@ void DebugFile::write()
 
   long readPos = m_input->tell();
 
-  std::vector<NotePos>::const_iterator noteIter = m_notes.begin();
+  auto noteIter = m_notes.begin();
 
   //! write the notes which does not have any position
   while (noteIter != m_notes.end() && noteIter->m_pos < 0) {
@@ -197,7 +196,7 @@ namespace Debug
 bool dumpFile(librevenge::RVNGBinaryData &data, char const *fileName)
 {
   if (!fileName) return false;
-  std::string fName = Debug::flattenFileName(fileName);
+  auto fName = Debug::flattenFileName(fileName);
   if (!data.size() || !data.getDataBuffer()) {
     STOFF_DEBUG_MSG(("Debug::dumpFile: can not find data for %s\n", fileName));
     return false;

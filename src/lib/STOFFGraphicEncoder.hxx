@@ -52,78 +52,78 @@ struct State;
 	\note as this class implements the functions librevenge::RVNGDrawingInterface,
   the documentation is not duplicated..
 */
-class STOFFGraphicEncoder : public librevenge::RVNGDrawingInterface
+class STOFFGraphicEncoder final : public librevenge::RVNGDrawingInterface
 {
 public:
   /// constructor
   STOFFGraphicEncoder();
   /// destructor
-  ~STOFFGraphicEncoder();
+  ~STOFFGraphicEncoder() final;
   /// return the final graphic
   bool getBinaryResult(STOFFEmbeddedObject &result);
 
-  void startDocument(const ::librevenge::RVNGPropertyList &propList);
-  void endDocument();
+  void startDocument(const ::librevenge::RVNGPropertyList &propList) final;
+  void endDocument() final;
 
-  void defineEmbeddedFont(const librevenge::RVNGPropertyList &propList);
+  void defineEmbeddedFont(const librevenge::RVNGPropertyList &propList) final;
 
-  void setDocumentMetaData(const librevenge::RVNGPropertyList &propList);
-  void startPage(const ::librevenge::RVNGPropertyList &propList);
-  void endPage();
-  void startMasterPage(const ::librevenge::RVNGPropertyList &propList);
-  void endMasterPage();
+  void setDocumentMetaData(const librevenge::RVNGPropertyList &propList) final;
+  void startPage(const ::librevenge::RVNGPropertyList &propList) final;
+  void endPage() final;
+  void startMasterPage(const ::librevenge::RVNGPropertyList &propList) final;
+  void endMasterPage() final;
 
-  void setStyle(const ::librevenge::RVNGPropertyList &propList);
-  void startLayer(const ::librevenge::RVNGPropertyList &propList);
-  void endLayer();
-  void startEmbeddedGraphics(const ::librevenge::RVNGPropertyList &propList);
-  void endEmbeddedGraphics();
-  void openGroup(const ::librevenge::RVNGPropertyList &propList);
-  void closeGroup();
+  void setStyle(const ::librevenge::RVNGPropertyList &propList) final;
+  void startLayer(const ::librevenge::RVNGPropertyList &propList) final;
+  void endLayer() final;
+  void startEmbeddedGraphics(const ::librevenge::RVNGPropertyList &propList) final;
+  void endEmbeddedGraphics() final;
+  void openGroup(const ::librevenge::RVNGPropertyList &propList) final;
+  void closeGroup() final;
 
 
-  void drawRectangle(const ::librevenge::RVNGPropertyList &propList);
-  void drawEllipse(const ::librevenge::RVNGPropertyList &propList);
-  void drawPolygon(const ::librevenge::RVNGPropertyList &vertices);
-  void drawPolyline(const ::librevenge::RVNGPropertyList &vertices);
-  void drawPath(const ::librevenge::RVNGPropertyList &path);
-  void drawConnector(const ::librevenge::RVNGPropertyList &propList);
+  void drawRectangle(const ::librevenge::RVNGPropertyList &propList) final;
+  void drawEllipse(const ::librevenge::RVNGPropertyList &propList) final;
+  void drawPolygon(const ::librevenge::RVNGPropertyList &vertices) final;
+  void drawPolyline(const ::librevenge::RVNGPropertyList &vertices) final;
+  void drawPath(const ::librevenge::RVNGPropertyList &path) final;
+  void drawConnector(const ::librevenge::RVNGPropertyList &propList) final;
 
-  void drawGraphicObject(const ::librevenge::RVNGPropertyList &propList);
+  void drawGraphicObject(const ::librevenge::RVNGPropertyList &propList) final;
 
-  void startTextObject(const ::librevenge::RVNGPropertyList &propList);
-  void endTextObject();
+  void startTextObject(const ::librevenge::RVNGPropertyList &propList) final;
+  void endTextObject() final;
 
-  void startTableObject(const librevenge::RVNGPropertyList &propList);
-  void endTableObject();
-  void openTableRow(const librevenge::RVNGPropertyList &propList);
-  void closeTableRow();
-  void openTableCell(const librevenge::RVNGPropertyList &propList);
-  void closeTableCell();
-  void insertCoveredTableCell(const librevenge::RVNGPropertyList &propList);
+  void startTableObject(const librevenge::RVNGPropertyList &propList) final;
+  void endTableObject() final;
+  void openTableRow(const librevenge::RVNGPropertyList &propList) final;
+  void closeTableRow() final;
+  void openTableCell(const librevenge::RVNGPropertyList &propList) final;
+  void closeTableCell() final;
+  void insertCoveredTableCell(const librevenge::RVNGPropertyList &propList) final;
 
-  void insertTab();
-  void insertSpace();
-  void insertText(const librevenge::RVNGString &text);
-  void insertLineBreak();
-  void insertField(const librevenge::RVNGPropertyList &propList);
+  void insertTab() final;
+  void insertSpace() final;
+  void insertText(const librevenge::RVNGString &text) final;
+  void insertLineBreak() final;
+  void insertField(const librevenge::RVNGPropertyList &propList) final;
 
-  void openLink(const librevenge::RVNGPropertyList &propList);
-  void closeLink();
-  void openOrderedListLevel(const librevenge::RVNGPropertyList &propList);
-  void openUnorderedListLevel(const librevenge::RVNGPropertyList &propList);
-  void closeOrderedListLevel();
-  void closeUnorderedListLevel();
-  void openListElement(const librevenge::RVNGPropertyList &propList);
-  void closeListElement();
+  void openLink(const librevenge::RVNGPropertyList &propList) final;
+  void closeLink() final;
+  void openOrderedListLevel(const librevenge::RVNGPropertyList &propList) final;
+  void openUnorderedListLevel(const librevenge::RVNGPropertyList &propList) final;
+  void closeOrderedListLevel() final;
+  void closeUnorderedListLevel() final;
+  void openListElement(const librevenge::RVNGPropertyList &propList) final;
+  void closeListElement() final;
 
-  void defineParagraphStyle(const librevenge::RVNGPropertyList &propList);
-  void openParagraph(const librevenge::RVNGPropertyList &propList);
-  void closeParagraph();
+  void defineParagraphStyle(const librevenge::RVNGPropertyList &propList) final;
+  void openParagraph(const librevenge::RVNGPropertyList &propList) final;
+  void closeParagraph() final;
 
-  void defineCharacterStyle(const librevenge::RVNGPropertyList &propList);
-  void openSpan(const librevenge::RVNGPropertyList &propList);
-  void closeSpan();
+  void defineCharacterStyle(const librevenge::RVNGPropertyList &propList) final;
+  void openSpan(const librevenge::RVNGPropertyList &propList) final;
+  void closeSpan() final;
 
 protected:
   //! the actual state

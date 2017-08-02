@@ -100,7 +100,7 @@ try
   std::shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
 
   if (!header.get()) return STOFF_R_UNKNOWN_ERROR;
-  std::shared_ptr<STOFFGraphicParser> parser=STOFFDocumentInternal::getGraphicParserFromHeader(ip, header.get(), password);
+  auto parser=STOFFDocumentInternal::getGraphicParserFromHeader(ip, header.get(), password);
   if (!parser) return STOFF_R_UNKNOWN_ERROR;
   parser->parse(documentInterface);
   return STOFF_R_OK;
@@ -137,7 +137,7 @@ try
   std::shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
 
   if (!header.get()) return STOFF_R_UNKNOWN_ERROR;
-  std::shared_ptr<STOFFGraphicParser> parser=STOFFDocumentInternal::getPresentationParserFromHeader(ip, header.get(), password);
+  auto parser=STOFFDocumentInternal::getPresentationParserFromHeader(ip, header.get(), password);
   if (!parser) return STOFF_R_UNKNOWN_ERROR;
   parser->parse(documentInterface);
   return STOFF_R_OK;
@@ -174,7 +174,7 @@ try
   std::shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
 
   if (!header.get()) return STOFF_R_UNKNOWN_ERROR;
-  std::shared_ptr<STOFFSpreadsheetParser> parser=STOFFDocumentInternal::getSpreadsheetParserFromHeader(ip, header.get(), password);
+  auto parser=STOFFDocumentInternal::getSpreadsheetParserFromHeader(ip, header.get(), password);
   if (!parser) return STOFF_R_UNKNOWN_ERROR;
   parser->parse(documentInterface);
   return STOFF_R_OK;
@@ -211,7 +211,7 @@ try
   std::shared_ptr<STOFFHeader> header(STOFFDocumentInternal::getHeader(ip, false));
 
   if (!header.get()) return STOFF_R_UNKNOWN_ERROR;
-  std::shared_ptr<STOFFTextParser> parser=STOFFDocumentInternal::getTextParserFromHeader(ip, header.get(), password);
+  auto parser=STOFFDocumentInternal::getTextParserFromHeader(ip, header.get(), password);
   if (!parser) return STOFF_R_UNKNOWN_ERROR;
   parser->parse(documentInterface);
 
@@ -285,8 +285,6 @@ namespace STOFFDocumentInternal
 STOFFHeader *getHeader(STOFFInputStreamPtr &ip, bool strict)
 try
 {
-  std::vector<STOFFHeader> listHeaders;
-
   if (!ip.get()) return 0L;
 
   if (ip->size() < 10) return 0L;
@@ -294,14 +292,11 @@ try
   ip->seek(0, librevenge::RVNG_SEEK_SET);
   ip->setReadInverted(false);
 
-  listHeaders = STOFFHeader::constructHeader(ip);
-  size_t numHeaders = listHeaders.size();
-  if (numHeaders==0) return 0L;
-
-  for (size_t i = 0; i < numHeaders; i++) {
-    if (!STOFFDocumentInternal::checkHeader(ip, listHeaders[i], strict))
+  auto listHeaders = STOFFHeader::constructHeader(ip);
+  for (auto &h : listHeaders) {
+    if (!STOFFDocumentInternal::checkHeader(ip, h, strict))
       continue;
-    return new STOFFHeader(listHeaders[i]);
+    return new STOFFHeader(h);
   }
   return 0L;
 }

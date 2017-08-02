@@ -67,7 +67,13 @@ class DebugFile
 public:
   //! constructor given the input file
   explicit DebugFile(STOFFInputStreamPtr ip=STOFFInputStreamPtr())
-    : m_fileName(""), m_file(), m_on(false), m_input(ip), m_actOffset(-1), m_notes(), m_skipZones() { }
+    : m_fileName("")
+    , m_file()
+    , m_on(false)
+    , m_input(ip)
+    , m_actOffset(-1)
+    , m_notes()
+    , m_skipZones() { }
 
   //! resets the input
   void setStream(STOFFInputStreamPtr ip)
@@ -124,10 +130,16 @@ protected:
   //! \brief a note and its position (used to sort all notes)
   struct NotePos {
     //! empty constructor used by std::vector
-    NotePos() : m_pos(-1), m_text(""), m_breaking(false) { }
+    NotePos()
+      : m_pos(-1)
+      , m_text("")
+      , m_breaking(false) { }
 
     //! constructor: given position and note
-    NotePos(long p, std::string const &n, bool br=true) : m_pos(p), m_text(n), m_breaking(br) {}
+    NotePos(long p, std::string const &n, bool br=true)
+      : m_pos(p)
+      , m_text(n)
+      , m_breaking(br) {}
     //! note offset
     long m_pos;
     //! note text

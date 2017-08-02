@@ -47,7 +47,14 @@ class STOFFEntry
 {
 public:
   //!constructor
-  STOFFEntry() : m_begin(-1), m_length(-1), m_type(""), m_name(""), m_id(-1), m_parsed(false), m_extra("") {}
+  STOFFEntry()
+    : m_begin(-1)
+    , m_length(-1)
+    , m_type("")
+    , m_name("")
+    , m_id(-1)
+    , m_parsed(false)
+    , m_extra("") {}
 
   virtual ~STOFFEntry();
 

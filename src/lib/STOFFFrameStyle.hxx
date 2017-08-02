@@ -44,7 +44,9 @@ class STOFFFrameStyle
 {
 public:
   /** constructor */
-  STOFFFrameStyle() : m_propertyList(), m_frameSize(0,0)
+  STOFFFrameStyle()
+    : m_propertyList()
+    , m_frameSize(0,0)
   {
   }
   //! add to the propList

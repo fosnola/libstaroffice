@@ -44,7 +44,12 @@ class STOFFFont
 {
 public:
   /** constructor */
-  STOFFFont() : m_propertyList(), m_shadowColor(STOFFColor::black()), m_hyphen(false), m_softHyphen(false), m_lineBreak(false)
+  STOFFFont()
+    : m_propertyList()
+    , m_shadowColor(STOFFColor::black())
+    , m_hyphen(false)
+    , m_softHyphen(false)
+    , m_lineBreak(false)
   {
   }
   /** destructor */
