@@ -45,13 +45,17 @@
 #include "STOFFInputStream.hxx"
 
 STOFFInputStream::STOFFInputStream(std::shared_ptr<librevenge::RVNGInputStream> inp, bool inverted)
-  : m_stream(inp), m_streamSize(0), m_inverseRead(inverted), m_readLimit(-1), m_prevLimits()
+  : m_stream(inp)
+  , m_streamSize(0)
+  , m_inverseRead(inverted)
 {
   updateStreamSize();
 }
 
 STOFFInputStream::STOFFInputStream(librevenge::RVNGInputStream *inp, bool inverted)
-  : m_stream(), m_streamSize(0), m_inverseRead(inverted), m_readLimit(-1), m_prevLimits()
+  : m_stream()
+  , m_streamSize(0)
+  , m_inverseRead(inverted)
 {
   if (!inp) return;
 
@@ -70,7 +74,7 @@ std::shared_ptr<STOFFInputStream> STOFFInputStream::get(librevenge::RVNGBinaryDa
   std::shared_ptr<STOFFInputStream> res;
   if (!data.size())
     return res;
-  librevenge::RVNGInputStream *dataStream = const_cast<librevenge::RVNGInputStream *>(data.getDataStream());
+  auto *dataStream = const_cast<librevenge::RVNGInputStream *>(data.getDataStream());
   if (!dataStream) {
     STOFF_DEBUG_MSG(("STOFFInputStream::get: can not retrieve a librevenge::RVNGInputStream\n"));
     return res;
@@ -126,8 +130,6 @@ int STOFFInputStream::seek(long offset, librevenge::RVNG_SEEK_TYPE seekType)
 
   if (offset < 0)
     offset = 0;
-  if (m_readLimit > 0 && offset > long(m_readLimit))
-    offset = long(m_readLimit);
   if (offset > size())
     offset = size();
 
@@ -139,7 +141,6 @@ bool STOFFInputStream::isEnd()
   if (!hasDataFork())
     return true;
   long pos = m_stream->tell();
-  if (m_readLimit > 0 && pos >= m_readLimit) return true;
   if (pos >= size()) return true;
 
   return m_stream->isEnd();
@@ -262,7 +263,7 @@ bool STOFFInputStream::readColor(STOFFColor &color)
     0xffffff,                          // COL_FIELD
     0                           // COL_FIELDTEXT
   };
-  if (colId<0 || colId>=int(sizeof(listColors)/sizeof(uint32_t))) {
+  if (colId<0 || colId>=int(STOFF_N_ELEMENTS(listColors))) {
     STOFF_DEBUG_MSG(("STOFFInputStream::readColor: can not find color %d\n", colId));
     return false;
   }
@@ -352,7 +353,6 @@ bool STOFFInputStream::readCompressedLong(long &res)
   }
   else if (p[0]==0x10) {
     long pos=tell();
-    if (m_readLimit > 0 && pos+4 > m_readLimit) return false;
     if (pos+4 > m_streamSize) return false;
     res=long(readULong(4));
     return true;
@@ -364,7 +364,6 @@ bool STOFFInputStream::readDouble8(double &res, bool &isNotANumber)
 {
   if (!m_stream) return false;
   long pos=tell();
-  if (m_readLimit > 0 && pos+8 > m_readLimit) return false;
   if (pos+8 > m_streamSize) return false;
 
   isNotANumber=false;
@@ -406,7 +405,6 @@ bool STOFFInputStream::readDouble10(double &res, bool &isNotANumber)
 {
   if (!m_stream) return false;
   long pos=tell();
-  if (m_readLimit > 0 && pos+10 > m_readLimit) return false;
   if (pos+10 > m_streamSize) return false;
 
   int exp = int(readULong(2));
@@ -447,7 +445,6 @@ bool STOFFInputStream::readDoubleReverted8(double &res, bool &isNotANumber)
 {
   if (!m_stream) return false;
   long pos=tell();
-  if (m_readLimit > 0 && pos+8 > m_readLimit) return false;
   if (pos+8 > m_streamSize) return false;
 
   isNotANumber=false;
@@ -518,7 +515,7 @@ std::string STOFFInputStream::subStreamName(unsigned id)
     STOFF_DEBUG_MSG(("STOFFInputStream::subStreamName: called on unstructured file\n"));
     return std::string("");
   }
-  char const *nm=m_stream->subStreamName(id);
+  auto const *nm=m_stream->subStreamName(id);
   if (!nm) {
     STOFF_DEBUG_MSG(("STOFFInputStream::subStreamName: can not find stream %d\n", int(id)));
     return std::string("");
@@ -581,7 +578,6 @@ bool STOFFInputStream::readDataBlock(long sz, librevenge::RVNGBinaryData &data)
   if (sz == 0) return true;
   long endPos=tell()+sz;
   if (endPos > size()) return false;
-  if (m_readLimit > 0 && endPos > long(m_readLimit)) return false;
 
   const unsigned char *readData;
   unsigned long sizeRead;
@@ -596,8 +592,7 @@ bool STOFFInputStream::readEndDataBlock(librevenge::RVNGBinaryData &data)
   data.clear();
   if (!hasDataFork()) return false;
 
-  long endPos=m_readLimit>0 ? m_readLimit : size();
-  return readDataBlock(endPos-tell(), data);
+  return readDataBlock(size()-tell(), data);
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

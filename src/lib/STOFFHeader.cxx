@@ -45,7 +45,10 @@
 
 #include "STOFFHeader.hxx"
 
-STOFFHeader::STOFFHeader(int vers, STOFFDocument::Kind kind) : m_version(vers), m_docKind(kind), m_isEncrypted(false)
+STOFFHeader::STOFFHeader(int vers, STOFFDocument::Kind kind)
+  : m_version(vers)
+  , m_docKind(kind)
+  , m_isEncrypted(false)
 {
 }
 

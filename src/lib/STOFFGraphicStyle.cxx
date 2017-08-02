@@ -44,14 +44,16 @@
 
 // graphic style function
 
-STOFFGraphicStyle::STOFFGraphicStyle() : m_propertyList(), m_hasBackground(false)
+STOFFGraphicStyle::STOFFGraphicStyle()
+  : m_propertyList()
+  , m_hasBackground(false)
 {
   for (int i=0; i<3; ++i) m_protections[i]=false;
 }
 
 std::ostream &operator<<(std::ostream &o, STOFFGraphicStyle const &graphicStyle)
 {
-  o << graphicStyle.m_propertyList.getPropString().cstr() << ",";;
+  o << graphicStyle.m_propertyList.getPropString().cstr() << ",";
   return o;
 }
 
@@ -78,13 +80,13 @@ void STOFFGraphicStyle::addTo(librevenge::RVNGPropertyList &pList) const
 void STOFFGraphicStyle::checkForPadding(librevenge::RVNGPropertyList &propList)
 {
   if (propList["librevenge:parent-display-name"]) return;
-  for (int i=0; i<4; ++i) {
-    char const *(wh[])= { "fo:padding-top", "fo:padding-bottom",
-                          "fo:padding-left", "fo:padding-right"
-                        };
-    if (propList[wh[i]])
+  char const *(wh[])= { "fo:padding-top", "fo:padding-bottom",
+                        "fo:padding-left", "fo:padding-right"
+                      };
+  for (auto const &what : wh) {
+    if (propList[what])
       continue;
-    propList.insert(wh[i],0,librevenge::RVNG_POINT);
+    propList.insert(what,0,librevenge::RVNG_POINT);
   }
 }
 

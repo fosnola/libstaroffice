@@ -56,7 +56,7 @@ struct State;
 
     \note All units are specified in librevenge::RVNG_POINT
  */
-class STOFFGraphicListener : public STOFFListener
+class STOFFGraphicListener final : public STOFFListener
 {
 public:
   /** constructor with a drawing interface*/
@@ -64,41 +64,41 @@ public:
   /** constructor with a presentation interface*/
   STOFFGraphicListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGPresentationInterface *presentationInterface);
   /** destructor */
-  virtual ~STOFFGraphicListener();
+  ~STOFFGraphicListener() final;
 
   /** returns the listener type */
-  Type getType() const
+  Type getType() const final
   {
     return Graphic;
   }
 
   /** sets the documents language */
-  void setDocumentLanguage(std::string locale);
+  void setDocumentLanguage(std::string locale) final;
   /** sets the document meta data */
-  void setDocumentMetaData(const librevenge::RVNGPropertyList &list);
+  void setDocumentMetaData(const librevenge::RVNGPropertyList &list) final;
   /** starts a new document */
-  void startDocument();
+  void startDocument() final;
   /** ends the actual document */
-  void endDocument(bool sendDelayedSubDoc=true);
+  void endDocument(bool sendDelayedSubDoc=true) final;
 
   // ------ general information --------
   /** returns true if a text zone is opened */
-  bool canWriteText() const;
+  bool canWriteText() const final;
   /** returns true if a document is opened */
-  bool isDocumentStarted() const;
+  bool isDocumentStarted() const final;
 
   /** function called to add a subdocument and modify the origin*/
-  void handleSubDocument(STOFFSubDocumentPtr subDocument, libstoff::SubDocumentType subDocumentType);
+  void handleSubDocument(STOFFSubDocumentPtr subDocument, libstoff::SubDocumentType subDocumentType) final;
   /** returns try if a subdocument is open  */
-  bool isSubDocumentOpened(libstoff::SubDocumentType &subdocType) const;
+  bool isSubDocumentOpened(libstoff::SubDocumentType &subdocType) const final;
   /** store the position and the style (which will be needed further to insert a textbox or a table with openTable) */
-  bool openFrame(STOFFPosition const &pos, STOFFGraphicStyle const &style=STOFFGraphicStyle());
+  bool openFrame(STOFFPosition const &pos, STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
   /** close a frame */
-  void closeFrame();
+  void closeFrame() final;
   /** open a group */
-  bool openGroup(STOFFPosition const &pos);
+  bool openGroup(STOFFPosition const &pos) final;
   /** close a group */
-  void closeGroup();
+  void closeGroup() final;
   /** open a layer */
   bool openLayer(librevenge::RVNGString const &name);
   /** close a layer */
@@ -113,143 +113,142 @@ public:
     _closePageSpan(true);
   }
   /** returns true if a page is opened */
-  bool isPageSpanOpened() const;
+  bool isPageSpanOpened() const final;
   /** returns the current page span
 
   \note this forces the opening of a new page if no page is opened.*/
-  STOFFPageSpan const &getPageSpan();
+  STOFFPageSpan const &getPageSpan() final;
 
   // ------ header/footer --------
   /** open a header  (interaction with STOFFPageSpan which fills the parameters for openHeader) */
-  bool openHeader(librevenge::RVNGPropertyList const &extras);
+  bool openHeader(librevenge::RVNGPropertyList const &extras) final;
   /** open a footer  (interaction with STOFFPageSpan which fills the parameters for openFooter) */
-  bool openFooter(librevenge::RVNGPropertyList const &extras);
+  bool openFooter(librevenge::RVNGPropertyList const &extras) final;
   /** close a header */
-  bool closeHeader();
+  bool closeHeader() final;
   /** close a footer */
-  bool closeFooter();
+  bool closeFooter() final;
   /** insert a header */
-  bool insertHeaderRegion(STOFFSubDocumentPtr subDocument, librevenge::RVNGString const &which);
+  bool insertHeaderRegion(STOFFSubDocumentPtr subDocument, librevenge::RVNGString const &which) final;
   /** insert a footer */
-  bool insertFooterRegion(STOFFSubDocumentPtr subDocument, librevenge::RVNGString const &which);
+  bool insertFooterRegion(STOFFSubDocumentPtr subDocument, librevenge::RVNGString const &which) final;
   /** returns true if the header/footer is open */
-  bool isHeaderFooterOpened() const;
+  bool isHeaderFooterOpened() const final;
 
   // ------ text data -----------
   //! adds a basic character, ..
-  void insertChar(uint8_t character);
+  void insertChar(uint8_t character) final;
   /** insert a character using the font converter to find the utf8
       character */
   /** adds an unicode character.
    *  By convention if \a character=0xfffd(undef), no character is added */
-  void insertUnicode(uint32_t character);
+  void insertUnicode(uint32_t character) final;
   //! adds a unicode string
-  void insertUnicodeString(librevenge::RVNGString const &str);
+  void insertUnicodeString(librevenge::RVNGString const &str) final;
 
   //! adds a tab
-  void insertTab();
+  void insertTab() final;
   //! adds an end of line ( by default an hard one)
-  void insertEOL(bool softBreak=false);
+  void insertEOL(bool softBreak=false) final;
 
   // ------ text format -----------
   //! sets the font
-  void setFont(STOFFFont const &font);
+  void setFont(STOFFFont const &font) final;
   //! returns the actual font
-  STOFFFont const &getFont() const;
+  STOFFFont const &getFont() const final;
 
   // ------ paragraph format -----------
   //! returns true if a paragraph or a list is opened
-  bool isParagraphOpened() const;
+  bool isParagraphOpened() const final;
   //! sets the paragraph
-  void setParagraph(STOFFParagraph const &paragraph);
+  void setParagraph(STOFFParagraph const &paragraph) final;
   //! returns the actual paragraph
-  STOFFParagraph const &getParagraph() const;
+  STOFFParagraph const &getParagraph() const final;
 
   // ------ style definition -----------
   /** defines a font styles */
-  void defineStyle(STOFFFont const &style);
+  void defineStyle(STOFFFont const &style) final;
   /** check if a font style with a display name is already defined */
-  bool isFontStyleDefined(librevenge::RVNGString const &name) const;
+  bool isFontStyleDefined(librevenge::RVNGString const &name) const final;
   /** defines a graphic styles */
-  void defineStyle(STOFFGraphicStyle const &style);
+  void defineStyle(STOFFGraphicStyle const &style) final;
   /** check if a graphic style with a display name is already defined */
-  bool isGraphicStyleDefined(librevenge::RVNGString const &name) const;
+  bool isGraphicStyleDefined(librevenge::RVNGString const &name) const final;
   /** defines a paragraph styles */
-  void defineStyle(STOFFParagraph const &style);
+  void defineStyle(STOFFParagraph const &style) final;
   /** check if a paragraph style with a display name is already defined */
-  bool isParagraphStyleDefined(librevenge::RVNGString const &name) const;
+  bool isParagraphStyleDefined(librevenge::RVNGString const &name) const final;
 
   // ------- fields ----------------
   //! adds a field type
-  void insertField(STOFFField const &field);
+  void insertField(STOFFField const &field) final;
 
   // ------- link ----------------
   //! open a link
-  void openLink(STOFFLink const &link);
+  void openLink(STOFFLink const &link) final;
   //! close a link
-  void closeLink();
+  void closeLink() final;
 
   // ------- subdocument -----------------
   /** adds a shape picture in given position */
-  void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos);
+  void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos) final;
   /** adds a textbox in given position */
-  void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &style=STOFFGraphicStyle());
+  void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
   /** adds a picture with potential various representationin given position */
   void insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture,
-                     STOFFGraphicStyle const &style=STOFFGraphicStyle());
+                     STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
   /** insert a note
 
    \note as RVNGDrawingInterface does not accept note, note can only be inserted in a text zone (and are inserted between --) */
-  void insertNote(STOFFNote const &note, STOFFSubDocumentPtr &subDocument);
+  void insertNote(STOFFNote const &note, STOFFSubDocumentPtr &subDocument) final;
   /** adds comment
 
    \note as RVNGDrawingInterface does not accept comment, comment can only be inserted in a text zone (and are inserted between --) */
-  void insertComment(STOFFSubDocumentPtr &subDocument, librevenge::RVNGString const &creator="", librevenge::RVNGString const &date="");
+  void insertComment(STOFFSubDocumentPtr &subDocument, librevenge::RVNGString const &creator="", librevenge::RVNGString const &date="") final;
 
   // ------- table -----------------
 
   /** open a table (using the last parameters of openFrame for the position ) */
-  void openTable(STOFFTable const &table);
+  void openTable(STOFFTable const &table) final;
   /** open a table in a given position */
   void openTable(STOFFPosition const &pos, STOFFTable const &table);
   /** closes this table */
-  void closeTable();
+  void closeTable() final;
   /** open a row with given height ( if h < 0.0, set min-row-height = -h )*/
-  void openTableRow(float h, librevenge::RVNGUnit unit, bool headerRow=false);
+  void openTableRow(float h, librevenge::RVNGUnit unit, bool headerRow=false) final;
   /** closes this row */
-  void closeTableRow();
+  void closeTableRow() final;
   /** open a cell */
-  void openTableCell(STOFFCell const &cell);
+  void openTableCell(STOFFCell const &cell) final;
   /** close a cell */
-  void closeTableCell();
+  void closeTableCell() final;
   /** add covered cell */
-  void addCoveredTableCell(STOFFVec2i const &pos);
+  void addCoveredTableCell(STOFFVec2i const &pos) final;
   /** add empty cell */
-  void addEmptyTableCell(STOFFVec2i const &pos, STOFFVec2i span=STOFFVec2i(1,1));
+  void addEmptyTableCell(STOFFVec2i const &pos, STOFFVec2i span=STOFFVec2i(1,1)) final;
 
   // ------- section ---------------
 
   /** returns true if we can add open a section, add page break, ... */
-  bool canOpenSectionAddBreak() const
+  bool canOpenSectionAddBreak() const final
   {
     return false;
   }
   //! returns true if a section is opened
-  bool isSectionOpened() const
+  bool isSectionOpened() const final
   {
     return false;
   }
   //! returns the actual section
-  STOFFSection const &getSection() const;
+  STOFFSection const &getSection() const final;
   //! open a section if possible
-  bool openSection(STOFFSection const &section);
+  bool openSection(STOFFSection const &section) final;
   //! close a section
-  bool closeSection()
-  {
+  bool closeSection() final {
     return false;
   }
   //! inserts a break type: ColumBreak, PageBreak, ..
-  void insertBreak(BreakType breakType);
+  void insertBreak(BreakType breakType) final;
 
 protected:
   //! does open a new page (low level)

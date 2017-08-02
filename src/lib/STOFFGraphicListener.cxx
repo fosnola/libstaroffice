@@ -65,11 +65,22 @@ namespace STOFFGraphicListenerInternal
 /** the global graphic state of STOFFGraphicListener */
 struct GraphicState {
   //! constructor
-  explicit GraphicState(std::vector<STOFFPageSpan> const &pageList) :
-    m_pageList(pageList), m_metaData(),
-    m_isDocumentStarted(false), m_isPageSpanOpened(false), m_isMasterPageSpanOpened(false), m_isAtLeastOnePageOpened(false),
-    m_isHeaderFooterOpened(false), m_isHeaderFooterRegionOpened(false), m_pageSpan(), m_sentListMarkers(), m_subDocuments(),
-    m_definedFontStyleSet(), m_definedGraphicStyleSet(), m_definedParagraphStyleSet(), m_section()
+  explicit GraphicState(std::vector<STOFFPageSpan> const &pageList)
+    : m_pageList(pageList)
+    , m_metaData()
+    , m_isDocumentStarted(false)
+    , m_isPageSpanOpened(false)
+    , m_isMasterPageSpanOpened(false)
+    , m_isAtLeastOnePageOpened(false)
+    , m_isHeaderFooterOpened(false)
+    , m_isHeaderFooterRegionOpened(false)
+    , m_pageSpan()
+    , m_sentListMarkers()
+    , m_subDocuments()
+    , m_definedFontStyleSet()
+    , m_definedGraphicStyleSet()
+    , m_definedParagraphStyleSet()
+    , m_section()
   {
   }
   //! destructor
@@ -169,29 +180,54 @@ private:
   State &operator=(const State &);
 };
 
-State::State() : m_origin(0,0),
-  m_textBuffer(""), m_font()/* default time 12 */, m_paragraph(), m_list(),
-  m_isFrameOpened(false), m_framePosition(), m_frameStyle(), m_isTextBoxOpened(false),
-  m_isGroupOpened(false), m_isLayerOpened(false),
-  m_isSpanOpened(false), m_isParagraphOpened(false), m_isListElementOpened(false),
-  m_listOrderedLevels(),
-  m_isTableOpened(false), m_isTableRowOpened(false), m_isTableColumnOpened(false),
-  m_isTableCellOpened(false),
-  m_currentPage(0), m_numPagesRemainingInSpan(0), m_currentPageNumber(1),
-  m_inLink(false), m_inNote(false), m_inSubDocument(false), m_subDocumentType(libstoff::DOC_NONE)
+State::State()
+  : m_origin(0,0)
+  , m_textBuffer("")
+  , m_font()/* default time 12 */
+  , m_paragraph()
+  , m_list()
+  , m_isFrameOpened(false)
+  , m_framePosition()
+  , m_frameStyle()
+  , m_isTextBoxOpened(false)
+  , m_isGroupOpened(false)
+  , m_isLayerOpened(false)
+  , m_isSpanOpened(false)
+  , m_isParagraphOpened(false)
+  , m_isListElementOpened(false)
+  , m_listOrderedLevels()
+  , m_isTableOpened(false)
+  , m_isTableRowOpened(false)
+  , m_isTableColumnOpened(false)
+  , m_isTableCellOpened(false)
+  , m_currentPage(0)
+  , m_numPagesRemainingInSpan(0)
+  , m_currentPageNumber(1)
+  , m_inLink(false)
+  , m_inNote(false)
+  , m_inSubDocument(false)
+  , m_subDocumentType(libstoff::DOC_NONE)
 {
 }
 }
 
-STOFFGraphicListener::STOFFGraphicListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGDrawingInterface *drawingInterface) : STOFFListener(listManager),
-  m_ds(new STOFFGraphicListenerInternal::GraphicState(pageList)), m_ps(new STOFFGraphicListenerInternal::State),
-  m_psStack(), m_drawingInterface(drawingInterface), m_presentationInterface(0)
+STOFFGraphicListener::STOFFGraphicListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGDrawingInterface *drawingInterface)
+  : STOFFListener(listManager)
+  , m_ds(new STOFFGraphicListenerInternal::GraphicState(pageList))
+  , m_ps(new STOFFGraphicListenerInternal::State)
+  , m_psStack()
+  , m_drawingInterface(drawingInterface)
+  , m_presentationInterface(0)
 {
 }
 
-STOFFGraphicListener::STOFFGraphicListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGPresentationInterface *presentationInterface) : STOFFListener(listManager),
-  m_ds(new STOFFGraphicListenerInternal::GraphicState(pageList)), m_ps(new STOFFGraphicListenerInternal::State),
-  m_psStack(), m_drawingInterface(0), m_presentationInterface(presentationInterface)
+STOFFGraphicListener::STOFFGraphicListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGPresentationInterface *presentationInterface)
+  : STOFFListener(listManager)
+  , m_ds(new STOFFGraphicListenerInternal::GraphicState(pageList))
+  , m_ps(new STOFFGraphicListenerInternal::State)
+  , m_psStack()
+  , m_drawingInterface(0)
+  , m_presentationInterface(presentationInterface)
 {
 }
 
@@ -547,7 +583,7 @@ void STOFFGraphicListener::_openPageSpan(bool sendHeaderFooters)
   }
   m_ds->m_isAtLeastOnePageOpened=true;
   unsigned actPage = 0;
-  std::vector<STOFFPageSpan>::iterator it = m_ds->m_pageList.begin();
+  auto it = m_ds->m_pageList.begin();
   m_ps->m_currentPage++;
   while (true) {
     actPage+=unsigned(it->m_pageSpan);
@@ -744,8 +780,7 @@ int STOFFGraphicListener::_getListId() const
     STOFF_DEBUG_MSG(("STOFFGraphicListener::_getListId: the list id is not set, try to find a new one\n"));
     first = false;
   }
-  std::shared_ptr<STOFFList> list=m_listManager->getNewList
-                                  (m_ps->m_list, int(newLevel), m_ps->m_paragraph.m_listLevel);
+  auto list=m_listManager->getNewList(m_ps->m_list, int(newLevel), m_ps->m_paragraph.m_listLevel);
   if (!list) return -1;
   return list->getId();
 }
@@ -1590,10 +1625,10 @@ void STOFFGraphicListener::handleSubDocument(STOFFSubDocumentPtr subDocument, li
     m_ps->m_inNote=true;
   // Check whether the document is calling itself
   bool sendDoc = true;
-  for (size_t i = 0; i < m_ds->m_subDocuments.size(); i++) {
+  for (auto &doc : m_ds->m_subDocuments) {
     if (!subDocument)
       break;
-    if (subDocument == m_ds->m_subDocuments[i]) {
+    if (*subDocument == *doc) {
       STOFF_DEBUG_MSG(("STOFFGraphicListener::handleSubDocument: recursif call, stop...\n"));
       sendDoc = false;
       break;

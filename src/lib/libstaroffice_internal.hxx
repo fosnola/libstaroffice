@@ -115,6 +115,8 @@ struct STOFF_shared_ptr_noop_deleter {
 #  define LIBSTOFF_ATTRIBUTE_PRINTF(fmt, arg)
 #endif
 
+#define STOFF_N_ELEMENTS(m) sizeof(m)/sizeof(m[0])
+
 /* ---------- debug  --------------- */
 #ifdef DEBUG
 namespace libstoff

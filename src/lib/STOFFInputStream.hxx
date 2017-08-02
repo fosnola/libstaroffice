@@ -91,7 +91,6 @@ public:
 
   /*! \brief seeks to a offset position, from actual, beginning or ending position
    * \return 0 if ok
-   * \sa pushLimit popLimit
    */
   int seek(long offset, librevenge::RVNG_SEEK_TYPE seekType);
   //! returns actual offset position
@@ -105,29 +104,10 @@ public:
   bool checkPosition(long pos) const
   {
     if (pos < 0) return false;
-    if (m_readLimit > 0 && pos > m_readLimit) return false;
     return pos<=m_streamSize;
   }
   //! returns true if we are at the end of the section/file
   bool isEnd();
-
-  /*! \brief defines a new section in the file (from actualPos to newLimit)
-   * next call of seek, tell, atEos, ... will be restrained to this section
-   */
-  void pushLimit(long newLimit)
-  {
-    m_prevLimits.push_back(m_readLimit);
-    m_readLimit = newLimit > m_streamSize ? m_streamSize : newLimit;
-  }
-  //! pops a section defined by pushLimit
-  void popLimit()
-  {
-    if (m_prevLimits.size()) {
-      m_readLimit = m_prevLimits.back();
-      m_prevLimits.pop_back();
-    }
-    else m_readLimit = -1;
-  }
 
   //
   // get data
@@ -266,11 +246,6 @@ protected:
 
   //! big or normal endian
   bool m_inverseRead;
-
-  //! actual section limit (-1 if no limit)
-  long m_readLimit;
-  //! list of previous limits
-  std::vector<long> m_prevLimits;
 };
 
 #endif
