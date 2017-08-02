@@ -108,8 +108,13 @@ public:
   /** structure use to store an object content */
   struct OleContent {
     //! constructor
-    OleContent(std::string const &dir, std::string const &base) :
-      m_dir(dir), m_base(base), m_isParsed(false), m_position(), m_imageData(), m_imageType("")
+    OleContent(std::string const &dir, std::string const &base)
+      : m_dir(dir)
+      , m_base(base)
+      , m_isParsed(false)
+      , m_position()
+      , m_imageData()
+      , m_imageType("")
     {
     }
     //! returns the base name
@@ -179,8 +184,16 @@ public:
   /** Internal: internal method to keep ole directory and their content */
   struct OleDirectory {
     //! constructor
-    OleDirectory(STOFFInputStreamPtr input, std::string const &dir) : m_input(input), m_dir(dir), m_contentList(), m_kind(STOFFDocument::STOFF_K_UNKNOWN),
-      m_hasCompObj(false), m_clsName(""), m_clipName(""), m_parsed(false), m_inUse(false) { }
+    OleDirectory(STOFFInputStreamPtr input, std::string const &dir)
+      : m_input(input)
+      , m_dir(dir)
+      , m_contentList()
+      , m_kind(STOFFDocument::STOFF_K_UNKNOWN)
+      , m_hasCompObj(false)
+      , m_clsName("")
+      , m_clipName("")
+      , m_parsed(false)
+      , m_inUse(false) { }
     //! add a new base file
     void addNewBase(std::string const &base)
     {
@@ -193,9 +206,9 @@ public:
     std::vector<std::string> getUnparsedOles() const
     {
       std::vector<std::string> res;
-      for (size_t i=0; i<m_contentList.size(); ++i) {
-        if (m_contentList[i].isParsed()) continue;
-        res.push_back(m_contentList[i].getOleName());
+      for (auto const &c : m_contentList) {
+        if (c.isParsed()) continue;
+        res.push_back(c.getOleName());
       }
       return res;
     }

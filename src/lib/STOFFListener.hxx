@@ -111,7 +111,7 @@ public:
    *  By convention if \a character=0xfffd(undef), no character is added */
   virtual void insertUnicode(uint32_t character)=0;
   /** try to insert a list of unicode character */
-  virtual void insertUnicodeList(std::vector<uint32_t> const &list)
+  void insertUnicodeList(std::vector<uint32_t> const &list)
   {
     if (list.empty() || !canWriteText())
       return;

@@ -95,7 +95,10 @@ namespace STOFFOLEParserInternal
 //! the state of a STOFFOLEParser
 struct State {
   //! constructor
-  State() : m_oleList(), m_unknownOLEs(), m_mapCls()
+  State()
+    : m_oleList()
+    , m_unknownOLEs()
+    , m_mapCls()
   {
   }
   //! returns a CLSName if knwon
@@ -230,7 +233,8 @@ void State::initCLSMap()
 }
 
 // constructor/destructor
-STOFFOLEParser::STOFFOLEParser() : m_state(new STOFFOLEParserInternal::State)
+STOFFOLEParser::STOFFOLEParser()
+  : m_state(new STOFFOLEParserInternal::State)
 {
 }
 
@@ -248,9 +252,9 @@ std::shared_ptr<STOFFOLEParser::OleDirectory> STOFFOLEParser::getDirectory(std::
   std::string dirName(dir);
   if (!dir.empty() && *dir.rbegin()=='/')
     dirName=dir.substr(0, dir.size()-1);
-  for (size_t i=0; i<m_state->m_oleList.size(); ++i) {
-    if (m_state->m_oleList[i] && m_state->m_oleList[i]->m_dir==dirName)
-      return m_state->m_oleList[i];
+  for (auto &ole : m_state->m_oleList) {
+    if (ole && ole->m_dir==dirName)
+      return ole;
   }
   return std::shared_ptr<STOFFOLEParser::OleDirectory>();
 }
@@ -276,7 +280,7 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
     // separated the directory and the name
     //    MatOST/MatadorObject1/Ole10Native
     //      -> dir="MatOST/MatadorObject1", base="Ole10Native"
-    std::string::size_type pos = name.find_last_of('/');
+    auto pos = name.find_last_of('/');
 
     std::string dir(""), base;
     if (pos == std::string::npos) base = name;
@@ -297,22 +301,20 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
     }
     listsByDir.find(dir)->second->addNewBase(base);
   }
-  for (size_t dir=0; dir<m_state->m_oleList.size(); ++dir) {
-    if (!m_state->m_oleList[dir]) continue;
-    STOFFOLEParser::OleDirectory &dOle = *m_state->m_oleList[dir];
-    if (dOle.m_hasCompObj) {
-      STOFFInputStreamPtr ole = file->getSubStreamByName(dOle.m_dir+"/CompObj");
+  for (auto &dOle : m_state->m_oleList) {
+    if (!dOle) continue;
+    if (dOle->m_hasCompObj) {
+      auto ole = file->getSubStreamByName(dOle->m_dir+"/CompObj");
       if (!ole.get()) {
-        STOFF_DEBUG_MSG(("STOFFOLEParser::parse: error: can not find CompObj in directory: \"%s\"\n", dOle.m_dir.c_str()));
+        STOFF_DEBUG_MSG(("STOFFOLEParser::parse: error: can not find CompObj in directory: \"%s\"\n", dOle->m_dir.c_str()));
       }
       else
-        readCompObj(ole, dOle);
+        readCompObj(ole, *dOle);
     }
-    for (size_t i=0; i< dOle.m_contentList.size(); ++i) {
-      STOFFOLEParser::OleContent &content = dOle.m_contentList[i];
+    for (auto &content : dOle->m_contentList) {
       std::string base=content.getBaseName();
       std::string oleName=content.getOleName();
-      STOFFInputStreamPtr ole = file->getSubStreamByName(oleName);
+      auto ole = file->getSubStreamByName(oleName);
       if (!ole.get()) {
         STOFF_DEBUG_MSG(("STOFFOLEParser::parse: error: can not find OLE part: \"%s\"\n", oleName.c_str()));
         continue;
@@ -348,17 +350,17 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
       if (base.compare(0,4,"Star")==0) {
         // times to update the
         if (base=="StarCalcDocument")
-          dOle.m_kind=STOFFDocument::STOFF_K_SPREADSHEET;
+          dOle->m_kind=STOFFDocument::STOFF_K_SPREADSHEET;
         else if (base=="StarChartDocument")
-          dOle.m_kind=STOFFDocument::STOFF_K_CHART;
+          dOle->m_kind=STOFFDocument::STOFF_K_CHART;
         else if (base=="StarDrawDocument" || base=="StarDrawDocument3")
-          dOle.m_kind=STOFFDocument::STOFF_K_DRAW;
+          dOle->m_kind=STOFFDocument::STOFF_K_DRAW;
         else if (base=="StarImageDocument")
-          dOle.m_kind=STOFFDocument::STOFF_K_BITMAP;
+          dOle->m_kind=STOFFDocument::STOFF_K_BITMAP;
         else if (base=="StarMathDocument")
-          dOle.m_kind=STOFFDocument::STOFF_K_MATH;
+          dOle->m_kind=STOFFDocument::STOFF_K_MATH;
         else if (base=="StarWriterDocument")
-          dOle.m_kind=STOFFDocument::STOFF_K_TEXT;
+          dOle->m_kind=STOFFDocument::STOFF_K_TEXT;
       }
     }
   }
@@ -370,7 +372,7 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
 bool STOFFOLEParser::getCompObjName(STOFFInputStreamPtr file, std::string &programName)
 {
   if (!file.get() || !file->isStructured()) return false;
-  STOFFInputStreamPtr ole = file->getSubStreamByName("/CompObj");
+  auto ole = file->getSubStreamByName("/CompObj");
   if (!ole) return false;
   STOFFOLEParser::OleDirectory oleDir(file,"");
   if (!readCompObj(ole, oleDir) || oleDir.m_clipName.empty()) return false;
@@ -504,11 +506,11 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
   ascii.addPos(pos);
   ascii.addNote(f.str().c_str());
 
-  for (std::map<long,int>::const_iterator it=posToTypeMap.begin(); it!=posToTypeMap.end(); ++it) {
-    pos=it->first;
+  for (auto const posToType : posToTypeMap) {
+    pos=posToType.first;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     f.str("");
-    f << "SumInfo-B" << it->second << ":";
+    f << "SumInfo-B" << posToType.second << ":";
     int type=int(input->readULong(4));
     if (type==0x1e) {
       long sSz=long(input->readULong(4));

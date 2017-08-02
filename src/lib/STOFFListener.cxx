@@ -38,7 +38,8 @@
 
 #include "STOFFList.hxx"
 
-STOFFListener::STOFFListener(STOFFListManagerPtr listManager) : m_listManager(listManager)
+STOFFListener::STOFFListener(STOFFListManagerPtr listManager)
+  : m_listManager(listManager)
 {
   if (!m_listManager)
     m_listManager.reset(new STOFFListManager);

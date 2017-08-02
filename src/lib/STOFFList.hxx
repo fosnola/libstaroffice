@@ -50,8 +50,11 @@ struct STOFFListLevel {
   enum Type { DEFAULT, NONE, BULLET, NUMBER };
 
   /** basic constructor */
-  STOFFListLevel() : m_type(NONE), m_propertyList(), m_font(),
-    m_startValue(0)
+  STOFFListLevel()
+    : m_type(NONE)
+    , m_propertyList()
+    , m_font()
+    , m_startValue(0)
   {
   }
   /** destructor */
@@ -60,7 +63,7 @@ struct STOFFListLevel {
   /** returns true if the level type was not set */
   bool isDefault() const
   {
-    return m_type ==DEFAULT;
+    return m_type==DEFAULT;
   }
   /** returns true if the list is decimal, alpha or roman */
   bool isNumeric() const
@@ -103,7 +106,13 @@ class STOFFList
 {
 public:
   /** default constructor */
-  explicit STOFFList(bool outline) : m_outline(outline), m_name(""), m_levels(), m_actLevel(-1), m_actualIndices(), m_nextIndices(), m_modifyMarker(1)
+  explicit STOFFList(bool outline)
+    : m_outline(outline)
+    , m_name(""), m_levels()
+    , m_actLevel(-1)
+    , m_actualIndices()
+    , m_nextIndices()
+    , m_modifyMarker(1)
   {
     m_id[0] = m_id[1] = -1;
   }
@@ -197,7 +206,9 @@ class STOFFListManager
 {
 public:
   //! the constructor
-  STOFFListManager() : m_listList(), m_sendIdMarkerList() { }
+  STOFFListManager()
+    : m_listList()
+    , m_sendIdMarkerList() { }
   //! the destructor
   ~STOFFListManager() { }
   /** check if a list need to be send/resend to the interface */

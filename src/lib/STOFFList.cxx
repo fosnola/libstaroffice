@@ -250,7 +250,7 @@ bool STOFFListManager::needToSend(int index, std::vector<int> &idMarkerList) con
     STOFF_DEBUG_MSG(("STOFFListManager::needToSend: can not find list %d\n", index));
     return false;
   }
-  STOFFList const &list=m_listList[mainId];
+  auto const &list=m_listList[mainId];
   if (idMarkerList[size_t(index)] == list.getMarker())
     return false;
   idMarkerList[size_t(index)]=list.getMarker();
