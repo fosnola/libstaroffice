@@ -314,7 +314,7 @@ bool Field::send(STOFFListenerPtr listener, StarState &state) const
 }
 
 //! Internal: a fixed date time field
-struct FieldDateTime : public Field {
+struct FieldDateTime final : public Field {
   //! constructor
   FieldDateTime() : Field(), m_dateTime(0), m_offset(0)
   {
@@ -324,11 +324,11 @@ struct FieldDateTime : public Field {
   {
   }
   //! destructor
-  virtual ~FieldDateTime();
+  ~FieldDateTime() final;
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! print a field
-  virtual void print(std::ostream &o) const
+  void print(std::ostream &o) const final
   {
     Field::print(o);
     if (m_dateTime) o << "date/time=" << m_dateTime << ",";
@@ -384,9 +384,13 @@ bool FieldDateTime::send(STOFFListenerPtr listener, StarState &state) const
 }
 
 //! Internal: a DB field field
-struct FieldDBField : public Field {
+struct FieldDBField final : public Field {
   //! constructor
-  FieldDBField() : Field(), m_dbName(""), m_colName(""), m_longNumber(0)
+  FieldDBField()
+    : Field()
+    , m_dbName("")
+    , m_colName("")
+    , m_longNumber(0)
   {
   }
   //! copy constructor
@@ -394,11 +398,11 @@ struct FieldDBField : public Field {
   {
   }
   //! destructor
-  virtual ~FieldDBField();
+  ~FieldDBField() final;
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! print a field
-  virtual void print(std::ostream &o) const
+  void print(std::ostream &o) const final
   {
     Field::print(o);
     if (!m_dbName.empty()) o << "dbName=" << m_dbName.cstr() << ",";
@@ -443,9 +447,12 @@ bool FieldDBField::send(STOFFListenerPtr listener, StarState &state) const
 }
 
 //! Internal: a hidden text/para field
-struct FieldHiddenText : public Field {
+struct FieldHiddenText final : public Field {
   //! constructor
-  FieldHiddenText() : Field(), m_hidden(true), m_condition("")
+  FieldHiddenText()
+    : Field()
+    , m_hidden(true)
+    , m_condition("")
   {
   }
   //! copy constructor
@@ -453,11 +460,11 @@ struct FieldHiddenText : public Field {
   {
   }
   //! destructor
-  virtual ~FieldHiddenText();
+  ~FieldHiddenText() final;
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! print a field
-  virtual void print(std::ostream &o) const
+  void print(std::ostream &o) const final
   {
     Field::print(o);
     if (!m_condition.empty()) o << "condition=" << m_condition.cstr() << ",";
@@ -513,19 +520,27 @@ bool FieldHiddenText::send(STOFFListenerPtr listener, StarState &state) const
 }
 
 //! Internal: a set field field
-struct FieldINet : public Field {
+struct FieldINet final : public Field {
   //! constructor
-  FieldINet() : Field(), m_url(""), m_target(""), m_libNames()
+  FieldINet()
+    : Field()
+    , m_url("")
+    , m_target("")
+    , m_libNames()
   {
   }
   //! copy constructor
-  explicit FieldINet(Field const &orig) : Field(orig), m_url(""), m_target(""), m_libNames()
+  explicit FieldINet(Field const &orig)
+    : Field(orig)
+    , m_url("")
+    , m_target("")
+    , m_libNames()
   {
   }
   //! destructor
-  virtual ~FieldINet();
+  ~FieldINet() final;
   //! print a field
-  virtual void print(std::ostream &o) const
+  void print(std::ostream &o) const final
   {
     Field::print(o);
     if (!m_url.empty()) o << "url=" << m_url.cstr() << ",";
@@ -550,21 +565,25 @@ FieldINet::~FieldINet()
 }
 
 //! Internal: a jump edit field
-struct FieldJumpEdit : public Field {
+struct FieldJumpEdit final : public Field {
   //! constructor
-  FieldJumpEdit() : Field(), m_help("")
+  FieldJumpEdit()
+    : Field()
+    , m_help("")
   {
   }
   //! copy constructor
-  explicit FieldJumpEdit(Field const &orig) : Field(orig), m_help("")
+  explicit FieldJumpEdit(Field const &orig)
+    : Field(orig)
+    , m_help("")
   {
   }
   //! destructor
-  virtual ~FieldJumpEdit();
+  ~FieldJumpEdit() final;
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! print a field
-  virtual void print(std::ostream &o) const
+  void print(std::ostream &o) const final
   {
     Field::print(o);
     if (!m_help.empty()) o << "help=" << m_help.cstr() << ",";
@@ -604,9 +623,13 @@ bool FieldJumpEdit::send(STOFFListenerPtr listener, StarState &state) const
 }
 
 //! Internal: a pageNumber field
-struct FieldPageNumber : public Field {
+struct FieldPageNumber final : public Field {
   //! constructor
-  FieldPageNumber() : Field(), m_userString(""), m_offset(0), m_isOn(true)
+  FieldPageNumber()
+    : Field()
+    , m_userString("")
+    , m_offset(0)
+    , m_isOn(true)
   {
   }
   //! copy constructor
@@ -614,11 +637,11 @@ struct FieldPageNumber : public Field {
   {
   }
   //! destructor
-  virtual ~FieldPageNumber();
+  ~FieldPageNumber() final;
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! print a field
-  virtual void print(std::ostream &o) const
+  void print(std::ostream &o) const final
   {
     Field::print(o);
     if (!m_userString.empty())
@@ -660,21 +683,27 @@ bool FieldPageNumber::send(STOFFListenerPtr listener, StarState &state) const
 }
 
 //! Internal: a postit field
-struct FieldPostIt : public Field {
+struct FieldPostIt final : public Field {
   //! constructor
-  FieldPostIt() : Field(), m_author(""), m_date(0)
+  FieldPostIt()
+    : Field()
+    , m_author("")
+    , m_date(0)
   {
   }
   //! copy constructor
-  explicit FieldPostIt(Field const &orig) : Field(orig), m_author(""), m_date(0)
+  explicit FieldPostIt(Field const &orig)
+    : Field(orig)
+    , m_author("")
+    , m_date(0)
   {
   }
   //! destructor
-  virtual ~FieldPostIt();
+  ~FieldPostIt() final;
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! print a field
-  virtual void print(std::ostream &o) const
+  void print(std::ostream &o) const final
   {
     Field::print(o);
     if (!m_author.empty()) o << "author=" << m_author.cstr() << ",";
@@ -691,19 +720,25 @@ FieldPostIt::~FieldPostIt()
 }
 
 //! Internal: a script field
-struct FieldScript : public Field {
+struct FieldScript final : public Field {
   //! constructor
-  FieldScript() : Field(), m_code(""), m_scriptType("")
+  FieldScript()
+    : Field()
+    , m_code("")
+    , m_scriptType("")
   {
   }
   //! copy constructor
-  explicit FieldScript(Field const &orig) : Field(orig), m_code(""), m_scriptType("")
+  explicit FieldScript(Field const &orig)
+    : Field(orig)
+    , m_code("")
+    , m_scriptType("")
   {
   }
   //! destructor
-  virtual ~FieldScript();
+  ~FieldScript() final;
   //! print a field
-  virtual void print(std::ostream &o) const
+  void print(std::ostream &o) const final
   {
     Field::print(o);
     if (!m_code.empty()) o << "code=" << m_code.cstr() << ",";
@@ -720,21 +755,35 @@ FieldScript::~FieldScript()
 }
 
 //! Internal: a set expr field
-struct FieldSetExp : public Field {
+struct FieldSetExp final : public Field {
   //! constructor
-  FieldSetExp() : Field(), m_fieldType(0), m_formula(""), m_prompt(""), m_seqVal(0), m_seqNo(0), m_delim('.')
+  FieldSetExp()
+    : Field()
+    , m_fieldType(0)
+    , m_formula("")
+    , m_prompt("")
+    , m_seqVal(0)
+    , m_seqNo(0)
+    , m_delim('.')
   {
   }
   //! copy constructor
-  explicit FieldSetExp(Field const &orig) : Field(orig), m_fieldType(0), m_formula(""), m_prompt(""), m_seqVal(0), m_seqNo(0), m_delim('.')
+  explicit FieldSetExp(Field const &orig)
+    : Field(orig)
+    , m_fieldType(0)
+    , m_formula("")
+    , m_prompt("")
+    , m_seqVal(0)
+    , m_seqNo(0)
+    , m_delim('.')
   {
   }
   //! destructor
-  virtual ~FieldSetExp();
+  ~FieldSetExp() final;
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! print a field
-  virtual void print(std::ostream &o) const
+  void print(std::ostream &o) const final
   {
     Field::print(o);
     if (m_fieldType) o << "fieldType=" << m_fieldType << ",";
@@ -793,21 +842,31 @@ bool FieldSetExp::send(STOFFListenerPtr listener, StarState &state) const
 }
 
 //! Internal: a set field field
-struct FieldSetField : public Field {
+struct FieldSetField final : public Field {
   //! constructor
-  FieldSetField() : Field(), m_condition(""), m_dbName(""), m_textNumber(""), m_longNumber(0)
+  FieldSetField()
+    : Field()
+    , m_condition("")
+    , m_dbName("")
+    , m_textNumber("")
+    , m_longNumber(0)
   {
   }
   //! copy constructor
-  explicit FieldSetField(Field const &orig) : Field(orig), m_condition(""), m_dbName(""), m_textNumber(""), m_longNumber(0)
+  explicit FieldSetField(Field const &orig)
+    : Field(orig)
+    , m_condition("")
+    , m_dbName("")
+    , m_textNumber("")
+    , m_longNumber(0)
   {
   }
   //! destructor
-  virtual ~FieldSetField();
+  ~FieldSetField() final;
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! print a field
-  virtual void print(std::ostream &o) const
+  void print(std::ostream &o) const final
   {
     Field::print(o);
     if (!m_condition.empty()) o << "condition=" << m_condition.cstr() << ",";
@@ -865,17 +924,18 @@ struct State {
 
 ////////////////////////////////////////
 //! Internal: the subdocument of a SWFieldManger
-class SubDocument : public STOFFSubDocument
+class SubDocument final : public STOFFSubDocument
 {
 public:
-  explicit SubDocument(librevenge::RVNGString const &text) :
-    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_text(text) {}
+  explicit SubDocument(librevenge::RVNGString const &text)
+    : STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry())
+    , m_text(text) {}
 
   //! destructor
   virtual ~SubDocument() {}
 
   //! operator!=
-  virtual bool operator!=(STOFFSubDocument const &doc) const
+  virtual bool operator!=(STOFFSubDocument const &doc) const final
   {
     if (STOFFSubDocument::operator!=(doc)) return true;
     SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
@@ -884,14 +944,8 @@ public:
     return false;
   }
 
-  //! operator!==
-  virtual bool operator==(STOFFSubDocument const &doc) const
-  {
-    return !operator!=(doc);
-  }
-
   //! the parser function
-  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type);
+  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type) final;
 
 protected:
   //! the text
@@ -932,7 +986,8 @@ bool FieldPostIt::send(STOFFListenerPtr listener, StarState &state) const
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SWFieldManager::SWFieldManager() : m_state(new SWFieldManagerInternal::State)
+SWFieldManager::SWFieldManager()
+  : m_state(new SWFieldManagerInternal::State)
 {
 }
 

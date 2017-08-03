@@ -52,7 +52,15 @@ namespace SWFieldManagerInternal
 //! Internal: a field
 struct Field {
   //! constructor
-  Field() : m_type(-1), m_subType(-1), m_format(-1), m_name(""), m_content(""), m_textValue(""), m_doubleValue(0), m_level(0)
+  Field()
+    : m_type(-1)
+    , m_subType(-1)
+    , m_format(-1)
+    , m_name("")
+    , m_content("")
+    , m_textValue("")
+    , m_doubleValue(0)
+    , m_level(0)
   {
   }
   //! destructor
@@ -85,10 +93,7 @@ struct Field {
   int m_level;
 protected:
   //! copy constructor
-  Field(const Field &orig) : m_type(orig.m_type), m_subType(orig.m_subType), m_format(orig.m_format),
-    m_name(orig.m_name), m_content(orig.m_content), m_textValue(orig.m_textValue), m_doubleValue(orig.m_doubleValue), m_level(orig.m_level)
-  {
-  }
+  Field(const Field &orig) = default;
 };
 
 struct State;
