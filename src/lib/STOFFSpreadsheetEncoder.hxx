@@ -52,132 +52,132 @@ struct State;
 	\note as this class implements the functions librevenge::RVNGSpreadsheetInterface,
   the documentation is not duplicated..
 */
-class STOFFSpreadsheetEncoder : public librevenge::RVNGSpreadsheetInterface
+class STOFFSpreadsheetEncoder final : public librevenge::RVNGSpreadsheetInterface
 {
 public:
   /// constructor
   STOFFSpreadsheetEncoder();
   /// destructor
-  ~STOFFSpreadsheetEncoder();
+  ~STOFFSpreadsheetEncoder() final;
   /// return the final spreadsheet
   bool getBinaryResult(STOFFEmbeddedObject &object);
 
-  void setDocumentMetaData(const librevenge::RVNGPropertyList &propList);
+  void setDocumentMetaData(const librevenge::RVNGPropertyList &propList) final;
 
-  void startDocument(const librevenge::RVNGPropertyList &propList);
-  void endDocument();
+  void startDocument(const librevenge::RVNGPropertyList &propList) final;
+  void endDocument() final;
 
-  void definePageStyle(const librevenge::RVNGPropertyList &propList);
-  void defineEmbeddedFont(const librevenge::RVNGPropertyList &propList);
+  void definePageStyle(const librevenge::RVNGPropertyList &propList) final;
+  void defineEmbeddedFont(const librevenge::RVNGPropertyList &propList) final;
 
-  void openPageSpan(const librevenge::RVNGPropertyList &propList);
-  void closePageSpan();
+  void openPageSpan(const librevenge::RVNGPropertyList &propList) final;
+  void closePageSpan() final;
 
-  void openHeader(const librevenge::RVNGPropertyList &propList);
-  void closeHeader();
+  void openHeader(const librevenge::RVNGPropertyList &propList) final;
+  void closeHeader() final;
 
-  void openFooter(const librevenge::RVNGPropertyList &propList);
-  void closeFooter();
+  void openFooter(const librevenge::RVNGPropertyList &propList) final;
+  void closeFooter() final;
 
-  void defineSheetNumberingStyle(const librevenge::RVNGPropertyList &propList);
-  void openSheet(const librevenge::RVNGPropertyList &propList);
-  void closeSheet();
-  void openSheetRow(const librevenge::RVNGPropertyList &propList);
-  void closeSheetRow();
-  void openSheetCell(const librevenge::RVNGPropertyList &propList);
-  void closeSheetCell();
+  void defineSheetNumberingStyle(const librevenge::RVNGPropertyList &propList) final;
+  void openSheet(const librevenge::RVNGPropertyList &propList) final;
+  void closeSheet() final;
+  void openSheetRow(const librevenge::RVNGPropertyList &propList) final;
+  void closeSheetRow() final;
+  void openSheetCell(const librevenge::RVNGPropertyList &propList) final;
+  void closeSheetCell() final;
 
-  void defineChartStyle(const librevenge::RVNGPropertyList &propList);
+  void defineChartStyle(const librevenge::RVNGPropertyList &propList) final;
 
-  void openChart(const librevenge::RVNGPropertyList &propList);
-  void closeChart();
+  void openChart(const librevenge::RVNGPropertyList &propList) final;
+  void closeChart() final;
 
-  void openChartTextObject(const librevenge::RVNGPropertyList &propList);
-  void closeChartTextObject();
+  void openChartTextObject(const librevenge::RVNGPropertyList &propList) final;
+  void closeChartTextObject() final;
 
-  void openChartPlotArea(const librevenge::RVNGPropertyList &propList);
-  void closeChartPlotArea();
-  void insertChartAxis(const librevenge::RVNGPropertyList &axis);
-  void openChartSerie(const librevenge::RVNGPropertyList &series);
-  void closeChartSerie();
+  void openChartPlotArea(const librevenge::RVNGPropertyList &propList) final;
+  void closeChartPlotArea() final;
+  void insertChartAxis(const librevenge::RVNGPropertyList &axis) final;
+  void openChartSerie(const librevenge::RVNGPropertyList &series) final;
+  void closeChartSerie() final;
 
-  void defineParagraphStyle(const librevenge::RVNGPropertyList &propList);
+  void defineParagraphStyle(const librevenge::RVNGPropertyList &propList) final;
 
-  void openParagraph(const librevenge::RVNGPropertyList &propList);
-  void closeParagraph();
+  void openParagraph(const librevenge::RVNGPropertyList &propList) final;
+  void closeParagraph() final;
 
-  void defineCharacterStyle(const librevenge::RVNGPropertyList &propList);
+  void defineCharacterStyle(const librevenge::RVNGPropertyList &propList) final;
 
-  void openSpan(const librevenge::RVNGPropertyList &propList);
-  void closeSpan();
-  void openLink(const librevenge::RVNGPropertyList &propList);
-  void closeLink();
+  void openSpan(const librevenge::RVNGPropertyList &propList) final;
+  void closeSpan() final;
+  void openLink(const librevenge::RVNGPropertyList &propList) final;
+  void closeLink() final;
 
-  void defineSectionStyle(const librevenge::RVNGPropertyList &propList);
+  void defineSectionStyle(const librevenge::RVNGPropertyList &propList) final;
 
-  void openSection(const librevenge::RVNGPropertyList &propList);
-  void closeSection();
+  void openSection(const librevenge::RVNGPropertyList &propList) final;
+  void closeSection() final;
 
-  void insertTab();
-  void insertSpace();
-  void insertText(const librevenge::RVNGString &text);
-  void insertLineBreak();
+  void insertTab() final;
+  void insertSpace() final;
+  void insertText(const librevenge::RVNGString &text) final;
+  void insertLineBreak() final;
 
-  void insertField(const librevenge::RVNGPropertyList &propList);
+  void insertField(const librevenge::RVNGPropertyList &propList) final;
 
-  void openOrderedListLevel(const librevenge::RVNGPropertyList &propList);
-  void openUnorderedListLevel(const librevenge::RVNGPropertyList &propList);
-  void closeOrderedListLevel();
-  void closeUnorderedListLevel();
-  void openListElement(const librevenge::RVNGPropertyList &propList);
-  void closeListElement();
+  void openOrderedListLevel(const librevenge::RVNGPropertyList &propList) final;
+  void openUnorderedListLevel(const librevenge::RVNGPropertyList &propList) final;
+  void closeOrderedListLevel() final;
+  void closeUnorderedListLevel() final;
+  void openListElement(const librevenge::RVNGPropertyList &propList) final;
+  void closeListElement() final;
 
-  void openFootnote(const librevenge::RVNGPropertyList &propList);
-  void closeFootnote();
+  void openFootnote(const librevenge::RVNGPropertyList &propList) final;
+  void closeFootnote() final;
 
-  void openComment(const librevenge::RVNGPropertyList &propList);
-  void closeComment();
+  void openComment(const librevenge::RVNGPropertyList &propList) final;
+  void closeComment() final;
 
-  void openFrame(const librevenge::RVNGPropertyList &propList);
-  void closeFrame();
-  void insertBinaryObject(const librevenge::RVNGPropertyList &propList);
+  void openFrame(const librevenge::RVNGPropertyList &propList) final;
+  void closeFrame() final;
+  void insertBinaryObject(const librevenge::RVNGPropertyList &propList) final;
 
   //
   // specific text/table
   //
 
-  void openTextBox(const librevenge::RVNGPropertyList &propList);
-  void closeTextBox();
+  void openTextBox(const librevenge::RVNGPropertyList &propList) final;
+  void closeTextBox() final;
 
-  void openTable(const librevenge::RVNGPropertyList &propList);
-  void closeTable();
-  void openTableRow(const librevenge::RVNGPropertyList &propList);
-  void closeTableRow();
-  void openTableCell(const librevenge::RVNGPropertyList &propList);
-  void closeTableCell();
-  void insertCoveredTableCell(const librevenge::RVNGPropertyList &propList);
+  void openTable(const librevenge::RVNGPropertyList &propList) final;
+  void closeTable() final;
+  void openTableRow(const librevenge::RVNGPropertyList &propList) final;
+  void closeTableRow() final;
+  void openTableCell(const librevenge::RVNGPropertyList &propList) final;
+  void closeTableCell() final;
+  void insertCoveredTableCell(const librevenge::RVNGPropertyList &propList) final;
 
   //
   // simple Graphic
   //
 
-  void openGroup(const librevenge::RVNGPropertyList &propList);
-  void closeGroup();
+  void openGroup(const librevenge::RVNGPropertyList &propList) final;
+  void closeGroup() final;
 
-  void defineGraphicStyle(const librevenge::RVNGPropertyList &propList);
+  void defineGraphicStyle(const librevenge::RVNGPropertyList &propList) final;
 
-  void drawRectangle(const librevenge::RVNGPropertyList &propList);
-  void drawEllipse(const librevenge::RVNGPropertyList &propList);
-  void drawPolygon(const librevenge::RVNGPropertyList &propList);
-  void drawPolyline(const librevenge::RVNGPropertyList &propList);
-  void drawPath(const librevenge::RVNGPropertyList &propList);
-  void drawConnector(const ::librevenge::RVNGPropertyList &propList);
+  void drawRectangle(const librevenge::RVNGPropertyList &propList) final;
+  void drawEllipse(const librevenge::RVNGPropertyList &propList) final;
+  void drawPolygon(const librevenge::RVNGPropertyList &propList) final;
+  void drawPolyline(const librevenge::RVNGPropertyList &propList) final;
+  void drawPath(const librevenge::RVNGPropertyList &propList) final;
+  void drawConnector(const ::librevenge::RVNGPropertyList &propList) final;
 
   //
   // Equation
   //
 
-  void insertEquation(const librevenge::RVNGPropertyList &propList);
+  void insertEquation(const librevenge::RVNGPropertyList &propList) final;
 
 protected:
   //! the actual state

@@ -54,7 +54,8 @@ namespace STOFFSpreadsheetEncoderInternal
 //! the state of a STOFFSpreadsheetEncoder
 struct State {
   //! constructor
-  State() : m_encoder()
+  State()
+    : m_encoder()
   {
   }
   //! the encoder
@@ -63,7 +64,9 @@ struct State {
 
 }
 
-STOFFSpreadsheetEncoder::STOFFSpreadsheetEncoder() : librevenge::RVNGSpreadsheetInterface(), m_state(new STOFFSpreadsheetEncoderInternal::State)
+STOFFSpreadsheetEncoder::STOFFSpreadsheetEncoder()
+  : librevenge::RVNGSpreadsheetInterface()
+  , m_state(new STOFFSpreadsheetEncoderInternal::State)
 {
 }
 

@@ -109,7 +109,7 @@ void STOFFPropertyHandlerEncoder::writePropertyList(const librevenge::RVNGProper
   for (i.rewind(); i.next();) numElt++;
   writeLong(numElt);
   for (i.rewind(); i.next();) {
-    librevenge::RVNGPropertyListVector const *child=xPropList.child(i.key());
+    auto const *child=xPropList.child(i.key());
     if (!child) {
       m_f << 'p';
       writeProperty(i.key(),*i());
@@ -310,11 +310,14 @@ protected:
     list.insert(key.cstr(), val);
     librevenge::RVNGProperty const *prop=list[key.cstr()];
     if (!prop) return true;
-    librevenge::RVNGUnit unit=prop->getUnit();
+    auto unit=prop->getUnit();
     if (unit==librevenge::RVNG_POINT)
       list.insert(key.cstr(), prop->getDouble()/72., librevenge::RVNG_INCH);
     else if (unit==librevenge::RVNG_TWIP)
       list.insert(key.cstr(), prop->getDouble()/1440., librevenge::RVNG_INCH);
+    else {
+      STOFF_DEBUG_MSG(("STOFFPropertyHandlerDecoder:readProperty find unknown unit\n"));
+    }
     return true;
   }
 
@@ -341,7 +344,7 @@ protected:
   static bool readLong(librevenge::RVNGInputStream &input, long &val)
   {
     unsigned long numRead = 0;
-    const unsigned char *dt = input.read(4, numRead);
+    auto const *dt = input.read(4, numRead);
     if (dt == 0L || numRead != 4) {
       STOFF_DEBUG_MSG(("STOFFPropertyHandlerDecoder::readLong: can not read long\n"));
       return false;

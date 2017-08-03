@@ -45,24 +45,25 @@
     \see STOFFSpreadsheetEncoder (with mimeType="image/stoff-odg") and to send
     it contents to librevenge::RVNGSpreadsheetInterface
 */
-class STOFFSpreadsheetDecoder : public STOFFPropertyHandler
+class STOFFSpreadsheetDecoder final : public STOFFPropertyHandler
 {
 public:
   /** constructor */
-  explicit STOFFSpreadsheetDecoder(librevenge::RVNGSpreadsheetInterface *output) : STOFFPropertyHandler(), m_output(output) { }
+  explicit STOFFSpreadsheetDecoder(librevenge::RVNGSpreadsheetInterface *output)
+    : STOFFPropertyHandler()
+    , m_output(output) { }
   /** destructor */
-  ~STOFFSpreadsheetDecoder() {}
+  ~STOFFSpreadsheetDecoder() final {}
 
   /** insert an element */
-  void insertElement(const char *psName);
+  void insertElement(const char *psName) final;
   /** insert an element ( with a librevenge::RVNGPropertyList ) */
-  void insertElement(const char *psName, const librevenge::RVNGPropertyList &xPropList);
+  void insertElement(const char *psName, const librevenge::RVNGPropertyList &xPropList) final;
   /** insert an element ( with a librevenge::RVNGPropertyListVector parameter ) */
   void insertElement(const char *psName, const librevenge::RVNGPropertyList &xPropList,
                      const librevenge::RVNGPropertyListVector &vector);
   /** insert a sequence of character */
-  void characters(const librevenge::RVNGString &sCharacters)
-  {
+  void characters(const librevenge::RVNGString &sCharacters) final {
     if (!m_output) return;
     m_output->insertText(sCharacters);
   }

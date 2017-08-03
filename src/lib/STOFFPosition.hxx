@@ -52,7 +52,9 @@ public:
 
 public:
   //! constructor
-  STOFFPosition() : m_anchorTo(Unknown), m_propertyList() {}
+  STOFFPosition()
+    : m_anchorTo(Unknown)
+    , m_propertyList() {}
   //! destructor
   virtual ~STOFFPosition();
   //! add to the propList

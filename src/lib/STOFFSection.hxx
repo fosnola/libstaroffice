@@ -47,7 +47,8 @@ class STOFFSection
 public:
   struct Column;
   //! constructor
-  STOFFSection() : m_propertyList()
+  STOFFSection()
+    : m_propertyList()
   {
   }
   //! destructor
