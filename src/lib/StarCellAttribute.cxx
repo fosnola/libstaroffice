@@ -47,7 +47,7 @@
 namespace StarCellAttribute
 {
 //! a character bool attribute
-class StarCAttributeBool : public StarAttributeBool
+class StarCAttributeBool final : public StarAttributeBool
 {
 public:
   //! constructor
@@ -56,22 +56,20 @@ public:
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeBool(*this));
   }
   //! add to a cell style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 
 protected:
   //! copy constructor
-  StarCAttributeBool(StarCAttributeBool const &orig) : StarAttributeBool(orig)
-  {
-  }
+  StarCAttributeBool(StarCAttributeBool const &orig) = default;
 };
 
 //! a character color attribute
-class StarCAttributeColor : public StarAttributeColor
+class StarCAttributeColor final : public StarAttributeColor
 {
 public:
   //! constructor
@@ -79,26 +77,24 @@ public:
   {
   }
   //! destructor
-  ~StarCAttributeColor();
+  ~StarCAttributeColor() final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeColor(*this));
   }
   //! add to a cell style
-  //virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarCAttributeColor(StarCAttributeColor const &orig) : StarAttributeColor(orig)
-  {
-  }
+  StarCAttributeColor(StarCAttributeColor const &orig) = default;
 };
 
 StarCAttributeColor::~StarCAttributeColor()
 {
 }
 //! a character integer attribute
-class StarCAttributeInt : public StarAttributeInt
+class StarCAttributeInt final : public StarAttributeInt
 {
 public:
   //! constructor
@@ -107,21 +103,19 @@ public:
   {
   }
   //! add to a cell style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeInt(*this));
   }
 protected:
   //! copy constructor
-  StarCAttributeInt(StarCAttributeInt const &orig) : StarAttributeInt(orig)
-  {
-  }
+  StarCAttributeInt(StarCAttributeInt const &orig) = default;
 };
 
 //! a character unsigned integer attribute
-class StarCAttributeUInt : public StarAttributeUInt
+class StarCAttributeUInt final : public StarAttributeUInt
 {
 public:
   //! constructor
@@ -130,21 +124,19 @@ public:
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeUInt(*this));
   }
   //! add to a cell style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarCAttributeUInt(StarCAttributeUInt const &orig) : StarAttributeUInt(orig)
-  {
-  }
+  StarCAttributeUInt(StarCAttributeUInt const &orig) = default;
 };
 
 //! a void attribute
-class StarCAttributeVoid : public StarAttributeVoid
+class StarCAttributeVoid final : public StarAttributeVoid
 {
 public:
   //! constructor
@@ -152,19 +144,17 @@ public:
   {
   }
   //! destructor
-  ~StarCAttributeVoid();
+  ~StarCAttributeVoid() final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeVoid(*this));
   }
   //! add to a cell style
-  //virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarCAttributeVoid(StarCAttributeVoid const &orig) : StarAttributeVoid(orig)
-  {
-  }
+  StarCAttributeVoid(StarCAttributeVoid const &orig) = default;
 };
 
 StarCAttributeVoid::~StarCAttributeVoid()
@@ -304,7 +294,7 @@ inline void addAttributeVoid(std::map<int, std::shared_ptr<StarAttribute> > &map
 namespace StarCellAttribute
 {
 //! a margins attribute
-class StarCAttributeMargins : public StarAttribute
+class StarCAttributeMargins final : public StarAttribute
 {
 public:
   //! constructor
@@ -313,16 +303,16 @@ public:
     for (int i=0; i<4; ++i) m_margins[i]=20;
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeMargins(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a cell style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     for (int i=0; i<4; ++i) {
@@ -343,7 +333,7 @@ protected:
 };
 
 //! a merge attribute
-class StarCAttributeMerge : public StarAttribute
+class StarCAttributeMerge final : public StarAttribute
 {
 public:
   //! constructor
@@ -351,16 +341,16 @@ public:
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeMerge(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a cell style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName;
     if (m_span!=STOFFVec2i(1,1)) o << "=" << m_span;
@@ -369,15 +359,13 @@ public:
 
 protected:
   //! copy constructor
-  StarCAttributeMerge(StarCAttributeMerge const &orig) : StarAttribute(orig), m_span(orig.m_span)
-  {
-  }
+  StarCAttributeMerge(StarCAttributeMerge const &orig) = default;
   //! the span
   STOFFVec2i m_span;
 };
 
 //! Pattern attribute of StarAttributeInternal
-class StarCAttributePattern : public StarAttributeItemSet
+class StarCAttributePattern final : public StarAttributeItemSet
 {
 public:
   //! constructor
@@ -387,15 +375,14 @@ public:
     m_limits.push_back(STOFFVec2i(100,148));
   }
   //! destructor
-  ~StarCAttributePattern();
+  ~StarCAttributePattern() final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributePattern(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &object)
-  {
+  bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &object) final {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
     libstoff::DebugFile &ascFile=zone.ascii();
@@ -404,7 +391,8 @@ public:
     // sc_patattr.cxx ScPatternAttr::Create
     bool hasStyle;
     *input>>hasStyle;
-    if (hasStyle) {
+    if (hasStyle)
+    {
       f << "hasStyle,";
       std::vector<uint32_t> text;
       if (!zone.readString(text) || input->tell()>endPos) {
@@ -430,7 +418,7 @@ public:
     return ok && input->tell()<=endPos;
   }
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const
+  void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const final
   {
     StarAttributeItemSet::print(o, done);
     if (m_style.empty())
@@ -439,9 +427,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarCAttributePattern(StarCAttributePattern const &orig) : StarAttributeItemSet(orig), m_style(orig.m_style)
-  {
-  }
+  StarCAttributePattern(StarCAttributePattern const &orig) = default;
   //! the style
   librevenge::RVNGString m_style;
 };
@@ -451,7 +437,7 @@ StarCAttributePattern::~StarCAttributePattern()
 }
 
 //! a protection attribute
-class StarCAttributeProtection : public StarAttribute
+class StarCAttributeProtection final : public StarAttribute
 {
 public:
   //! constructor
@@ -460,16 +446,16 @@ public:
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeProtection(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a cell style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (m_protected) o << "protected,";
@@ -481,9 +467,7 @@ public:
 
 protected:
   //! copy constructor
-  StarCAttributeProtection(StarCAttributeProtection const &orig) : StarAttribute(orig), m_protected(orig.m_protected), m_hiddenFormula(orig.m_hiddenFormula), m_hiddenCell(orig.m_hiddenCell), m_doNotPrint(orig.m_doNotPrint)
-  {
-  }
+  StarCAttributeProtection(StarCAttributeProtection const &orig) = default;
   //! the cell is protected
   bool m_protected;
   //! the formula is hidden

@@ -56,8 +56,17 @@ struct Token {
   //! the content type
   enum Content { C_Data, C_FunctionOperator };
   //! constructor
-  Token() : m_type(Unknown), m_content(C_Data), m_operation(0), m_longValue(0), m_doubleValue(0), m_textValue(""),
-    m_index(0), m_jumpPositions(), m_instruction(), m_extra("")
+  Token()
+    : m_type(Unknown)
+    , m_content(C_Data)
+    , m_operation(0)
+    , m_longValue(0)
+    , m_doubleValue(0)
+    , m_textValue("")
+    , m_index(0)
+    , m_jumpPositions()
+    , m_instruction()
+    , m_extra("")
   {
   }
   //! operator<<
@@ -197,7 +206,7 @@ bool Token::get(STOFFCellContent::FormulaInstruction &instr, bool &ignore)
 bool Token::updateFunction()
 {
   unsigned const &nOp=m_operation;
-  STOFFCellContent::FormulaInstruction &instr=m_instruction;
+  auto &instr=m_instruction;
 
   // binary op
   if (nOp==33 || nOp==34) { // change, ie reconstructor a&&b in AND(a,b), ...
@@ -331,7 +340,7 @@ bool Token::addToken(std::vector<std::vector<Token> > &stack, Token const &token
     }
     else if (c)
       child.push_back(token);
-    std::vector<Token> const &node=stack[size_t(numElt-nChild+c)];
+    auto const &node=stack[size_t(numElt-nChild+c)];
     child.insert(child.end(), node.begin(), node.end());
   }
   sep.m_instruction.m_content=")";
@@ -356,8 +365,7 @@ bool Token::addToken(std::vector<std::vector<Token> > &stack, Token const &token
 void StarCellFormula::updateFormula(STOFFCellContent &content, std::vector<librevenge::RVNGString> const &sheetNames, int sheetId)
 {
   int numNames=int(sheetNames.size());
-  for (size_t i=0; i<content.m_formula.size(); ++i) {
-    STOFFCellContent::FormulaInstruction &form=content.m_formula[i];
+  for (auto &form : content.m_formula) {
     if ((form.m_type!=STOFFCellContent::FormulaInstruction::F_Cell &&
          form.m_type!=STOFFCellContent::FormulaInstruction::F_CellList) ||
         form.m_sheetId<0 || form.m_sheetId==sheetId)
@@ -414,12 +422,12 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCellContent &content, i
   }
 
   bool hasIndex=false, formulaSet=false;
-  for (size_t i=0; i<tokenList.size(); ++i) {
+  for (auto &token : tokenList) {
     STOFFCellContent::FormulaInstruction finalInstr;
     bool ignore;
-    if (tokenList[i].get(finalInstr,ignore) && !ignore)
+    if (token.get(finalInstr,ignore) && !ignore)
       content.m_formula.push_back(finalInstr);
-    else if (tokenList[i].m_type==StarCellFormulaInternal::Token::Index)
+    else if (token.m_type==StarCellFormulaInternal::Token::Index)
       hasIndex=true;
   }
   if (hasIndex)
@@ -470,8 +478,8 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCellContent &content, i
   }
   if (ok && !formulaSet && rpnList.size()) {
     std::vector<std::vector<StarCellFormulaInternal::Token> > stack;
-    for (size_t i=0; i<rpnList.size(); ++i) {
-      if (!StarCellFormulaInternal::Token::addToken(stack, rpnList[i])) {
+    for (auto const &rpn : rpnList) {
+      if (!StarCellFormulaInternal::Token::addToken(stack, rpn)) {
         ok=false;
         break;
       }
@@ -479,12 +487,12 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCellContent &content, i
     if (ok && stack.size()==1) {
       hasIndex=false;
       std::vector<StarCellFormulaInternal::Token> &code=stack[0];
-      for (size_t i=0; i<code.size(); ++i) {
+      for (auto &codeData : code) {
         STOFFCellContent::FormulaInstruction finalInstr;
         bool ignore;
-        if (code[i].get(finalInstr,ignore) && !ignore)
+        if (codeData.get(finalInstr,ignore) && !ignore)
           content.m_formula.push_back(finalInstr);
-        else if (code[i].m_type==StarCellFormulaInternal::Token::Index)
+        else if (codeData.m_type==StarCellFormulaInternal::Token::Index)
           hasIndex=true;
       }
       if (hasIndex)
@@ -497,11 +505,10 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCellContent &content, i
 #if 0
     else {
       std::cerr << "Bad=[\n";
-      for (size_t i=0; i<stack.size(); ++i) {
+      for (auto const &codeList : stack) {
         std::cerr << "\t";
-        std::vector<StarCellFormulaInternal::Token> &code=stack[i];
-        for (size_t j=0; j<code.size(); ++j)
-          std::cerr << code[j];
+        for (auto const &code : codeList)
+          std::cerr << code;
         std::cerr << "\n";
       }
       std::cerr << "]\n";
@@ -769,7 +776,7 @@ bool StarCellFormula::readSCToken3(StarZone &zone, StarCellFormulaInternal::Toke
   token.m_operation=nOp;
   bool ok=true;
   libstoff::DebugStream f;
-  STOFFCellContent::FormulaInstruction &instr=token.m_instruction;
+  auto &instr=token.m_instruction;
   switch (nOp) {
   case 0: {
     uint8_t type;

@@ -50,7 +50,7 @@
 namespace StarCharAttribute
 {
 //! a character bool attribute
-class StarCAttributeBool : public StarAttributeBool
+class StarCAttributeBool final : public StarAttributeBool
 {
 public:
   //! constructor
@@ -59,22 +59,20 @@ public:
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeBool(*this));
   }
   //! add to a font
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 
 protected:
   //! copy constructor
-  StarCAttributeBool(StarCAttributeBool const &orig) : StarAttributeBool(orig)
-  {
-  }
+  StarCAttributeBool(StarCAttributeBool const &orig) = default;
 };
 
 //! a character color attribute
-class StarCAttributeColor : public StarAttributeColor
+class StarCAttributeColor final : public StarAttributeColor
 {
 public:
   //! constructor
@@ -82,21 +80,19 @@ public:
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeColor(*this));
   }
   //! add to a font
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarCAttributeColor(StarCAttributeColor const &orig) : StarAttributeColor(orig)
-  {
-  }
+  StarCAttributeColor(StarCAttributeColor const &orig) = default;
 };
 
 //! a character integer attribute
-class StarCAttributeInt : public StarAttributeInt
+class StarCAttributeInt final : public StarAttributeInt
 {
 public:
   //! constructor
@@ -105,21 +101,19 @@ public:
   {
   }
   //! add to a font
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeInt(*this));
   }
 protected:
   //! copy constructor
-  StarCAttributeInt(StarCAttributeInt const &orig) : StarAttributeInt(orig)
-  {
-  }
+  StarCAttributeInt(StarCAttributeInt const &orig) = default;
 };
 
 //! a character unsigned integer attribute
-class StarCAttributeUInt : public StarAttributeUInt
+class StarCAttributeUInt final : public StarAttributeUInt
 {
 public:
   //! constructor
@@ -128,21 +122,19 @@ public:
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeUInt(*this));
   }
   //! add to a font
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarCAttributeUInt(StarCAttributeUInt const &orig) : StarAttributeUInt(orig)
-  {
-  }
+  StarCAttributeUInt(StarCAttributeUInt const &orig) = default;
 };
 
 //! a void attribute
-class StarCAttributeVoid : public StarAttributeVoid
+class StarCAttributeVoid final : public StarAttributeVoid
 {
 public:
   //! constructor
@@ -150,17 +142,15 @@ public:
   {
   }
   //! add to a font
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeVoid(*this));
   }
 protected:
   //! copy constructor
-  StarCAttributeVoid(StarCAttributeVoid const &orig) : StarAttributeVoid(orig)
-  {
-  }
+  StarCAttributeVoid(StarCAttributeVoid const &orig) = default;
 };
 
 //! add a bool attribute
@@ -391,17 +381,17 @@ namespace StarCharAttribute
 // ------------------------------------------------------------
 ////////////////////////////////////////
 //! Internal: the subdocument of a StarObjectSpreadsheet
-class SubDocument : public STOFFSubDocument
+class SubDocument final : public STOFFSubDocument
 {
 public:
   explicit SubDocument(std::shared_ptr<StarObjectTextInternal::Content> content, StarItemPool const *pool, StarObject &object) :
     STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_content(content), m_pool(pool), m_object(object) {}
 
   //! destructor
-  virtual ~SubDocument() {}
+  ~SubDocument() final {}
 
   //! operator!=
-  virtual bool operator!=(STOFFSubDocument const &doc) const
+  bool operator!=(STOFFSubDocument const &doc) const final
   {
     if (STOFFSubDocument::operator!=(doc)) return true;
     SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
@@ -412,14 +402,8 @@ public:
     return false;
   }
 
-  //! operator!==
-  virtual bool operator==(STOFFSubDocument const &doc) const
-  {
-    return !operator!=(doc);
-  }
-
   //! the parser function
-  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type);
+  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type) final;
 
 protected:
   //! the content
@@ -446,7 +430,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
 }
 
 //! a escapement attribute
-class StarCAttributeEscapement : public StarAttribute
+class StarCAttributeEscapement final : public StarAttribute
 {
 public:
   //! constructor
@@ -454,16 +438,16 @@ public:
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeEscapement(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a font
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (m_delta) o << "decal=" << m_delta << "%,";
@@ -472,9 +456,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarCAttributeEscapement(StarCAttributeEscapement const &orig) : StarAttribute(orig), m_delta(orig.m_delta), m_scale(orig.m_scale)
-  {
-  }
+  StarCAttributeEscapement(StarCAttributeEscapement const &orig) = default;
   //! the sub/super decal in %
   int m_delta;
   //! the scaling
@@ -482,7 +464,7 @@ protected:
 };
 
 //! a font attribute
-class StarCAttributeFont : public StarAttribute
+class StarCAttributeFont final : public StarAttribute
 {
 public:
   //! constructor
@@ -491,16 +473,16 @@ public:
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeFont(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a font
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (!m_name.empty()) o << "name=" << m_name.cstr() << ",";
@@ -551,9 +533,7 @@ public:
 
 protected:
   //! copy constructor
-  StarCAttributeFont(StarCAttributeFont const &orig) : StarAttribute(orig), m_name(orig.m_name), m_style(orig.m_style), m_encoding(orig.m_encoding), m_family(orig.m_family), m_pitch(orig.m_pitch)
-  {
-  }
+  StarCAttributeFont(StarCAttributeFont const &orig) = default;
   //! the font name
   librevenge::RVNGString m_name;
   //! the style
@@ -568,7 +548,7 @@ protected:
 
 
 //! a font size attribute
-class StarCAttributeFontSize : public StarAttribute
+class StarCAttributeFontSize final : public StarAttribute
 {
 public:
   //! constructor
@@ -577,16 +557,16 @@ public:
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeFontSize(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a font
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (m_size!=240) o << "sz=" << m_size << ",";
@@ -606,9 +586,7 @@ public:
 
 protected:
   //! copy constructor
-  StarCAttributeFontSize(StarCAttributeFontSize const &orig) : StarAttribute(orig), m_size(orig.m_size), m_proportion(orig.m_proportion), m_unit(orig.m_unit)
-  {
-  }
+  StarCAttributeFontSize(StarCAttributeFontSize const &orig) = default;
   //! the font size
   int m_size;
   //! the font proportion
@@ -618,118 +596,123 @@ protected:
 };
 
 //! a charFormat attribute
-class StarCAttributeCharFormat : public StarAttribute
+class StarCAttributeCharFormat final : public StarAttribute
 {
 public:
   //! constructor
-  StarCAttributeCharFormat(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_name("")
+  StarCAttributeCharFormat(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName), m_name("")
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeCharFormat(*this));
   }
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName;
     if (!m_name.empty()) o << "=" << m_name.cstr();
     o << ",";
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a font
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarCAttributeCharFormat(StarCAttributeCharFormat const &orig) : StarAttribute(orig), m_name(orig.m_name)
-  {
-  }
+  StarCAttributeCharFormat(StarCAttributeCharFormat const &orig) = default;
   //! the charFormat
   librevenge::RVNGString m_name;
 };
 
 //! a content attribute
-class StarCAttributeContent : public StarAttribute
+class StarCAttributeContent final : public StarAttribute
 {
 public:
   //! constructor
-  StarCAttributeContent(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_content()
+  StarCAttributeContent(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_content()
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeContent(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a font
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (!m_content) o << "empty,";
     o << "],";
   }
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const;
+  bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const final;
 protected:
   //! copy constructor
-  StarCAttributeContent(StarCAttributeContent const &orig) : StarAttribute(orig), m_content(orig.m_content)
-  {
-  }
+  StarCAttributeContent(StarCAttributeContent const &orig) = default;
   //! the content
   std::shared_ptr<StarObjectTextInternal::Content> m_content;
 };
 
 //! a field attribute
-class StarCAttributeField : public StarAttribute
+class StarCAttributeField final : public StarAttribute
 {
 public:
   //! constructor
-  StarCAttributeField(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_field()
+  StarCAttributeField(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_field()
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeField(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a font
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarCAttributeField(StarCAttributeField const &orig) : StarAttribute(orig), m_field(orig.m_field)
-  {
-  }
+  StarCAttributeField(StarCAttributeField const &orig) = default;
   //! the field
   std::shared_ptr<SWFieldManagerInternal::Field> m_field;
 };
 
 //! a footnote attribute
-class StarCAttributeFootnote : public StarAttribute
+class StarCAttributeFootnote final : public StarAttribute
 {
 public:
   //! constructor
-  StarCAttributeFootnote(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_number(0), m_label(""), m_content(), m_numSeq(0), m_flags(0)
+  StarCAttributeFootnote(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_number(0)
+    , m_label("")
+    , m_content()
+    , m_numSeq(0)
+    , m_flags(0)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeFootnote(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a font
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (m_number) o << "number=" << m_number << ",";
@@ -740,12 +723,10 @@ public:
     o << "],";
   }
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const;
+  bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const final;
 protected:
   //! copy constructor
-  StarCAttributeFootnote(StarCAttributeFootnote const &orig) : StarAttribute(orig), m_number(orig.m_number), m_label(orig.m_label), m_content(orig.m_content), m_numSeq(orig.m_numSeq), m_flags(orig.m_flags)
-  {
-  }
+  StarCAttributeFootnote(StarCAttributeFootnote const &orig) = default;
   //! the numbering
   int m_number;
   //! the label
@@ -759,25 +740,30 @@ protected:
 };
 
 //! a INetFmt attribute: ie. a link, ...
-class StarCAttributeINetFmt : public StarAttribute
+class StarCAttributeINetFmt final : public StarAttribute
 {
 public:
   //! constructor
-  StarCAttributeINetFmt(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_url(""), m_target(""), m_name(""), m_libNames()
+  StarCAttributeINetFmt(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_url("")
+    , m_target("")
+    , m_name("")
+    , m_libNames()
   {
     for (int i=0; i<2; ++i) m_indices[i]=0xFFFF;
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeINetFmt(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a font
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (!m_url.empty()) o << "url=" << m_url.cstr() << ",";
@@ -796,10 +782,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarCAttributeINetFmt(StarCAttributeINetFmt const &orig) : StarAttribute(orig), m_url(orig.m_url), m_target(orig.m_target), m_name(orig.m_name), m_libNames(orig.m_libNames)
-  {
-    for (int i=0; i<2; ++i) m_indices[i]=orig.m_indices[i];
-  }
+  StarCAttributeINetFmt(StarCAttributeINetFmt const &orig) = default;
   //! the url
   librevenge::RVNGString m_url;
   //! the target
@@ -814,24 +797,26 @@ protected:
 };
 
 //! a refMark attribute
-class StarCAttributeRefMark : public StarAttribute
+class StarCAttributeRefMark final : public StarAttribute
 {
 public:
   //! constructor
-  StarCAttributeRefMark(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_name("")
+  StarCAttributeRefMark(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_name("")
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarCAttributeRefMark(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a font
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName;
     if (!m_name.empty()) o << "=" << m_name.cstr();
@@ -839,9 +824,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarCAttributeRefMark(StarCAttributeRefMark const &orig) : StarAttribute(orig),  m_name(orig.m_name)
-  {
-  }
+  StarCAttributeRefMark(StarCAttributeRefMark const &orig) = default;
   //! the name
   librevenge::RVNGString m_name;
 };
@@ -933,7 +916,7 @@ void StarCAttributeCharFormat::addTo(StarState &state, std::set<StarAttribute co
   done.insert(this);
   if (m_type==ATTR_TXT_CHARFMT) {
     if (m_name.empty() || !state.m_global->m_pool) return;
-    StarItemStyle const *style=state.m_global->m_pool->findStyleWithFamily(m_name, StarItemStyle::F_Char);
+    auto const *style=state.m_global->m_pool->findStyleWithFamily(m_name, StarItemStyle::F_Char);
     if (style) {
       state.m_font=STOFFFont();
       StarItemSet const &itemSet=style->m_itemSet;
