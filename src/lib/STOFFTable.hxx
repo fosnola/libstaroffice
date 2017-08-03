@@ -52,7 +52,8 @@ class STOFFTable
 {
 public:
   //! the constructor
-  STOFFTable() : m_propertyList()
+  STOFFTable()
+    : m_propertyList()
   {
   }
   //! the destructor
