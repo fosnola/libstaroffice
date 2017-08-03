@@ -785,11 +785,15 @@ public:
   }
 protected:
   //! constructor
-  StarAttribute(Type type, std::string const &debugName) : m_type(type), m_debugName(debugName)
+  StarAttribute(Type type, std::string const &debugName)
+    : m_type(type)
+    , m_debugName(debugName)
   {
   }
   //! copy constructor
-  explicit StarAttribute(StarAttribute const &orig) : m_type(orig.m_type), m_debugName(orig.m_debugName)
+  explicit StarAttribute(StarAttribute const &orig)
+    : m_type(orig.m_type)
+    , m_debugName(orig.m_debugName)
   {
   }
 
@@ -811,18 +815,20 @@ class StarAttributeBool : public StarAttribute
 {
 public:
   //! constructor
-  StarAttributeBool(Type type, std::string const &debugName, bool value) : StarAttribute(type, debugName), m_value(value)
+  StarAttributeBool(Type type, std::string const &debugName, bool value)
+    : StarAttribute(type, debugName)
+    , m_value(value)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const override
   {
     return std::shared_ptr<StarAttribute>(new StarAttributeBool(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int ver, long endPos, StarObject &object);
+  bool read(StarZone &zone, int ver, long endPos, StarObject &object) override;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const override
   {
     o << m_debugName;
     if (m_value) o << "=true";
@@ -830,9 +836,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarAttributeBool(StarAttributeBool const &orig) : StarAttribute(orig), m_value(orig.m_value)
-  {
-  }
+  StarAttributeBool(StarAttributeBool const &orig) = default;
   // the bool value
   bool m_value;
 };
@@ -842,26 +846,27 @@ class StarAttributeColor : public StarAttribute
 {
 public:
   //! constructor
-  StarAttributeColor(Type type, std::string const &debugName, STOFFColor const &value) : StarAttribute(type, debugName), m_value(value), m_defValue(value)
+  StarAttributeColor(Type type, std::string const &debugName, STOFFColor const &value)
+    : StarAttribute(type, debugName)
+    , m_value(value)
+    , m_defValue(value)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const override
   {
     return std::shared_ptr<StarAttribute>(new StarAttributeColor(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) override;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const override
   {
     o << m_debugName << "[col=" << m_value << "],";
   }
 protected:
   //! copy constructor
-  StarAttributeColor(StarAttributeColor const &orig) : StarAttribute(orig), m_value(orig.m_value), m_defValue(orig.m_defValue)
-  {
-  }
+  StarAttributeColor(StarAttributeColor const &orig) = default;
   //! the color value
   STOFFColor m_value;
   //! the default value
@@ -877,15 +882,15 @@ public:
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const override
   {
     return std::shared_ptr<StarAttribute>(new StarAttributeDouble(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) override;
 
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const override
   {
     o << m_debugName;
     if (m_value<0 || m_value>0) o << "=" << m_value;
@@ -893,9 +898,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarAttributeDouble(StarAttributeDouble const &orig) : StarAttribute(orig), m_value(orig.m_value)
-  {
-  }
+  StarAttributeDouble(StarAttributeDouble const &orig) = default;
   // the double value
   double m_value;
 };
@@ -905,7 +908,10 @@ class StarAttributeInt : public StarAttribute
 {
 public:
   //! constructor
-  StarAttributeInt(Type type, std::string const &debugName, int intSize, int value) : StarAttribute(type, debugName), m_value(value), m_intSize(intSize)
+  StarAttributeInt(Type type, std::string const &debugName, int intSize, int value)
+    : StarAttribute(type, debugName)
+    , m_value(value)
+    , m_intSize(intSize)
   {
     if (intSize!=1 && intSize!=2 && intSize!=4) {
       STOFF_DEBUG_MSG(("StarAttributeInt: bad num size\n"));
@@ -913,14 +919,14 @@ public:
     }
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const override
   {
     return std::shared_ptr<StarAttribute>(new StarAttributeInt(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) override;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const override
   {
     o << m_debugName;
     if (m_value) o << "=" << m_value;
@@ -929,9 +935,7 @@ public:
 
 protected:
   //! copy constructor
-  StarAttributeInt(StarAttributeInt const &orig) : StarAttribute(orig), m_value(orig.m_value), m_intSize(orig.m_intSize)
-  {
-  }
+  StarAttributeInt(StarAttributeInt const &orig) = default;
   // the int value
   int m_value;
   // number of byte 1,2,4
@@ -943,7 +947,10 @@ class StarAttributeUInt : public StarAttribute
 {
 public:
   //! constructor
-  StarAttributeUInt(Type type, std::string const &debugName, int intSize, unsigned int value) : StarAttribute(type, debugName), m_value(value), m_intSize(intSize)
+  StarAttributeUInt(Type type, std::string const &debugName, int intSize, unsigned int value)
+    : StarAttribute(type, debugName)
+    , m_value(value)
+    , m_intSize(intSize)
   {
     if (intSize!=1 && intSize!=2 && intSize!=4) {
       STOFF_DEBUG_MSG(("StarAttributeUInt: bad num size\n"));
@@ -951,14 +958,14 @@ public:
     }
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const override
   {
     return std::shared_ptr<StarAttribute>(new StarAttributeUInt(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) override;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const override
   {
     o << m_debugName;
     if (m_value) o << "=" << m_value;
@@ -966,9 +973,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarAttributeUInt(StarAttributeUInt const &orig) : StarAttribute(orig), m_value(orig.m_value), m_intSize(orig.m_intSize)
-  {
-  }
+  StarAttributeUInt(StarAttributeUInt const &orig) = default;
   // the int value
   unsigned int m_value;
   // number of byte 1,2,4
@@ -980,7 +985,10 @@ class StarAttributeVec2i : public StarAttribute
 {
 public:
   //! constructor
-  StarAttributeVec2i(Type type, std::string const &debugName, int intSize, STOFFVec2i value=STOFFVec2i(0,0)) : StarAttribute(type, debugName), m_value(value), m_intSize(intSize)
+  StarAttributeVec2i(Type type, std::string const &debugName, int intSize, STOFFVec2i value=STOFFVec2i(0,0))
+    : StarAttribute(type, debugName)
+    , m_value(value)
+    , m_intSize(intSize)
   {
     if (intSize!=1 && intSize!=2 && intSize!=4) {
       STOFF_DEBUG_MSG(("StarAttributeVec2i: bad num size\n"));
@@ -988,14 +996,14 @@ public:
     }
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const override
   {
     return std::shared_ptr<StarAttribute>(new StarAttributeVec2i(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) override;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const override
   {
     o << m_debugName;
     if (m_value!=STOFFVec2i(0,0)) o << "=" << m_value;
@@ -1004,9 +1012,7 @@ public:
 
 protected:
   //! copy constructor
-  StarAttributeVec2i(StarAttributeVec2i const &orig) : StarAttribute(orig), m_value(orig.m_value), m_intSize(orig.m_intSize)
-  {
-  }
+  StarAttributeVec2i(StarAttributeVec2i const &orig) = default;
   // the int value
   STOFFVec2i m_value;
   // number of byte 1,2,4
@@ -1018,30 +1024,30 @@ class StarAttributeItemSet : public StarAttribute
 {
 public:
   //! constructor
-  StarAttributeItemSet(Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits) :
-    StarAttribute(type, debugName), m_limits(limits), m_itemSet()
+  StarAttributeItemSet(Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits)
+    : StarAttribute(type, debugName)
+    , m_limits(limits)
+    , m_itemSet()
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const override
   {
     return std::shared_ptr<StarAttribute>(new StarAttributeItemSet(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) override;
   //! debug function to print the data
-  virtual void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const;
+  void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const override;
 
 protected:
   //! add to a state
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &done) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &done) const override;
   //! try to send the sone data
-  virtual bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const;
+  bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const override;
 
   //! copy constructor
-  StarAttributeItemSet(StarAttributeItemSet const &orig) : StarAttribute(orig), m_limits(orig.m_limits), m_itemSet()
-  {
-  }
+  StarAttributeItemSet(StarAttributeItemSet const &orig) = default;
   //! the pool limits id
   std::vector<STOFFVec2i> m_limits;
   //! the list of items
@@ -1053,16 +1059,17 @@ class StarAttributeVoid : public StarAttribute
 {
 public:
   //! constructor
-  StarAttributeVoid(Type type, std::string const &debugName) : StarAttribute(type, debugName)
+  StarAttributeVoid(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const override
   {
     return std::shared_ptr<StarAttribute>(new StarAttributeVoid(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) override;
 };
 
 /** \brief the main class to read/.. a StarOffice attribute

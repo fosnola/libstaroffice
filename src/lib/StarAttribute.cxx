@@ -62,7 +62,7 @@
 namespace StarAttributeInternal
 {
 //! xml attribute of StarAttributeInternal
-class StarAttributeXML : public StarAttributeVoid
+class StarAttributeXML final : public StarAttributeVoid
 {
   // call SfxPoolItem::Create which does nothing
 public:
@@ -73,7 +73,7 @@ public:
   //! destructor
   ~StarAttributeXML();
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarAttributeXML(*this));
   }
@@ -389,10 +389,9 @@ void StarAttributeItemSet::addTo(StarState &state, std::set<StarAttribute const 
     newSet=true;
   }
   StarItemSet const &set=newSet ? finalSet : m_itemSet;
-  for (std::map<int, std::shared_ptr<StarItem> >::const_iterator it=set.m_whichToItemMap.begin();
-       it!=set.m_whichToItemMap.end(); ++it) {
-    if (it->second && it->second->m_attribute)
-      it->second->m_attribute->addTo(state, done);
+  for (auto const &it : set.m_whichToItemMap) {
+    if (it.second && it.second->m_attribute)
+      it.second->m_attribute->addTo(state, done);
   }
 }
 
@@ -407,10 +406,9 @@ void StarAttributeItemSet::print(libstoff::DebugStream &o, std::set<StarAttribut
   o << m_debugName;
   if (!m_itemSet.empty()) {
     o << "[";
-    for (std::map<int, std::shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
-         it!=m_itemSet.m_whichToItemMap.end(); ++it) {
-      if (it->second && it->second->m_attribute)
-        it->second->m_attribute->print(o, done);
+    for (auto const &it : m_itemSet.m_whichToItemMap) {
+      if (it.second && it.second->m_attribute)
+        it.second->m_attribute->print(o, done);
       else
         o << "_";
       o << ",";
@@ -546,10 +544,9 @@ bool StarAttributeItemSet::send(STOFFListenerPtr listener, StarState &state, std
     return false;
   }
   done.insert(this);
-  for (std::map<int, std::shared_ptr<StarItem> >::const_iterator it=m_itemSet.m_whichToItemMap.begin();
-       it!=m_itemSet.m_whichToItemMap.end(); ++it) {
-    if (it->second && it->second->m_attribute)
-      it->second->m_attribute->send(listener, state, done);
+  for (auto const &it : m_itemSet.m_whichToItemMap) {
+    if (it.second && it.second->m_attribute)
+      it.second->m_attribute->send(listener, state, done);
   }
   return true;
 }
@@ -558,7 +555,8 @@ bool StarAttributeItemSet::send(STOFFListenerPtr listener, StarState &state, std
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
 
-StarAttributeManager::StarAttributeManager() : m_state(new StarAttributeInternal::State)
+StarAttributeManager::StarAttributeManager()
+  : m_state(new StarAttributeInternal::State)
 {
 }
 
@@ -593,7 +591,7 @@ std::shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zon
   long pos=input->tell();
   if (m_state->m_whichToAttributeMap.find(nWhich)!=m_state->m_whichToAttributeMap.end() &&
       m_state->m_whichToAttributeMap.find(nWhich)->second) {
-    std::shared_ptr<StarAttribute> attrib=m_state->m_whichToAttributeMap.find(nWhich)->second->create();
+    auto attrib=m_state->m_whichToAttributeMap.find(nWhich)->second->create();
     if (!attrib || !attrib->read(zone, nVers, lastPos, object)) {
       STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read an attribute\n"));
       f << "###bad";

@@ -57,8 +57,17 @@ namespace StarBitmapInternal
 //! internal: the bitmap information
 struct Bitmap {
   //! constructor
-  Bitmap() : m_width(0), m_height(0), m_planes(0), m_bitCount(0),
-    m_compression(0), m_sizeImage(0), m_hasAlphaColor(false), m_colorsList(), m_indexDataList(), m_colorDataList()
+  Bitmap()
+    : m_width(0)
+    , m_height(0)
+    , m_planes(0)
+    , m_bitCount(0)
+    , m_compression(0)
+    , m_sizeImage(0)
+    , m_hasAlphaColor(false)
+    , m_colorsList()
+    , m_indexDataList()
+    , m_colorDataList()
   {
     m_pixelsPerMeter[0]=m_pixelsPerMeter[1]=0;
     m_numColors[0]=m_numColors[1]=0;
@@ -71,15 +80,15 @@ struct Bitmap {
     data.clear();
     std::stringstream f;
     f << "P6\n" << m_width << " " << m_height << " 255\n";
-    std::string const &header = f.str();
+    auto const header = f.str();
     data.append(reinterpret_cast<const unsigned char *>(header.c_str()), header.size());
     if (!m_colorDataList.empty()) {
       if (m_colorDataList.size()!=size_t(m_width*m_height)) {
         STOFF_DEBUG_MSG(("StarBitmapInternal::Bitmap::getPPMData: color data list's size is bad\n"));
         return false;
       }
-      for (size_t c=0; c<m_colorDataList.size(); ++c) {
-        uint32_t col=m_colorDataList[c].value();
+      for (auto const &c : m_colorDataList) {
+        uint32_t col=c.value();
         for (int comp=0, depl=16; comp<3; ++comp, depl-=8)
           data.append(static_cast<unsigned char>((col>>depl)&0xFF));
       }
@@ -90,8 +99,7 @@ struct Bitmap {
       return false;
     }
     int numColors=int(m_colorsList.size());
-    for (size_t i=0; i<m_indexDataList.size(); ++i) {
-      int index=m_indexDataList[i];
+    for (auto const &index : m_indexDataList) {
       if (index<0 || index>=numColors) {
         STOFF_DEBUG_MSG(("StarBitmapInternal::Bitmap::getPPMData: find bad index=%d\n", index));
         return false;
@@ -147,7 +155,8 @@ struct Bitmap {
 //! Internal: the state of a StarBitmap
 struct State {
   //! constructor
-  State() : m_bitmap()
+  State()
+    : m_bitmap()
   {
   }
   //! the bitmap
@@ -159,7 +168,8 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarBitmap::StarBitmap() : m_state(new StarBitmapInternal::State)
+StarBitmap::StarBitmap()
+  : m_state(new StarBitmapInternal::State)
 {
 }
 
@@ -167,7 +177,8 @@ StarBitmap::~StarBitmap()
 {
 }
 
-StarBitmap::StarBitmap(uint32_t const((&pixels)[32]), STOFFColor const((&colors)[2])) : m_state(new StarBitmapInternal::State)
+StarBitmap::StarBitmap(uint32_t const((&pixels)[32]), STOFFColor const((&colors)[2]))
+  : m_state(new StarBitmapInternal::State)
 {
   m_state->m_bitmap.m_width=m_state->m_bitmap.m_height=32;
   for (int i=0; i<2; ++i)
@@ -238,7 +249,7 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  StarBitmapInternal::Bitmap &bitmap=m_state->m_bitmap;
+  auto &bitmap=m_state->m_bitmap;
   if (!readBitmapInformation(zone, bitmap, lastPos)) return false;
 
   pos=input->tell();
