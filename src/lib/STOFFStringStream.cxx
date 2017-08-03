@@ -45,9 +45,9 @@ private:
   STOFFStringStreamPrivate &operator=(const STOFFStringStreamPrivate &);
 };
 
-STOFFStringStreamPrivate::STOFFStringStreamPrivate(const unsigned char *data, unsigned dataSize) :
-  m_buffer(dataSize),
-  m_offset(0)
+STOFFStringStreamPrivate::STOFFStringStreamPrivate(const unsigned char *data, unsigned dataSize)
+  : m_buffer(dataSize)
+  , m_offset(0)
 {
   std::memcpy(&m_buffer[0], data, dataSize);
 }

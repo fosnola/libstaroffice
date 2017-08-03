@@ -35,12 +35,17 @@
 
 #include "STOFFInputStream.hxx"
 
-STOFFSubDocument::STOFFSubDocument(STOFFParser *pars, STOFFInputStreamPtr ip, STOFFEntry const &z):
-  m_parser(pars), m_input(ip), m_zone(z)
+STOFFSubDocument::STOFFSubDocument(STOFFParser *pars, STOFFInputStreamPtr ip, STOFFEntry const &z)
+  : m_parser(pars)
+  , m_input(ip)
+  , m_zone(z)
 {
 }
 
-STOFFSubDocument::STOFFSubDocument(STOFFSubDocument const &doc) : m_parser(0), m_input(), m_zone()
+STOFFSubDocument::STOFFSubDocument(STOFFSubDocument const &doc)
+  : m_parser(0)
+  , m_input()
+  , m_zone()
 {
   *this = doc;
 }

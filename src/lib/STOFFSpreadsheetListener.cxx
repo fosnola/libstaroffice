@@ -77,11 +77,22 @@ enum { PageBreakBit=0x1, ColumnBreakBit=0x2 };
 //! a class to store the document state of a STOFFSpreadsheetListener
 struct DocumentState {
   //! constructor
-  explicit DocumentState(std::vector<STOFFPageSpan> const &pageList) :
-    m_pageList(pageList), m_pageSpan(), m_metaData(), m_footNoteNumber(0), m_smallPictureNumber(0),
-    m_isDocumentStarted(false), m_isSheetOpened(false), m_isSheetRowOpened(false),
-    m_sentListMarkers(), m_numberingIdMap(),
-    m_subDocuments(), m_definedFontStyleSet(), m_definedGraphicStyleSet(), m_definedParagraphStyleSet(), m_section()
+  explicit DocumentState(std::vector<STOFFPageSpan> const &pageList)
+    : m_pageList(pageList)
+    , m_pageSpan()
+    , m_metaData()
+    , m_footNoteNumber(0)
+    , m_smallPictureNumber(0)
+    , m_isDocumentStarted(false)
+    , m_isSheetOpened(false)
+    , m_isSheetRowOpened(false)
+    , m_sentListMarkers()
+    , m_numberingIdMap()
+    , m_subDocuments()
+    , m_definedFontStyleSet()
+    , m_definedGraphicStyleSet()
+    , m_definedParagraphStyleSet()
+    , m_section()
   {
   }
   //! destructor
@@ -182,41 +193,55 @@ private:
   State &operator=(const State &);
 };
 
-State::State() :
-  m_textBuffer(""), m_numDeferredTabs(0),
+State::State()
+  : m_textBuffer("")
+  , m_numDeferredTabs(0)
 
-  m_font(),
+  , m_font()
 
-  m_paragraph(),
+  , m_paragraph()
 
-  m_list(),
+  , m_list()
 
-  m_isPageSpanOpened(false), m_isHeaderFooterOpened(false), m_isHeaderFooterRegionOpened(false),
-  m_isFrameOpened(false), m_isTextboxOpened(false),
-  m_isHeaderFooterWithoutParagraph(false),
+  , m_isPageSpanOpened(false)
+  , m_isHeaderFooterOpened(false)
+  , m_isHeaderFooterRegionOpened(false)
+  , m_isFrameOpened(false)
+  , m_isTextboxOpened(false)
+  , m_isHeaderFooterWithoutParagraph(false)
 
-  m_isSpanOpened(false), m_isParagraphOpened(false), m_isListElementOpened(false),
+  , m_isSpanOpened(false)
+  , m_isParagraphOpened(false)
+  , m_isListElementOpened(false)
 
-  m_isSheetColumnOpened(false),
-  m_isSheetCellOpened(false),
+  , m_isSheetColumnOpened(false)
+  , m_isSheetCellOpened(false)
 
-  m_isTableOpened(false), m_isTableRowOpened(false), m_isTableColumnOpened(false),
-  m_isTableCellOpened(false),
+  , m_isTableOpened(false)
+  , m_isTableRowOpened(false)
+  , m_isTableColumnOpened(false)
+  , m_isTableCellOpened(false)
 
-  m_currentPage(0), m_numPagesRemainingInSpan(0), m_currentPageNumber(1),
+  , m_currentPage(0)
+  , m_numPagesRemainingInSpan(0)
+  , m_currentPageNumber(1)
 
-  m_listOrderedLevels(),
+  , m_listOrderedLevels()
 
-  m_inSubDocument(false),
-  m_isNote(false), m_inLink(false),
-  m_subDocumentType(libstoff::DOC_NONE)
+  , m_inSubDocument(false)
+  , m_isNote(false)
+  , m_inLink(false)
+  , m_subDocumentType(libstoff::DOC_NONE)
 {
 }
 }
 
-STOFFSpreadsheetListener::STOFFSpreadsheetListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface) : STOFFListener(listManager),
-  m_ds(new STOFFSpreadsheetListenerInternal::DocumentState(pageList)), m_ps(new STOFFSpreadsheetListenerInternal::State), m_psStack(),
-  m_documentInterface(documentInterface)
+STOFFSpreadsheetListener::STOFFSpreadsheetListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface)
+  : STOFFListener(listManager)
+  , m_ds(new STOFFSpreadsheetListenerInternal::DocumentState(pageList))
+  , m_ps(new STOFFSpreadsheetListenerInternal::State)
+  , m_psStack()
+  , m_documentInterface(documentInterface)
 {
 }
 
@@ -809,8 +834,7 @@ int STOFFSpreadsheetListener::_getListId() const
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::_getListId: the list id is not set, try to find a new one\n"));
     first = false;
   }
-  std::shared_ptr<STOFFList> list=m_listManager->getNewList
-                                  (m_ps->m_list, int(newLevel), m_ps->m_paragraph.m_listLevel);
+  auto list=m_listManager->getNewList(m_ps->m_list, int(newLevel), m_ps->m_paragraph.m_listLevel);
   if (!list) return -1;
   return list->getId();
 }
@@ -1258,10 +1282,11 @@ void STOFFSpreadsheetListener::handleSubDocument(STOFFSubDocumentPtr subDocument
 
   // Check whether the document is calling itself
   bool sendDoc = true;
-  for (size_t i = 0; i < m_ds->m_subDocuments.size(); i++) {
+  for (auto const &subDoc : m_ds->m_subDocuments) {
     if (!subDocument)
       break;
-    if (subDocument == m_ds->m_subDocuments[i]) {
+    if (!subDoc) continue;
+    if (*subDocument == *subDoc) {
       STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::handleSubDocument: recursif call, stop...\n"));
       sendDoc = false;
       break;
@@ -1438,9 +1463,9 @@ void STOFFSpreadsheetListener::openSheetCell(STOFFCell const &cell, STOFFCellCon
   // formula
   if (content.m_formula.size()) {
     librevenge::RVNGPropertyListVector formulaVect;
-    for (size_t i=0; i < content.m_formula.size(); ++i) {
-      if (content.m_formula[i].m_type!=STOFFCellContent::FormulaInstruction::F_None)
-        formulaVect.append(content.m_formula[i].getPropertyList());
+    for (auto const &f : content.m_formula) {
+      if (f.m_type!=STOFFCellContent::FormulaInstruction::F_None)
+        formulaVect.append(f.getPropertyList());
     }
     propList.insert("librevenge:formula", formulaVect);
   }
@@ -1692,7 +1717,7 @@ void STOFFSpreadsheetListener::closeTableCell()
 // ---------- state stack ------------------
 std::shared_ptr<STOFFSpreadsheetListenerInternal::State> STOFFSpreadsheetListener::_pushParsingState()
 {
-  std::shared_ptr<STOFFSpreadsheetListenerInternal::State> actual = m_ps;
+  auto actual = m_ps;
   m_psStack.push_back(actual);
   m_ps.reset(new STOFFSpreadsheetListenerInternal::State);
 

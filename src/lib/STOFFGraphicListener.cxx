@@ -1625,9 +1625,10 @@ void STOFFGraphicListener::handleSubDocument(STOFFSubDocumentPtr subDocument, li
     m_ps->m_inNote=true;
   // Check whether the document is calling itself
   bool sendDoc = true;
-  for (auto &doc : m_ds->m_subDocuments) {
+  for (auto const &doc : m_ds->m_subDocuments) {
     if (!subDocument)
       break;
+    if (!doc) continue;
     if (*subDocument == *doc) {
       STOFF_DEBUG_MSG(("STOFFGraphicListener::handleSubDocument: recursif call, stop...\n"));
       sendDoc = false;
