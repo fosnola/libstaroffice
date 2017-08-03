@@ -72,7 +72,10 @@ void STOFFHeaderFooter::send(STOFFListener *listener, bool isHeader) const
 }
 
 // ----------------- STOFFPageSpan ------------------------
-STOFFPageSpan::STOFFPageSpan() : m_pageSpan(1), m_section(), m_pageNumber(-1)
+STOFFPageSpan::STOFFPageSpan()
+  : m_pageSpan(1)
+  , m_section()
+  , m_pageNumber(-1)
 {
   m_propertiesList[0].insert("fo:page-height", 11., librevenge::RVNG_INCH);
   m_propertiesList[0].insert("fo:page-width", 8.5, librevenge::RVNG_INCH);
@@ -96,9 +99,8 @@ void STOFFPageSpan::sendHeaderFooters(STOFFListener *listener) const
   }
 
   for (int i=0; i<2; ++i) {
-    std::map<std::string,STOFFHeaderFooter>::const_iterator it;
-    for (it=m_occurrenceHFMap[i].begin(); it!=m_occurrenceHFMap[i].end(); ++it) {
-      std::string occurrence=it->first;
+    for (auto &hf : m_occurrenceHFMap[i]) {
+      std::string const &occurrence=hf.first;
       if (occurrence.empty()) continue;
       librevenge::RVNGPropertyList propList;
       propList.insert("librevenge:occurrence", occurrence.c_str());
@@ -106,7 +108,7 @@ void STOFFPageSpan::sendHeaderFooters(STOFFListener *listener) const
         listener->openHeader(propList);
       else
         listener->openFooter(propList);
-      it->second.send(listener, i==0);
+      hf.second.send(listener, i==0);
       if (i==0)
         listener->closeHeader();
       else
@@ -142,9 +144,9 @@ bool STOFFPageSpan::operator==(std::shared_ptr<STOFFPageSpan> const &page2) cons
     if (m_occurrenceHFMap[i].size()!=page2->m_occurrenceHFMap[i].size())
       return false;
     std::map<std::string,STOFFHeaderFooter>::const_iterator it1, it2;
-    for (it1=m_occurrenceHFMap[i].begin(); it1!=m_occurrenceHFMap[i].end(); ++it1) {
-      it2=page2->m_occurrenceHFMap[i].find(it1->first);
-      if (it2==page2->m_occurrenceHFMap[i].end() || it1->second!=it2->second) return false;
+    for (auto &hf : m_occurrenceHFMap[i]) {
+      it2=page2->m_occurrenceHFMap[i].find(hf.first);
+      if (it2==page2->m_occurrenceHFMap[i].end() || hf.second!=it2->second) return false;
     }
   }
   STOFF_DEBUG_MSG(("WordPerfect: STOFFPageSpan == comparison finished, found no differences\n"));

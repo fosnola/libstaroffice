@@ -40,10 +40,18 @@
 
 #include "STOFFParser.hxx"
 
-STOFFParserState::STOFFParserState(STOFFParserState::Type type, STOFFInputStreamPtr input, STOFFHeader *header) :
-  m_type(type), m_kind(STOFFDocument::STOFF_K_TEXT), m_version(0), m_input(input), m_header(header),
-  m_pageSpan(), m_listManager(), m_graphicListener(), m_spreadsheetListener(), m_textListener(),
-  m_asciiFile(input)
+STOFFParserState::STOFFParserState(STOFFParserState::Type type, STOFFInputStreamPtr input, STOFFHeader *header)
+  : m_type(type)
+  , m_kind(STOFFDocument::STOFF_K_TEXT)
+  , m_version(0)
+  , m_input(input)
+  , m_header(header)
+  , m_pageSpan()
+  , m_listManager()
+  , m_graphicListener()
+  , m_spreadsheetListener()
+  , m_textListener()
+  , m_asciiFile(input)
 {
   if (header) {
     m_version=header->getVersion();
@@ -56,8 +64,9 @@ STOFFParserState::~STOFFParserState()
 {
 }
 
-STOFFParser::STOFFParser(STOFFParserState::Type type, STOFFInputStreamPtr input, STOFFHeader *header):
-  m_parserState(), m_asciiName("")
+STOFFParser::STOFFParser(STOFFParserState::Type type, STOFFInputStreamPtr input, STOFFHeader *header)
+  : m_parserState()
+  , m_asciiName("")
 {
   m_parserState.reset(new STOFFParserState(type, input, header));
 }

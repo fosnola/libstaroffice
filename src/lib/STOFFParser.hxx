@@ -202,7 +202,7 @@ protected:
   //! constructor using a state
   explicit STOFFTextParser(STOFFParserStatePtr state) : STOFFParser(state) {}
   //! destructor
-  virtual ~STOFFTextParser();
+  ~STOFFTextParser() override;
 };
 
 /** virtual class which defines the ancestor of all graphic/presentation zone parser */
@@ -219,7 +219,7 @@ protected:
   //! constructor using a state
   explicit STOFFGraphicParser(STOFFParserStatePtr state) : STOFFParser(state) {}
   //! destructor
-  virtual ~STOFFGraphicParser();
+  ~STOFFGraphicParser() override;
 };
 
 /** virtual class which defines the ancestor of all spreadsheet zone parser */
@@ -234,7 +234,7 @@ protected:
   //! constructor using a state
   explicit STOFFSpreadsheetParser(STOFFParserStatePtr state) : STOFFParser(state) {}
   //! destructor
-  virtual ~STOFFSpreadsheetParser();
+  ~STOFFSpreadsheetParser() override;
 };
 
 #endif /* STOFFPARSER_H */

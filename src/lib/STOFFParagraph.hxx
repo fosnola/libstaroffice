@@ -48,7 +48,14 @@ class STOFFParagraph
 {
 public:
   //! constructor
-  STOFFParagraph() : m_propertyList(), m_outline(false), m_bulletVisible(false), m_listLevelIndex(0), m_listId(-1), m_listStartValue(-1), m_listLevel()
+  STOFFParagraph()
+    : m_propertyList()
+    , m_outline(false)
+    , m_bulletVisible(false)
+    , m_listLevelIndex(0)
+    , m_listId(-1)
+    , m_listStartValue(-1)
+    , m_listLevel()
   {
   }
   //! add to the propList
