@@ -53,15 +53,14 @@ namespace StarObjectInternal
 //! the state of a StarObject
 struct State {
   //! constructor
-  State() : m_poolList(), m_attributeManager(new StarAttributeManager), m_formatManager(new StarFormatManager)
+  State()
+    : m_poolList()
+    , m_attributeManager(new StarAttributeManager)
+    , m_formatManager(new StarFormatManager)
   {
   }
   //! copy constructor
-  State(State const &orig) : m_poolList(orig.m_poolList), m_attributeManager(orig.m_attributeManager), m_formatManager(orig.m_formatManager)
-  {
-    for (int i=0; i<4; ++i)
-      m_userMetaNames[i]=orig.m_userMetaNames[i];
-  }
+  State(State const &orig) = default;
   //! the list of pool
   std::vector<std::shared_ptr<StarItemPool> > m_poolList;
   //! the attribute manager
@@ -71,19 +70,28 @@ struct State {
   //! the list of user name
   librevenge::RVNGString m_userMetaNames[4];
 private:
-  State operator=(State const &orig);
+  State operator=(State const &orig) = delete;
 };
 }
 
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObject::StarObject(char const *passwd, std::shared_ptr<STOFFOLEParser> oleParser, std::shared_ptr<STOFFOLEParser::OleDirectory> directory) :
-  m_password(passwd), m_oleParser(oleParser), m_directory(directory), m_state(new StarObjectInternal::State()), m_metaData()
+StarObject::StarObject(char const *passwd, std::shared_ptr<STOFFOLEParser> oleParser, std::shared_ptr<STOFFOLEParser::OleDirectory> directory)
+  : m_password(passwd)
+  , m_oleParser(oleParser)
+  , m_directory(directory)
+  , m_state(new StarObjectInternal::State())
+  , m_metaData()
 {
 }
 
-StarObject::StarObject(StarObject const &orig, bool duplicateState) : m_password(orig.m_password), m_oleParser(orig.m_oleParser), m_directory(orig.m_directory), m_state(), m_metaData(orig.m_metaData)
+StarObject::StarObject(StarObject const &orig, bool duplicateState)
+  : m_password(orig.m_password)
+  , m_oleParser(orig.m_oleParser)
+  , m_directory(orig.m_directory)
+  , m_state()
+  , m_metaData(orig.m_metaData)
 {
   if (duplicateState)
     m_state.reset(new StarObjectInternal::State(*orig.m_state));
@@ -97,9 +105,9 @@ StarObject::~StarObject()
 
 void StarObject::cleanPools()
 {
-  for (size_t i=0; i<m_state->m_poolList.size(); ++i) {
-    if (m_state->m_poolList[i])
-      m_state->m_poolList[i]->clean();
+  for (auto &p : m_state->m_poolList) {
+    if (p)
+      p->clean();
   }
   m_state->m_poolList.clear();
 }
@@ -141,7 +149,7 @@ std::shared_ptr<StarItemPool> StarObject::getNewItemPool(StarItemPool::Type type
 std::shared_ptr<StarItemPool> StarObject::getCurrentPool(bool onlyInside)
 {
   for (size_t i=m_state->m_poolList.size(); i>0;) {
-    std::shared_ptr<StarItemPool> pool=m_state->m_poolList[--i];
+    auto pool=m_state->m_poolList[--i];
     if (pool && !pool->isSecondaryPool() && (!onlyInside || pool->isInside()))
       return pool;
   }
@@ -151,7 +159,7 @@ std::shared_ptr<StarItemPool> StarObject::getCurrentPool(bool onlyInside)
 std::shared_ptr<StarItemPool> StarObject::findItemPool(StarItemPool::Type type, bool isInside)
 {
   for (size_t i=m_state->m_poolList.size(); i>0;) {
-    std::shared_ptr<StarItemPool> pool=m_state->m_poolList[--i];
+    auto pool=m_state->m_poolList[--i];
     if (!pool || pool->getType()!=type) continue;
     if (isInside && !pool->isInside()) continue;
     return pool;
@@ -168,11 +176,10 @@ bool StarObject::parse()
   if (!m_directory->m_hasCompObj) {
     STOFF_DEBUG_MSG(("StarObject::parse: called with unknown document\n"));
   }
-  for (size_t i = 0; i < m_directory->m_contentList.size(); ++i) {
-    STOFFOLEParser::OleContent &content=m_directory->m_contentList[i];
+  for (auto &content : m_directory->m_contentList) {
     if (content.isParsed()) continue;
-    std::string name = content.getOleName();
-    std::string const &base = content.getBaseName();
+    auto name = content.getOleName();
+    auto const &base = content.getBaseName();
     STOFFInputStreamPtr ole;
     if (m_directory->m_input)
       ole = m_directory->m_input->getSubStreamByName(name.c_str());
@@ -264,7 +271,7 @@ bool StarObject::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*li
   ascFile.addNote(f.str().c_str());
   for (int i=0; i<int(n); ++i) {
     pos=input->tell();
-    std::shared_ptr<StarItem> item=pool->readItem(zone, isDirect, lastPos);
+    auto item=pool->readItem(zone, isDirect, lastPos);
     if (item && input->tell()<=lastPos) {
       itemSet.add(item);
       continue;
@@ -640,7 +647,7 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
   if (bPasswd) f << "passwd,"; // the password does not seems to be kept/used in this block
   if (bPGraphic) f << "portableGraphic,";
   if (bQTemplate) f << "queryTemplate,";
-  StarEncoding::Encoding encoding=StarEncoding::getEncodingForId(nUS);
+  auto encoding=StarEncoding::getEncodingForId(nUS);
   ascii.addPos(0);
   ascii.addNote(f.str().c_str());
 
@@ -675,7 +682,7 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
     std::vector<uint32_t> finalString;
     std::vector<size_t> srcPositions;
     if (StarEncoding::convert(string, encoding, finalString, srcPositions)) {
-      librevenge::RVNGString attrib=libstoff::getString(finalString);
+      auto attrib=libstoff::getString(finalString);
       f << attrib.cstr() << ",";
       static char const *(attribNames[]) = {
         "meta:initial-creator", "dc:creator", "", "dc:title", "dc:subject", "dc:description"/*comment*/, "meta:keywords",
@@ -767,7 +774,7 @@ bool StarObject::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const
     pool=getNewItemPool(StarItemPool::T_XOutdevPool);
     pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
   }
-  std::shared_ptr<StarItemPool>  mainPool=pool;
+  auto mainPool=pool;
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
     long pos=input->tell();

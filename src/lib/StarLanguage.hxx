@@ -38,7 +38,7 @@
 #ifndef STAR_LANGUAGE
 #  define STAR_LANGUAGE
 
-#include <vector>
+#include <string>
 
 #include "libstaroffice_internal.hxx"
 #include "STOFFDebug.hxx"

@@ -50,7 +50,8 @@ class StarZone;
 struct StarLayout {
 public:
   //! constructor
-  StarLayout() : m_version(0)
+  StarLayout()
+    : m_version(0)
   {
   }
   //! try to read a layout: 'U'

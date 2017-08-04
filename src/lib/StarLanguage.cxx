@@ -452,9 +452,8 @@ public:
       { LANGUAGE_AZERI_CYRILLIC,              "az", "cyrillic" }
     };
 
-    int const N=int(sizeof(idIsoList)/sizeof(IdIsoLanguageEntry));
-    for (int i=0; i<N; ++i)
-      m_idLanguageMap.insert(std::map<int,IdIsoLanguageEntry>::value_type(idIsoList[i].m_languageId,idIsoList[i]));
+    for (auto const &l : idIsoList)
+      m_idLanguageMap.insert(std::map<int,IdIsoLanguageEntry>::value_type(l.m_languageId,l));
   }
   bool getLanguageId(int id, std::string &lang, std::string &country) const
   {

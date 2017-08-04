@@ -150,8 +150,8 @@ protected:
   librevenge::RVNGPropertyList m_metaData;
 
 private:
-  StarObject(StarObject const &orig);
-  StarObject &operator=(StarObject const &orig);
+  StarObject(StarObject const &orig) = delete;
+  StarObject &operator=(StarObject const &orig) = delete;
 };
 
 #endif
