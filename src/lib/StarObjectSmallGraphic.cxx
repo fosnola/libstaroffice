@@ -65,7 +65,12 @@ class GluePoint
 {
 public:
   //! constructor
-  GluePoint(int x=0, int y=0) : m_dimension(x, y), m_direction(0), m_id(0), m_align(0), m_percent(false)
+  GluePoint(int x=0, int y=0)
+    : m_dimension(x, y)
+    , m_direction(0)
+    , m_id(0)
+    , m_align(0)
+    , m_percent(false)
   {
   }
   //! operator<<
@@ -97,7 +102,12 @@ public:
   //! small struct use to define a Zone: v<=3
   struct Zone {
     //! constructor
-    Zone() : m_text(), m_depth(0), m_backgroundColor(STOFFColor::white()), m_background(), m_colorName("")
+    Zone()
+      : m_text()
+      , m_depth(0)
+      , m_backgroundColor(STOFFColor::white())
+      , m_background()
+      , m_colorName("")
     {
     }
     //! operator<<
@@ -122,7 +132,12 @@ public:
     librevenge::RVNGString m_colorName;
   };
   //! constructor
-  OutlinerParaObject() : m_version(0), m_zones(), m_textZone(), m_depthList(), m_isEditDoc(false)
+  OutlinerParaObject()
+    : m_version(0)
+    , m_zones()
+    , m_textZone()
+    , m_depthList()
+    , m_isEditDoc(false)
   {
   }
   //! operator<<
@@ -131,15 +146,15 @@ public:
     o << "version=" << obj.m_version << ",";
     if (!obj.m_zones.empty()) {
       o << "zones=[";
-      for (size_t i=0; i<obj.m_zones.size(); ++i)
-        o << "[" << obj.m_zones[i] << "],";
+      for (auto const &z : obj.m_zones)
+        o << "[" << z << "],";
       o << "],";
     }
     if (obj.m_textZone) o << "hasTextZone,";
     if (!obj.m_depthList.empty()) {
       o << "depth=[";
-      for (size_t i=0; i<obj.m_depthList.size(); ++i)
-        o << obj.m_depthList[i] << ",";
+      for (auto d : obj.m_depthList)
+        o << d << ",";
       o << "],";
     }
     if (obj.m_isEditDoc) o << "isEditDoc,";
@@ -155,10 +170,14 @@ public:
     if (m_textZone)
       m_textZone->send(listener);
     else {
-      for (size_t z=0; z<m_zones.size(); ++z) {
-        if (z) listener->insertEOL();
-        if (m_zones[z].m_text)
-          m_zones[z].m_text->send(listener, m_zones[z].m_depth);
+      bool first=true;
+      for (auto const &z : m_zones) {
+        if (first)
+          first=false;
+        else
+          listener->insertEOL();
+        if (z.m_text)
+          z.m_text->send(listener, z.m_depth);
       }
     }
     return true;
@@ -177,17 +196,18 @@ public:
 
 ////////////////////////////////////////
 //! Internal: the subdocument of a StarObjectSmallGraphic
-class SubDocument : public STOFFSubDocument
+class SubDocument final : public STOFFSubDocument
 {
 public:
-  explicit SubDocument(std::shared_ptr<OutlinerParaObject> text) :
-    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_text(text) {}
+  explicit SubDocument(std::shared_ptr<OutlinerParaObject> text)
+    : STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry())
+    , m_text(text) {}
 
   //! destructor
-  virtual ~SubDocument() {}
+  ~SubDocument() final {}
 
   //! operator!=
-  virtual bool operator!=(STOFFSubDocument const &doc) const
+  bool operator!=(STOFFSubDocument const &doc) const final
   {
     if (STOFFSubDocument::operator!=(doc)) return true;
     SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
@@ -196,14 +216,8 @@ public:
     return false;
   }
 
-  //! operator!==
-  virtual bool operator==(STOFFSubDocument const &doc) const
-  {
-    return !operator!=(doc);
-  }
-
   //! the parser function
-  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type);
+  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type) final;
 
 protected:
   //! the text
@@ -230,7 +244,8 @@ class Graphic
 {
 public:
   //! constructor
-  explicit Graphic(int id) : m_identifier(id)
+  explicit Graphic(int id)
+    : m_identifier(id)
   {
   }
   //! destructor
@@ -261,17 +276,24 @@ Graphic::~Graphic()
 }
 ////////////////////////////////////////
 //! Internal: virtual class to store a SCHU graphic
-class SCHUGraphic : public Graphic
+class SCHUGraphic final : public Graphic
 {
 public:
   //! constructor
-  explicit SCHUGraphic(int id) : Graphic(id), m_id(0), m_adjust(0), m_orientation(0), m_column(0), m_row(0), m_factor(0)
+  explicit SCHUGraphic(int id)
+    : Graphic(id)
+    , m_id(0)
+    , m_adjust(0)
+    , m_orientation(0)
+    , m_column(0)
+    , m_row(0)
+    , m_factor(0)
   {
   }
   //! destructor
-  ~SCHUGraphic();
+  ~SCHUGraphic() final;
   //! return the object name
-  std::string getName() const
+  std::string getName() const final
   {
     if (m_identifier>0 && m_identifier<=7) {
       char const *(wh[])= {"none", "group",  "objectId", "objectAdjustId", "dataRowId",
@@ -284,7 +306,7 @@ public:
     return s.str();
   }
   //! basic print function
-  virtual std::string print() const
+  std::string print() const final
   {
     std::stringstream s;
     s << *this << ",";
@@ -343,13 +365,14 @@ class SDUDGraphic : public Graphic
 {
 public:
   //! constructor
-  explicit SDUDGraphic(int id) : Graphic(id)
+  explicit SDUDGraphic(int id)
+    : Graphic(id)
   {
   }
   //! destructor
-  ~SDUDGraphic();
+  ~SDUDGraphic() override;
   //! return the object name
-  std::string getName() const
+  std::string getName() const override
   {
     if (m_identifier>0 && m_identifier<=2) {
       char const *(wh[])= {"none", "animationInfo",  "imapInfo" };
@@ -360,7 +383,7 @@ public:
     return s.str();
   }
   //! basic print function
-  virtual std::string print() const
+  std::string print() const override
   {
     std::stringstream s;
     s << *this << ",";
@@ -384,14 +407,19 @@ class SdrGraphic : public Graphic
 {
 public:
   //! constructor
-  explicit SdrGraphic(int id) : Graphic(id), m_bdbox(), m_layerId(-1), m_anchorPosition(0,0), m_polygon()
+  explicit SdrGraphic(int id)
+    : Graphic(id)
+    , m_bdbox()
+    , m_layerId(-1)
+    , m_anchorPosition(0,0)
+    , m_polygon()
   {
     for (int i=0; i<6; ++i) m_flags[i]=false;
   }
   //! destructor
-  ~SdrGraphic();
+  ~SdrGraphic() override;
   //! return the object name
-  std::string getName() const
+  std::string getName() const override
   {
     if (m_identifier>0 && m_identifier<=32) {
       char const *(wh[])= {"none", "group", "line", "rect", "circle",
@@ -427,7 +455,7 @@ public:
     // todo noVisible as master ie hide in master
   }
   //! basic print function
-  virtual std::string print() const
+  std::string print() const override
   {
     std::stringstream s;
     s << *this << ",";
@@ -475,13 +503,16 @@ class SdrGraphicAttribute : public SdrGraphic
 {
 public:
   //! constructor
-  explicit SdrGraphicAttribute(int id) : SdrGraphic(id), m_itemList(), m_sheetStyle("")
+  explicit SdrGraphicAttribute(int id)
+    : SdrGraphic(id)
+    , m_itemList()
+    , m_sheetStyle("")
   {
   }
   //! destructor
-  ~SdrGraphicAttribute();
+  ~SdrGraphicAttribute() override;
   //! basic print function
-  virtual std::string print() const
+  std::string print() const override
   {
     std::stringstream s;
     s << SdrGraphic::print() << *this << ",";
@@ -492,32 +523,31 @@ public:
   {
     SdrGraphic::updateStyle(state, listener);
     if (state.m_global->m_pool && !m_sheetStyle.empty()) {
-      StarItemStyle const *mStyle=state.m_global->m_pool->findStyleWithFamily(m_sheetStyle, StarItemStyle::F_Paragraph);
+      auto const *mStyle=state.m_global->m_pool->findStyleWithFamily(m_sheetStyle, StarItemStyle::F_Paragraph);
       if (mStyle && !mStyle->m_names[0].empty()) {
         if (listener) state.m_global->m_pool->defineGraphicStyle(listener, mStyle->m_names[0], state.m_global->m_object);
         state.m_graphic.m_propertyList.insert("librevenge:parent-display-name", mStyle->m_names[0]);
       }
       else if (mStyle) {
-        std::map<int, std::shared_ptr<StarItem> >::const_iterator it;
-        for (it=mStyle->m_itemSet.m_whichToItemMap.begin(); it!=mStyle->m_itemSet.m_whichToItemMap.end(); ++it) {
-          if (it->second && it->second->m_attribute)
-            it->second->m_attribute->addTo(state);
+        for (auto it : mStyle->m_itemSet.m_whichToItemMap) {
+          if (it.second && it.second->m_attribute)
+            it.second->m_attribute->addTo(state);
         }
       }
     }
-    for (size_t i=0; i<m_itemList.size(); ++i) {
-      if (m_itemList[i] && m_itemList[i]->m_attribute)
-        m_itemList[i]->m_attribute->addTo(state);
+    for (auto &item : m_itemList) {
+      if (item && item->m_attribute)
+        item->m_attribute->addTo(state);
     }
   }
   //! print object data
   friend std::ostream &operator<<(std::ostream &o, SdrGraphicAttribute const &graph)
   {
     o << graph.getName() << ",";
-    for (size_t i=0; i<graph.m_itemList.size(); ++i) {
-      if (!graph.m_itemList[i] || !graph.m_itemList[i]->m_attribute) continue;
+    for (auto &item : graph.m_itemList) {
+      if (!item || !item->m_attribute) continue;
       libstoff::DebugStream f;
-      graph.m_itemList[i]->m_attribute->printData(f);
+      item->m_attribute->printData(f);
       o << "[" << f.str() << "],";
     }
     if (!graph.m_sheetStyle.empty()) o << "sheetStyle[name]=" << graph.m_sheetStyle.cstr() << ",";
@@ -535,33 +565,41 @@ SdrGraphicAttribute::~SdrGraphicAttribute()
 
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic group
-class SdrGraphicGroup : public SdrGraphic
+class SdrGraphicGroup final : public SdrGraphic
 {
 public:
   //! constructor
-  explicit SdrGraphicGroup(int id) : SdrGraphic(id), m_groupName(), m_child(), m_refPoint(), m_hasRefPoint(false), m_groupDrehWink(0), m_groupShearWink(0)
+  explicit SdrGraphicGroup(int id)
+    : SdrGraphic(id)
+    , m_groupName()
+    , m_child()
+    , m_refPoint()
+    , m_hasRefPoint(false)
+    , m_groupDrehWink(0)
+    , m_groupShearWink(0)
   {
   }
   //! destructor
-  ~SdrGraphicGroup();
+  ~SdrGraphicGroup() final;
   //! basic print function
-  virtual std::string print() const
+  std::string print() const final
   {
     std::stringstream s;
     s << SdrGraphic::print() << *this << ",";
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage)
-  {
-    if (!listener) {
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage) final {
+    if (!listener)
+    {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicGroup::send: unexpected listener\n"));
       return false;
     }
     listener->openGroup(pos);
-    for (size_t c=0; c<m_child.size(); ++c) {
-      if (m_child[c])
-        m_child[c]->send(listener, pos, object, inMasterPage);
+    for (auto &child : m_child)
+    {
+      if (child)
+        child->send(listener, pos, object, inMasterPage);
     }
     listener->closeGroup();
     return true;
@@ -601,12 +639,18 @@ class SdrGraphicText : public SdrGraphicAttribute
 {
 public:
   //! constructor
-  explicit SdrGraphicText(int id) : SdrGraphicAttribute(id), m_textKind(0), m_textRectangle(),
-    m_textDrehWink(0), m_textShearWink(0), m_outlinerParaObject(), m_textBound()
+  explicit SdrGraphicText(int id)
+    : SdrGraphicAttribute(id)
+    , m_textKind(0)
+    , m_textRectangle()
+    , m_textDrehWink(0)
+    , m_textShearWink(0)
+    , m_outlinerParaObject()
+    , m_textBound()
   {
   }
   //! destructor
-  ~SdrGraphicText();
+  ~SdrGraphicText() override;
   //! try to update the transformation
   void updateTransformProperties(librevenge::RVNGPropertyList &list) const
   {
@@ -626,7 +670,7 @@ public:
     }
   }
   //! basic print function
-  virtual std::string print() const
+  std::string print() const override
   {
     std::stringstream s;
     s << SdrGraphicAttribute::print() << *this << ",";
@@ -645,7 +689,7 @@ public:
     position.setOrigin(libstoff::convertMiniMToPointVect(box[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(box.size()), librevenge::RVNG_POINT);
     position.setAnchor(STOFFPosition::Page);
-    std::shared_ptr<StarItemPool> pool=getPool(object);
+    auto pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
     // if (!state.m_graphic.m_hasBackground) state.m_graphic.m_propertyList.insert("draw:fill", "none"); checkme
@@ -697,13 +741,15 @@ class SdrGraphicRect : public SdrGraphicText
 {
 public:
   //! constructor
-  explicit SdrGraphicRect(int id) : SdrGraphicText(id), m_eckRag(0)
+  explicit SdrGraphicRect(int id)
+    : SdrGraphicText(id)
+    , m_eckRag(0)
   {
   }
   //! destructor
-  ~SdrGraphicRect();
+  ~SdrGraphicRect() override;
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage)
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage) override
   {
     if (!listener || m_textRectangle.size()[0]<=0 || m_textRectangle.size()[1]<=0) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicText::send: can not send a shape\n"));
@@ -728,7 +774,7 @@ public:
     return true;
   }
   //! basic print function
-  virtual std::string print() const
+  std::string print() const override
   {
     std::stringstream s;
     s << SdrGraphicText::print() << *this << ",";
@@ -751,7 +797,7 @@ SdrGraphicRect::~SdrGraphicRect()
 
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic caption
-class SdrGraphicCaption : public SdrGraphicRect
+class SdrGraphicCaption final : public SdrGraphicRect
 {
 public:
   //! constructor
@@ -759,9 +805,9 @@ public:
   {
   }
   //! destructor
-  ~SdrGraphicCaption();
+  ~SdrGraphicCaption() final;
   //! basic print function
-  virtual std::string print() const
+  std::string print() const final
   {
     std::stringstream s;
     s << SdrGraphicRect::print() << *this << ",";
@@ -773,8 +819,8 @@ public:
     o << graph.getName() << ",";
     if (!graph.m_captionPolygon.empty()) {
       o << "poly=[";
-      for (size_t i=0; i<graph.m_captionPolygon.size(); ++i)
-        o << graph.m_captionPolygon[i] << ",";
+      for (auto const &p : graph.m_captionPolygon)
+        o << p << ",";
       o << "],";
     }
     if (graph.m_captionItem && graph.m_captionItem->m_attribute) {
@@ -785,9 +831,9 @@ public:
     return o;
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/)
-  {
-    if (!listener || m_captionPolygon.empty()) {
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/) final {
+    if (!listener || m_captionPolygon.empty())
+    {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicCaption::send: can not send a shape\n"));
       return false;
     }
@@ -795,13 +841,13 @@ public:
     STOFFGraphicShape shape;
     shape.m_command=STOFFGraphicShape::C_Polyline;
     StarGraphicStruct::StarPolygon polygon;
-    for (size_t p=0; p<m_captionPolygon.size(); ++p)
-      polygon.m_points.push_back(StarGraphicStruct::StarPolygon::Point(m_captionPolygon[p], 0));
+    for (auto const &p : m_captionPolygon)
+      polygon.m_points.push_back(StarGraphicStruct::StarPolygon::Point(p, 0));
     librevenge::RVNGPropertyListVector path;
     polygon.addToPath(path, false);
     shape.m_propertyList.insert("svg:d", path);
     updateTransformProperties(shape.m_propertyList);
-    std::shared_ptr<StarItemPool> pool=getPool(object);
+    auto pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
     listener->insertShape(shape, state.m_graphic, pos);
@@ -818,7 +864,7 @@ SdrGraphicCaption::~SdrGraphicCaption()
 }
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic circle
-class SdrGraphicCircle : public SdrGraphicRect
+class SdrGraphicCircle final : public SdrGraphicRect
 {
 public:
   //! constructor
@@ -827,18 +873,18 @@ public:
     m_angles[0]=m_angles[1]=0;
   }
   //! destructor
-  ~SdrGraphicCircle();
+  ~SdrGraphicCircle() final;
   //! basic print function
-  virtual std::string print() const
+  std::string print() const final
   {
     std::stringstream s;
     s << SdrGraphicRect::print() << *this << ",";
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/)
-  {
-    if (!listener || m_textRectangle.size()[0]<=0 || m_textRectangle.size()[1]<=0) {
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/) final {
+    if (!listener || m_textRectangle.size()[0]<=0 || m_textRectangle.size()[1]<=0)
+    {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicCircle::send: can not send a shape\n"));
       return false;
     }
@@ -850,16 +896,18 @@ public:
     STOFFVec2f radius=0.5f*STOFFVec2f(m_textRectangle[1]-m_textRectangle[0]);
     shape.m_propertyList.insert("svg:rx",20*libstoff::convertMiniMToPoint(radius.x()), librevenge::RVNG_TWIP);
     shape.m_propertyList.insert("svg:ry",20*libstoff::convertMiniMToPoint(radius.y()), librevenge::RVNG_TWIP);
-    if (m_identifier!=4) {
+    if (m_identifier!=4)
+    {
       shape.m_propertyList.insert("draw:start-angle", double(m_angles[0]), librevenge::RVNG_GENERIC);
       shape.m_propertyList.insert("draw:end-angle", double(m_angles[1]), librevenge::RVNG_GENERIC);
     }
-    if (m_identifier>=4 && m_identifier<=7) {
+    if (m_identifier>=4 && m_identifier<=7)
+    {
       char const *(wh[])= {"full", "section", "arc", "cut"};
       shape.m_propertyList.insert("draw:kind", wh[m_identifier-4]);
     }
     updateTransformProperties(shape.m_propertyList);
-    std::shared_ptr<StarItemPool> pool=getPool(object);
+    auto pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
     listener->insertShape(shape, state.m_graphic, pos);
@@ -898,13 +946,14 @@ SdrGraphicCircle::~SdrGraphicCircle()
 }
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic edge
-class SdrGraphicEdge : public SdrGraphicText
+class SdrGraphicEdge final : public SdrGraphicText
 {
 public:
   //! the information record
   struct Information {
     //! constructor
-    Information() : m_orthoForm(0)
+    Information()
+      : m_orthoForm(0)
     {
       m_angles[0]=m_angles[1]=0;
       for (int i=0; i<3; ++i) m_n[i]=0;
@@ -936,9 +985,9 @@ public:
   {
   }
   //! destructor
-  ~SdrGraphicEdge();
+  ~SdrGraphicEdge() final;
   //! basic print function
-  virtual std::string print() const
+  std::string print() const final
   {
     std::stringstream s;
     s << SdrGraphicText::print() << *this << ",";
@@ -968,9 +1017,9 @@ public:
     return o;
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/)
-  {
-    if (!listener || m_edgePolygon.empty()) {
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/) final {
+    if (!listener || m_edgePolygon.empty())
+    {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicEdge::send: can not send a shape\n"));
       return false;
     }
@@ -984,7 +1033,7 @@ public:
     polygon.addToPath(path, false);
     shape.m_propertyList.insert("svg:d", path);
     updateTransformProperties(shape.m_propertyList);
-    std::shared_ptr<StarItemPool> pool=getPool(object);
+    auto pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
     listener->insertShape(shape, state.m_graphic, pos);
@@ -1006,30 +1055,37 @@ SdrGraphicEdge::~SdrGraphicEdge()
 }
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic graph
-class SdrGraphicGraph : public SdrGraphicRect
+class SdrGraphicGraph final : public SdrGraphicRect
 {
 public:
   //! constructor
-  SdrGraphicGraph() : SdrGraphicRect(22), m_graphic(), m_graphRectangle(), m_mirrored(false), m_hasGraphicLink(false), m_graphItem()
+  SdrGraphicGraph()
+    : SdrGraphicRect(22)
+    , m_graphic()
+    , m_graphRectangle()
+    , m_mirrored(false)
+    , m_hasGraphicLink(false)
+    , m_graphItem()
   {
   }
   //! destructor
   ~SdrGraphicGraph();
   //! basic print function
-  virtual std::string print() const
+  std::string print() const final
   {
     std::stringstream s;
     s << SdrGraphicRect::print() << *this << ",";
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage)
-  {
-    if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage) final {
+    if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0)
+    {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicGraph::send: can not send a shape\n"));
       return false;
     }
-    if ((!m_graphic || m_graphic->m_object.isEmpty()) && m_graphNames[1].empty()) {
+    if ((!m_graphic || m_graphic->m_object.isEmpty()) && m_graphNames[1].empty())
+    {
       static bool first=true;
       if (first) {
         first=false;
@@ -1041,10 +1097,11 @@ public:
     position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
     position.setAnchor(pos.m_anchorTo);
-    std::shared_ptr<StarItemPool> pool=getPool(object);
+    auto pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
-    if (!m_graphic || m_graphic->m_object.isEmpty()) {
+    if (!m_graphic || m_graphic->m_object.isEmpty())
+    {
       // CHECKME: we need probably correct the filename, transform ":" in "/", ...
       STOFFEmbeddedObject link;
       link.m_filenameLink=m_graphNames[1];
@@ -1106,25 +1163,27 @@ SdrGraphicGraph::~SdrGraphicGraph()
 
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic edge
-class SdrGraphicMeasure : public SdrGraphicText
+class SdrGraphicMeasure final : public SdrGraphicText
 {
 public:
   //! constructor
-  SdrGraphicMeasure() : SdrGraphicText(29), m_overwritten(false), m_measureItem()
+  SdrGraphicMeasure()
+    : SdrGraphicText(29)
+    , m_overwritten(false)
+    , m_measureItem()
   {
   }
   //! destructor
-  ~SdrGraphicMeasure();
+  ~SdrGraphicMeasure() final;
   //! basic print function
-  virtual std::string print() const
+  std::string print() const final
   {
     std::stringstream s;
     s << SdrGraphicText::print() << *this << ",";
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/)
-  {
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/) final {
     STOFFGraphicShape shape;
     std::shared_ptr<StarItemPool> pool=getPool(object);
     StarState state(pool.get(), object);
@@ -1133,7 +1192,8 @@ public:
     shape.m_command=STOFFGraphicShape::C_Polyline;
     shape.m_propertyList.insert("draw:show-unit", true);
     librevenge::RVNGPropertyList list;
-    for (int i=0; i<2; ++i) {
+    for (int i=0; i<2; ++i)
+    {
       list.insert("svg:x",libstoff::convertMiniMToPoint(m_measurePoints[i][0]), librevenge::RVNG_POINT);
       list.insert("svg:y",libstoff::convertMiniMToPoint(m_measurePoints[i][1]), librevenge::RVNG_POINT);
       vect.append(list);
@@ -1178,37 +1238,42 @@ SdrGraphicMeasure::~SdrGraphicMeasure()
 }
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic OLE
-class SdrGraphicOLE : public SdrGraphicRect
+class SdrGraphicOLE final : public SdrGraphicRect
 {
 public:
   //! constructor
-  explicit SdrGraphicOLE(int id) : SdrGraphicRect(id), m_graphic(), m_oleParser()
+  explicit SdrGraphicOLE(int id)
+    : SdrGraphicRect(id)
+    , m_graphic()
+    , m_oleParser()
   {
   }
   //! destructor
-  ~SdrGraphicOLE();
+  ~SdrGraphicOLE() final;
   //! basic print function
-  virtual std::string print() const
+  std::string print() const final
   {
     std::stringstream s;
     s << SdrGraphicRect::print() << *this << ",";
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage)
-  {
-    if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage) final {
+    if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0)
+    {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: can not send a shape\n"));
       return false;
     }
     STOFFEmbeddedObject localPicture;
-    if (!m_oleNames[0].empty() && m_oleParser) {
-      std::shared_ptr<STOFFOLEParser::OleDirectory> dir=m_oleParser->getDirectory(m_oleNames[0].cstr());
+    if (!m_oleNames[0].empty() && m_oleParser)
+    {
+      auto dir=m_oleParser->getDirectory(m_oleNames[0].cstr());
       if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture) || localPicture.isEmpty()) {
         STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: sorry, can not find object %s\n", m_oleNames[0].cstr()));
       }
     }
-    if (m_graphic && !m_graphic->m_object.isEmpty()) {
+    if (m_graphic && !m_graphic->m_object.isEmpty())
+    {
       size_t numTypes=m_graphic->m_object.m_typeList.size();
       for (size_t i=0; i<m_graphic->m_object.m_dataList.size(); ++i) {
         if (m_graphic->m_object.m_dataList[i].empty())
@@ -1219,7 +1284,8 @@ public:
           localPicture.add(m_graphic->m_object.m_dataList[i]);
       }
     }
-    if (localPicture.isEmpty()) {
+    if (localPicture.isEmpty())
+    {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: sorry, can not find some graphic representation\n"));
       return SdrGraphicRect::send(listener, pos, object, inMasterPage);
     }
@@ -1227,7 +1293,7 @@ public:
     position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
     position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
     position.setAnchor(pos.m_anchorTo);
-    std::shared_ptr<StarItemPool> pool=getPool(object);
+    auto pool=getPool(object);
     StarState state(pool.get(), object);
     updateStyle(state, listener);
     listener->insertPicture(position, localPicture, state.m_graphic);
@@ -1263,25 +1329,26 @@ SdrGraphicOLE::~SdrGraphicOLE()
 }
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic page
-class SdrGraphicPage : public SdrGraphic
+class SdrGraphicPage final : public SdrGraphic
 {
 public:
   //! constructor
-  SdrGraphicPage() : SdrGraphic(28), m_page(0)
+  SdrGraphicPage()
+    : SdrGraphic(28)
+    , m_page(0)
   {
   }
   //! destructor
   ~SdrGraphicPage();
   //! basic print function
-  virtual std::string print() const
+  std::string print() const final
   {
     std::stringstream s;
     s << SdrGraphic::print() << *this << ",";
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr /*listener*/, STOFFPosition const &/*pos*/, StarObject &/*object*/, bool /*inMasterPage*/)
-  {
+  bool send(STOFFListenerPtr /*listener*/, STOFFPosition const &/*pos*/, StarObject &/*object*/, bool /*inMasterPage*/) final {
     STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPage::send: unexpected call\n"));
     return false;
   }
@@ -1300,17 +1367,19 @@ SdrGraphicPage::~SdrGraphicPage()
 }
 ////////////////////////////////////////
 //! Internal: virtual class to store a Sdr graphic path
-class SdrGraphicPath : public SdrGraphicText
+class SdrGraphicPath final : public SdrGraphicText
 {
 public:
   //! constructor
-  explicit SdrGraphicPath(int id) : SdrGraphicText(id), m_pathPolygons()
+  explicit SdrGraphicPath(int id)
+    : SdrGraphicText(id)
+    , m_pathPolygons()
   {
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/);
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/) final;
   //! basic print function
-  virtual std::string print() const
+  std::string print() const final
   {
     std::stringstream s;
     s << SdrGraphicText::print() << *this << ",";
@@ -1338,7 +1407,7 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFPosition const &pos, S
   }
 
   STOFFGraphicShape shape;
-  std::shared_ptr<StarItemPool> pool=getPool(object);
+  auto pool=getPool(object);
   StarState state(pool.get(), object);
   updateStyle(state, listener);
   librevenge::RVNGPropertyListVector vect;
@@ -1395,8 +1464,8 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFPosition const &pos, S
 
   // first check if we have some spline, bezier flags
   bool hasSpecialPoint=false;
-  for (size_t p=0; p<m_pathPolygons.size(); ++p) {
-    if (m_pathPolygons[p].hasSpecialPoints()) {
+  for (auto const &poly : m_pathPolygons) {
+    if (poly.hasSpecialPoints()) {
       hasSpecialPoint=true;
       break;
     }
@@ -1414,8 +1483,8 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFPosition const &pos, S
   else {
     shape.m_command=STOFFGraphicShape::C_Path;
     librevenge::RVNGPropertyListVector path;
-    for (size_t p=0; p<m_pathPolygons.size(); ++p)
-      m_pathPolygons[p].addToPath(path, isClosed);
+    for (auto const poly : m_pathPolygons)
+      poly.addToPath(path, isClosed);
     shape.m_propertyList.insert("svg:d", path);
   }
   updateTransformProperties(shape.m_propertyList);
@@ -1431,13 +1500,15 @@ class SdrGraphicUno : public SdrGraphicRect
 {
 public:
   //! constructor
-  SdrGraphicUno() : SdrGraphicRect(32), m_unoName()
+  SdrGraphicUno()
+    : SdrGraphicRect(32)
+    , m_unoName()
   {
   }
   //! destructor
-  ~SdrGraphicUno();
+  ~SdrGraphicUno() final;
   //! basic print function
-  virtual std::string print() const
+  std::string print() const final
   {
     std::stringstream s;
     s << SdrGraphicRect::print() << *this << ",";
@@ -1460,11 +1531,14 @@ SdrGraphicUno::~SdrGraphicUno()
 
 ////////////////////////////////////////
 //! Internal: virtual class to store a SDUD graphic animation
-class SDUDGraphicAnimation : public SDUDGraphic
+class SDUDGraphicAnimation final : public SDUDGraphic
 {
 public:
   //! constructor
-  SDUDGraphicAnimation() : SDUDGraphic(1), m_polygon(), m_order(0)
+  SDUDGraphicAnimation()
+    : SDUDGraphic(1)
+    , m_polygon()
+    , m_order(0)
   {
     for (int i=0; i<8; ++i) m_values[i]=0;
     for (int i=0; i<2; ++i) m_colors[i]=STOFFColor::white();
@@ -1486,8 +1560,8 @@ public:
     o << graph.getName() << ",";
     if (!graph.m_polygon.empty()) {
       o << "poly=[";
-      for (size_t i=0; i<graph.m_polygon.size(); ++i)
-        o << graph.m_polygon[i] << ",";
+      for (auto const &p : graph.m_polygon)
+        o << p << ",";
       o << "],";
     }
     if (graph.m_limits[0]!=STOFFVec2i(0,0)) o << "start=" << graph.m_limits[0] << ",";
@@ -1547,7 +1621,8 @@ SDUDGraphicAnimation::~SDUDGraphicAnimation()
 //! Internal: the state of a StarObjectSmallGraphic
 struct State {
   //! constructor
-  State() : m_graphic()
+  State()
+    : m_graphic()
   {
   }
   //! the graphic object
@@ -1559,7 +1634,9 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectSmallGraphic::StarObjectSmallGraphic(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_graphicState(new StarObjectSmallGraphicInternal::State)
+StarObjectSmallGraphic::StarObjectSmallGraphic(StarObject const &orig, bool duplicateState)
+  : StarObject(orig, duplicateState)
+  , m_graphicState(new StarObjectSmallGraphicInternal::State)
 {
 }
 
@@ -1869,7 +1946,7 @@ bool StarObjectSmallGraphic::readSVDRObjectAttrib(StarZone &zone, StarObjectSmal
   }
 
   long lastPos=zone.getRecordLastPosition();
-  std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
+  auto pool=findItemPool(StarItemPool::T_XOutdevPool, false);
   if (!pool)
     pool=getNewItemPool(StarItemPool::T_VCControlPool);
   int vers=zone.getHeaderVersion();
@@ -1882,7 +1959,7 @@ bool StarObjectSmallGraphic::readSVDRObjectAttrib(StarZone &zone, StarObjectSmal
                              1096 /*SDRATTRSET_OUTLINER*/, 1126 /*SDRATTRSET_MISC*/
                             };
     uint16_t nWhich=what[i];
-    std::shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
+    auto item=pool->loadSurrogate(zone, nWhich, false, f);
     if (input->tell()>lastPos) { // null is ok
       f << "###";
       ok=false;
@@ -1956,7 +2033,7 @@ bool StarObjectSmallGraphic::readSVDRObjectCaption(StarZone &zone, StarObjectSma
     graphic.m_captionPolygon.push_back(STOFFVec2i(dim[0],dim[1]));
   }
   if (ok) {
-    std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
+    auto pool=findItemPool(StarItemPool::T_XOutdevPool, false);
     if (!pool)
       pool=getNewItemPool(StarItemPool::T_XOutdevPool);
     uint16_t nWhich=1195; // SDRATTRSET_CAPTION
@@ -1999,7 +2076,7 @@ bool StarObjectSmallGraphic::readSVDRObjectCircle(StarZone &zone, StarObjectSmal
       graphic.m_angles[i]=float(input->readLong(4))/100.f;
   }
   if (input->tell()!=lastPos) {
-    std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
+    auto pool=findItemPool(StarItemPool::T_XOutdevPool, false);
     if (!pool)
       pool=getNewItemPool(StarItemPool::T_XOutdevPool);
     uint16_t nWhich=1179; // SDRATTRSET_CIRC
@@ -2093,11 +2170,11 @@ bool StarObjectSmallGraphic::readSVDRObjectEdge(StarZone &zone, StarObjectSmallG
     }
   }
   if (ok && input->tell()<lastPos) {
-    std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
+    auto pool=findItemPool(StarItemPool::T_XOutdevPool, false);
     if (!pool)
       pool=getNewItemPool(StarItemPool::T_XOutdevPool);
     uint16_t nWhich=1146; // SDRATTRSET_EDGE
-    std::shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
+    auto item=pool->loadSurrogate(zone, nWhich, false, f);
     if (!item || input->tell()>lastPos) {
       f << "###";
     }
@@ -2114,7 +2191,7 @@ bool StarObjectSmallGraphic::readSVDRObjectEdge(StarZone &zone, StarObjectSmallG
       ok=false;
     }
     else {
-      StarObjectSmallGraphicInternal::SdrGraphicEdge::Information &info=graphic.m_info;
+      auto &info=graphic.m_info;
       for (int pt=0; pt<5; ++pt) {
         int dim[2];
         for (int i=0; i<2; ++i) dim[i]=int(input->readLong(4));
@@ -2356,7 +2433,7 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
     if (ok)
       *input >> graphic.m_hasGraphicLink;
     if (ok && input->tell()<lastPos) {
-      std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
+      auto pool=findItemPool(StarItemPool::T_XOutdevPool, false);
       if (!pool)
         pool=getNewItemPool(StarItemPool::T_XOutdevPool);
       uint16_t nWhich=1243; // SDRATTRSET_GRAF
@@ -2495,11 +2572,11 @@ bool StarObjectSmallGraphic::readSVDRObjectMeasure(StarZone &zone, StarObjectSma
     graphic.m_measurePoints[pt]=STOFFVec2i(dim[0],dim[1]);
   }
   *input >> graphic.m_overwritten;
-  std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_XOutdevPool, false);
+  auto pool=findItemPool(StarItemPool::T_XOutdevPool, false);
   if (!pool)
     pool=getNewItemPool(StarItemPool::T_XOutdevPool);
   uint16_t nWhich=1171; // SDRATTRSET_MEASURE
-  std::shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
+  auto item=pool->loadSurrogate(zone, nWhich, false, f);
   if (!item || input->tell()>lastPos) {
     f << "###";
   }
@@ -2619,7 +2696,7 @@ bool StarObjectSmallGraphic::readSVDRObjectPath(StarZone &zone, StarObjectSmallG
         break;
       }
       graphic.m_pathPolygons.push_back(StarGraphicStruct::StarPolygon());
-      StarGraphicStruct::StarPolygon &polygon=graphic.m_pathPolygons.back();
+      auto &polygon=graphic.m_pathPolygons.back();
       for (int pt=0; pt<int(n); ++pt) {
         int dim[2];
         for (int i=0; i<2; ++i) dim[i]=int(input->readLong(4));
@@ -2647,7 +2724,7 @@ bool StarObjectSmallGraphic::readSVDRObjectPath(StarZone &zone, StarObjectSmallG
         break;
       }
       graphic.m_pathPolygons.push_back(StarGraphicStruct::StarPolygon());
-      StarGraphicStruct::StarPolygon &polygon=graphic.m_pathPolygons.back();
+      auto &polygon=graphic.m_pathPolygons.back();
       polygon.m_points.resize(size_t(n));
       for (size_t pt=0; pt<size_t(n); ++pt) {
         int dim[2];

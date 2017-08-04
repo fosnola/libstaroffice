@@ -150,7 +150,7 @@ protected:
   //! the state
   std::shared_ptr<StarObjectSmallGraphicInternal::State> m_graphicState;
 private:
-  StarObjectSmallGraphic &operator=(StarObjectSmallGraphic const &orig);
+  StarObjectSmallGraphic &operator=(StarObjectSmallGraphic const &orig) = delete;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
