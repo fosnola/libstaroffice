@@ -89,7 +89,7 @@ protected:
   //! the state
   std::shared_ptr<StarObjectNumericRulerInternal::State> m_numericRulerState;
 private:
-  StarObjectNumericRuler &operator=(StarObjectNumericRuler const &orig);
+  StarObjectNumericRuler &operator=(StarObjectNumericRuler const &orig) = delete;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

@@ -62,7 +62,11 @@ namespace StarObjectPageStyleInternal
 struct NoteDesc {
 public:
   //! constructor
-  explicit NoteDesc(bool isFootnote) : m_isFootnote(isFootnote), m_adjust(0), m_penWidth(0), m_color(STOFFColor::black())
+  explicit NoteDesc(bool isFootnote)
+    : m_isFootnote(isFootnote)
+    , m_adjust(0)
+    , m_penWidth(0)
+    , m_color(STOFFColor::black())
   {
     for (int i=0; i<4; ++i) m_distances[i]=0;
   }
@@ -139,7 +143,14 @@ std::ostream &operator<<(std::ostream &o, NoteDesc const &desc)
 struct PageDesc {
 public:
   //! constructor
-  explicit PageDesc() : m_name(""), m_follow(""), m_landscape(false), m_poolId(0), m_numType(0), m_usedOn(3), m_regCollIdx(0xFFFF)
+  explicit PageDesc()
+    : m_name("")
+    , m_follow("")
+    , m_landscape(false)
+    , m_poolId(0)
+    , m_numType(0)
+    , m_usedOn(3)
+    , m_regCollIdx(0xFFFF)
   {
   }
   //! destructor
@@ -177,12 +188,12 @@ public:
 void PageDesc::updatePageSpan(StarState &state) const
 {
   updateState(state);
-  STOFFPageSpan &page=state.m_global->m_page;
+  auto &page=state.m_global->m_page;
   if (m_landscape && page.m_propertiesList[0]["fo:page-height"] && page.m_propertiesList[0]["fo:page-width"] &&
       page.m_propertiesList[0]["fo:page-height"]->getInt() > page.m_propertiesList[0]["fo:page-width"]->getInt()) {
     // we must inverse fo:page-height and fo:page-width
-    librevenge::RVNGString height=page.m_propertiesList[0]["fo:page-height"]->getStr();
-    page.m_propertiesList[0].insert("fo:page-height", page.m_propertiesList[0]["fo:page-width"]->getStr());
+    auto height=page.m_propertiesList[0]["fo:page-height"]->getStr();
+    page.m_propertiesList[0].insert("fo:page-height", page.m_propertiesList[0]["fo:page-width"]);
     page.m_propertiesList[0].insert("fo:page-width", height);
     page.m_propertiesList[0].insert("style:print-orientation", "landscape");
   }
@@ -191,9 +202,9 @@ void PageDesc::updatePageSpan(StarState &state) const
 bool PageDesc::updateState(StarState &state) const
 {
   for (int step=0; step<2; ++step) {
-    for (size_t i=0; i<m_attributes[step].size(); ++i) {
-      if (m_attributes[step][i].m_attribute)
-        m_attributes[step][i].m_attribute->addTo(state);
+    for (auto &attr : m_attributes[step]) {
+      if (attr.m_attribute)
+        attr.m_attribute->addTo(state);
     }
   }
   return true;
@@ -316,7 +327,10 @@ std::ostream &operator<<(std::ostream &o, PageDesc const &desc)
 //! Internal: the state of a StarObjectPageStyle
 struct State {
   //! constructor
-  State() : m_pageList(), m_nameToPageIdMap(), m_simplifyNameToPageIdMap()
+  State()
+    : m_pageList()
+    , m_nameToPageIdMap()
+    , m_simplifyNameToPageIdMap()
   {
   }
   //! list of pages
@@ -332,7 +346,9 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectPageStyle::StarObjectPageStyle(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_pageStyleState(new StarObjectPageStyleInternal::State)
+StarObjectPageStyle::StarObjectPageStyle(StarObject const &orig, bool duplicateState)
+  : StarObject(orig, duplicateState)
+  , m_pageStyleState(new StarObjectPageStyleInternal::State)
 {
 }
 
@@ -345,13 +361,13 @@ StarObjectPageStyle::~StarObjectPageStyle()
 ////////////////////////////////////////////////////////////
 bool StarObjectPageStyle::updatePageSpan(librevenge::RVNGString const &name, StarState &state)
 {
-  STOFFPageSpan &ps=state.m_global->m_page;
+  auto &ps=state.m_global->m_page;
   ps=STOFFPageSpan();
   size_t id=0;
   if (m_pageStyleState->m_nameToPageIdMap.find(name) != m_pageStyleState->m_nameToPageIdMap.end())
     id=m_pageStyleState->m_nameToPageIdMap.find(name)->second;
   else {
-    librevenge::RVNGString simpName=libstoff::simplifyString(name);
+    auto simpName=libstoff::simplifyString(name);
     if (m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)!=m_pageStyleState->m_simplifyNameToPageIdMap.end())
       id=m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)->second;
     else if (!name.empty()) {
@@ -365,7 +381,7 @@ bool StarObjectPageStyle::updatePageSpan(librevenge::RVNGString const &name, Sta
   std::set<librevenge::RVNGString> seen;
   int numPages=0;
   for (int i=0; i<3; ++i) {
-    StarObjectPageStyleInternal::PageDesc const &page=m_pageStyleState->m_pageList[id];
+    auto const &page=m_pageStyleState->m_pageList[id];
     listIds[i]=id;
     numPages=i+1;
     if ((page.m_usedOn&3)==3) {
@@ -375,13 +391,13 @@ bool StarObjectPageStyle::updatePageSpan(librevenge::RVNGString const &name, Sta
     }
     listOccurence[i]=(page.m_usedOn&1) ? "left" : "right";
     seen.insert(page.m_name);
-    librevenge::RVNGString const &follow=page.m_follow;
+    auto const &follow=page.m_follow;
     if (follow.empty() || seen.find(follow)!=seen.end())
       break;
     if (m_pageStyleState->m_nameToPageIdMap.find(follow) != m_pageStyleState->m_nameToPageIdMap.end())
       id=m_pageStyleState->m_nameToPageIdMap.find(follow)->second;
     else {
-      librevenge::RVNGString simpName=libstoff::simplifyString(follow);
+      auto simpName=libstoff::simplifyString(follow);
       if (m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)!=m_pageStyleState->m_simplifyNameToPageIdMap.end())
         id=m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)->second;
       else {
@@ -407,9 +423,9 @@ bool StarObjectPageStyle::updatePageSpans
   librevenge::RVNGString lastPageName("");
   int numPage=0;
   number=0;
-  std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
+  auto pool=findItemPool(StarItemPool::T_WriterPool, false);
   StarState state(pool.get(), *this);
-  STOFFPageSpan &ps=state.m_global->m_page;
+  auto &ps=state.m_global->m_page;
   for (size_t i=0; i<=listNames.size(); ++i) {
     bool newPage=(i==listNames.size()) || (lastPageName!="" && listNames[i]!="" && lastPageName!=listNames[i]);
     if (!newPage) {
@@ -480,7 +496,7 @@ try
         }
         else {
           m_pageStyleState->m_nameToPageIdMap[desc.m_name]=m_pageStyleState->m_pageList.size();
-          librevenge::RVNGString simpName=libstoff::simplifyString(desc.m_name);
+          auto simpName=libstoff::simplifyString(desc.m_name);
           if (m_pageStyleState->m_simplifyNameToPageIdMap.find(simpName)==m_pageStyleState->m_simplifyNameToPageIdMap.end())
             m_pageStyleState->m_simplifyNameToPageIdMap[simpName]=m_pageStyleState->m_pageList.size();
         }

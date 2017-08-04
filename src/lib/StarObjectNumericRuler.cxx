@@ -62,7 +62,9 @@ namespace StarObjectNumericRulerInternal
 //! Internal: the state of a StarObjectNumericRuler
 struct State {
   //! constructor
-  State() : m_nameToListMap(), m_simplifyNameToListMap()
+  State()
+    : m_nameToListMap()
+    , m_simplifyNameToListMap()
   {
   }
   //! a map list name to list
@@ -76,7 +78,9 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectNumericRuler::StarObjectNumericRuler(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_numericRulerState(new StarObjectNumericRulerInternal::State)
+StarObjectNumericRuler::StarObjectNumericRuler(StarObject const &orig, bool duplicateState)
+  : StarObject(orig, duplicateState)
+  , m_numericRulerState(new StarObjectNumericRulerInternal::State)
 {
 }
 
@@ -93,7 +97,7 @@ std::shared_ptr<STOFFList> StarObjectNumericRuler::getList(librevenge::RVNGStrin
     return std::shared_ptr<STOFFList>();
   if (m_numericRulerState->m_nameToListMap.find(name)!=m_numericRulerState->m_nameToListMap.end())
     return m_numericRulerState->m_nameToListMap.find(name)->second;
-  librevenge::RVNGString simpName=libstoff::simplifyString(name);
+  auto simpName=libstoff::simplifyString(name);
   if (m_numericRulerState->m_simplifyNameToListMap.find(simpName)!=m_numericRulerState->m_simplifyNameToListMap.end())
     return m_numericRulerState->m_simplifyNameToListMap.find(simpName)->second;
   STOFF_DEBUG_MSG(("StarObjectNumericRuler::getList: can not find list with name %s\n", name.cstr()));
@@ -132,7 +136,7 @@ try
       }
       else {
         m_numericRulerState->m_nameToListMap[list->m_name]=list;
-        librevenge::RVNGString simpName=libstoff::simplifyString(list->m_name);
+        auto simpName=libstoff::simplifyString(list->m_name);
         if (m_numericRulerState->m_simplifyNameToListMap.find(simpName)==m_numericRulerState->m_simplifyNameToListMap.end())
           m_numericRulerState->m_simplifyNameToListMap[simpName]=list;
       }
@@ -282,7 +286,7 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
     std::vector<uint32_t> res;
     std::vector<size_t> positions;
     // checkme if fontname is StarBats or StarMath, this does not works very well...
-    StarEncoding::Encoding encoding=(charSet==0 && isSymbolFont) ? StarEncoding::E_SYMBOL : StarEncoding::getEncodingForId(charSet);
+    auto encoding=(charSet==0 && isSymbolFont) ? StarEncoding::E_SYMBOL : StarEncoding::getEncodingForId(charSet);
     StarEncoding::convert(buffer, encoding, res, positions);
     level.m_propertyList.insert("text:bullet-char", libstoff::getString(res));
     f << "bullet=" << libstoff::getString(res).cstr() << ",";
@@ -470,7 +474,7 @@ bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long l
     // SvxBulletItem::CreateFont
     f << "font=[";
     level.m_font.reset(new STOFFFont);
-    STOFFFont &font=*level.m_font;
+    auto &font=*level.m_font;
 
     STOFFColor col;
     if (!input->readColor(col)) {
@@ -504,7 +508,7 @@ bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long l
       return false;
     }
     if (!text.empty()) {
-      librevenge::RVNGString name=libstoff::getString(text);
+      auto name=libstoff::getString(text);
       font.m_propertyList.insert("style:font-name", name);
       f << name.cstr() << ",";
       if (name=="StarBats" || name=="StarMath") {
@@ -638,7 +642,7 @@ bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long l
     std::vector<uint8_t> buffer(1, uint8_t(symbol));
     std::vector<uint32_t> res;
     std::vector<size_t> positions;
-    StarEncoding::Encoding encoding=(charSet==0 && isSymbolFont) ? StarEncoding::E_SYMBOL : StarEncoding::getEncodingForId(charSet);
+    auto encoding=(charSet==0 && isSymbolFont) ? StarEncoding::E_SYMBOL : StarEncoding::getEncodingForId(charSet);
     StarEncoding::convert(buffer, encoding, res, positions);
     level.m_propertyList.insert("text:bullet-char", libstoff::getString(res));
   }
