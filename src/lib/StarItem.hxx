@@ -54,11 +54,19 @@ class StarItem
 {
 public:
   //! constructor
-  explicit StarItem(int which) : m_attribute(), m_which(which), m_surrogateId(0), m_localId(false)
+  explicit StarItem(int which)
+    : m_attribute()
+    , m_which(which)
+    , m_surrogateId(0)
+    , m_localId(false)
   {
   }
   //! constructor from attribute
-  StarItem(std::shared_ptr<StarAttribute> attribute, int which) : m_attribute(attribute), m_which(which), m_surrogateId(0), m_localId(false)
+  StarItem(std::shared_ptr<StarAttribute> attribute, int which)
+    : m_attribute(attribute)
+    , m_which(which)
+    , m_surrogateId(0)
+    , m_localId(false)
   {
   }
   /** the attribute if loaded */
@@ -80,7 +88,10 @@ class StarItemSet
 {
 public:
   //! constructor
-  StarItemSet() : m_style(""), m_family(0), m_whichToItemMap()
+  StarItemSet()
+    : m_style("")
+    , m_family(0)
+    , m_whichToItemMap()
   {
   }
   //! return true if the set is empty
@@ -109,7 +120,12 @@ public:
     F_Char=1, F_Paragraph=2, F_Frame=4, F_Page=8, F_Pseudo=0x10, F_ALL=0xFE
   };
   //! constructor
-  StarItemStyle() : m_family(0), m_mask(0), m_itemSet(), m_helpId(0), m_outlineLevel(-1)
+  StarItemStyle()
+    : m_family(0)
+    , m_mask(0)
+    , m_itemSet()
+    , m_helpId(0)
+    , m_outlineLevel(-1)
   {
   }
   //! operator<<

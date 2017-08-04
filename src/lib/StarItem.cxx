@@ -54,13 +54,12 @@ std::string StarItemSet::printChild() const
   if (m_whichToItemMap.empty()) return "";
   libstoff::DebugStream o;
   o << "Attrib=[";
-  for (std::map<int, std::shared_ptr<StarItem> >::const_iterator it=m_whichToItemMap.begin();
-       it!=m_whichToItemMap.end(); ++it) {
-    if (!it->second || !it->second->m_attribute) {
+  for (auto const &it : m_whichToItemMap) {
+    if (!it.second || !it.second->m_attribute) {
       o << "_,";
       continue;
     }
-    it->second->m_attribute->printData(o);
+    it.second->m_attribute->printData(o);
     o << ",";
   }
   o << "],";
