@@ -735,8 +735,8 @@ bool StarPolygon::convert(librevenge::RVNGString &path, librevenge::RVNGString &
 std::ostream &operator<<(std::ostream &o, StarPolygon const &poly)
 {
   o << "points=[";
-  for (size_t i=0; i<poly.m_points.size(); ++i)
-    o << poly.m_points[i] << ",";
+  for (auto const &pt : poly.m_points)
+    o << pt << ",";
   o << "],";
   return o;
 }

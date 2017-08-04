@@ -52,51 +52,48 @@
 namespace StarGraphicAttribute
 {
 //! a character bool attribute
-class StarGAttributeBool : public StarAttributeBool
+class StarGAttributeBool final : public StarAttributeBool
 {
 public:
   //! constructor
-  StarGAttributeBool(Type type, std::string const &debugName, bool value) :
-    StarAttributeBool(type, debugName, value)
+  StarGAttributeBool(Type type, std::string const &debugName, bool value)
+    : StarAttributeBool(type, debugName, value)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeBool(*this));
   }
   //! add to a graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 
 protected:
   //! copy constructor
-  StarGAttributeBool(StarGAttributeBool const &orig) : StarAttributeBool(orig)
-  {
-  }
+  StarGAttributeBool(StarGAttributeBool const &orig) = default;
 };
 
 //! a character color attribute
-class StarGAttributeColor : public StarAttributeColor
+class StarGAttributeColor final : public StarAttributeColor
 {
 public:
   //! constructor
-  StarGAttributeColor(Type type, std::string const &debugName, STOFFColor const &value) : StarAttributeColor(type, debugName, value)
+  StarGAttributeColor(Type type, std::string const &debugName, STOFFColor const &value)
+    : StarAttributeColor(type, debugName, value)
   {
   }
   //! destructor
-  ~StarGAttributeColor();
+  ~StarGAttributeColor() final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeColor(*this));
   }
   //! add to a graphic style
-  //virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarGAttributeColor(StarGAttributeColor const &orig) : StarAttributeColor(orig)
-  {
-  }
+  StarGAttributeColor(StarGAttributeColor const &orig) = default;
 };
 
 StarGAttributeColor::~StarGAttributeColor()
@@ -104,22 +101,25 @@ StarGAttributeColor::~StarGAttributeColor()
 }
 
 //! an integer attribute
-class StarGAttributeFraction : public StarAttribute
+class StarGAttributeFraction final : public StarAttribute
 {
 public:
   //! constructor
-  StarGAttributeFraction(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_numerator(0), m_denominator(1)
+  StarGAttributeFraction(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_numerator(0)
+    , m_denominator(1)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeFraction(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName;
     if (m_numerator) o << "=" << m_numerator << "/" << m_denominator;
@@ -128,9 +128,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeFraction(StarGAttributeFraction const &orig) : StarAttribute(orig), m_numerator(orig.m_numerator), m_denominator(orig.m_denominator)
-  {
-  }
+  StarGAttributeFraction(StarGAttributeFraction const &orig) = default;
   // numerator
   int m_numerator;
   // denominator
@@ -154,73 +152,68 @@ bool StarGAttributeFraction::read(StarZone &zone, int /*vers*/, long endPos, Sta
 }
 
 //! a character integer attribute
-class StarGAttributeInt : public StarAttributeInt
+class StarGAttributeInt final : public StarAttributeInt
 {
 public:
   //! constructor
-  StarGAttributeInt(Type type, std::string const &debugName, int intSize, int value) :
-    StarAttributeInt(type, debugName, intSize, value)
+  StarGAttributeInt(Type type, std::string const &debugName, int intSize, int value)
+    : StarAttributeInt(type, debugName, intSize, value)
   {
   }
   //! add to a graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeInt(*this));
   }
 protected:
   //! copy constructor
-  StarGAttributeInt(StarGAttributeInt const &orig) : StarAttributeInt(orig)
-  {
-  }
+  StarGAttributeInt(StarGAttributeInt const &orig) = default;
 };
 
 //! a character unsigned integer attribute
-class StarGAttributeUInt : public StarAttributeUInt
+class StarGAttributeUInt final : public StarAttributeUInt
 {
 public:
   //! constructor
-  StarGAttributeUInt(Type type, std::string const &debugName, int intSize, unsigned int value) :
-    StarAttributeUInt(type, debugName, intSize, value)
+  StarGAttributeUInt(Type type, std::string const &debugName, int intSize, unsigned int value)
+    : StarAttributeUInt(type, debugName, intSize, value)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeUInt(*this));
   }
   //! add to a graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarGAttributeUInt(StarGAttributeUInt const &orig) : StarAttributeUInt(orig)
-  {
-  }
+  StarGAttributeUInt(StarGAttributeUInt const &orig) = default;
 };
 
 //! a void attribute
-class StarGAttributeVoid : public StarAttributeVoid
+class StarGAttributeVoid final : public StarAttributeVoid
 {
 public:
   //! constructor
-  StarGAttributeVoid(Type type, std::string const &debugName) : StarAttributeVoid(type, debugName)
+  StarGAttributeVoid(Type type, std::string const &debugName)
+    : StarAttributeVoid(type, debugName)
   {
   }
   //! destructor
-  ~StarGAttributeVoid();
+  ~StarGAttributeVoid() final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeVoid(*this));
   }
   //! add to a graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarGAttributeVoid(StarGAttributeVoid const &orig) : StarAttributeVoid(orig)
-  {
-  }
+  StarGAttributeVoid(StarGAttributeVoid const &orig) = default;
 };
 
 StarGAttributeVoid::~StarGAttributeVoid()
@@ -228,27 +221,25 @@ StarGAttributeVoid::~StarGAttributeVoid()
 }
 
 //! a list of item attribute of StarAttributeInternal
-class StarGAttributeItemSet : public StarAttributeItemSet
+class StarGAttributeItemSet final : public StarAttributeItemSet
 {
 public:
   //! constructor
-  StarGAttributeItemSet(Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits) :
-    StarAttributeItemSet(type, debugName, limits)
+  StarGAttributeItemSet(Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits)
+    : StarAttributeItemSet(type, debugName, limits)
   {
   }
   //! destructor
-  ~StarGAttributeItemSet();
+  ~StarGAttributeItemSet() final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeItemSet(*this));
   }
 
 protected:
   //! copy constructor
-  explicit StarGAttributeItemSet(StarAttributeItemSet const &orig) : StarAttributeItemSet(orig)
-  {
-  }
+  StarGAttributeItemSet(StarGAttributeItemSet const &orig) = default;
 };
 
 StarGAttributeItemSet::~StarGAttributeItemSet()
@@ -518,23 +509,26 @@ namespace StarGraphicAttribute
 // ------------------------------------------------------------
 
 //! a box info attribute
-class StarGAttributeBoxInfo : public StarAttribute
+class StarGAttributeBoxInfo final : public StarAttribute
 {
 public:
   //! constructor
-  StarGAttributeBoxInfo(Type type, std::string const &debugName) :
-    StarAttribute(type, debugName), m_distance(0), m_borderList(), m_flags(0)
+  StarGAttributeBoxInfo(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_distance(0)
+    , m_borderList()
+    , m_flags(0)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeBoxInfo(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (m_distance) o << "dist=" << m_distance << ",";
@@ -550,9 +544,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeBoxInfo(StarGAttributeBoxInfo const &orig) : StarAttribute(orig), m_distance(orig.m_distance), m_borderList(orig.m_borderList), m_flags(orig.m_flags)
-  {
-  }
+  StarGAttributeBoxInfo(StarGAttributeBoxInfo const &orig) = default;
   //! the distance
   int m_distance;
   //! the boxInfo list: top, left, right, bottom
@@ -562,33 +554,34 @@ protected:
 };
 
 //! a crop attribute
-class StarGAttributeCrop : public StarAttribute
+class StarGAttributeCrop final : public StarAttribute
 {
 public:
   //! constructor
-  StarGAttributeCrop(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_leftTop(0,0), m_rightBottom(0,0)
+  StarGAttributeCrop(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_leftTop(0,0)
+    , m_rightBottom(0,0)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeCrop(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[" << m_leftTop << "<->" << m_rightBottom << "],";
   }
 
 protected:
   //! copy constructor
-  StarGAttributeCrop(StarGAttributeCrop const &orig) : StarAttribute(orig), m_leftTop(orig.m_leftTop), m_rightBottom(orig.m_rightBottom)
-  {
-  }
+  StarGAttributeCrop(StarGAttributeCrop const &orig) = default;
   //! the cropping left/top
   STOFFVec2i m_leftTop;
   //! the cropping right/bottom
@@ -604,9 +597,9 @@ public:
   {
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) override;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const override
   {
     o << m_debugName << "=[";
     if (!m_named.empty())
@@ -618,9 +611,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeNamed(StarGAttributeNamed const &orig) : StarAttribute(orig), m_named(orig.m_named), m_namedId(orig.m_namedId)
-  {
-  }
+  StarGAttributeNamed(StarGAttributeNamed const &orig) = default;
   //! the named
   librevenge::RVNGString m_named;
   //! the name id
@@ -628,24 +619,26 @@ protected:
 };
 
 //! a arrow's named attribute
-class StarGAttributeNamedArrow : public StarGAttributeNamed
+class StarGAttributeNamedArrow final : public StarGAttributeNamed
 {
 public:
   //! constructor
-  StarGAttributeNamedArrow(Type type, std::string const &debugName) : StarGAttributeNamed(type, debugName), m_polygon()
+  StarGAttributeNamedArrow(Type type, std::string const &debugName)
+    : StarGAttributeNamed(type, debugName)
+    , m_polygon()
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeNamedArrow(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     StarGAttributeNamed::printData(o);
     o << ":[" << m_polygon << "],";
@@ -653,33 +646,32 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeNamedArrow(StarGAttributeNamedArrow const &orig) : StarGAttributeNamed(orig), m_polygon(orig.m_polygon)
-  {
-  }
+  StarGAttributeNamedArrow(StarGAttributeNamedArrow const &orig) = default;
   //! the polygon
   StarGraphicStruct::StarPolygon m_polygon;
 };
 
 //! a bitmap's named attribute
-class StarGAttributeNamedBitmap : public StarGAttributeNamed
+class StarGAttributeNamedBitmap final : public StarGAttributeNamed
 {
 public:
   //! constructor
-  StarGAttributeNamedBitmap(Type type, std::string const &debugName) :
-    StarGAttributeNamed(type, debugName), m_bitmap()
+  StarGAttributeNamedBitmap(Type type, std::string const &debugName)
+    : StarGAttributeNamed(type, debugName)
+    , m_bitmap()
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeNamedBitmap(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     StarGAttributeNamed::printData(o);
     if (m_bitmap.isEmpty()) o << "empty";
@@ -688,33 +680,32 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeNamedBitmap(StarGAttributeNamedBitmap const &orig) : StarGAttributeNamed(orig), m_bitmap(orig.m_bitmap)
-  {
-  }
+  StarGAttributeNamedBitmap(StarGAttributeNamedBitmap const &orig) = default;
   //! the bitmap
   STOFFEmbeddedObject m_bitmap;
 };
 
 //! a color's named attribute
-class StarGAttributeNamedColor : public StarGAttributeNamed
+class StarGAttributeNamedColor final : public StarGAttributeNamed
 {
 public:
   //! constructor
-  StarGAttributeNamedColor(Type type, std::string const &debugName, STOFFColor const &defColor) :
-    StarGAttributeNamed(type, debugName), m_color(defColor)
+  StarGAttributeNamedColor(Type type, std::string const &debugName, STOFFColor const &defColor)
+    : StarGAttributeNamed(type, debugName)
+    , m_color(defColor)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeNamedColor(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a font/graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     StarGAttributeNamed::printData(o);
     o << ":[" << m_color << "],";
@@ -722,35 +713,35 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeNamedColor(StarGAttributeNamedColor const &orig) : StarGAttributeNamed(orig), m_color(orig.m_color)
-  {
-  }
+  StarGAttributeNamedColor(StarGAttributeNamedColor const &orig) = default;
   //! the color
   STOFFColor m_color;
 };
 
 //! a dash's named attribute
-class StarGAttributeNamedDash : public StarGAttributeNamed
+class StarGAttributeNamedDash final : public StarGAttributeNamed
 {
 public:
   //! constructor
-  StarGAttributeNamedDash(Type type, std::string const &debugName) :
-    StarGAttributeNamed(type, debugName), m_dashStyle(0), m_distance(20)
+  StarGAttributeNamedDash(Type type, std::string const &debugName)
+    : StarGAttributeNamed(type, debugName)
+    , m_dashStyle(0)
+    , m_distance(20)
   {
     for (int i=0; i<2; ++i) m_numbers[i]=1;
     for (int i=0; i<2; ++i) m_lengths[i]=20;
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeNamedDash(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     StarGAttributeNamed::printData(o);
     o << ":[";
@@ -765,11 +756,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeNamedDash(StarGAttributeNamedDash const &orig) : StarGAttributeNamed(orig), m_dashStyle(orig.m_dashStyle), m_distance(orig.m_distance)
-  {
-    for (int i=0; i<2; ++i) m_numbers[i]=orig.m_numbers[i];
-    for (int i=0; i<2; ++i) m_lengths[i]=orig.m_lengths[i];
-  }
+  StarGAttributeNamedDash(StarGAttributeNamedDash const &orig) = default;
   //! the style:  XDASH_RECT, XDASH_ROUND, XDASH_RECTRELATIVE, XDASH_ROUNDRELATIVE
   int m_dashStyle;
   //! the number of dot/dash
@@ -781,11 +768,17 @@ protected:
 };
 
 //! a gradient's named attribute
-class StarGAttributeNamedGradient : public StarGAttributeNamed
+class StarGAttributeNamedGradient final : public StarGAttributeNamed
 {
 public:
   //! constructor
-  StarGAttributeNamedGradient(Type type, std::string const &debugName) : StarGAttributeNamed(type, debugName), m_gradientType(0), m_enable(true), m_angle(0), m_border(0), m_step(0)
+  StarGAttributeNamedGradient(Type type, std::string const &debugName)
+    : StarGAttributeNamed(type, debugName)
+    , m_gradientType(0)
+    , m_enable(true)
+    , m_angle(0)
+    , m_border(0)
+    , m_step(0)
   {
     for (int i=0; i<2; ++i) {
       m_offsets[i]=50;
@@ -793,16 +786,16 @@ public:
     }
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeNamedGradient(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     StarGAttributeNamed::printData(o);
     o << ":[";
@@ -819,14 +812,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeNamedGradient(StarGAttributeNamedGradient const &orig) : StarGAttributeNamed(orig), m_gradientType(orig.m_gradientType), m_enable(orig.m_enable), m_angle(orig.m_angle), m_border(orig.m_border), m_step(orig.m_step)
-  {
-    for (int i=0; i<2; ++i) {
-      m_colors[i]=orig.m_colors[i];
-      m_offsets[i]=orig.m_offsets[i];
-      m_intensities[i]=orig.m_intensities[i];
-    }
-  }
+  StarGAttributeNamedGradient(StarGAttributeNamedGradient const &orig) = default;
   //! the gradient type
   int m_gradientType;
   //! a flag to know if the gradient is enable
@@ -846,24 +832,29 @@ protected:
 };
 
 //! a hatch's named attribute
-class StarGAttributeNamedHatch : public StarGAttributeNamed
+class StarGAttributeNamedHatch final : public StarGAttributeNamed
 {
 public:
   //! constructor
-  StarGAttributeNamedHatch(Type type, std::string const &debugName) : StarGAttributeNamed(type, debugName), m_hatchType(0), m_color(STOFFColor::black()), m_distance(0), m_angle(0)
+  StarGAttributeNamedHatch(Type type, std::string const &debugName)
+    : StarGAttributeNamed(type, debugName)
+    , m_hatchType(0)
+    , m_color(STOFFColor::black())
+    , m_distance(0)
+    , m_angle(0)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarGAttributeNamedHatch(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     StarGAttributeNamed::printData(o);
     o << ":[";
@@ -875,9 +866,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeNamedHatch(StarGAttributeNamedHatch const &orig) : StarGAttributeNamed(orig), m_hatchType(orig.m_hatchType), m_color(orig.m_color), m_distance(orig.m_distance), m_angle(orig.m_angle)
-  {
-  }
+  StarGAttributeNamedHatch(StarGAttributeNamedHatch const &orig) = default;
   //! the type
   int m_hatchType;
   //! the color

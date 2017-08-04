@@ -52,7 +52,15 @@ class StarBrush
 {
 public:
   //! constructor
-  StarBrush() : m_transparency(0), m_color(STOFFColor::white()), m_fillColor(STOFFColor::white()), m_style(0), m_position(0), m_linkName(""), m_filterName(""), m_extra("")
+  StarBrush()
+    : m_transparency(0)
+    , m_color(STOFFColor::white())
+    , m_fillColor(STOFFColor::white())
+    , m_style(0)
+    , m_position(0)
+    , m_linkName("")
+    , m_filterName("")
+    , m_extra("")
   {
   }
   //! returns true if the brush is empty
@@ -97,7 +105,9 @@ class StarGraphic
 {
 public:
   //! constructor
-  StarGraphic() : m_object(), m_bitmap()
+  StarGraphic()
+    : m_object()
+    , m_bitmap()
   {
   }
   //! try to read a graphic, give lastPos if you are sure of the end graphic position
@@ -115,7 +125,9 @@ public:
   //! a structure to keep a point and a flag
   struct Point {
     //! constructor
-    explicit Point(STOFFVec2i point=STOFFVec2i(), int flag=0) : m_point(point), m_flags(flag)
+    explicit Point(STOFFVec2i point=STOFFVec2i(), int flag=0)
+      : m_point(point)
+      , m_flags(flag)
     {
     }
     //! operator<<
@@ -146,14 +158,15 @@ public:
     int m_flags;
   };
   //! contructor
-  StarPolygon() : m_points()
+  StarPolygon()
+    : m_points()
   {
   }
   //! check if a polygon has special point
   bool hasSpecialPoints() const
   {
-    for (size_t i=0; i<m_points.size(); ++i) {
-      if (m_points[i].m_flags)
+    for (auto const &pt : m_points) {
+      if (pt.m_flags)
         return true;
     }
     return false;
