@@ -65,10 +65,10 @@ FormatDef::~FormatDef()
 
 void FormatDef::updateState(StarState &state) const
 {
-  for (size_t i=0; i<m_attributeList.size(); ++i) {
-    if (!m_attributeList[i].m_attribute)
+  for (auto const &attr : m_attributeList) {
+    if (!attr.m_attribute)
       continue;
-    m_attributeList[i].m_attribute->addTo(state);
+    attr.m_attribute->addTo(state);
   }
 }
 
@@ -79,13 +79,13 @@ bool FormatDef::send(STOFFListenerPtr listener, StarState &state) const
     return false;
   }
   bool done=false;
-  for (size_t i=0; i<m_attributeList.size(); ++i) {
-    if (!m_attributeList[i].m_attribute)
+  for (auto const &attr : m_attributeList) {
+    if (!attr.m_attribute)
       continue;
-    m_attributeList[i].m_attribute->addTo(state);
+    attr.m_attribute->addTo(state);
     if (!state.m_content) continue;
     done=true;
-    m_attributeList[i].m_attribute->send(listener, state);
+    attr.m_attribute->send(listener, state);
   }
   if (!done) {
     STOFF_DEBUG_MSG(("StarFormatManagerInternal::FormatDef::send: can not find and data to send\n"));
@@ -110,7 +110,9 @@ struct NumberFormatter {
   //! struct use to store small format item
   struct FormatItem {
     //! constructor
-    FormatItem() : m_text(""), m_type(0)
+    FormatItem()
+      : m_text("")
+      , m_type(0)
     {
     }
     //! try to update the cell's formating
@@ -153,7 +155,15 @@ struct NumberFormatter {
   //! struct use to store different local format
   struct Format {
     //! constructor
-    Format() : m_itemList(), m_type(0), m_hasThousandSep(false), m_prefix(0), m_postfix(0), m_exponential(0), m_thousand(0), m_colorName("")
+    Format()
+      : m_itemList()
+      , m_type(0)
+      , m_hasThousandSep(false)
+      , m_prefix(0)
+      , m_postfix(0)
+      , m_exponential(0)
+      , m_thousand(0)
+      , m_colorName("")
     {
     }
     //! operator<<
@@ -194,7 +204,13 @@ struct NumberFormatter {
     librevenge::RVNGString m_colorName;
   };
   //! constructor
-  NumberFormatter() : m_format(""), m_language(0), m_type(0), m_isStandart(false), m_isUsed(false), m_extra("")
+  NumberFormatter()
+    : m_format("")
+    , m_language(0)
+    , m_type(0)
+    , m_isStandart(false)
+    , m_isUsed(false)
+    , m_extra("")
   {
     for (int i=0; i<2; ++i) {
       m_limits[i]=0;
@@ -429,19 +445,18 @@ bool NumberFormatter::FormatItem::updateNumberingProperties(librevenge::RVNGProp
 bool NumberFormatter::Format::updateNumberingProperties(STOFFCell &cell, std::string const &language, std::string const &country) const
 {
   if (m_type==0 || m_type==0x800) return false;
-  librevenge::RVNGPropertyList &propList=cell.getNumberingStyle();
+  auto &propList=cell.getNumberingStyle();
   librevenge::RVNGPropertyListVector pVect;
   STOFFCell::Format format=cell.getFormat();
+  bool done=true;
   if (m_type&6) {
     format.m_format=(m_type&6)==6 ? STOFFCell::F_DATETIME : (m_type&6)==2 ? STOFFCell::F_DATE : STOFFCell::F_TIME;
-    for (size_t i=0; i<m_itemList.size(); ++i) {
-      if (!m_itemList[i].updateNumberingProperties(pVect))
+    for (auto const &item : m_itemList) {
+      if (!item.updateNumberingProperties(pVect))
         return false;
     }
     propList.insert("librevenge:value-type", (m_type&6)==4 ? "time" : "date");
     propList.insert("librevenge:format", pVect);
-    cell.setFormat(format);
-    return true;
   }
   else if (m_type&8) {
     format.m_format=STOFFCell::F_NUMBER;
@@ -449,9 +464,9 @@ bool NumberFormatter::Format::updateNumberingProperties(STOFFCell &cell, std::st
     librevenge::RVNGString currency("");
     // look for currency
     int nString=0;
-    for (size_t i=0; i<m_itemList.size(); ++i) {
-      if (m_itemList[i].m_type!=-1) continue;
-      currency=m_itemList[i].m_text;
+    for (auto const &item : m_itemList) {
+      if (item.m_type!=-1) continue;
+      currency=item.m_text;
       ++nString;
     }
     if (nString!=1 || currency.empty()) currency="$";
@@ -469,8 +484,6 @@ bool NumberFormatter::Format::updateNumberingProperties(STOFFCell &cell, std::st
     if (m_hasThousandSep) list.insert("number:grouping", true);
     pVect.append(list);
     propList.insert("librevenge:format", pVect);
-    cell.setFormat(format);
-    return true;
   }
   else if (m_type&0x10) {
     format.m_format=STOFFCell::F_NUMBER;
@@ -484,8 +497,6 @@ bool NumberFormatter::Format::updateNumberingProperties(STOFFCell &cell, std::st
       prefix-=3;
     }
     if (prefix>0) propList.insert("number:min-integer-digits", prefix);
-    cell.setFormat(format);
-    return true;
   }
   else if (m_type&0x20) {
     format.m_format=STOFFCell::F_NUMBER;
@@ -495,8 +506,6 @@ bool NumberFormatter::Format::updateNumberingProperties(STOFFCell &cell, std::st
     if (m_prefix) propList.insert("number:min-integer-digits", m_prefix);
     if (m_exponential) propList.insert("number:min-exponent-digits", m_exponential);
     if (m_hasThousandSep) propList.insert("number:grouping", true);
-    cell.setFormat(format);
-    return true;
   }
   else if (m_type&0x40) {
     format.m_format=STOFFCell::F_NUMBER;
@@ -506,8 +515,6 @@ bool NumberFormatter::Format::updateNumberingProperties(STOFFCell &cell, std::st
     propList.insert("number:min-denominator-digits", m_exponential ? m_exponential : 1);
     if (m_prefix) propList.insert("number:min-integer-digits", m_prefix);
     if (m_hasThousandSep) propList.insert("number:grouping", true);
-    cell.setFormat(format);
-    return true;
   }
   else if (m_type&0x80) {
     format.m_format=STOFFCell::F_NUMBER;
@@ -516,21 +523,19 @@ bool NumberFormatter::Format::updateNumberingProperties(STOFFCell &cell, std::st
     propList.insert("number:decimal-places", m_postfix);
     if (m_prefix) propList.insert("number:min-integer-digits", m_prefix);
     if (m_hasThousandSep) propList.insert("number:grouping", true);
-    cell.setFormat(format);
-    return true;
   }
-  else if (m_type&0x100)
+  else if (m_type&0x100) {
     format.m_format=STOFFCell::F_TEXT;
+    done = false;
+  }
   else if (m_type&0x400) {
     format.m_format=STOFFCell::F_BOOLEAN;
     propList.insert("librevenge:value-type", "boolean");
-    cell.setFormat(format);
-    return true;
   }
   else
     return false;
   cell.setFormat(format);
-  return false;
+  return done;
 }
 
 ////////////////////////////////////////
@@ -552,7 +557,8 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarFormatManager::StarFormatManager() : m_state(new StarFormatManagerInternal::State)
+StarFormatManager::StarFormatManager()
+  : m_state(new StarFormatManagerInternal::State)
 {
 }
 
@@ -1130,9 +1136,9 @@ bool StarFormatManager::readSWPatternLCL(StarZone &zone)
 
 void StarFormatManager::updateNumberingProperties(STOFFCell &cell) const
 {
-  STOFFCellStyle const &style=cell.getCellStyle();
-  librevenge::RVNGPropertyList &propList=cell.getNumberingStyle();
-  STOFFCell::Format format=cell.getFormat();
+  auto const &style=cell.getCellStyle();
+  auto &propList=cell.getNumberingStyle();
+  auto format=cell.getFormat();
   librevenge::RVNGPropertyListVector pVect;
   if (style.m_format &&
       m_state->m_idNumberFormatMap.find(unsigned(style.m_format))!=m_state->m_idNumberFormatMap.end() &&

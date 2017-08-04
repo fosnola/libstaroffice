@@ -65,9 +65,20 @@ namespace StarFileManagerInternal
 //! Internal: a structure use to read SfxMultiRecord zone of a StarFileManager
 struct SfxMultiRecord {
   //! constructor
-  explicit SfxMultiRecord(StarZone &zone) : m_zone(zone), m_zoneType(0), m_zoneOpened(false), m_headerType(0), m_headerVersion(0), m_headerTag(0),
-    m_actualRecord(0), m_numRecord(0), m_contentSize(0),
-    m_startPos(0), m_endPos(0), m_offsetList(), m_extra("")
+  explicit SfxMultiRecord(StarZone &zone)
+    : m_zone(zone)
+    , m_zoneType(0)
+    , m_zoneOpened(false)
+    , m_headerType(0)
+    , m_headerVersion(0)
+    , m_headerTag(0)
+    , m_actualRecord(0)
+    , m_numRecord(0)
+    , m_contentSize(0)
+    , m_startPos(0)
+    , m_endPos(0)
+    , m_offsetList()
+    , m_extra("")
   {
   }
   //! try to open a zone
@@ -277,7 +288,8 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarFileManager::StarFileManager() : m_state(new StarFileManagerInternal::State)
+StarFileManager::StarFileManager()
+  : m_state(new StarFileManagerInternal::State)
 {
 }
 
@@ -404,10 +416,10 @@ bool StarFileManager::readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser
     }
   }
   // finally look if some content have image
-  for (size_t i=0; i<ole->m_contentList.size(); ++i) {
+  for (auto &content : ole->m_contentList) {
     librevenge::RVNGBinaryData data;
     std::string type;
-    if (ole->m_contentList[i].getImageData(data,type))
+    if (content.getImageData(data,type))
       image.add(data, type);
   }
   ole->m_inUse=false;
@@ -420,11 +432,11 @@ void StarFileManager::checkUnparsed(STOFFInputStreamPtr input, std::shared_ptr<S
     STOFF_DEBUG_MSG(("StarFileManager::readOLEDirectory: can not find the input/ole parser\n"));
     return;
   }
-  std::vector<std::shared_ptr<STOFFOLEParser::OleDirectory> > listDir=oleParser->getDirectoryList();
-  for (size_t d=0; d<listDir.size(); ++d) {
-    if (!listDir[d] || listDir[d]->m_parsed) continue;
-    listDir[d]->m_parsed=true;
-    StarObject object(password, oleParser, listDir[d]);
+  auto listDir=oleParser->getDirectoryList();
+  for (auto &dir : listDir) {
+    if (!dir || dir->m_parsed) continue;
+    dir->m_parsed=true;
+    StarObject object(password, oleParser, dir);
     if (object.getDocumentKind()==STOFFDocument::STOFF_K_CHART) {
       StarObjectChart chart(object, false);
       chart.parse();
@@ -446,19 +458,16 @@ void StarFileManager::checkUnparsed(STOFFInputStreamPtr input, std::shared_ptr<S
       continue;
     }
     // Ole-Object has persist elements, so...
-    if (listDir[d]->m_hasCompObj) object.parse();
-    STOFFOLEParser::OleDirectory &direct=*listDir[d];
-    std::vector<std::string> unparsedOLEs=direct.getUnparsedOles();
-    size_t numUnparsed = unparsedOLEs.size();
-    for (size_t i = 0; i < numUnparsed; i++) {
-      std::string const &name = unparsedOLEs[i];
-      STOFFInputStreamPtr ole = input->getSubStreamByName(name.c_str());
+    if (dir->m_hasCompObj) object.parse();
+    auto unparsedOLEs=dir->getUnparsedOles();
+    for (auto const &name : unparsedOLEs) {
+      auto ole = input->getSubStreamByName(name.c_str());
       if (!ole.get()) {
         STOFF_DEBUG_MSG(("SDWParser::createZones: error: can not find OLE part: \"%s\"\n", name.c_str()));
         continue;
       }
 
-      std::string::size_type pos = name.find_last_of('/');
+      auto pos = name.find_last_of('/');
       std::string base;
       if (pos == std::string::npos) base = name;
       else base = name.substr(pos+1);
@@ -534,14 +543,14 @@ bool StarFileManager::readEmbeddedPicture(std::shared_ptr<STOFFOLEParser> olePar
     STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: called without OLE parser\n"));
     return false;
   }
-  std::shared_ptr<STOFFOLEParser::OleDirectory> dir=oleParser->getDirectory("EmbeddedPictures");
+  auto dir=oleParser->getDirectory("EmbeddedPictures");
   if (!dir || !dir->m_input || !dir->m_input->isStructured()) {
     STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: can not find the embedded picture directory\n"));
     return false;
   }
   std::string name("EmbeddedPictures/");
   name+=fileName;
-  STOFFInputStreamPtr ole= dir->m_input->getSubStreamByName(name.c_str());
+  auto ole= dir->m_input->getSubStreamByName(name.c_str());
   if (!ole) {
     STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: can not find the picture %s\n", name.c_str()));
     return false;

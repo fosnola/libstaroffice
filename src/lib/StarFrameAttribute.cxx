@@ -46,92 +46,87 @@
 namespace StarFrameAttribute
 {
 //! a character bool attribute
-class StarFAttributeBool : public StarAttributeBool
+class StarFAttributeBool final : public StarAttributeBool
 {
 public:
   //! constructor
-  StarFAttributeBool(Type type, std::string const &debugName, bool value) :
-    StarAttributeBool(type, debugName, value)
+  StarFAttributeBool(Type type, std::string const &debugName, bool value)
+    : StarAttributeBool(type, debugName, value)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarFAttributeBool(*this));
   }
   //! add to a frame style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 
 protected:
   //! copy constructor
-  StarFAttributeBool(StarFAttributeBool const &orig) : StarAttributeBool(orig)
-  {
-  }
+  StarFAttributeBool(StarFAttributeBool const &orig) = default;
 };
 
 //! a character color attribute
-class StarFAttributeColor : public StarAttributeColor
+class StarFAttributeColor final : public StarAttributeColor
 {
 public:
   //! constructor
-  StarFAttributeColor(Type type, std::string const &debugName, STOFFColor const &value) : StarAttributeColor(type, debugName, value)
+  StarFAttributeColor(Type type, std::string const &debugName, STOFFColor const &value)
+    : StarAttributeColor(type, debugName, value)
   {
   }
   //! destructor
-  ~StarFAttributeColor();
+  ~StarFAttributeColor() final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarFAttributeColor(*this));
   }
   //! add to a frame style
-  //virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarFAttributeColor(StarFAttributeColor const &orig) : StarAttributeColor(orig)
-  {
-  }
+  StarFAttributeColor(StarFAttributeColor const &orig) = default;
 };
 
 StarFAttributeColor::~StarFAttributeColor()
 {
 }
 //! a character integer attribute
-class StarFAttributeInt : public StarAttributeInt
+class StarFAttributeInt final : public StarAttributeInt
 {
 public:
   //! constructor
-  StarFAttributeInt(Type type, std::string const &debugName, int intSize, int value) :
-    StarAttributeInt(type, debugName, intSize, value)
+  StarFAttributeInt(Type type, std::string const &debugName, int intSize, int value)
+    : StarAttributeInt(type, debugName, intSize, value)
   {
   }
   //! add to a frame style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarFAttributeInt(*this));
   }
 protected:
   //! copy constructor
-  StarFAttributeInt(StarFAttributeInt const &orig) : StarAttributeInt(orig)
-  {
-  }
+  StarFAttributeInt(StarFAttributeInt const &orig) = default;
 };
 
 //! a character unsigned integer attribute
-class StarFAttributeUInt : public StarAttributeUInt
+class StarFAttributeUInt final : public StarAttributeUInt
 {
 public:
   //! constructor
-  StarFAttributeUInt(Type type, std::string const &debugName, int intSize, unsigned int value) :
-    StarAttributeUInt(type, debugName, intSize, value)
+  StarFAttributeUInt(Type type, std::string const &debugName, int intSize, unsigned int value)
+    : StarAttributeUInt(type, debugName, intSize, value)
   {
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object)
-  {
-    if (m_type==ATTR_FRM_BREAK) {
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final {
+    if (m_type==ATTR_FRM_BREAK)
+    {
       // SvxFmtBreakItem
       STOFFInputStreamPtr input=zone.input();
       long pos=input->tell();
@@ -147,41 +142,38 @@ public:
     return StarAttributeUInt::read(zone, vers, endPos, object);
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarFAttributeUInt(*this));
   }
   //! add to a frame style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarFAttributeUInt(StarFAttributeUInt const &orig) : StarAttributeUInt(orig)
-  {
-  }
+  StarFAttributeUInt(StarFAttributeUInt const &orig) = default;
 };
 
 //! a void attribute
-class StarFAttributeVoid : public StarAttributeVoid
+class StarFAttributeVoid final : public StarAttributeVoid
 {
 public:
   //! constructor
-  StarFAttributeVoid(Type type, std::string const &debugName) : StarAttributeVoid(type, debugName)
+  StarFAttributeVoid(Type type, std::string const &debugName)
+    : StarAttributeVoid(type, debugName)
   {
   }
   //! destructor
-  ~StarFAttributeVoid();
+  ~StarFAttributeVoid() final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarFAttributeVoid(*this));
   }
   //! add to a frame style
-  //virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarFAttributeVoid(StarFAttributeVoid const &orig) : StarAttributeVoid(orig)
-  {
-  }
+  StarFAttributeVoid(StarFAttributeVoid const &orig) = default;
 };
 
 StarFAttributeVoid::~StarFAttributeVoid()
@@ -239,26 +231,27 @@ inline void addAttributeVoid(std::map<int, std::shared_ptr<StarAttribute> > &map
 namespace StarFrameAttribute
 {
 //! a border attribute
-class StarFAttributeBorder : public StarAttribute
+class StarFAttributeBorder final : public StarAttribute
 {
 public:
   //! constructor
-  StarFAttributeBorder(Type type, std::string const &debugName) :
-    StarAttribute(type, debugName), m_distance(0)
+  StarFAttributeBorder(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_distance(0)
   {
     for (int i=0; i<4; ++i) m_distances[i]=0;
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarFAttributeBorder(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a cell/graphic/paragraph style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (m_distance) o << "dist=" << m_distance << ",";
@@ -284,13 +277,7 @@ public:
 
 protected:
   //! copy constructor
-  StarFAttributeBorder(StarFAttributeBorder const &orig) : StarAttribute(orig), m_distance(orig.m_distance)
-  {
-    for (int i=0; i<4; ++i) {
-      m_borders[i]=orig.m_borders[i];
-      m_distances[i]=orig.m_distances[i];
-    }
-  }
+  StarFAttributeBorder(StarFAttributeBorder const &orig) = default;
   //! the distance
   int m_distance;
   //! the border list: top, left, right, bottom
@@ -300,58 +287,61 @@ protected:
 };
 
 //! a brush attribute
-class StarFAttributeBrush : public StarAttribute
+class StarFAttributeBrush final : public StarAttribute
 {
 public:
   //! constructor
-  StarFAttributeBrush(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_brush()
+  StarFAttributeBrush(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_brush()
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarFAttributeBrush(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a cell/font/graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[" << m_brush << "],";
   }
 
 protected:
   //! copy constructor
-  StarFAttributeBrush(StarFAttributeBrush const &orig) : StarAttribute(orig), m_brush(orig.m_brush)
-  {
-  }
+  StarFAttributeBrush(StarFAttributeBrush const &orig) = default;
   //! the brush
   StarGraphicStruct::StarBrush m_brush;
 };
 
 //! a frameSize attribute
-class StarFAttributeFrameSize : public StarAttribute
+class StarFAttributeFrameSize final : public StarAttribute
 {
 public:
   //! constructor
-  StarFAttributeFrameSize(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_frmType(0), m_width(0), m_height(0), m_percent(0,0)
+  StarFAttributeFrameSize(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_frmType(0)
+    , m_width(0)
+    , m_height(0)
+    , m_percent(0,0)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarFAttributeFrameSize(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
-  // //! add to a graphic style
-  // virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a page
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (m_frmType) // 0: var, 1:fixed, 2:min
@@ -367,9 +357,7 @@ public:
 
 protected:
   //! copy constructor
-  StarFAttributeFrameSize(StarFAttributeFrameSize const &orig) : StarAttribute(orig), m_frmType(orig.m_frmType), m_width(orig.m_width), m_height(orig.m_height), m_percent(orig.m_percent)
-  {
-  }
+  StarFAttributeFrameSize(StarFAttributeFrameSize const &orig) = default;
   //! the type
   int m_frmType;
   //! the width
@@ -381,24 +369,27 @@ protected:
 };
 
 //! a line numbering attribute
-class StarFAttributeLineNumbering : public StarAttribute
+class StarFAttributeLineNumbering final : public StarAttribute
 {
 public:
   //! constructor
-  StarFAttributeLineNumbering(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_start(-1), m_countLines(false)
+  StarFAttributeLineNumbering(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_start(-1)
+    , m_countLines(false)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarFAttributeLineNumbering(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a para
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName;
     if (m_countLines)
@@ -408,9 +399,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarFAttributeLineNumbering(StarFAttributeLineNumbering const &orig) : StarAttribute(orig), m_start(orig.m_start), m_countLines(orig.m_countLines)
-  {
-  }
+  StarFAttributeLineNumbering(StarFAttributeLineNumbering const &orig) = default;
   //! the name value
   long m_start;
   //! the countLines flag
@@ -418,26 +407,29 @@ protected:
 };
 
 //! a left, right, ... attribute
-class StarFAttributeLRSpace : public StarAttribute
+class StarFAttributeLRSpace final : public StarAttribute
 {
 public:
   //! constructor
-  StarFAttributeLRSpace(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_textLeft(0), m_autoFirst(false)
+  StarFAttributeLRSpace(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_textLeft(0)
+    , m_autoFirst(false)
   {
     for (int i=0; i<3; ++i) m_margins[i]=0;
     for (int i=0; i<3; ++i) m_propMargins[i]=100;
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarFAttributeLRSpace(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a paragraph/page
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     for (int i=0; i<3; ++i) {
@@ -453,11 +445,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarFAttributeLRSpace(StarFAttributeLRSpace const &orig) : StarAttribute(orig), m_textLeft(orig.m_textLeft), m_autoFirst(orig.m_autoFirst)
-  {
-    for (int i=0; i<3; ++i) m_margins[i]=orig.m_margins[i];
-    for (int i=0; i<3; ++i) m_propMargins[i]=orig.m_propMargins[i];
-  }
+  StarFAttributeLRSpace(StarFAttributeLRSpace const &orig) = default;
   //! the margins: left, right, firstline
   int m_margins[3];
   //! the prop margins: left, right, firstline
@@ -469,24 +457,29 @@ protected:
 };
 
 //! a orientation attribute
-class StarFAttributeOrientation : public StarAttribute
+class StarFAttributeOrientation final : public StarAttribute
 {
 public:
   //! constructor
-  StarFAttributeOrientation(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_position(0), m_orient(0), m_relat(1), m_posToggle(false)
+  StarFAttributeOrientation(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_position(0)
+    , m_orient(0)
+    , m_relat(1)
+    , m_posToggle(false)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarFAttributeOrientation(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a cell style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (m_position) o << "pos=" << m_position << ",";
@@ -498,9 +491,7 @@ public:
 
 protected:
   //! copy constructor
-  StarFAttributeOrientation(StarFAttributeOrientation const &orig) : StarAttribute(orig), m_position(orig.m_position), m_orient(orig.m_orient), m_relat(orig.m_relat), m_posToggle(orig.m_posToggle)
-  {
-  }
+  StarFAttributeOrientation(StarFAttributeOrientation const &orig) = default;
   //! the position in twip
   uint32_t m_position;
   /** the orientation:
@@ -515,26 +506,31 @@ protected:
 };
 
 //! a shadow attribute
-class StarFAttributeShadow : public StarAttribute
+class StarFAttributeShadow final : public StarAttribute
 {
 public:
   //! constructor
-  StarFAttributeShadow(Type type, std::string const &debugName) :
-    StarAttribute(type, debugName), m_location(0), m_width(0), m_transparency(0), m_color(STOFFColor::white()),
-    m_fillColor(STOFFColor::white()), m_style(0)
+  StarFAttributeShadow(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_location(0)
+    , m_width(0)
+    , m_transparency(0)
+    , m_color(STOFFColor::white())
+    , m_fillColor(STOFFColor::white())
+    , m_style(0)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarFAttributeShadow(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a cell/graphic style
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (m_location) o << "loc=" << m_location << ",";
@@ -548,11 +544,7 @@ public:
 
 protected:
   //! copy constructor
-  StarFAttributeShadow(StarFAttributeShadow const &orig) :
-    StarAttribute(orig), m_location(orig.m_location), m_width(orig.m_width), m_transparency(orig.m_transparency), m_color(orig.m_color),
-    m_fillColor(orig.m_fillColor), m_style(orig.m_style)
-  {
-  }
+  StarFAttributeShadow(StarFAttributeShadow const &orig) = default;
   //! the location 0-4
   int m_location;
   //! the width in twip
@@ -568,26 +560,27 @@ protected:
 };
 
 //! a top, bottom, ... attribute
-class StarFAttributeULSpace : public StarAttribute
+class StarFAttributeULSpace final : public StarAttribute
 {
 public:
   //! constructor
-  StarFAttributeULSpace(Type type, std::string const &debugName) : StarAttribute(type, debugName)
+  StarFAttributeULSpace(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
   {
     for (int i=0; i<2; ++i) m_margins[i]=0;
     for (int i=0; i<2; ++i) m_propMargins[i]=100;
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarFAttributeULSpace(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! add to a page/paragraph
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     for (int i=0; i<2; ++i) {
@@ -601,11 +594,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarFAttributeULSpace(StarFAttributeULSpace const &orig) : StarAttribute(orig)
-  {
-    for (int i=0; i<2; ++i) m_margins[i]=orig.m_margins[i];
-    for (int i=0; i<2; ++i) m_propMargins[i]=orig.m_propMargins[i];
-  }
+  StarFAttributeULSpace(StarFAttributeULSpace const &orig) = default;
   //! the margins: top, bottom
   int m_margins[2];
   //! the prop margins: top, bottom
