@@ -71,7 +71,9 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectChart::StarObjectChart(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_chartState(new StarObjectChartInternal::State)
+StarObjectChart::StarObjectChart(StarObject const &orig, bool duplicateState)
+  : StarObject(orig, duplicateState)
+  , m_chartState(new StarObjectChartInternal::State)
 {
 }
 
@@ -95,21 +97,19 @@ bool StarObjectChart::parse()
     STOFF_DEBUG_MSG(("StarObjectChart::parser: error, incomplete document\n"));
     return false;
   }
-  STOFFOLEParser::OleDirectory &directory=*getOLEDirectory();
+  auto &directory=*getOLEDirectory();
   StarObject::parse();
-  std::vector<std::string> unparsedOLEs=directory.getUnparsedOles();
-  size_t numUnparsed = unparsedOLEs.size();
+  auto unparsedOLEs=directory.getUnparsedOles();
   STOFFInputStreamPtr input=directory.m_input;
   StarFileManager fileManager;
-  for (size_t i = 0; i < numUnparsed; i++) {
-    std::string const &name = unparsedOLEs[i];
+  for (auto const &name : unparsedOLEs) {
     STOFFInputStreamPtr ole = input->getSubStreamByName(name.c_str());
     if (!ole.get()) {
       STOFF_DEBUG_MSG(("StarObjectChart::parse: error: can not find OLE part: \"%s\"\n", name.c_str()));
       continue;
     }
 
-    std::string::size_type pos = name.find_last_of('/');
+    auto pos = name.find_last_of('/');
     std::string base;
     if (pos == std::string::npos) base = name;
     else base = name.substr(pos+1);
@@ -167,7 +167,7 @@ try
   ascFile.addPos(0);
   ascFile.addNote(f.str().c_str());
   long pos=input->tell(), lastPos= zone.getRecordLastPosition();
-  std::shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_VCControlPool);
+  auto pool=getNewItemPool(StarItemPool::T_VCControlPool);
   if (!pool || !pool->read(zone))
     input->seek(pos, librevenge::RVNG_SEEK_SET);
 
@@ -244,11 +244,11 @@ bool StarObjectChart::readSfxStyleSheets(STOFFInputStreamPtr input, std::string 
 
   // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
   // chart sch_docshell.cxx SchChartDocShell::Load
-  std::shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
+  auto pool=getNewItemPool(StarItemPool::T_XOutdevPool);
   pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
   pool->addSecondaryPool(getNewItemPool(StarItemPool::T_ChartPool));
 
-  std::shared_ptr<StarItemPool> mainPool=pool;
+  auto mainPool=pool;
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
     long pos=input->tell();
@@ -449,7 +449,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  std::shared_ptr<StarItemPool> pool=getCurrentPool();
+  auto pool=getCurrentPool();
   if (!pool) {
     // CHANGEME
     static bool first=true;

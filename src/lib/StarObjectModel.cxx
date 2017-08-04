@@ -74,7 +74,10 @@ class Layer
 {
 public:
   //! constructor
-  Layer() : m_name(""), m_id(0), m_type(0)
+  Layer()
+    : m_name("")
+    , m_id(0)
+    , m_type(0)
   {
   }
   //! operator<<
@@ -98,7 +101,10 @@ class LayerSet
 {
 public:
   //! constructor
-  LayerSet() : m_name(""), m_memberList(), m_excludeList()
+  LayerSet()
+    : m_name("")
+    , m_memberList()
+    , m_excludeList()
   {
   }
   //! operator<<
@@ -134,7 +140,9 @@ public:
   //! Internal: class used to store a page descriptor
   struct Descriptor {
     //! constructor
-    Descriptor() : m_masterId(1), m_layerList()
+    Descriptor()
+      : m_masterId(1)
+      , m_layerList()
     {
     }
     //! operator<<
@@ -155,7 +163,15 @@ public:
     std::vector<bool> m_layerList;
   };
   //! constructor
-  Page() : m_masterPage(false), m_name(""), m_size(0,0), m_masterPageDescList(), m_layer(), m_layerSet(), m_objectList(), m_background()
+  Page()
+    : m_masterPage(false)
+    , m_name("")
+    , m_size(0,0)
+    , m_masterPageDescList()
+    , m_layer()
+    , m_layerSet()
+    , m_objectList()
+    , m_background()
   {
     for (int i=0; i<4; ++i) m_borders[i]=0;
   }
@@ -193,17 +209,17 @@ public:
     o << "],";
     if (!page.m_masterPageDescList.empty()) {
       o << "desc=[";
-      for (size_t i=0; i<page.m_masterPageDescList.size(); ++i)
-        o << "[" << page.m_masterPageDescList[i] << "],";
+      for (auto const &desc : page.m_masterPageDescList)
+        o << "[" << desc << "],";
       o << "],";
     }
     o << "layer=[" << page.m_layer << "],";
     o << "layerSet=[" << page.m_layerSet << "],";
     if (page.m_background) o << "hasBackground,";
 #if 1
-    for (size_t i=0; i<page.m_objectList.size(); ++i) {
-      if (page.m_objectList[i])
-        o << "\n\t\t" << *page.m_objectList[i];
+    for (auto &obj : page.m_objectList) {
+      if (obj)
+        o << "\n\t\t" << *obj;
     }
     o << "\n";
 #else
@@ -235,8 +251,14 @@ public:
 //! Internal: the state of a StarObjectModel
 struct State {
   //! constructor
-  State() : m_previewMasterPage(-1), m_pageList(), m_masterPageList(), m_idToLayerMap(), m_layerSetList(),
-    m_pageToSendList(), m_masterPageToSendSet()
+  State()
+    : m_previewMasterPage(-1)
+    , m_pageList()
+    , m_masterPageList()
+    , m_idToLayerMap()
+    , m_layerSetList()
+    , m_pageToSendList()
+    , m_masterPageToSendSet()
   {
   }
   //! small operator<< to print the content of the state
@@ -246,32 +268,32 @@ struct State {
       o << "prev[masterPage]=" << state.m_previewMasterPage << ",";
     if (!state.m_pageList.empty()) {
       o << "pages=[\n";
-      for (size_t i=0; i<state.m_pageList.size(); ++i) {
-        if (!state.m_pageList[i])
+      for (auto &page : state.m_pageList) {
+        if (!page)
           continue;
-        o << "\t" << *state.m_pageList[i] << "\n";
+        o << "\t" << *page << "\n";
       }
       o << "]\n";
     }
     if (!state.m_masterPageList.empty()) {
       o << "masterPages=[\n";
-      for (size_t i=0; i<state.m_masterPageList.size(); ++i) {
-        if (!state.m_masterPageList[i])
+      for (auto &page : state.m_masterPageList) {
+        if (!page)
           continue;
-        o << "\t" << *state.m_masterPageList[i] << "\n";
+        o << "\t" << *page << "\n";
       }
       o << "]\n";
     }
     if (!state.m_idToLayerMap.empty()) {
       o << "layers=[";
-      for (std::map<int, Layer>::const_iterator it=state.m_idToLayerMap.begin(); it!=state.m_idToLayerMap.end(); ++it)
-        o << "[" << it->second << "],";
+      for (auto it : state.m_idToLayerMap)
+        o << "[" << it.second << "],";
       o << "]\n";
     }
     if (!state.m_layerSetList.empty()) {
       o << "layerSets=[\n";
-      for (size_t i=0; i<state.m_layerSetList.size(); ++i)
-        o << "\t" << state.m_layerSetList[i] << "\n";
+      for (auto const &layer : state.m_layerSetList)
+        o << "\t" << layer << "\n";
       o << "]\n";
     }
     return o;
@@ -310,7 +332,9 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectModel::StarObjectModel(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_modelState(new StarObjectModelInternal::State)
+StarObjectModel::StarObjectModel(StarObject const &orig, bool duplicateState)
+  : StarObject(orig, duplicateState)
+  , m_modelState(new StarObjectModelInternal::State)
 {
 }
 
@@ -337,7 +361,7 @@ bool StarObjectModel::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int 
   for (size_t i=0; i<m_modelState->m_pageList.size(); ++i) {
     if (!m_modelState->m_pageList[i])
       continue;
-    StarObjectModelInternal::Page const &page=*m_modelState->m_pageList[i];
+    auto const &page=*m_modelState->m_pageList[i];
     int id=page.getMasterPageId();
     if (id<=0 || (id&1)!=1) continue;
     m_modelState->m_pageToSendList.push_back(int(i));
@@ -361,9 +385,13 @@ bool StarObjectModel::sendPages(STOFFListenerPtr listener)
     STOFF_DEBUG_MSG(("StarObjectModel::sendPages: can not find the listener\n"));
     return false;
   }
-  for (size_t i=0; i<m_modelState->m_pageToSendList.size(); ++i) {
-    if (i) listener->insertBreak(STOFFListener::PageBreak);
-    sendPage(m_modelState->m_pageToSendList[i], listener, false);
+  bool first=true;
+  for (auto &page : m_modelState->m_pageToSendList) {
+    if (!first)
+      listener->insertBreak(STOFFListener::PageBreak);
+    else
+      first=false;
+    sendPage(page, listener, false);
   }
   return true;
 }
@@ -375,14 +403,12 @@ bool StarObjectModel::sendMasterPages(STOFFGraphicListenerPtr listener)
     return false;
   }
   int numMasters=int(m_modelState->m_masterPageList.size());
-  for (std::set<int>::iterator it=m_modelState->m_masterPageToSendSet.begin();
-       it!=m_modelState->m_masterPageToSendSet.end(); ++it) {
-    int id=*it;
+  for (auto id : m_modelState->m_masterPageToSendSet) {
     if (id<0 || id>=numMasters || !m_modelState->m_masterPageList[size_t(id)]) {
       STOFF_DEBUG_MSG(("StarObjectModel::sendMasterPages: can not find master page %d\n", id));
       continue;
     }
-    StarObjectModelInternal::Page const &page=*m_modelState->m_masterPageList[size_t(id)];
+    auto const &page=*m_modelState->m_masterPageList[size_t(id)];
     STOFFPageSpan ps;
     page.updatePageSpan(ps);
     librevenge::RVNGString masterName;
@@ -413,9 +439,9 @@ bool StarObjectModel::sendPage(int pageId, STOFFListenerPtr listener, bool maste
   STOFFPosition pos;
   pos.m_anchorTo=STOFFPosition::Page;
   if (!masterPage) pos.m_propertyList.insert("text:anchor-page-number", pageId+1);
-  for (size_t i=0; i<page.m_objectList.size(); ++i) {
-    if (page.m_objectList[i])
-      page.m_objectList[i]->send(listener, pos, *this, masterPage);
+  for (auto pag : page.m_objectList) {
+    if (pag)
+      pag->send(listener, pos, *this, masterPage);
   }
   return true;
 }
@@ -659,7 +685,7 @@ bool StarObjectModel::read(StarZone &zone)
       }
     }
     if ((magic=="DrPg" || magic=="DrMP")) {
-      std::shared_ptr<StarObjectModelInternal::Page> page=readSdrPage(zone);
+      auto page=readSdrPage(zone);
       if (page) {
         if (magic=="DrPg")
           m_modelState->m_pageList.push_back(page);
@@ -893,7 +919,7 @@ std::shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(Star
     }
     if (ok && n==1) {
       long actPos=input->tell();
-      std::shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_VCControlPool);
+      auto pool=getNewItemPool(StarItemPool::T_VCControlPool);
       if (!pool || !pool->read(zone))
         input->seek(actPos, librevenge::RVNG_SEEK_SET);
     }

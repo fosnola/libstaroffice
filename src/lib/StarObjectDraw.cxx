@@ -62,7 +62,9 @@ namespace StarObjectDrawInternal
 //! Internal: the state of a StarObjectDraw
 struct State {
   //! constructor
-  State() : m_model(), m_numPages()
+  State()
+    : m_model()
+    , m_numPages()
   {
   }
   //! the model
@@ -76,7 +78,9 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectDraw::StarObjectDraw(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_drawState(new StarObjectDrawInternal::State)
+StarObjectDraw::StarObjectDraw(StarObject const &orig, bool duplicateState)
+  : StarObject(orig, duplicateState)
+  , m_drawState(new StarObjectDrawInternal::State)
 {
 }
 
@@ -125,23 +129,21 @@ bool StarObjectDraw::parse()
     STOFF_DEBUG_MSG(("StarObjectDraw::parser: error, incomplete document\n"));
     return false;
   }
-  STOFFOLEParser::OleDirectory &directory=*getOLEDirectory();
+  auto &directory=*getOLEDirectory();
   StarObject::parse();
-  std::vector<std::string> unparsedOLEs=directory.getUnparsedOles();
-  size_t numUnparsed = unparsedOLEs.size();
+  auto unparsedOLEs=directory.getUnparsedOles();
   STOFFInputStreamPtr input=directory.m_input;
 
   STOFFInputStreamPtr mainOle; // let store the StarDrawDocument to read it in last position
   std::string mainName;
-  for (size_t i = 0; i < numUnparsed; i++) {
-    std::string const &name = unparsedOLEs[i];
+  for (auto const &name : unparsedOLEs) {
     STOFFInputStreamPtr ole = input->getSubStreamByName(name.c_str());
     if (!ole.get()) {
       STOFF_DEBUG_MSG(("StarObjectDraw::parse: error: can not find OLE part: \"%s\"\n", name.c_str()));
       continue;
     }
 
-    std::string::size_type pos = name.find_last_of('/');
+    auto pos = name.find_last_of('/');
     std::string base;
     if (pos == std::string::npos) base = name;
     else if (pos == 0) base = name.substr(1);
@@ -438,9 +440,9 @@ bool StarObjectDraw::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
   }
   // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
   // chart sch_docshell.cxx SchChartDocShell::Load
-  std::shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
+  auto pool=getNewItemPool(StarItemPool::T_XOutdevPool);
   pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
-  std::shared_ptr<StarItemPool> mainPool=pool;
+  auto mainPool=pool;
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
     long pos=input->tell();

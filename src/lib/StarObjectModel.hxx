@@ -105,7 +105,7 @@ protected:
   //! the state
   std::shared_ptr<StarObjectModelInternal::State> m_modelState;
 private:
-  StarObjectModel &operator=(StarObjectModel const &orig);
+  StarObjectModel &operator=(StarObjectModel const &orig) = delete;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
