@@ -66,7 +66,9 @@ struct Zone {
 //! Internal: a set of zone
 struct Content {
   //! constructor
-  Content() : m_sectionName(""), m_zoneList()
+  Content()
+    : m_sectionName("")
+    , m_zoneList()
   {
   }
   //! destructor
@@ -95,13 +97,13 @@ class StarZone;
  *
  *
  */
-class StarObjectText : public StarObject
+class StarObjectText final : public StarObject
 {
 public:
   //! constructor
   StarObjectText(StarObject const &orig, bool duplicateState);
   //! destructor
-  virtual ~StarObjectText();
+  ~StarObjectText() final;
 
   // try to parse all zone
   bool parse();
@@ -147,7 +149,7 @@ protected:
   //! the state
   std::shared_ptr<StarObjectTextInternal::State> m_textState;
 private:
-  StarObjectText &operator=(StarObjectText const &orig);
+  StarObjectText &operator=(StarObjectText const &orig) = delete;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

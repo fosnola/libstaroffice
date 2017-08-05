@@ -86,10 +86,10 @@ void Content::inventoryPages(StarState &state) const
     STOFF_DEBUG_MSG(("StarObjectTextInternal::Content::inventoryPages: can not find the pool\n"));
     return;
   }
-  for (size_t t=0; t<m_zoneList.size(); ++t) {
-    if (m_zoneList[t])
-      m_zoneList[t]->inventoryPage(state);
-    if (t==0 && state.m_global->m_pageNameList.empty())
+  for (auto &z : m_zoneList) {
+    if (z)
+      z->inventoryPage(state);
+    if (state.m_global->m_pageNameList.empty())
       state.m_global->m_pageNameList.push_back("");
   }
 }
@@ -112,13 +112,15 @@ bool Content::send(STOFFListenerPtr listener, StarState &state) const
 
 ////////////////////////////////////////
 //! Internal: a formatZone of StarObjectTextInteral
-struct FormatZone : public Zone {
+struct FormatZone final : public Zone {
   //! constructor
-  explicit FormatZone(std::shared_ptr<StarFormatManagerInternal::FormatDef> format) : Zone(), m_format(format)
+  explicit FormatZone(std::shared_ptr<StarFormatManagerInternal::FormatDef> format)
+    : Zone()
+    , m_format(format)
   {
   }
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! the format
   std::shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
 };
@@ -139,13 +141,17 @@ bool FormatZone::send(STOFFListenerPtr listener, StarState &state) const
 
 ////////////////////////////////////////
 //! Internal: a graphZone of StarObjectTextInteral
-struct GraphZone : public Zone {
+struct GraphZone final : public Zone {
   //! constructor
-  explicit GraphZone(std::shared_ptr<STOFFOLEParser> oleParser) : Zone(), m_oleParser(oleParser), m_attributeList(), m_contour()
+  explicit GraphZone(std::shared_ptr<STOFFOLEParser> oleParser)
+    : Zone()
+    , m_oleParser(oleParser)
+    , m_attributeList()
+    , m_contour()
   {
   }
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! the ole parser
   std::shared_ptr<STOFFOLEParser> m_oleParser;
   //! the graph name, the fltName, the replace text
@@ -183,13 +189,17 @@ bool GraphZone::send(STOFFListenerPtr listener, StarState &/* state */) const
 
 ////////////////////////////////////////
 //! Internal: a OLEZone of StarObjectTextInteral
-struct OLEZone : public Zone {
+struct OLEZone final : public Zone {
   //! constructor
-  OLEZone() : Zone(), m_name(""), m_replaceText(""), m_oleParser()
+  OLEZone()
+    : Zone()
+    , m_name("")
+    , m_replaceText("")
+    , m_oleParser()
   {
   }
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! the OLE name
   librevenge::RVNGString m_name;
   //! the replacement text
@@ -213,7 +223,7 @@ bool OLEZone::send(STOFFListenerPtr listener, StarState &/*state*/) const
     return false;
   }
   STOFFEmbeddedObject localPicture;
-  std::shared_ptr<STOFFOLEParser::OleDirectory> dir=m_oleParser->getDirectory(m_name.cstr());
+  auto dir=m_oleParser->getDirectory(m_name.cstr());
   if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture) || localPicture.isEmpty()) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: sorry, can not find object %s\n", m_name.cstr()));
     return false;
@@ -231,13 +241,21 @@ bool OLEZone::send(STOFFListenerPtr listener, StarState &/*state*/) const
 
 ////////////////////////////////////////
 //! Internal: a sectionZone of StarObjectTextInteral
-struct SectionZone : public Zone {
+struct SectionZone final : public Zone {
   //! constructor
-  SectionZone() : Zone(), m_name(""), m_condition(""), m_linkName(""), m_type(0), m_flags(0), m_format(), m_content()
+  SectionZone()
+    : Zone()
+    , m_name("")
+    , m_condition("")
+    , m_linkName("")
+    , m_type(0)
+    , m_flags(0)
+    , m_format()
+    , m_content()
   {
   }
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! the section name
   librevenge::RVNGString m_name;
   //! the section condition
@@ -271,15 +289,24 @@ bool SectionZone::send(STOFFListenerPtr listener, StarState &state) const
 
 ////////////////////////////////////////
 //! Internal: a textZone of StarObjectTextInteral
-struct TextZone : public Zone {
+struct TextZone final : public Zone {
   //! constructor
-  TextZone() : Zone(), m_text(), m_textSourcePosition(), m_styleName(""), m_level(-1), m_charAttributeList(), m_format(), m_list(), m_markList()
+  TextZone()
+    : Zone()
+    , m_text()
+    , m_textSourcePosition()
+    , m_styleName("")
+    , m_level(-1)
+    , m_charAttributeList()
+    , m_format()
+    , m_list()
+    , m_markList()
   {
   }
   //! try to inventory the different pages
-  virtual void inventoryPage(StarState &state) const;
+  void inventoryPage(StarState &state) const final;
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! the text
   std::vector<uint32_t> m_text;
   //! the text initial position
@@ -300,18 +327,16 @@ struct TextZone : public Zone {
 
 void TextZone::inventoryPage(StarState &state) const
 {
-  std::map<int, std::shared_ptr<StarItem> >::const_iterator it;
   size_t numPages=state.m_global->m_pageNameList.size();
   if (state.m_styleName!=m_styleName) {
     state.reinitializeLineData();
     state.m_styleName=m_styleName;
     if (state.m_global->m_pool && !m_styleName.empty()) { // checkme
-      StarItemStyle const *style=state.m_global->m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
+      auto const *style=state.m_global->m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
       if (style) {
-        StarItemSet const &itemSet=style->m_itemSet;
-        for (it=itemSet.m_whichToItemMap.begin(); it!=itemSet.m_whichToItemMap.end(); ++it) {
-          if (it->second && it->second->m_attribute)
-            it->second->m_attribute->addTo(state);
+        for (auto it : style->m_itemSet.m_whichToItemMap) {
+          if (it.second && it.second->m_attribute)
+            it.second->m_attribute->addTo(state);
         }
       }
       else {
@@ -320,9 +345,7 @@ void TextZone::inventoryPage(StarState &state) const
     }
   }
   StarState lineState(state);
-  size_t numAttr=m_charAttributeList.size();
-  for (size_t i=0; i<numAttr; ++i) {
-    StarWriterStruct::Attribute const &attrib=m_charAttributeList[i];
+  for (auto const &attrib : m_charAttributeList) {
     if ((attrib.m_position[1]<0 && attrib.m_position[0]>0) || attrib.m_position[0]>0)
       continue;
     if (!attrib.m_attribute)
@@ -346,7 +369,6 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
 
   if (m_list) state.m_global->m_list=listener->getListManager()->addList(m_list);
   size_t numPages=state.m_global->m_pageNameList.size();
-  std::map<int, std::shared_ptr<StarItem> >::const_iterator it;
   if (state.m_styleName!=m_styleName) {
     state.reinitializeLineData();
     state.m_paragraph=STOFFParagraph();
@@ -354,14 +376,13 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
     if (state.m_global->m_pool && !m_styleName.empty()) { // checkme
       StarItemStyle const *style=state.m_global->m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
       if (style) {
-        StarItemSet const &itemSet=style->m_itemSet;
         if (style->m_outlineLevel>=0 && style->m_outlineLevel<20) {
           state.m_paragraph.m_outline=true;
           state.m_paragraph.m_listLevelIndex=style->m_outlineLevel+1;
         }
-        for (it=itemSet.m_whichToItemMap.begin(); it!=itemSet.m_whichToItemMap.end(); ++it) {
-          if (it->second && it->second->m_attribute)
-            it->second->m_attribute->addTo(state);
+        for (auto it : style->m_itemSet.m_whichToItemMap) {
+          if (it.second && it.second->m_attribute)
+            it.second->m_attribute->addTo(state);
         }
 #if 0
         std::cerr << "Para[" << m_styleName.cstr() << "]:" << style->m_itemSet.printChild() << "\n";
@@ -394,15 +415,14 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a refMark in mainFont\n"));
   }
   std::set<size_t> modPosSet;
-  size_t numFonts=m_charAttributeList.size();
   modPosSet.insert(0);
-  for (size_t i=0; i<numFonts; ++i) {
-    if (m_charAttributeList[i].m_position[0]>0)
-      modPosSet.insert(size_t(m_charAttributeList[i].m_position[0]));
-    if (m_charAttributeList[i].m_position[1]>0)
-      modPosSet.insert(size_t(m_charAttributeList[i].m_position[1]));
+  for (auto const &attrib : m_charAttributeList) {
+    if (attrib.m_position[0]>0)
+      modPosSet.insert(size_t(attrib.m_position[0]));
+    if (attrib.m_position[1]>0)
+      modPosSet.insert(size_t(attrib.m_position[1]));
   }
-  std::set<size_t>::const_iterator posSetIt=modPosSet.begin();
+  auto posSetIt=modPosSet.begin();
   int endLinkPos=-1, endRefMarkPos=-1;
   librevenge::RVNGString refMarkString;
   StarState lineState(state);
@@ -424,8 +444,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
       lineState.reinitializeLineData();
       lineState.m_font=mainFont;
       STOFFFont &font=lineState.m_font;
-      for (size_t f=0; f<numFonts; ++f) {
-        StarWriterStruct::Attribute const &attrib=m_charAttributeList[f];
+      for (auto const &attrib : m_charAttributeList) {
         if ((attrib.m_position[1]<0 && attrib.m_position[0]>=0 && attrib.m_position[0]!=int(srcPos)) ||
             (attrib.m_position[0]>=0 && attrib.m_position[0]>int(srcPos)) ||
             (attrib.m_position[1]>=0 && attrib.m_position[1]<=int(srcPos)))
@@ -573,13 +592,15 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
 }
 
 //! Internal: a table of StarObjectTextInteral
-struct Table : public Zone {
+struct Table final : public Zone {
   //! constructor
-  Table() : Zone(), m_table()
+  Table()
+    : Zone()
+    , m_table()
   {
   }
   //! try to send the data to a listener
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! the table
   std::shared_ptr<StarTable> m_table;
 };
@@ -601,7 +622,13 @@ bool Table::send(STOFFListenerPtr listener, StarState &state) const
 //! Internal: the state of a StarObjectText
 struct State {
   //! constructor
-  State() : m_numPages(0), m_numGraphicPages(0), m_mainContent(), m_numericRuler(), m_pageStyle(), m_model()
+  State()
+    : m_numPages(0)
+    , m_numGraphicPages(0)
+    , m_mainContent()
+    , m_numericRuler()
+    , m_pageStyle()
+    , m_model()
   {
   }
   //! the number of pages
@@ -623,7 +650,9 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectText::StarObjectText(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_textState(new StarObjectTextInternal::State)
+StarObjectText::StarObjectText(StarObject const &orig, bool duplicateState)
+  : StarObject(orig, duplicateState)
+  , m_textState(new StarObjectTextInternal::State)
 {
 }
 
@@ -639,7 +668,7 @@ bool StarObjectText::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &
 {
   numPages=0;
 
-  std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
+  auto pool=findItemPool(StarItemPool::T_WriterPool, false);
   StarState state(pool.get(), *this);
   if (m_textState->m_mainContent)
     m_textState->m_mainContent->inventoryPages(state);
@@ -675,7 +704,7 @@ bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
     for (int i=0; i<=m_textState->m_numGraphicPages; ++i)
       m_textState->m_model->sendPage(i, listener);
   }
-  std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_WriterPool, false);
+  auto pool=findItemPool(StarItemPool::T_WriterPool, false);
   StarState state(pool.get(), *this);
   state.m_global->m_numericRuler=m_textState->m_numericRuler;
   m_textState->m_mainContent->send(listener, state);
@@ -691,23 +720,21 @@ bool StarObjectText::parse()
     STOFF_DEBUG_MSG(("StarObjectText::parser: error, incomplete document\n"));
     return false;
   }
-  STOFFOLEParser::OleDirectory &directory=*getOLEDirectory();
+  auto &directory=*getOLEDirectory();
   StarObject::parse();
-  std::vector<std::string> unparsedOLEs=directory.getUnparsedOles();
-  size_t numUnparsed = unparsedOLEs.size();
+  auto unparsedOLEs=directory.getUnparsedOles();
   STOFFInputStreamPtr input=directory.m_input;
   StarFileManager fileManager;
   STOFFInputStreamPtr mainOle; // let store the StarWriterDocument to read it in last position
   std::string mainName;
-  for (size_t i = 0; i < numUnparsed; i++) {
-    std::string const &name = unparsedOLEs[i];
+  for (auto const &name : unparsedOLEs) {
     STOFFInputStreamPtr ole = input->getSubStreamByName(name.c_str());
     if (!ole.get()) {
       STOFF_DEBUG_MSG(("StarObjectText::parse: error: can not find OLE part: \"%s\"\n", name.c_str()));
       continue;
     }
 
-    std::string::size_type pos = name.find_last_of('/');
+    auto pos = name.find_last_of('/');
     std::string base;
     if (pos == std::string::npos) base = name;
     else if (pos == 0) base = name.substr(1);
@@ -786,8 +813,8 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
   }
   // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
   // chart sch_docshell.cxx SchChartDocShell::Load
-  std::shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_WriterPool);
-  std::shared_ptr<StarItemPool> mainPool=pool;
+  auto pool=getNewItemPool(StarItemPool::T_WriterPool);
+  auto mainPool=pool;
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
     long pos=input->tell();
@@ -1489,7 +1516,7 @@ try
   // sw_sw3imp.cxx Sw3IoImp::LoadDrawingLayer
 
   // create this pool from the main's SWG pool
-  std::shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
+  auto pool=getNewItemPool(StarItemPool::T_XOutdevPool);
   pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
 
   while (!input->isEnd()) {
