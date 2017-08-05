@@ -48,79 +48,74 @@
 namespace StarPageAttribute
 {
 //! a character bool attribute
-class StarPAttributeBool : public StarAttributeBool
+class StarPAttributeBool final : public StarAttributeBool
 {
 public:
   //! constructor
-  StarPAttributeBool(Type type, std::string const &debugName, bool value) :
-    StarAttributeBool(type, debugName, value)
+  StarPAttributeBool(Type type, std::string const &debugName, bool value)
+    : StarAttributeBool(type, debugName, value)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributeBool(*this));
   }
   //! add to a page
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 
 protected:
   //! copy constructor
-  StarPAttributeBool(StarPAttributeBool const &orig) : StarAttributeBool(orig)
-  {
-  }
+  StarPAttributeBool(StarPAttributeBool const &orig) = default;
 };
 
 //! a character color attribute
-class StarPAttributeColor : public StarAttributeColor
+class StarPAttributeColor final : public StarAttributeColor
 {
 public:
   //! constructor
-  StarPAttributeColor(Type type, std::string const &debugName, STOFFColor const &value) : StarAttributeColor(type, debugName, value)
+  StarPAttributeColor(Type type, std::string const &debugName, STOFFColor const &value)
+    : StarAttributeColor(type, debugName, value)
   {
   }
   //! destructor
-  ~StarPAttributeColor();
+  ~StarPAttributeColor() final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributeColor(*this));
   }
   //! add to a page
-  // virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarPAttributeColor(StarPAttributeColor const &orig) : StarAttributeColor(orig)
-  {
-  }
+  StarPAttributeColor(StarPAttributeColor const &orig) = default;
 };
 
 StarPAttributeColor::~StarPAttributeColor()
 {
 }
 //! a character integer attribute
-class StarPAttributeInt : public StarAttributeInt
+class StarPAttributeInt final : public StarAttributeInt
 {
 public:
   //! constructor
-  StarPAttributeInt(Type type, std::string const &debugName, int intSize, int value) :
-    StarAttributeInt(type, debugName, intSize, value)
+  StarPAttributeInt(Type type, std::string const &debugName, int intSize, int value)
+    : StarAttributeInt(type, debugName, intSize, value)
   {
   }
   //! destructor
   ~StarPAttributeInt();
   //! add to a page
-  // virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributeInt(*this));
   }
 protected:
   //! copy constructor
-  StarPAttributeInt(StarPAttributeInt const &orig) : StarAttributeInt(orig)
-  {
-  }
+  StarPAttributeInt(StarPAttributeInt const &orig) = default;
 };
 
 StarPAttributeInt::~StarPAttributeInt()
@@ -128,30 +123,28 @@ StarPAttributeInt::~StarPAttributeInt()
 }
 
 //! a character unsigned integer attribute
-class StarPAttributeUInt : public StarAttributeUInt
+class StarPAttributeUInt final : public StarAttributeUInt
 {
 public:
   //! constructor
-  StarPAttributeUInt(Type type, std::string const &debugName, int intSize, unsigned int value) :
-    StarAttributeUInt(type, debugName, intSize, value)
+  StarPAttributeUInt(Type type, std::string const &debugName, int intSize, unsigned int value)
+    : StarAttributeUInt(type, debugName, intSize, value)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributeUInt(*this));
   }
   //! add to a page
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarPAttributeUInt(StarPAttributeUInt const &orig) : StarAttributeUInt(orig)
-  {
-  }
+  StarPAttributeUInt(StarPAttributeUInt const &orig) = default;
 };
 
 //! a void attribute
-class StarPAttributeVoid : public StarAttributeVoid
+class StarPAttributeVoid final : public StarAttributeVoid
 {
 public:
   //! constructor
@@ -159,19 +152,17 @@ public:
   {
   }
   //! destructor
-  ~StarPAttributeVoid();
+  ~StarPAttributeVoid() final;
   //! add to a page
-  // virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const nfinal;
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributeVoid(*this));
   }
 protected:
   //! copy constructor
-  StarPAttributeVoid(StarPAttributeVoid const &orig) : StarAttributeVoid(orig)
-  {
-  }
+  StarPAttributeVoid(StarPAttributeVoid const &orig) = default;
 };
 
 StarPAttributeVoid::~StarPAttributeVoid()
@@ -179,49 +170,46 @@ StarPAttributeVoid::~StarPAttributeVoid()
 }
 
 //! a list of item attribute of StarAttributeInternal
-class StarPAttributeItemSet : public StarAttributeItemSet
+class StarPAttributeItemSet final : public StarAttributeItemSet
 {
 public:
   //! constructor
-  StarPAttributeItemSet(Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits) :
-    StarAttributeItemSet(type, debugName, limits)
+  StarPAttributeItemSet(Type type, std::string const &debugName, std::vector<STOFFVec2i> const &limits)
+    : StarAttributeItemSet(type, debugName, limits)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributeItemSet(*this));
   }
   //! add to a pageSpan
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &done) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &done) const final;
 
 protected:
   //! copy constructor
-  explicit StarPAttributeItemSet(StarAttributeItemSet const &orig) : StarAttributeItemSet(orig)
-  {
-  }
+  explicit StarPAttributeItemSet(StarPAttributeItemSet const &orig) = default;
 };
 
 //! an Vec2i attribute
-class StarPAttributeVec2i : public StarAttributeVec2i
+class StarPAttributeVec2i final : public StarAttributeVec2i
 {
 public:
   //! constructor
-  StarPAttributeVec2i(Type type, std::string const &debugName, int intSize, STOFFVec2i value=STOFFVec2i(0,0)) : StarAttributeVec2i(type, debugName, intSize, value)
+  StarPAttributeVec2i(Type type, std::string const &debugName, int intSize, STOFFVec2i value=STOFFVec2i(0,0))
+    : StarAttributeVec2i(type, debugName, intSize, value)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributeVec2i(*this));
   }
   //! add to a pageSpan
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  explicit StarPAttributeVec2i(StarAttributeVec2i const &orig) : StarAttributeVec2i(orig)
-  {
-  }
+  StarPAttributeVec2i(StarPAttributeVec2i const &orig) = default;
 };
 
 void StarPAttributeBool::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
@@ -317,7 +305,7 @@ void StarPAttributeItemSet::addTo(StarState &state, std::set<StarAttribute const
   }
   if (m_type!=ATTR_SC_PAGE_HEADERSET && m_type!=ATTR_SC_PAGE_FOOTERSET)
     return;
-  STOFFPageSpan::ZoneType prevZone=state.m_global->m_pageZone;
+  auto prevZone=state.m_global->m_pageZone;
   state.m_global->m_pageZone=m_type==ATTR_SC_PAGE_HEADERSET ? STOFFPageSpan::Header : STOFFPageSpan::Footer;
   StarAttributeItemSet::addTo(state, done);
   state.m_global->m_pageZone=prevZone;
@@ -355,19 +343,27 @@ namespace StarPageAttribute
 {
 ////////////////////////////////////////
 //! Internal: the subdocument of a StarObjectSpreadsheet
-class SubDocument : public STOFFSubDocument
+class SubDocument final : public STOFFSubDocument
 {
 public:
-  explicit SubDocument(std::shared_ptr<StarObjectSmallText> text) :
-    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_smallText(text), m_format(), m_object(0), m_pool(0) {}
-  SubDocument(std::shared_ptr<StarFormatManagerInternal::FormatDef> format, StarItemPool const *pool, StarObject *object) :
-    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_smallText(), m_format(format), m_object(object), m_pool(pool) {}
+  explicit SubDocument(std::shared_ptr<StarObjectSmallText> text)
+    : STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry())
+    , m_smallText(text)
+    , m_format()
+    , m_object(0)
+    , m_pool(0) {}
+  SubDocument(std::shared_ptr<StarFormatManagerInternal::FormatDef> format, StarItemPool const *pool, StarObject *object)
+    : STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry())
+    , m_smallText()
+    , m_format(format)
+    , m_object(object)
+    , m_pool(pool) {}
 
   //! destructor
-  virtual ~SubDocument() {}
+  ~SubDocument() final {}
 
   //! operator!=
-  virtual bool operator!=(STOFFSubDocument const &doc) const
+  bool operator!=(STOFFSubDocument const &doc) const final
   {
     if (STOFFSubDocument::operator!=(doc)) return true;
     SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
@@ -379,14 +375,8 @@ public:
     return false;
   }
 
-  //! operator!==
-  virtual bool operator==(STOFFSubDocument const &doc) const
-  {
-    return !operator!=(doc);
-  }
-
   //! the parser function
-  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type);
+  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type) final;
 
 protected:
   //! the note text
@@ -399,8 +389,8 @@ protected:
   StarItemPool const *m_pool;
 
 private:
-  SubDocument(SubDocument const &);
-  SubDocument &operator=(SubDocument const &);
+  SubDocument(SubDocument const &) = delete;
+  SubDocument &operator=(SubDocument const &) = delete;
 };
 
 void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*type*/)
@@ -418,7 +408,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
 }
 
 //! a frame + columns
-class StarPAttributeColumns : public StarAttribute
+class StarPAttributeColumns final : public StarAttribute
 {
 protected:
   //! a column
@@ -456,22 +446,30 @@ protected:
   };
 public:
   //! constructor
-  StarPAttributeColumns(Type type, std::string const &debugName) :
-    StarAttribute(type, debugName), m_lineAdj(0), m_ortho(true), m_lineHeight(0), m_gutterWidth(0), m_wishWidth(0),
-    m_penStyle(0), m_penWidth(0), m_penColor(STOFFColor::black()), m_columnList()
+  StarPAttributeColumns(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_lineAdj(0)
+    , m_ortho(true)
+    , m_lineHeight(0)
+    , m_gutterWidth(0)
+    , m_wishWidth(0)
+    , m_penStyle(0)
+    , m_penWidth(0)
+    , m_penColor(STOFFColor::black())
+    , m_columnList()
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributeColumns(*this));
   }
   //! add to a page
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (m_lineAdj) o << "line[adj]=" << m_lineAdj << ",";
@@ -484,9 +482,9 @@ public:
     if (!m_penColor.isBlack()) o << "pen[color]=" << m_penColor << ",";
     if (!m_columnList.empty()) {
       o << "columns=[";
-      for (size_t i=0; i<m_columnList.size(); ++i) {
+      for (auto const &c : m_columnList) {
         o << "[";
-        m_columnList[i].printData(o);
+        c.printData(o);
         o << "],";
       }
       o << "],";
@@ -496,12 +494,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributeColumns(StarPAttributeColumns const &orig) :
-    StarAttribute(orig), m_lineAdj(orig.m_lineAdj), m_ortho(orig.m_ortho), m_lineHeight(orig.m_lineHeight),
-    m_gutterWidth(orig.m_gutterWidth), m_wishWidth(orig.m_wishWidth), m_penStyle(orig.m_penStyle), m_penWidth(orig.m_penWidth),
-    m_penColor(orig.m_penColor), m_columnList(orig.m_columnList)
-  {
-  }
+  StarPAttributeColumns(StarPAttributeColumns const &orig) = default;
 
   //! the lineAdj
   int m_lineAdj;
@@ -524,24 +517,28 @@ protected:
 };
 
 //! a frame header/footer attribute (used to define header/footer in a sdw file)
-class StarPAttributeFrameHF : public StarAttribute
+class StarPAttributeFrameHF final : public StarAttribute
 {
 public:
   //! constructor
-  StarPAttributeFrameHF(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_active(true), m_format(), m_object(0)
+  StarPAttributeFrameHF(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_active(true)
+    , m_format()
+    , m_object(0)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributeFrameHF(*this));
   }
   //! add to a page
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName;
     if (!m_active)
@@ -551,9 +548,7 @@ public:
 
 protected:
   //! copy constructor
-  explicit StarPAttributeFrameHF(StarPAttributeFrameHF const &orig) : StarAttribute(orig), m_active(orig.m_active), m_format(orig.m_format), m_object(orig.m_object)
-  {
-  }
+  explicit StarPAttributeFrameHF(StarPAttributeFrameHF const &orig) = default;
   //! active flag
   bool m_active;
   //! the format
@@ -566,24 +561,29 @@ private:
 
 // ------------------------------------------------------------
 //! a page attribute
-class StarPAttributePage : public StarAttribute
+class StarPAttributePage final : public StarAttribute
 {
 public:
   //! constructor
-  StarPAttributePage(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_name(""), m_pageType(0), m_landscape(false), m_used(0)
+  StarPAttributePage(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_name("")
+    , m_pageType(0)
+    , m_landscape(false)
+    , m_used(0)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributePage(*this));
   }
   //! add to a page
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (!m_name.empty()) o << m_name.cstr();
@@ -605,9 +605,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributePage(StarPAttributePage const &orig) : StarAttribute(orig), m_name(orig.m_name), m_pageType(orig.m_pageType), m_landscape(orig.m_landscape), m_used(orig.m_used)
-  {
-  }
+  StarPAttributePage(StarPAttributePage const &orig) = default;
   //! the name
   librevenge::RVNGString m_name;
   //! the type
@@ -619,24 +617,28 @@ protected:
 };
 
 //! a page descriptor attribute
-class StarPAttributePageDesc : public StarAttribute
+class StarPAttributePageDesc final : public StarAttribute
 {
 public:
   //! constructor
-  StarPAttributePageDesc(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_auto(false), m_offset(0), m_name("")
+  StarPAttributePageDesc(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_auto(false)
+    , m_offset(0)
+    , m_name("")
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributePageDesc(*this));
   }
   //! add to a page
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     if (!m_auto) o << "auto[no],";
@@ -647,9 +649,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributePageDesc(StarPAttributePageDesc const &orig) : StarAttribute(orig), m_auto(orig.m_auto), m_offset(orig.m_offset), m_name(orig.m_name)
-  {
-  }
+  StarPAttributePageDesc(StarPAttributePageDesc const &orig) = default;
   //! the auto flag
   bool m_auto;
   //! the offset
@@ -659,89 +659,88 @@ protected:
 };
 
 //! a page header/footer attribute
-class StarPAttributePageHF : public StarAttribute
+class StarPAttributePageHF final : public StarAttribute
 {
 public:
   //! constructor
-  StarPAttributePageHF(Type type, std::string const &debugName) : StarAttribute(type, debugName)
+  StarPAttributePageHF(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributePageHF(*this));
   }
   //! add to a page
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=*,";
   }
 
 protected:
   //! copy constructor
-  StarPAttributePageHF(StarPAttributePageHF const &orig) : StarAttribute(orig)
-  {
-    for (int i=0; i<3; ++i) m_zones[i]=orig.m_zones[i];
-  }
+  StarPAttributePageHF(StarPAttributePageHF const &orig) = default;
   //! the left/middle/right zones
   std::shared_ptr<StarObjectSmallText> m_zones[3];
 };
 
 //! a print attribute
-class StarPAttributePrint : public StarAttribute
+class StarPAttributePrint final : public StarAttribute
 {
 public:
   //! constructor
-  StarPAttributePrint(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_tableList()
+  StarPAttributePrint(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_tableList()
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributePrint(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
-    for (size_t i=0; i<m_tableList.size(); ++i)
-      o << m_tableList[i];
+    for (auto const &table : m_tableList)
+      o << table;
     o << "],";
   }
 
 protected:
   //! copy constructor
-  StarPAttributePrint(StarPAttributePrint const &orig) : StarAttribute(orig), m_tableList(orig.m_tableList)
-  {
-  }
+  StarPAttributePrint(StarPAttributePrint const &orig) = default;
   //! the list of table to print
   std::vector<int> m_tableList;
 };
 
 //! a rangeItem attribute
-class StarPAttributeRangeItem : public StarAttribute
+class StarPAttributeRangeItem final : public StarAttribute
 {
 public:
   //! constructor
-  StarPAttributeRangeItem(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_table(-1), m_range()
+  StarPAttributeRangeItem(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName), m_table(-1), m_range()
   {
     for (int i=0; i<2; ++i) m_flags[i]=false;
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributeRangeItem(*this));
   }
   //! read a zone
-  virtual bool read(StarZone &zone, int vers, long endPos, StarObject &object);
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName << "=[";
     o << "range=" << m_range << ",";
@@ -755,10 +754,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributeRangeItem(StarPAttributeRangeItem const &orig) : StarAttribute(orig), m_table(orig.m_table), m_range(orig.m_range)
-  {
-    for (int i=0; i<2; ++i) m_flags[i]=orig.m_flags[i];
-  }
+  StarPAttributeRangeItem(StarPAttributeRangeItem const &orig) = default;
   //! the table(v0)
   int m_table;
   //! the range
@@ -768,32 +764,32 @@ protected:
 };
 
 //! a character unsigned integer attribute
-class StarPAttributeViewMode : public StarAttributeUInt
+class StarPAttributeViewMode final : public StarAttributeUInt
 {
 public:
   //! constructor
-  StarPAttributeViewMode(Type type, std::string const &debugName) :
-    StarAttributeUInt(type, debugName, 2, 0)
+  StarPAttributeViewMode(Type type, std::string const &debugName)
+    : StarAttributeUInt(type, debugName, 2, 0)
   {
   }
   //! create a new attribute
-  virtual std::shared_ptr<StarAttribute> create() const
+  std::shared_ptr<StarAttribute> create() const final
   {
     return std::shared_ptr<StarAttribute>(new StarPAttributeViewMode(*this));
   }
   //! add to a page
-  virtual void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const;
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! try to read a field
-  bool read(StarZone &zone, int vers, long endPos, StarObject &object)
-  {
-    if (vers==0) {
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final {
+    if (vers==0)
+    {
       m_value=0; // show
       return true;
     }
     return StarAttributeUInt::read(zone, vers, endPos, object);
   }
   //! print data
-  void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const final
   {
     o << m_debugName;
     switch (m_value) {
@@ -812,9 +808,7 @@ public:
 
 protected:
   //! copy constructor
-  explicit StarPAttributeViewMode(StarPAttributeUInt const &orig) : StarAttributeUInt(orig)
-  {
-  }
+  StarPAttributeViewMode(StarPAttributeViewMode const &orig) = default;
 };
 
 void StarPAttributeColumns::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
@@ -822,9 +816,9 @@ void StarPAttributeColumns::addTo(StarState &state, std::set<StarAttribute const
   if (m_type==ATTR_FRM_COL) {
     if (!m_columnList.empty()) {
       librevenge::RVNGPropertyListVector columns;
-      for (size_t c=0; c < m_columnList.size(); c++) {
+      for (auto const &c : m_columnList) {
         librevenge::RVNGPropertyList propList;
-        if (m_columnList[c].addTo(propList))
+        if (c.addTo(propList))
           columns.append(propList);
       }
       state.m_global->m_page.m_section.m_propertyList.insert("style:columns", columns);
