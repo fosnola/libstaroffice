@@ -61,13 +61,13 @@ class StarFormatManager;
  *
  *
  */
-class SDAParser : public STOFFGraphicParser
+class SDAParser final : public STOFFGraphicParser
 {
 public:
   //! constructor
   SDAParser(STOFFInputStreamPtr input, STOFFHeader *header);
   //! destructor
-  virtual ~SDAParser();
+  ~SDAParser() final;
   //! set the document password
   void setDocumentPassword(char const *passwd)
   {
@@ -77,9 +77,9 @@ public:
   bool checkHeader(STOFFHeader *header, bool strict=false);
 
   // the main parse function
-  void parse(librevenge::RVNGDrawingInterface *documentInterface);
+  void parse(librevenge::RVNGDrawingInterface *documentInterface) final;
   // the main presentation parse function
-  void parse(librevenge::RVNGPresentationInterface *documentInterface);
+  void parse(librevenge::RVNGPresentationInterface *documentInterface) final;
 
 protected:
   //! creates the listener which will be associated to the document
@@ -105,8 +105,8 @@ protected:
   //! the state
   std::shared_ptr<SDAParserInternal::State> m_state;
 private:
-  SDAParser(SDAParser const &orig);
-  SDAParser &operator=(SDAParser const &orig);
+  SDAParser(SDAParser const &orig) = delete;
+  SDAParser &operator=(SDAParser const &orig) = delete;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

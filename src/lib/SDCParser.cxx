@@ -55,7 +55,10 @@ namespace SDCParserInternal
 //! Internal: the state of a SDCParser
 struct State {
   //! constructor
-  State() : m_actPage(0), m_numPages(0), m_mainSpreadsheet()
+  State()
+    : m_actPage(0)
+    , m_numPages(0)
+    , m_mainSpreadsheet()
   {
   }
 
@@ -68,8 +71,11 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SDCParser::SDCParser(STOFFInputStreamPtr input, STOFFHeader *header) :
-  STOFFSpreadsheetParser(input, header), m_password(0), m_oleParser(), m_state(new SDCParserInternal::State)
+SDCParser::SDCParser(STOFFInputStreamPtr input, STOFFHeader *header)
+  : STOFFSpreadsheetParser(input, header)
+  , m_password(0)
+  , m_oleParser()
+  , m_state(new SDCParserInternal::State)
 {
 }
 
@@ -112,7 +118,7 @@ bool SDCParser::createZones()
   m_oleParser.reset(new STOFFOLEParser);
   m_oleParser->parse(getInput());
 
-  std::shared_ptr<STOFFOLEParser::OleDirectory> mainOle=m_oleParser->getDirectory("/");
+  auto mainOle=m_oleParser->getDirectory("/");
   if (!mainOle) {
     STOFF_DEBUG_MSG(("SDCParser::createZones: can not find the main ole\n"));
     return false;

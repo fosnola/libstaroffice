@@ -61,13 +61,13 @@ class StarFormatManager;
  *
  *
  */
-class SDWParser : public STOFFTextParser
+class SDWParser final : public STOFFTextParser
 {
 public:
   //! constructor
   SDWParser(STOFFInputStreamPtr input, STOFFHeader *header);
   //! destructor
-  virtual ~SDWParser();
+  ~SDWParser() final;
   //! set the document password
   void setDocumentPassword(char const *passwd)
   {
@@ -101,8 +101,8 @@ protected:
   //! the state
   std::shared_ptr<SDWParserInternal::State> m_state;
 private:
-  SDWParser(SDWParser const &orig);
-  SDWParser &operator=(SDWParser const &orig);
+  SDWParser(SDWParser const &orig) = delete;
+  SDWParser &operator=(SDWParser const &orig) = delete;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

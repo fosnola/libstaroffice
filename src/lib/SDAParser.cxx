@@ -55,7 +55,10 @@ namespace SDAParserInternal
 //! Internal: the state of a SDAParser
 struct State {
   //! constructor
-  State() : m_actPage(0), m_numPages(0), m_mainGraphic()
+  State()
+    : m_actPage(0)
+    , m_numPages(0)
+    , m_mainGraphic()
   {
   }
 
@@ -68,8 +71,11 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SDAParser::SDAParser(STOFFInputStreamPtr input, STOFFHeader *header) :
-  STOFFGraphicParser(input, header), m_password(0), m_oleParser(), m_state(new SDAParserInternal::State)
+SDAParser::SDAParser(STOFFInputStreamPtr input, STOFFHeader *header)
+  : STOFFGraphicParser(input, header)
+  , m_password(0)
+  , m_oleParser()
+  , m_state(new SDAParserInternal::State)
 {
 }
 
@@ -139,7 +145,7 @@ bool SDAParser::createZones()
   m_oleParser.reset(new STOFFOLEParser);
   m_oleParser->parse(getInput());
 
-  std::shared_ptr<STOFFOLEParser::OleDirectory> mainOle=m_oleParser->getDirectory("/");
+  auto mainOle=m_oleParser->getDirectory("/");
   if (!mainOle) {
     STOFF_DEBUG_MSG(("SDAParser::parse: can not find the main ole\n"));
     return false;

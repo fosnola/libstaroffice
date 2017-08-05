@@ -58,7 +58,10 @@ class Image
 {
 public:
   //! constructor
-  Image() : m_object(), m_size(), m_link()
+  Image()
+    : m_object()
+    , m_size()
+    , m_link()
   {
   }
   //! the object
@@ -73,7 +76,8 @@ public:
 //! Internal: the state of a SDGParser
 struct State {
   //! constructor
-  State() : m_imagesList()
+  State()
+    : m_imagesList()
   {
   }
 
@@ -83,17 +87,18 @@ struct State {
 
 ////////////////////////////////////////
 //! Internal: the subdocument of a SDGParser
-class SubDocument : public STOFFSubDocument
+class SubDocument final : public STOFFSubDocument
 {
 public:
-  explicit SubDocument(librevenge::RVNGString const &text) :
-    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_text(text) {}
+  explicit SubDocument(librevenge::RVNGString const &text)
+    : STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry())
+    , m_text(text) {}
 
   //! destructor
-  virtual ~SubDocument() {}
+  ~SubDocument() final {}
 
   //! operator!=
-  virtual bool operator!=(STOFFSubDocument const &doc) const
+  bool operator!=(STOFFSubDocument const &doc) const final
   {
     if (STOFFSubDocument::operator!=(doc)) return true;
     SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
@@ -102,14 +107,8 @@ public:
     return false;
   }
 
-  //! operator!==
-  virtual bool operator==(STOFFSubDocument const &doc) const
-  {
-    return !operator!=(doc);
-  }
-
   //! the parser function
-  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type);
+  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type) final;
 
 protected:
   //! the text
@@ -132,8 +131,10 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SDGParser::SDGParser(STOFFInputStreamPtr input, STOFFHeader *header) :
-  STOFFGraphicParser(input, header), m_password(0), m_state(new SDGParserInternal::State)
+SDGParser::SDGParser(STOFFInputStreamPtr input, STOFFHeader *header)
+  : STOFFGraphicParser(input, header)
+  , m_password(0)
+  , m_state(new SDGParserInternal::State)
 {
 }
 
@@ -160,11 +161,14 @@ void SDGParser::parse(librevenge::RVNGDrawingInterface *docInterface)
         STOFFGraphicStyle style;
         style.m_propertyList.insert("draw:stroke", "none");
         style.m_propertyList.insert("draw:fill", "none");
-        for (size_t i=0; i<m_state->m_imagesList.size(); ++i) {
-          if (i) listener->insertBreak(STOFFListener::PageBreak);
-          SDGParserInternal::Image const &image=m_state->m_imagesList[i];
+        bool first=true;
+        for (auto const &image : m_state->m_imagesList) {
           if (image.m_object.isEmpty())
             continue;
+          if (!first)
+            listener->insertBreak(STOFFListener::PageBreak);
+          else
+            first=false;
           position.setOrigin(STOFFVec2f(20,20), librevenge::RVNG_POINT);
           STOFFVec2f size=(image.m_size[0]>0 && image.m_size[1]>0) ? STOFFVec2f(image.m_size) : STOFFVec2f(400,400);
           position.setSize(size, librevenge::RVNG_POINT);

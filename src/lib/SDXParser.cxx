@@ -61,7 +61,9 @@ namespace SDXParserInternal
 //! Internal: the state of a SDXParser
 struct State {
   //! constructor
-  State() : m_actPage(0), m_numPages(0)
+  State()
+    : m_actPage(0)
+    , m_numPages(0)
   {
   }
 
@@ -73,8 +75,11 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SDXParser::SDXParser(STOFFInputStreamPtr input, STOFFHeader *header) :
-  STOFFTextParser(input, header), m_password(0), m_oleParser(), m_state()
+SDXParser::SDXParser(STOFFInputStreamPtr input, STOFFHeader *header)
+  : STOFFTextParser(input, header)
+  , m_password(0)
+  , m_oleParser()
+  , m_state()
 {
   init();
 }
@@ -121,11 +126,11 @@ bool SDXParser::createZones()
   m_oleParser->parse(getInput());
 
   // send the final data
-  std::vector<std::shared_ptr<STOFFOLEParser::OleDirectory> > listDir=m_oleParser->getDirectoryList();
-  for (size_t d=0; d<listDir.size(); ++d) {
-    if (!listDir[d] || listDir[d]->m_parsed) continue;
-    listDir[d]->m_parsed=true;
-    StarObject object(m_password, m_oleParser, listDir[d]);
+  auto listDir=m_oleParser->getDirectoryList();
+  for (auto &dir : listDir) {
+    if (!dir || dir->m_parsed) continue;
+    dir->m_parsed=true;
+    StarObject object(m_password, m_oleParser, dir);
     if (object.getDocumentKind()==STOFFDocument::STOFF_K_CHART) {
       StarObjectChart chart(object, false);
       chart.parse();
@@ -147,20 +152,18 @@ bool SDXParser::createZones()
       continue;
     }
     // Ole-Object has persist elements, so...
-    if (listDir[d]->m_hasCompObj) object.parse();
-    STOFFOLEParser::OleDirectory &direct=*listDir[d];
-    std::vector<std::string> unparsedOLEs=direct.getUnparsedOles();
-    size_t numUnparsed = unparsedOLEs.size();
+    if (dir->m_hasCompObj) object.parse();
+    STOFFOLEParser::OleDirectory &direct=*dir;
+    auto unparsedOLEs=direct.getUnparsedOles();
     StarFileManager fileManager;
-    for (size_t i = 0; i < numUnparsed; i++) {
-      std::string const &name = unparsedOLEs[i];
+    for (auto const &name : unparsedOLEs) {
       STOFFInputStreamPtr ole = getInput()->getSubStreamByName(name.c_str());
       if (!ole.get()) {
         STOFF_DEBUG_MSG(("SDXParser::createZones: error: can not find OLE part: \"%s\"\n", name.c_str()));
         continue;
       }
 
-      std::string::size_type pos = name.find_last_of('/');
+      auto pos = name.find_last_of('/');
       std::string base;
       if (pos == std::string::npos) base = name;
       else base = name.substr(pos+1);

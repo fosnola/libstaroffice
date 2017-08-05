@@ -61,13 +61,13 @@ class StarFormatManager;
  *
  *
  */
-class SDGParser : public STOFFGraphicParser
+class SDGParser final : public STOFFGraphicParser
 {
 public:
   //! constructor
   SDGParser(STOFFInputStreamPtr input, STOFFHeader *header);
   //! destructor
-  virtual ~SDGParser();
+  ~SDGParser() final;
   //! set the document password
   void setDocumentPassword(char const *passwd)
   {
@@ -104,8 +104,8 @@ protected:
   //! the state
   std::shared_ptr<SDGParserInternal::State> m_state;
 private:
-  SDGParser(SDGParser const &orig);
-  SDGParser &operator=(SDGParser const &orig);
+  SDGParser(SDGParser const &orig) = delete;
+  SDGParser &operator=(SDGParser const &orig) = delete;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
