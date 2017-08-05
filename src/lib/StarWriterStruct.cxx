@@ -350,8 +350,8 @@ std::ostream &operator<<(std::ostream &o, DatabaseName const &dbase)
   if (!dbase.m_sql.empty()) o << "sql=" << dbase.m_sql.cstr() << ",";
   if (!dbase.m_dataList.empty()) {
     o << "data=[";
-    for (size_t i=0; i<dbase.m_dataList.size(); ++i)
-      o << "[" << dbase.m_dataList[i] << "],";
+    for (auto const &data : dbase.m_dataList)
+      o << "[" << data << "],";
     o << "],";
   }
   return o;
@@ -402,8 +402,8 @@ std::ostream &operator<<(std::ostream &o, Dictionary const &dbase)
 {
   if (!dbase.m_dataList.empty()) {
     o << "data=[";
-    for (size_t i=0; i<dbase.m_dataList.size(); ++i)
-      o << "[" << dbase.m_dataList[i] << "],";
+    for (auto const &data : dbase.m_dataList)
+      o << "[" << data << "],";
     o << "],";
   }
   return o;
@@ -1054,18 +1054,18 @@ std::ostream &operator<<(std::ostream &o, TOX const &tox)
   if (tox.m_OLEOptions) o << "OLEOptions=" << tox.m_OLEOptions << ",";
   if (!tox.m_stringIdList.empty()) {
     o << "stringIdList=[";
-    for (size_t i=0; i<tox.m_stringIdList.size(); ++i) {
-      if (tox.m_stringIdList[i]==0xFFFF)
+    for (auto const &id : tox.m_stringIdList) {
+      if (id==0xFFFF)
         o << "_,";
       else
-        o << tox.m_stringIdList[i] << ",";
+        o << id << ",";
     }
     o << "],";
   }
   if (!tox.m_styleList.empty()) {
     o << "styleList=[";
-    for (size_t i=0; i<tox.m_styleList.size(); ++i)
-      o << "[" << tox.m_styleList[i] << "],";
+    for (auto const &style : tox.m_styleList)
+      o << "[" << style << "],";
     o << "],";
   }
   if (tox.m_titleLength) o << "titleLength=" << tox.m_titleLength << ",";
@@ -1197,17 +1197,17 @@ std::ostream &operator<<(std::ostream &o, TOX51 const &tox)
   if (!tox.m_title.empty()) o << "title=" << tox.m_title.cstr() << ",";
   if (!tox.m_patternList.empty()) {
     o << "patternList=[";
-    for (size_t i=0; i<tox.m_patternList.size(); ++i)
-      o << tox.m_patternList[i].cstr() << ",";
+    for (auto const &pattern : tox.m_patternList)
+      o << pattern.cstr() << ",";
     o << "],";
   }
   if (!tox.m_stringIdList.empty()) {
     o << "stringIdList=[";
-    for (size_t i=0; i<tox.m_stringIdList.size(); ++i) {
-      if (tox.m_stringIdList[i]==0xFFFF)
+    for (auto const &id : tox.m_stringIdList) {
+      if (id==0xFFFF)
         o << "_,";
       else
-        o << tox.m_stringIdList[i] << ",";
+        o << id << ",";
     }
     o << "],";
   }

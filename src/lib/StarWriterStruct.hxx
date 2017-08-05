@@ -61,7 +61,9 @@ namespace StarWriterStruct
 struct Attribute {
 public:
   //! constructor
-  Attribute() : m_attribute(), m_position(-1,-1)
+  Attribute()
+    : m_attribute()
+    , m_position(-1,-1)
   {
   }
   //! destructor
@@ -84,7 +86,12 @@ class Bookmark
 {
 public:
   //! the constructor
-  Bookmark() : m_shortName(""), m_name(""), m_offset(0), m_key(0), m_modifier(0)
+  Bookmark()
+    : m_shortName("")
+    , m_name("")
+    , m_offset(0)
+    , m_key(0)
+    , m_modifier(0)
   {
   }
   //! operator<<
@@ -112,7 +119,9 @@ public:
 struct DatabaseName {
 public:
   //! constructor
-  DatabaseName() : m_sql(""), m_dataList()
+  DatabaseName()
+    : m_sql("")
+    , m_dataList()
   {
   }
   //! operator<<
@@ -122,7 +131,9 @@ public:
   //! a data of a DatabaseName
   struct Data {
     //! constructor
-    Data() : m_name(""), m_selection(0,0)
+    Data()
+      : m_name("")
+      , m_selection(0,0)
     {
     }
     //! operator<<
@@ -150,7 +161,8 @@ public:
 struct Dictionary {
 public:
   //! constructor
-  Dictionary() : m_dataList()
+  Dictionary()
+    : m_dataList()
   {
   }
   //! operator<<
@@ -160,7 +172,11 @@ public:
   //! a data of a Dictionary
   struct Data {
     //! constructor
-    Data() : m_name(""), m_language(0), m_id(0), m_spellWrong(true)
+    Data()
+      : m_name("")
+      , m_language(0)
+      , m_id(0)
+      , m_spellWrong(true)
     {
     }
     //! operator<<
@@ -190,7 +206,8 @@ public:
 struct DocStats {
 public:
   //! constructor
-  DocStats() : m_isModified(false)
+  DocStats()
+    : m_isModified(false)
   {
     for (int i=0; i<7; ++i) m_numbers[i]=0;
   }
@@ -209,7 +226,9 @@ public:
 struct Macro {
 public:
   //! constructor
-  Macro() : m_key(0), m_scriptType(0)
+  Macro()
+    : m_key(0)
+    , m_scriptType(0)
   {
   }
   //! operator<<
@@ -231,7 +250,10 @@ public:
 struct Mark {
 public:
   //! constructor
-  Mark() : m_type(-1), m_id(-1), m_offset(-1)
+  Mark()
+    : m_type(-1)
+    , m_id(-1)
+    , m_offset(-1)
   {
   }
   //! operator<<
@@ -251,7 +273,10 @@ public:
 struct NodeRedline {
 public:
   //! constructor
-  NodeRedline() : m_id(-1), m_offset(-1), m_flags(0)
+  NodeRedline()
+    : m_id(-1)
+    , m_offset(-1)
+    , m_flags(0)
   {
   }
   //! operator<<
@@ -271,7 +296,12 @@ public:
 struct NoteInfo {
 public:
   //! constructor
-  explicit NoteInfo(bool isFootnote) : m_isFootnote(isFootnote), m_type(0), m_ftnOffset(0), m_posType(0), m_numType(0)
+  explicit NoteInfo(bool isFootnote)
+    : m_isFootnote(isFootnote)
+    , m_type(0)
+    , m_ftnOffset(0)
+    , m_posType(0)
+    , m_numType(0)
   {
     for (int i=0; i<4; ++i) m_idx[i]=0xFFFF;
   }
@@ -300,7 +330,9 @@ public:
 struct PrintData {
 public:
   //! constructor
-  PrintData() : m_flags(0), m_colRow(1,1)
+  PrintData()
+    : m_flags(0)
+    , m_colRow(1,1)
   {
     for (int i=0; i<6; ++i) m_spacings[i]=0;
   }
@@ -321,7 +353,12 @@ public:
 struct Redline {
 public:
   //! constructor
-  Redline() : m_type(0), m_stringId(0), m_date(0), m_time(0), m_comment()
+  Redline()
+    : m_type(0)
+    , m_stringId(0)
+    , m_date(0)
+    , m_time(0)
+    , m_comment()
   {
   }
   //! operator<<
@@ -349,8 +386,20 @@ public:
 struct TOX {
 public:
   //! constructor
-  TOX() : m_type(0), m_createType(0), m_captionDisplay(0), m_styleId(0xFFFF), m_data(0), m_formFlags(0)
-    , m_title(""), m_name(""), m_OLEOptions(0), m_stringIdList(), m_styleList(), m_titleLength(), m_formatList()
+  TOX()
+    : m_type(0)
+    , m_createType(0)
+    , m_captionDisplay(0)
+    , m_styleId(0xFFFF)
+    , m_data(0)
+    , m_formFlags(0)
+    , m_title("")
+    , m_name("")
+    , m_OLEOptions(0)
+    , m_stringIdList()
+    , m_styleList()
+    , m_titleLength()
+    , m_formatList()
   {
     for (int i=0; i<3; ++i) m_stringIds[i]=0xFFFF;
   }
@@ -366,7 +415,9 @@ public:
   //! a style
   struct Style {
     //! constructor
-    Style() : m_level(0), m_names()
+    Style()
+      : m_level(0)
+      , m_names()
     {
     }
     //! operator<<
@@ -375,7 +426,7 @@ public:
       o << "level=" << style.m_level << ",";
       if (!style.m_names.empty()) {
         o << "names=[";
-        for (size_t i=0; i<style.m_names.size(); ++i) o << style.m_names[i].cstr() << ",";
+        for (auto const &name : style.m_names) o << name.cstr() << ",";
         o << "],";
       }
       return o;
@@ -420,7 +471,15 @@ public:
 struct TOX51 {
 public:
   //! constructor
-  TOX51() : m_typeName(""), m_type(0), m_createType(0), m_firstTabPos(0), m_title(""), m_patternList(), m_stringIdList(), m_infLevel(0)
+  TOX51()
+    : m_typeName("")
+    , m_type(0)
+    , m_createType(0)
+    , m_firstTabPos(0)
+    , m_title("")
+    , m_patternList()
+    , m_stringIdList()
+    , m_infLevel(0)
   {
   }
   //! destructor

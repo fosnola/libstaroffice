@@ -46,10 +46,22 @@
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarZone::StarZone(STOFFInputStreamPtr inputStream, std::string const &ascName, std::string const &zoneName, char const *password) :
-  m_input(inputStream), m_ascii(inputStream), m_version(0), m_documentVersion(0), m_headerVersionStack(),
-  m_encoding(StarEncoding::E_DONTKNOW), m_guiType(0), m_encryption(), m_asciiName(ascName), m_zoneName(zoneName),
-  m_typeStack(), m_positionStack(), m_beginToEndMap(), m_flagEndZone(), m_poolList()
+StarZone::StarZone(STOFFInputStreamPtr inputStream, std::string const &ascName, std::string const &zoneName, char const *password)
+  : m_input(inputStream)
+  , m_ascii(inputStream)
+  , m_version(0)
+  , m_documentVersion(0)
+  , m_headerVersionStack()
+  , m_encoding(StarEncoding::E_DONTKNOW)
+  , m_guiType(0)
+  , m_encryption()
+  , m_asciiName(ascName)
+  , m_zoneName(zoneName)
+  , m_typeStack()
+  , m_positionStack()
+  , m_beginToEndMap()
+  , m_flagEndZone()
+  , m_poolList()
 {
   if (password)
     m_encryption.reset(new StarEncryption(password));
@@ -83,7 +95,7 @@ bool StarZone::readString(std::vector<uint32_t> &string, std::vector<size_t> &sr
   std::memcpy(&buffer[0], data, size_t(sSz));
   if (chckEncryption && m_encryption)
     m_encryption->decode(buffer);
-  StarEncoding::Encoding encod=m_encoding;
+  auto encod=m_encoding;
   if (encoding>=1) encod=StarEncoding::getEncodingForId(encoding);
   return StarEncoding::convert(buffer, encod, string, srcPositions);
 }
