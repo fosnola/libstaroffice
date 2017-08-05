@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
   librevenge::RVNGFileStream input(argv[optind]);
 
   STOFFDocument::Kind kind;
-  STOFFDocument::Confidence confidence = STOFFDocument::STOFF_C_NONE;
+  auto confidence = STOFFDocument::STOFF_C_NONE;
   try {
     confidence = STOFFDocument::isFileFormatSupported(&input, kind);
   }
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     fprintf(stderr,"ERROR: Unsupported file format!\n");
     return 1;
   }
-  STOFFDocument::Result error=STOFFDocument::STOFF_R_OK;
+  auto error=STOFFDocument::STOFF_R_OK;
   librevenge::RVNGStringVector vec;
 
   try {

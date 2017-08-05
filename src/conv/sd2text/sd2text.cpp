@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
   librevenge::RVNGFileStream input(argv[optind]);
 
   STOFFDocument::Kind kind;
-  STOFFDocument::Confidence confidence = STOFFDocument::STOFF_C_NONE;
+  auto confidence = STOFFDocument::STOFF_C_NONE;
   try {
     confidence=STOFFDocument::isFileFormatSupported(&input, kind);
   }
@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
   librevenge::RVNGString document;
   librevenge::RVNGStringVector pages;
   bool useStringVector=false;
-  STOFFDocument::Result error = STOFFDocument::STOFF_R_OK;
+  auto error = STOFFDocument::STOFF_R_OK;
   try {
     if (kind == STOFFDocument::STOFF_K_DRAW || kind == STOFFDocument::STOFF_K_GRAPHIC) {
       if (isInfo) {
