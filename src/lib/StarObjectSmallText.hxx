@@ -81,7 +81,7 @@ protected:
   //! the state
   std::shared_ptr<StarObjectSmallTextInternal::State> m_textState;
 private:
-  StarObjectSmallText &operator=(StarObjectSmallText const &orig);
+  StarObjectSmallText &operator=(StarObjectSmallText const &orig) = delete;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

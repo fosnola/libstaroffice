@@ -58,7 +58,14 @@ namespace StarObjectSmallTextInternal
 //! Internal: a paragraph of StarObjectSmallText
 struct Paragraph {
   //! constructor
-  Paragraph() : m_text(), m_textSourcePosition(), m_styleName(), m_family(0), m_itemSet(), m_charItemList(), m_charLimitList()
+  Paragraph()
+    : m_text()
+    , m_textSourcePosition()
+    , m_styleName()
+    , m_family(0)
+    , m_itemSet()
+    , m_charItemList()
+    , m_charLimitList()
   {
   }
   //! try to send the data to a listener
@@ -86,11 +93,10 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState
     return false;
   }
 
-  std::map<int, std::shared_ptr<StarItem> >::const_iterator it;
   mainState.m_break=0;
   mainState.m_paragraph=STOFFParagraph();
   if (mainState.m_global->m_pool && !m_styleName.empty()) { // checkme
-    StarItemStyle const *style=mainState.m_global->m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
+    auto const *style=mainState.m_global->m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
     if (style) {
 #if 0
       bool done=false;
@@ -100,9 +106,9 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState
         done=true;
       }
 #endif
-      for (it=style->m_itemSet.m_whichToItemMap.begin(); it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
-        if (it->second && it->second->m_attribute)
-          it->second->m_attribute->addTo(mainState);
+      for (auto it : style->m_itemSet.m_whichToItemMap) {
+        if (it.second && it.second->m_attribute)
+          it.second->m_attribute->addTo(mainState);
       }
 #if 0
       std::cerr << "Para:" << style->m_itemSet.printChild() << "\n";
@@ -112,9 +118,9 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState
   editState.m_paragraph=mainState.m_paragraph;
   if (level>=0) editState.m_paragraph.m_listLevelIndex=level;
   editState.m_font=mainState.m_font;
-  for (it=m_itemSet.m_whichToItemMap.begin(); it!=m_itemSet.m_whichToItemMap.end(); ++it) {
-    if (!it->second || !it->second->m_attribute) continue;
-    it->second->m_attribute->addTo(editState);
+  for (auto it : m_itemSet.m_whichToItemMap) {
+    if (!it.second || !it.second->m_attribute) continue;
+    it.second->m_attribute->addTo(editState);
   }
 #if 0
   std::cerr << "ItemSet:" << m_itemSet.printChild() << "\n";
@@ -134,7 +140,7 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState
     modPosSet.insert(size_t(m_charLimitList[i][0]));
     modPosSet.insert(size_t(m_charLimitList[i][1]));
   }
-  std::set<size_t>::const_iterator posSetIt=modPosSet.begin();
+  auto posSetIt=modPosSet.begin();
   for (size_t c=0; c<m_text.size(); ++c) {
     bool fontChange=false;
     size_t srcPos=c<m_textSourcePosition.size() ? m_textSourcePosition[c] : 10000;
@@ -174,7 +180,8 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState
 //! Internal: the state of a StarObjectSmallText
 struct State {
   //! constructor
-  State() : m_paragraphList()
+  State()
+    : m_paragraphList()
   {
   }
 
@@ -187,7 +194,9 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectSmallText::StarObjectSmallText(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_textState(new StarObjectSmallTextInternal::State)
+StarObjectSmallText::StarObjectSmallText(StarObject const &orig, bool duplicateState)
+  : StarObject(orig, duplicateState)
+  , m_textState(new StarObjectSmallTextInternal::State)
 {
 }
 
@@ -202,8 +211,8 @@ bool StarObjectSmallText::send(std::shared_ptr<STOFFListener> listener, int leve
     return false;
   }
   // fixme: this works almost alway, but ...
-  std::shared_ptr<StarItemPool> editPool=findItemPool(StarItemPool::T_EditEnginePool, false);
-  std::shared_ptr<StarItemPool> mainPool=findItemPool(StarItemPool::T_XOutdevPool, false);
+  auto editPool=findItemPool(StarItemPool::T_EditEnginePool, false);
+  auto mainPool=findItemPool(StarItemPool::T_XOutdevPool, false);
   StarState mainState(mainPool.get(), *this, 0.028346457);
   StarState editState(editPool.get(), *this, 0.028346457);
   for (size_t p=0; p<m_textState->m_paragraphList.size(); ++p) {
@@ -288,7 +297,7 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
   for (size_t i=0; i<size_t(nPara); ++i) {
     if (i>=m_textState->m_paragraphList.size())
       m_textState->m_paragraphList.resize(i+10>size_t(nPara) ? size_t(nPara) : i+10);
-    StarObjectSmallTextInternal::Paragraph &para=m_textState->m_paragraphList[i];
+    auto &para=m_textState->m_paragraphList[i];
     pos=input->tell();
     f.str("");
     f << "EditTextObject[para" << i << "]:";

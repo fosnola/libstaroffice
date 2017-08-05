@@ -60,13 +60,13 @@ class STOFFPageSpan;
  *
  *
  */
-class StarObjectSpreadsheet : public StarObject
+class StarObjectSpreadsheet final : public StarObject
 {
 public:
   //! constructor
   StarObjectSpreadsheet(StarObject const &orig, bool duplicateState);
   //! destructor
-  virtual ~StarObjectSpreadsheet();
+  ~StarObjectSpreadsheet() final;
   //! try to parse the current object
   bool parse();
   //! try to send the spreadsheet

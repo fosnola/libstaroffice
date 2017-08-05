@@ -72,8 +72,17 @@ namespace StarObjectSpreadsheetInternal
 //! Internal: a structure use to read ScMultiRecord zone of a StarObjectSpreadsheet
 struct ScMultiRecord {
   //! constructor
-  explicit ScMultiRecord(StarZone &zone) : m_zone(zone), m_zoneOpened(false), m_actualRecord(0), m_numRecord(0),
-    m_startPos(0), m_endPos(0), m_endContentPos(0), m_endRecordPos(0), m_offsetList(), m_extra("")
+  explicit ScMultiRecord(StarZone &zone)
+    : m_zone(zone)
+    , m_zoneOpened(false)
+    , m_actualRecord(0)
+    , m_numRecord(0)
+    , m_startPos(0)
+    , m_endPos(0)
+    , m_endContentPos(0)
+    , m_endRecordPos(0)
+    , m_offsetList()
+    , m_extra("")
   {
   }
   //! destructor
@@ -251,7 +260,11 @@ class Cell : public STOFFCell
 {
 public:
   //! constructor
-  explicit Cell(STOFFVec2i pos=STOFFVec2i(0,0)) : STOFFCell(), m_content(), m_textZone(), m_hasNote(false)
+  explicit Cell(STOFFVec2i pos=STOFFVec2i(0,0))
+    : STOFFCell()
+    , m_content()
+    , m_textZone()
+    , m_hasNote(false)
   {
     setPosition(pos);
   }
@@ -276,7 +289,9 @@ class RowContent
 {
 public:
   //! constructor
-  RowContent() : m_colToCellMap(), m_colToAttributeMap()
+  RowContent()
+    : m_colToCellMap()
+    , m_colToAttributeMap()
   {
   }
   //! try to compress the item list and create a attribute list
@@ -315,7 +330,15 @@ class Table : public STOFFTable
 {
 public:
   //! constructor
-  Table(int loadingVers, int maxRow) : m_loadingVersion(loadingVers), m_name(""), m_pageStyle(""), m_maxRow(maxRow), m_colWidthList(), m_rowHeightMap(), m_rowToRowContentMap(), m_badCell()
+  Table(int loadingVers, int maxRow)
+    : m_loadingVersion(loadingVers)
+    , m_name("")
+    , m_pageStyle("")
+    , m_maxRow(maxRow)
+    , m_colWidthList()
+    , m_rowHeightMap()
+    , m_rowToRowContentMap()
+    , m_badCell()
   {
   }
   //! destructor
@@ -356,7 +379,7 @@ public:
   //! returns the row size in point
   float getRowHeight(int row) const
   {
-    std::map<STOFFVec2i,int>::const_iterator rIt=m_rowHeightMap.lower_bound(STOFFVec2i(-1,row));
+    auto rIt=m_rowHeightMap.lower_bound(STOFFVec2i(-1,row));
     if (rIt!=m_rowHeightMap.end() && rIt->first[0]<=row && rIt->first[1]>=row)
       return float(rIt->second)/20.f;
     return 12.f;
@@ -364,7 +387,7 @@ public:
   //! returns a row content
   RowContent *getRow(int row)
   {
-    std::map<STOFFVec2i, RowContent>::iterator it=m_rowToRowContentMap.lower_bound(STOFFVec2i(-1,row));
+    auto it=m_rowToRowContentMap.lower_bound(STOFFVec2i(-1,row));
     if (it!=m_rowToRowContentMap.end() && it->first[0]<=row && row<=it->first[1])
       return &it->second;
     return 0;
@@ -372,7 +395,7 @@ public:
   //! create a block of rows(if not created)
   void updateRowsBlocks(STOFFVec2i const &rows)
   {
-    std::map<STOFFVec2i, RowContent>::iterator it=m_rowToRowContentMap.lower_bound(STOFFVec2i(-1,rows[0]));
+    auto it=m_rowToRowContentMap.lower_bound(STOFFVec2i(-1,rows[0]));
     if (it==m_rowToRowContentMap.end()) {
       m_rowToRowContentMap[rows]=RowContent();
       return;
@@ -456,7 +479,11 @@ Table::~Table()
 //! Internal: the state of a StarObjectSpreadsheet
 struct State {
   //! constructor
-  State() : m_model(), m_tableList(), m_sheetNames(), m_pageStyle("")
+  State()
+    : m_model()
+    , m_tableList()
+    , m_sheetNames()
+    , m_pageStyle("")
   {
   }
   //! the model
@@ -471,17 +498,17 @@ struct State {
 
 ////////////////////////////////////////
 //! Internal: the subdocument of a StarObjectSpreadsheet
-class SubDocument : public STOFFSubDocument
+class SubDocument final : public STOFFSubDocument
 {
 public:
   explicit SubDocument(librevenge::RVNGString const &text) :
     STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_text(text) {}
 
   //! destructor
-  virtual ~SubDocument() {}
+  ~SubDocument() final {}
 
   //! operator!=
-  virtual bool operator!=(STOFFSubDocument const &doc) const
+  bool operator!=(STOFFSubDocument const &doc) const
   {
     if (STOFFSubDocument::operator!=(doc)) return true;
     SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
@@ -490,14 +517,8 @@ public:
     return false;
   }
 
-  //! operator!==
-  virtual bool operator==(STOFFSubDocument const &doc) const
-  {
-    return !operator!=(doc);
-  }
-
   //! the parser function
-  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type);
+  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type) final;
 
 protected:
   //! the note text
@@ -521,7 +542,9 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObjectSpreadsheet::StarObjectSpreadsheet(StarObject const &orig, bool duplicateState) : StarObject(orig, duplicateState), m_spreadsheetState(new StarObjectSpreadsheetInternal::State)
+StarObjectSpreadsheet::StarObjectSpreadsheet(StarObject const &orig, bool duplicateState)
+  : StarObject(orig, duplicateState)
+  , m_spreadsheetState(new StarObjectSpreadsheetInternal::State)
 {
 }
 
@@ -542,7 +565,7 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
 
   librevenge::RVNGString styleName("");
   int nPages=0;
-  std::shared_ptr<StarItemPool> pool=const_cast<StarObjectSpreadsheet *>(this)->findItemPool(StarItemPool::T_SpreadsheetPool, false);
+  auto pool=const_cast<StarObjectSpreadsheet *>(this)->findItemPool(StarItemPool::T_SpreadsheetPool, false);
   StarState state(pool.get(), *this);
   for (size_t i=0; i<=m_spreadsheetState->m_tableList.size(); ++i) {
     bool isEnd=(i==m_spreadsheetState->m_tableList.size());
@@ -551,16 +574,15 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
       continue;
     }
     if (nPages) {
-      StarItemStyle const *style=(pool&&!styleName.empty()) ? pool->findStyleWithFamily(styleName, StarItemStyle::F_Page) : 0;
+      auto const *style=(pool&&!styleName.empty()) ? pool->findStyleWithFamily(styleName, StarItemStyle::F_Page) : 0;
       if (!style && pool && !m_spreadsheetState->m_pageStyle.empty())
         style=pool->findStyleWithFamily(m_spreadsheetState->m_pageStyle, StarItemStyle::F_Page);
       state.m_global->m_page=STOFFPageSpan();
       state.m_global->m_page.m_pageSpan=nPages;
       if (style) {
-        for (std::map<int, std::shared_ptr<StarItem> >::const_iterator it=style->m_itemSet.m_whichToItemMap.begin();
-             it!=style->m_itemSet.m_whichToItemMap.end(); ++it) {
-          if (it->second && it->second->m_attribute)
-            it->second->m_attribute->addTo(state);
+        for (auto it : style->m_itemSet.m_whichToItemMap) {
+          if (it.second && it.second->m_attribute)
+            it.second->m_attribute->addTo(state);
         }
 #if 0
         std::cerr << style->m_itemSet.printChild() << "\n";
@@ -583,11 +605,11 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
   }
   // first creates the list of sheet names
   m_spreadsheetState->m_sheetNames.clear();
-  for (size_t t=0; t<m_spreadsheetState->m_tableList.size(); ++t) {
-    if (!m_spreadsheetState->m_tableList[t])
+  for (auto const &t : m_spreadsheetState->m_tableList) {
+    if (!t)
       m_spreadsheetState->m_sheetNames.push_back("");
     else
-      m_spreadsheetState->m_sheetNames.push_back(m_spreadsheetState->m_tableList[t]->m_name);
+      m_spreadsheetState->m_sheetNames.push_back(t->m_name);
   }
 
   for (size_t t=0; t<m_spreadsheetState->m_tableList.size(); ++t) {
@@ -604,20 +626,18 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
        the set corresponding to a position where the rows change
        excepted the last position */
     std::set<int> newRowSet;
-    for (std::map<STOFFVec2i, StarObjectSpreadsheetInternal::RowContent>::iterator it=sheet.m_rowToRowContentMap.begin();
-         it!=sheet.m_rowToRowContentMap.end(); ++it) {
-      STOFFVec2i rows=it->first;
+    for (auto it : sheet.m_rowToRowContentMap) {
+      STOFFVec2i const &rows=it.first;
       newRowSet.insert(rows[0]);
       newRowSet.insert(rows[1]+1);
     }
-    for (std::map<STOFFVec2i,int>::const_iterator it=sheet.m_rowHeightMap.begin();
-         it!=sheet.m_rowHeightMap.end(); ++it) {
-      STOFFVec2i rows=it->first;
+    for (auto it : sheet.m_rowHeightMap) {
+      STOFFVec2i const &rows=it.first;
       newRowSet.insert(rows[0]);
       newRowSet.insert(rows[1]+1);
     }
 
-    for (std::set<int>::const_iterator it=newRowSet.begin(); it!=newRowSet.end();) {
+    for (auto it=newRowSet.begin(); it!=newRowSet.end();) {
       int row=*(it++);
       if (row<0) {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::sendSpreadsheet: find a negative row %d\n", row));
@@ -641,8 +661,8 @@ bool StarObjectSpreadsheet::sendRow(int table, int row, STOFFSpreadsheetListener
     STOFF_DEBUG_MSG(("StarObjectSpreadsheet::send: can not find the table %d\n", table));
     return false;
   }
-  StarObjectSpreadsheetInternal::Table &sheet=*m_spreadsheetState->m_tableList[size_t(table)];
-  StarObjectSpreadsheetInternal::RowContent *rowC=sheet.getRow(row);
+  auto &sheet=*m_spreadsheetState->m_tableList[size_t(table)];
+  auto *rowC=sheet.getRow(row);
   if (!rowC) return true;
   rowC->compressItemList();
 
@@ -698,7 +718,7 @@ bool StarObjectSpreadsheet::sendCell(StarObjectSpreadsheetInternal::Cell &cell, 
     return false;
   }
   if (attrib) {
-    std::shared_ptr<StarItemPool> pool=findItemPool(StarItemPool::T_SpreadsheetPool, false);
+    auto pool=findItemPool(StarItemPool::T_SpreadsheetPool, false);
     StarState state(pool.get(), *this);
     attrib->addTo(state);
     cell.setFont(state.m_font);
@@ -731,24 +751,22 @@ bool StarObjectSpreadsheet::parse()
     STOFF_DEBUG_MSG(("StarObjectSpreadsheet::parser: error, incomplete document\n"));
     return false;
   }
-  STOFFOLEParser::OleDirectory &directory=*getOLEDirectory();
+  auto &directory=*getOLEDirectory();
   StarObject::parse();
-  std::vector<std::string> unparsedOLEs=directory.getUnparsedOles();
-  size_t numUnparsed = unparsedOLEs.size();
+  auto unparsedOLEs=directory.getUnparsedOles();
   STOFFInputStreamPtr input=directory.m_input;
   StarFileManager fileManager;
 
   STOFFInputStreamPtr mainOle; // let store the StarCalcDocument to read it in last position
   std::string mainName;
-  for (size_t i = 0; i < numUnparsed; i++) {
-    std::string const &name = unparsedOLEs[i];
+  for (auto const &name : unparsedOLEs) {
     STOFFInputStreamPtr ole = input->getSubStreamByName(name.c_str());
     if (!ole.get()) {
       STOFF_DEBUG_MSG(("StarObjectSpreadsheet::parse: error: can not find OLE part: \"%s\"\n", name.c_str()));
       continue;
     }
 
-    std::string::size_type pos = name.find_last_of('/');
+    auto pos = name.find_last_of('/');
     std::string base;
     if (pos == std::string::npos) base = name;
     else base = name.substr(pos+1);
@@ -1345,7 +1363,7 @@ try
         switch (nId) {
         case 0x4260: {
           f << "pool,";
-          std::shared_ptr<StarItemPool> pool=getNewItemPool(StarItemPool::T_XOutdevPool);
+          auto pool=getNewItemPool(StarItemPool::T_XOutdevPool);
           pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
           if (!pool->read(zone))
             input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1676,7 +1694,7 @@ bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::s
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   long lastPos=zone.getRecordLastPosition();
-  StarEncoding::Encoding oldEncoding=zone.getEncoding();
+  auto oldEncoding=zone.getEncoding();
   while (input->tell()+6 < lastPos) {
     pos=input->tell();
     f.str("");
@@ -1693,7 +1711,7 @@ bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::s
     case 0x4211:
     case 0x4214: {
       f << (nId==0x4211 ? "pool" : "pool[edit]") << ",";
-      std::shared_ptr<StarItemPool> pool=getNewItemPool(nId==0x4211 ? StarItemPool::T_SpreadsheetPool : StarItemPool::T_EditEnginePool);
+      auto pool=getNewItemPool(nId==0x4211 ? StarItemPool::T_SpreadsheetPool : StarItemPool::T_EditEnginePool);
       if (pool && pool->read(zone)) {
         if (nId==0x4214 || !mainPool) mainPool=pool;
       }
@@ -2085,7 +2103,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
       for (int i=0; i<nCount; ++i) {
         int row=int(input->readULong(2));
         f << "note" << i << "[R" << row << ",";
-        StarObjectSpreadsheetInternal::Cell &cell=table.getCell(STOFFVec2i(column, row));
+        auto &cell=table.getCell(STOFFVec2i(column, row));
         // sc_cell.cxx ScBaseCell::LoadNotes, ScPostIt operator>>
         for (int j=0; j<3; ++j) {
           if (!zone.readString(string)||input->tell()>endDataPos) {
@@ -2124,7 +2142,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
         int newRow=int(input->readULong(2));
         f << newRow << ":";
         uint16_t nWhich=149;//StarAttribute::ATTR_SC_PATTERN-3;
-        std::shared_ptr<StarItem> item=pool->loadSurrogate(zone, nWhich, false, f);
+        auto item=pool->loadSurrogate(zone, nWhich, false, f);
         if (!item || input->tell()>endDataPos) {
           STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCColumn:can not read a attrib\n"));
           f << "###attrib";
@@ -2142,8 +2160,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
 #endif
         if (newRow>=row) {
           table.updateRowsBlocks(STOFFVec2i(row, newRow));
-          std::map<STOFFVec2i, StarObjectSpreadsheetInternal::RowContent>::iterator it=
-            table.m_rowToRowContentMap.lower_bound(STOFFVec2i(-1,row));
+          auto it= table.m_rowToRowContentMap.lower_bound(STOFFVec2i(-1,row));
           while (it!=table.m_rowToRowContentMap.end() && it->first[1]<=newRow) {
             it->second.m_colToAttributeMap[STOFFVec2i(column, column)]=item->m_attribute;
             ++it;
@@ -2204,7 +2221,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
     uint8_t what;
     *input>>what;
     bool ok=true;
-    StarObjectSpreadsheetInternal::Cell &cell=table.getCell(STOFFVec2i(column, row));
+    auto &cell=table.getCell(STOFFVec2i(column, row));
     STOFFCell::Format format=cell.getFormat();
     switch (what) {
     case 1: { // value
