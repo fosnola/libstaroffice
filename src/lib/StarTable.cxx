@@ -62,9 +62,14 @@ struct TableLine;
 struct TableBox {
   //! constructor
   TableBox()
-    : m_position(), m_formatId(0xFFFF), m_numLines(0)
-    , m_content(), m_lineList()
-    , m_format(), m_cellStyle(), m_xDimension(0,0)
+    : m_position()
+    , m_formatId(0xFFFF)
+    , m_numLines(0)
+    , m_content()
+    , m_lineList()
+    , m_format()
+    , m_cellStyle()
+    , m_xDimension(0,0)
   {
   }
   //! try to read the data
@@ -94,7 +99,12 @@ struct TableBox {
 //! small structure used to store a table line
 struct TableLine {
   //! constructor
-  TableLine() : m_position(), m_formatId(0xFFFF), m_numBoxes(0), m_boxList(), m_format()
+  TableLine()
+    : m_position()
+    , m_formatId(0xFFFF)
+    , m_numBoxes(0)
+    , m_boxList()
+    , m_format()
   {
   }
   //! try to read the data
@@ -120,10 +130,17 @@ class Table
 public:
   //! the constructor
   Table()
-    : m_headerRepeated(false), m_numBoxes(0), m_chgMode(0)
-    , m_dimension(), m_minColWidth(1000000)
-    , m_format(), m_formatList(), m_lineList()
-    , m_xPositionSet(), m_columnWidthList(), m_rowToBoxMap()
+    : m_headerRepeated(false)
+    , m_numBoxes(0)
+    , m_chgMode(0)
+    , m_dimension()
+    , m_minColWidth(1000000)
+    , m_format()
+    , m_formatList()
+    , m_lineList()
+    , m_xPositionSet()
+    , m_columnWidthList()
+    , m_rowToBoxMap()
   {
   }
   //! try use the xdimension to compute the final col positions
@@ -435,35 +452,34 @@ void Table::updateColumnsPosition()
   std::set<float> xPositionSet, xRoundedPositionSet;
   float minColWidth = m_minColWidth>10 ? 10 : m_minColWidth;
   float f=2.f/minColWidth;
-  for (std::set<float>::const_iterator it=m_xPositionSet.begin(); it!=m_xPositionSet.end(); ++it) {
+  for (auto const &pos : m_xPositionSet) {
     // todo replace float(int(f*(*it)+0.5f)) by std::round(f*(*it)) when possible
-    float xRounded=0.5f*float(int(f*(*it)+0.5f))*minColWidth;
+    float xRounded=0.5f*float(int(f*pos+0.5f))*minColWidth;
     if (xRoundedPositionSet.find(xRounded)!=xRoundedPositionSet.end())
       continue;
-    xPositionSet.insert(*it);
+    xPositionSet.insert(pos);
     xRoundedPositionSet.insert(xRounded);
   }
   int col=0;
   std::map<float,int> xPosToColMap;
-  for (std::set<float>::const_iterator it=xRoundedPositionSet.begin(); it!=xRoundedPositionSet.end(); ++it, ++col)
-    xPosToColMap[(*it)]=col;
+  for (auto const &pos : xRoundedPositionSet)
+    xPosToColMap[pos]=col++;
   float prevPos=0;
-  for (std::set<float>::const_iterator it=xPositionSet.begin(); it!=xPositionSet.end(); ++it) {
-    if (*it<=prevPos) continue;
-    m_columnWidthList.push_back(*it-prevPos);
-    prevPos=*it;
+  for (auto const &pos : xPositionSet) {
+    if (pos<=prevPos) continue;
+    m_columnWidthList.push_back(pos-prevPos);
+    prevPos=pos;
   }
   int maxCol=int(xPosToColMap.size()-1);
-  for (std::map<int, std::vector<StarTableInternal::TableBox *> >::iterator it=m_rowToBoxMap.begin(); it!=m_rowToBoxMap.end(); ++it) {
-    std::vector<StarTableInternal::TableBox *> &boxes=it->second;
+  for (auto &it : m_rowToBoxMap) {
+    auto &boxes=it.second;
     int actCol=0;
-    for (size_t b=0; b<boxes.size(); ++b) {
-      if (!boxes[b])
+    for (auto *box : boxes) {
+      if (!box)
         continue;
-      StarTableInternal::TableBox &box=*(boxes[b]);
       for (int c=0; c<2; ++c) {
-        float x=box.m_xDimension[c];
-        std::map<float,int>::const_iterator mIt=xPosToColMap.lower_bound(x);
+        float x=box->m_xDimension[c];
+        auto mIt=xPosToColMap.lower_bound(x);
         int newCol=0;
         if (mIt==xPosToColMap.end())
           newCol=maxCol;
@@ -475,12 +491,12 @@ void Table::updateColumnsPosition()
           break;
         }
         if (c==0) {
-          if (newCol!=box.m_position.min()[0])
-            box.m_position.min()[0]=newCol;
+          if (newCol!=box->m_position.min()[0])
+            box->m_position.min()[0]=newCol;
         }
         else {
-          if (newCol!=box.m_position.max()[0])
-            box.m_position.max()[0]=newCol;
+          if (newCol!=box->m_position.max()[0])
+            box->m_position.max()[0]=newCol;
         }
         actCol=newCol;
       }
@@ -585,10 +601,9 @@ bool StarTableInternal::Table::send(STOFFListenerPtr listener, StarState &state)
       table.m_propertyList.insert("style:width", double(cState.m_frame.m_frameSize[0]), librevenge::RVNG_POINT);
   }
   m_xPositionSet.insert(0);
-  for (size_t l=0; l<m_lineList.size(); ++l) {
-    if (!m_lineList[l]) continue;
-    TableLine &line=*m_lineList[l];
-    line.updatePosition(*this, cState, 0, STOFFVec2i(m_dimension[0],line.m_position.max()[1]));
+  for (auto line : m_lineList) {
+    if (!line) continue;
+    line->updatePosition(*this, cState, 0, STOFFVec2i(m_dimension[0],line->m_position.max()[1]));
   }
   updateColumnsPosition();
   // first find the number of columns
@@ -596,16 +611,16 @@ bool StarTableInternal::Table::send(STOFFListenerPtr listener, StarState &state)
   if (!m_columnWidthList.empty()) {
     if (percentMaxValue>0) {
       float factor=1/percentMaxValue;
-      for (size_t c=0; c < m_columnWidthList.size(); ++c) {
+      for (auto const &c : m_columnWidthList) {
         librevenge::RVNGPropertyList column;
-        column.insert("style:column-width", factor*m_columnWidthList[c], librevenge::RVNG_PERCENT);
+        column.insert("style:column-width", factor*c, librevenge::RVNG_PERCENT);
         columns.append(column);
       }
     }
     else {
-      for (size_t c=0; c < m_columnWidthList.size(); ++c) {
+      for (auto const &c : m_columnWidthList) {
         librevenge::RVNGPropertyList column;
-        column.insert("style:column-width", m_columnWidthList[c], librevenge::RVNG_POINT);
+        column.insert("style:column-width", c, librevenge::RVNG_POINT);
         columns.append(column);
       }
     }
@@ -619,18 +634,16 @@ bool StarTableInternal::Table::send(STOFFListenerPtr listener, StarState &state)
   }
   table.m_propertyList.insert("librevenge:table-columns", columns);
   listener->openTable(table);
-  std::map<int, std::vector<StarTableInternal::TableBox *> >::const_iterator it;
   int row=-1;
-  for (it=m_rowToBoxMap.begin(); it!=m_rowToBoxMap.end(); ++it) {
-    while (++row<it->first) {
+  for (auto it : m_rowToBoxMap) {
+    while (++row<it.first) {
       listener->openTableRow(0, librevenge::RVNG_POINT);
       listener->closeTableRow();
     }
     listener->openTableRow(0, librevenge::RVNG_POINT);
-    std::vector<StarTableInternal::TableBox *> const &line=it->second;
+    std::vector<StarTableInternal::TableBox *> const &line=it.second;
     int col=-1;
-    for (size_t b=0; b<line.size(); ++b) {
-      TableBox const *box=line[b];
+    for (auto const *box : line) {
       if (!box) continue;
       while (++col<box->m_position.min()[0])
         listener->addCoveredTableCell(STOFFVec2i(col,row));

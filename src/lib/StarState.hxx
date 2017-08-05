@@ -69,11 +69,18 @@ public:
   //! small struct use to store global data
   struct GlobalState {
     //! constructor
-    GlobalState(StarItemPool const *pool, StarObject &object, double relUnit=0.05) :
-      m_pool(pool), m_object(object), m_numericRuler(),
-      m_page(), m_pageName(""), m_pageNameList(), m_pageZone(STOFFPageSpan::Page), m_pageOccurence("all"),
-      m_list(), m_listLevel(-1),
-      m_relativeUnit(relUnit)
+    GlobalState(StarItemPool const *pool, StarObject &object, double relUnit=0.05)
+      : m_pool(pool)
+      , m_object(object)
+      , m_numericRuler()
+      , m_page()
+      , m_pageName("")
+      , m_pageNameList()
+      , m_pageZone(STOFFPageSpan::Page)
+      , m_pageOccurence("all")
+      , m_list()
+      , m_listLevel(-1)
+      , m_relativeUnit(relUnit)
     {
     }
     //! destructor
@@ -102,8 +109,8 @@ public:
     double m_relativeUnit;
 
   private:
-    GlobalState(GlobalState const &);
-    GlobalState &operator=(GlobalState const &);
+    GlobalState(GlobalState const &) = delete;
+    GlobalState &operator=(GlobalState const &) = delete;
   };
   //! constructor
   StarState(StarItemPool const *pool, StarObject &object, double relUnit=0.05)
@@ -114,23 +121,33 @@ public:
     , m_frame()
     , m_graphic()
     , m_paragraph()
-    , m_font(), m_content(false), m_footnote(false), m_link(""), m_refMark(""), m_field()
+    , m_font()
+    , m_content(false)
+    , m_footnote(false)
+    , m_link("")
+    , m_refMark("")
+    , m_field()
   {
   }
   //! constructor
-  explicit StarState(std::shared_ptr<GlobalState> global) :
-    m_global(global),
-    m_styleName(""),
-    m_break(0),
-    m_cell(),
-    m_frame(),
-    m_graphic(),
-    m_paragraph(),
-    m_font(), m_content(false), m_footnote(false), m_link(""), m_refMark(""), m_field()
+  explicit StarState(std::shared_ptr<GlobalState> global)
+    : m_global(global)
+    , m_styleName("")
+    , m_break(0)
+    , m_cell()
+    , m_frame()
+    , m_graphic()
+    , m_paragraph()
+    , m_font()
+    , m_content(false)
+    , m_footnote(false)
+    , m_link("")
+    , m_refMark("")
+    , m_field()
   {
   }
   //! copy constructor
-  explicit StarState(StarState const &orig);
+  explicit StarState(StarState const &orig) = default;
   //! destructor
   ~StarState();
   //! reinit the local data: break, font, content, footnote, ...
@@ -165,7 +182,7 @@ public:
   /** the field */
   std::shared_ptr<SWFieldManagerInternal::Field> m_field;
 private:
-  StarState &operator=(StarState const &);
+  StarState &operator=(StarState const &) = delete;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
