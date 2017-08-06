@@ -60,7 +60,7 @@ namespace StarItemPoolInternal
 struct SfxMultiRecord {
   //! constructor
   SfxMultiRecord()
-    : m_zone(0)
+    : m_zone(nullptr)
     , m_zoneType(0)
     , m_zoneOpened(false)
     , m_headerType(0)
@@ -182,7 +182,7 @@ struct SfxMultiRecord {
     else if (input->tell()==m_endPos)
       input->seek(m_zone->getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
     m_zone->closeSfxRecord(m_zoneType, wh);
-    m_zone=0;
+    m_zone=nullptr;
   }
   //! try to go to the new content positon
   bool getNewContent(std::string const &wh, int &id)
@@ -469,7 +469,7 @@ struct State {
   {
     if (which>=m_verStart&&which<=m_verEnd) return this;
     if (m_secondaryPool) return m_secondaryPool->m_state->getPoolStateFor(which);
-    return 0;
+    return nullptr;
   }
   //! returns a pointer to the values data
   Values *getValues(int id, bool create=false)
@@ -477,7 +477,7 @@ struct State {
     if (m_slotIdToValuesMap.find(id)!=m_slotIdToValuesMap.end())
       return &m_slotIdToValuesMap.find(id)->second;
     if (!create)
-      return 0;
+      return nullptr;
     m_slotIdToValuesMap[id]=Values();
     return &m_slotIdToValuesMap.find(id)->second;
   }
@@ -988,7 +988,7 @@ bool StarItemPool::read(StarZone &zone)
   input->seek(pos, librevenge::RVNG_SEEK_SET);
   if ((tag!=0x1111 && tag!=0xbbbb) || nMajorVers<1 || nMajorVers>2)
     return false;
-  StarItemPool *master=0, *pool=this;
+  StarItemPool *master=nullptr, *pool=this;
   // update the inside flag to true
   while (pool) {
     pool->m_isInside=true;
@@ -2126,7 +2126,7 @@ void StarItemPool::updateStyles()
 StarItemStyle const *StarItemPool::findStyleWithFamily(librevenge::RVNGString const &style, int family) const
 {
   if (style.empty())
-    return 0;
+    return nullptr;
   for (int step=0; step<2; ++step) {
     librevenge::RVNGString name(style);
     if (step==1) {
@@ -2145,7 +2145,7 @@ StarItemStyle const *StarItemPool::findStyleWithFamily(librevenge::RVNGString co
     }
   }
   STOFF_DEBUG_MSG(("StarItemPool::findStyleWithFamily: can not find with style %s-%d\n", style.cstr(), family));
-  return 0;
+  return nullptr;
 }
 
 void StarItemPool::defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName, StarObject &object, std::set<librevenge::RVNGString> &done) const

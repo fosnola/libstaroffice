@@ -74,8 +74,8 @@ static int printVersion()
 
 int main(int argc, char *argv[])
 {
-  char const *file = 0;
-  char const *password=0;
+  char const *file = nullptr;
+  char const *password=nullptr;
   bool printHelp=false;
   int ch;
 

@@ -145,7 +145,7 @@ class STOFFPropertyHandlerDecoder
 {
 public:
   //! constructor given a STOFFPropertyHandler
-  explicit STOFFPropertyHandlerDecoder(STOFFPropertyHandler *hdl=0L):m_handler(hdl) {}
+  explicit STOFFPropertyHandlerDecoder(STOFFPropertyHandler *hdl=nullptr):m_handler(hdl) {}
 
   //! tries to read the data
   bool readData(librevenge::RVNGBinaryData const &encoded)
@@ -332,7 +332,7 @@ protected:
     }
     unsigned long numRead;
     const unsigned char *dt = input.read(static_cast<unsigned long>(numC), numRead);
-    if (dt == 0L || numRead != static_cast<unsigned long>(numC)) {
+    if (dt == nullptr || numRead != static_cast<unsigned long>(numC)) {
       STOFF_DEBUG_MSG(("STOFFPropertyHandlerDecoder::readString: can not read a string\n"));
       return false;
     }
@@ -345,7 +345,7 @@ protected:
   {
     unsigned long numRead = 0;
     auto const *dt = input.read(4, numRead);
-    if (dt == 0L || numRead != 4) {
+    if (dt == nullptr || numRead != 4) {
       STOFF_DEBUG_MSG(("STOFFPropertyHandlerDecoder::readLong: can not read long\n"));
       return false;
     }

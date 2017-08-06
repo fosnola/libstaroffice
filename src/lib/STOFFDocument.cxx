@@ -285,9 +285,9 @@ namespace STOFFDocumentInternal
 STOFFHeader *getHeader(STOFFInputStreamPtr &ip, bool strict)
 try
 {
-  if (!ip.get()) return 0L;
+  if (!ip.get()) return nullptr;
 
-  if (ip->size() < 10) return 0L;
+  if (ip->size() < 10) return nullptr;
 
   ip->seek(0, librevenge::RVNG_SEEK_SET);
   ip->setReadInverted(false);
@@ -298,23 +298,23 @@ try
       continue;
     return new STOFFHeader(h);
   }
-  return 0L;
+  return nullptr;
 }
 catch (libstoff::FileException)
 {
   STOFF_DEBUG_MSG(("STOFFDocumentInternal::STOFFDocument[getHeader]:File exception trapped\n"));
-  return 0L;
+  return nullptr;
 }
 catch (libstoff::ParseException)
 {
   STOFF_DEBUG_MSG(("STOFFDocumentInternal::getHeader:Parse exception trapped\n"));
-  return 0L;
+  return nullptr;
 }
 catch (...)
 {
   //fixme: too generic
   STOFF_DEBUG_MSG(("STOFFDocumentInternal::getHeader:Unknown exception trapped\n"));
-  return 0L;
+  return nullptr;
 }
 
 /** Factory wrapper to construct a parser corresponding to an graphic header */
@@ -406,9 +406,9 @@ std::shared_ptr<STOFFSpreadsheetParser> getSpreadsheetParserFromHeader(STOFFInpu
 bool checkHeader(STOFFInputStreamPtr &input, STOFFHeader &header, bool strict)
 try
 {
-  std::shared_ptr<STOFFParser> parser=getTextParserFromHeader(input, &header, 0);
-  if (!parser) parser=getSpreadsheetParserFromHeader(input, &header, 0);
-  if (!parser) parser=getGraphicParserFromHeader(input, &header, 0);
+  std::shared_ptr<STOFFParser> parser=getTextParserFromHeader(input, &header, nullptr);
+  if (!parser) parser=getSpreadsheetParserFromHeader(input, &header, nullptr);
+  if (!parser) parser=getGraphicParserFromHeader(input, &header, nullptr);
   if (!parser) return false;
   return parser->checkHeader(&header, strict);
 }

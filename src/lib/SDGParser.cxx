@@ -91,7 +91,7 @@ class SubDocument final : public STOFFSubDocument
 {
 public:
   explicit SubDocument(librevenge::RVNGString const &text)
-    : STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry())
+    : STOFFSubDocument(nullptr, STOFFInputStreamPtr(), STOFFEntry())
     , m_text(text) {}
 
   //! destructor
@@ -133,7 +133,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
 ////////////////////////////////////////////////////////////
 SDGParser::SDGParser(STOFFInputStreamPtr input, STOFFHeader *header)
   : STOFFGraphicParser(input, header)
-  , m_password(0)
+  , m_password(nullptr)
   , m_state(new SDGParserInternal::State)
 {
 }
@@ -147,10 +147,10 @@ SDGParser::~SDGParser()
 ////////////////////////////////////////////////////////////
 void SDGParser::parse(librevenge::RVNGDrawingInterface *docInterface)
 {
-  if (!getInput().get() || !checkHeader(0L))  throw(libstoff::ParseException());
+  if (!getInput().get() || !checkHeader(nullptr))  throw(libstoff::ParseException());
   bool ok = true;
   try {
-    checkHeader(0L);
+    checkHeader(nullptr);
     ok = createZones();
     if (ok) {
       createDocument(docInterface);

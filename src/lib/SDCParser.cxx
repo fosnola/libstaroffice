@@ -73,7 +73,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 SDCParser::SDCParser(STOFFInputStreamPtr input, STOFFHeader *header)
   : STOFFSpreadsheetParser(input, header)
-  , m_password(0)
+  , m_password(nullptr)
   , m_oleParser()
   , m_state(new SDCParserInternal::State)
 {
@@ -88,11 +88,11 @@ SDCParser::~SDCParser()
 ////////////////////////////////////////////////////////////
 void SDCParser::parse(librevenge::RVNGSpreadsheetInterface *docInterface)
 {
-  if (!getInput().get() || !checkHeader(0L))  throw(libstoff::ParseException());
+  if (!getInput().get() || !checkHeader(nullptr))  throw(libstoff::ParseException());
   bool ok = true;
   try {
     // create the asciiFile
-    checkHeader(0L);
+    checkHeader(nullptr);
     ok = createZones();
     if (ok) {
       createDocument(docInterface);

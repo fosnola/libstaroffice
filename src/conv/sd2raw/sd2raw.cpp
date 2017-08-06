@@ -79,8 +79,8 @@ static int printVersion()
 int main(int argc, char *argv[])
 {
   bool printIndentLevel = false, printHelp = false;
-  char *file = 0;
-  char const *password=0;
+  char *file = nullptr;
+  char const *password=nullptr;
   int ch;
 
   while ((ch = getopt(argc, argv, "chvp:")) != -1) {

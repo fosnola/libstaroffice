@@ -385,7 +385,7 @@ class SubDocument final : public STOFFSubDocument
 {
 public:
   explicit SubDocument(std::shared_ptr<StarObjectTextInternal::Content> content, StarItemPool const *pool, StarObject &object) :
-    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_content(content), m_pool(pool), m_object(object) {}
+    STOFFSubDocument(nullptr, STOFFInputStreamPtr(), STOFFEntry()), m_content(content), m_pool(pool), m_object(object) {}
 
   //! destructor
   ~SubDocument() final {}

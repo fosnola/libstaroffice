@@ -305,7 +305,7 @@ bool StarFileManager::readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser
     return false;
   }
   ole->m_inUse=true;
-  StarObject object(0, oleParser, ole); // do we need password here ?
+  StarObject object(nullptr, oleParser, ole); // do we need password here ?
   if (object.getDocumentKind()==STOFFDocument::STOFF_K_CHART) {
     // TODO: retrieve content
     StarObjectChart chart(object, false);
@@ -567,7 +567,7 @@ bool StarFileManager::readEmbeddedPicture(STOFFInputStreamPtr input, librevenge:
 try
 {
   // see this Ole with classic bitmap format
-  StarZone zone(input, fileName, "EmbeddedPicture", 0);
+  StarZone zone(input, fileName, "EmbeddedPicture", nullptr);
 
   libstoff::DebugFile &ascii=zone.ascii();
   ascii.open(fileName);
@@ -737,7 +737,7 @@ bool StarFileManager::readMathDocument(STOFFInputStreamPtr input, std::string co
 try
 {
   // checkme this zone can not be encoded
-  StarZone zone(input, fileName, "MathDocument", 0); // use encoding RTL_TEXTENCODING_MS_1252
+  StarZone zone(input, fileName, "MathDocument", nullptr); // use encoding RTL_TEXTENCODING_MS_1252
   libstoff::DebugFile &ascii=zone.ascii();
   ascii.open(fileName);
 

@@ -85,7 +85,7 @@ const unsigned char *STOFFStringStream::read(unsigned long numBytes, unsigned lo
   numBytesRead = 0;
 
   if (numBytes == 0 || !m_data)
-    return 0;
+    return nullptr;
 
   long numBytesToRead;
 
@@ -97,7 +97,7 @@ const unsigned char *STOFFStringStream::read(unsigned long numBytes, unsigned lo
   numBytesRead = static_cast<unsigned long>(numBytesToRead); // about as paranoid as we can be..
 
   if (numBytesToRead == 0)
-    return 0;
+    return nullptr;
 
   long oldOffset = m_data->m_offset;
   m_data->m_offset += numBytesToRead;
@@ -153,7 +153,7 @@ unsigned STOFFStringStream::subStreamCount()
 
 const char *STOFFStringStream::subStreamName(unsigned)
 {
-  return 0;
+  return nullptr;
 }
 
 bool STOFFStringStream::existsSubStream(const char *)
@@ -163,12 +163,12 @@ bool STOFFStringStream::existsSubStream(const char *)
 
 librevenge::RVNGInputStream *STOFFStringStream::getSubStreamById(unsigned)
 {
-  return 0;
+  return nullptr;
 }
 
 librevenge::RVNGInputStream *STOFFStringStream::getSubStreamByName(const char *)
 {
-  return 0;
+  return nullptr;
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
