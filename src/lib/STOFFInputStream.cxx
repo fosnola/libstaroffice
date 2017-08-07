@@ -581,7 +581,7 @@ bool STOFFInputStream::readDataBlock(long sz, librevenge::RVNGBinaryData &data)
 
   const unsigned char *readData;
   unsigned long sizeRead;
-  if ((readData=m_stream->read(static_cast<unsigned long>(sz), sizeRead)) == 0 || long(sizeRead)!=sz)
+  if ((readData=m_stream->read(static_cast<unsigned long>(sz), sizeRead)) == nullptr || long(sizeRead)!=sz)
     return false;
   data.append(readData, sizeRead);
   return true;

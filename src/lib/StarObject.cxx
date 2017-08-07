@@ -612,7 +612,7 @@ bool StarObject::readPersistData(StarZone &zone, long lastPos, bool inPersistEle
 
 bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::string const &name)
 {
-  StarZone zone(input, name, "SfxDocInfo", 0); // no password
+  StarZone zone(input, name, "SfxDocInfo", nullptr); // no password
   libstoff::DebugFile &ascii=zone.ascii();
   ascii.open(name);
   input->seek(0, librevenge::RVNG_SEEK_SET);

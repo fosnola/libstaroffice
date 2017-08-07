@@ -78,8 +78,8 @@ int main(int argc, char *argv[])
   if (argc < 2)
     return printUsage();
 
-  char const *output = 0;
-  char const *password=0;
+  char const *output = nullptr;
+  char const *password=nullptr;
   bool isInfo = false;
   bool printHelp=false;
   int ch;

@@ -71,23 +71,23 @@ static unsigned char *createAndInitBMPData(STOFFVec2i const &sz, unsigned &dibFi
 {
   if (sz[0]*sz[1]<=0) {
     STOFF_DEBUG_MSG(("StarGraphicStruct::createAndInitBMPData: the image size seems bad\n"));
-    return 0;
+    return nullptr;
   }
   unsigned tmpPixelSize = unsigned(sz[0]*sz[1]);
   unsigned tmpDIBImageSize = tmpPixelSize * 4;
   if (tmpPixelSize > tmpDIBImageSize) // overflow !!!
-    return 0;
+    return nullptr;
 
   unsigned const headerSize=56;
   unsigned tmpDIBOffsetBits = 14 + headerSize;
   dibFileSize = tmpDIBOffsetBits + tmpDIBImageSize;
   if (tmpDIBImageSize > dibFileSize) // overflow !!!
-    return 0;
+    return nullptr;
 
   unsigned char *tmpDIBBuffer = new unsigned char[dibFileSize];
   if (!tmpDIBBuffer) {
     STOFF_DEBUG_MSG(("StarGraphicStruct::createAndInitBMPData: fail to allocated the data buffer\n"));
-    return 0;
+    return nullptr;
   }
   bufferPosition = 0;
   // Create DIB file header

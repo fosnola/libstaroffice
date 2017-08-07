@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
   bool printNumberOfSheet=false;
   bool generateFormula=false;
   int sheetToConvert=0;
-  char const *output = 0;
+  char const *output = nullptr;
   int ch;
   char decSeparator='.', fieldSeparator=',', textSeparator='"';
   std::string dateFormat("%m/%d/%y"), timeFormat("%H:%M:%S");

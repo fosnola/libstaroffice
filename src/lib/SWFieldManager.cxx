@@ -928,7 +928,7 @@ class SubDocument final : public STOFFSubDocument
 {
 public:
   explicit SubDocument(librevenge::RVNGString const &text)
-    : STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry())
+    : STOFFSubDocument(nullptr, STOFFInputStreamPtr(), STOFFEntry())
     , m_text(text) {}
 
   //! destructor

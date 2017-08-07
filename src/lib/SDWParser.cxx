@@ -74,7 +74,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 SDWParser::SDWParser(STOFFInputStreamPtr input, STOFFHeader *header)
   : STOFFTextParser(input, header)
-  , m_password(0)
+  , m_password(nullptr)
   , m_oleParser()
   , m_state(new SDWParserInternal::State)
 {
@@ -89,11 +89,11 @@ SDWParser::~SDWParser()
 ////////////////////////////////////////////////////////////
 void SDWParser::parse(librevenge::RVNGTextInterface *docInterface)
 {
-  if (!getInput().get() || !checkHeader(0L))  throw(libstoff::ParseException());
+  if (!getInput().get() || !checkHeader(nullptr))  throw(libstoff::ParseException());
   bool ok = true;
   try {
     // create the asciiFile
-    checkHeader(0L);
+    checkHeader(nullptr);
     ok = createZones();
     if (ok) {
       createDocument(docInterface);

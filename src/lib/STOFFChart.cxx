@@ -61,7 +61,7 @@ class SubDocument final : public STOFFSubDocument
 {
 public:
   SubDocument(STOFFChart *chart, STOFFChart::TextZone::Type textZone) :
-    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_chart(chart), m_textZone(textZone)
+    STOFFSubDocument(nullptr, STOFFInputStreamPtr(), STOFFEntry()), m_chart(chart), m_textZone(textZone)
   {
   }
 

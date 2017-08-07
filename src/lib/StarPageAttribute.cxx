@@ -347,13 +347,13 @@ class SubDocument final : public STOFFSubDocument
 {
 public:
   explicit SubDocument(std::shared_ptr<StarObjectSmallText> text)
-    : STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry())
+    : STOFFSubDocument(nullptr, STOFFInputStreamPtr(), STOFFEntry())
     , m_smallText(text)
     , m_format()
-    , m_object(0)
-    , m_pool(0) {}
+    , m_object(nullptr)
+    , m_pool(nullptr) {}
   SubDocument(std::shared_ptr<StarFormatManagerInternal::FormatDef> format, StarItemPool const *pool, StarObject *object)
-    : STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry())
+    : STOFFSubDocument(nullptr, STOFFInputStreamPtr(), STOFFEntry())
     , m_smallText()
     , m_format(format)
     , m_object(object)
@@ -525,7 +525,7 @@ public:
     : StarAttribute(type, debugName)
     , m_active(true)
     , m_format()
-    , m_object(0)
+    , m_object(nullptr)
   {
   }
   //! create a new attribute

@@ -104,7 +104,7 @@ public:
      \param password The file password
 
    \note Reserved for future use. Actually, it only returns false */
-  static STOFFLIB Result parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *documentInterface, char const *password=0);
+  static STOFFLIB Result parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *documentInterface, char const *password=nullptr);
 
   /** Parses the input stream content. It will make callbacks to the functions provided by a
      librevenge::RVNGDrawingInterface class implementation when needed. This is often commonly called the
@@ -114,7 +114,7 @@ public:
      \param password The file password
 
      \note Reserved for future use. Actually, it only returns false. */
-  static STOFFLIB Result parse(librevenge::RVNGInputStream *input, librevenge::RVNGDrawingInterface *documentInterface, char const *password=0);
+  static STOFFLIB Result parse(librevenge::RVNGInputStream *input, librevenge::RVNGDrawingInterface *documentInterface, char const *password=nullptr);
 
   /** Parses the input stream content. It will make callbacks to the functions provided by a
      librevenge::RVNGPresentationInterface class implementation when needed. This is often commonly called the
@@ -124,7 +124,7 @@ public:
      \param password The file password
 
      \note Reserved for future use. Actually, it only returns false. */
-  static STOFFLIB Result parse(librevenge::RVNGInputStream *input, librevenge::RVNGPresentationInterface *documentInterface, char const *password=0);
+  static STOFFLIB Result parse(librevenge::RVNGInputStream *input, librevenge::RVNGPresentationInterface *documentInterface, char const *password=nullptr);
 
   /** Parses the input stream content. It will make callbacks to the functions provided by a
      librevenge::RVNGSpreadsheetInterface class implementation when needed. This is often commonly called the
@@ -134,7 +134,7 @@ public:
      \param password The file password
 
    \note Can only convert some basic documents: retrieving more cells' contents but no formating. */
-  static STOFFLIB Result parse(librevenge::RVNGInputStream *input, librevenge::RVNGSpreadsheetInterface *documentInterface, char const *password=0);
+  static STOFFLIB Result parse(librevenge::RVNGInputStream *input, librevenge::RVNGSpreadsheetInterface *documentInterface, char const *password=nullptr);
 
   // ------------------------------------------------------------
   // decoders of the embedded zones created by libstoff

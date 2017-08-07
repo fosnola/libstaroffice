@@ -43,7 +43,7 @@ STOFFSubDocument::STOFFSubDocument(STOFFParser *pars, STOFFInputStreamPtr ip, ST
 }
 
 STOFFSubDocument::STOFFSubDocument(STOFFSubDocument const &doc)
-  : m_parser(0)
+  : m_parser(nullptr)
   , m_input()
   , m_zone()
 {

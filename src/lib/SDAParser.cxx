@@ -73,7 +73,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 SDAParser::SDAParser(STOFFInputStreamPtr input, STOFFHeader *header)
   : STOFFGraphicParser(input, header)
-  , m_password(0)
+  , m_password(nullptr)
   , m_oleParser()
   , m_state(new SDAParserInternal::State)
 {
@@ -88,11 +88,11 @@ SDAParser::~SDAParser()
 ////////////////////////////////////////////////////////////
 void SDAParser::parse(librevenge::RVNGDrawingInterface *docInterface)
 {
-  if (!getInput().get() || !checkHeader(0L))  throw(libstoff::ParseException());
+  if (!getInput().get() || !checkHeader(nullptr))  throw(libstoff::ParseException());
   bool ok = true;
   try {
     // create the asciiFile
-    checkHeader(0L);
+    checkHeader(nullptr);
     ok = createZones();
     if (ok) {
       createDocument(docInterface);
@@ -115,11 +115,11 @@ void SDAParser::parse(librevenge::RVNGDrawingInterface *docInterface)
 
 void SDAParser::parse(librevenge::RVNGPresentationInterface *docInterface)
 {
-  if (!getInput().get() || !checkHeader(0L))  throw(libstoff::ParseException());
+  if (!getInput().get() || !checkHeader(nullptr))  throw(libstoff::ParseException());
   bool ok = true;
   try {
     // create the asciiFile
-    checkHeader(0L);
+    checkHeader(nullptr);
     ok = createZones();
     if (ok) {
       createDocument(docInterface);

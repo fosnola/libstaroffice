@@ -390,7 +390,7 @@ public:
     auto it=m_rowToRowContentMap.lower_bound(STOFFVec2i(-1,row));
     if (it!=m_rowToRowContentMap.end() && it->first[0]<=row && row<=it->first[1])
       return &it->second;
-    return 0;
+    return nullptr;
   }
   //! create a block of rows(if not created)
   void updateRowsBlocks(STOFFVec2i const &rows)
@@ -502,7 +502,7 @@ class SubDocument final : public STOFFSubDocument
 {
 public:
   explicit SubDocument(librevenge::RVNGString const &text) :
-    STOFFSubDocument(0, STOFFInputStreamPtr(), STOFFEntry()), m_text(text) {}
+    STOFFSubDocument(nullptr, STOFFInputStreamPtr(), STOFFEntry()), m_text(text) {}
 
   //! destructor
   ~SubDocument() final {}
@@ -574,7 +574,7 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
       continue;
     }
     if (nPages) {
-      auto const *style=(pool&&!styleName.empty()) ? pool->findStyleWithFamily(styleName, StarItemStyle::F_Page) : 0;
+      auto const *style=(pool&&!styleName.empty()) ? pool->findStyleWithFamily(styleName, StarItemStyle::F_Page) : nullptr;
       if (!style && pool && !m_spreadsheetState->m_pageStyle.empty())
         style=pool->findStyleWithFamily(m_spreadsheetState->m_pageStyle, StarItemStyle::F_Page);
       state.m_global->m_page=STOFFPageSpan();
@@ -693,18 +693,18 @@ bool StarObjectSpreadsheet::sendRow(int table, int row, STOFFSpreadsheetListener
     if (checkStyle && (!checkCell || actStyleCol<newCol)) {
       emptyCell.setPosition(STOFFVec2i(actStyleCol, row));
       int numRepeated=(checkCell && newCol<=sIt->first[1]) ? newCol-actStyleCol : sIt->first[1]-actStyleCol+1;
-      sendCell(emptyCell, sIt->second ? sIt->second.get() : 0, table, numRepeated, listener);
+      sendCell(emptyCell, sIt->second ? sIt->second.get() : nullptr, table, numRepeated, listener);
       actStyleCol += numRepeated;
       continue;
     }
     if (!checkCell)
       break;
     if (checkStyle && newCol==actStyleCol) {
-      sendCell(cIt->second ? *cIt->second : emptyCell, sIt->second ? sIt->second.get() : 0, table, 1, listener);
+      sendCell(cIt->second ? *cIt->second : emptyCell, sIt->second ? sIt->second.get() : nullptr, table, 1, listener);
       ++actStyleCol;
     }
     else
-      sendCell(cIt->second ? *cIt->second : emptyCell, 0, table, 1, listener);
+      sendCell(cIt->second ? *cIt->second : emptyCell, nullptr, table, 1, listener);
     ++cIt;
     checkCell=cIt!=rowC->m_colToCellMap.end();
   }

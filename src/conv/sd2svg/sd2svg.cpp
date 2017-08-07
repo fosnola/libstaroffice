@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
   if (argc < 2)
     return printUsage();
 
-  char const *output = 0;
+  char const *output = nullptr;
   bool printHelp=false;
   bool printNumberOfPages=false;
   int ch, pageToConvert=0;

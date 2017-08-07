@@ -217,7 +217,7 @@ STOFFGraphicListener::STOFFGraphicListener(STOFFListManagerPtr listManager, std:
   , m_ps(new STOFFGraphicListenerInternal::State)
   , m_psStack()
   , m_drawingInterface(drawingInterface)
-  , m_presentationInterface(0)
+  , m_presentationInterface(nullptr)
 {
 }
 
@@ -226,7 +226,7 @@ STOFFGraphicListener::STOFFGraphicListener(STOFFListManagerPtr listManager, std:
   , m_ds(new STOFFGraphicListenerInternal::GraphicState(pageList))
   , m_ps(new STOFFGraphicListenerInternal::State)
   , m_psStack()
-  , m_drawingInterface(0)
+  , m_drawingInterface(nullptr)
   , m_presentationInterface(presentationInterface)
 {
 }
