@@ -1069,7 +1069,7 @@ public:
   {
   }
   //! destructor
-  ~SdrGraphicGraph();
+  ~SdrGraphicGraph() override;
   //! basic print function
   std::string print() const final
   {
@@ -1339,7 +1339,7 @@ public:
   {
   }
   //! destructor
-  ~SdrGraphicPage();
+  ~SdrGraphicPage() override;
   //! basic print function
   std::string print() const final
   {
@@ -1546,9 +1546,9 @@ public:
     for (int i=0; i<5; ++i) m_booleans[i]=false;
   }
   //! destructor
-  ~SDUDGraphicAnimation();
+  ~SDUDGraphicAnimation() override;
   //! basic print function
-  virtual std::string print() const
+  std::string print() const override
   {
     std::stringstream s;
     s << *this << ",";

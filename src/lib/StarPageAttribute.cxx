@@ -105,7 +105,7 @@ public:
   {
   }
   //! destructor
-  ~StarPAttributeInt();
+  ~StarPAttributeInt() override;
   //! add to a page
   // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! create a new attribute

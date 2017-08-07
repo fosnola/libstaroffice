@@ -61,7 +61,7 @@ public:
   //! constructor
   StarObjectSmallText(StarObject const &orig, bool duplicateState);
   //! destructor
-  virtual ~StarObjectSmallText();
+  ~StarObjectSmallText() override;
 
   //! try to read a small text object
   bool read(StarZone &zone, long lastPos);

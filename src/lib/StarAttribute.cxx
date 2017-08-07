@@ -71,7 +71,7 @@ public:
   {
   }
   //! destructor
-  ~StarAttributeXML();
+  ~StarAttributeXML() override;
   //! create a new attribute
   std::shared_ptr<StarAttribute> create() const final
   {

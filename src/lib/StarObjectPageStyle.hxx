@@ -65,7 +65,7 @@ public:
   //! constructor
   StarObjectPageStyle(StarObject const &orig, bool duplicateState);
   //! destructor
-  virtual ~StarObjectPageStyle();
+  ~StarObjectPageStyle() override;
   //! try to read a PageStyle zone
   bool read(StarZone &zone);
 

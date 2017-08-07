@@ -62,7 +62,7 @@ public:
   //! constructor
   StarObjectChart(StarObject const &orig, bool duplicateState);
   //! destructor
-  virtual ~StarObjectChart();
+  ~StarObjectChart() override;
   //! try to parse the current object
   bool parse();
 
