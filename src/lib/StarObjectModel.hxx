@@ -65,7 +65,7 @@ public:
   //! constructor
   StarObjectModel(StarObject const &orig, bool duplicateState);
   //! destructor
-  virtual ~StarObjectModel();
+  ~StarObjectModel() override;
   //! try to read a SdrModel zone: "DrMd"
   bool read(StarZone &zone);
 

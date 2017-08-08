@@ -932,10 +932,10 @@ public:
     , m_text(text) {}
 
   //! destructor
-  virtual ~SubDocument() {}
+  ~SubDocument() override {}
 
   //! operator!=
-  virtual bool operator!=(STOFFSubDocument const &doc) const final
+  bool operator!=(STOFFSubDocument const &doc) const final
   {
     if (STOFFSubDocument::operator!=(doc)) return true;
     SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);

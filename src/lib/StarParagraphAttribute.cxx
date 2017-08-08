@@ -626,7 +626,7 @@ public:
   //! add to a para
   void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! debug function to print the data
-  virtual void printData(libstoff::DebugStream &o) const
+  void printData(libstoff::DebugStream &o) const override
   {
     o << m_debugName << "=[";
     for (auto const &t : m_tabList)

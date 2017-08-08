@@ -53,17 +53,17 @@ public:
     : STOFFPropertyHandler()
     , m_output(output) { }
   /** destructor */
-  ~STOFFGraphicDecoder() {}
+  ~STOFFGraphicDecoder() override {}
 
   /** insert an element */
-  void insertElement(const char *psName);
+  void insertElement(const char *psName) override;
   /** insert an element ( with a librevenge::RVNGPropertyList ) */
-  void insertElement(const char *psName, const librevenge::RVNGPropertyList &xPropList);
+  void insertElement(const char *psName, const librevenge::RVNGPropertyList &xPropList) override;
   /** insert an element ( with a librevenge::RVNGPropertyListVector parameter ) */
   void insertElement(const char *psName, const librevenge::RVNGPropertyList &xPropList,
                      const librevenge::RVNGPropertyListVector &vector);
   /** insert a sequence of character */
-  void characters(const librevenge::RVNGString &sCharacters)
+  void characters(const librevenge::RVNGString &sCharacters) override
   {
     if (!m_output) return;
     m_output->insertText(sCharacters);

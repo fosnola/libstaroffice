@@ -79,7 +79,7 @@ public:
   //! constructor
   StarObjectSmallGraphic(StarObject const &orig, bool duplicateState);
   //! destructor
-  virtual ~StarObjectSmallGraphic();
+  ~StarObjectSmallGraphic() override;
   //! try to read a object zone: "DrOb'
   bool readSdrObject(StarZone &zone);
   //! try to send a object to the listener

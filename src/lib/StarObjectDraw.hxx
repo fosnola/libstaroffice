@@ -64,7 +64,7 @@ public:
   //! constructor
   StarObjectDraw(StarObject const &orig, bool duplicateState);
   //! destructor
-  virtual ~StarObjectDraw();
+  ~StarObjectDraw() override;
   //! try to parse the current object
   bool parse();
 

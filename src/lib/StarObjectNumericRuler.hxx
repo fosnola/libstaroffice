@@ -66,7 +66,7 @@ public:
   //! constructor
   StarObjectNumericRuler(StarObject const &orig, bool duplicateState);
   //! destructor
-  virtual ~StarObjectNumericRuler();
+  ~StarObjectNumericRuler() override;
   //! try to read a number format zone : 'n'
   static bool readLevel(StarZone &zone, STOFFListLevel &level);
   //! try to read a attribute format : ATTR_EE_PARA_BULLET

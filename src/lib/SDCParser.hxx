@@ -74,10 +74,10 @@ public:
     m_password=passwd;
   }
   //! checks if the document header is correct (or not)
-  bool checkHeader(STOFFHeader *header, bool strict=false);
+  bool checkHeader(STOFFHeader *header, bool strict=false) override;
 
   // the main parse function
-  void parse(librevenge::RVNGSpreadsheetInterface *documentInterface);
+  void parse(librevenge::RVNGSpreadsheetInterface *documentInterface) override;
 
 protected:
   //! creates the listener which will be associated to the document

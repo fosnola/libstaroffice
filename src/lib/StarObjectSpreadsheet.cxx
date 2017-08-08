@@ -269,7 +269,7 @@ public:
     setPosition(pos);
   }
   //! destructor
-  ~Cell();
+  ~Cell() override;
   //! the cell content
   STOFFCellContent m_content;
   //! the text zone(if set)
@@ -342,7 +342,7 @@ public:
   {
   }
   //! destructor
-  ~Table();
+  ~Table() override;
   //! returns the load version
   int getLoadingVersion() const
   {
@@ -508,7 +508,7 @@ public:
   ~SubDocument() final {}
 
   //! operator!=
-  bool operator!=(STOFFSubDocument const &doc) const
+  bool operator!=(STOFFSubDocument const &doc) const override
   {
     if (STOFFSubDocument::operator!=(doc)) return true;
     SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
