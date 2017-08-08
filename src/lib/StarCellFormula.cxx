@@ -102,8 +102,8 @@ struct Token {
     case Jump: {
       o << tok.m_instruction << ",";
       o << "jump=[";
-      for (size_t i=0; i<tok.m_jumpPositions.size(); ++i)
-        o << tok.m_jumpPositions[i] << ",";
+      for (int jumpPosition : tok.m_jumpPositions)
+        o << jumpPosition << ",";
       o << "],";
       break;
     }

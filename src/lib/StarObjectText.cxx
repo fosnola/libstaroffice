@@ -1078,7 +1078,7 @@ bool StarObjectText::readSWGraphNode(StarZone &zone, std::shared_ptr<StarObjectT
           }
           for (int p=0; p<numPoints; ++p) {
             int dim[2];
-            for (int j=0; j<2; ++j) dim[j]=int(input->readLong(4));
+            for (int &j : dim) j=int(input->readLong(4));
             graphZone->m_contour.m_points.push_back(StarGraphicStruct::StarPolygon::Point(STOFFVec2i(dim[0],dim[1])));
             f << STOFFVec2i(dim[0],dim[1]) << ",";
           }

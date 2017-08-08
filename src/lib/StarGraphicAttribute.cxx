@@ -728,8 +728,8 @@ public:
     , m_dashStyle(0)
     , m_distance(20)
   {
-    for (int i=0; i<2; ++i) m_numbers[i]=1;
-    for (int i=0; i<2; ++i) m_lengths[i]=20;
+    for (int &number : m_numbers) number=1;
+    for (int &length : m_lengths) length=20;
   }
   //! create a new attribute
   std::shared_ptr<StarAttribute> create() const final
@@ -1026,7 +1026,7 @@ bool StarGAttributeCrop::read(StarZone &zone, int vers, long endPos, StarObject 
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName;
   if (vers!=0) {
     int dim[4]; // TLRB
-    for (int i=0; i<4; ++i) dim[i]=int(input->readLong(4));
+    for (int &i : dim) i=int(input->readLong(4));
     m_leftTop=STOFFVec2i(dim[1],dim[0]);
     m_rightBottom=STOFFVec2i(dim[2],dim[3]);
   }
@@ -1077,7 +1077,7 @@ bool StarGAttributeNamedArrow::read(StarZone &zone, int nVers, long endPos, Star
     m_polygon.m_points.resize(size_t(nPoints));
     for (size_t i=0; i<size_t(nPoints); ++i) {
       int dim[2];
-      for (int j=0; j<2; ++j) dim[j]=int(input->readLong(4));
+      for (int &j : dim) j=int(input->readLong(4));
       m_polygon.m_points[i].m_point=STOFFVec2i(dim[0],dim[1]);
       m_polygon.m_points[i].m_flags=int(input->readULong(4));
     }
@@ -1119,9 +1119,9 @@ bool StarGAttributeNamedBitmap::read(StarZone &zone, int nVers, long endPos, Sta
         else {
           f << "val=[";
           uint32_t values[32];
-          for (int i=0; i<32; ++i) {
-            *input>>values[i];
-            if (values[i]) f << std::hex << values[i] << std::dec << ",";
+          for (unsigned int &value : values) {
+            *input>>value;
+            if (value) f << std::hex << value << std::dec << ",";
             else f << "_,";
           }
           f << "],";
@@ -1248,8 +1248,8 @@ bool StarGAttributeNamedGradient::read(StarZone &zone, int nVers, long endPos, S
     m_colors[1]=STOFFColor(uint8_t(red2>>8),uint8_t(green2>>8),uint8_t(blue2>>8));
     m_angle=int(input->readULong(4));
     m_border=int(input->readULong(2));
-    for (int i=0; i<2; ++i) m_offsets[i]=int(input->readULong(2));
-    for (int i=0; i<2; ++i) m_intensities[i]=int(input->readULong(2));
+    for (int &offset : m_offsets) offset=int(input->readULong(2));
+    for (int &intensity : m_intensities) intensity=int(input->readULong(2));
     if (nVers>=1) m_step=int(input->readULong(2));
     if (m_type==XATTR_FILLFLOATTRANSPARENCE) *input >> m_enable;
   }

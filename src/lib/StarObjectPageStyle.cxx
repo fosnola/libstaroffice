@@ -68,7 +68,7 @@ public:
     , m_penWidth(0)
     , m_color(STOFFColor::black())
   {
-    for (int i=0; i<4; ++i) m_distances[i]=0;
+    for (float &distance : m_distances) distance=0;
   }
   //! operator<<
   friend std::ostream &operator<<(std::ostream &o, NoteDesc const &desc);
@@ -103,7 +103,7 @@ bool NoteDesc::read(StarZone &zone)
   for (int i=1; i<4; ++i) m_distances[i]=float(input->readLong(4));
   m_adjust=int(input->readLong(2));
   long dim[2];
-  for (int i=0; i<2; ++i) dim[i]=long(input->readLong(4));
+  for (long &i : dim) i=long(input->readLong(4));
   if (!dim[1]) {
     STOFF_DEBUG_MSG(("StarObjectPageStyleInternal::NoteDesc::read: can not find the width deminator\n"));
   }
@@ -201,8 +201,8 @@ void PageDesc::updatePageSpan(StarState &state) const
 
 bool PageDesc::updateState(StarState &state) const
 {
-  for (int step=0; step<2; ++step) {
-    for (auto &attr : m_attributes[step]) {
+  for (const auto &attribute : m_attributes) {
+    for (auto &attr : attribute) {
       if (attr.m_attribute)
         attr.m_attribute->addTo(state);
     }

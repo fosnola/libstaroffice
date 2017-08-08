@@ -397,9 +397,9 @@ bool STOFFOLEParser::readOle(STOFFInputStreamPtr ip, std::string const &oleName,
   ip->seek(0, librevenge::RVNG_SEEK_SET);
 
   int val[20];
-  for (int i= 0; i < 20; i++) {
-    val[i] = int(ip->readLong(1));
-    if (val[i] < -10 || val[i] > 10) return false;
+  for (int &i : val) {
+    i = int(ip->readLong(1));
+    if (i < -10 || i > 10) return false;
   }
 
   libstoff::DebugStream f;
@@ -586,8 +586,8 @@ bool STOFFOLEParser::readCompObj(STOFFInputStreamPtr ip, STOFFOLEParser::OleDire
   ascii.addPos(12);
   // the clsid
   unsigned long clsData[4]; // ushort n1, n2, n3, b8, ... b15
-  for (int i = 0; i < 4; i++)
-    clsData[i] = ip->readULong(4);
+  for (unsigned long &i : clsData)
+    i = ip->readULong(4);
 
   f.str("");
   f << "@@CompObj(CLSID):";
@@ -1051,7 +1051,7 @@ bool STOFFOLEParser::readCONTENTS(STOFFInputStreamPtr input, STOFFOLEParser::Ole
   pos.m_anchorTo=STOFFPosition::Char;
   for (int st = 0; st < 2 ; st++) {
     long dim[4];
-    for (int i = 0; i < 4; i++) dim[i] = input->readLong(4);
+    for (long &i : dim) i = input->readLong(4);
 
     bool ok = dim[0] >= 0 && dim[2] > dim[0] && dim[1] >= 0 && dim[3] > dim[2];
     if (ok && st==0) pos.setSize(STOFFVec2f(float(dim[2]-dim[0]), float(dim[3]-dim[1])), librevenge::RVNG_POINT);

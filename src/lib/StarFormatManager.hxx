@@ -55,7 +55,7 @@ struct FormatDef {
   //! constructor
   FormatDef() : m_attributeList()
   {
-    for (int i=0; i<3; ++i) m_values[i]=0;
+    for (int &value : m_values) value=0;
   }
   //! destructor
   ~FormatDef();

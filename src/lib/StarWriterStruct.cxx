@@ -186,14 +186,14 @@ bool Bookmark::read(StarZone &zone)
     zone.closeFlagZone();
   }
   if (ok && input->tell()<zone.getRecordLastPosition()) {
-    for (int i=0; i<4; ++i) { // start[aMac:aLib],end[aMac:Alib]
+    for (auto &macroName : m_macroNames) {  // start[aMac:aLib],end[aMac:Alib]
       if (!zone.readString(text)) {
         STOFF_DEBUG_MSG(("StarWriterStruct::Bookmark::read: can not read macro name\n"));
         f << "###macro";
         break;
       }
       else
-        m_macroNames[i]=libstoff::getString(text);
+        macroName=libstoff::getString(text);
     }
   }
 
@@ -327,7 +327,7 @@ bool DatabaseName::read(StarZone &zone)
         }
         data.m_name=libstoff::getString(text);
         int positions[2];
-        for (int j=0; j<2; ++j) positions[j]=int(input->readULong(4));
+        for (int &position : positions) position=int(input->readULong(4));
         data.m_selection=STOFFVec2i(positions[0],positions[1]);
         m_dataList.push_back(data);
       }
@@ -473,7 +473,7 @@ bool Macro::read(StarZone &zone)
   f << "Entries(StarMacro)[" << zone.getRecordLevel() << "]:";
   m_key=int(input->readULong(2));
   bool ok=true;
-  for (int i=0; i<2; ++i) {
+  for (auto &name : m_names) {
     std::vector<uint32_t> string;
     if (!zone.readString(string)) {
       STOFF_DEBUG_MSG(("StarObjectText::readSWMacroTable: can not read a string\n"));
@@ -481,7 +481,7 @@ bool Macro::read(StarZone &zone)
       ok=false;
       break;
     }
-    m_names[i]=libstoff::getString(string);
+    name=libstoff::getString(string);
   }
   if (ok && zone.isCompatibleWith(0x102))
     m_scriptType=int(input->readULong(2));
@@ -732,9 +732,9 @@ bool PrintData::read(StarZone &zone)
   f << "Entries(StarPrintData)[" << zone.getRecordLevel() << "]:";
   m_flags=int(input->readULong(1));
   int dim[2];
-  for (int i=0; i<2; ++i) dim[i]=int(input->readULong(2));
+  for (int &i : dim) i=int(input->readULong(2));
   m_colRow=STOFFVec2i(dim[1],dim[0]);
-  for (int i=0; i<6; ++i) m_spacings[i]=int(input->readULong(2));
+  for (int &spacing : m_spacings) spacing=int(input->readULong(2));
   f << *this;
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());

@@ -177,8 +177,8 @@ struct NumberFormatter {
       if (form.m_hasThousandSep) o << "thousand[digits]=" << form.m_thousand << ",";
       if (!form.m_itemList.empty()) {
         o << "item=[";
-        for (size_t i=0; i<form.m_itemList.size(); ++i)
-          o << form.m_itemList[i] << ",";
+        for (const auto &i : form.m_itemList)
+          o << i << ",";
         o << "],";
       }
       if (!form.m_colorName.empty()) o << "color[name]=" << form.m_colorName.cstr() << ",";
@@ -908,13 +908,13 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
         f << "##limit" << i << ",";
       }
     }
-    for (int i=0; i<2; ++i)
-      form.m_limitsOp[i]=int(input->readULong(2));
+    for (int &i : form.m_limitsOp)
+      i=int(input->readULong(2));
     *input >> form.m_isStandart;
     *input >> form.m_isUsed;
 
     bool ok=true;
-    for (int i=0; i<4; ++i) {
+    for (auto &subFormat : form.m_subFormats) {
       // ImpSvNumFor::Load
       StarFormatManagerInternal::NumberFormatter::Format subForm;
       int N=int(input->readULong(2));
@@ -950,7 +950,7 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
         f << "###[" << subForm << "],";
         break;
       }
-      form.m_subFormats[i]=subForm;
+      subFormat=subForm;
     }
     form.m_extra=f.str();
     if (ok && m_state->m_idNumberFormatMap.find(unsigned(id))==m_state->m_idNumberFormatMap.end())

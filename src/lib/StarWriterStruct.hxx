@@ -209,7 +209,7 @@ public:
   DocStats()
     : m_isModified(false)
   {
-    for (int i=0; i<7; ++i) m_numbers[i]=0;
+    for (long &number : m_numbers) number=0;
   }
   //! operator<<
   friend std::ostream &operator<<(std::ostream &o, DocStats const &docStats);
@@ -303,7 +303,7 @@ public:
     , m_posType(0)
     , m_numType(0)
   {
-    for (int i=0; i<4; ++i) m_idx[i]=0xFFFF;
+    for (int &i : m_idx) i=0xFFFF;
   }
   //! operator<<
   friend std::ostream &operator<<(std::ostream &o, NoteInfo const &noteInfo);
@@ -334,7 +334,7 @@ public:
     : m_flags(0)
     , m_colRow(1,1)
   {
-    for (int i=0; i<6; ++i) m_spacings[i]=0;
+    for (int &spacing : m_spacings) spacing=0;
   }
   //! operator<<
   friend std::ostream &operator<<(std::ostream &o, PrintData const &printData);
@@ -401,7 +401,7 @@ public:
     , m_titleLength()
     , m_formatList()
   {
-    for (int i=0; i<3; ++i) m_stringIds[i]=0xFFFF;
+    for (int &stringId : m_stringIds) stringId=0xFFFF;
   }
   //! destructor
   ~TOX();

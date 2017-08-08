@@ -115,10 +115,10 @@ public:
   {
     if (list.empty() || !canWriteText())
       return;
-    for (size_t i=0; i<list.size(); ++i) {
-      if (list[i]==0x9) insertTab();
-      else if (list[i]==0xa || list[i]==0xc) insertEOL(); // checkme: use softBreak ?
-      else insertUnicode(list[i]);
+    for (unsigned int i : list) {
+      if (i==0x9) insertTab();
+      else if (i==0xa || i==0xc) insertEOL(); // checkme: use softBreak ?
+      else insertUnicode(i);
     }
   }
   //! adds a unicode string

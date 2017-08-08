@@ -416,7 +416,7 @@ protected:
     //! constructor
     Column() : m_wishWidth(0)
     {
-      for (int i=0; i<4; ++i) m_margins[i]=0;
+      for (int &margin : m_margins) margin=0;
     }
     //! debug function to print the data
     void printData(libstoff::DebugStream &o) const
@@ -730,7 +730,7 @@ public:
   StarPAttributeRangeItem(Type type, std::string const &debugName)
     : StarAttribute(type, debugName), m_table(-1), m_range()
   {
-    for (int i=0; i<2; ++i) m_flags[i]=false;
+    for (bool &flag : m_flags) flag=false;
   }
   //! create a new attribute
   std::shared_ptr<StarAttribute> create() const final
@@ -941,7 +941,7 @@ bool StarPAttributeColumns::read(StarZone &zone, int /*vers*/, long endPos, Star
   m_penStyle=int(input->readULong(1));
   m_penWidth=int(input->readULong(2));
   uint8_t color[3];
-  for (int i=0; i<3; ++i) color[i]=uint8_t(input->readULong(2)>>8);
+  for (unsigned char &i : color) i=uint8_t(input->readULong(2)>>8);
   m_penColor=STOFFColor(color[0],color[1],color[2]);
   int nCol=int(input->readULong(2));
   f << "N=" << nCol << ",";
@@ -955,7 +955,7 @@ bool StarPAttributeColumns::read(StarZone &zone, int /*vers*/, long endPos, Star
   for (int i=0; i<nCol; ++i) {
     StarPAttributeColumns::Column col;
     col.m_wishWidth=int(input->readULong(2));
-    for (int d=0; d<4; ++d) col.m_margins[d]=int(input->readULong(2));
+    for (int &margin : col.m_margins) margin=int(input->readULong(2));
     m_columnList.push_back(col);
   }
   printData(f);
@@ -1028,7 +1028,7 @@ bool StarPAttributePageHF::read(StarZone &zone, int /*vers*/, long endPos, StarO
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   bool ok=true;
-  for (int i=0; i<3; ++i) {
+  for (auto &z : m_zones) {
     long actPos=input->tell();
     std::shared_ptr<StarObjectSmallText> smallText(new StarObjectSmallText(object, true));
     if (!smallText->read(zone, endPos) || input->tell()>endPos) {
@@ -1036,7 +1036,7 @@ bool StarPAttributePageHF::read(StarZone &zone, int /*vers*/, long endPos, StarO
       input->seek(actPos, librevenge::RVNG_SEEK_SET);
       ok=false;
     }
-    m_zones[i]=smallText;
+    z=smallText;
   }
   printData(f);
   ascFile.addPos(pos);
@@ -1078,10 +1078,10 @@ bool StarPAttributeRangeItem::read(StarZone &zone, int vers, long endPos, StarOb
   int dim[4];
   if (vers==0) {
     m_table=int(input->readULong(2));
-    for (int i=0; i<4; ++i) dim[i]=int(input->readULong(2));
+    for (int &i : dim) i=int(input->readULong(2));
   }
   else {
-    for (int i=0; i<4; ++i) dim[i]=int(input->readULong(2));
+    for (int &i : dim) i=int(input->readULong(2));
     if (vers>=2) {
       *input>>m_flags[0];
       if (input->tell()+1==endPos) // checkme

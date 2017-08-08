@@ -230,8 +230,7 @@ struct SfxMultiRecord {
     if (r.m_contentSize) o << "content[size/pos]=" << r.m_contentSize << ",";
     if (!r.m_offsetList.empty()) {
       o << "offset=[";
-      for (size_t i=0; i<r.m_offsetList.size(); ++i) {
-        uint32_t off=r.m_offsetList[i];
+      for (unsigned int off : r.m_offsetList) {
         if (off&0xff)
           o << (off>>8) << ":" << (off&0xff) << ",";
         else
@@ -1177,7 +1176,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
     switch (type) {
     case 1:
       f << "pixel=" << input->readLong(4) << "x" << input->readLong(4) << ",";
-      for (int c=0; c<3; ++c) col[c]=static_cast<unsigned char>(input->readULong(2)>>8);
+      for (unsigned char &c : col) c=static_cast<unsigned char>(input->readULong(2)>>8);
       f << "col=" << STOFFColor(col[0],col[1],col[2]) << ",";
       break;
     case 2:
@@ -1247,7 +1246,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       }
       if (type==1025) {
         f << "style=" << input->readULong(2) << ",";
-        for (int c=0; c<3; ++c) col[c]=static_cast<unsigned char>(input->readULong(2)>>8);
+        for (unsigned char &c : col) c=static_cast<unsigned char>(input->readULong(2)>>8);
         f << "col=" << STOFFColor(col[0],col[1],col[2]) << ",";
         f << "distance=" << input->readLong(4) << ",";
         f << "nComment=" << input->readULong(4) << ",";
@@ -1362,7 +1361,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
     }
     case 19:
       f << "pen,";
-      for (int c=0; c<3; ++c) col[c]=static_cast<unsigned char>(input->readULong(2)>>8);
+      for (unsigned char &c : col) c=static_cast<unsigned char>(input->readULong(2)>>8);
       color=STOFFColor(col[0],col[1],col[2]);
       if (!color.isBlack()) f << "col=" << color << ",";
       f << "penWidth=" << input->readULong(4) << ",";
@@ -1371,7 +1370,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
     case 20: {
       f << "font,";
       for (int c=0; c<2; ++c) {
-        for (int j=0; j<3; ++j) col[j]=static_cast<unsigned char>(input->readULong(2)>>8);
+        for (unsigned char &j : col) j=static_cast<unsigned char>(input->readULong(2)>>8);
         color=STOFFColor(col[0],col[1],col[2]);
         if ((c==1&&!color.isWhite()) || (c==0&&!color.isBlack()))
           f << (c==0 ? "col" : "col[fill]") << "=" << color << ",";
@@ -1413,7 +1412,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
     case 21: // unsure
     case 22:
       f << (type==21 ? "brush[back]" : "brush[fill]") << ",";
-      for (int j=0; j<3; ++j) col[j]=static_cast<unsigned char>(input->readULong(2)>>8);
+      for (unsigned char &j : col) j=static_cast<unsigned char>(input->readULong(2)>>8);
       f << STOFFColor(col[0],col[1],col[2]) << ",";
       input->seek(6, librevenge::RVNG_SEEK_CUR); // unknown
       f << "style=" << input->readLong(2) << ",";
@@ -1541,7 +1540,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
         << input->readLong(4) << "x" << input->readLong(4) << ",";
       f << "style=" << input->readULong(2) << ",";
       for (int c=0; c<2; ++c) {
-        for (int j=0; j<3; ++j) col[j]=static_cast<unsigned char>(input->readULong(2)>>8);
+        for (unsigned char &j : col) j=static_cast<unsigned char>(input->readULong(2)>>8);
         color=STOFFColor(col[0],col[1],col[2]);
         f << "col" << c << "=" << color << ",";
       }
@@ -1559,7 +1558,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       break;
     case 1027:
       f << "textline[color,comment],";
-      for (int j=0; j<3; ++j) col[j]=static_cast<unsigned char>(input->readULong(2)>>8);
+      for (unsigned char &j : col) j=static_cast<unsigned char>(input->readULong(2)>>8);
       f << "col=" << STOFFColor(col[0],col[1],col[2]) << ",";
       f << "set=" << input->readULong(1) << ",";
       f << "nComments=" << input->readULong(4) << ",";

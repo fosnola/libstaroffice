@@ -414,7 +414,7 @@ public:
     , m_anchorPosition(0,0)
     , m_polygon()
   {
-    for (int i=0; i<6; ++i) m_flags[i]=false;
+    for (bool &flag : m_flags) flag=false;
   }
   //! destructor
   ~SdrGraphic() override;
@@ -475,8 +475,8 @@ public:
     }
     if (!graph.m_polygon.empty()) {
       o << "poly=[";
-      for (size_t i=0; i<graph.m_polygon.size(); ++i)
-        o << graph.m_polygon[i] << ",";
+      for (const auto &i : graph.m_polygon)
+        o << i << ",";
       o << "],";
     }
     return o;
@@ -956,13 +956,13 @@ public:
       : m_orthoForm(0)
     {
       m_angles[0]=m_angles[1]=0;
-      for (int i=0; i<3; ++i) m_n[i]=0;
+      for (int &i : m_n) i=0;
     }
     //! operator=
     friend std::ostream &operator<<(std::ostream &o, Information const &info)
     {
       o << "pts=[";
-      for (int i=0; i<5; ++i) o << info.m_points[i] << ",";
+      for (auto point : info.m_points) o << point << ",";
       o << "],";
       o << "angles=" << info.m_angles[0] << "x" << info.m_angles[1] << ",";
       for (int i=0; i<3; ++i) {
@@ -1192,10 +1192,10 @@ public:
     shape.m_command=STOFFGraphicShape::C_Polyline;
     shape.m_propertyList.insert("draw:show-unit", true);
     librevenge::RVNGPropertyList list;
-    for (int i=0; i<2; ++i)
+    for (auto &measurePoint : m_measurePoints)
     {
-      list.insert("svg:x",libstoff::convertMiniMToPoint(m_measurePoints[i][0]), librevenge::RVNG_POINT);
-      list.insert("svg:y",libstoff::convertMiniMToPoint(m_measurePoints[i][1]), librevenge::RVNG_POINT);
+      list.insert("svg:x",libstoff::convertMiniMToPoint(measurePoint[0]), librevenge::RVNG_POINT);
+      list.insert("svg:y",libstoff::convertMiniMToPoint(measurePoint[1]), librevenge::RVNG_POINT);
       vect.append(list);
     }
     shape.m_propertyList.insert("svg:points", vect);
@@ -1216,7 +1216,7 @@ public:
     o << graph.getName() << ",";
     if (graph.m_overwritten) o << "overwritten,";
     o << "pts=[";
-    for (int i=0; i<2; ++i) o << graph.m_measurePoints[i] << ",";
+    for (auto measurePoint : graph.m_measurePoints) o << measurePoint << ",";
     o << "],";
     if (graph.m_measureItem && graph.m_measureItem->m_attribute) {
       libstoff::DebugStream f;
@@ -1540,10 +1540,10 @@ public:
     , m_polygon()
     , m_order(0)
   {
-    for (int i=0; i<8; ++i) m_values[i]=0;
-    for (int i=0; i<2; ++i) m_colors[i]=STOFFColor::white();
-    for (int i=0; i<3; ++i) m_flags[i]=false;
-    for (int i=0; i<5; ++i) m_booleans[i]=false;
+    for (int &value : m_values) value=0;
+    for (auto &color : m_colors) color=STOFFColor::white();
+    for (bool &flag : m_flags) flag=false;
+    for (bool &boolean : m_booleans) boolean=false;
   }
   //! destructor
   ~SDUDGraphicAnimation() override;
@@ -2029,7 +2029,7 @@ bool StarObjectSmallGraphic::readSVDRObjectCaption(StarZone &zone, StarObjectSma
   }
   for (int pt=0; pt<int(n); ++pt) {
     int dim[2];
-    for (int i=0; i<2; ++i) dim[i]=int(input->readLong(4));
+    for (int &i : dim) i=int(input->readLong(4));
     graphic.m_captionPolygon.push_back(STOFFVec2i(dim[0],dim[1]));
   }
   if (ok) {
@@ -2072,8 +2072,8 @@ bool StarObjectSmallGraphic::readSVDRObjectCircle(StarZone &zone, StarObjectSmal
   }
   long lastPos=zone.getRecordLastPosition();
   if (id!=4) {
-    for (int i=0; i<2; ++i)
-      graphic.m_angles[i]=float(input->readLong(4))/100.f;
+    for (float &angle : graphic.m_angles)
+      angle=float(input->readLong(4))/100.f;
   }
   if (input->tell()!=lastPos) {
     auto pool=findItemPool(StarItemPool::T_XOutdevPool, false);
@@ -2142,7 +2142,7 @@ bool StarObjectSmallGraphic::readSVDRObjectEdge(StarZone &zone, StarObjectSmallG
     else {
       for (int pt=0; pt<int(n); ++pt) {
         int dim[2];
-        for (int i=0; i<2; ++i) dim[i]=int(input->readLong(4));
+        for (int &i : dim) i=int(input->readLong(4));
         graphic.m_edgePolygon.push_back(STOFFVec2i(dim[0],dim[1]));
       }
       for (int pt=0; pt<int(n); ++pt) graphic.m_edgePolygonFlags.push_back(int(input->readULong(1)));
@@ -2192,13 +2192,13 @@ bool StarObjectSmallGraphic::readSVDRObjectEdge(StarZone &zone, StarObjectSmallG
     }
     else {
       auto &info=graphic.m_info;
-      for (int pt=0; pt<5; ++pt) {
+      for (auto &point : info.m_points) {
         int dim[2];
-        for (int i=0; i<2; ++i) dim[i]=int(input->readLong(4));
-        info.m_points[pt]=STOFFVec2i(dim[0],dim[1]);
+        for (int &i : dim) i=int(input->readLong(4));
+        point=STOFFVec2i(dim[0],dim[1]);
       }
-      for (int i=0; i<2; ++i) info.m_angles[i]=int(input->readLong(4));
-      for (int i=0; i<3; ++i) info.m_n[i]=int(input->readULong(2));
+      for (int &angle : info.m_angles) angle=int(input->readLong(4));
+      for (int &i : info.m_n) i=int(input->readULong(2));
       info.m_orthoForm=int(input->readULong(1));
       f << "infoRec=[" << info << "],";
     }
@@ -2239,7 +2239,7 @@ bool StarObjectSmallGraphic::readSVDRObjectHeader(StarZone &zone, StarObjectSmal
   int vers=zone.getHeaderVersion();
   // svx_svdobj: SdrObject::ReadData
   int dim[4];    // gen.cxx operator>>(Rect) : test compression here
-  for (int i=0; i<4; ++i) dim[i]=int(input->readLong(4));
+  for (int &i : dim) i=int(input->readLong(4));
   graphic.m_bdbox=STOFFBox2i(STOFFVec2i(dim[0],dim[1]),STOFFVec2i(dim[2],dim[3]));
   graphic.m_layerId=int(input->readULong(2));
   for (int i=0; i<2; ++i) dim[i]=int(input->readLong(4));
@@ -2363,7 +2363,7 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
     }
     if (ok && vers>=6) {
       int dim[4];
-      for (int i=0; i<4; ++i) dim[i]=int(input->readLong(4));
+      for (int &i : dim) i=int(input->readLong(4));
       graphic.m_graphRectangle=STOFFBox2i(STOFFVec2i(dim[0],dim[1]),STOFFVec2i(dim[2],dim[3]));
     }
     if (ok && vers>=8) {
@@ -2416,10 +2416,10 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
     }
     if (ok) {
       int dim[4];
-      for (int i=0; i<4; ++i) dim[i]=int(input->readLong(4));
+      for (int &i : dim) i=int(input->readLong(4));
       graphic.m_graphRectangle=STOFFBox2i(STOFFVec2i(dim[0],dim[1]),STOFFVec2i(dim[2],dim[3]));
       *input >> graphic.m_mirrored;
-      for (int i=0; i<3; ++i) {
+      for (auto &graphName : graphic.m_graphNames) {
         std::vector<uint32_t> string;
         if (!zone.readString(string) || input->tell()>lastPos) {
           STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSVDRObjectGraph: can not read a string\n"));
@@ -2427,7 +2427,7 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
           ok=false;
           break;
         }
-        graphic.m_graphNames[i]=libstoff::getString(string);
+        graphName=libstoff::getString(string);
       }
     }
     if (ok)
@@ -2488,7 +2488,7 @@ bool StarObjectSmallGraphic::readSVDRObjectGroup(StarZone &zone, StarObjectSmall
   if (ok) {
     *input >> graphic.m_hasRefPoint;
     int dim[2];
-    for (int i=0; i<2; ++i) dim[i]=int(input->readLong(4));
+    for (int &i : dim) i=int(input->readLong(4));
     graphic.m_refPoint=STOFFVec2i(dim[0],dim[1]);
     if (input->tell()>lastPos) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSVDRObjectGroup: the zone seems too short\n"));
@@ -2566,10 +2566,10 @@ bool StarObjectSmallGraphic::readSVDRObjectMeasure(StarZone &zone, StarObjectSma
     return false;
   }
   long lastPos=zone.getRecordLastPosition();
-  for (int pt=0; pt<2; ++pt) {
+  for (auto &measurePoint : graphic.m_measurePoints) {
     int dim[2];
-    for (int i=0; i<2; ++i) dim[i]=int(input->readLong(4));
-    graphic.m_measurePoints[pt]=STOFFVec2i(dim[0],dim[1]);
+    for (int &i : dim) i=int(input->readLong(4));
+    measurePoint=STOFFVec2i(dim[0],dim[1]);
   }
   *input >> graphic.m_overwritten;
   auto pool=findItemPool(StarItemPool::T_XOutdevPool, false);
@@ -2609,7 +2609,7 @@ bool StarObjectSmallGraphic::readSVDRObjectOLE(StarZone &zone, StarObjectSmallGr
   }
   long lastPos=zone.getRecordLastPosition();
   bool ok=true;
-  for (int i=0; i<2; ++i) {
+  for (auto &oleName : graphic.m_oleNames) {
     std::vector<uint32_t> string;
     if (!zone.readString(string) || input->tell()>lastPos) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSVDRObjectOLE: can not read a string\n"));
@@ -2618,7 +2618,7 @@ bool StarObjectSmallGraphic::readSVDRObjectOLE(StarZone &zone, StarObjectSmallGr
       break;
     }
     if (!string.empty())
-      graphic.m_oleNames[i]=libstoff::getString(string);
+      oleName=libstoff::getString(string);
   }
   if (ok) {
     graphic.m_oleParser=m_oleParser;
@@ -2699,7 +2699,7 @@ bool StarObjectSmallGraphic::readSVDRObjectPath(StarZone &zone, StarObjectSmallG
       auto &polygon=graphic.m_pathPolygons.back();
       for (int pt=0; pt<int(n); ++pt) {
         int dim[2];
-        for (int i=0; i<2; ++i) dim[i]=int(input->readLong(4));
+        for (int &i : dim) i=int(input->readLong(4));
         polygon.m_points.push_back(StarGraphicStruct::StarPolygon::Point(STOFFVec2i(dim[0],dim[1])));
       }
     }
@@ -2728,7 +2728,7 @@ bool StarObjectSmallGraphic::readSVDRObjectPath(StarZone &zone, StarObjectSmallG
       polygon.m_points.resize(size_t(n));
       for (size_t pt=0; pt<size_t(n); ++pt) {
         int dim[2];
-        for (int i=0; i<2; ++i) dim[i]=int(input->readLong(4));
+        for (int &i : dim) i=int(input->readLong(4));
         polygon.m_points[pt].m_point=STOFFVec2i(dim[0],dim[1]);
       }
       for (size_t pt=0; pt<size_t(n); ++pt)
@@ -2807,7 +2807,7 @@ bool StarObjectSmallGraphic::readSVDRObjectText(StarZone &zone, StarObjectSmallG
   int vers=zone.getHeaderVersion();
   graphic.m_textKind=int(input->readULong(1));
   int dim[4];
-  for (int i=0; i<4; ++i) dim[i]=int(input->readLong(4));
+  for (int &i : dim) i=int(input->readLong(4));
   graphic.m_textRectangle=STOFFBox2i(STOFFVec2i(dim[0],dim[1]),STOFFVec2i(dim[2],dim[3]));
   graphic.m_textDrehWink=int(input->readLong(4));
   graphic.m_textShearWink=int(input->readLong(4));
@@ -2847,7 +2847,7 @@ bool StarObjectSmallGraphic::readSVDRObjectText(StarZone &zone, StarObjectSmallG
     bool hasBound;
     *input >> hasBound;
     if (hasBound) {
-      for (int i=0; i<4; ++i) dim[i]=int(input->readLong(4));
+      for (int &i : dim) i=int(input->readLong(4));
       graphic.m_textBound=STOFFBox2i(STOFFVec2i(dim[0],dim[1]),STOFFVec2i(dim[2],dim[3]));
       f << "bound=" << graphic.m_textBound << ",";
     }
@@ -3115,7 +3115,7 @@ bool StarObjectSmallGraphic::readSDRGluePoint(StarZone &zone, StarObjectSmallGra
   f << "Entries(SdrGluePoint):";
   // svx_svdglue_drawdoc.xx: operator>>(SdrGluePoint)
   int dim[2];
-  for (int i=0; i<2; ++i) dim[i]=int(input->readULong(2));
+  for (int &i : dim) i=int(input->readULong(2));
   pt.m_dimension=STOFFVec2i(dim[0],dim[1]);
   pt.m_direction=int(input->readULong(2));
   pt.m_id=int(input->readULong(2));
@@ -3419,20 +3419,20 @@ std::shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic:
       else {
         for (int pt=0; pt<int(n); ++pt) {
           int dim[2];
-          for (int i=0; i<2; ++i) dim[i]=int(input->readLong(4));
+          for (int &i : dim) i=int(input->readLong(4));
           graphic->m_polygon.push_back(STOFFVec2i(dim[0],dim[1]));
         }
       }
     }
     if (ok) {
-      for (int pt=0; pt<2; ++pt) {
+      for (auto &limit : graphic->m_limits) {
         int dim[2];
-        for (int i=0; i<2; ++i) dim[i]=int(input->readLong(4));
-        graphic->m_limits[pt]=STOFFVec2i(dim[0],dim[1]);
+        for (int &i : dim) i=int(input->readLong(4));
+        limit=STOFFVec2i(dim[0],dim[1]);
       }
       for (int i=0; i<2; ++i)
         graphic->m_values[i]=int(input->readULong(2));
-      for (int i=0; i<3; ++i) graphic->m_flags[i]=input->readULong(2)!=0;
+      for (bool &flag : graphic->m_flags) flag=input->readULong(2)!=0;
       if (input->tell()>endPos) {
         STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDUDObject: the zone is too short\n"));
         f << "###short";
@@ -3440,7 +3440,7 @@ std::shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic:
       }
     }
     if (ok) {
-      for (int i=0; i<2; ++i) {
+      for (auto &c : graphic->m_colors) {
         STOFFColor color;
         if (!input->readColor(color) || input->tell()>endPos) {
           STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDUDObject: can not find a color\n"));
@@ -3449,7 +3449,7 @@ std::shared_ptr<StarObjectSmallGraphicInternal::Graphic> StarObjectSmallGraphic:
           break;
         }
         else
-          graphic->m_colors[i]=color;
+          c=color;
       }
     }
     int encoding=0;

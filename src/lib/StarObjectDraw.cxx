@@ -559,7 +559,7 @@ bool StarObjectDraw::readSdrHelpLine(StarZone &zone)
   int val=int(input->readULong(2));
   if (val) f << "kind=" << val << ",";
   int dim[2];
-  for (int i=0; i<2; ++i) dim[i]=int(input->readLong(4));
+  for (int &i : dim) i=int(input->readLong(4));
   f << "pos=" << STOFFVec2i(dim[0],dim[1]) << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -701,7 +701,7 @@ bool StarObjectDraw::readSdrFrameView(StarZone &zone)
   }
   if (ok&&vers>=3) {
     int dim[4];
-    for (int i=0; i<4; ++i) dim[i]=int(input->readLong(4));
+    for (int &i : dim) i=int(input->readLong(4));
     f << "vis[area]=" << STOFFBox2i(STOFFVec2i(dim[0],dim[1]),STOFFVec2i(dim[2],dim[3])) << ",";
     f << "page[kind]=" << input->readULong(4) << ",";
     f << "page[select]=" << input->readULong(2) << ",";

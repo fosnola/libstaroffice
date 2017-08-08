@@ -300,7 +300,7 @@ public:
   //! constructor
   StarCAttributeMargins(Type type, std::string const &debugName) : StarAttribute(type, debugName)
   {
-    for (int i=0; i<4; ++i) m_margins[i]=20;
+    for (int &margin : m_margins) margin=20;
   }
   //! create a new attribute
   std::shared_ptr<StarAttribute> create() const final
@@ -525,8 +525,8 @@ bool StarCAttributeMargins::read(StarZone &zone, int /*vers*/, long endPos, Star
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  for (int i=0; i<4; ++i)
-    m_margins[i]=int(input->readLong(2));
+  for (int &margin : m_margins)
+    margin=int(input->readLong(2));
   printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -542,8 +542,8 @@ bool StarCAttributeMerge::read(StarZone &zone, int /*vers*/, long endPos, StarOb
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   int span[2];
-  for (int i=0; i<2; ++i)
-    span[i]=int(input->readLong(2));
+  for (int &i : span)
+    i=int(input->readLong(2));
   m_span=STOFFVec2i(span[0], span[1]);
   printData(f);
   ascFile.addPos(pos);

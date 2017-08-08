@@ -414,8 +414,8 @@ struct STOFFEmbeddedObject {
   {
     if (!m_filenameLink.empty())
       return false;
-    for (size_t i=0; i<m_dataList.size(); ++i) {
-      if (!m_dataList[i].empty())
+    for (const auto &i : m_dataList) {
+      if (!i.empty())
         return false;
     }
     return true;
@@ -846,7 +846,7 @@ public:
   template <class U>
   STOFFVec3<T> &operator*=(U scale)
   {
-    for (int c = 0; c < 3; c++) m_val[c] = T(m_val[c]*scale);
+    for (auto &c : m_val) c = T(c*scale);
     return *this;
   }
 

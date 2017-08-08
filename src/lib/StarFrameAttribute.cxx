@@ -239,7 +239,7 @@ public:
     : StarAttribute(type, debugName)
     , m_distance(0)
   {
-    for (int i=0; i<4; ++i) m_distances[i]=0;
+    for (int &distance : m_distances) distance=0;
   }
   //! create a new attribute
   std::shared_ptr<StarAttribute> create() const final
@@ -260,16 +260,16 @@ public:
         o << "border" << i << "=[" << m_borders[i] << "],";
     }
     bool hasDistances=false;
-    for (int i=0; i<4; ++i) {
-      if (m_distances[i]) {
+    for (int distance : m_distances) {
+      if (distance) {
         hasDistances=true;
         break;
       }
     }
     if (hasDistances) {
       o << "dists=[";
-      for (int i=0; i<4; ++i)
-        o << m_distances[i] << ",";
+      for (int distance : m_distances)
+        o << distance << ",";
       o << "],";
     }
     o << "],";
@@ -416,8 +416,8 @@ public:
     , m_textLeft(0)
     , m_autoFirst(false)
   {
-    for (int i=0; i<3; ++i) m_margins[i]=0;
-    for (int i=0; i<3; ++i) m_propMargins[i]=100;
+    for (int &margin : m_margins) margin=0;
+    for (int &propMargin : m_propMargins) propMargin=100;
   }
   //! create a new attribute
   std::shared_ptr<StarAttribute> create() const final
@@ -567,8 +567,8 @@ public:
   StarFAttributeULSpace(Type type, std::string const &debugName)
     : StarAttribute(type, debugName)
   {
-    for (int i=0; i<2; ++i) m_margins[i]=0;
-    for (int i=0; i<2; ++i) m_propMargins[i]=100;
+    for (int &margin : m_margins) margin=0;
+    for (int &propMargin : m_propMargins) propMargin=100;
   }
   //! create a new attribute
   std::shared_ptr<StarAttribute> create() const final
@@ -919,7 +919,7 @@ bool StarFAttributeBorder::read(StarZone &zone, int nVers, long endPos, StarObje
       f << "###distances,";
     }
     else {
-      for (int i=0; i<4; ++i) m_distances[i]=int(input->readULong(2));
+      for (int &distance : m_distances) distance=int(input->readULong(2));
     }
   }
   printData(f);
@@ -961,7 +961,7 @@ bool StarFAttributeFrameSize::read(StarZone &zone, int nVers, long endPos, StarO
   m_height=int(input->readLong(4));
   if (nVers>1) {
     int dim[2];
-    for (int i=0; i<2; ++i) dim[i]=int(input->readULong(1));
+    for (int &i : dim) i=int(input->readULong(1));
     m_percent=STOFFVec2i(dim[0],dim[1]);
   }
   printData(f);

@@ -117,7 +117,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
 STOFFChart::STOFFChart(librevenge::RVNGString const &sheetName, STOFFVec2f const &dim) :
   m_sheetName(sheetName), m_dim(dim), m_type(STOFFChart::Series::S_Bar), m_dataStacked(false), m_legend(), m_seriesList(), m_textZoneMap()
 {
-  for (int i=0; i<4; ++i) m_axis[i]=Axis();
+  for (auto &axis : m_axis) axis=Axis();
 }
 
 STOFFChart::~STOFFChart()

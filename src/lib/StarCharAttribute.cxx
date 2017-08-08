@@ -751,7 +751,7 @@ public:
     , m_name("")
     , m_libNames()
   {
-    for (int i=0; i<2; ++i) m_indices[i]=0xFFFF;
+    for (int &indice : m_indices) indice=0xFFFF;
   }
   //! create a new attribute
   std::shared_ptr<StarAttribute> create() const final
@@ -1178,7 +1178,7 @@ bool StarCAttributeINetFmt::read(StarZone &zone, int nVers, long endPos, StarObj
     else
       m_target=libstoff::getString(string);
   }
-  for (int i=0; i<2; ++i) m_indices[i]=int(input->readULong(2));
+  for (int &indice : m_indices) indice=int(input->readULong(2));
   int nCnt=int(input->readULong(2));
   for (int i=0; i<2*nCnt; ++i) {
     if (!zone.readString(string) || input->tell()>endPos) {

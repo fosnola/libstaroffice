@@ -181,8 +181,8 @@ StarBitmap::StarBitmap(uint32_t const((&pixels)[32]), STOFFColor const((&colors)
   : m_state(new StarBitmapInternal::State)
 {
   m_state->m_bitmap.m_width=m_state->m_bitmap.m_height=32;
-  for (int i=0; i<2; ++i)
-    m_state->m_bitmap.m_colorsList.push_back(colors[i]);
+  for (auto color : colors)
+    m_state->m_bitmap.m_colorsList.push_back(color);
   m_state->m_bitmap.m_indexDataList.resize(32*32);
   size_t w=0;
   uint32_t const *read=pixels;

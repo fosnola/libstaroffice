@@ -223,7 +223,7 @@ struct ScMultiRecord {
     if (r.m_numRecord) o << "num[record]=" << r.m_numRecord << ",";
     if (!r.m_offsetList.empty()) {
       o << "offset=[";
-      for (size_t i=0; i<r.m_offsetList.size(); ++i) o << r.m_offsetList[i] << ",";
+      for (unsigned int i : r.m_offsetList) o << i << ",";
       o << "],";
     }
     o << r.m_extra;

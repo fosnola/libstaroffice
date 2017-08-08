@@ -466,14 +466,14 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
     STOFFVec2i(3994,4037) /*EE_ITEMS_START, EE_ITEMS_END*/
   };
   std::vector<STOFFVec2i> titleLimits;
-  for (int i=0; i<7; ++i) titleLimits.push_back(titleLimitsVec[i]);
+  for (auto i : titleLimitsVec) titleLimits.push_back(i);
   static STOFFVec2i const(allAxisLimitsVec[])= {
     STOFFVec2i(4,4) /*SCHATTR_TEXT_ORIENT*/, STOFFVec2i(53,54) /*SCHATTR_TEXT_ORIENT, SCHATTR_TEXT_OVERLAP*/,
     STOFFVec2i(85,85) /* SCHATTR_AXIS_SHOWDESCR */, STOFFVec2i(1000,1016) /*XATTR_LINE_FIRST, XATTR_LINE_LAST*/,
     STOFFVec2i(3994,4037) /*EE_ITEMS_START, EE_ITEMS_END*/, STOFFVec2i(30587,30587) /* SID_TEXTBREAK*/
   };
   std::vector<STOFFVec2i> allAxisLimits;
-  for (int i=0; i<6; ++i) allAxisLimits.push_back(allAxisLimitsVec[i]);
+  for (auto i : allAxisLimitsVec) allAxisLimits.push_back(i);
   static STOFFVec2i const(compatAxisLimitsVec[])= {
     STOFFVec2i(4,39) /*SCHATTR_TEXT_START, SCHATTR_AXISTYPE*/, STOFFVec2i(53,54)/*SCHATTR_TEXT_DEGREES,SCHATTR_TEXT_OVERLAP*/,
     STOFFVec2i(70,95) /*SCHATTR_AXIS_START,SCHATTR_AXIS_END*/, STOFFVec2i(1000,1016) /*XATTR_LINE_FIRST, XATTR_LINE_LAST*/,
@@ -481,7 +481,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
     STOFFVec2i(10585,10585) /*SID_ATTR_NUMBERFORMAT_VALUE*/
   };
   std::vector<STOFFVec2i> compatAxisLimits;
-  for (int i=0; i<7; ++i) compatAxisLimits.push_back(compatAxisLimitsVec[i]);
+  for (auto i : compatAxisLimitsVec) compatAxisLimits.push_back(i);
   std::vector<STOFFVec2i> gridLimits;
   gridLimits.push_back(STOFFVec2i(1000,1016)); //XATTR_LINE_FIRST, XATTR_LINE_LAST
   gridLimits.push_back(STOFFVec2i(100,100)); // SCHATTR_USER_DEFINED_ATTR

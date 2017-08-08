@@ -63,17 +63,17 @@ uint8_t readU8(librevenge::RVNGInputStream *input)
 librevenge::RVNGString getString(std::vector<uint32_t> const &unicode)
 {
   librevenge::RVNGString res("");
-  for (size_t i=0; i<unicode.size(); ++i) {
-    if (unicode[i]<0x20 && unicode[i]!=0x9 && unicode[i]!=0xa && unicode[i]!=0xd) {
+  for (unsigned int i : unicode) {
+    if (i<0x20 && i!=0x9 && i!=0xa && i!=0xd) {
       static int numErrors=0;
       if (++numErrors<10) {
-        STOFF_DEBUG_MSG(("libstoff::getString: find odd char %x\n", static_cast<unsigned int>(unicode[i])));
+        STOFF_DEBUG_MSG(("libstoff::getString: find odd char %x\n", static_cast<unsigned int>(i)));
       }
     }
-    else if (unicode[i]<0x80)
-      res.append(char(unicode[i]));
+    else if (i<0x80)
+      res.append(char(i));
     else
-      appendUnicode(unicode[i], res);
+      appendUnicode(i, res);
   }
   return res;
 }

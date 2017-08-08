@@ -226,7 +226,7 @@ bool STOFFInputStream::readColor(STOFFColor &color)
   if (colId & 0x8000) {
     if (!checkPosition(tell()+6)) return false;
     unsigned char col[3];
-    for (int i=0; i<3; ++i) col[i]=static_cast<unsigned char>(readULong(2)>>8);
+    for (unsigned char &i : col) i=static_cast<unsigned char>(readULong(2)>>8);
     color=STOFFColor(col[0],col[1],col[2]);
     return true;
   }
@@ -450,7 +450,7 @@ bool STOFFInputStream::readDoubleReverted8(double &res, bool &isNotANumber)
   isNotANumber=false;
   res=0;
   int bytes[6];
-  for (int i=0; i<6; ++i) bytes[i]=int(readULong(1));
+  for (int &byte : bytes) byte=int(readULong(1));
 
   int val=int(readULong(1));
   int mantExp=int(readULong(1));

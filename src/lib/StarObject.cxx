@@ -351,7 +351,7 @@ bool StarObject::readPersistElements(STOFFInputStreamPtr input, std::string cons
   f.str("");
   f << "Persists-B:";
   int dim[4];
-  for (int i=0; i<4; ++i) dim[i]=int(input->readLong(4));
+  for (int &i : dim) i=int(input->readLong(4));
   f << "dim=" << STOFFBox2i(STOFFVec2i(dim[0],dim[1]), STOFFVec2i(dim[2],dim[3])) << ",";
   val=int(input->readLong(2)); // 0|9
   if (val) f << "f0=" << val << ",";

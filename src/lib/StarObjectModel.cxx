@@ -173,7 +173,7 @@ public:
     , m_objectList()
     , m_background()
   {
-    for (int i=0; i<4; ++i) m_borders[i]=0;
+    for (int &border : m_borders) border=0;
   }
   //! returns the master page id
   int getMasterPageId() const
@@ -205,7 +205,7 @@ public:
     if (!page.m_name.empty()) o << "name=" << page.m_name.cstr() << ",";
     o << "sz=" << page.m_size << ",";
     o << "borders=[";
-    for (int i=0; i<4; ++i) o << page.m_borders[i] << ",";
+    for (int border : page.m_borders) o << border << ",";
     o << "],";
     if (!page.m_masterPageDescList.empty()) {
       o << "desc=[";

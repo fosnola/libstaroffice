@@ -490,7 +490,7 @@ bool StarAttributeVec2i::read(StarZone &zone, int /*vers*/, long endPos, StarObj
   libstoff::DebugStream f;
   if (m_intSize) {
     int dim[2];
-    for (int i=0; i<2; ++i) dim[i]=int(input->readLong(m_intSize));
+    for (int &i : dim) i=int(input->readLong(m_intSize));
     m_value=STOFFVec2i(dim[0],dim[1]);
   }
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";

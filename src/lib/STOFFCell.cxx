@@ -413,8 +413,8 @@ std::ostream &operator<<(std::ostream &o, STOFFCellContent const &content)
     break;
   case STOFFCellContent::C_FORMULA:
     o << ",formula=";
-    for (size_t l=0; l < content.m_formula.size(); ++l)
-      o << content.m_formula[l];
+    for (const auto &l : content.m_formula)
+      o << l;
     if (content.isValueSet()) o << "[" << content.m_value << "]";
     break;
   case STOFFCellContent::C_UNKNOWN:
