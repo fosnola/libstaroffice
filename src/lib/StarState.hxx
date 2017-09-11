@@ -147,7 +147,7 @@ public:
   {
   }
   //! copy constructor
-  explicit StarState(StarState const &orig) = default;
+  explicit StarState(StarState const &) = default;
   //! destructor
   ~StarState();
   //! reinit the local data: break, font, content, footnote, ...

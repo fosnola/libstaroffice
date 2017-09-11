@@ -70,7 +70,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeBool(StarGAttributeBool const &orig) = default;
+  StarGAttributeBool(StarGAttributeBool const &) = default;
 };
 
 //! a character color attribute
@@ -93,7 +93,7 @@ public:
   // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarGAttributeColor(StarGAttributeColor const &orig) = default;
+  StarGAttributeColor(StarGAttributeColor const &) = default;
 };
 
 StarGAttributeColor::~StarGAttributeColor()
@@ -128,7 +128,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeFraction(StarGAttributeFraction const &orig) = default;
+  StarGAttributeFraction(StarGAttributeFraction const &) = default;
   // numerator
   int m_numerator;
   // denominator
@@ -169,7 +169,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarGAttributeInt(StarGAttributeInt const &orig) = default;
+  StarGAttributeInt(StarGAttributeInt const &) = default;
 };
 
 //! a character unsigned integer attribute
@@ -190,7 +190,7 @@ public:
   void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarGAttributeUInt(StarGAttributeUInt const &orig) = default;
+  StarGAttributeUInt(StarGAttributeUInt const &) = default;
 };
 
 //! a void attribute
@@ -213,7 +213,7 @@ public:
   void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarGAttributeVoid(StarGAttributeVoid const &orig) = default;
+  StarGAttributeVoid(StarGAttributeVoid const &) = default;
 };
 
 StarGAttributeVoid::~StarGAttributeVoid()
@@ -239,7 +239,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeItemSet(StarGAttributeItemSet const &orig) = default;
+  StarGAttributeItemSet(StarGAttributeItemSet const &) = default;
 };
 
 StarGAttributeItemSet::~StarGAttributeItemSet()
@@ -544,7 +544,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeBoxInfo(StarGAttributeBoxInfo const &orig) = default;
+  StarGAttributeBoxInfo(StarGAttributeBoxInfo const &) = default;
   //! the distance
   int m_distance;
   //! the boxInfo list: top, left, right, bottom
@@ -581,7 +581,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeCrop(StarGAttributeCrop const &orig) = default;
+  StarGAttributeCrop(StarGAttributeCrop const &) = default;
   //! the cropping left/top
   STOFFVec2i m_leftTop;
   //! the cropping right/bottom
@@ -611,7 +611,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeNamed(StarGAttributeNamed const &orig) = default;
+  StarGAttributeNamed(StarGAttributeNamed const &) = default;
   //! the named
   librevenge::RVNGString m_named;
   //! the name id
@@ -646,7 +646,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeNamedArrow(StarGAttributeNamedArrow const &orig) = default;
+  StarGAttributeNamedArrow(StarGAttributeNamedArrow const &) = default;
   //! the polygon
   StarGraphicStruct::StarPolygon m_polygon;
 };
@@ -680,7 +680,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeNamedBitmap(StarGAttributeNamedBitmap const &orig) = default;
+  StarGAttributeNamedBitmap(StarGAttributeNamedBitmap const &) = default;
   //! the bitmap
   STOFFEmbeddedObject m_bitmap;
 };
@@ -713,7 +713,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeNamedColor(StarGAttributeNamedColor const &orig) = default;
+  StarGAttributeNamedColor(StarGAttributeNamedColor const &) = default;
   //! the color
   STOFFColor m_color;
 };
@@ -756,7 +756,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeNamedDash(StarGAttributeNamedDash const &orig) = default;
+  StarGAttributeNamedDash(StarGAttributeNamedDash const &) = default;
   //! the style:  XDASH_RECT, XDASH_ROUND, XDASH_RECTRELATIVE, XDASH_ROUNDRELATIVE
   int m_dashStyle;
   //! the number of dot/dash
@@ -812,7 +812,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeNamedGradient(StarGAttributeNamedGradient const &orig) = default;
+  StarGAttributeNamedGradient(StarGAttributeNamedGradient const &) = default;
   //! the gradient type
   int m_gradientType;
   //! a flag to know if the gradient is enable
@@ -866,7 +866,7 @@ public:
 
 protected:
   //! copy constructor
-  StarGAttributeNamedHatch(StarGAttributeNamedHatch const &orig) = default;
+  StarGAttributeNamedHatch(StarGAttributeNamedHatch const &) = default;
   //! the type
   int m_hatchType;
   //! the color

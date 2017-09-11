@@ -60,7 +60,7 @@ struct State {
   {
   }
   //! copy constructor
-  State(State const &orig) = default;
+  State(State const &) = default;
   //! the list of pool
   std::vector<std::shared_ptr<StarItemPool> > m_poolList;
   //! the attribute manager
@@ -70,7 +70,7 @@ struct State {
   //! the list of user name
   librevenge::RVNGString m_userMetaNames[4];
 private:
-  State operator=(State const &orig) = delete;
+  State operator=(State const &) = delete;
 };
 }
 

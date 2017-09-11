@@ -65,7 +65,7 @@ public:
 
 protected:
   //! copy constructor
-  StarCAttributeBool(StarCAttributeBool const &orig) = default;
+  StarCAttributeBool(StarCAttributeBool const &) = default;
 };
 
 //! a character color attribute
@@ -87,7 +87,7 @@ public:
   // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarCAttributeColor(StarCAttributeColor const &orig) = default;
+  StarCAttributeColor(StarCAttributeColor const &) = default;
 };
 
 StarCAttributeColor::~StarCAttributeColor()
@@ -111,7 +111,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarCAttributeInt(StarCAttributeInt const &orig) = default;
+  StarCAttributeInt(StarCAttributeInt const &) = default;
 };
 
 //! a character unsigned integer attribute
@@ -132,7 +132,7 @@ public:
   void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarCAttributeUInt(StarCAttributeUInt const &orig) = default;
+  StarCAttributeUInt(StarCAttributeUInt const &) = default;
 };
 
 //! a void attribute
@@ -154,7 +154,7 @@ public:
   // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarCAttributeVoid(StarCAttributeVoid const &orig) = default;
+  StarCAttributeVoid(StarCAttributeVoid const &) = default;
 };
 
 StarCAttributeVoid::~StarCAttributeVoid()
@@ -359,7 +359,7 @@ public:
 
 protected:
   //! copy constructor
-  StarCAttributeMerge(StarCAttributeMerge const &orig) = default;
+  StarCAttributeMerge(StarCAttributeMerge const &) = default;
   //! the span
   STOFFVec2i m_span;
 };
@@ -427,7 +427,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarCAttributePattern(StarCAttributePattern const &orig) = default;
+  StarCAttributePattern(StarCAttributePattern const &) = default;
   //! the style
   librevenge::RVNGString m_style;
 };
@@ -467,7 +467,7 @@ public:
 
 protected:
   //! copy constructor
-  StarCAttributeProtection(StarCAttributeProtection const &orig) = default;
+  StarCAttributeProtection(StarCAttributeProtection const &) = default;
   //! the cell is protected
   bool m_protected;
   //! the formula is hidden

@@ -836,7 +836,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarAttributeBool(StarAttributeBool const &orig) = default;
+  StarAttributeBool(StarAttributeBool const &) = default;
   // the bool value
   bool m_value;
 };
@@ -866,7 +866,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarAttributeColor(StarAttributeColor const &orig) = default;
+  StarAttributeColor(StarAttributeColor const &) = default;
   //! the color value
   STOFFColor m_value;
   //! the default value
@@ -898,7 +898,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarAttributeDouble(StarAttributeDouble const &orig) = default;
+  StarAttributeDouble(StarAttributeDouble const &) = default;
   // the double value
   double m_value;
 };
@@ -935,7 +935,7 @@ public:
 
 protected:
   //! copy constructor
-  StarAttributeInt(StarAttributeInt const &orig) = default;
+  StarAttributeInt(StarAttributeInt const &) = default;
   // the int value
   int m_value;
   // number of byte 1,2,4
@@ -973,7 +973,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarAttributeUInt(StarAttributeUInt const &orig) = default;
+  StarAttributeUInt(StarAttributeUInt const &) = default;
   // the int value
   unsigned int m_value;
   // number of byte 1,2,4
@@ -1012,7 +1012,7 @@ public:
 
 protected:
   //! copy constructor
-  StarAttributeVec2i(StarAttributeVec2i const &orig) = default;
+  StarAttributeVec2i(StarAttributeVec2i const &) = default;
   // the int value
   STOFFVec2i m_value;
   // number of byte 1,2,4
@@ -1047,7 +1047,7 @@ protected:
   bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const override;
 
   //! copy constructor
-  StarAttributeItemSet(StarAttributeItemSet const &orig) = default;
+  StarAttributeItemSet(StarAttributeItemSet const &) = default;
   //! the pool limits id
   std::vector<STOFFVec2i> m_limits;
   //! the list of items

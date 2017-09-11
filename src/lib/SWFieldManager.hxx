@@ -93,7 +93,7 @@ struct Field {
   int m_level;
 protected:
   //! copy constructor
-  Field(const Field &orig) = default;
+  Field(const Field &) = default;
 };
 
 struct State;

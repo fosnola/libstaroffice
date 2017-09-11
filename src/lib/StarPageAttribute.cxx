@@ -66,7 +66,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributeBool(StarPAttributeBool const &orig) = default;
+  StarPAttributeBool(StarPAttributeBool const &) = default;
 };
 
 //! a character color attribute
@@ -89,7 +89,7 @@ public:
   // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarPAttributeColor(StarPAttributeColor const &orig) = default;
+  StarPAttributeColor(StarPAttributeColor const &) = default;
 };
 
 StarPAttributeColor::~StarPAttributeColor()
@@ -115,7 +115,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarPAttributeInt(StarPAttributeInt const &orig) = default;
+  StarPAttributeInt(StarPAttributeInt const &) = default;
 };
 
 StarPAttributeInt::~StarPAttributeInt()
@@ -140,7 +140,7 @@ public:
   void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarPAttributeUInt(StarPAttributeUInt const &orig) = default;
+  StarPAttributeUInt(StarPAttributeUInt const &) = default;
 };
 
 //! a void attribute
@@ -162,7 +162,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarPAttributeVoid(StarPAttributeVoid const &orig) = default;
+  StarPAttributeVoid(StarPAttributeVoid const &) = default;
 };
 
 StarPAttributeVoid::~StarPAttributeVoid()
@@ -188,7 +188,7 @@ public:
 
 protected:
   //! copy constructor
-  explicit StarPAttributeItemSet(StarPAttributeItemSet const &orig) = default;
+  explicit StarPAttributeItemSet(StarPAttributeItemSet const &) = default;
 };
 
 //! an Vec2i attribute
@@ -209,7 +209,7 @@ public:
   void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarPAttributeVec2i(StarPAttributeVec2i const &orig) = default;
+  StarPAttributeVec2i(StarPAttributeVec2i const &) = default;
 };
 
 void StarPAttributeBool::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
@@ -494,7 +494,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributeColumns(StarPAttributeColumns const &orig) = default;
+  StarPAttributeColumns(StarPAttributeColumns const &) = default;
 
   //! the lineAdj
   int m_lineAdj;
@@ -548,7 +548,7 @@ public:
 
 protected:
   //! copy constructor
-  explicit StarPAttributeFrameHF(StarPAttributeFrameHF const &orig) = default;
+  explicit StarPAttributeFrameHF(StarPAttributeFrameHF const &) = default;
   //! active flag
   bool m_active;
   //! the format
@@ -605,7 +605,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributePage(StarPAttributePage const &orig) = default;
+  StarPAttributePage(StarPAttributePage const &) = default;
   //! the name
   librevenge::RVNGString m_name;
   //! the type
@@ -649,7 +649,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributePageDesc(StarPAttributePageDesc const &orig) = default;
+  StarPAttributePageDesc(StarPAttributePageDesc const &) = default;
   //! the auto flag
   bool m_auto;
   //! the offset
@@ -684,7 +684,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributePageHF(StarPAttributePageHF const &orig) = default;
+  StarPAttributePageHF(StarPAttributePageHF const &) = default;
   //! the left/middle/right zones
   std::shared_ptr<StarObjectSmallText> m_zones[3];
 };
@@ -717,7 +717,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributePrint(StarPAttributePrint const &orig) = default;
+  StarPAttributePrint(StarPAttributePrint const &) = default;
   //! the list of table to print
   std::vector<int> m_tableList;
 };
@@ -754,7 +754,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributeRangeItem(StarPAttributeRangeItem const &orig) = default;
+  StarPAttributeRangeItem(StarPAttributeRangeItem const &) = default;
   //! the table(v0)
   int m_table;
   //! the range
@@ -808,7 +808,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributeViewMode(StarPAttributeViewMode const &orig) = default;
+  StarPAttributeViewMode(StarPAttributeViewMode const &) = default;
 };
 
 void StarPAttributeColumns::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const

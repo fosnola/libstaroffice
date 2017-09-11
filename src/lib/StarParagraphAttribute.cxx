@@ -68,7 +68,7 @@ public:
 
 protected:
   //! copy constructor
-  StarPAttributeBool(StarPAttributeBool const &orig) = default;
+  StarPAttributeBool(StarPAttributeBool const &) = default;
 };
 
 StarPAttributeBool::~StarPAttributeBool()
@@ -95,7 +95,7 @@ public:
   // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarPAttributeColor(StarPAttributeColor const &orig) = default;
+  StarPAttributeColor(StarPAttributeColor const &) = default;
 };
 
 StarPAttributeColor::~StarPAttributeColor()
@@ -121,7 +121,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarPAttributeInt(StarPAttributeInt const &orig) = default;
+  StarPAttributeInt(StarPAttributeInt const &) = default;
 };
 
 StarPAttributeInt::~StarPAttributeInt()
@@ -167,7 +167,7 @@ public:
   void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarPAttributeUInt(StarPAttributeUInt const &orig) = default;
+  StarPAttributeUInt(StarPAttributeUInt const &) = default;
 };
 
 StarPAttributeUInt::~StarPAttributeUInt()
@@ -193,7 +193,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarPAttributeVoid(StarPAttributeVoid const &orig) = default;
+  StarPAttributeVoid(StarPAttributeVoid const &) = default;
 };
 
 StarPAttributeVoid::~StarPAttributeVoid()
@@ -296,7 +296,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarPAttributeAdjust(StarPAttributeAdjust const &orig) = default;
+  StarPAttributeAdjust(StarPAttributeAdjust const &) = default;
   //! the adjust value
   int m_adjust;
   //! the flags
@@ -338,7 +338,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarPAttributeBulletNumeric(StarPAttributeBulletNumeric const &orig) = default;
+  StarPAttributeBulletNumeric(StarPAttributeBulletNumeric const &) = default;
   //! the type
   int m_numType;
   //! the numLevels
@@ -376,7 +376,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarPAttributeBulletSimple(StarPAttributeBulletSimple const &orig) = default;
+  StarPAttributeBulletSimple(StarPAttributeBulletSimple const &) = default;
   //! the level
   STOFFListLevel m_level;
 };
@@ -421,7 +421,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarPAttributeDrop(StarPAttributeDrop const &orig) = default;
+  StarPAttributeDrop(StarPAttributeDrop const &) = default;
   //! the number of format
   int m_numFormats;
   //! the number of lines
@@ -474,7 +474,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarPAttributeHyphen(StarPAttributeHyphen const &orig) = default;
+  StarPAttributeHyphen(StarPAttributeHyphen const &) = default;
   //! the hyphen value
   int m_hyphenZone;
   //! the page end flag
@@ -523,7 +523,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarPAttributeLineSpacing(StarPAttributeLineSpacing const &orig) = default;
+  StarPAttributeLineSpacing(StarPAttributeLineSpacing const &) = default;
   //! the prop lineSpacing
   int m_propLineSpace;
   //! the line spacing
@@ -566,7 +566,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarPAttributeNumericRuler(StarPAttributeNumericRuler const &orig) = default;
+  StarPAttributeNumericRuler(StarPAttributeNumericRuler const &) = default;
   //! the name value
   librevenge::RVNGString m_name;
   //! the poolId
@@ -635,7 +635,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarPAttributeTabStop(StarPAttributeTabStop const &orig) = default;
+  StarPAttributeTabStop(StarPAttributeTabStop const &) = default;
   //! the tabStop list
   std::vector<TabStop> m_tabList;
 };

@@ -68,7 +68,7 @@ public:
 
 protected:
   //! copy constructor
-  StarCAttributeBool(StarCAttributeBool const &orig) = default;
+  StarCAttributeBool(StarCAttributeBool const &) = default;
 };
 
 //! a character color attribute
@@ -88,7 +88,7 @@ public:
   void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarCAttributeColor(StarCAttributeColor const &orig) = default;
+  StarCAttributeColor(StarCAttributeColor const &) = default;
 };
 
 //! a character integer attribute
@@ -109,7 +109,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarCAttributeInt(StarCAttributeInt const &orig) = default;
+  StarCAttributeInt(StarCAttributeInt const &) = default;
 };
 
 //! a character unsigned integer attribute
@@ -130,7 +130,7 @@ public:
   void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarCAttributeUInt(StarCAttributeUInt const &orig) = default;
+  StarCAttributeUInt(StarCAttributeUInt const &) = default;
 };
 
 //! a void attribute
@@ -150,7 +150,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarCAttributeVoid(StarCAttributeVoid const &orig) = default;
+  StarCAttributeVoid(StarCAttributeVoid const &) = default;
 };
 
 //! add a bool attribute
@@ -456,7 +456,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarCAttributeEscapement(StarCAttributeEscapement const &orig) = default;
+  StarCAttributeEscapement(StarCAttributeEscapement const &) = default;
   //! the sub/super decal in %
   int m_delta;
   //! the scaling
@@ -533,7 +533,7 @@ public:
 
 protected:
   //! copy constructor
-  StarCAttributeFont(StarCAttributeFont const &orig) = default;
+  StarCAttributeFont(StarCAttributeFont const &) = default;
   //! the font name
   librevenge::RVNGString m_name;
   //! the style
@@ -586,7 +586,7 @@ public:
 
 protected:
   //! copy constructor
-  StarCAttributeFontSize(StarCAttributeFontSize const &orig) = default;
+  StarCAttributeFontSize(StarCAttributeFontSize const &) = default;
   //! the font size
   int m_size;
   //! the font proportion
@@ -622,7 +622,7 @@ public:
   void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarCAttributeCharFormat(StarCAttributeCharFormat const &orig) = default;
+  StarCAttributeCharFormat(StarCAttributeCharFormat const &) = default;
   //! the charFormat
   librevenge::RVNGString m_name;
 };
@@ -657,7 +657,7 @@ public:
   bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const final;
 protected:
   //! copy constructor
-  StarCAttributeContent(StarCAttributeContent const &orig) = default;
+  StarCAttributeContent(StarCAttributeContent const &) = default;
   //! the content
   std::shared_ptr<StarObjectTextInternal::Content> m_content;
 };
@@ -683,7 +683,7 @@ public:
   void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarCAttributeField(StarCAttributeField const &orig) = default;
+  StarCAttributeField(StarCAttributeField const &) = default;
   //! the field
   std::shared_ptr<SWFieldManagerInternal::Field> m_field;
 };
@@ -726,7 +726,7 @@ public:
   bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const final;
 protected:
   //! copy constructor
-  StarCAttributeFootnote(StarCAttributeFootnote const &orig) = default;
+  StarCAttributeFootnote(StarCAttributeFootnote const &) = default;
   //! the numbering
   int m_number;
   //! the label
@@ -782,7 +782,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarCAttributeINetFmt(StarCAttributeINetFmt const &orig) = default;
+  StarCAttributeINetFmt(StarCAttributeINetFmt const &) = default;
   //! the url
   librevenge::RVNGString m_url;
   //! the target
@@ -824,7 +824,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarCAttributeRefMark(StarCAttributeRefMark const &orig) = default;
+  StarCAttributeRefMark(StarCAttributeRefMark const &) = default;
   //! the name
   librevenge::RVNGString m_name;
 };

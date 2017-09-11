@@ -64,7 +64,7 @@ public:
 
 protected:
   //! copy constructor
-  StarFAttributeBool(StarFAttributeBool const &orig) = default;
+  StarFAttributeBool(StarFAttributeBool const &) = default;
 };
 
 //! a character color attribute
@@ -87,7 +87,7 @@ public:
   // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarFAttributeColor(StarFAttributeColor const &orig) = default;
+  StarFAttributeColor(StarFAttributeColor const &) = default;
 };
 
 StarFAttributeColor::~StarFAttributeColor()
@@ -111,7 +111,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarFAttributeInt(StarFAttributeInt const &orig) = default;
+  StarFAttributeInt(StarFAttributeInt const &) = default;
 };
 
 //! a character unsigned integer attribute
@@ -150,7 +150,7 @@ public:
   void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarFAttributeUInt(StarFAttributeUInt const &orig) = default;
+  StarFAttributeUInt(StarFAttributeUInt const &) = default;
 };
 
 //! a void attribute
@@ -173,7 +173,7 @@ public:
   // void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
 protected:
   //! copy constructor
-  StarFAttributeVoid(StarFAttributeVoid const &orig) = default;
+  StarFAttributeVoid(StarFAttributeVoid const &) = default;
 };
 
 StarFAttributeVoid::~StarFAttributeVoid()
@@ -277,7 +277,7 @@ public:
 
 protected:
   //! copy constructor
-  StarFAttributeBorder(StarFAttributeBorder const &orig) = default;
+  StarFAttributeBorder(StarFAttributeBorder const &) = default;
   //! the distance
   int m_distance;
   //! the border list: top, left, right, bottom
@@ -313,7 +313,7 @@ public:
 
 protected:
   //! copy constructor
-  StarFAttributeBrush(StarFAttributeBrush const &orig) = default;
+  StarFAttributeBrush(StarFAttributeBrush const &) = default;
   //! the brush
   StarGraphicStruct::StarBrush m_brush;
 };
@@ -357,7 +357,7 @@ public:
 
 protected:
   //! copy constructor
-  StarFAttributeFrameSize(StarFAttributeFrameSize const &orig) = default;
+  StarFAttributeFrameSize(StarFAttributeFrameSize const &) = default;
   //! the type
   int m_frmType;
   //! the width
@@ -399,7 +399,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarFAttributeLineNumbering(StarFAttributeLineNumbering const &orig) = default;
+  StarFAttributeLineNumbering(StarFAttributeLineNumbering const &) = default;
   //! the name value
   long m_start;
   //! the countLines flag
@@ -445,7 +445,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarFAttributeLRSpace(StarFAttributeLRSpace const &orig) = default;
+  StarFAttributeLRSpace(StarFAttributeLRSpace const &) = default;
   //! the margins: left, right, firstline
   int m_margins[3];
   //! the prop margins: left, right, firstline
@@ -491,7 +491,7 @@ public:
 
 protected:
   //! copy constructor
-  StarFAttributeOrientation(StarFAttributeOrientation const &orig) = default;
+  StarFAttributeOrientation(StarFAttributeOrientation const &) = default;
   //! the position in twip
   uint32_t m_position;
   /** the orientation:
@@ -544,7 +544,7 @@ public:
 
 protected:
   //! copy constructor
-  StarFAttributeShadow(StarFAttributeShadow const &orig) = default;
+  StarFAttributeShadow(StarFAttributeShadow const &) = default;
   //! the location 0-4
   int m_location;
   //! the width in twip
@@ -594,7 +594,7 @@ public:
   }
 protected:
   //! copy constructor
-  StarFAttributeULSpace(StarFAttributeULSpace const &orig) = default;
+  StarFAttributeULSpace(StarFAttributeULSpace const &) = default;
   //! the margins: top, bottom
   int m_margins[2];
   //! the prop margins: top, bottom
