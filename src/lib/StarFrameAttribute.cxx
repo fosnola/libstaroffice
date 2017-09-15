@@ -789,7 +789,7 @@ void StarFAttributeLRSpace::addTo(StarState &state, std::set<StarAttribute const
     state.m_paragraph.m_propertyList.insert("style:auto-text-indent", m_autoFirst);
   }
   // page
-  if (m_type==ATTR_FRM_LR_SPACE && state.m_global->m_pageZone>=0 && state.m_global->m_pageZone<=2) {
+  if (m_type==ATTR_FRM_LR_SPACE && state.m_global->m_pageZone<=2) {
     if (m_propMargins[0]==100)
       state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-left", double(m_margins[0])*0.05, librevenge::RVNG_POINT);
     else
@@ -875,7 +875,7 @@ void StarFAttributeULSpace::addTo(StarState &state, std::set<StarAttribute const
       state.m_paragraph.m_propertyList.insert("fo:margin-bottom", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
   }
   // page
-  if (m_type==ATTR_FRM_UL_SPACE && state.m_global->m_pageZone>=0 && state.m_global->m_pageZone<=2) {
+  if (m_type==ATTR_FRM_UL_SPACE && state.m_global->m_pageZone<=2) {
     if (m_propMargins[0]==100)
       state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-top", double(m_margins[0])*0.05, librevenge::RVNG_POINT);
     else
