@@ -41,6 +41,7 @@
 #endif
 
 #include <cmath>
+#include <limits>
 #include <map>
 #include <memory>
 #include <ostream>
@@ -160,6 +161,14 @@ uint8_t readU8(librevenge::RVNGInputStream *input);
 void appendUnicode(uint32_t val, librevenge::RVNGString &buffer);
 //! transform a unicode string in a RNVGString
 librevenge::RVNGString getString(std::vector<uint32_t> const &unicode);
+
+//! checks whether addition of \c x and \c y would overflow
+template<typename T>
+bool checkAddOverflow(T x, T y)
+{
+  return (x < 0 && y < std::numeric_limits<T>::min() - x)
+          || (x > 0 && y > std::numeric_limits<T>::max() - x);
+}
 }
 
 /* ---------- small enum/class ------------- */
@@ -622,6 +631,8 @@ public:
   //! increases the actuals values by \a dx and \a dy
   void add(T dx, T dy)
   {
+    if (libstoff::checkAddOverflow(m_x, dx) || libstoff::checkAddOverflow(m_y, dy))
+      throw libstoff::GenericException();
     m_x += dx;
     m_y += dy;
   }
@@ -635,6 +646,10 @@ public:
   //! operator-=
   STOFFVec2<T> &operator-=(STOFFVec2<T> const &p)
   {
+    // check if negation of either of the coords will cause overflow
+    const T diff = std::numeric_limits<T>::min() + std::numeric_limits<T>::max();
+    if (libstoff::checkAddOverflow(p.m_x, diff) || libstoff::checkAddOverflow(p.m_y, diff))
+      throw libstoff::GenericException();
     add(-p.m_x, -p.m_y);
     return *this;
   }
