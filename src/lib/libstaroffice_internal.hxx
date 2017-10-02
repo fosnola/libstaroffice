@@ -629,15 +629,13 @@ public:
   //! operator+=
   STOFFVec2<T> &operator+=(STOFFVec2<T> const &p)
   {
-    m_x += p.m_x;
-    m_y += p.m_y;
+    add(p.m_x, p.m_y);
     return *this;
   }
   //! operator-=
   STOFFVec2<T> &operator-=(STOFFVec2<T> const &p)
   {
-    m_x -= p.m_x;
-    m_y -= p.m_y;
+    add(-p.m_x, -p.m_y);
     return *this;
   }
   //! generic operator*=
