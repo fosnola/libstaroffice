@@ -244,7 +244,8 @@ public:
   //! open a section if possible
   bool openSection(STOFFSection const &section) final;
   //! close a section
-  bool closeSection() final {
+  bool closeSection() final
+  {
     return false;
   }
   //! inserts a break type: ColumBreak, PageBreak, ..
