@@ -167,7 +167,7 @@ template<typename T>
 bool checkAddOverflow(T x, T y)
 {
   return (x < 0 && y < std::numeric_limits<T>::min() - x)
-          || (x > 0 && y > std::numeric_limits<T>::max() - x);
+         || (x > 0 && y > std::numeric_limits<T>::max() - x);
 }
 }
 
