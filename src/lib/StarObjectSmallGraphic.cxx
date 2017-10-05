@@ -698,7 +698,7 @@ public:
       STOFFVec2f orig=libstoff::convertMiniMToPointVect(box[0]);
       state.m_graphic.m_propertyList.insert("librevenge:rotate-cx", orig[0], librevenge::RVNG_POINT);
       state.m_graphic.m_propertyList.insert("librevenge:rotate-cy", orig[1], librevenge::RVNG_POINT);
-      state.m_graphic.m_propertyList.insert("librevenge:rotate", -m_textDrehWink/100., librevenge::RVNG_GENERIC);
+      state.m_graphic.m_propertyList.insert("librevenge:rotate", -(m_textDrehWink/100.), librevenge::RVNG_GENERIC);
     }
     std::shared_ptr<SubDocument> doc(new SubDocument(m_outlinerParaObject));
     listener->insertTextBox(position, doc, state.m_graphic);
