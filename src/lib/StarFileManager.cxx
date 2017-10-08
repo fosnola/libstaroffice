@@ -1441,7 +1441,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
         break;
       case 2:
         *input >> nTmp;
-        if (nTmp<0 || input->tell()+8*nTmp>endDataPos) {
+        if (nTmp<0 || nTmp>(endDataPos-input->tell())/8) {
           STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad number of points\n"));
           f << "###nPts=" << nTmp << ",";
           break;
