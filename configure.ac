@@ -223,12 +223,7 @@ AC_ARG_ENABLE([zip],
 	[with_zip=yes]
 )
 if test "x$with_zip" != "xno"; then
-	PKG_CHECK_MODULES([ZLIB],[zlib],[],[
-		AC_CHECK_HEADER(zlib.h, [],
-			[AC_MSG_ERROR(zlib.h not found. install zlib)], [])
-		AC_CHECK_LIB(z, inflate, [ ZLIB_LIBS=-lz ],
-			[AC_MSG_ERROR(zlib not found or functional)], [])
-	])
+	PKG_CHECK_MODULES([ZLIB],[zlib])
 	AC_DEFINE([USE_ZIP],[1],[Use the zip library to create mwawZip.])
 	ZLIB_CFLAGS="$ZLIB_CFLAGS -DUSE_ZIP"
 else
