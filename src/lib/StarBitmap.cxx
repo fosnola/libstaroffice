@@ -537,7 +537,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
       RGBMask[2]= bitmap.m_bitCount == 16 ? 0x0000001fUL : 0x000000ffUL;
       RGBShift[0]= bitmap.m_bitCount == 16 ? 10 : 16;
       RGBShift[1]= bitmap.m_bitCount == 16 ? 5 : 8;
-      RGBShift[2]= bitmap.m_bitCount == 16 ? 0 : 0;
+      RGBShift[2]= 0; // checkme
     }
   }
 
