@@ -1,3 +1,7 @@
+0.0.5:
+- 10/30/2017:
+   - require C++11 for build.
+
 0.0.4:
 - 07/15/2017:
    - correct many errors detected by fuzzing

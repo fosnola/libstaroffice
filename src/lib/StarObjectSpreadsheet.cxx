@@ -139,7 +139,8 @@ struct ScMultiRecord {
   }
   //! try to close a zone
   void close(std::string const &wh)
-  try {
+  try
+  {
     if (!m_zoneOpened) {
       STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::ScMultiRecord::close: can not find any opened zone\n"));
       return;
@@ -161,9 +162,10 @@ struct ScMultiRecord {
     if (m_endRecordPos>0)
       input->seek(m_endRecordPos, librevenge::RVNG_SEEK_SET);
   }
-  catch(...) {
-      STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::ScMultiRecord::close: catch an exception...\n"));
-      m_zoneOpened=false;
+  catch (...)
+  {
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::ScMultiRecord::close: catch an exception...\n"));
+    m_zoneOpened=false;
   }
   //! returns true if a content is opened
   bool isContentOpened() const
