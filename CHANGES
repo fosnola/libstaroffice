@@ -2,6 +2,7 @@ CHANGES:
 
 10/30/2017:
    - Require C++11 for build.
+   - correct a problem detected with fuzzing...
 
 07/15/2017:
    - correct many problems detected with fuzzing...
