@@ -95,7 +95,7 @@ void DebugFile::sort()
 
   size_t i = 0;
   for (auto const &notePos : set)
-    m_notes[i] = notePos;
+    m_notes[i++] = notePos;
   if (i != numNotes) m_notes.resize(i);
 
   STOFFVec2i::MapX sMap;
