@@ -72,7 +72,7 @@ public:
   static void checkUnparsed(STOFFInputStreamPtr input, std::shared_ptr<STOFFOLEParser> oleParser, char const *password);
 
   //! try to read a Ole directory
-  static bool readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser, std::shared_ptr<STOFFOLEParser::OleDirectory> ole, STOFFEmbeddedObject &image);
+  static bool readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser, std::shared_ptr<STOFFOLEParser::OleDirectory> ole, STOFFEmbeddedObject &image, std::shared_ptr<StarObject> &object);
 
   //! try to read a image zone: "StarImageDocument" or "StarImageDocument 4.0
   static bool readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName);

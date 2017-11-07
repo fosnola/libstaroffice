@@ -351,12 +351,20 @@ std::ostream &operator<<(std::ostream &o, StarObjectModel const &model)
 ////////////////////////////////////////////////////////////
 // send data
 ////////////////////////////////////////////////////////////
-bool StarObjectModel::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &number) const
+bool StarObjectModel::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &number, bool usePage0) const
 {
   m_modelState->m_pageToSendList.clear();
   m_modelState->m_masterPageToSendSet.clear();
 
   pageSpan.clear();
+  if (usePage0) {
+    if (m_modelState->m_pageList.empty() || !m_modelState->m_pageList[0])
+      return false;
+    STOFFPageSpan ps;
+    m_modelState->m_pageList[0]->updatePageSpan(ps);
+    pageSpan.push_back(ps);
+    return true;
+  }
   int numMasterPage=int(m_modelState->m_masterPageList.size());
   for (size_t i=0; i<m_modelState->m_pageList.size(); ++i) {
     if (!m_modelState->m_pageList[i])

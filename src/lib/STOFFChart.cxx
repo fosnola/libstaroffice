@@ -114,48 +114,77 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
 ////////////////////////////////////////////////////////////
 // STOFFChart
 ////////////////////////////////////////////////////////////
-STOFFChart::STOFFChart(librevenge::RVNGString const &sheetName, STOFFVec2f const &dim) :
-  m_sheetName(sheetName), m_dim(dim), m_type(STOFFChart::Series::S_Bar), m_dataStacked(false), m_legend(), m_seriesList(), m_textZoneMap()
+STOFFChart::STOFFChart(STOFFVec2f const &dim)
+  : m_dimension(dim)
+  , m_type(STOFFChart::Serie::S_Bar)
+  , m_dataStacked(false)
+  , m_dataPercentStacked(false)
+  , m_dataVertical(false)
+  , m_is3D(false)
+  , m_is3DDeep(false)
+
+  , m_style()
+  , m_name()
+
+  , m_plotAreaPosition()
+  , m_plotAreaStyle()
+
+  , m_legendPosition()
+
+  , m_floorStyle()
+  , m_wallStyle()
+
+  , m_gridColor(179,179,179)
+  , m_legend()
+  , m_serieMap()
+  , m_textZoneMap()
 {
-  for (auto &axis : m_axis) axis=Axis();
+  // checkme define the default wall/floor line color
 }
 
 STOFFChart::~STOFFChart()
 {
 }
 
-void STOFFChart::add(int coord, STOFFChart::Axis const &axis)
+STOFFChart::Axis &STOFFChart::getAxis(int coord)
 {
-  if (coord<0 || coord>2) {
-    STOFF_DEBUG_MSG(("STOFFChart::add[Axis]: called with bad coord\n"));
-    return;
-  }
-  m_axis[coord]=axis;
-}
-
-STOFFChart::Axis const &STOFFChart::getAxis(int coord) const
-{
-  if (coord<0 || coord>2) {
+  if (coord<0 || coord>3) {
     STOFF_DEBUG_MSG(("STOFFChart::getAxis: called with bad coord\n"));
-    return m_axis[3];
+    return  m_axis[4];
   }
   return m_axis[coord];
 }
 
-void STOFFChart::add(STOFFChart::Series const &series)
+STOFFChart::Axis const &STOFFChart::getAxis(int coord) const
 {
-  m_seriesList.push_back(series);
+  if (coord<0 || coord>3) {
+    STOFF_DEBUG_MSG(("STOFFChart::getAxis: called with bad coord\n"));
+    return  m_axis[4];
+  }
+  return m_axis[coord];
 }
 
-bool STOFFChart::getTextZone(STOFFChart::TextZone::Type type, STOFFChart::TextZone &textZone)
+STOFFChart::Serie *STOFFChart::getSerie(int id, bool create)
 {
-  if (m_textZoneMap.find(type)==m_textZoneMap.end())
-    return false;
-  textZone=m_textZoneMap.find(type)->second;
-  return true;
+  if (m_serieMap.find(id)!=m_serieMap.end())
+    return &m_serieMap.find(id)->second;
+  if (!create)
+    return nullptr;
+  m_serieMap[id]=STOFFChart::Serie();
+  return &m_serieMap.find(id)->second;
 }
 
-void STOFFChart::sendTextZoneContent(STOFFChart::TextZone::Type type, STOFFListenerPtr &listener)
+STOFFChart::TextZone *STOFFChart::getTextZone(STOFFChart::TextZone::Type type, bool create)
+{
+  if (m_textZoneMap.find(type)!=m_textZoneMap.end())
+    return &m_textZoneMap.find(type)->second;
+  if (!create)
+    return nullptr;
+  m_textZoneMap.insert(std::map<TextZone::Type, TextZone>::value_type(type,STOFFChart::TextZone(type)));
+  return &m_textZoneMap.find(type)->second;
+}
+
+void STOFFChart::sendTextZoneContent(STOFFChart::TextZone::Type type, STOFFListenerPtr &listener) const
 {
   if (m_textZoneMap.find(type)==m_textZoneMap.end()) {
     STOFF_DEBUG_MSG(("STOFFChart::sendTextZoneContent: called with unknown zone(%d)\n", int(type)));
@@ -164,65 +193,70 @@ void STOFFChart::sendTextZoneContent(STOFFChart::TextZone::Type type, STOFFListe
   sendContent(m_textZoneMap.find(type)->second, listener);
 }
 
-void STOFFChart::add(STOFFChart::TextZone const &textZone)
-{
-  m_textZoneMap[textZone.m_type]=textZone;
-}
-
 void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RVNGSpreadsheetInterface *interface)
 {
   if (!listener || !interface) {
     STOFF_DEBUG_MSG(("STOFFChart::sendChart: can not find listener or interface\n"));
     return;
   }
-  if (m_seriesList.empty()) {
+  if (m_serieMap.empty()) {
     STOFF_DEBUG_MSG(("STOFFChart::sendChart: can not find the series\n"));
     return;
   }
-  auto genericListener=listener;
+  std::shared_ptr<STOFFListener> genericListener=listener;
   int styleId=0;
 
   librevenge::RVNGPropertyList style;
   style.insert("librevenge:chart-id", styleId);
-  style.insert("draw:stroke", "none");
-  style.insert("draw:fill", "none");
+  m_style.addTo(style);
   interface->defineChartStyle(style);
 
   librevenge::RVNGPropertyList chart;
-  chart.insert("svg:width", double(m_dim[0]), librevenge::RVNG_POINT);
-  chart.insert("svg:height", double(m_dim[1]), librevenge::RVNG_POINT);
-  if (!m_seriesList.empty())
-    chart.insert("chart:class", Series::getSeriesTypeName(m_seriesList[0].m_type).cstr());
+  if (m_dimension[0]>0 && m_dimension[1]>0) {
+    // set the size if known
+    chart.insert("svg:width", double(m_dimension[0]), librevenge::RVNG_POINT);
+    chart.insert("svg:height", double(m_dimension[1]), librevenge::RVNG_POINT);
+  }
+  if (!m_serieMap.empty())
+    chart.insert("chart:class", Serie::getSerieTypeName(m_serieMap.begin()->second.m_type).c_str());
   else
-    chart.insert("chart:class", Series::getSeriesTypeName(m_type).cstr());
+    chart.insert("chart:class", Serie::getSerieTypeName(m_type).c_str());
   chart.insert("librevenge:chart-id", styleId++);
   interface->openChart(chart);
 
   // legend
   if (m_legend.m_show) {
+    bool autoPlace=m_legendPosition==STOFFBox2f()||m_dimension==STOFFVec2i();
     style=librevenge::RVNGPropertyList();
     m_legend.addStyleTo(style);
     style.insert("librevenge:chart-id", styleId);
+    style.insert("chart:auto-position",autoPlace);
     interface->defineChartStyle(style);
     librevenge::RVNGPropertyList legend;
     m_legend.addContentTo(legend);
     legend.insert("librevenge:chart-id", styleId++);
     legend.insert("librevenge:zone-type", "legend");
+    if (!autoPlace) {
+      legend.insert("svg:x", double(m_legendPosition[0][0])*double(m_dimension[0]), librevenge::RVNG_POINT);
+      legend.insert("svg:y", double(m_legendPosition[0][1])*double(m_dimension[1]), librevenge::RVNG_POINT);
+      legend.insert("svg:width", double(m_legendPosition.size()[0])*double(m_dimension[0]), librevenge::RVNG_POINT);
+      legend.insert("svg:height", double(m_legendPosition.size()[1])*double(m_dimension[1]), librevenge::RVNG_POINT);
+    }
     interface->openChartTextObject(legend);
     interface->closeChartTextObject();
   }
-  for (auto const &textIt : m_textZoneMap) {
-    auto const &zone= textIt.second;
-    if (zone.m_type != TextZone::T_Title && zone.m_type != TextZone::T_SubTitle)
-      continue;
+  for (auto textIt : m_textZoneMap) {
+    TextZone const &zone= textIt.second;
+    if (!zone.valid()) continue;
     style=librevenge::RVNGPropertyList();
     zone.addStyleTo(style);
     style.insert("librevenge:chart-id", styleId);
     interface->defineChartStyle(style);
     librevenge::RVNGPropertyList textZone;
-    zone.addContentTo(m_sheetName, textZone);
+    zone.addContentTo(textZone);
     textZone.insert("librevenge:chart-id", styleId++);
-    textZone.insert("librevenge:zone-type", zone.m_type==TextZone::T_Title ? "title":"subtitle");
+    textZone.insert("librevenge:zone-type",
+                    zone.m_type==TextZone::T_Title ? "title": zone.m_type==TextZone::T_SubTitle ?"subtitle" : "footer");
     interface->openChartTextObject(textZone);
     if (zone.m_contentType==TextZone::C_Text) {
       std::shared_ptr<STOFFSubDocument> doc(new STOFFChartInternal::SubDocument(this, zone.m_type));
@@ -232,87 +266,78 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
   }
   // plot area
   style=librevenge::RVNGPropertyList();
+  bool autoPlace=m_plotAreaPosition==STOFFBox2f()||m_dimension==STOFFVec2i();
+  m_plotAreaStyle.addTo(style);
   style.insert("librevenge:chart-id", styleId);
   style.insert("chart:include-hidden-cells","false");
-  style.insert("chart:auto-position","true");
-  style.insert("chart:auto-size","true");
+  style.insert("chart:auto-position",autoPlace);
+  style.insert("chart:auto-size",autoPlace);
   style.insert("chart:treat-empty-cells","leave-gap");
   style.insert("chart:right-angled-axes","true");
   style.insert("chart:stacked", m_dataStacked);
+  style.insert("chart:percentage", m_dataPercentStacked);
+  if (m_dataVertical)
+    style.insert("chart:vertical", true);
+  if (m_is3D) {
+    style.insert("chart:three-dimensional", true);
+    style.insert("chart:deep", m_is3DDeep);
+  }
   interface->defineChartStyle(style);
 
   librevenge::RVNGPropertyList plotArea;
-  if (m_dim[0]>80) {
-    plotArea.insert("svg:x", 20, librevenge::RVNG_POINT);
-    plotArea.insert("svg:width", double(m_dim[0]-40), librevenge::RVNG_POINT);
-  }
-  if (m_dim[1]>80) {
-    plotArea.insert("svg:y", 20, librevenge::RVNG_POINT);
-    plotArea.insert("svg:height", double(m_dim[1]-40), librevenge::RVNG_POINT);
+  if (!autoPlace) {
+    plotArea.insert("svg:x", double(m_plotAreaPosition[0][0])*double(m_dimension[0]), librevenge::RVNG_POINT);
+    plotArea.insert("svg:y", double(m_plotAreaPosition[0][1])*double(m_dimension[1]), librevenge::RVNG_POINT);
+    plotArea.insert("svg:width", double(m_plotAreaPosition.size()[0])*double(m_dimension[0]), librevenge::RVNG_POINT);
+    plotArea.insert("svg:height", double(m_plotAreaPosition.size()[1])*double(m_dimension[1]), librevenge::RVNG_POINT);
   }
   plotArea.insert("librevenge:chart-id", styleId++);
 
   librevenge::RVNGPropertyList floor, wall;
   librevenge::RVNGPropertyListVector vect;
   style=librevenge::RVNGPropertyList();
-  style.insert("draw:stroke","solid");
-  style.insert("svg:stroke-color","#b3b3b3");
-  style.insert("draw:fill","none");
+  // add floor
+  m_floorStyle.addTo(style);
   style.insert("librevenge:chart-id", styleId);
   interface->defineChartStyle(style);
   floor.insert("librevenge:type", "floor");
   floor.insert("librevenge:chart-id", styleId++);
   vect.append(floor);
 
-  style.insert("draw:fill","solid");
-  style.insert("draw:fill-color","#ffffff");
+  // add wall
+  style=librevenge::RVNGPropertyList();
+  m_wallStyle.addTo(style);
   style.insert("librevenge:chart-id", styleId);
   interface->defineChartStyle(style);
   wall.insert("librevenge:type", "wall");
   wall.insert("librevenge:chart-id", styleId++);
   vect.append(wall);
+
   plotArea.insert("librevenge:childs", vect);
+
   interface->openChartPlotArea(plotArea);
-  // axis
-  for (int i=0; i<3; ++i) {
+  // axis : x, y, second, z
+  for (int i=0; i<4; ++i) {
     if (m_axis[i].m_type==Axis::A_None) continue;
     style=librevenge::RVNGPropertyList();
     m_axis[i].addStyleTo(style);
     style.insert("librevenge:chart-id", styleId);
     interface->defineChartStyle(style);
     librevenge::RVNGPropertyList axis;
-    m_axis[i].addContentTo(m_sheetName, i, axis);
+    m_axis[i].addContentTo(i, axis);
     axis.insert("librevenge:chart-id", styleId++);
     interface->insertChartAxis(axis);
   }
-  // label
-  for (auto const &textIt : m_textZoneMap) {
-    TextZone const &zone= textIt.second;
-    if (zone.m_type == TextZone::T_Title || zone.m_type == TextZone::T_SubTitle)
-      continue;
-    style=librevenge::RVNGPropertyList();
-    zone.addStyleTo(style);
-    style.insert("librevenge:chart-id", styleId);
-    interface->defineChartStyle(style);
-    librevenge::RVNGPropertyList textZone;
-    zone.addContentTo(m_sheetName, textZone);
-    textZone.insert("librevenge:chart-id", styleId++);
-    textZone.insert("librevenge:zone-type", "label");
-    interface->openChartTextObject(textZone);
-    if (zone.m_contentType==TextZone::C_Text) {
-      std::shared_ptr<STOFFSubDocument> doc(new STOFFChartInternal::SubDocument(this, zone.m_type));
-      listener->handleSubDocument(doc, libstoff::DOC_CHART_ZONE);
-    }
-    interface->closeChartTextObject();
-  }
   // series
-  for (auto &ser : m_seriesList) {
+  for (auto it : m_serieMap) {
+    auto const &serie = it.second;
+    if (!serie.valid()) continue;
     style=librevenge::RVNGPropertyList();
-    ser.addStyleTo(style);
+    serie.addStyleTo(style);
     style.insert("librevenge:chart-id", styleId);
     interface->defineChartStyle(style);
     librevenge::RVNGPropertyList series;
-    ser.addContentTo(m_sheetName, series);
+    serie.addContentTo(series);
     series.insert("librevenge:chart-id", styleId++);
     interface->openChartSerie(series);
     interface->closeChartSerie();
@@ -323,43 +348,115 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
 }
 
 ////////////////////////////////////////////////////////////
+// Position
+////////////////////////////////////////////////////////////
+librevenge::RVNGString STOFFChart::Position::getCellName() const
+{
+  if (!valid()) {
+    STOFF_DEBUG_MSG(("STOFFChart::Position::getCellName: called on invalid cell\n"));
+    return librevenge::RVNGString();
+  }
+  std::string cellName=libstoff::getCellName(m_pos);
+  if (cellName.empty())
+    return librevenge::RVNGString();
+  std::stringstream o;
+  o << m_sheetName.cstr() << "." << cellName;
+  return librevenge::RVNGString(o.str().c_str());
+}
+std::ostream &operator<<(std::ostream &o, STOFFChart::Position const &pos)
+{
+  if (pos.valid())
+    o << pos.m_pos << "[" << pos.m_sheetName.cstr() << "]";
+  else
+    o << "_";
+  return o;
+}
+
+////////////////////////////////////////////////////////////
 // Axis
 ////////////////////////////////////////////////////////////
-STOFFChart::Axis::Axis() : m_type(STOFFChart::Axis::A_None), m_showGrid(true), m_showLabel(true),
-  m_labelRange(STOFFVec2f(0,0), STOFFVec2f(-1,-1))
+STOFFChart::Axis::Axis()
+  : m_type(STOFFChart::Axis::A_None)
+  , m_automaticScaling(true)
+  , m_scaling()
+  , m_showGrid(true)
+  , m_showLabel(true)
+  , m_showTitle(true)
+  , m_titleRange()
+  , m_title()
+  , m_subTitle()
+  , m_style()
 {
+  m_style.m_propertyList.insert("svg:stroke-width", 0, librevenge::RVNG_POINT); // checkme
 }
 
 STOFFChart::Axis::~Axis()
 {
 }
 
-void STOFFChart::Axis::addContentTo(librevenge::RVNGString const &sheetName, int coord, librevenge::RVNGPropertyList &propList) const
+void STOFFChart::Axis::addContentTo(int coord, librevenge::RVNGPropertyList &propList) const
 {
   std::string axis("");
-  axis += char('x'+coord);
+  axis += coord==0 ? 'x' : coord==3 ? 'z' : 'y';
   propList.insert("chart:dimension",axis.c_str());
-  axis = "primary-"+axis;
+  axis = (coord==2 ? "secondary-y" : "primary-"+axis);
   propList.insert("chart:name",axis.c_str());
+  librevenge::RVNGPropertyListVector childs;
   if (m_showGrid && (m_type==A_Numeric || m_type==A_Logarithmic)) {
     librevenge::RVNGPropertyList grid;
     grid.insert("librevenge:type", "grid");
     grid.insert("chart:class", "major");
-    librevenge::RVNGPropertyListVector childs;
     childs.append(grid);
-    propList.insert("librevenge:childs", childs);
   }
-  if (m_showLabel && m_labelRange.size()[0]>=0 && m_labelRange.size()[1]>=0) {
+  if (m_cellRanges[0].valid(m_cellRanges[1])) {
     librevenge::RVNGPropertyList range;
-    range.insert("librevenge:sheet-name", sheetName);
-    range.insert("librevenge:start-row", m_labelRange.min()[1]);
-    range.insert("librevenge:start-column", m_labelRange.min()[0]);
-    range.insert("librevenge:end-row", m_labelRange.max()[1]);
-    range.insert("librevenge:end-column", m_labelRange.max()[0]);
+    range.insert("librevenge:sheet-name", m_cellRanges[0].m_sheetName);
+    range.insert("librevenge:start-row", m_cellRanges[0].m_pos[1]);
+    range.insert("librevenge:start-column", m_cellRanges[0].m_pos[0]);
+    if (m_cellRanges[0].m_sheetName!=m_cellRanges[1].m_sheetName)
+      range.insert("librevenge:end-sheet-name", m_cellRanges[1].m_sheetName);
+    range.insert("librevenge:end-row", m_cellRanges[1].m_pos[1]);
+    range.insert("librevenge:end-column", m_cellRanges[1].m_pos[0]);
+    librevenge::RVNGPropertyListVector vect;
+    vect.append(range);
+    propList.insert("chart:values-cell-range-address", vect);
+  }
+  if (m_labelRanges[0].valid(m_labelRanges[1]) && m_showLabel) {
+    librevenge::RVNGPropertyList range;
+    range.insert("librevenge:sheet-name", m_labelRanges[0].m_sheetName);
+    range.insert("librevenge:start-row", m_labelRanges[0].m_pos[1]);
+    range.insert("librevenge:start-column", m_labelRanges[0].m_pos[0]);
+    if (m_labelRanges[0].m_sheetName!=m_labelRanges[1].m_sheetName)
+      range.insert("librevenge:end-sheet-name", m_labelRanges[1].m_sheetName);
+    range.insert("librevenge:end-row", m_labelRanges[1].m_pos[1]);
+    range.insert("librevenge:end-column", m_labelRanges[1].m_pos[0]);
     librevenge::RVNGPropertyListVector vect;
     vect.append(range);
     propList.insert("chart:label-cell-address", vect);
   }
+  if (m_showTitle && (!m_title.empty() || !m_subTitle.empty())) {
+    auto finalString(m_title);
+    if (!m_title.empty() && !m_subTitle.empty()) finalString.append(" - ");
+    finalString.append(m_subTitle);
+    librevenge::RVNGPropertyList title;
+    title.insert("librevenge:type", "title");
+    title.insert("librevenge:text", finalString);
+    childs.append(title);
+  }
+  else if (m_showTitle && m_titleRange.valid()) {
+    librevenge::RVNGPropertyList title;
+    title.insert("librevenge:type", "title");
+    librevenge::RVNGPropertyList range;
+    range.insert("librevenge:sheet-name", m_titleRange.m_sheetName);
+    range.insert("librevenge:start-row", m_titleRange.m_pos[1]);
+    range.insert("librevenge:start-column", m_titleRange.m_pos[0]);
+    librevenge::RVNGPropertyListVector vect;
+    vect.append(range);
+    title.insert("table:cell-range", vect);
+    childs.append(title);
+  }
+  if (!childs.empty())
+    propList.insert("librevenge:childs", childs);
 }
 
 void STOFFChart::Axis::addStyleTo(librevenge::RVNGPropertyList &propList) const
@@ -369,6 +466,11 @@ void STOFFChart::Axis::addStyleTo(librevenge::RVNGPropertyList &propList) const
   propList.insert("chart:reverse-direction", false);
   propList.insert("chart:logarithmic", m_type==STOFFChart::Axis::A_Logarithmic);
   propList.insert("text:line-break", false);
+  if (!m_automaticScaling) {
+    propList.insert("chart:minimum", m_scaling[0], librevenge::RVNG_GENERIC);
+    propList.insert("chart:maximum", m_scaling[1], librevenge::RVNG_GENERIC);
+  }
+  m_style.addTo(propList);
 }
 
 std::ostream &operator<<(std::ostream &o, STOFFChart::Axis const &axis)
@@ -389,15 +491,27 @@ std::ostream &operator<<(std::ostream &o, STOFFChart::Axis const &axis)
   case STOFFChart::Axis::A_Sequence_Skip_Empty:
     o << "sequence[noEmpty],";
     break;
+#if !defined(__clang__)
   default:
     o << "###type,";
     STOFF_DEBUG_MSG(("STOFFChart::Axis: unexpected type\n"));
     break;
+#endif
   }
   if (axis.m_showGrid) o << "show[grid],";
   if (axis.m_showLabel) o << "show[label],";
-  if (axis.m_labelRange.size()[0]>=0 && axis.m_labelRange.size()[1]>=0)
-    o << "label[range]=" << axis.m_labelRange << ",";
+  if (axis.m_cellRanges[0].valid(axis.m_cellRanges[1]))
+    o << "cell[range]=" << axis.m_cellRanges[0] << ":" << axis.m_cellRanges[1] << ",";
+  if (axis.m_labelRanges[0].valid(axis.m_labelRanges[1]))
+    o << "label[range]=" << axis.m_labelRanges[0] << ":" << axis.m_labelRanges[1] << ",";
+  if (axis.m_showTitle) {
+    if (axis.m_titleRange.valid()) o << "title[range]=" << axis.m_titleRange << ",";
+    if (!axis.m_title.empty()) o << "title=" << axis.m_title.cstr() << ",";
+    if (!axis.m_subTitle.empty()) o << "subTitle=" << axis.m_subTitle.cstr() << ",";
+  }
+  if (!axis.m_automaticScaling && axis.m_scaling!=STOFFVec2f())
+    o << "scaling=manual[" << axis.m_scaling[0] << "->" << axis.m_scaling[1] << ",";
+  o << axis.m_style;
   return o;
 }
 
@@ -406,8 +520,10 @@ std::ostream &operator<<(std::ostream &o, STOFFChart::Axis const &axis)
 ////////////////////////////////////////////////////////////
 void STOFFChart::Legend::addContentTo(librevenge::RVNGPropertyList &propList) const
 {
-  propList.insert("svg:x", double(m_position[0]), librevenge::RVNG_POINT);
-  propList.insert("svg:y", double(m_position[1]), librevenge::RVNG_POINT);
+  if (m_position[0]>0 && m_position[1]>0) {
+    propList.insert("svg:x", double(m_position[0]), librevenge::RVNG_POINT);
+    propList.insert("svg:y", double(m_position[1]), librevenge::RVNG_POINT);
+  }
   if (!m_autoPosition || !m_relativePosition)
     return;
   std::stringstream s;
@@ -428,6 +544,7 @@ void STOFFChart::Legend::addStyleTo(librevenge::RVNGPropertyList &propList) cons
 {
   propList.insert("chart:auto-position", m_autoPosition);
   m_font.addTo(propList);
+  m_style.addTo(propList);
 }
 
 std::ostream &operator<<(std::ostream &o, STOFFChart::Legend const &legend)
@@ -452,148 +569,255 @@ std::ostream &operator<<(std::ostream &o, STOFFChart::Legend const &legend)
   }
   else
     o << "pos=" << legend.m_position << ",";
+  o << legend.m_style;
   return o;
 }
 
 ////////////////////////////////////////////////////////////
 // Serie
 ////////////////////////////////////////////////////////////
-STOFFChart::Series::Series()
-  : m_type(STOFFChart::Series::S_Bar)
-  , m_range()
+STOFFChart::Serie::Serie()
+  : m_type(STOFFChart::Serie::S_Bar)
+  , m_useSecondaryY(false)
+  , m_font()
+  , m_legendRange()
+  , m_legendText()
+  , m_style()
+  , m_pointType(P_None)
 {
 }
 
-STOFFChart::Series::~Series()
+STOFFChart::Serie::~Serie()
 {
 }
 
-librevenge::RVNGString STOFFChart::Series::getSeriesTypeName(Type type)
+std::string STOFFChart::Serie::getSerieTypeName(Type type)
 {
   switch (type) {
   case S_Area:
     return "chart:area";
+  case S_Bar:
+    return "chart:bar";
+  case S_Bubble:
+    return "chart:bubble";
+  case S_Circle:
+    return "chart:circle";
   case S_Column:
     return "chart:column";
+  case S_Gantt:
+    return "chart:gantt";
   case S_Line:
     return "chart:line";
-  case S_Pie:
-    return "chart:pie";
+  case S_Radar:
+    return "chart:radar";
+  case S_Ring:
+    return "chart:ring";
   case S_Scatter:
     return "chart:scatter";
   case S_Stock:
     return "chart:stock";
-  case S_Bar:
-    return "chart:bar";
+  case S_Surface:
+    return "chart:surface";
+#if !defined(__clang__)
   default:
     break;
+#endif
   }
   return "chart:bar";
 }
 
-void STOFFChart::Series::addContentTo(librevenge::RVNGString const &sheetName, librevenge::RVNGPropertyList &serie) const
+void STOFFChart::Serie::addContentTo(librevenge::RVNGPropertyList &serie) const
 {
-  serie.insert("chart:class",getSeriesTypeName(m_type));
-  librevenge::RVNGPropertyList range, datapoint;
-  range.insert("librevenge:sheet-name", sheetName);
-  range.insert("librevenge:start-row", m_range.min()[1]);
-  range.insert("librevenge:start-column", m_range.min()[0]);
-  range.insert("librevenge:end-row", m_range.max()[1]);
-  range.insert("librevenge:end-column", m_range.max()[0]);
+  serie.insert("chart:class",getSerieTypeName(m_type).c_str());
+  if (m_useSecondaryY)
+    serie.insert("chart:attached-axis","secondary-y");
+  librevenge::RVNGPropertyList datapoint;
   librevenge::RVNGPropertyListVector vect;
-  vect.append(range);
-  serie.insert("chart:values-cell-range-address", vect);
-  vect.clear();
-  int numPt=m_range.size()[0]>m_range.size()[1] ?
-            m_range.size()[0]+1 : m_range.size()[1]+1;
+  if (m_ranges[0].valid(m_ranges[1])) {
+    librevenge::RVNGPropertyList range;
+    range.insert("librevenge:sheet-name", m_ranges[0].m_sheetName);
+    range.insert("librevenge:start-row", m_ranges[0].m_pos[1]);
+    range.insert("librevenge:start-column", m_ranges[0].m_pos[0]);
+    if (m_ranges[0].m_sheetName != m_ranges[1].m_sheetName)
+      range.insert("librevenge:end-sheet-name", m_ranges[1].m_sheetName);
+    range.insert("librevenge:end-row", m_ranges[1].m_pos[1]);
+    range.insert("librevenge:end-column", m_ranges[1].m_pos[0]);
+    vect.append(range);
+    serie.insert("chart:values-cell-range-address", vect);
+    vect.clear();
+  }
+
+  // to do use labelRanges
+
+  // USEME: set the font here
+  if (m_legendRange.valid()) {
+    librevenge::RVNGPropertyList label;
+    label.insert("librevenge:sheet-name", m_legendRange.m_sheetName);
+    label.insert("librevenge:start-row", m_legendRange.m_pos[1]);
+    label.insert("librevenge:start-column", m_legendRange.m_pos[0]);
+    vect.append(label);
+    serie.insert("chart:label-cell-address", vect);
+    vect.clear();
+  }
+  if (!m_legendText.empty()) {
+    // replace ' ' and non basic caracters by _ because this causes LibreOffice's problem
+    std::string basicString(m_legendText.cstr());
+    for (auto &c : basicString) {
+      if (c==' ' || (unsigned char)(c)>=0x80)
+        c='_';
+    }
+    serie.insert("chart:label-string", basicString.c_str());
+  }
   datapoint.insert("librevenge:type", "data-point");
-  datapoint.insert("chart:repeated", numPt);
+  STOFFVec2i dataSize=m_ranges[1].m_pos-m_ranges[0].m_pos;
+  datapoint.insert("chart:repeated", 1+std::max(dataSize[0],dataSize[1]));
   vect.append(datapoint);
   serie.insert("librevenge:childs", vect);
 }
 
-void STOFFChart::Series::addStyleTo(librevenge::RVNGPropertyList &/*propList*/) const
+void STOFFChart::Serie::addStyleTo(librevenge::RVNGPropertyList &propList) const
 {
+  m_style.addTo(propList);
+  if (m_pointType != STOFFChart::Serie::P_None) {
+    char const *(what[]) = {
+      "none", "automatic", "square", "diamond", "arrow-down",
+      "arrow-up", "arrow-right", "arrow-left", "bow-tie", "hourglass",
+      "circle", "star", "x", "plus", "asterisk",
+      "horizontal-bar", "vertical-bar"
+    };
+    if (m_pointType == STOFFChart::Serie::P_Automatic)
+      propList.insert("chart:symbol-type", "automatic");
+    else if (m_pointType < STOFF_N_ELEMENTS(what)) {
+      propList.insert("chart:symbol-type", "named-symbol");
+      propList.insert("chart:symbol-name", what[m_pointType]);
+    }
+  }
+  //propList.insert("chart:data-label-number","value");
+  //propList.insert("chart:data-label-text","false");
 }
 
-std::ostream &operator<<(std::ostream &o, STOFFChart::Series const &series)
+std::ostream &operator<<(std::ostream &o, STOFFChart::Serie const &serie)
 {
-  switch (series.m_type) {
-  case STOFFChart::Series::S_Area:
+  switch (serie.m_type) {
+  case STOFFChart::Serie::S_Area:
     o << "area,";
     break;
-  case STOFFChart::Series::S_Bar:
+  case STOFFChart::Serie::S_Bar:
     o << "bar,";
     break;
-  case STOFFChart::Series::S_Column:
+  case STOFFChart::Serie::S_Bubble:
+    o << "bubble,";
+    break;
+  case STOFFChart::Serie::S_Circle:
+    o << "circle,";
+    break;
+  case STOFFChart::Serie::S_Column:
     o << "column,";
     break;
-  case STOFFChart::Series::S_Line:
+  case STOFFChart::Serie::S_Gantt:
+    o << "gantt,";
+    break;
+  case STOFFChart::Serie::S_Line:
     o << "line,";
     break;
-  case STOFFChart::Series::S_Pie:
-    o << "pie,";
+  case STOFFChart::Serie::S_Radar:
+    o << "radar,";
     break;
-  case STOFFChart::Series::S_Scatter:
+  case STOFFChart::Serie::S_Ring:
+    o << "ring,";
+    break;
+  case STOFFChart::Serie::S_Scatter:
     o << "scatter,";
     break;
-  case STOFFChart::Series::S_Stock:
+  case STOFFChart::Serie::S_Stock:
     o << "stock,";
     break;
+  case STOFFChart::Serie::S_Surface:
+    o << "surface,";
+    break;
+#if !defined(__clang__)
   default:
     o << "###type,";
-    STOFF_DEBUG_MSG(("STOFFChart::Series: unexpected type\n"));
+    STOFF_DEBUG_MSG(("STOFFChart::Serie: unexpected type\n"));
     break;
+#endif
   }
-  o << "range=" << series.m_range << ",";
+  o << "range=" << serie.m_ranges[0] << ":" << serie.m_ranges[1] << ",";
+  o << serie.m_style;
+  if (serie.m_labelRanges[0].valid(serie.m_labelRanges[1]))
+    o << "label[range]=" << serie.m_labelRanges[0] << "<->" << serie.m_labelRanges[1] << ",";
+  if (serie.m_legendRange.valid())
+    o << "legend[range]=" << serie.m_legendRange << ",";
+  if (!serie.m_legendText.empty())
+    o << "label[text]=" << serie.m_legendText.cstr() << ",";
+  if (serie.m_pointType != STOFFChart::Serie::P_None) {
+    char const *(what[]) = {
+      "none", "automatic", "square", "diamond", "arrow-down",
+      "arrow-up", "arrow-right", "arrow-left", "bow-tie", "hourglass",
+      "circle", "star", "x", "plus", "asterisk",
+      "horizontal-bar", "vertical-bar"
+    };
+    if (serie.m_pointType>0 && serie.m_pointType < STOFF_N_ELEMENTS(what)) {
+      o << "point=" << what[serie.m_pointType] << ",";
+    }
+    else if (serie.m_pointType>0)
+      o << "#point=" << serie.m_pointType << ",";
+  }
   return o;
 }
 
 ////////////////////////////////////////////////////////////
 // TextZone
 ////////////////////////////////////////////////////////////
-STOFFChart::TextZone::TextZone()
-  : m_type(STOFFChart::TextZone::T_Title)
-  , m_contentType(STOFFChart::TextZone::C_Cell)
+STOFFChart::TextZone::TextZone(Type type)
+  : m_type(type)
+  , m_contentType(STOFFChart::TextZone::C_Text)
+  , m_show(true)
   , m_position(-1,-1)
   , m_cell()
-  , m_textEntry()
+  , m_textEntryList()
   , m_font()
+  , m_style()
 {
+  m_style.m_propertyList.insert("svg:stroke-width", 0, librevenge::RVNG_POINT); // checkme
 }
 
 STOFFChart::TextZone::~TextZone()
 {
 }
 
-void STOFFChart::TextZone::addContentTo(librevenge::RVNGString const &sheetName, librevenge::RVNGPropertyList &propList) const
+void STOFFChart::TextZone::addContentTo(librevenge::RVNGPropertyList &propList) const
 {
-  if (m_position[0]>=0 && m_position[1]>=0) {
+  if (m_position[0]>0 && m_position[1]>0) {
     propList.insert("svg:x", double(m_position[0]), librevenge::RVNG_POINT);
     propList.insert("svg:y", double(m_position[1]), librevenge::RVNG_POINT);
   }
+  else
+    propList.insert("chart:auto-position",true);
+  propList.insert("chart:auto-size",true);
   switch (m_type) {
+  case T_Footer:
+    propList.insert("librevenge:zone-type", "footer");
+    break;
   case T_Title:
     propList.insert("librevenge:zone-type", "title");
     break;
   case T_SubTitle:
     propList.insert("librevenge:zone-type", "subtitle");
     break;
-  case T_AxisX:
-  case T_AxisY:
-  case T_AxisZ:
-    propList.insert("librevenge:zone-type", "label");
-    return;
+#if !defined(__clang__)
   default:
+    propList.insert("librevenge:zone-type", "label");
     STOFF_DEBUG_MSG(("STOFFChart::TextZone:addContentTo: unexpected type\n"));
     break;
+#endif
   }
-  if (m_contentType==C_Cell) {
+  if (m_contentType==C_Cell && m_cell.valid()) {
     librevenge::RVNGPropertyList range;
     librevenge::RVNGPropertyListVector vect;
-    range.insert("librevenge:sheet-name", sheetName);
-    range.insert("librevenge:row", m_cell[1]);
-    range.insert("librevenge:column", m_cell[0]);
+    range.insert("librevenge:sheet-name", m_cell.m_sheetName);
+    range.insert("librevenge:row", m_cell.m_pos[1]);
+    range.insert("librevenge:column", m_cell.m_pos[0]);
     vect.append(range);
     propList.insert("table:cell-range", vect);
   }
@@ -602,6 +826,7 @@ void STOFFChart::TextZone::addContentTo(librevenge::RVNGString const &sheetName,
 void STOFFChart::TextZone::addStyleTo(librevenge::RVNGPropertyList &propList) const
 {
   m_font.addTo(propList);
+  m_style.addTo(propList);
 }
 
 std::ostream &operator<<(std::ostream &o, STOFFChart::TextZone const &zone)
@@ -611,33 +836,25 @@ std::ostream &operator<<(std::ostream &o, STOFFChart::TextZone const &zone)
     o << "sub";
     STOFF_FALLTHROUGH;
   case STOFFChart::TextZone::T_Title:
-    o << "title";
-    if (zone.m_contentType==STOFFChart::TextZone::C_Cell)
-      o << "[" << zone.m_cell << "]";
-    o << ",";
+    o << "title,";
     break;
-  case STOFFChart::TextZone::T_AxisX:
-  case STOFFChart::TextZone::T_AxisY:
-  case STOFFChart::TextZone::T_AxisZ:
-    if (zone.m_type==STOFFChart::TextZone::T_AxisX)
-      o << "axisX";
-    else if (zone.m_type==STOFFChart::TextZone::T_AxisY)
-      o << "axisY";
-    else
-      o << "axisZ";
-    if (zone.m_contentType==STOFFChart::TextZone::C_Cell)
-      o << "[cells]";
-    o << ",";
+  case STOFFChart::TextZone::T_Footer:
+    o << "footer,";
     break;
+#if !defined(__clang__)
   default:
     o << "###type,";
     STOFF_DEBUG_MSG(("STOFFChart::TextZone: unexpected type\n"));
     break;
+#endif
   }
   if (zone.m_contentType==STOFFChart::TextZone::C_Text)
     o << "text,";
+  else if (zone.m_contentType==STOFFChart::TextZone::C_Cell)
+    o << "cell=" << zone.m_cell << ",";
   if (zone.m_position[0]>0 || zone.m_position[1]>0)
     o << "pos=" << zone.m_position << ",";
+  o << zone.m_style;
   return o;
 }
 

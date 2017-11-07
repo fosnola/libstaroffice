@@ -265,13 +265,7 @@ std::string STOFFCell::getColumnName(int col)
 std::string STOFFCell::getCellName(STOFFVec2i const &pos, STOFFVec2b const &absolute)
 {
   std::stringstream f;
-  f << "[.";
-  if (absolute[1]) f << "$";
-  int col = pos[0];
-  if (col > 26) f << char('A'+col/26);
-  f << char('A'+(col%26));
-  if (absolute[0]) f << "$";
-  f << pos[1]+1 << ']';
+  f << "[." << libstoff::getCellName(pos, absolute) << ']';
   return f.str();
 }
 
@@ -504,15 +498,7 @@ std::ostream &operator<<(std::ostream &o, STOFFCellContent::FormulaInstruction c
       o << "S" << inst.m_sheetId;
       o << ":";
     }
-    if (!inst.m_positionRelative[0][0]) o << "$";
-    if (inst.m_position[0][0]<0) o << "C" << inst.m_position[0][0];
-    else {
-      if (inst.m_position[0][0]>=26) o << char(inst.m_position[0][0]/26-1 + 'A');
-      o << char(inst.m_position[0][0]%26+'A');
-    }
-    if (!inst.m_positionRelative[0][1]) o << "$";
-    if (inst.m_position[0][1]<0) o << "R" << inst.m_position[0][1];
-    else o << inst.m_position[0][1];
+    o << libstoff::getCellName(inst.m_position[0],inst.m_positionRelative[0]);
   }
   else if (inst.m_type==STOFFCellContent::FormulaInstruction::F_CellList) {
     if (!inst.m_sheet.empty()) o << inst.m_sheet.cstr() << ":";
@@ -522,15 +508,7 @@ std::ostream &operator<<(std::ostream &o, STOFFCellContent::FormulaInstruction c
       o << ":";
     }
     for (int l=0; l<2; ++l) {
-      if (!inst.m_positionRelative[l][0]) o << "$";
-      if (inst.m_position[l][0]<0) o << "C" << inst.m_position[l][0];
-      else {
-        if (inst.m_position[l][0]>=26) o << char(inst.m_position[l][0]/26-1 + 'A');
-        o << char(inst.m_position[l][0]%26+'A');
-      }
-      if (!inst.m_positionRelative[l][1]) o << "$";
-      if (inst.m_position[l][1]<0) o << "R" << inst.m_position[l][1];
-      else o << inst.m_position[l][1];
+      o << libstoff::getCellName(inst.m_position[l],inst.m_positionRelative[l]);
       if (l==0) o << ":";
     }
   }

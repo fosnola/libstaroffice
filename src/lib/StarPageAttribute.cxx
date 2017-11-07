@@ -780,9 +780,9 @@ public:
   //! add to a page
   void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
   //! try to read a field
-  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final
-  {
-    if (vers==0) {
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final {
+    if (vers==0)
+    {
       m_value=0; // show
       return true;
     }

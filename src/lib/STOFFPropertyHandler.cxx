@@ -308,16 +308,6 @@ protected:
     if (!readString(input, val)) return false;
 
     list.insert(key.cstr(), val);
-    librevenge::RVNGProperty const *prop=list[key.cstr()];
-    if (!prop) return true;
-    auto unit=prop->getUnit();
-    if (unit==librevenge::RVNG_POINT)
-      list.insert(key.cstr(), prop->getDouble()/72., librevenge::RVNG_INCH);
-    else if (unit==librevenge::RVNG_TWIP)
-      list.insert(key.cstr(), prop->getDouble()/1440., librevenge::RVNG_INCH);
-    else {
-      STOFF_DEBUG_MSG(("STOFFPropertyHandlerDecoder:readProperty find unknown unit\n"));
-    }
     return true;
   }
 

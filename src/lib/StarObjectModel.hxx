@@ -70,7 +70,7 @@ public:
   bool read(StarZone &zone);
 
   /** try to update the page span (to create draw document)*/
-  bool updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages) const;
+  bool updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages, bool usePage0=false) const;
   //! try to send the master pages
   bool sendMasterPages(STOFFGraphicListenerPtr listener);
   //! try to send the different page

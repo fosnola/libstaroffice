@@ -124,9 +124,9 @@ public:
   {
   }
   //! read a zone
-  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final
-  {
-    if (m_type==ATTR_FRM_BREAK) {
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final {
+    if (m_type==ATTR_FRM_BREAK)
+    {
       // SvxFmtBreakItem
       STOFFInputStreamPtr input=zone.input();
       long pos=input->tell();

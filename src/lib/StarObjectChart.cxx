@@ -35,11 +35,17 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <sstream>
 
 #include <librevenge/librevenge.h>
 
+#include "STOFFChart.hxx"
+#include "STOFFGraphicEncoder.hxx"
+#include "STOFFGraphicListener.hxx"
 #include "STOFFOLEParser.hxx"
+#include "STOFFPageSpan.hxx"
+#include "STOFFSpreadsheetListener.hxx"
 
 #include "StarAttribute.hxx"
 #include "StarEncryption.hxx"
@@ -58,12 +64,42 @@
 namespace StarObjectChartInternal
 {
 ////////////////////////////////////////
+//! the chart of a StarObjectChart
+class Chart final : public STOFFChart
+{
+public:
+  //! constructor
+  Chart() : STOFFChart()
+  {
+  }
+protected:
+  //! send the zone content (called when the zone is of text type)
+  void sendContent(TextZone const &zone, STOFFListenerPtr &listener) const final;
+};
+
+void Chart::sendContent(Chart::TextZone const &/*zone*/, STOFFListenerPtr &listener) const
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarObjectChartInternal::Chart::sendContent: can not find the listener\n"));
+    return;
+  }
+  STOFF_DEBUG_MSG(("StarObjectChartInternal::Chart::sendContent: sorry, not implemented\n"));
+}
+
+////////////////////////////////////////
 //! Internal: the state of a StarObjectChart
 struct State {
   //! constructor
   State()
+    : m_chart()
+    , m_model()
   {
   }
+
+  //! the chart
+  std::shared_ptr<Chart> m_chart;
+  //! the model
+  std::shared_ptr<StarObjectModel> m_model;
 };
 
 }
@@ -87,6 +123,32 @@ StarObjectChart::~StarObjectChart()
 // Intermediate level
 //
 ////////////////////////////////////////////////////////////
+
+bool StarObjectChart::send(STOFFListenerPtr listener, STOFFPosition const &pos, STOFFGraphicStyle const &style)
+{
+  auto sheetListener=std::dynamic_pointer_cast<STOFFSpreadsheetListener>(listener);
+  if (!sheetListener && m_chartState->m_chart) {
+    sheetListener->insertChart(pos, *m_chartState->m_chart, style);
+    return true;
+  }
+  if (!listener || !m_chartState->m_model) {
+    STOFF_DEBUG_MSG(("StarObjectChart::send: oops, can not create the graphic representation\n"));
+  }
+
+  STOFFGraphicEncoder graphicEncoder;
+  std::vector<STOFFPageSpan> pageList;
+  int numPages;
+  if (!m_chartState->m_model->updatePageSpans(pageList, numPages, true))
+    pageList.push_back(STOFFPageSpan());
+  STOFFGraphicListenerPtr graphicListener(new STOFFGraphicListener(STOFFListManagerPtr(), pageList, &graphicEncoder));
+  graphicListener->startDocument();
+  m_chartState->m_model->sendPage(0,graphicListener);
+  graphicListener->endDocument();
+  STOFFEmbeddedObject image;
+  graphicEncoder.getBinaryResult(image);
+  listener->insertPicture(pos, image, style);
+  return true;
+}
 
 ////////////////////////////////////////////////////////////
 // main zone
@@ -144,6 +206,7 @@ try
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
 
+  auto chart=std::make_shared<StarObjectChartInternal::Chart>();
   libstoff::DebugStream f;
   f << "Entries(SCChartDocument):";
   // sch_docshell.cxx: SchChartDocShell::Load
@@ -184,14 +247,14 @@ try
   }
 
   pos=input->tell();
-  std::shared_ptr<StarObjectModel> model(new StarObjectModel(*this, true));
+  auto model=std::make_shared<StarObjectModel>(*this, true);
   if (!model->read(zone)) {
     STOFF_DEBUG_MSG(("StarObjectChart::readChartDocument: can not find the SdrModel\n"));
     ascFile.addPos(pos);
     ascFile.addNote("SCChartDocument:###SdrModel");
     return true;
   }
-
+  m_chartState->m_model=model;
   pos=input->tell();
   if (input->isEnd()) {
     STOFF_DEBUG_MSG(("StarObjectChart::readChartDocument: find no attribute\n"));
@@ -449,7 +512,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  auto pool=getCurrentPool();
+  auto pool=findItemPool(StarItemPool::T_XOutdevPool, false);
   if (!pool) {
     // CHANGEME
     static bool first=true;
@@ -505,7 +568,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
 
   std::vector<STOFFVec2i> rowLimits(1, STOFFVec2i(0,0)); // CHART_ROW_WHICHPAIRS
   int nLoop = version<4 ? 2 : 3;
-  for (int loop=0; loop<nLoop; ++loop) {
+  for (int loop=0; loop<nLoop; ++loop) { // row attr styles, point attr list, switchPoint attr list
     pos=input->tell();
     f.str("");
     f << "SCHAttributesC:";
@@ -520,6 +583,9 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
         zone.closeSCHHeader("SCHAttributes");
         return true;
       }
+#if 0
+      std::cout << i << "[" << loop << "]->" << itemSet.printChild() << "\n";
+#endif
     }
   }
 

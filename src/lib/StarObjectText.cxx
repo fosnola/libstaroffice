@@ -35,6 +35,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <sstream>
 
 #include <librevenge/librevenge.h>
@@ -223,17 +224,30 @@ bool OLEZone::send(STOFFListenerPtr listener, StarState &/*state*/) const
     return false;
   }
   STOFFEmbeddedObject localPicture;
+  std::shared_ptr<StarObject> localObj;
   auto dir=m_oleParser->getDirectory(m_name.cstr());
-  if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture) || localPicture.isEmpty()) {
-    STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: sorry, can not find object %s\n", m_name.cstr()));
-    return false;
-  }
   STOFFPosition position;
   position.setAnchor(STOFFPosition::Paragraph);
   //position.setOrigin(STOFFVec2i(0,0), librevenge::RVNG_POINT);
   position.setSize(STOFFVec2i(100,100), librevenge::RVNG_POINT);
   STOFFGraphicStyle style;
   //updateStyle(style, object, listener);
+  if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture, localObj) || localPicture.isEmpty()) {
+    if (!localObj) {
+      STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: sorry, can not find object %s\n", m_name.cstr()));
+      return false;
+    }
+    auto chart=std::dynamic_pointer_cast<StarObjectChart>(localObj);
+    if (chart && chart->send(listener, position, style))
+      return true;
+    else if (std::dynamic_pointer_cast<StarObjectText>(localObj)) {
+      STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: sorry, unsure how to send a text object %s\n", m_name.cstr()));
+    }
+    else {
+      STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: sorry, find unexpected object for %s\n", m_name.cstr()));
+    }
+    return false;
+  }
   listener->insertPicture(position, localPicture, style);
 
   return true;
@@ -806,7 +820,7 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
   ascFile.open(name);
 
   if (getDocumentKind()!=STOFFDocument::STOFF_K_TEXT) {
-    STOFF_DEBUG_MSG(("StarObjectChart::readSfxStyleSheets: called with unexpected document\n"));
+    STOFF_DEBUG_MSG(("StarObjectText::readSfxStyleSheets: called with unexpected document\n"));
     ascFile.addPos(0);
     ascFile.addNote("Entries(SfxStyleSheets)");
     return false;

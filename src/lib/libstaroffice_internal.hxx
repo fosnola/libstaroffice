@@ -1155,6 +1155,8 @@ void splitString(librevenge::RVNGString const &string, librevenge::RVNGString co
 
  \note this function is mainly used to try to test for searching a string when some encoding problem has happens*/
 librevenge::RVNGString simplifyString(librevenge::RVNGString const &s);
+//! returns the cell name corresponding to a cell's position
+std::string getCellName(STOFFVec2i const &cellPos, STOFFVec2b const &relative=STOFFVec2b(true,true));
 // some geometrical function
 //! factor to convert from one unit to other
 float getScaleFactor(librevenge::RVNGUnit orig, librevenge::RVNGUnit dest);

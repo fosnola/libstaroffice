@@ -35,6 +35,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <sstream>
 
 #include <librevenge/librevenge.h>
@@ -296,7 +297,7 @@ StarFileManager::~StarFileManager()
 {
 }
 
-bool StarFileManager::readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser, std::shared_ptr<STOFFOLEParser::OleDirectory> ole, STOFFEmbeddedObject &image)
+bool StarFileManager::readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser, std::shared_ptr<STOFFOLEParser::OleDirectory> ole, STOFFEmbeddedObject &image, std::shared_ptr<StarObject> &res)
 {
   image=STOFFEmbeddedObject();
   if (!oleParser || !ole || ole->m_inUse) {
@@ -306,9 +307,10 @@ bool StarFileManager::readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser
   ole->m_inUse=true;
   StarObject object(nullptr, oleParser, ole); // do we need password here ?
   if (object.getDocumentKind()==STOFFDocument::STOFF_K_CHART) {
-    // TODO: retrieve content
-    StarObjectChart chart(object, false);
-    chart.parse();
+    auto chart=std::make_shared<StarObjectChart>(object, false);
+    ole->m_parsed=true;
+    if (chart->parse())
+      res=chart;
   }
   else if (object.getDocumentKind()==STOFFDocument::STOFF_K_DRAW) {
     StarObjectDraw draw(object, false);
@@ -349,9 +351,10 @@ bool StarFileManager::readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser
     }
   }
   else if (object.getDocumentKind()==STOFFDocument::STOFF_K_TEXT) {
-    // TODO: retrieve content
-    StarObjectText text(object, false);
-    text.parse();
+    auto text=std::make_shared<StarObjectText>(object, false);
+    ole->m_parsed=true;
+    if (text->parse())
+      res=text;
   }
   else {
     ole->m_parsed=true;

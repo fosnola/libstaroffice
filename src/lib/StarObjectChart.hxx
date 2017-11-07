@@ -43,6 +43,7 @@
 
 #include "libstaroffice_internal.hxx"
 #include "StarObject.hxx"
+#include "STOFFGraphicStyle.hxx"
 
 namespace StarObjectChartInternal
 {
@@ -65,6 +66,8 @@ public:
   ~StarObjectChart() override;
   //! try to parse the current object
   bool parse();
+  //! try to send a object to the listener
+  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, STOFFGraphicStyle const &style=STOFFGraphicStyle());
 
 protected:
   //

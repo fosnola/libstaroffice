@@ -452,6 +452,21 @@ librevenge::RVNGString simplifyString(librevenge::RVNGString const &s)
   return res;
 }
 
+std::string getCellName(STOFFVec2i const &cellPos, STOFFVec2b const &relative)
+{
+  if (cellPos[0]<0 || cellPos[0]>=26*26*26 || cellPos[1]<0) {
+    STOFF_DEBUG_MSG(("libwps::getCellName: invalid cell position\n"));
+    return "";
+  }
+  std::stringstream o;
+  if (!relative[0]) o << "$";
+  if (cellPos[0]>=26*26) o << (char)(cellPos[0]/26/26-1 + 'A');
+  if (cellPos[0]>=26) o << (char)((cellPos[0]%(26*26))/26-1 + 'A');
+  o << (char)(cellPos[0]%26+'A');
+  if (!relative[1]) o << "$";
+  o << cellPos[1]+1;
+  return o.str();
+}
 // a little geometry
 STOFFVec2f rotatePointAroundCenter(STOFFVec2f const &point, STOFFVec2f const &center, float angle)
 {

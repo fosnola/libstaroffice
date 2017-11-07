@@ -63,6 +63,9 @@ class SdrGraphicPath;
 class SdrGraphicRect;
 class SdrGraphicText;
 
+// SDR User data
+class SDRUserData;
+
 struct State;
 }
 
@@ -129,18 +132,19 @@ protected:
   //! try to read a outliner para object
   bool readSDROutlinerParaObject(StarZone &zone, StarObjectSmallGraphicInternal::OutlinerParaObject &object);
   //! try to read a SDR userData
-  bool readSDRUserData(StarZone &zone, bool inRecord);
+  std::shared_ptr<StarObjectSmallGraphicInternal::SDRUserData> readSDRUserData(StarZone &zone, bool inRecord);
   //! try to read a SDR userData list
-  bool readSDRUserDataList(StarZone &zone, bool inRecord);
+  bool readSDRUserDataList(StarZone &zone, bool inRecord,
+                           std::vector<std::shared_ptr<StarObjectSmallGraphicInternal::SDRUserData> > &data);
 
   //! try to read a FM01 object
   std::shared_ptr<StarObjectSmallGraphicInternal::Graphic> readFmFormObject(StarZone &zone, int identifier);
 
   //! try to read a SCHU object
-  std::shared_ptr<StarObjectSmallGraphicInternal::Graphic> readSCHUObject(StarZone &zone, int identifier);
+  std::shared_ptr<StarObjectSmallGraphicInternal::SDRUserData> readSCHUObject(StarZone &zone, int identifier);
 
   //! try to read a SDDU object
-  std::shared_ptr<StarObjectSmallGraphicInternal::Graphic> readSDUDObject(StarZone &zone, int identifier);
+  std::shared_ptr<StarObjectSmallGraphicInternal::SDRUserData> readSDUDObject(StarZone &zone, int identifier);
 
 protected:
   //

@@ -145,11 +145,11 @@ public:
     return std::shared_ptr<StarAttribute>(new StarPAttributeUInt(*this));
   }
   //! read a zone
-  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final
-  {
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
-    if (pos+2==endPos && m_intSize==1 && (m_type==ATTR_PARA_WIDOWS || m_type==ATTR_PARA_ORPHANS)) {
+    if (pos+2==endPos && m_intSize==1 && (m_type==ATTR_PARA_WIDOWS || m_type==ATTR_PARA_ORPHANS))
+    {
       // unsure, sometimes, I found an extra byte
       libstoff::DebugFile &ascFile=zone.ascii();
       libstoff::DebugStream f;
