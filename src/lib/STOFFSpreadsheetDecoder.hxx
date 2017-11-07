@@ -63,7 +63,8 @@ public:
   void insertElement(const char *psName, const librevenge::RVNGPropertyList &xPropList,
                      const librevenge::RVNGPropertyListVector &vector);
   /** insert a sequence of character */
-  void characters(const librevenge::RVNGString &sCharacters) final {
+  void characters(const librevenge::RVNGString &sCharacters) final
+  {
     if (!m_output) return;
     m_output->insertText(sCharacters);
   }

@@ -382,7 +382,8 @@ public:
     return std::shared_ptr<StarAttribute>(new StarCAttributePattern(*this));
   }
   //! read a zone
-  bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &object) final {
+  bool read(StarZone &zone, int /*vers*/, long endPos, StarObject &object) final
+  {
     STOFFInputStreamPtr input=zone.input();
     long pos=input->tell();
     libstoff::DebugFile &ascFile=zone.ascii();
@@ -391,8 +392,7 @@ public:
     // sc_patattr.cxx ScPatternAttr::Create
     bool hasStyle;
     *input>>hasStyle;
-    if (hasStyle)
-    {
+    if (hasStyle) {
       f << "hasStyle,";
       std::vector<uint32_t> text;
       if (!zone.readString(text) || input->tell()>endPos) {
