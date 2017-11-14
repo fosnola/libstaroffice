@@ -219,9 +219,9 @@ struct STOFFColor {
              double(S)/255;
     double tmp=std::fmod((double(H)*6/255),2)-1;
     double x=c*(1-(tmp>0 ? tmp : -tmp));
-    unsigned char C=static_cast<unsigned char>(255*c);
-    unsigned char M=static_cast<unsigned char>(double(L)-255*c/2);
-    unsigned char X=static_cast<unsigned char>(255*x);
+    auto C=static_cast<unsigned char>(255*c);
+    auto M=static_cast<unsigned char>(double(L)-255*c/2);
+    auto X=static_cast<unsigned char>(255*x);
     if (H<=42) return STOFFColor(static_cast<unsigned char>(M+C),static_cast<unsigned char>(M+X),static_cast<unsigned char>(M));
     if (H<=85) return STOFFColor(static_cast<unsigned char>(M+X),static_cast<unsigned char>(M+C),static_cast<unsigned char>(M));
     if (H<=127) return STOFFColor(static_cast<unsigned char>(M),static_cast<unsigned char>(M+C),static_cast<unsigned char>(M+X));

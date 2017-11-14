@@ -75,7 +75,7 @@ bool Attribute::read(StarZone &zone, StarObject &object)
   if (fl&0x20) *input >> nEnd;
   m_position=STOFFVec2i(nBegin==0xFFFF ? -1 : int(nBegin), nEnd==0xFFFF ? -1 : int(nEnd));
 
-  int which=int(nWhich);
+  auto which=int(nWhich);
   if (which>0x6001 && zone.getDocumentVersion()!=0x0219) // bug correction 0x95500
     which+=15;
   if (which>=0x1000 && which<=0x1024) which+=-0x1000+int(StarAttribute::ATTR_CHR_CASEMAP);
@@ -311,7 +311,7 @@ bool DatabaseName::read(StarZone &zone)
     m_names[1]=libstoff::getString(text);
   }
   if (zone.isCompatibleWith(0x12,0x22, 0x101)) {
-    int nCount=int(input->readULong(2));
+    auto nCount=int(input->readULong(2));
     if (nCount>0 && zone.isCompatibleWith(0x28)) {
       for (int i=0; i<nCount; ++i) {
         if (input->tell()>=zone.getRecordLastPosition()) {
@@ -807,7 +807,7 @@ bool Redline::readList(StarZone &zone, std::vector<Redline> &redlineList)
   // sw_sw3misc.cxx InRedlines
   f << "Entries(StarRedline)[list-" << zone.getRecordLevel() << "]:";
   zone.openFlagZone();
-  int N=int(input->readULong(2));
+  auto N=int(input->readULong(2));
   zone.closeFlagZone();
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -933,7 +933,7 @@ bool TOX::read(StarZone &zone, StarObject &object)
       f << "aDummy=" << libstoff::getString(string).cstr() << ",";
   }
 
-  int N=int(input->readULong(1));
+  auto N=int(input->readULong(1));
   f << "nPatterns=" << N << ",";
   bool ok=true;
   for (int i=0; i<N; ++i) { // storeme
@@ -957,7 +957,7 @@ bool TOX::read(StarZone &zone, StarObject &object)
   for (int i=0; i<N; ++i) {
     Style style;
     style.m_level=int(input->readULong(1));
-    int nCount=int(input->readULong(2));
+    auto nCount=int(input->readULong(2));
     f << "nCount=" << nCount << ",";
     if (input->tell()+2*nCount>lastRecordPos) {
       STOFF_DEBUG_MSG(("StarWriterStruct::TOX::read: can not read some string id\n"));
@@ -967,7 +967,7 @@ bool TOX::read(StarZone &zone, StarObject &object)
     }
     librevenge::RVNGString poolName;
     for (int j=0; j<nCount; ++j) {
-      int val=int(input->readULong(2));
+      auto val=int(input->readULong(2));
       if (!zone.getPoolName(val, poolName))
         f << "###nPoolId=" << val << ",";
       else
@@ -1096,7 +1096,7 @@ bool TOX51::read(StarZone &zone, StarObject &/*object*/)
   f << "Entries(StarTox51)[" << type << "-" << zone.getRecordLevel() << "]:";
   std::vector<uint32_t> string;
   if (zone.isCompatibleWith(0x201)) {
-    int strId=int(input->readULong(2));
+    auto strId=int(input->readULong(2));
     if (strId!=0xFFFF && !zone.getPoolName(strId, m_typeName))
       f << "###nPoolId=" << strId << ",";
   }
@@ -1126,7 +1126,7 @@ bool TOX51::read(StarZone &zone, StarObject &/*object*/)
   if (zone.isCompatibleWith(0x213) && (fl&0x10))
     m_firstTabPos=int(input->readULong(2));
 
-  int N=int(input->readULong(1));
+  auto N=int(input->readULong(1));
   bool ok=true;
   for (int i=0; i<N; ++i) {
     if (!zone.readString(string)) {

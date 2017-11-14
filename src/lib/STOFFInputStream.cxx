@@ -182,7 +182,7 @@ unsigned long STOFFInputStream::readULong(librevenge::RVNGInputStream *stream, i
 
 long STOFFInputStream::readLong(int num)
 {
-  long v = long(readULong(num));
+  auto v = long(readULong(num));
   switch (num) {
   case 4:
     return static_cast<int32_t>(v);
@@ -214,7 +214,7 @@ uint8_t STOFFInputStream::readU8(librevenge::RVNGInputStream *stream)
 int STOFFInputStream::peek()
 {
   if (isEnd()) return -1;
-  int res=int(readULong(1));
+  auto res=int(readULong(1));
   seek(-1, librevenge::RVNG_SEEK_CUR);
   return res;
 }
@@ -222,7 +222,7 @@ int STOFFInputStream::peek()
 bool STOFFInputStream::readColor(STOFFColor &color)
 {
   if (!m_stream || !checkPosition(tell()+2)) return false;
-  int colId=int(readULong(2));
+  auto colId=int(readULong(2));
   if (colId & 0x8000) {
     if (!checkPosition(tell()+6)) return false;
     unsigned char col[3];
@@ -368,8 +368,8 @@ bool STOFFInputStream::readDouble8(double &res, bool &isNotANumber)
 
   isNotANumber=false;
   res=0;
-  int mantExp=int(readULong(1));
-  int val=int(readULong(1));
+  auto mantExp=int(readULong(1));
+  auto val=int(readULong(1));
   int exp=(mantExp<<4)+(val>>4);
   double mantisse=double(val&0xF)/16.;
   double factor=1./16/256.;
@@ -407,7 +407,7 @@ bool STOFFInputStream::readDouble10(double &res, bool &isNotANumber)
   long pos=tell();
   if (pos+10 > m_streamSize) return false;
 
-  int exp = int(readULong(2));
+  auto exp = int(readULong(2));
   int sign = 1;
   if (exp & 0x8000) {
     exp &= 0x7fff;
@@ -416,7 +416,7 @@ bool STOFFInputStream::readDouble10(double &res, bool &isNotANumber)
   exp -= 0x3fff;
 
   isNotANumber=false;
-  unsigned long mantisse = static_cast<unsigned long>(readULong(4));
+  auto mantisse = static_cast<unsigned long>(readULong(4));
   if ((mantisse & 0x80000001) == 0) {
     // unormalized number are not frequent, but can appear at least for date, ...
     if (readULong(4) != 0)
@@ -452,8 +452,8 @@ bool STOFFInputStream::readDoubleReverted8(double &res, bool &isNotANumber)
   int bytes[6];
   for (int &byte : bytes) byte=int(readULong(1));
 
-  int val=int(readULong(1));
-  int mantExp=int(readULong(1));
+  auto val=int(readULong(1));
+  auto mantExp=int(readULong(1));
   int exp=(mantExp<<4)+(val>>4);
   double mantisse=double(val&0xF)/16.;
   double factor=1./16./256.;

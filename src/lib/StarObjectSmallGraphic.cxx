@@ -213,7 +213,7 @@ public:
   bool operator!=(STOFFSubDocument const &doc) const final
   {
     if (STOFFSubDocument::operator!=(doc)) return true;
-    SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
+    auto const *sDoc = dynamic_cast<SubDocument const *>(&doc);
     if (!sDoc) return true;
     if (m_text.get() != sDoc->m_text.get()) return true;
     return false;
@@ -2989,7 +2989,7 @@ bool StarObjectSmallGraphic::readSDRObjectSurrogate(StarZone &zone)
   libstoff::DebugStream f;
   f << "Entries(SdrObjSurr):";
   // svx_svdsuro.cxx SdrObjSurrogate::ImpRead
-  int id=int(input->readULong(1));
+  auto id=int(input->readULong(1));
   f << "id=" << id << ",";
   bool ok=true;
   if (id) {
@@ -3005,7 +3005,7 @@ bool StarObjectSmallGraphic::readSDRObjectSurrogate(StarZone &zone)
     if (ok && eid>=0x10 && eid<=0x1a)
       f << "page=" << input->readULong(2) << ",";
     if (ok && id&0x20) {
-      int grpLevel=int(input->readULong(2));
+      auto grpLevel=int(input->readULong(2));
       f << "nChild=" << grpLevel << ",";
       if (input->tell()+nBytes*grpLevel>lastPos) {
         STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSdrObjectConnection: num child is bas\n"));
@@ -3036,9 +3036,9 @@ bool StarObjectSmallGraphic::readSDROutlinerParaObject(StarZone &zone, StarObjec
   libstoff::DebugStream f;
   f << "Entries(SdrParaObject):";
   // svx_outlobj.cxx OutlinerParaObject::Create
-  long N=long(input->readULong(4));
+  auto N=long(input->readULong(4));
   f << "N=" << N << ",";
-  long syncRef=long(input->readULong(4));
+  auto syncRef=long(input->readULong(4));
   int vers=0;
   if (syncRef == 0x12345678)
     vers = 1;
@@ -3080,7 +3080,7 @@ bool StarObjectSmallGraphic::readSDROutlinerParaObject(StarZone &zone, StarObjec
       paraZone.m_depth=int(input->readULong(2));
       bool ok=true;
       if (vers==1) {
-        int flags=int(input->readULong(2));
+        auto flags=int(input->readULong(2));
         if (flags&1) {
           StarBitmap bitmap;
           librevenge::RVNGBinaryData data;
@@ -3206,7 +3206,7 @@ bool StarObjectSmallGraphic::readSDRGluePointList
   libstoff::DebugStream f;
   f << "Entries(SdrGluePoint)[list]:";
   // svx_svdglue_drawdoc.xx: operator>>(SdrGluePointList)
-  int n=int(input->readULong(2));
+  auto n=int(input->readULong(2));
   f << "n=" << n << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -3245,7 +3245,7 @@ std::shared_ptr<StarObjectSmallGraphicInternal::SDRUserData> StarObjectSmallGrap
   else {
     std::string type("");
     for (int i=0; i<4; ++i) type+=char(input->readULong(1));
-    int id=int(input->readULong(2));
+    auto id=int(input->readULong(2));
     f << type << ",id=" << id << ",";
     if (type=="SCHU" || type=="SDUD") {
       if (type=="SCHU")
@@ -3307,7 +3307,7 @@ bool StarObjectSmallGraphic::readSDRUserDataList(StarZone &zone, bool inRecord,
   libstoff::DebugStream f;
   f << "Entries(SdrUserData)[list]:";
   // svx_svdglue_drawdoc.xx: operator>>(SdrUserDataList)
-  int n=int(input->readULong(2));
+  auto n=int(input->readULong(2));
   f << "n=" << n << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -3415,7 +3415,7 @@ std::shared_ptr<StarObjectSmallGraphicInternal::SDRUserData> StarObjectSmallGrap
   }
   graphic = std::make_shared<StarObjectSmallGraphicInternal::SCHUGraphic>(identifier);
   // sch_objfac.cxx : SchObjFactory::MakeUserData
-  int vers=int(input->readULong(2));
+  auto vers=int(input->readULong(2));
   switch (identifier) {
   case 2:
   case 7:
@@ -3466,7 +3466,7 @@ std::shared_ptr<StarObjectSmallGraphicInternal::SDRUserData> StarObjectSmallGrap
     return res;
   }
   // sd_sdobjfac.cxx : SchObjFactory::MakeUserData
-  int vers=int(input->readULong(2));
+  auto vers=int(input->readULong(2));
   f << "vers=" << vers << ",";
   if (!zone.openSCHHeader()) {
     STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDUDObject: can not open main record\n"));
@@ -3543,7 +3543,7 @@ std::shared_ptr<StarObjectSmallGraphicInternal::SDRUserData> StarObjectSmallGrap
     if (ok && vers>2)
       *input >> graphic->m_booleans[1];
     if (ok && vers>3) {
-      int nFlag=int(input->readULong(2));
+      auto nFlag=int(input->readULong(2));
       if (nFlag==1) {
         // TODO store surrogate
         ascFile.addPos(pos);

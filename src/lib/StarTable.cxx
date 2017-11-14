@@ -470,7 +470,7 @@ void Table::updateColumnsPosition()
     m_columnWidthList.push_back(pos-prevPos);
     prevPos=pos;
   }
-  int maxCol=int(xPosToColMap.size()-1);
+  auto maxCol=int(xPosToColMap.size()-1);
   for (auto &it : m_rowToBoxMap) {
     auto &boxes=it.second;
     int actCol=0;

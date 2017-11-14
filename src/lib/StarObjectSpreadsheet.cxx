@@ -519,7 +519,7 @@ public:
   bool operator!=(STOFFSubDocument const &doc) const override
   {
     if (STOFFSubDocument::operator!=(doc)) return true;
-    SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
+    auto const *sDoc = dynamic_cast<SubDocument const *>(&doc);
     if (!sDoc) return true;
     if (m_text != sDoc->m_text) return true;
     return false;
@@ -906,9 +906,9 @@ try
           uint16_t rangeType, index;
           uint8_t nData;
           *input >> nPos >> rangeType >> index >> nData;
-          int row=int(nPos&0xFFFF);
-          int col=int((nPos>>16)&0xFF);
-          int table=int((nPos>>24)&0xFF);
+          auto row=int(nPos&0xFFFF);
+          auto col=int((nPos>>16)&0xFF);
+          auto table=int((nPos>>24)&0xFF);
           f << "pos=" << row << "x" << col;
           if (table) f << "x" << table;
           f << ",";
@@ -1521,10 +1521,10 @@ try
     }
     case 0x422c: {
       f << "charset,";
-      int guiType=int(input->readULong(1));
+      auto guiType=int(input->readULong(1));
       f << "gui[type]=" << guiType << ",";
       zone.setGuiType(guiType);
-      int charSet=int(input->readULong(1));
+      auto charSet=int(input->readULong(1));
       f << "set=" << charSet << ",";
       if (StarEncoding::getEncodingForId(charSet)!=StarEncoding::E_DONTKNOW)
         zone.setEncoding(StarEncoding::getEncodingForId(charSet));
@@ -2109,7 +2109,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
       *input >> nCount;
       f << "n=" << nCount << ",";
       for (int i=0; i<nCount; ++i) {
-        int row=int(input->readULong(2));
+        auto row=int(input->readULong(2));
         f << "note" << i << "[R" << row << ",";
         auto &cell=table.getCell(STOFFVec2i(column, row));
         // sc_cell.cxx ScBaseCell::LoadNotes, ScPostIt operator>>
@@ -2147,7 +2147,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
       std::cerr << "Attrib\n";
 #endif
       for (int i=0,row=0; i<nCount; ++i) {
-        int newRow=int(input->readULong(2));
+        auto newRow=int(input->readULong(2));
         f << newRow << ":";
         uint16_t nWhich=149;//StarAttribute::ATTR_SC_PATTERN-3;
         auto item=pool->loadSurrogate(zone, nWhich, false, f);
@@ -2206,7 +2206,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(SCData)[C" << column << "-" << zone.getRecordLevel() << "]:" << scRecord;
-  int count=int(input->readULong(2));
+  auto count=int(input->readULong(2));
   f << "count=" << count << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -2224,7 +2224,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
       ascFile.addNote(f.str().c_str());
       break;
     }
-    int row=int(input->readULong(2));
+    auto row=int(input->readULong(2));
     f << "row=" << row << ",";
     uint8_t what;
     *input>>what;
@@ -2282,7 +2282,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
       }
       long endDataPos=scRecord.getContentLastPosition();
       if (version>=8) {
-        int cData=int(input->readULong(1));
+        auto cData=int(input->readULong(1));
         if ((cData&0x10) && (cData&0xf)>=4) {
           f << "format=" <<input->readULong(4)<<",";
           cData-=4;
@@ -3002,7 +3002,7 @@ bool StarObjectSpreadsheet::readSCOutlineArray(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(SCOutlineArray)[" << zone.getRecordLevel() << "]:";
-  int depth=int(input->readULong(2));
+  auto depth=int(input->readULong(2));
   f << "depth=" << depth << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -3019,7 +3019,7 @@ bool StarObjectSpreadsheet::readSCOutlineArray(StarZone &zone)
       scRecord.close("SCOutlineArray");
       return true;
     }
-    int count=int(input->readULong(2));
+    auto count=int(input->readULong(2));
     f << "entries=[";
     for (int i=0; i<count; ++i) {
       if (!scRecord.openContent("SCOutlineArray")) {

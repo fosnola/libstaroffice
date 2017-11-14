@@ -73,7 +73,7 @@ static unsigned char *createAndInitBMPData(STOFFVec2i const &sz, unsigned &dibFi
     STOFF_DEBUG_MSG(("StarGraphicStruct::createAndInitBMPData: the image size seems bad\n"));
     return nullptr;
   }
-  unsigned tmpPixelSize = unsigned(sz[0]*sz[1]);
+  auto tmpPixelSize = unsigned(sz[0]*sz[1]);
   unsigned tmpDIBImageSize = tmpPixelSize * 4;
   if (tmpPixelSize > tmpDIBImageSize) // overflow !!!
     return nullptr;
@@ -84,7 +84,7 @@ static unsigned char *createAndInitBMPData(STOFFVec2i const &sz, unsigned &dibFi
   if (tmpDIBImageSize > dibFileSize) // overflow !!!
     return nullptr;
 
-  unsigned char *tmpDIBBuffer = new unsigned char[dibFileSize];
+  auto *tmpDIBBuffer = new unsigned char[dibFileSize];
   if (!tmpDIBBuffer) {
     STOFF_DEBUG_MSG(("StarGraphicStruct::createAndInitBMPData: fail to allocated the data buffer\n"));
     return nullptr;
@@ -518,7 +518,7 @@ bool StarBrush::read(StarZone &zone, int nVers, long /*endPos*/, StarObject &/*o
     m_position=10; // area
     return true;
   }
-  int doLoad=int(input->readULong(2));
+  auto doLoad=int(input->readULong(2));
   if (doLoad & 1) { // TODO: svx_frmitems.cxx:1948
     STOFF_DEBUG_MSG(("StarGraphicStruct::StarBrush::read: do not know how to load graphic\n"));
     return false;

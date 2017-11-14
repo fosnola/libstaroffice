@@ -300,7 +300,7 @@ bool StarObject::readPersistElements(STOFFInputStreamPtr input, std::string cons
     ascii.addNote(f.str().c_str());
     return true;
   }
-  int hasElt=int(input->readLong(1));
+  auto hasElt=int(input->readLong(1));
   if (hasElt==1) {
     if (input->size()<29) {
       STOFF_DEBUG_MSG(("StarObject::readPersistElements: flag hasData, but zone seems too short\n"));
@@ -320,7 +320,7 @@ bool StarObject::readPersistElements(STOFFInputStreamPtr input, std::string cons
   if (hasElt) {
     val=int(input->readULong(1)); // always 80?
     if (val!=0x80) f << "#f0=" << std::hex << val << std::dec << ",";
-    long dSz=long(input->readULong(4));
+    auto dSz=long(input->readULong(4));
     N=int(input->readULong(4));
     f << "dSz=" << dSz << ",N=" << N << ",";
     if (!dSz || 7+dSz+18>input->size()) {
@@ -621,7 +621,7 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
   f << "Entries(SfxDocInfo):";
 
   // see sfx2_docinf.cxx
-  int sSz=int(input->readULong(2));
+  auto sSz=int(input->readULong(2));
   if (2+sSz>input->size()) {
     STOFF_DEBUG_MSG(("StarObject::readSfxDocumentInformation: header seems bad\n"));
     f << "###sSz=" << sSz << ",";
@@ -656,7 +656,7 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
     long pos=input->tell();
     f.str("");
     f << "SfxDocInfo-A" << i << ":";
-    int dSz=int(input->readULong(2));
+    auto dSz=int(input->readULong(2));
     int expectedSz= i < 3 ? 33 : i < 5 ? 65 : i==5 ? 257 : i==6 ? 129 : i<15 ? 21 : 2;
     static char const *(wh[])= {
       "time[creation]","time[mod]","time[print]","title","subject","comment","keyword",
@@ -830,7 +830,7 @@ bool StarObject::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libstoff
   *input >> cC >> fileVersion >> lDirPos;
   if (cC!=26) f << "c=" << cC << ",";
   if (fileVersion!=26) f << "vers=" << fileVersion << ",";
-  long pos=long(lDirPos);
+  auto pos=long(lDirPos);
   if (!input->checkPosition(pos+2)) {
     STOFF_DEBUG_MSG(("StarObject::readStarFrameworkConfigFile: dir pos is bad\n"));
     f << "###dirPos" << pos << ",";
@@ -869,7 +869,7 @@ bool StarObject::readStarFrameworkConfigFile(STOFFInputStreamPtr input, libstoff
       input->seek(actPos, librevenge::RVNG_SEEK_SET);
       if (lLength) f << "len=" << lLength << ",";
     }
-    int strSz=int(input->readULong(2));
+    auto strSz=int(input->readULong(2));
     if (!input->checkPosition(input->tell()+strSz)) {
       STOFF_DEBUG_MSG(("StarObject::readStarFrameworkConfigFile: a item seems bad\n"));
       f << "###item,";
@@ -958,7 +958,7 @@ bool StarObject::readSfxWindows(STOFFInputStreamPtr input, libstoff::DebugFile &
     long pos=input->tell();
     if (!input->checkPosition(pos+2))
       break;
-    int dSz=int(input->readULong(2));
+    auto dSz=int(input->readULong(2));
     if (!input->checkPosition(pos+2+dSz)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;

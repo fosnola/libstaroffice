@@ -73,7 +73,7 @@ public:
   {
     if (STOFFSubDocument::operator!=(doc))
       return true;
-    SubDocument const *subDoc=dynamic_cast<SubDocument const *>(&doc);
+    auto const *subDoc=dynamic_cast<SubDocument const *>(&doc);
     if (!subDoc) return true;
     return m_chart!=subDoc->m_chart || m_textZone!=subDoc->m_textZone;
   }

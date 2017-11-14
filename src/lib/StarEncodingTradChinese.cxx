@@ -66,7 +66,7 @@ bool StarEncodingTradChinese::readChinese1
     if (pos>=src.size()) return false;
     c2=int(src[pos++]);
   }
-  uint32_t unicode=uint32_t(c);
+  auto unicode=uint32_t(c);
   switch (c) {
   case 0xa1:
     if (c2>=0x40 && c2<=0xfe) {

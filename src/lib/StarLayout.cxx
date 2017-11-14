@@ -47,7 +47,7 @@ int StarLayout::readNumber(STOFFInputStreamPtr input, int vers) const
 {
   if (m_version<vers)
     return int(input->readULong(2));
-  int N=int(input->readULong(1));
+  auto N=int(input->readULong(1));
   if (N) return N;
   return int(input->readULong(2));
 }
@@ -55,7 +55,7 @@ int StarLayout::readNumber(STOFFInputStreamPtr input, int vers) const
 bool StarLayout::readDataBlock(StarZone &zone, libstoff::DebugStream &f) const
 {
   STOFFInputStreamPtr input=zone.input();
-  int type2=int(input->readULong(1));
+  auto type2=int(input->readULong(1));
   f << "type=" << std::hex << type2 << std::dec << ",";
   if (type2&0x40)
     f << "da40=" << std::hex << input->readULong(2) << std::dec << ",";
@@ -241,14 +241,14 @@ bool StarLayout::readC2(StarZone &zone, StarObject &object)
     ascFile.addDelimiter(input->tell(),'|');
     input->seek(12, librevenge::RVNG_SEEK_CUR);
     ascFile.addDelimiter(input->tell(),'|');
-    int val=int(input->readULong(m_version>=0x200 ? 1 : 2)); // checkme: probably read long compressed
+    auto val=int(input->readULong(m_version>=0x200 ? 1 : 2)); // checkme: probably read long compressed
     if (val) f << "g0=" << val << ",";
     ascFile.addDelimiter(input->tell(),'|');
     input->seek(8, librevenge::RVNG_SEEK_CUR);
     ascFile.addDelimiter(input->tell(),'|');
   }
   else if (mainType==0xce) {
-    int val=int(input->readULong(2));
+    auto val=int(input->readULong(2));
     if (val) f << "g0=" << val << ",";
     val=int(input->readULong(2));
     if (val) f << "g1=" << val << ",";
@@ -257,7 +257,7 @@ bool StarLayout::readC2(StarZone &zone, StarObject &object)
     ascFile.addDelimiter(input->tell(),'|');
     input->seek(input->tell()+2, librevenge::RVNG_SEEK_SET);
     ascFile.addDelimiter(input->tell(),'|');
-    int N0=int(input->readULong(m_version<0x200 ? 2 : 1)); // checkme
+    auto N0=int(input->readULong(m_version<0x200 ? 2 : 1)); // checkme
     if (N0) f << "N0=" << N0 << ",";
   }
   else if (mainType==0xd2 || mainType==0xd7) {
@@ -504,7 +504,7 @@ bool StarLayout::readHeader(StarZone &zone, libstoff::DebugStream &f, int &type,
     type=int(static_cast<unsigned long>(type)+(input->readULong(1)<<8));
   if (type) f << "type1=" << std::hex << type << std::dec << ",";
 
-  int val=int(input->readULong(1));
+  auto val=int(input->readULong(1));
   if (val) f << "f0=" << std::hex << val << std::dec << ",";
   val=int(input->readULong(1));
   if (val) f << "f1=" << std::hex << val << std::dec << ",";

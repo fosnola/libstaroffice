@@ -155,7 +155,7 @@ public:
       libstoff::DebugStream f;
       m_value=static_cast<unsigned int>(input->readULong(1));
       f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:" << m_debugName << "=" << m_value << ",";
-      int tmp=int(input->readULong(1));
+      auto tmp=int(input->readULong(1));
       if (tmp) f << "#unkn=" << tmp << ",";
       ascFile.addPos(pos);
       ascFile.addNote(f.str().c_str());
@@ -944,7 +944,7 @@ bool StarPAttributeTabStop::read(StarZone &zone, int /*vers*/, long endPos, Star
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
-  int N=int(input->readULong(1));
+  auto N=int(input->readULong(1));
   if (input->tell()+7*N>endPos) {
     STOFF_DEBUG_MSG(("StarPAttributeTabStop::read: N is too big\n"));
     f << "###N=" << N << ",";

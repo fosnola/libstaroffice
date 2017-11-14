@@ -916,7 +916,7 @@ void STOFFTextListener::_closeListElement()
 
 int STOFFTextListener::_getListId() const
 {
-  size_t newLevel= size_t(m_ps->m_paragraph.m_listLevelIndex);
+  auto newLevel= size_t(m_ps->m_paragraph.m_listLevelIndex);
   if (newLevel == 0) return -1;
   int newListId = m_ps->m_paragraph.m_listId;
   if (newListId > 0) return newListId;
@@ -936,7 +936,7 @@ void STOFFTextListener::_changeList()
     _closeParagraph();
 
   size_t actualLevel = m_ps->m_listOrderedLevels.size();
-  size_t newLevel= size_t(m_ps->m_paragraph.m_listLevelIndex > 0 && !m_ps->m_paragraph.m_outline ? m_ps->m_paragraph.m_listLevelIndex : 0);
+  auto newLevel= size_t(m_ps->m_paragraph.m_listLevelIndex > 0 && !m_ps->m_paragraph.m_outline ? m_ps->m_paragraph.m_listLevelIndex : 0);
   if (newLevel>100) {
     STOFF_DEBUG_MSG(("STOFFTextListener::_changeList: find level=%d, set it to 100\n", static_cast<int>(newLevel)));
     newLevel=100;

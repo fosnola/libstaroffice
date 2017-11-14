@@ -182,7 +182,7 @@ bool StarEncryption::findEncryptedPassword(std::vector<uint8_t> const &src, std:
     if (crypter[i]==0)
       return false;
     if (i!=1) continue;
-    uint8_t calcC0c1=uint8_t(crypter[0]+crypter[1]);
+    auto calcC0c1=uint8_t(crypter[0]+crypter[1]);
     if (calcC0c1==0) calcC0c1=1;
     if (calcC0c1!=c0c1) return false;
   }
@@ -202,7 +202,7 @@ STOFFInputStreamPtr StarEncryption::decodeStream(STOFFInputStreamPtr input, uint
     STOFF_DEBUG_MSG(("StarEncryption::decodeStream: can not read the original stream\n"));
     return res;
   }
-  uint8_t *finalData=new uint8_t[numRead];
+  auto *finalData=new uint8_t[numRead];
   if (!finalData) return res;
   uint8_t *finalDataPtr=finalData;
   for (long l=0; l<dataSize; ++l, ++data)
@@ -217,7 +217,7 @@ STOFFInputStreamPtr StarEncryption::decodeStream(STOFFInputStreamPtr input, uint
 
 uint8_t StarEncryption::getMaskToDecodeStream(uint8_t src, uint8_t dest)
 {
-  uint8_t nibbleSrc=uint8_t((src>>4)|(src<<4));
+  auto nibbleSrc=uint8_t((src>>4)|(src<<4));
   return nibbleSrc^dest;
 }
 

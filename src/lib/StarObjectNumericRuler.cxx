@@ -159,7 +159,7 @@ try
     switch (type) {
     case '+': { // extra outline
       zone.openFlagZone();
-      int N=int(input->readULong(1));
+      auto N=int(input->readULong(1));
       f << "N=" << N << ",";
       zone.closeFlagZone();
       if (input->tell()+3*N>zone.getRecordLastPosition()) {
@@ -239,9 +239,9 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
     else if (i==1) level.m_propertyList.insert("style:num-suffix",libstoff::getString(string));
     else if (i==2) fontName=libstoff::getString(string);
   }
-  int format=int(input->readULong(2));
-  int eType=int(input->readULong(1));
-  uint8_t cBullet=uint8_t(input->readULong(1));
+  auto format=int(input->readULong(2));
+  auto eType=int(input->readULong(1));
+  auto cBullet=uint8_t(input->readULong(1));
   int maxLevel=0;
   if (zone.isCompatibleWith(0x201))
     maxLevel=int(input->readULong(1));
@@ -251,12 +251,12 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
     if (hasLevel) maxLevel=10;
   }
   level.m_startValue=int(input->readULong(2));
-  int adjust=int(input->readULong(1));
+  auto adjust=int(input->readULong(1));
   unsigned long leftSpace=input->readULong(4);
   long firstLineOffset=input->readLong(4);
-  int fontFamily=int(input->readULong(1));
-  int fontPitch=int(input->readULong(1));
-  int charSet=int(input->readULong(1));
+  auto fontFamily=int(input->readULong(1));
+  auto fontPitch=int(input->readULong(1));
+  auto charSet=int(input->readULong(1));
   bool isSymbolFont=false;
   if (!fontName.empty()) {
     // todo find where other font characteristic are stored
@@ -334,7 +334,7 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
     f << "nRelLSpace=" << input->readLong(4) << ",";
   }
   if (zone.isCompatibleWith(0x17,0x22, 0x101)) {
-    int charTextDistance=int(input->readULong(2));
+    auto charTextDistance=int(input->readULong(2));
     if (charTextDistance) {
       level.m_propertyList.insert("text:min-label-distance", 0.05*double(charTextDistance), librevenge::RVNG_POINT);
       f << "nTextOffset=" << charTextDistance << ",";
@@ -342,7 +342,7 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
     if (input->tell()<zone.getRecordLastPosition() && eType==8) {
       f << "width=" << input->readLong(4) << ",";
       f << "height=" << input->readLong(4) << ",";
-      int cF=int(input->readULong(1));
+      auto cF=int(input->readULong(1));
       if (cF&1) f << "nVer[brush]=" << input->readULong(2) << ",";
       if (cF&2) f << "nVer[vertOrient]=" << input->readULong(2) << ",";
     }
@@ -369,8 +369,8 @@ bool StarObjectNumericRuler::readList(StarZone &zone, std::shared_ptr<STOFFList>
   int val;
   librevenge::RVNGString name;
   if (zone.isCompatibleWith(0x201)) {
-    int cFlags=int(zone.openFlagZone());
-    int nStringId=int(input->readULong(2));
+    auto cFlags=int(zone.openFlagZone());
+    auto nStringId=int(input->readULong(2));
     if (nStringId==0xFFFF)
       ;
     else if (!zone.getPoolName(nStringId, name))
@@ -404,7 +404,7 @@ bool StarObjectNumericRuler::readList(StarZone &zone, std::shared_ptr<STOFFList>
   for (int i=0; i<10; ++i) list->set(i+1, defLevel);
   if (zone.isCompatibleWith(0x201))
     zone.closeFlagZone();
-  int nFormat=int(input->readULong(1));
+  auto nFormat=int(input->readULong(1));
   long lastPos=zone.getRecordLastPosition();
   f << "nFormat=" << nFormat << ",";
   if (input->tell()+nFormat>lastPos) {
@@ -617,11 +617,11 @@ bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long l
     font.m_propertyList.insert("style:text-outline", outline);
     font.m_propertyList.insert("fo:text-shadow", shadow ? "1pt 1pt" : "none");
   }
-  int width=int(input->readLong(4));
-  int start=int(input->readULong(2));
-  int justify=int(input->readULong(1));
-  int symbol=int(input->readULong(1));
-  int scale=int(input->readULong(2));
+  auto width=int(input->readLong(4));
+  auto start=int(input->readULong(2));
+  auto justify=int(input->readULong(1));
+  auto symbol=int(input->readULong(1));
+  auto scale=int(input->readULong(2));
   if (width) f << "width=" << width << ",";
   if (start) f << "start=" << start << ",";
   if (justify) f << "justify=" << justify << ",";

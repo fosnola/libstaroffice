@@ -938,7 +938,7 @@ public:
   bool operator!=(STOFFSubDocument const &doc) const final
   {
     if (STOFFSubDocument::operator!=(doc)) return true;
-    SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
+    auto const *sDoc = dynamic_cast<SubDocument const *>(&doc);
     if (!sDoc) return true;
     if (m_text != sDoc->m_text) return true;
     return false;
@@ -1074,7 +1074,7 @@ std::shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZon
       break;
     }
     // lcl_sw3io_InDBField
-    int cFlag=int(input->readULong(1));
+    auto cFlag=int(input->readULong(1));
     if (cFlag)
       f << "cFlag=" << std::hex << cFlag << std::dec << ",";
     val=int(input->readULong(2));
@@ -1248,7 +1248,7 @@ std::shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZon
     field=setExp;
     if (cKind!='Y' && zone.isCompatibleWith(0x202)) {
       // lcl_sw3io_InSetExpField
-      int cFlags=int(input->readULong(1));
+      auto cFlags=int(input->readULong(1));
       if (cFlags) f << "flag=" << cFlags << ",";
       val=int(input->readULong(2));
       if (!zone.getPoolName(val, field->m_name)) // checkme
@@ -1308,7 +1308,7 @@ std::shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZon
       break;
     }
     // lcl_sw3io_InSetExpField40 end
-    int cFlags=int(input->readULong(1));
+    auto cFlags=int(input->readULong(1));
     if (cFlags)
       f << "cFlags=" << cFlags << ",";
     if (!zone.readString(name)) {
@@ -1539,7 +1539,7 @@ std::shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZon
     if (!zone.isCompatibleWith(0x202))
       field->m_subType=int(input->readULong(2));
     else {
-      int flag=int(input->readULong(1));
+      auto flag=int(input->readULong(1));
       if (!zone.readString(name)) {
         f << "###string,";
         STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a string\n"));
@@ -1701,7 +1701,7 @@ std::shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZon
         iNet->m_target=libstoff::getString(name);
     }
     if (zone.isCompatibleWith(0x11,0x13)) {
-      int nCnt=int(input->readULong(2));
+      auto nCnt=int(input->readULong(2));
       for (int i=0; i<nCnt; ++i) {
         if (input->tell()>lastPos) {
           STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a libmac name\n"));
@@ -1797,13 +1797,13 @@ std::shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZon
     if (cKind!='Y') break;
     val=int(zone.openFlagZone());
     if (val&0xf0) f << "flag=" << (val>>4) << ",";
-    int N=int(input->readULong(2));
+    auto N=int(input->readULong(2));
     if (N) f << "N=" << N << ",";
     val=int(input->readULong(1));
     if (val) f << "cPrefix=" << val << ",";
     val=int(input->readULong(1));
     if (val) f << "cSuffix=" << val << ",";
-    int nSort=int(input->readULong(2));
+    auto nSort=int(input->readULong(2));
     if (nSort) f << "cSortCount=" << nSort << ",";
     zone.closeFlagZone();
 

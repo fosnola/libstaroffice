@@ -102,7 +102,7 @@ struct Bitmap {
       STOFF_DEBUG_MSG(("StarBitmapInternal::Bitmap::getPPMData: index data list's size is bad\n"));
       return false;
     }
-    int numColors=int(m_colorsList.size());
+    auto numColors=int(m_colorsList.size());
     for (auto const &index : m_indexDataList) {
       if (index<0 || index>=numColors) {
         STOFF_DEBUG_MSG(("StarBitmapInternal::Bitmap::getPPMData: find bad index=%d\n", index));
@@ -557,9 +557,9 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
         return false;
       }
       if (y>=bitmap.m_height) break;
-      int nCount=int(input->readULong(1));
+      auto nCount=int(input->readULong(1));
       if (!nCount) {
-        int nBytes=int(input->readULong(1));
+        auto nBytes=int(input->readULong(1));
         if (nBytes==0) { // new line
           ++y;
           x=0;
@@ -587,7 +587,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
           return false;
         }
         for (int i=0; i<nBytes; ++i) {
-          int val=int(input->readULong(1));
+          auto val=int(input->readULong(1));
           if (bit4) {
             if (++x<=bitmap.m_width && wPos<lastWPos) bitmap.m_indexDataList[wPos++]=(val>>4)&0xf;
             if (++i<nBytes && ++x<=bitmap.m_width && wPos<lastWPos) bitmap.m_indexDataList[wPos++]=val&0xf;
@@ -603,7 +603,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
         STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: can not read some lre count(2)\n"));
         return false;
       }
-      int val=int(input->readULong(1));
+      auto val=int(input->readULong(1));
       if (bit4) {
         for (int i=0; i<nCount; ++i) {
           if (++x>bitmap.m_width||wPos>=lastWPos) break;
@@ -684,7 +684,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
     for (uint32_t y=0; y<bitmap.m_height; ++y) {
       actPos=input->tell();
       for (uint32_t x=0; x<bitmap.m_width; ++x) {
-        uint16_t val=static_cast<uint16_t>(input->readULong(2));
+        auto val=static_cast<uint16_t>(input->readULong(2));
         bitmap.m_colorDataList[wPos++]=
           STOFFColor(static_cast<unsigned char>((val&RGBMask[0])>>RGBShift[0]), static_cast<unsigned char>((val&RGBMask[1])>>RGBShift[1]),
                      static_cast<unsigned char>((val&RGBMask[2])>>RGBShift[2]));

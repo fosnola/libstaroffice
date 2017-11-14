@@ -366,7 +366,7 @@ public:
   bool operator!=(STOFFSubDocument const &doc) const final
   {
     if (STOFFSubDocument::operator!=(doc)) return true;
-    SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
+    auto const *sDoc = dynamic_cast<SubDocument const *>(&doc);
     if (!sDoc) return true;
     if (m_smallText.get() != sDoc->m_smallText.get()) return true;
     if (m_format.get() != sDoc->m_format.get()) return true;
@@ -943,7 +943,7 @@ bool StarPAttributeColumns::read(StarZone &zone, int /*vers*/, long endPos, Star
   uint8_t color[3];
   for (unsigned char &i : color) i=uint8_t(input->readULong(2)>>8);
   m_penColor=STOFFColor(color[0],color[1],color[2]);
-  int nCol=int(input->readULong(2));
+  auto nCol=int(input->readULong(2));
   f << "N=" << nCol << ",";
   if (m_wishWidth==0)
     nCol=0;
@@ -1009,7 +1009,7 @@ bool StarPAttributePageDesc::read(StarZone &zone, int nVers, long endPos, StarOb
     }
     m_offset=int(nOff);
   }
-  int id=int(input->readULong(2));
+  auto id=int(input->readULong(2));
   if (id!=0xFFFF && !zone.getPoolName(id, m_name)) {
     STOFF_DEBUG_MSG(("StarPAttributePageDesc::read: can not find the style name\n"));
     f << "###id=" << id << ",";

@@ -646,7 +646,7 @@ try
     return false;
   }
   long pictPos=input->tell();
-  int header=int(input->readULong(2));
+  auto header=int(input->readULong(2));
   input->seek(pictPos, librevenge::RVNG_SEEK_SET);
   std::string extension("pict");
   if (header==0x4142 || header==0x4d42) {
@@ -1010,7 +1010,7 @@ bool StarFileManager::readJobSetUp(StarZone &zone, bool useJobLen)
   // sfx2_printer.cxx: SfxPrinter::Create
   // jobset.cxx: JobSetup operator>>
   long lastPos=zone.getRecordLastPosition();
-  int len=int(input->readULong(2));
+  auto len=int(input->readULong(2));
   f << "nLen=" << len << ",";
   if (len==0) {
     ascFile.addPos(pos);
@@ -1036,7 +1036,7 @@ bool StarFileManager::readJobSetUp(StarZone &zone, bool useJobLen)
       int const length=(i==0 ? 64 : 32);
       std::string name("");
       for (int c=0; c<length; ++c) {
-        char ch=char(input->readULong(1));
+        auto ch=char(input->readULong(1));
         if (ch==0) break;
         name+=ch;
       }
@@ -1385,7 +1385,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       }
       std::string name("");
       for (int c=0; c<32; ++c) {
-        char ch=char(input->readULong(1));
+        auto ch=char(input->readULong(1));
         if (!ch) break;
         name+=ch;
       }

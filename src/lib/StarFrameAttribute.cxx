@@ -1008,7 +1008,7 @@ bool StarFAttributeLRSpace::read(StarZone &zone, int vers, long endPos, StarObje
   if (vers>=3) {
     *input >> autofirst;
     m_autoFirst=(autofirst&1);
-    long marker=long(input->readULong(4));
+    auto marker=long(input->readULong(4));
     if (marker==0x599401FE) {
       m_margins[2]=int(input->readLong(2));
       if (m_margins[2]<0)

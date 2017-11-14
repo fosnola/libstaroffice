@@ -80,7 +80,7 @@ void StarZone::setInput(STOFFInputStreamPtr ip)
 
 bool StarZone::readString(std::vector<uint32_t> &string, std::vector<size_t> &srcPositions, int encoding, bool chckEncryption) const
 {
-  int sSz=int(m_input->readULong(2));
+  auto sSz=int(m_input->readULong(2));
   string.clear();
   srcPositions.clear();
   if (!sSz) return true;
@@ -115,7 +115,7 @@ bool StarZone::readStringsPool()
   m_poolList.clear();
   long lastPos=getRecordLastPosition();
   if (!isCompatibleWith(3)) {
-    int n=int(m_input->readULong(2));
+    auto n=int(m_input->readULong(2));
     if (n>=256) {
       m_input->seek(-1, librevenge::RVNG_SEEK_CUR);
       encoding=int(m_input->readULong(1));
@@ -144,7 +144,7 @@ bool StarZone::readStringsPool()
   else {
     encoding=int(m_input->readULong(1));
     f << "encoding=" << encoding << ",";
-    int n=int(m_input->readULong(2));
+    auto n=int(m_input->readULong(2));
     f << "n=" << n << ",";
     m_ascii.addPos(pos);
     m_ascii.addNote(f.str().c_str());
@@ -154,7 +154,7 @@ bool StarZone::readStringsPool()
       pos=m_input->tell();
       f.str("");
       f << "SWPoolList-" << i << ":";
-      int nId=int(m_input->readULong(2));
+      auto nId=int(m_input->readULong(2));
       f << "nId=" << nId << ",";
       if (!readString(string, encoding) || m_input->tell()>lastPos) {
         STOFF_DEBUG_MSG(("StarZone::readStringsPool: can not read a string\n"));
@@ -205,7 +205,7 @@ bool StarZone::readSWHeader()
   }
   m_input->seek(0, librevenge::RVNG_SEEK_SET);
 
-  int val=int(m_input->readULong(2));
+  auto val=int(m_input->readULong(2));
   if (val==0x5357)
     m_input->setReadInverted(!m_input->readInverted());
   else if (val!=0x5753) {
@@ -219,7 +219,7 @@ bool StarZone::readSWHeader()
 
   m_input->seek(0, librevenge::RVNG_SEEK_SET);
   for (int i=0; i<7; ++i) {
-    char c=char(m_input->readULong(1));
+    auto c=char(m_input->readULong(1));
     static char const(expected[])= {'S','W',char(0),'H', 'D', 'R', char(0)};
     if (c==expected[i]) continue;
     if (i!=2) {
@@ -239,7 +239,7 @@ bool StarZone::readSWHeader()
       f << "version=" << m_version << ",";
     }
   }
-  int hSz=int(m_input->readULong(1));
+  auto hSz=int(m_input->readULong(1));
   if (hSz<0x2e || !m_input->checkPosition(8+hSz)) {
     STOFF_DEBUG_MSG(("StarZone::readSWHeader: the header seems bad\n"));
     f << "###hSz";
@@ -250,7 +250,7 @@ bool StarZone::readSWHeader()
   }
   m_documentVersion=int(m_input->readULong(2));
   f << "docVersion=" << std::hex << m_documentVersion << std::dec << ",";
-  int fFlags=int(m_input->readULong(2));
+  auto fFlags=int(m_input->readULong(2));
   bool hasPasswd=false;
   if (fFlags&2) f << "hasBlockName,";
   if (fFlags&8) {
@@ -269,7 +269,7 @@ bool StarZone::readSWHeader()
   }
   fFlags&=0x7EF5;
   if (fFlags) f << "flags=" << std::hex << fFlags << std::dec << ",";
-  long dFlags=long(m_input->readULong(4));
+  auto dFlags=long(m_input->readULong(4));
   if (dFlags&1) f << "browse[mode],";
   if (dFlags&2) f << "browse[mode2],";
   if (dFlags&4) f << "html[mode],";
@@ -314,7 +314,7 @@ bool StarZone::readSWHeader()
   if (hSz==0x2e +64 && (fFlags&2)) {
     std::string string("");
     for (int i=0; i<64; ++i) {
-      char c=char(m_input->readULong(1));
+      auto c=char(m_input->readULong(1));
       if (!c) break;
       string+=c;
     }
@@ -343,7 +343,7 @@ bool StarZone::openSCHHeader()
   long pos=m_input->tell();
   if (!m_input->checkPosition(pos+6)) return false;
   // schiocmp.cxx: SchIOHeader::SchIOHeader
-  long len=long(m_input->readULong(4));
+  auto len=long(m_input->readULong(4));
   m_headerVersionStack.push(int(m_input->readULong(2)));
   long endPos=pos+len;
   if (len<6 || !m_input->checkPosition(endPos)) {
@@ -375,7 +375,7 @@ bool StarZone::openVersionCompatHeader()
   if (!m_input->checkPosition(pos+6)) return false;
   // vcompat.cxx: VersionCompat::VersionCompat
   m_headerVersionStack.push(int(m_input->readULong(2)));
-  long len=long(m_input->readULong(4));
+  auto len=long(m_input->readULong(4));
   long endPos=pos+6+len;
   if (len<0 || !m_input->checkPosition(endPos)) {
     m_headerVersionStack.pop();
@@ -414,7 +414,7 @@ bool StarZone::openSDRHeader(std::string &magic)
     return true;
   }
   m_headerVersionStack.push(int(m_input->readULong(2)));
-  long len=long(m_input->readULong(4));
+  auto len=long(m_input->readULong(4));
   long endPos=pos+len;
   if (len<10 || magic.compare(0,2,"Dr")!=0 || !m_input->checkPosition(endPos)) {
     m_headerVersionStack.pop();
@@ -610,7 +610,7 @@ bool StarZone::closeRecord(char type, std::string const &debugName)
 
 unsigned char StarZone::openFlagZone()
 {
-  unsigned char cFlags=static_cast<unsigned char>(m_input->readULong(1));
+  auto cFlags=static_cast<unsigned char>(m_input->readULong(1));
   m_flagEndZone=m_input->tell()+long(cFlags&0xf);
   return cFlags;
 }
@@ -657,7 +657,7 @@ bool StarZone::readRecordSizes(long pos)
   }
 
   openFlagZone();
-  int nCount=int(m_input->readULong(4));
+  auto nCount=int(m_input->readULong(4));
   f << "N=" << nCount << ",";
   closeFlagZone();
 
@@ -674,8 +674,8 @@ bool StarZone::readRecordSizes(long pos)
   }
   f << "pos:size=[";
   for (int i=0; i<nCount; ++i) {
-    long cPos=long(m_input->readULong(4));
-    long sz=long(m_input->readULong(4));
+    auto cPos=long(m_input->readULong(4));
+    auto sz=long(m_input->readULong(4));
     m_beginToEndMap[cPos]=cPos+sz;
     f << std::hex << cPos << "<->" << cPos+sz << std::dec << ",";
   }

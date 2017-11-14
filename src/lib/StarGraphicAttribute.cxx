@@ -997,7 +997,7 @@ bool StarGAttributeBoxInfo::read(StarZone &zone, int /*nVers*/, long endPos, Sta
   m_distance=int(input->readULong(2));
   bool ok=true;
   while (input->tell()<endPos) {
-    int cLine=int(input->readULong(1));
+    auto cLine=int(input->readULong(1));
     if (cLine>1) break;
     STOFFBorderLine border;
     if (!input->readColor(border.m_color)) {

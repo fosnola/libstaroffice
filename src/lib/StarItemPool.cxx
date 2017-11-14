@@ -1317,7 +1317,7 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
     }
     f << "pos=[";
     std::vector<int> listData;
-    for (int i=int(nStart); i<=int(nEnd); ++i) {
+    for (auto i=int(nStart); i<=int(nEnd); ++i) {
       uint16_t nPos;
       *input>>nPos;
       listData.push_back(int(nPos));
@@ -1944,9 +1944,9 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
       long dataPos=input->tell(), endDataPos=dataPos+long(nSize);
       libstoff::DebugStream f2;
       f2 << "Entries(SwStyleSheet):sz=" << nSize << ",";
-      int nId=int(input->readULong(2));
+      auto nId=int(input->readULong(2));
       if (nId) f2 << "id=" << nId << ",";
-      int level=int(input->readULong(1));
+      auto level=int(input->readULong(1));
       if (level!=201) {
         // checkme: sometimes is more complicated
         if (m_state->m_styleIdToStyleMap.find(styleId)!=m_state->m_styleIdToStyleMap.end())
@@ -1970,7 +1970,7 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
               break;
             }
             f2 << "[" << libstoff::getString(text).cstr();
-            int cond=int(input->readULong(4));
+            auto cond=int(input->readULong(4));
             if (cond) f2 << "cond=" << std::hex << cond << std::dec << ",";
             if (cond & 0x8000) {
               if (!zone.readString(text, charSet) || input->tell()>endDataPos) {
@@ -1997,7 +1997,7 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
           long len=dataOk ? long(input->readULong(4)) : 0;
           dataOk=input->tell()+len<=endDataPos;
           if (dataOk && len>=2 && doc.getAttributeManager()) {
-            int nAttrVer=int(input->readULong(2));
+            auto nAttrVer=int(input->readULong(2));
             auto attrib=doc.getAttributeManager()->readAttribute
                         (zone, StarAttribute::ATTR_FRM_LR_SPACE, nAttrVer, endDataPos, doc);
             f2 << "LR,";

@@ -394,7 +394,7 @@ public:
   bool operator!=(STOFFSubDocument const &doc) const final
   {
     if (STOFFSubDocument::operator!=(doc)) return true;
-    SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
+    auto const *sDoc = dynamic_cast<SubDocument const *>(&doc);
     if (!sDoc) return true;
     if (m_content.get() != sDoc->m_content.get()) return true;
     if (m_pool != sDoc->m_pool) return true;
@@ -1061,7 +1061,7 @@ bool StarCAttributeCharFormat::read(StarZone &zone, int /*nVers*/, long endPos, 
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   // fmtAttr2: SwFmtCharFmt
-  int id=int(input->readULong(2));
+  auto id=int(input->readULong(2));
   if (!zone.getPoolName(id, m_name)) {
     STOFF_DEBUG_MSG(("StarCAttributeCharFormat::read: can not find the style name\n"));
     f << "###id=" << id << ",";
@@ -1179,7 +1179,7 @@ bool StarCAttributeINetFmt::read(StarZone &zone, int nVers, long endPos, StarObj
       m_target=libstoff::getString(string);
   }
   for (int &indice : m_indices) indice=int(input->readULong(2));
-  int nCnt=int(input->readULong(2));
+  auto nCnt=int(input->readULong(2));
   for (int i=0; i<2*nCnt; ++i) {
     if (!zone.readString(string) || input->tell()>endPos) {
       STOFF_DEBUG_MSG(("StarCAttributeINetFmt::read: can not read a string\n"));

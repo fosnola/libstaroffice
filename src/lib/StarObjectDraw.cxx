@@ -192,7 +192,7 @@ try
   StarZone zone(input, name, "SCDrawDocument", getPassword()); // checkme: do we need to pass the password
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
-  uint8_t firstByte=static_cast<uint8_t>(input->readULong(1));
+  auto firstByte=static_cast<uint8_t>(input->readULong(1));
   if (firstByte!=0x44) { // D
     /* if the zone has a password, we can retrieve it knowing that the first byte must be 0x44
 
@@ -256,7 +256,7 @@ bool StarObjectDraw::readPresentationData(StarZone &zone)
     char const *(wh[])= {"pres[all]", "pres[end]", "pres[manual]", "mouse[visible]", "mouse[asPen]"};
     f << wh[i] << ",";
   }
-  int firstPage=int(input->readULong(4));
+  auto firstPage=int(input->readULong(4));
   if (firstPage!=1) f << "firstPage=" << firstPage << ",";
 
   if (input->tell()>lastPos) {
@@ -306,7 +306,7 @@ bool StarObjectDraw::readPresentationData(StarZone &zone)
     ok=input->tell()<=lastPos;
   }
   if (ok&&vers>=4) {
-    int n=int(input->readULong(4));
+    auto n=int(input->readULong(4));
     f << "num[frameView]=" << n << ",";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
@@ -371,7 +371,7 @@ bool StarObjectDraw::readPresentationData(StarZone &zone)
     ok=input->tell()<=lastPos;
   }
   if (ok&&vers>=12) {
-    int docType=int(input->readULong(2));
+    auto docType=int(input->readULong(2));
     if (docType==0) f << "impress,";
     else if (docType==1) f << "draw,";
     else {
@@ -384,7 +384,7 @@ bool StarObjectDraw::readPresentationData(StarZone &zone)
     bool custShow;
     *input>>custShow;
     if (custShow) f << "customShow,";
-    int nCustShow=int(input->readULong(4));
+    auto nCustShow=int(input->readULong(4));
     if (nCustShow) {
       f << "n[custShow]=" << nCustShow << ",";
       pos=input->tell();
@@ -508,7 +508,7 @@ bool StarObjectDraw::readSdrCustomShow(StarZone &zone)
     return true;
   }
   f << libstoff::getString(string).cstr() << ",";
-  long n=long(input->readULong(4));
+  auto n=long(input->readULong(4));
   f << "N=" << n << ",";
   if (n<0 || (lastPos-input->tell())/2<n || input->tell()+2*n>lastPos) {
     STOFF_DEBUG_MSG(("StarObjectDraw::readSdrCustomShow: the number of page seems bad\n"));
@@ -556,7 +556,7 @@ bool StarObjectDraw::readSdrHelpLine(StarZone &zone)
   int version=zone.getHeaderVersion();
   f << magic << ",nVers=" << version << ",";
   long lastPos=zone.getRecordLastPosition();
-  int val=int(input->readULong(2));
+  auto val=int(input->readULong(2));
   if (val) f << "kind=" << val << ",";
   int dim[2];
   for (int &i : dim) i=int(input->readLong(4));
@@ -594,7 +594,7 @@ bool StarObjectDraw::readSdrHelpLineSet(StarZone &zone)
   long lastPos=zone.getRecordLastPosition();
   int version=zone.getHeaderVersion();
   f << magic << ",nVers=" << version << ",";
-  int n=int(input->readULong(2));
+  auto n=int(input->readULong(2));
   if (n) f << "N=" << n << ",";
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());

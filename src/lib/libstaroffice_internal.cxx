@@ -205,7 +205,7 @@ STOFFColor STOFFColor::barycenter(float alpha, STOFFColor const &colA,
     float val=alpha*float((colA.m_value>>depl)&0xFF)+beta*float((colB.m_value>>depl)&0xFF);
     if (val < 0) val=0;
     if (val > 256) val=256;
-    unsigned char comp= static_cast<unsigned char>(val);
+    auto comp= static_cast<unsigned char>(val);
     res+=uint32_t(comp<<depl);
   }
   return STOFFColor(res);

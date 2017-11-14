@@ -192,8 +192,8 @@ bool StarEncoding::read
   if (encoding==E_MS_1361)
     return StarEncodingOtherKorean::readKoreanMS1361(src, pos, encoding, dest);
   if (pos>=src.size()) return false;
-  int c=int(src[pos++]);
-  uint32_t unicode=uint32_t(c);
+  auto c=int(src[pos++]);
+  auto unicode=uint32_t(c);
   switch (encoding) {
   case E_DONTKNOW: // MS1252 seems to be the default encoding
   case E_ASCII_US: // use the same as MS1252

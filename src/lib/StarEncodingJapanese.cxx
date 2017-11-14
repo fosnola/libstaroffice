@@ -65,7 +65,7 @@ bool StarEncodingJapanese::readJapanese1
     if (pos>=src.size()) return false;
     c2=int(src[pos++]);
   }
-  uint32_t unicode=uint32_t(c);
+  auto unicode=uint32_t(c);
   switch (c) {
   case 0x80:
     unicode=0x5c;
@@ -1658,7 +1658,7 @@ bool StarEncodingJapanese::readJapaneseEUC
   }
   if (pos>=src.size()) return false;
   int c=src[pos++];
-  uint32_t unicode=uint32_t(c);
+  auto unicode=uint32_t(c);
   if (c<=0x7f) {
     dest.push_back(unicode);
     return true;
@@ -1699,7 +1699,7 @@ bool StarEncodingJapanese::readJapanese208
   }
   c-=trailOff;
   c2-=trailOff;
-  uint32_t unicode=uint32_t(c);
+  auto unicode=uint32_t(c);
   switch (c) {
   case 0x21:
     if (c2>=0x21 && c2<=0x7e) {
@@ -3343,7 +3343,7 @@ bool StarEncodingJapanese::readJapanese212
   }
   c-=trailOff;
   c2-=trailOff;
-  uint32_t unicode=uint32_t(c);
+  auto unicode=uint32_t(c);
   switch (c) {
   case 0x22:
     if (c2>=0x2f && c2<=0x71) {

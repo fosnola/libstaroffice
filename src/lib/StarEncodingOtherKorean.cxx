@@ -65,7 +65,7 @@ bool StarEncodingOtherKorean::readKoreanBig5
     if (pos>=src.size()) return false;
     c2=int(src[pos++]);
   }
-  uint32_t unicode=uint32_t(c);
+  auto unicode=uint32_t(c);
   switch (c) {
   case 0x88:
     if (c2>=0x40 && c2<=0xaa) {
@@ -1039,7 +1039,7 @@ bool StarEncodingOtherKorean::readKoreanMS1361
     if (pos>=src.size()) return false;
     c2=int(src[pos++]);
   }
-  uint32_t unicode=uint32_t(c);
+  auto unicode=uint32_t(c);
   switch (c) {
   case 0x84:
     if (c2>=0x45 && c2<=0xe2) {

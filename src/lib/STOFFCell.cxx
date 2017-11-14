@@ -302,7 +302,7 @@ bool STOFFCell::sendContent(STOFFListenerPtr, STOFFTable &)
 bool STOFFCellContent::double2Date(double val, int &Y, int &M, int &D)
 {
   /* first convert the date in long*/
-  long numDaysSinceOrigin=long(val+(val>0 ? -2 : -3)+0.4);
+  auto numDaysSinceOrigin=long(val+(val>0 ? -2 : -3)+0.4);
   // checkme: do we need to check before for isNan(val) ?
   if (numDaysSinceOrigin<-10000*365 || numDaysSinceOrigin>10000*365) {
     /* normally, we can expect documents to contain date between 1900
@@ -333,7 +333,7 @@ bool STOFFCellContent::double2Date(double val, int &Y, int &M, int &D)
     numDaysToEndY1=Y*365+(Y>0 ? (Y-1)/4+((century%4)?0:1) : 0);
   }
   // finish to compute the date
-  int numDaysFrom1Jan=int(numDaysSinceOrigin-numDaysToEndY1);
+  auto numDaysFrom1Jan=int(numDaysSinceOrigin-numDaysToEndY1);
   Y+=century*100;
   bool isLeap=(Y%4)==0 && ((Y%400)==0 || (Y%100)!=0);
 

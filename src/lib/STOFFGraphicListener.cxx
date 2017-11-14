@@ -771,7 +771,7 @@ void STOFFGraphicListener::_closeListElement()
 
 int STOFFGraphicListener::_getListId() const
 {
-  size_t newLevel= size_t(m_ps->m_paragraph.m_listLevelIndex);
+  auto newLevel= size_t(m_ps->m_paragraph.m_listLevelIndex);
   if (newLevel == 0) return -1;
   int newListId = m_ps->m_paragraph.m_listId;
   if (newListId > 0) return newListId;
@@ -795,7 +795,7 @@ void STOFFGraphicListener::_changeList()
     _closeParagraph();
 
   size_t actualLevel = m_ps->m_listOrderedLevels.size();
-  size_t newLevel= size_t(m_ps->m_paragraph.m_listLevelIndex);
+  auto newLevel= size_t(m_ps->m_paragraph.m_listLevelIndex);
   int newListId = newLevel>0 ? _getListId() : -1;
   bool changeList = newLevel &&
                     (m_ps->m_list && m_ps->m_list->getId()!=newListId);

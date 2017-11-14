@@ -311,8 +311,8 @@ bool Token::addToken(std::vector<std::vector<Token> > &stack, Token const &token
     return true;
   }
   bool isOperator=token.m_instruction.m_type==STOFFCellContent::FormulaInstruction::F_Operator;
-  int nChild=int(token.m_longValue);
-  int numElt=int(stack.size());
+  auto nChild=int(token.m_longValue);
+  auto numElt=int(stack.size());
   int special=0;
   if (nChild<0) {
     special=-nChild;
@@ -364,7 +364,7 @@ bool Token::addToken(std::vector<std::vector<Token> > &stack, Token const &token
 ////////////////////////////////////////////////////////////
 void StarCellFormula::updateFormula(STOFFCellContent &content, std::vector<librevenge::RVNGString> const &sheetNames, int sheetId)
 {
-  int numNames=int(sheetNames.size());
+  auto numNames=int(sheetNames.size());
   for (auto &form : content.m_formula) {
     if ((form.m_type!=STOFFCellContent::FormulaInstruction::F_Cell &&
          form.m_type!=STOFFCellContent::FormulaInstruction::F_CellList) ||
@@ -595,7 +595,7 @@ bool StarCellFormula::readSCToken(StarZone &zone, StarCellFormulaInternal::Token
   case 8: // external
   default: { // ?
     if (type==8) {
-      int cByte=int(input->readULong(1));
+      auto cByte=int(input->readULong(1));
       if (cByte)
         f << "cByte=" << cByte << ",";
       f << "external,";

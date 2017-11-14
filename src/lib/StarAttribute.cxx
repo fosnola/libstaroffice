@@ -638,7 +638,7 @@ std::shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zon
 
   case StarAttribute::ATTR_TXT_TOXMARK: {
     f << "textAtrToXMark,";
-    int cType=int(input->readULong(1));
+    auto cType=int(input->readULong(1));
     f << "cType=" << cType << ",";
     f << "nLevel=" << input->readULong(2) << ",";
     std::vector<uint32_t> string;

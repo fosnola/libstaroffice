@@ -87,7 +87,7 @@ void STOFFPropertyHandlerEncoder::writeString(const librevenge::RVNGString &stri
 
 void STOFFPropertyHandlerEncoder::writeLong(long val)
 {
-  int32_t value=static_cast<int32_t>(val);
+  auto value=static_cast<int32_t>(val);
   unsigned char const allValue[]= {static_cast<unsigned char>(value&0xFF), static_cast<unsigned char>((value>>8)&0xFF), static_cast<unsigned char>((value>>16)&0xFF), static_cast<unsigned char>((value>>24)&0xFF)};
   m_f.write(reinterpret_cast<const char *>(allValue), 4);
 }
@@ -151,7 +151,7 @@ public:
   bool readData(librevenge::RVNGBinaryData const &encoded)
   {
     try {
-      librevenge::RVNGInputStream *inp = const_cast<librevenge::RVNGInputStream *>(encoded.getDataStream());
+      auto *inp = const_cast<librevenge::RVNGInputStream *>(encoded.getDataStream());
       if (!inp) return false;
 
       while (!inp->isEnd()) {

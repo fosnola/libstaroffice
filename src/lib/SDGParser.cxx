@@ -101,7 +101,7 @@ public:
   bool operator!=(STOFFSubDocument const &doc) const final
   {
     if (STOFFSubDocument::operator!=(doc)) return true;
-    SubDocument const *sDoc = dynamic_cast<SubDocument const *>(&doc);
+    auto const *sDoc = dynamic_cast<SubDocument const *>(&doc);
     if (!sDoc) return true;
     if (m_text != sDoc->m_text) return true;
     return false;
@@ -224,7 +224,7 @@ void SDGParser::createDocument(librevenge::RVNGDrawingInterface *documentInterfa
 {
   if (!documentInterface) return;
 
-  int numImages=int(m_state->m_imagesList.size());
+  auto numImages=int(m_state->m_imagesList.size());
   std::vector<STOFFPageSpan> pageList;
   STOFFPageSpan ps(getPageSpan());
   ps.m_pageSpan=numImages ? numImages : 1;
@@ -296,14 +296,14 @@ bool SDGParser::readBitmap(StarZone &zone)
   if (!input->checkPosition(pos+7)) return false;
   f << "Entries(SGA3):";
   for (int i=0; i<3; ++i) { // f0=4, f1=5|6, f2=1|2|5
-    int val=int(input->readULong(2));
+    auto val=int(input->readULong(2));
     int const expected[]= {4,5,1};
     if (val!=expected[i]) f << "f" << i << "=" << val << ",";
   }
   SDGParserInternal::Image image;
   int val;
   for (int step=0; step<2; ++step) {
-    int type=int(input->readULong(1));
+    auto type=int(input->readULong(1));
     if (type>2) {
       input->seek(-1, librevenge::RVNG_SEEK_CUR);
       break;

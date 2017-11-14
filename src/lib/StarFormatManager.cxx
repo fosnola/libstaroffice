@@ -299,7 +299,7 @@ bool NumberFormatter::FormatItem::updateNumberingProperties(librevenge::RVNGProp
   switch (m_type) {
   case -3: {
     if (m_text.empty()) break;
-    int fChar=int(m_text.cstr()[0]);
+    auto fChar=int(m_text.cstr()[0]);
     if (fChar>=32) {
       static int cCharWidths[ 128-32 ] = {
         1,1,1,2,2,3,2,1,1,1,1,2,1,1,1,1,
@@ -827,9 +827,9 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
   f.str("");
   f << "NumberFormatter-T:";
   input->seek(endDataPos, librevenge::RVNG_SEEK_SET);
-  int val=int(input->readULong(2));
+  auto val=int(input->readULong(2));
   if (val) f << "nId=" << val << ",";
-  long nSizeTableLen=long(input->readULong(4));
+  auto nSizeTableLen=long(input->readULong(4));
   f << "nTableSize=" << nSizeTableLen << ","; // copy in pMemStream
   long lastZonePos=input->tell()+nSizeTableLen;
   std::vector<long> fieldSize;
@@ -854,7 +854,7 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
   input->seek(actPos, librevenge::RVNG_SEEK_SET);
   f.str("");
   f << "NumberFormatter:";
-  int nVers=int(input->readULong(2));
+  auto nVers=int(input->readULong(2));
   f << "vers=" << nVers << ",";
   val=int(input->readULong(2));
   if (val) f << "nSysOnStore=" << std::hex << val << std::dec << ",";
@@ -863,7 +863,7 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
   ascFile.addPos(actPos);
   ascFile.addNote(f.str().c_str());
 
-  unsigned long id=static_cast<unsigned long>(input->readULong(4));
+  auto id=static_cast<unsigned long>(input->readULong(4));
   size_t n=0;
   while (id!=0xffffffff) {
     pos=input->tell();
@@ -917,7 +917,7 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
     for (auto &subFormat : form.m_subFormats) {
       // ImpSvNumFor::Load
       StarFormatManagerInternal::NumberFormatter::Format subForm;
-      int N=int(input->readULong(2));
+      auto N=int(input->readULong(2));
       if (input->tell()+4*N>endFieldPos) break;
       for (int c=0; c<N; ++c) {
         StarFormatManagerInternal::NumberFormatter::FormatItem item;
@@ -1067,7 +1067,7 @@ bool StarFormatManager::readSWPatternLCL(StarZone &zone)
     f.str("");
     f << "SWPatternLCL[token-" << zone.getRecordLevel() << "]:";
     zone.openFlagZone();
-    int nType=int(input->readULong(2));
+    auto nType=int(input->readULong(2));
     f << "nType=" << nType << ",";
     f << "nStrIdx=" << input->readULong(2) << ",";
     zone.closeFlagZone();

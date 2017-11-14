@@ -585,7 +585,7 @@ void STOFFSpreadsheetListener::_openPageSpan(bool sendHeaderFooters)
     throw libstoff::ParseException();
   }
   unsigned actPage = 0;
-  std::vector<STOFFPageSpan>::iterator it = m_ds->m_pageList.begin();
+  auto it = m_ds->m_pageList.begin();
   ++m_ps->m_currentPage;
   while (true) {
     actPage+=unsigned(it->m_pageSpan);
@@ -825,7 +825,7 @@ void STOFFSpreadsheetListener::_closeListElement()
 
 int STOFFSpreadsheetListener::_getListId() const
 {
-  size_t newLevel= size_t(m_ps->m_paragraph.m_listLevelIndex);
+  auto newLevel= size_t(m_ps->m_paragraph.m_listLevelIndex);
   if (newLevel == 0) return -1;
   int newListId = m_ps->m_paragraph.m_listId;
   if (newListId > 0) return newListId;
@@ -848,7 +848,7 @@ void STOFFSpreadsheetListener::_changeList()
     _closeParagraph();
 
   size_t actualLevel = m_ps->m_listOrderedLevels.size();
-  size_t newLevel= size_t(m_ps->m_paragraph.m_listLevelIndex);
+  auto newLevel= size_t(m_ps->m_paragraph.m_listLevelIndex);
   int newListId = newLevel>0 ? _getListId() : -1;
   bool changeList = newLevel &&
                     (m_ps->m_list && m_ps->m_list->getId()!=newListId);

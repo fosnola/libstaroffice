@@ -365,7 +365,7 @@ bool StarObjectModel::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int 
     pageSpan.push_back(ps);
     return true;
   }
-  int numMasterPage=int(m_modelState->m_masterPageList.size());
+  auto numMasterPage=int(m_modelState->m_masterPageList.size());
   for (size_t i=0; i<m_modelState->m_pageList.size(); ++i) {
     if (!m_modelState->m_pageList[i])
       continue;
@@ -410,7 +410,7 @@ bool StarObjectModel::sendMasterPages(STOFFGraphicListenerPtr listener)
     STOFF_DEBUG_MSG(("StarObjectModel::sendMasterPages: can not find the listener\n"));
     return false;
   }
-  int numMasters=int(m_modelState->m_masterPageList.size());
+  auto numMasters=int(m_modelState->m_masterPageList.size());
   for (auto id : m_modelState->m_masterPageToSendSet) {
     if (id<0 || id>=numMasters || !m_modelState->m_masterPageList[size_t(id)]) {
       STOFF_DEBUG_MSG(("StarObjectModel::sendMasterPages: can not find master page %d\n", id));
@@ -587,7 +587,7 @@ bool StarObjectModel::read(StarZone &zone)
         if (nTmp) f << "unk=" << nTmp << ",";
       }
       if (input->tell()+4<=zone.getRecordLastPosition()) {
-        int compressedMode=int(input->readULong(2));
+        auto compressedMode=int(input->readULong(2));
         if (compressedMode) // checkme: find 0 or 16-17, do not seems to cause problem
           f << "#streamCompressed=" << compressedMode << ",";
         f << "nStreamNumberFormat=" << input->readULong(2) << ",";
@@ -620,7 +620,7 @@ bool StarObjectModel::read(StarZone &zone)
     }
     else {
       if (version<11) {
-        int charSet=int(input->readLong(2));
+        auto charSet=int(input->readLong(2));
         if (StarEncoding::getEncodingForId(charSet)!=StarEncoding::E_DONTKNOW)
           zone.setEncoding(StarEncoding::getEncodingForId(charSet));
         else
@@ -724,7 +724,7 @@ bool StarObjectModel::read(StarZone &zone)
   // in DrawingLayer, find also 0500000001 and 060000000[01]00
   pos=input->tell();
   if (pos+4<=zone.getRecordLastPosition()) {
-    long sz=long(input->readULong(4));
+    auto sz=long(input->readULong(4));
     if (pos+sz==zone.getRecordLastPosition()) {
       ascFile.addPos(pos);
       ascFile.addNote("SdrModel:#extra");
@@ -1012,7 +1012,7 @@ std::shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(Star
       f << "pages=[";
       StarObjectModelInternal::Page::Descriptor desc;
       for (int i=0; i<int(n); ++i) {
-        int id=int(input->readULong(2));
+        auto id=int(input->readULong(2));
         f << id << ",";
         desc.m_masterId=id;
         page->m_masterPageDescList.push_back(desc);
@@ -1094,7 +1094,7 @@ std::shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(Star
       else if (n==2 && pos+12==zone.getRecordLastPosition()) {
         f << "empty,";
         for (int i=0; i<4; ++i) { // always 0
-          int val=int(input->readLong(2));
+          auto val=int(input->readLong(2));
           if (val) f << "f" << i << "=" << val << ",";
         }
       }
@@ -1128,7 +1128,7 @@ bool StarObjectModel::readSdrPageUnknownZone1(StarZone &zone, long lastPos)
   libstoff::DebugStream f;
   f << "Entries(SdrPageUnkn1)[" << zone.getRecordLevel() << "]:";
   if (pos+28>lastPos) return false;
-  int val=int(input->readULong(2));
+  auto val=int(input->readULong(2));
   if (val!=3 && val!=7)
     return false;
   f << "f0=" << val << ",";
@@ -1150,7 +1150,7 @@ bool StarObjectModel::readSdrPageUnknownZone1(StarZone &zone, long lastPos)
   if (!zone.readString(string) || input->tell()>lastPos)
     return false;
   f << libstoff::getString(string).cstr() << ",";
-  int n=int(input->readULong(4));
+  auto n=int(input->readULong(4));
   if (n<0 || (lastPos-input->tell())/8<n || input->tell()+8*n>lastPos)
     return false;
   f << "unk=[";

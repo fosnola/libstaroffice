@@ -227,7 +227,7 @@ bool PageDesc::read(StarZone &zone, StarObject &object)
   int fl=zone.openFlagZone();
   if (fl&0x10) m_landscape=true;
   if (fl&0xf0) f << "fl=" << (fl>>4) << ",";
-  int val=int(input->readULong(2));
+  auto val=int(input->readULong(2));
   if (!zone.getPoolName(val, m_name)) {
     STOFF_DEBUG_MSG(("StarObjectPageStyleInternal::PageDesc::read: can not find a pool name\n"));
     f << "###nameId=" << val << ",";
@@ -483,7 +483,7 @@ try
     switch (type) {
     case 'P': {
       zone.openFlagZone();
-      int N=int(input->readULong(2));
+      auto N=int(input->readULong(2));
       f << "N=" << N << ",";
       zone.closeFlagZone();
       for (int i=0; i<N; ++i) {

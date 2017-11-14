@@ -893,7 +893,7 @@ bool StarObjectText::readSWContent(StarZone &zone, std::shared_ptr<StarObjectTex
     nNodes=int(input->readULong(4));
   else {
     if (zone.isCompatibleWith(5)) {
-      int id=int(input->readULong(2));
+      auto id=int(input->readULong(2));
       // dummy sectid, so probably ok if we do not find the pool name
       if (id>=zone.getNumPoolNames() || !zone.getPoolName(id, content->m_sectionName))
         f << "#sectId=" << id << ",";
@@ -1080,11 +1080,11 @@ bool StarObjectText::readSWGraphNode(StarZone &zone, std::shared_ptr<StarObjectT
       zone.closeFlagZone();
       if (polyFl&0x10) {
         // poly2.cxx operator>>
-        int numPoly=int(input->readULong(2));
+        auto numPoly=int(input->readULong(2));
         for (int i=0; i<numPoly; ++i) {
           f << "poly" << i << "=[";
           // poly.cxx operator>>
-          int numPoints=int(input->readULong(2));
+          auto numPoints=int(input->readULong(2));
           if (input->tell()+8*numPoints>lastPos) {
             STOFF_DEBUG_MSG(("StarObjectText::readSWGraphNode: can not read a polygon\n"));
             f << "###poly";
@@ -1370,13 +1370,13 @@ bool StarObjectText::readSWTextZone(StarZone &zone, std::shared_ptr<StarObjectTe
   f << "Entries(SWText)[" << zone.getRecordLevel() << "]:";
   textZone.reset(new StarObjectTextInternal::TextZone);
   int fl=zone.openFlagZone();
-  int poolId=int(input->readULong(2));
+  auto poolId=int(input->readULong(2));
   if (!zone.getPoolName(poolId, textZone->m_styleName))
     f << "###nPoolId=" << poolId << ",";
   else
     f << textZone->m_styleName.cstr() << ",";
   if (fl&0x10 && !zone.isCompatibleWith(0x201)) {
-    int val=int(input->readULong(1));
+    auto val=int(input->readULong(1));
     if (val==200 && zone.isCompatibleWith(0xf,0x101) && input->tell() < zone.getFlagLastPosition())
       val=int(input->readULong(1));
     if (val!=200) {
@@ -1465,7 +1465,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone, std::shared_ptr<StarObjectTe
       // sw_sw3num InNodeNum
       f << "nodeNum,";
       int cFlag=zone.openFlagZone();
-      int nLevel=int(input->readULong(1));
+      auto nLevel=int(input->readULong(1));
       if (nLevel!=201) {
         int level=(nLevel&0x1f);
         if (level>=10) {
@@ -1494,7 +1494,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone, std::shared_ptr<StarObjectTe
       f << "nBeginInv=" << input->readULong(2) << ",";
       f << "nEndInc=" << input->readULong(2) << ",";
       zone.closeFlagZone();
-      int N =int(input->readULong(2));
+      auto N =int(input->readULong(2));
       if (input->tell()+4*N>zone.getRecordLastPosition()) {
         STOFF_DEBUG_MSG(("StarObjectText::readSWTextZone: find bad count\n"));
         f << "###N=" << N << ",";
@@ -1733,7 +1733,7 @@ try
         break;
       }
       for (int i=0; i<5; ++i) { // f0=f1=1
-        int val=int(input->readULong(1));
+        auto val=int(input->readULong(1));
         if (val) f << "f" << i << "=" << val << ",";
       }
       if (!zone.readString(string)) {
@@ -1783,7 +1783,7 @@ try
       break;
     case '7': { // config, ignored by LibreOffice, and find no code
       f << "config,";
-      int fl=int(zone.openFlagZone());
+      auto fl=int(zone.openFlagZone());
       if (fl&0xf0) f << "fl=" << (fl>>4) << ",";
       f << "f0=" << input->readULong(1) << ","; // 1
       for (int i=0; i<5; ++i) // e,1,5,1,5
