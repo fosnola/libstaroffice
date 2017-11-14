@@ -133,6 +133,7 @@ bool StarObjectChart::send(STOFFListenerPtr listener, STOFFPosition const &pos, 
   }
   if (!listener || !m_chartState->m_model) {
     STOFF_DEBUG_MSG(("StarObjectChart::send: oops, can not create the graphic representation\n"));
+    return false;
   }
 
   STOFFGraphicEncoder graphicEncoder;
