@@ -127,7 +127,7 @@ StarObjectChart::~StarObjectChart()
 bool StarObjectChart::send(STOFFListenerPtr listener, STOFFPosition const &pos, STOFFGraphicStyle const &style)
 {
   auto sheetListener=std::dynamic_pointer_cast<STOFFSpreadsheetListener>(listener);
-  if (!sheetListener && m_chartState->m_chart) {
+  if (sheetListener && m_chartState->m_chart) {
     sheetListener->insertChart(pos, *m_chartState->m_chart, style);
     return true;
   }
