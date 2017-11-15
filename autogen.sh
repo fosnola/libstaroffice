@@ -3,7 +3,7 @@ TESTLIBTOOLIZE="glibtoolize libtoolize"
 
 LIBTOOLIZEFOUND="0"
 
-aclocal --version > /dev/null 2> /dev/null || {
+aclocal -I m4 --version > /dev/null 2> /dev/null || {
     echo "error: aclocal not found"
     exit 1
 }
