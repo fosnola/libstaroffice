@@ -51,6 +51,7 @@
 #include "StarGraphicStruct.hxx"
 #include "StarObject.hxx"
 #include "StarObjectChart.hxx"
+#include "StarObjectMath.hxx"
 #include "StarObjectSmallText.hxx"
 #include "StarObjectText.hxx"
 #include "StarItemPool.hxx"
@@ -1159,7 +1160,14 @@ public:
             }
             return true;
           }
-          else if (std::dynamic_pointer_cast<StarObjectText>(localObj)) {
+          auto math=std::dynamic_pointer_cast<StarObjectMath>(localObj);
+          if (math && math->send(listener, position, state.m_graphic)) {
+            if (m_graphic && !m_graphic->m_object.isEmpty()) {
+              STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: find extra graphic for math %s\n", m_oleNames[0].cstr()));
+            }
+            return true;
+          }
+          if (std::dynamic_pointer_cast<StarObjectText>(localObj)) {
             STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: sorry, unsure how to send a text object %s\n", m_oleNames[0].cstr()));
           }
           else {

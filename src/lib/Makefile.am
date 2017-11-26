@@ -75,6 +75,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	STOFFSpreadsheetEncoder.hxx		\
 	STOFFSpreadsheetListener.cxx		\
 	STOFFSpreadsheetListener.hxx		\
+	STOFFStarMathToMMLConverter.cxx		\
+	STOFFStarMathToMMLConverter.hxx		\
 	STOFFStringStream.cxx			\
 	STOFFStringStream.hxx			\
 	STOFFSubDocument.cxx			\
@@ -131,6 +133,8 @@ libstaroffice_@STAROFFICE_MAJOR_VERSION@_@STAROFFICE_MINOR_VERSION@_la_SOURCES =
 	StarObjectChart.hxx			\
 	StarObjectDraw.cxx			\
 	StarObjectDraw.hxx			\
+	StarObjectMath.cxx			\
+	StarObjectMath.hxx			\
 	StarObjectModel.cxx			\
 	StarObjectModel.hxx			\
 	StarObjectNumericRuler.cxx		\

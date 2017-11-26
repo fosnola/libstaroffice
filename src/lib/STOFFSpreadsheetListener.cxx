@@ -1092,6 +1092,26 @@ void STOFFSpreadsheetListener::insertPicture(STOFFPosition const &pos, STOFFEmbe
   closeFrame();
 }
 
+void STOFFSpreadsheetListener::insertEquation(STOFFPosition const &pos, librevenge::RVNGString const &equation,
+    STOFFGraphicStyle const &style)
+{
+  if (!m_ds->m_isSheetOpened) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertEquation insert an equation outside a sheet is not implemented\n"));
+    return;
+  }
+  if (equation.empty()) {
+    STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertEquation: oops the equation is empty\n"));
+    return;
+  }
+  if (!openFrame(pos, style)) return;
+
+  librevenge::RVNGPropertyList propList;
+  propList.insert("librevenge:mime-type", "application/mathml+xml");
+  propList.insert("librevenge:data", equation);
+  m_documentInterface->insertEquation(propList);
+  closeFrame();
+}
+
 void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos)
 {
   if (!m_ds->m_isSheetOpened) {

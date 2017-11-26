@@ -57,6 +57,7 @@
 #include "StarItemPool.hxx"
 #include "StarLayout.hxx"
 #include "StarObjectChart.hxx"
+#include "StarObjectMath.hxx"
 #include "StarObjectModel.hxx"
 #include "StarObjectNumericRuler.hxx"
 #include "StarObjectPageStyle.hxx"
@@ -240,7 +241,10 @@ bool OLEZone::send(STOFFListenerPtr listener, StarState &/*state*/) const
     auto chart=std::dynamic_pointer_cast<StarObjectChart>(localObj);
     if (chart && chart->send(listener, position, style))
       return true;
-    else if (std::dynamic_pointer_cast<StarObjectText>(localObj)) {
+    auto math=std::dynamic_pointer_cast<StarObjectMath>(localObj);
+    if (math && math->send(listener, position, style))
+      return true;
+    if (std::dynamic_pointer_cast<StarObjectText>(localObj)) {
       STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: sorry, unsure how to send a text object %s\n", m_name.cstr()));
     }
     else {

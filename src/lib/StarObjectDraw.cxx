@@ -48,7 +48,6 @@
 #include "StarGraphicStruct.hxx"
 #include "StarFileManager.hxx"
 #include "StarItemPool.hxx"
-#include "StarObjectChart.hxx"
 #include "StarObjectModel.hxx"
 #include "StarObjectSmallGraphic.hxx"
 #include "StarZone.hxx"

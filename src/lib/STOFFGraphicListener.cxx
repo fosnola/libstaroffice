@@ -1171,6 +1171,40 @@ void STOFFGraphicListener::insertPicture(STOFFPosition const &pos, STOFFEmbedded
   }
 }
 
+void STOFFGraphicListener::insertEquation(STOFFPosition const &pos, librevenge::RVNGString const &equation,
+    STOFFGraphicStyle const &style)
+{
+  if (equation.empty()) {
+    STOFF_DEBUG_MSG(("STOFFGraphicListener::insertEquation: oops the equation is empty\n"));
+    return;
+  }
+  if (!m_ds->m_isDocumentStarted) {
+    STOFF_DEBUG_MSG(("STOFFGraphicListener::insertEquation: the document is not started\n"));
+    return;
+  }
+  if (m_ps->m_isFrameOpened) {
+    STOFF_DEBUG_MSG(("STOFFGraphicListener::insertEquation: a frame is already open\n"));
+    return;
+  }
+  if (!m_ds->m_isPageSpanOpened)
+    _openPageSpan();
+  librevenge::RVNGPropertyList list;
+  style.addTo(list);
+  if (m_drawingInterface)
+    m_drawingInterface->setStyle(list);
+  else
+    m_presentationInterface->setStyle(list);
+  list.clear();
+  _handleFrameParameters(list, pos, style);
+  librevenge::RVNGPropertyList propList;
+  propList.insert("librevenge:mime-type", "application/mathml+xml");
+  propList.insert("office:binary-data", equation);
+  if (m_drawingInterface)
+    m_drawingInterface->drawGraphicObject(list);
+  else
+    m_presentationInterface->drawGraphicObject(list);
+}
+
 void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos)
 {
   if (!m_ds->m_isDocumentStarted) {

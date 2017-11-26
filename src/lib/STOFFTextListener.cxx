@@ -1245,6 +1245,22 @@ void STOFFTextListener::insertPicture(STOFFPosition const &pos, STOFFEmbeddedObj
   closeFrame();
 }
 
+void STOFFTextListener::insertEquation(STOFFPosition const &pos, librevenge::RVNGString const &equation,
+                                       STOFFGraphicStyle const &style)
+{
+  if (equation.empty()) {
+    STOFF_DEBUG_MSG(("STOFFTextListener::insertEquation: oops the equation is empty\n"));
+    return;
+  }
+  if (!openFrame(pos, style)) return;
+
+  librevenge::RVNGPropertyList propList;
+  propList.insert("librevenge:mime-type", "application/mathml+xml");
+  propList.insert("librevenge:data", equation);
+  m_documentInterface->insertEquation(propList);
+  closeFrame();
+}
+
 ///////////////////
 // frame
 ///////////////////

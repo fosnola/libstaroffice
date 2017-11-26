@@ -23,8 +23,11 @@
 #ifndef LIBSTAROFFICE_HXX
 #define LIBSTAROFFICE_HXX
 
-/** Defines the chart possible conversion (actually none) */
-#define STOFF_CHART_VERSION 0
+/** Defines the chart possible conversion:
+    - 1: try to retrieve the graphic representation of the chart when
+         a chart is in some defined document(from libstoff-0.0.6)
+ */
+#define STOFF_CHART_VERSION 1
 /** Defines the database possible conversion (actually none) */
 #define STOFF_DATABASE_VERSION 0
 /** Defines the vector graphic possible conversion
@@ -33,8 +36,10 @@
     - 2: can generate some graphic OLE(from libstoff-0.0.2)
 */
 #define STOFF_GRAPHIC_VERSION 2
-/** Defines the math possible conversion (actually none) */
-#define STOFF_MATH_VERSION 0
+/** Defines the math possible conversion :
+    - 1: try to retrieve the graphic representation of the chart when
+         a chart is in some defined document(from libstoff-0.0.6)*/
+#define STOFF_MATH_VERSION 1
 /** Defines the presentation possible conversion
     - 1: begin to convert the files created by StarImpress
          in presentation(from libstoff-0.0.3)

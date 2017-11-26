@@ -198,6 +198,9 @@ public:
   /** adds a picture with potential various representationin given position */
   void insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture,
                      STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
+  /** adds a equation given a position */
+  void insertEquation(STOFFPosition const &pos, librevenge::RVNGString const &equation,
+                      STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
   /** insert a note */
   void insertNote(STOFFNote const &note, STOFFSubDocumentPtr &subDocument) final;
   /** adds comment */

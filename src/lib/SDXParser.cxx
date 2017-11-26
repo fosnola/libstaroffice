@@ -48,6 +48,7 @@
 #include "StarItemPool.hxx"
 #include "StarObjectChart.hxx"
 #include "StarObjectDraw.hxx"
+#include "StarObjectMath.hxx"
 #include "StarObjectSpreadsheet.hxx"
 #include "StarObjectText.hxx"
 #include "StarZone.hxx"
@@ -141,6 +142,11 @@ bool SDXParser::createZones()
       draw.parse();
       continue;
     }
+    if (object.getDocumentKind()==STOFFDocument::STOFF_K_MATH) {
+      StarObjectMath math(object, false);
+      math.parse();
+      continue;
+    }
     if (object.getDocumentKind()==STOFFDocument::STOFF_K_SPREADSHEET) {
       StarObjectSpreadsheet spreadsheet(object, false);
       spreadsheet.parse();
@@ -176,10 +182,6 @@ bool SDXParser::createZones()
       if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
         librevenge::RVNGBinaryData data;
         fileManager.readImageDocument(ole,data,name);
-        continue;
-      }
-      if (base=="StarMathDocument") {
-        fileManager.readMathDocument(ole,name,object);
         continue;
       }
       if (base.compare(0,3,"Pic")==0) {

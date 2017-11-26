@@ -76,8 +76,6 @@ public:
 
   //! try to read a image zone: "StarImageDocument" or "StarImageDocument 4.0
   static bool readImageDocument(STOFFInputStreamPtr input, librevenge::RVNGBinaryData &data, std::string const &fileName);
-  //! try to read a math zone: "StarMathDocument" (v 3 or v4) .sdf
-  static bool readMathDocument(STOFFInputStreamPtr input, std::string const &fileName, StarObject &doc);
 
   //! try to read a embedded picture file: Embedded/PicXXXXXX
   static bool readEmbeddedPicture(std::shared_ptr<STOFFOLEParser> oleParser, std::string const &fileName, STOFFEmbeddedObject &image);
