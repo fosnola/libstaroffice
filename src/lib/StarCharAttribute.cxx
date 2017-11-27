@@ -38,6 +38,7 @@
 #include "STOFFSubDocument.hxx"
 
 #include "StarAttribute.hxx"
+#include "StarFormatManager.hxx"
 #include "StarItemPool.hxx"
 #include "StarLanguage.hxx"
 #include "StarObject.hxx"
@@ -688,6 +689,39 @@ protected:
   std::shared_ptr<SWFieldManagerInternal::Field> m_field;
 };
 
+//! a txtFlyCnt attribute
+class StarCAttributeFlyCnt final : public StarAttribute
+{
+public:
+  //! constructor
+  StarCAttributeFlyCnt(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_format()
+  {
+  }
+  //! create a new attribute
+  std::shared_ptr<StarAttribute> create() const final
+  {
+    return std::shared_ptr<StarAttribute>(new StarCAttributeFlyCnt(*this));
+  }
+  //! add to the state
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
+  //! read a zone
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
+  //! debug function to print the data
+  void printData(libstoff::DebugStream &o) const final
+  {
+    o << m_debugName << ",";
+  }
+  //! add to send the zone data
+  bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const final;
+protected:
+  //! copy constructor
+  StarCAttributeFlyCnt(StarCAttributeFlyCnt const &) = default;
+  //! the format
+  std::shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+};
+
 //! a footnote attribute
 class StarCAttributeFootnote final : public StarAttribute
 {
@@ -940,6 +974,11 @@ void StarCAttributeField::addTo(StarState &state, std::set<StarAttribute const *
   state.m_field=m_field;
 }
 
+void StarCAttributeFlyCnt::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
+{
+  state.m_flyCnt=true;
+}
+
 void StarCAttributeFootnote::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   state.m_footnote=true;
@@ -1116,6 +1155,23 @@ bool StarCAttributeField::read(StarZone &zone, int /*nVers*/, long endPos, StarO
   return m_field && input->tell()<=endPos;
 }
 
+bool StarCAttributeFlyCnt::read(StarZone &zone, int /*vers*/, long endPos, StarObject &object)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  if (input->peek()=='o')
+    object.getFormatManager()->readSWFormatDef(zone,'o', m_format, object);
+  else
+    object.getFormatManager()->readSWFormatDef(zone,'l', m_format, object);
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
 bool StarCAttributeFootnote::read(StarZone &zone, int nVers, long endPos, StarObject &object)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -1273,6 +1329,24 @@ bool StarCAttributeContent::send(STOFFListenerPtr listener, StarState &state, st
   return true;
 }
 
+bool StarCAttributeFlyCnt::send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const
+{
+  if (done.find(this)!=done.end()) {
+    STOFF_DEBUG_MSG(("StarCAttributeFlyCnt::send: find a loop\n"));
+    return false;
+  }
+  done.insert(this);
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarCAttributeFlyCnt::send: can not find the listener\n"));
+    return false;
+  }
+  if (!m_format) {
+    STOFF_DEBUG_MSG(("StarCAttributeFlyCnt::send: can not find the format\n"));
+    return false;
+  }
+  return m_format->send(listener, state);
+}
+
 bool StarCAttributeFootnote::send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const
 {
   if (done.find(this)!=done.end()) {
@@ -1341,6 +1415,7 @@ void addInitTo(std::map<int, std::shared_ptr<StarAttribute> > &map)
   map[StarAttribute::ATTR_TXT_CHARFMT]=std::shared_ptr<StarAttribute>(new StarCAttributeCharFormat(StarAttribute::ATTR_TXT_CHARFMT,"textAtrCharFmt"));
   map[StarAttribute::ATTR_TXT_FTN]=std::shared_ptr<StarAttribute>(new StarCAttributeFootnote(StarAttribute::ATTR_TXT_FTN,"textAtrFtn"));
   map[StarAttribute::ATTR_TXT_FIELD]=std::shared_ptr<StarAttribute>(new StarCAttributeField(StarAttribute::ATTR_TXT_FIELD,"textAtrField"));
+  map[StarAttribute::ATTR_TXT_FLYCNT]=std::shared_ptr<StarAttribute>(new StarCAttributeFlyCnt(StarAttribute::ATTR_TXT_FLYCNT,"textAtrTxtFlyCnt"));
   map[StarAttribute::ATTR_TXT_INETFMT]=std::shared_ptr<StarAttribute>(new StarCAttributeINetFmt(StarAttribute::ATTR_TXT_INETFMT,"textAtrInetFmt"));
   map[StarAttribute::ATTR_TXT_REFMARK]=std::shared_ptr<StarAttribute>(new StarCAttributeRefMark(StarAttribute::ATTR_TXT_REFMARK,"textAtrRefMark"));
   addAttributeBool(map,StarAttribute::ATTR_CHR_NOLINEBREAK,"char[nolineBreak]",true);

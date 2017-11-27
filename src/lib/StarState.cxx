@@ -52,7 +52,7 @@ StarState::~StarState()
 void StarState::reinitializeLineData()
 {
   m_font=STOFFFont();
-  m_content=m_footnote=false;
+  m_content=m_flyCnt=m_footnote=false;
   m_link=m_refMark="";
   m_field.reset();
 }

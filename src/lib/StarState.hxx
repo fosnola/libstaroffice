@@ -123,6 +123,7 @@ public:
     , m_paragraph()
     , m_font()
     , m_content(false)
+    , m_flyCnt(false)
     , m_footnote(false)
     , m_link("")
     , m_refMark("")
@@ -140,6 +141,7 @@ public:
     , m_paragraph()
     , m_font()
     , m_content(false)
+    , m_flyCnt(false)
     , m_footnote(false)
     , m_link("")
     , m_refMark("")
@@ -173,6 +175,8 @@ public:
   STOFFFont m_font;
   /// flag to know if this is a content zone
   bool m_content;
+  /// flag to know if this is a flyCnt
+  bool m_flyCnt;
   /// flag to know if this is a footnote
   bool m_footnote;
   /** the link url */

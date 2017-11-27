@@ -396,7 +396,7 @@ private:
 void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*type*/)
 {
   if (!listener.get()) {
-    STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::SubDocument::parse: no listener\n"));
+    STOFF_DEBUG_MSG(("StarPageAttributeInternal::SubDocument::parse: no listener\n"));
     return;
   }
   if (m_smallText)

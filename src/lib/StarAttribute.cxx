@@ -40,7 +40,6 @@
 #include <librevenge/librevenge.h>
 
 #include "SWFieldManager.hxx"
-#include "StarFormatManager.hxx"
 
 #include "StarBitmap.hxx"
 #include "StarCellAttribute.hxx"
@@ -701,15 +700,6 @@ std::shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zon
     f << "textAtrCJKRuby=" << input->readULong(1) << ",";
     break;
 
-  case StarAttribute::ATTR_TXT_FLYCNT: {
-    f << "textAtrFlycnt,";
-    std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
-    if (input->peek()=='o')
-      object.getFormatManager()->readSWFormatDef(zone,'o', format, object);
-    else
-      object.getFormatManager()->readSWFormatDef(zone,'l', format, object);
-    break;
-  }
   case StarAttribute::ATTR_TXT_HARDBLANK: // ok no data
     f << "textAtrHardBlank,";
     if (nVers>=1)

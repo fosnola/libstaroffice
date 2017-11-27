@@ -103,6 +103,7 @@ bool Content::send(STOFFListenerPtr listener, StarState &state) const
     return false;
   }
   StarState cState(state.m_global);
+  cState.m_frame=state.m_frame;
   for (size_t t=0; t<m_zoneList.size(); ++t) {
     if (m_zoneList[t])
       m_zoneList[t]->send(listener, cState);
@@ -164,7 +165,7 @@ struct GraphZone final : public Zone {
   StarGraphicStruct::StarPolygon m_contour;
 };
 
-bool GraphZone::send(STOFFListenerPtr listener, StarState &/* state */) const
+bool GraphZone::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::GraphZone::send: call without listener\n"));
@@ -182,7 +183,10 @@ bool GraphZone::send(STOFFListenerPtr listener, StarState &/* state */) const
   STOFFPosition position;
   position.setAnchor(STOFFPosition::Paragraph);
   //position.setOrigin(STOFFVec2i(0,0), librevenge::RVNG_POINT);
-  position.setSize(STOFFVec2i(100,100), librevenge::RVNG_POINT);
+  if (state.m_frame.m_frameSize[0]>0 && state.m_frame.m_frameSize[1]>0)
+    position.setSize(state.m_frame.m_frameSize, librevenge::RVNG_POINT);
+  else
+    position.setSize(STOFFVec2i(100,100), librevenge::RVNG_POINT);
   STOFFGraphicStyle style;
   //updateStyle(style, object, listener);
   listener->insertPicture(position, localPicture, style);
@@ -210,7 +214,7 @@ struct OLEZone final : public Zone {
   std::shared_ptr<STOFFOLEParser> m_oleParser;
 };
 
-bool OLEZone::send(STOFFListenerPtr listener, StarState &/*state*/) const
+bool OLEZone::send(STOFFListenerPtr listener, StarState &state) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: call without listener\n"));
@@ -230,7 +234,10 @@ bool OLEZone::send(STOFFListenerPtr listener, StarState &/*state*/) const
   STOFFPosition position;
   position.setAnchor(STOFFPosition::Paragraph);
   //position.setOrigin(STOFFVec2i(0,0), librevenge::RVNG_POINT);
-  position.setSize(STOFFVec2i(100,100), librevenge::RVNG_POINT);
+  if (state.m_frame.m_frameSize[0]>0 && state.m_frame.m_frameSize[1]>0)
+    position.setSize(state.m_frame.m_frameSize, librevenge::RVNG_POINT);
+  else
+    position.setSize(STOFFVec2i(100,100), librevenge::RVNG_POINT);
   STOFFGraphicStyle style;
   //updateStyle(style, object, listener);
   if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture, localObj) || localPicture.isEmpty()) {
@@ -420,6 +427,9 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
       first=false;
     }
   }
+  if (state.m_flyCnt) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a flyCnt in mainFont\n"));
+  }
   if (state.m_footnote) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a footnote in mainFont\n"));
   }
@@ -453,6 +463,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
       ++posSetIt;
       fontChange=true;
     }
+    std::shared_ptr<StarAttribute> flyCnt;
     std::shared_ptr<StarAttribute> footnote;
     std::shared_ptr<SWFieldManagerInternal::Field> field;
     librevenge::RVNGString linkString;
@@ -472,6 +483,8 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
         attrib.m_attribute->addTo(lineState);
         if (!footnote && lineState.m_footnote)
           footnote=attrib.m_attribute;
+        if (!flyCnt && lineState.m_flyCnt)
+          flyCnt=attrib.m_attribute;
         if (c==0) {
           switch (lineState.m_break) {
           case 0:
@@ -582,6 +595,10 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
     if (footnote) {
       StarState cState(state.m_global->m_pool, state.m_global->m_object, state.m_global->m_relativeUnit);
       footnote->send(listener, cState);
+    }
+    else if (flyCnt) {
+      StarState cState(state.m_global->m_pool, state.m_global->m_object, state.m_global->m_relativeUnit);
+      flyCnt->send(listener, cState);
     }
     else if (field) {
       StarState cState(state.m_global->m_pool, state.m_global->m_object, state.m_global->m_relativeUnit);

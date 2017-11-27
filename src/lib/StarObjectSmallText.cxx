@@ -160,8 +160,8 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState
         m_charItemList[f]->m_attribute->addTo(editState);
       }
       static bool first=true;
-      if (first && (editState.m_content || editState.m_footnote || editState.m_field || !editState.m_link.empty() || !editState.m_refMark.empty())) {
-        STOFF_DEBUG_MSG(("StarObjectSmallTextInternal::Paragraph::send: sorry, sending content/field/footnote/refMark/link is not implemented\n"));
+      if (first && (editState.m_content || editState.m_flyCnt || editState.m_footnote || editState.m_field || !editState.m_link.empty() || !editState.m_refMark.empty())) {
+        STOFF_DEBUG_MSG(("StarObjectSmallTextInternal::Paragraph::send: sorry, sending content/field/flyCnt/footnote/refMark/link is not implemented\n"));
         first=false;
       }
       listener->setFont(font);
