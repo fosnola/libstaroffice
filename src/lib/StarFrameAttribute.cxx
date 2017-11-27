@@ -230,6 +230,44 @@ inline void addAttributeVoid(std::map<int, std::shared_ptr<StarAttribute> > &map
 
 namespace StarFrameAttribute
 {
+//! a anchor attribute
+class StarFAttributeAnchor final : public StarAttribute
+{
+public:
+  //! constructor
+  StarFAttributeAnchor(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_anchor(-1)
+    , m_index(0)
+  {
+  }
+  //! create a new attribute
+  std::shared_ptr<StarAttribute> create() const final
+  {
+    return std::shared_ptr<StarAttribute>(new StarFAttributeAnchor(*this));
+  }
+  //! read a zone
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
+  //! add to a cell/graphic/paragraph style
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
+  //! debug function to print the data
+  void printData(libstoff::DebugStream &o) const final
+  {
+    o << m_debugName << "=[";
+    if (m_anchor>=0) o << "anchor=" << m_anchor << ",";
+    if (m_index) o << "index=" << m_index << ",";
+    o << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarFAttributeAnchor(StarFAttributeAnchor const &) = default;
+  //! the anchor
+  int m_anchor;
+  //! the index (page?)
+  int m_index;
+};
+
 //! a border attribute
 class StarFAttributeBorder final : public StarAttribute
 {
@@ -493,7 +531,7 @@ protected:
   //! copy constructor
   StarFAttributeOrientation(StarFAttributeOrientation const &) = default;
   //! the position in twip
-  uint32_t m_position;
+  int32_t m_position;
   /** the orientation:
       -horizontal:NONE,RIGHT,CENTER, LEFT,INSIDE,OUTSIDE,FULL, LEFT_AND_WIDTH
       -vertical:NONE,TOP,CENTER,BOTTOM,CHAR_TOP,CHAR_CENTER,CHAR_BOTTOM,LINE_TOP,LINE_CENTER,LINE_BOTTOM
@@ -600,6 +638,20 @@ protected:
   //! the prop margins: top, bottom
   int m_propMargins[2];
 };
+
+void StarFAttributeAnchor::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
+{
+  /* FLY_AT_PARA, FLY_AS_CHAR, FLY_AT_PAGE, FLY_AT_FLY, FLY_AT_CHAR
+     RND_STD_HEADER, RND_STD_FOOTER, RND_STD_HEADERL, RND_STD_HEADERR,
+     RND_STD_FOOTERL, RND_STD_FOOTERR,
+     RND_DRAW_OBJECT   */
+  STOFFPosition::AnchorTo const(wh[])= {STOFFPosition::Paragraph, STOFFPosition::CharBaseLine,  STOFFPosition::Page, STOFFPosition::Frame, STOFFPosition::Char };
+  if (m_anchor>=0 && m_anchor < int(STOFF_N_ELEMENTS(wh)))
+    state.m_frame.m_position.setAnchor(wh[m_anchor]);
+  else if (m_anchor>=0) {
+    STOFF_DEBUG_MSG(("StarFrameAttributeInternal::StarFAttributeAnchor::addTo: unsure how to send anchor=%d\n", m_anchor));
+  }
+}
 
 void StarFAttributeBorder::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
@@ -818,6 +870,8 @@ void StarFAttributeOrientation::addTo(StarState &state, std::set<StarAttribute c
     default: // TODO
       break;
     }
+    if (m_position)
+      state.m_frame.m_position.m_propertyList.insert("svg:x", double(m_position)*0.05, librevenge::RVNG_POINT);
   }
   else if (m_type==StarAttribute::ATTR_FRM_VERT_ORIENT) {
     switch (m_orient) {
@@ -833,6 +887,8 @@ void StarFAttributeOrientation::addTo(StarState &state, std::set<StarAttribute c
     default: // TODO
       break;
     }
+    if (m_position)
+      state.m_frame.m_position.m_propertyList.insert("svg:y", double(m_position)*0.05, librevenge::RVNG_POINT);
   }
 }
 
@@ -886,6 +942,42 @@ void StarFAttributeULSpace::addTo(StarState &state, std::set<StarAttribute const
     else
       state.m_global->m_page.m_propertiesList[state.m_global->m_pageZone].insert("fo:margin-bottom", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
   }
+}
+
+bool StarFAttributeAnchor::read(StarZone &zone, int nVers, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  m_anchor=int(input->readULong(1));
+  bool ok=true;
+  if (nVers<1)
+    m_index=int(input->readULong(2));
+  else {
+    unsigned long nId;
+    if (!input->readCompressedULong(nId)) {
+      STOFF_DEBUG_MSG(("StarFrameAttribute::StarFAttributeBorder::read: can not read nId\n"));
+      f << "###nId,";
+      ok=false;
+    }
+    else
+      m_index=int(nId);
+  }
+  if (!ok) {
+    if (input->tell()+8 > endPos) {
+      STOFF_DEBUG_MSG(("StarFrameAttribute::StarFAttributeBorder::read: try to use endPos\n"));
+      ok=true;
+      input->seek(endPos, librevenge::RVNG_SEEK_SET);
+    }
+    else
+      f << "###extra,";
+  }
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok && input->tell()<=endPos;
 }
 
 bool StarFAttributeBorder::read(StarZone &zone, int nVers, long endPos, StarObject &/*object*/)
@@ -1112,6 +1204,7 @@ void addInitTo(std::map<int, std::shared_ptr<StarAttribute> > &map)
   map[StarAttribute::ATTR_FRM_HORI_ORIENT]=std::shared_ptr<StarAttribute>(new StarFAttributeOrientation(StarAttribute::ATTR_FRM_HORI_ORIENT,"horiOrient"));
   map[StarAttribute::ATTR_FRM_VERT_ORIENT]=std::shared_ptr<StarAttribute>(new StarFAttributeOrientation(StarAttribute::ATTR_FRM_VERT_ORIENT,"vertOrient"));
   map[StarAttribute::ATTR_FRM_FRM_SIZE]=std::shared_ptr<StarAttribute>(new StarFAttributeFrameSize(StarAttribute::ATTR_FRM_FRM_SIZE,"frmSize"));
+  map[StarAttribute::ATTR_FRM_ANCHOR]=std::shared_ptr<StarAttribute>(new StarFAttributeAnchor(StarAttribute::ATTR_FRM_ANCHOR,"frmAnchor"));
   map[StarAttribute::ATTR_FRM_BOX]=std::shared_ptr<StarAttribute>(new StarFAttributeBorder(StarAttribute::ATTR_FRM_BOX,"box"));
   map[StarAttribute::ATTR_SC_BORDER]=std::shared_ptr<StarAttribute>(new StarFAttributeBorder(StarAttribute::ATTR_SC_BORDER,"scBorder"));
   map[StarAttribute::ATTR_FRM_SHADOW]=std::shared_ptr<StarAttribute>(new StarFAttributeShadow(StarAttribute::ATTR_FRM_SHADOW,"shadow"));

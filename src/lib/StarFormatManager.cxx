@@ -78,16 +78,22 @@ bool FormatDef::send(STOFFListenerPtr listener, StarState &state) const
     STOFF_DEBUG_MSG(("StarFormatManagerInternal::FormatDef::send: call without listener\n"));
     return false;
   }
-  bool done=false;
+  std::shared_ptr<StarAttribute> attrib;
   for (auto const &attr : m_attributeList) {
     if (!attr.m_attribute)
       continue;
     attr.m_attribute->addTo(state);
     if (!state.m_content) continue;
-    done=true;
-    attr.m_attribute->send(listener, state);
+    if (!attrib)
+      attrib=attr.m_attribute;
+    else {
+      STOFF_DEBUG_MSG(("StarFormatManagerInternal::FormatDef::send: oops find already a content attribute\n"));
+    }
+    state.m_content=false;
   }
-  if (!done) {
+  if (attrib)
+    attrib->send(listener, state);
+  else {
     STOFF_DEBUG_MSG(("StarFormatManagerInternal::FormatDef::send: can not find and data to send\n"));
   }
   return true;

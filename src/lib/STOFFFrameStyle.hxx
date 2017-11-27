@@ -39,6 +39,8 @@
 
 #include "libstaroffice_internal.hxx"
 
+#include "STOFFPosition.hxx"
+
 //! Class to store a frame style
 class STOFFFrameStyle
 {
@@ -46,12 +48,13 @@ public:
   /** constructor */
   STOFFFrameStyle()
     : m_propertyList()
-    , m_frameSize(0,0)
+    , m_position()
   {
   }
   //! add to the propList
   void addTo(librevenge::RVNGPropertyList &propList) const;
-
+  //! return a position corresponding to the current style
+  STOFFPosition getPosition() const;
   //! operator<<
   friend std::ostream &operator<<(std::ostream &o, STOFFFrameStyle const &frameStyle);
   //! operator==
@@ -63,6 +66,8 @@ public:
   }
   /** the property list */
   librevenge::RVNGPropertyList m_propertyList;
+  //! the position
+  STOFFPosition m_position;
   /** the last frame dimension */
   STOFFVec2f m_frameSize;
 };

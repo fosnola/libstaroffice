@@ -180,16 +180,9 @@ bool GraphZone::send(STOFFListenerPtr listener, StarState &state) const
     STOFF_DEBUG_MSG(("StarObjectTextInternal: sorry, can not find object %s\n", m_names[0].cstr()));
     return false;
   }
-  STOFFPosition position;
-  position.setAnchor(STOFFPosition::Paragraph);
-  //position.setOrigin(STOFFVec2i(0,0), librevenge::RVNG_POINT);
-  if (state.m_frame.m_frameSize[0]>0 && state.m_frame.m_frameSize[1]>0)
-    position.setSize(state.m_frame.m_frameSize, librevenge::RVNG_POINT);
-  else
-    position.setSize(STOFFVec2i(100,100), librevenge::RVNG_POINT);
   STOFFGraphicStyle style;
-  //updateStyle(style, object, listener);
-  listener->insertPicture(position, localPicture, style);
+  state.m_frame.addTo(style.m_propertyList);
+  listener->insertPicture(state.m_frame.getPosition(), localPicture, style);
   return true;
 }
 
@@ -231,15 +224,9 @@ bool OLEZone::send(STOFFListenerPtr listener, StarState &state) const
   STOFFEmbeddedObject localPicture;
   std::shared_ptr<StarObject> localObj;
   auto dir=m_oleParser->getDirectory(m_name.cstr());
-  STOFFPosition position;
-  position.setAnchor(STOFFPosition::Paragraph);
-  //position.setOrigin(STOFFVec2i(0,0), librevenge::RVNG_POINT);
-  if (state.m_frame.m_frameSize[0]>0 && state.m_frame.m_frameSize[1]>0)
-    position.setSize(state.m_frame.m_frameSize, librevenge::RVNG_POINT);
-  else
-    position.setSize(STOFFVec2i(100,100), librevenge::RVNG_POINT);
+  auto position= state.m_frame.getPosition();
   STOFFGraphicStyle style;
-  //updateStyle(style, object, listener);
+  state.m_frame.addTo(style.m_propertyList);
   if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture, localObj) || localPicture.isEmpty()) {
     if (!localObj) {
       STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: sorry, can not find object %s\n", m_name.cstr()));

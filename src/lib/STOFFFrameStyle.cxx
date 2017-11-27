@@ -50,7 +50,19 @@ std::ostream &operator<<(std::ostream &o, STOFFFrameStyle const &frameStyle)
 bool STOFFFrameStyle::operator==(STOFFFrameStyle const &frameStyle) const
 {
   return m_propertyList.getPropString() == frameStyle.m_propertyList.getPropString() &&
-         m_frameSize == frameStyle.m_frameSize;
+         m_position==frameStyle.m_position && m_frameSize == frameStyle.m_frameSize;
+}
+
+STOFFPosition STOFFFrameStyle::getPosition() const
+{
+  STOFFPosition position(m_position);
+  if (m_frameSize[0]>0 && m_frameSize[1]>0)
+    position.setSize(m_frameSize, librevenge::RVNG_POINT);
+  else {
+    STOFF_DEBUG_MSG(("STOFFFrameStyle::getPosition: unknown frame size\n"));
+    position.setSize(STOFFVec2i(-50,-50), librevenge::RVNG_POINT);
+  }
+  return position;
 }
 
 void STOFFFrameStyle::addTo(librevenge::RVNGPropertyList &pList) const

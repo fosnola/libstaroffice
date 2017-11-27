@@ -720,21 +720,6 @@ std::shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zon
     if (nVers>2) f << "bCont=" << input->readULong(1) << ",";
     if (nVers>3) f << "bOutside1=" << input->readULong(1) << ",";
     break;
-  case StarAttribute::ATTR_FRM_ANCHOR:
-    f << "anchor=" << input->readULong(1) << ",";
-    if (nVers<1)
-      f << "nId=" << input->readULong(2) << ",";
-    else {
-      unsigned long nId;
-      if (!input->readCompressedULong(nId)) {
-        STOFF_DEBUG_MSG(("StarAttributeManager::readAttribute: can not read nId\n"));
-        f << "###nId,";
-        break;
-      }
-      else
-        f << "nId=" << nId << ",";
-    }
-    break;
   case StarAttribute::ATTR_FRM_FRMMACRO: { // macitem.cxx SvxMacroTableDtor::Read
     f << "frmMacro,";
     if (nVers>=1) {
