@@ -1012,7 +1012,7 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
   return true;
 }
 
-bool StarFormatManager::readSWFlyFrameList(StarZone &zone, StarObject &doc)
+bool StarFormatManager::readSWFlyFrameList(StarZone &zone, StarObject &doc, std::vector<std::shared_ptr<StarFormatManagerInternal::FormatDef> > &listFormats)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
@@ -1030,8 +1030,10 @@ bool StarFormatManager::readSWFlyFrameList(StarZone &zone, StarObject &doc)
     pos=input->tell();
     int rType=input->peek();
     std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
-    if ((rType=='o' || rType=='l') && readSWFormatDef(zone, char(rType), format, doc))
+    if ((rType=='o' || rType=='l') && readSWFormatDef(zone, char(rType), format, doc)) {
+      if (format) listFormats.push_back(format);
       continue;
+    }
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     break;
   }

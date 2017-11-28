@@ -103,7 +103,7 @@ public:
   //! try to read a number formatter type : 'q'
   bool readSWNumberFormatterList(StarZone &zone);
   //! try to read a fly frame list : 'F' (list of 'l' or 'o')
-  bool readSWFlyFrameList(StarZone &zone, StarObject &doc);
+  bool readSWFlyFrameList(StarZone &zone, StarObject &doc, std::vector<std::shared_ptr<StarFormatManagerInternal::FormatDef> > &listFormats);
   //! try to read a format pattern LCL : 'P' (list of 'D') (child of a TOXs)
   bool readSWPatternLCL(StarZone &zone);
 

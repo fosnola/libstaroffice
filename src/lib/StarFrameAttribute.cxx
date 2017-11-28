@@ -238,7 +238,7 @@ public:
   StarFAttributeAnchor(Type type, std::string const &debugName)
     : StarAttribute(type, debugName)
     , m_anchor(-1)
-    , m_index(0)
+    , m_index(-1)
   {
   }
   //! create a new attribute
@@ -255,7 +255,7 @@ public:
   {
     o << m_debugName << "=[";
     if (m_anchor>=0) o << "anchor=" << m_anchor << ",";
-    if (m_index) o << "index=" << m_index << ",";
+    if (m_index>=0) o << "index=" << m_index << ",";
     o << "],";
   }
 
@@ -646,8 +646,18 @@ void StarFAttributeAnchor::addTo(StarState &state, std::set<StarAttribute const 
      RND_STD_FOOTERL, RND_STD_FOOTERR,
      RND_DRAW_OBJECT   */
   STOFFPosition::AnchorTo const(wh[])= {STOFFPosition::Paragraph, STOFFPosition::CharBaseLine,  STOFFPosition::Page, STOFFPosition::Frame, STOFFPosition::Char };
-  if (m_anchor>=0 && m_anchor < int(STOFF_N_ELEMENTS(wh)))
+  if (m_anchor>=0 && m_anchor < int(STOFF_N_ELEMENTS(wh))) {
     state.m_frame.m_position.setAnchor(wh[m_anchor]);
+    if (m_anchor==2) {
+      if (m_index>=0)
+        state.m_frame.m_propertyList.insert("text:anchor-page-number", m_index);
+      // default position seem relative to page
+      if (!state.m_frame.m_propertyList["style:horizontal-rel"])
+        state.m_frame.m_propertyList.insert("style:horizontal-rel", "page");
+      if (!state.m_frame.m_propertyList["style:vertical-rel"])
+        state.m_frame.m_propertyList.insert("style:vertical-rel", "page");
+    }
+  }
   else if (m_anchor>=0) {
     STOFF_DEBUG_MSG(("StarFrameAttributeInternal::StarFAttributeAnchor::addTo: unsure how to send anchor=%d\n", m_anchor));
   }

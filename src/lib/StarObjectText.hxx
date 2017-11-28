@@ -74,7 +74,7 @@ struct Content {
   //! destructor
   ~Content();
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarState &state) const;
+  bool send(STOFFListenerPtr listener, StarState &state, bool isFlyer=false) const;
   //! try to inventory the different pages
   void inventoryPages(StarState &state) const;
   //! the section name

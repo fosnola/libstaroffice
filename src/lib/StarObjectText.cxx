@@ -45,6 +45,7 @@
 #include "STOFFPageSpan.hxx"
 #include "STOFFParagraph.hxx"
 #include "STOFFSection.hxx"
+#include "STOFFSubDocument.hxx"
 #include "STOFFTextListener.hxx"
 
 #include "SWFieldManager.hxx"
@@ -73,6 +74,49 @@
 namespace StarObjectTextInternal
 {
 ////////////////////////////////////////
+//! Internal: the subdocument of a StarObjectSpreadsheet
+class SubDocument final : public STOFFSubDocument
+{
+public:
+  explicit SubDocument(StarObjectTextInternal::Content const &content, StarState &state) :
+    STOFFSubDocument(nullptr, STOFFInputStreamPtr(), STOFFEntry()), m_content(content), m_state(state) {}
+
+  //! destructor
+  ~SubDocument() final {}
+
+  //! operator!=
+  bool operator!=(STOFFSubDocument const &doc) const final
+  {
+    if (STOFFSubDocument::operator!=(doc)) return true;
+    auto const *sDoc = dynamic_cast<SubDocument const *>(&doc);
+    if (!sDoc) return true;
+    if (&m_content != &sDoc->m_content) return true;
+    return false;
+  }
+
+  //! the parser function
+  void parse(STOFFListenerPtr &listener, libstoff::SubDocumentType type) final;
+
+protected:
+  //! the content
+  StarObjectTextInternal::Content const &m_content;
+  //! the state
+  StarState &m_state;
+private:
+  SubDocument(SubDocument const &);
+  SubDocument &operator=(SubDocument const &);
+};
+
+void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*type*/)
+{
+  if (!listener.get()) {
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheetInternal::SubDocument::parse: no listener\n"));
+    return;
+  }
+  m_content.send(listener, m_state);
+}
+
+////////////////////////////////////////
 // Zone, Content function
 Zone::~Zone()
 {
@@ -94,23 +138,6 @@ void Content::inventoryPages(StarState &state) const
     if (state.m_global->m_pageNameList.empty())
       state.m_global->m_pageNameList.push_back("");
   }
-}
-
-bool Content::send(STOFFListenerPtr listener, StarState &state) const
-{
-  if (!listener) {
-    STOFF_DEBUG_MSG(("StarObjectTextInternal::Content::send: call without listener\n"));
-    return false;
-  }
-  StarState cState(state.m_global);
-  cState.m_frame=state.m_frame;
-  for (size_t t=0; t<m_zoneList.size(); ++t) {
-    if (m_zoneList[t])
-      m_zoneList[t]->send(listener, cState);
-    if (t+1!=m_zoneList.size())
-      listener->insertEOL();
-  }
-  return true;
 }
 
 ////////////////////////////////////////
@@ -640,6 +667,35 @@ bool Table::send(STOFFListenerPtr listener, StarState &state) const
   return m_table->send(listener, state);
 }
 
+bool Content::send(STOFFListenerPtr listener, StarState &state, bool isFlyer) const
+{
+  if (!listener) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::Content::send: call without listener\n"));
+    return false;
+  }
+  StarState cState(state.m_global);
+  if (isFlyer) {
+    // check if we need to create a textbox
+    for (size_t t=0; t<m_zoneList.size(); ++t) {
+      if (!std::dynamic_pointer_cast<TextZone>(m_zoneList[t]))
+        continue;
+      auto subDoc = std::make_shared<SubDocument>(*this, cState);
+      STOFFGraphicStyle style;
+      state.m_frame.addTo(style.m_propertyList);
+      listener->insertTextBox(state.m_frame.getPosition(), subDoc, style);
+      return true;
+    }
+  }
+  cState.m_frame=state.m_frame;
+  for (size_t t=0; t<m_zoneList.size(); ++t) {
+    if (m_zoneList[t])
+      m_zoneList[t]->send(listener, cState);
+    if (t+1!=m_zoneList.size())
+      listener->insertEOL();
+  }
+  return true;
+}
+
 ////////////////////////////////////////
 //! Internal: the state of a StarObjectText
 struct State {
@@ -648,6 +704,7 @@ struct State {
     : m_numPages(0)
     , m_numGraphicPages(0)
     , m_mainContent()
+    , m_flyList()
     , m_numericRuler()
     , m_pageStyle()
     , m_model()
@@ -659,6 +716,8 @@ struct State {
   int m_numGraphicPages;
   //! the main content
   std::shared_ptr<Content> m_mainContent;
+  //! the list of fly zone
+  std::vector<std::shared_ptr<StarFormatManagerInternal::FormatDef> > m_flyList;
   //! the numeric ruler
   std::shared_ptr<StarObjectNumericRuler> m_numericRuler;
   //! the page style
@@ -723,11 +782,19 @@ bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
     return true;
   }
   if (m_textState->m_model) {
+    // send the graphics which are in the model
     for (int i=0; i<=m_textState->m_numGraphicPages; ++i)
       m_textState->m_model->sendPage(i, listener);
   }
   auto pool=findItemPool(StarItemPool::T_WriterPool, false);
   StarState state(pool.get(), *this);
+  // then send the frames relative to the page
+  for (auto fly : m_textState->m_flyList) {
+    if (!fly) continue;
+    StarState cState(state);
+    fly->send(listener, cState);
+  }
+  // finally send the text content
   state.m_global->m_numericRuler=m_textState->m_numericRuler;
   m_textState->m_mainContent->send(listener, state);
   return true;
@@ -1662,7 +1729,7 @@ try
       break;
     }
     case 'F':
-      done=getFormatManager()->readSWFlyFrameList(zone, *this);
+      done=getFormatManager()->readSWFlyFrameList(zone, *this, m_textState->m_flyList);
       break;
     case 'J':
       done=readSWJobSetUp(zone);
