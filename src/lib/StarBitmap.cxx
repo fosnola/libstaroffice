@@ -549,7 +549,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
     if (bitmap.m_sizeImage) lastPos= input->tell() + long(bitmap.m_sizeImage);
     bool bit4=bitmap.m_compression==2;
     size_t wPos=0, lastWPos=size_t(bitmap.m_height*bitmap.m_width);
-    if (lastWPos / bitmap.m_height != bitmap.m_width) {
+    if (lastWPos == 0 || lastWPos / bitmap.m_height != bitmap.m_width) {
       STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: bitmap dimensions are too big\n"));
       return false;
     }
