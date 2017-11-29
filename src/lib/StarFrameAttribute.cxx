@@ -648,14 +648,19 @@ void StarFAttributeAnchor::addTo(StarState &state, std::set<StarAttribute const 
   STOFFPosition::AnchorTo const(wh[])= {STOFFPosition::Paragraph, STOFFPosition::CharBaseLine,  STOFFPosition::Page, STOFFPosition::Frame, STOFFPosition::Char };
   if (m_anchor>=0 && m_anchor < int(STOFF_N_ELEMENTS(wh))) {
     state.m_frame.m_position.setAnchor(wh[m_anchor]);
+    char const *(defaultXRel[]) = {"paragraph", "paragraph", "page", "frame", "paragraph" };
+    char const *(defaultYRel[]) = {"paragraph", "baseline", "page", "frame", "paragraph" };
+    char const *(defaultYPos[]) = {nullptr, "middle", nullptr, nullptr, "from-top"};
+    if (!state.m_frame.m_propertyList["style:horizontal-rel"] && defaultXRel[m_anchor])
+      state.m_frame.m_propertyList.insert("style:horizontal-rel",  defaultXRel[m_anchor]);
+    if (!state.m_frame.m_propertyList["style:vertical-rel"] && defaultYRel[m_anchor])
+      state.m_frame.m_propertyList.insert("style:vertical-rel",  defaultYRel[m_anchor]);
+    if (!state.m_frame.m_propertyList["style:vertical-pos"] && defaultYPos[m_anchor])
+      state.m_frame.m_propertyList.insert("style:vertical-pos",  defaultYPos[m_anchor]);
+
     if (m_anchor==2) { // page
       if (m_index>=0)
         state.m_frame.m_propertyList.insert("text:anchor-page-number", m_index);
-      // default position seem relative to page
-      if (!state.m_frame.m_propertyList["style:horizontal-rel"])
-        state.m_frame.m_propertyList.insert("style:horizontal-rel", "page");
-      if (!state.m_frame.m_propertyList["style:vertical-rel"])
-        state.m_frame.m_propertyList.insert("style:vertical-rel", "page");
     }
     else if (m_anchor==4) // at char
       state.m_frame.m_anchorIndex = m_index;

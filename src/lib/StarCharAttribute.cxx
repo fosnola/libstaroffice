@@ -385,8 +385,8 @@ namespace StarCharAttribute
 class SubDocument final : public STOFFSubDocument
 {
 public:
-  explicit SubDocument(std::shared_ptr<StarObjectTextInternal::Content> content, StarItemPool const *pool, StarObject &object) :
-    STOFFSubDocument(nullptr, STOFFInputStreamPtr(), STOFFEntry()), m_content(content), m_pool(pool), m_object(object) {}
+  SubDocument(std::shared_ptr<StarObjectTextInternal::Content> content, std::shared_ptr<StarState::GlobalState> state) :
+    STOFFSubDocument(nullptr, STOFFInputStreamPtr(), STOFFEntry()), m_content(content), m_state(state) {}
 
   //! destructor
   ~SubDocument() final {}
@@ -397,9 +397,7 @@ public:
     if (STOFFSubDocument::operator!=(doc)) return true;
     auto const *sDoc = dynamic_cast<SubDocument const *>(&doc);
     if (!sDoc) return true;
-    if (m_content.get() != sDoc->m_content.get()) return true;
-    if (m_pool != sDoc->m_pool) return true;
-    if (&m_object != &sDoc->m_object) return true;
+    if (m_state.get() != sDoc->m_state.get()) return true;
     return false;
   }
 
@@ -409,10 +407,8 @@ public:
 protected:
   //! the content
   std::shared_ptr<StarObjectTextInternal::Content> m_content;
-  //! the pool
-  StarItemPool const *m_pool;
-  //! the object
-  StarObject &m_object;
+  //! the global state
+  std::shared_ptr<StarState::GlobalState> m_state;
 private:
   SubDocument(SubDocument const &);
   SubDocument &operator=(SubDocument const &);
@@ -425,7 +421,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
     return;
   }
   if (m_content) {
-    StarState state(m_pool, m_object);
+    StarState state(m_state->m_pool, m_state->m_object, m_state->m_relativeUnit);
     m_content->send(listener, state);
   }
 }
@@ -1358,7 +1354,7 @@ bool StarCAttributeFootnote::send(STOFFListenerPtr listener, StarState &state, s
     STOFF_DEBUG_MSG(("StarCAttributeFootnote::send: can not find the listener\n"));
     return false;
   }
-  STOFFSubDocumentPtr subDocument(new SubDocument(m_content, state.m_global->m_pool, state.m_global->m_object));
+  STOFFSubDocumentPtr subDocument(new SubDocument(m_content, state.m_global));
   STOFFNote note(STOFFNote::FootNote);
   if (m_label.empty())
     note.m_label=m_label;

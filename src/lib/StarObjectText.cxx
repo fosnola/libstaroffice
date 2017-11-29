@@ -799,14 +799,14 @@ bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
       m_textState->m_model->sendPage(i, listener);
   }
   auto pool=findItemPool(StarItemPool::T_WriterPool, false);
-  StarState state(pool.get(), *this);
   // then send the frames relative to the page
   for (auto fly : m_textState->m_flyList) {
     if (!fly) continue;
-    StarState cState(state);
-    fly->send(listener, cState);
+    StarState state(pool.get(), *this);
+    fly->send(listener, state);
   }
   // finally send the text content
+  StarState state(pool.get(), *this);
   state.m_global->m_numericRuler=m_textState->m_numericRuler;
   m_textState->m_mainContent->send(listener, state);
   return true;
