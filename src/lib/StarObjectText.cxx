@@ -337,7 +337,7 @@ struct TextZone final : public Zone {
     , m_styleName("")
     , m_level(-1)
     , m_charAttributeList()
-    , m_format()
+    , m_formatList()
     , m_list()
     , m_markList()
   {
@@ -357,7 +357,7 @@ struct TextZone final : public Zone {
   //! the character item list
   std::vector<StarWriterStruct::Attribute> m_charAttributeList;
   //! the format
-  std::shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
+  std::vector<std::shared_ptr<StarFormatManagerInternal::FormatDef> > m_formatList;
   //! the list (if defined)
   std::shared_ptr<STOFFList> m_list;
   //! the mark
@@ -464,6 +464,17 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
     if (attrib.m_position[1]>0)
       modPosSet.insert(size_t(attrib.m_position[1]));
   }
+  std::multimap<size_t, std::shared_ptr<StarFormatManagerInternal::FormatDef> > posToFormat;
+  for (auto const &c : m_formatList) {
+    if (!c) continue;
+    // either a paragraph anchor or a "at char" anchor
+    StarState fState(state);
+    c->updateState(fState);
+    size_t lastIndex=m_textSourcePosition.empty() ? 0 : m_textSourcePosition.back();
+    size_t cPos=fState.m_frame.m_anchorIndex<0 ? 0 : fState.m_frame.m_anchorIndex>int(lastIndex) ? lastIndex :
+                size_t(fState.m_frame.m_anchorIndex);
+    posToFormat.insert(std::multimap<size_t, std::shared_ptr<StarFormatManagerInternal::FormatDef> >::value_type(cPos, c));
+  }
   auto posSetIt=modPosSet.begin();
   int endLinkPos=-1, endRefMarkPos=-1;
   librevenge::RVNGString refMarkString;
@@ -472,7 +483,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
   bool newPage=false;
   for (size_t c=0; c<= m_text.size(); ++c) {
     bool fontChange=false;
-    size_t srcPos=c<m_textSourcePosition.size() ? m_textSourcePosition[c] : 10000;
+    size_t srcPos=c<m_textSourcePosition.size() ? m_textSourcePosition[c] : m_textSourcePosition.empty() ? 0 : 10000;
     while (posSetIt!=modPosSet.end() && *posSetIt <= srcPos) {
       ++posSetIt;
       fontChange=true;
@@ -570,11 +581,6 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
         }
         listener->setParagraph(lineState.m_paragraph);
       }
-      if (c==0 && m_format) {
-        StarState cState(lineState.m_global->m_pool, lineState.m_global->m_object, lineState.m_global->m_relativeUnit);
-        m_format->send(listener, cState);
-        listener->setFont(font);
-      }
       static bool first=true;
       if (first && lineState.m_content) {
         first=false;
@@ -583,6 +589,10 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
     }
     if (c==0 && !newPage && numPages && numPages!=lineState.m_global->m_pageNameList.size())
       listener->insertBreak(STOFFListener::SoftPageBreak);
+    for (auto it=posToFormat.lower_bound(srcPos); it!=posToFormat.upper_bound(srcPos); ++it) {
+      StarState cState(lineState.m_global->m_pool, lineState.m_global->m_object, lineState.m_global->m_relativeUnit);
+      it->second->send(listener, cState);
+    }
 
     if (!linkString.empty()) {
       STOFFLink link;
@@ -673,12 +683,13 @@ bool Content::send(STOFFListenerPtr listener, StarState &state, bool isFlyer) co
     STOFF_DEBUG_MSG(("StarObjectTextInternal::Content::send: call without listener\n"));
     return false;
   }
-  StarState cState(state.m_global);
   if (isFlyer) {
     // check if we need to create a textbox
     for (size_t t=0; t<m_zoneList.size(); ++t) {
       if (!std::dynamic_pointer_cast<TextZone>(m_zoneList[t]))
         continue;
+      StarState cState(state.m_global);
+      //cState.m_frame.m_position.setAnchor(STOFFPosition::Frame);
       auto subDoc = std::make_shared<SubDocument>(*this, cState);
       STOFFGraphicStyle style;
       state.m_frame.addTo(style.m_propertyList);
@@ -686,6 +697,7 @@ bool Content::send(STOFFListenerPtr listener, StarState &state, bool isFlyer) co
       return true;
     }
   }
+  StarState cState(state.m_global);
   cState.m_frame=state.m_frame;
   for (size_t t=0; t<m_zoneList.size(); ++t) {
     if (m_zoneList[t])
@@ -1510,9 +1522,13 @@ bool StarObjectText::readSWTextZone(StarZone &zone, std::shared_ptr<StarObjectTe
     case 'S':
       done=StarWriterStruct::Attribute::readList(zone, textZone->m_charAttributeList, *this);
       break;
-    case 'l': // related to link
-      done=getFormatManager()->readSWFormatDef(zone,'l', textZone->m_format, *this);
+    case 'l': { // related to link
+      std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
+      done=getFormatManager()->readSWFormatDef(zone,'l', format, *this);
+      if (done && format)
+        textZone->m_formatList.push_back(format);
       break;
+    }
     case 'o': { // format: safe to ignore
       std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
       done=getFormatManager()->readSWFormatDef(zone,'o', format, *this);

@@ -1325,7 +1325,7 @@ bool StarCAttributeContent::send(STOFFListenerPtr listener, StarState &state, st
     return false;
   }
   if (m_content) // checkme zone time, we need probably to create a frame
-    m_content->send(listener, state, true);
+    m_content->send(listener, state, !state.m_headerFooter);
   return true;
 }
 

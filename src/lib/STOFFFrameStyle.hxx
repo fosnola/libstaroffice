@@ -49,6 +49,8 @@ public:
   STOFFFrameStyle()
     : m_propertyList()
     , m_position()
+    , m_frameSize()
+    , m_anchorIndex(-1)
   {
   }
   //! add to the propList
@@ -70,6 +72,8 @@ public:
   STOFFPosition m_position;
   /** the last frame dimension */
   STOFFVec2f m_frameSize;
+  /** the anchor index: used to relate to find the character related to at_char */
+  int m_anchorIndex;
 };
 
 

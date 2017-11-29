@@ -403,6 +403,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
     m_smallText->send(listener);
   else if (m_format && m_object) {
     StarState state(m_pool, *m_object); // check me, set relUnit
+    state.m_headerFooter=true;
     m_format->send(listener, state);
   }
 }

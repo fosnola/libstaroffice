@@ -125,6 +125,7 @@ public:
     , m_content(false)
     , m_flyCnt(false)
     , m_footnote(false)
+    , m_headerFooter(false)
     , m_link("")
     , m_refMark("")
     , m_field()
@@ -143,6 +144,7 @@ public:
     , m_content(false)
     , m_flyCnt(false)
     , m_footnote(false)
+    , m_headerFooter(false)
     , m_link("")
     , m_refMark("")
     , m_field()
@@ -179,6 +181,8 @@ public:
   bool m_flyCnt;
   /// flag to know if this is a footnote
   bool m_footnote;
+  /// flag to know if this is a header/footer
+  bool m_headerFooter;
   /** the link url */
   librevenge::RVNGString m_link;
   /// the ref mark

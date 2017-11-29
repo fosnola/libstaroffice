@@ -648,7 +648,7 @@ void StarFAttributeAnchor::addTo(StarState &state, std::set<StarAttribute const 
   STOFFPosition::AnchorTo const(wh[])= {STOFFPosition::Paragraph, STOFFPosition::CharBaseLine,  STOFFPosition::Page, STOFFPosition::Frame, STOFFPosition::Char };
   if (m_anchor>=0 && m_anchor < int(STOFF_N_ELEMENTS(wh))) {
     state.m_frame.m_position.setAnchor(wh[m_anchor]);
-    if (m_anchor==2) {
+    if (m_anchor==2) { // page
       if (m_index>=0)
         state.m_frame.m_propertyList.insert("text:anchor-page-number", m_index);
       // default position seem relative to page
@@ -657,6 +657,8 @@ void StarFAttributeAnchor::addTo(StarState &state, std::set<StarAttribute const 
       if (!state.m_frame.m_propertyList["style:vertical-rel"])
         state.m_frame.m_propertyList.insert("style:vertical-rel", "page");
     }
+    else if (m_anchor==4) // at char
+      state.m_frame.m_anchorIndex = m_index;
   }
   else if (m_anchor>=0) {
     STOFF_DEBUG_MSG(("StarFrameAttributeInternal::StarFAttributeAnchor::addTo: unsure how to send anchor=%d\n", m_anchor));

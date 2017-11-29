@@ -50,7 +50,8 @@ std::ostream &operator<<(std::ostream &o, STOFFFrameStyle const &frameStyle)
 bool STOFFFrameStyle::operator==(STOFFFrameStyle const &frameStyle) const
 {
   return m_propertyList.getPropString() == frameStyle.m_propertyList.getPropString() &&
-         m_position==frameStyle.m_position && m_frameSize == frameStyle.m_frameSize;
+         m_position==frameStyle.m_position && m_anchorIndex == frameStyle.m_anchorIndex &&
+         m_frameSize == frameStyle.m_frameSize;
 }
 
 STOFFPosition STOFFFrameStyle::getPosition() const
