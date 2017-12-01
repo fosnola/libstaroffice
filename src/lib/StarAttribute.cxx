@@ -713,13 +713,6 @@ std::shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zon
     if (val&2) f << "size[protect],";
     if (val&4) f << "cntnt[protect],";
     break;
-  case StarAttribute::ATTR_FRM_SURROUND:
-    f << "surround=" << input->readULong(1) << ",";
-    if (nVers<5) f << "bGold=" << input->readULong(1) << ",";
-    if (nVers>1) f << "bAnch=" << input->readULong(1) << ",";
-    if (nVers>2) f << "bCont=" << input->readULong(1) << ",";
-    if (nVers>3) f << "bOutside1=" << input->readULong(1) << ",";
-    break;
   case StarAttribute::ATTR_FRM_FRMMACRO: { // macitem.cxx SvxMacroTableDtor::Read
     f << "frmMacro,";
     if (nVers>=1) {

@@ -165,7 +165,7 @@ bool FormatZone::send(STOFFListenerPtr listener, StarState &state) const
     STOFF_DEBUG_MSG(("StarObjectTextInternal::FormatZone::send: can not find the format\n"));
     return false;
   }
-  StarState cState(state.m_global->m_pool, state.m_global->m_object, state.m_global->m_relativeUnit);
+  StarState cState(*state.m_global);
   return m_format->send(listener, cState);
 }
 
@@ -207,7 +207,7 @@ bool GraphZone::send(STOFFListenerPtr listener, StarState &state) const
     STOFF_DEBUG_MSG(("StarObjectTextInternal: sorry, can not find object %s\n", m_names[0].cstr()));
     return false;
   }
-  STOFFGraphicStyle style;
+  STOFFGraphicStyle style=state.m_graphic;
   state.m_frame.addTo(style.m_propertyList);
   listener->insertPicture(state.m_frame.getPosition(), localPicture, style);
   return true;
@@ -252,7 +252,7 @@ bool OLEZone::send(STOFFListenerPtr listener, StarState &state) const
   std::shared_ptr<StarObject> localObj;
   auto dir=m_oleParser->getDirectory(m_name.cstr());
   auto position= state.m_frame.getPosition();
-  STOFFGraphicStyle style;
+  STOFFGraphicStyle style=state.m_graphic;
   state.m_frame.addTo(style.m_propertyList);
   if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture, localObj) || localPicture.isEmpty()) {
     if (!localObj) {
@@ -590,7 +590,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
     if (c==0 && !newPage && numPages && numPages!=lineState.m_global->m_pageNameList.size())
       listener->insertBreak(STOFFListener::SoftPageBreak);
     for (auto it=posToFormat.lower_bound(srcPos); it!=posToFormat.upper_bound(srcPos); ++it) {
-      StarState cState(lineState.m_global->m_pool, lineState.m_global->m_object, lineState.m_global->m_relativeUnit);
+      StarState cState(*lineState.m_global);
       it->second->send(listener, cState);
     }
 
@@ -617,15 +617,15 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
       endRefMarkPos=-1;
     }
     if (footnote) {
-      StarState cState(state.m_global->m_pool, state.m_global->m_object, state.m_global->m_relativeUnit);
+      StarState cState(*state.m_global);
       footnote->send(listener, cState);
     }
     else if (flyCnt) {
-      StarState cState(state.m_global->m_pool, state.m_global->m_object, state.m_global->m_relativeUnit);
+      StarState cState(*state.m_global);
       flyCnt->send(listener, cState);
     }
     else if (field) {
-      StarState cState(state.m_global->m_pool, state.m_global->m_object, state.m_global->m_relativeUnit);
+      StarState cState(*state.m_global);
       field->send(listener, state);
     }
     else if (c==m_text.size())
@@ -691,7 +691,7 @@ bool Content::send(STOFFListenerPtr listener, StarState &state, bool isFlyer) co
       StarState cState(state.m_global);
       //cState.m_frame.m_position.setAnchor(STOFFPosition::Frame);
       auto subDoc = std::make_shared<SubDocument>(*this, cState);
-      STOFFGraphicStyle style;
+      STOFFGraphicStyle style=cState.m_graphic;
       state.m_frame.addTo(style.m_propertyList);
       listener->insertTextBox(state.m_frame.getPosition(), subDoc, style);
       return true;

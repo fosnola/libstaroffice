@@ -597,6 +597,48 @@ protected:
   int m_style;
 };
 
+//! a surround attribute
+class StarFAttributeSurround final : public StarAttribute
+{
+public:
+  //! constructor
+  StarFAttributeSurround(Type type, std::string const &debugName)
+    : StarAttribute(type, debugName)
+    , m_surround(2)
+  {
+    for (auto &b : m_bools) b=false;
+  }
+  //! create a new attribute
+  std::shared_ptr<StarAttribute> create() const final
+  {
+    return std::shared_ptr<StarAttribute>(new StarFAttributeSurround(*this));
+  }
+  //! read a zone
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
+  //! add to a cell/graphic style
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
+  //! debug function to print the data
+  void printData(libstoff::DebugStream &o) const final
+  {
+    o << m_debugName << "=[";
+    if (m_surround) o << "surround=" << m_surround << ",";
+    for (int i=0; i<4; ++i) {
+      if (!m_bools[i]) continue;
+      char const *(wh[]) = {"ideal", "anchor[only]", "contour", "outside"};
+      o << wh[i] << ",";
+    }
+    o << "],";
+  }
+
+protected:
+  //! copy constructor
+  StarFAttributeSurround(StarFAttributeSurround const &) = default;
+  //! the main value: NONE, THROUGH, PARALLEL, IDEAL, LEFT, RIGHT, END
+  int m_surround;
+  //! the ideal,anchorOnly, contour, outside
+  bool m_bools[4];
+};
+
 //! a top, bottom, ... attribute
 class StarFAttributeULSpace final : public StarAttribute
 {
@@ -874,7 +916,7 @@ void StarFAttributeLRSpace::addTo(StarState &state, std::set<StarAttribute const
 void StarFAttributeOrientation::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==StarAttribute::ATTR_FRM_HORI_ORIENT) {
-    switch (m_orient) {
+    switch (m_orient) { // NONE,RIGHT,CENTER, LEFT,INSIDE,OUTSIDE,FULL, LEFT_AND_WIDTH
     case 0: // default
       break;
     case 1:
@@ -891,18 +933,21 @@ void StarFAttributeOrientation::addTo(StarState &state, std::set<StarAttribute c
       state.m_frame.m_position.m_propertyList.insert("svg:x", double(m_position)*0.05, librevenge::RVNG_POINT);
   }
   else if (m_type==StarAttribute::ATTR_FRM_VERT_ORIENT) {
-    switch (m_orient) {
-    case 0: // default
-      break;
-    case 1:
-    case 2:
-    case 3: {
-      char const *(wh[])= {"top", "middle", "bottom"};
-      state.m_frame.m_propertyList.insert("style:vertical-align", wh[m_orient-1]);
-      break;
-    }
-    default: // TODO
-      break;
+    // NONE,TOP,CENTER,BOTTOM,CHAR_TOP,CHAR_CENTER,CHAR_BOTTOM,LINE_TOP,LINE_CENTER,LINE_BOTTOM
+    if (m_orient>0 && m_orient<=9) {
+      switch (m_orient%3) {
+      case 0: // BOTTOM, CHAR_BOTTOM, LINE_BOTTOM
+        state.m_frame.m_propertyList.insert("style:vertical-pos", "bottom");
+        break;
+      case 1: // TOP, CHAR_TOP, LINE_TOP
+        state.m_frame.m_propertyList.insert("style:vertical-pos", m_position ? "from-top" : "top");
+        break;
+      case 2: // CENTER, CHAR_CENTER, LINE_CENTER
+        state.m_frame.m_propertyList.insert("style:vertical-pos", "middle");
+        break;
+      default: // nothing
+        break;
+      }
     }
     if (m_position)
       state.m_frame.m_position.m_propertyList.insert("svg:y", double(m_position)*0.05, librevenge::RVNG_POINT);
@@ -931,6 +976,19 @@ void StarFAttributeShadow::addTo(StarState &state, std::set<StarAttribute const 
       << (m_location<=2?-1:1)*double(m_width)/20. << "pt";
     state.m_cell.m_propertyList.insert("style:shadow", s.str().c_str());
   }
+}
+
+void StarFAttributeSurround::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
+{
+  int surround = m_surround; // NONE, THROUGH, PARALLEL, IDEAL, LEFT, RIGHT, END
+  if (m_bools[0] && surround>1) surround=3;
+  if (surround>=0 && surround<=5) {
+    char const *(wh[])= {"none", "run-through", "parallel", "dynamic", "left", "right"};
+    state.m_frame.m_propertyList.insert("style:wrap", wh[surround]);
+  }
+  // checkme what is bAnchorOnly : m_bools[1]
+  state.m_frame.m_propertyList.insert("style:wrap-countour", m_bools[2]);
+  state.m_frame.m_propertyList.insert("style:wrap-contour-mode", m_bools[3] ? "outside" : "full");
 }
 
 void StarFAttributeULSpace::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
@@ -1189,6 +1247,29 @@ bool StarFAttributeShadow::read(StarZone &zone, int /*vers*/, long endPos, StarO
   return ok && input->tell()<=endPos;
 }
 
+bool StarFAttributeSurround::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  bool ok=true;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  m_surround = int(input->readULong(1));
+  if (vers<5) // ideal
+    *input >> m_bools[0];
+  if (vers>1) // anchor only
+    *input >> m_bools[1];
+  if (vers>2) // continuous only
+    *input >> m_bools[2];
+  if (vers>3) // outside
+    *input >> m_bools[2];
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return ok && input->tell()<=endPos;
+}
+
 bool StarFAttributeULSpace::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)
 {
   STOFFInputStreamPtr input=zone.input();
@@ -1226,6 +1307,7 @@ void addInitTo(std::map<int, std::shared_ptr<StarAttribute> > &map)
   map[StarAttribute::ATTR_SC_BORDER]=std::shared_ptr<StarAttribute>(new StarFAttributeBorder(StarAttribute::ATTR_SC_BORDER,"scBorder"));
   map[StarAttribute::ATTR_FRM_SHADOW]=std::shared_ptr<StarAttribute>(new StarFAttributeShadow(StarAttribute::ATTR_FRM_SHADOW,"shadow"));
   map[StarAttribute::ATTR_SC_SHADOW]=std::shared_ptr<StarAttribute>(new StarFAttributeShadow(StarAttribute::ATTR_SC_SHADOW,"shadow"));
+  map[StarAttribute::ATTR_FRM_SURROUND]=std::shared_ptr<StarAttribute>(new StarFAttributeSurround(StarAttribute::ATTR_FRM_SURROUND,"surround"));
   map[StarAttribute::ATTR_CHR_BACKGROUND]=std::shared_ptr<StarAttribute>(new StarFAttributeBrush(StarAttribute::ATTR_CHR_BACKGROUND,"chrBackground"));
   map[StarAttribute::ATTR_FRM_BACKGROUND]=std::shared_ptr<StarAttribute>(new StarFAttributeBrush(StarAttribute::ATTR_FRM_BACKGROUND,"frmBackground"));
   map[StarAttribute::ATTR_SC_BACKGROUND]=std::shared_ptr<StarAttribute>(new StarFAttributeBrush(StarAttribute::ATTR_SC_BACKGROUND,"scBackground"));

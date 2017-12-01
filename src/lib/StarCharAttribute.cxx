@@ -421,7 +421,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
     return;
   }
   if (m_content) {
-    StarState state(m_state->m_pool, m_state->m_object, m_state->m_relativeUnit);
+    StarState state(*m_state);
     m_content->send(listener, state);
   }
 }

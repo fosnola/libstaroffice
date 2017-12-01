@@ -435,6 +435,12 @@ void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
     if (m_value<5) {
       char const *(wh[])= {"none", "none" /*blink*/, "scroll", "alternate", "slide"};
       state.m_graphic.m_propertyList.insert("text:animation", wh[m_value]);
+      if (m_value) {
+        if (!state.m_graphic.m_propertyList["text:animation-direction"])
+          state.m_graphic.m_propertyList.insert("text:animation-direction", "left");
+        if (!state.m_graphic.m_propertyList["text:animation-steps"])
+          state.m_graphic.m_propertyList.insert("text:animation-steps", 0.02, librevenge::RVNG_PERCENT);
+      }
     }
     else {
       STOFF_DEBUG_MSG(("StarGAttributeUInt::addTo: unknown animation direction %d\n", int(m_value)));
