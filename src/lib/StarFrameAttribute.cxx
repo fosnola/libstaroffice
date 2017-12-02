@@ -692,7 +692,7 @@ void StarFAttributeAnchor::addTo(StarState &state, std::set<StarAttribute const 
     state.m_frame.m_position.setAnchor(wh[m_anchor]);
     char const *(defaultXRel[]) = {"paragraph", "paragraph", "page", "frame", "paragraph" };
     char const *(defaultYRel[]) = {"paragraph", "baseline", "page", "frame", "paragraph" };
-    char const *(defaultYPos[]) = {nullptr, "middle", nullptr, nullptr, "from-top"};
+    char const *(defaultYPos[]) = {nullptr, "bottom", nullptr, nullptr, "from-top"};
     if (!state.m_frame.m_propertyList["style:horizontal-rel"] && defaultXRel[m_anchor])
       state.m_frame.m_propertyList.insert("style:horizontal-rel",  defaultXRel[m_anchor]);
     if (!state.m_frame.m_propertyList["style:vertical-rel"] && defaultYRel[m_anchor])
@@ -899,6 +899,18 @@ void StarFAttributeLRSpace::addTo(StarState &state, std::set<StarAttribute const
     // m_textLeft: ok to ignore ?
     state.m_paragraph.m_propertyList.insert("style:auto-text-indent", m_autoFirst);
   }
+  // frame
+  if (m_type==ATTR_FRM_LR_SPACE) {
+    if (m_propMargins[0]==100)
+      state.m_frame.m_propertyList.insert("fo:margin-left", state.m_global->m_relativeUnit*double(m_textLeft), librevenge::RVNG_POINT);
+    else
+      state.m_frame.m_propertyList.insert("fo:margin-left", double(m_propMargins[0])/100., librevenge::RVNG_PERCENT);
+
+    if (m_propMargins[1]==100)
+      state.m_frame.m_propertyList.insert("fo:margin-right", state.m_global->m_relativeUnit*double(m_margins[1]), librevenge::RVNG_POINT);
+    else
+      state.m_frame.m_propertyList.insert("fo:margin-right", double(m_propMargins[1])/100., librevenge::RVNG_PERCENT);
+  }
   // page
   if (m_type==ATTR_FRM_LR_SPACE && state.m_global->m_pageZone<=2) {
     if (m_propMargins[0]==100)
@@ -916,19 +928,33 @@ void StarFAttributeLRSpace::addTo(StarState &state, std::set<StarAttribute const
 void StarFAttributeOrientation::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==StarAttribute::ATTR_FRM_HORI_ORIENT) {
-    switch (m_orient) { // NONE,RIGHT,CENTER, LEFT,INSIDE,OUTSIDE,FULL, LEFT_AND_WIDTH
+    // NONE,RIGHT,CENTER, LEFT,INSIDE,OUTSIDE,FULL, LEFT_AND_WIDTH
+    char const *(wh[])= {nullptr, "right", "center", "left", "inside", "outside", nullptr, "from-left"};
+    if (m_orient>=0 && m_orient<=7 && wh[m_orient])
+      state.m_frame.m_propertyList.insert("style:horizontal-pos", wh[m_orient-1]);
+
+    switch (m_orient) {
     case 0: // default
       break;
     case 1:
     case 2:
     case 3: { // CHECKME
-      char const *(wh[])= {"start", "center", "left"};
-      state.m_frame.m_propertyList.insert("fo:text-align", wh[m_orient-1]);
+      char const *(align[])= {"start", "center", "left"};
+      state.m_frame.m_propertyList.insert("fo:text-align", align[m_orient-1]);
       break;
     }
+    case 6:
+      state.m_frame.m_propertyList.insert("fo:text-align", "justify");
+      break;
     default: // TODO
       break;
     }
+    // the relative position, FRAME, PRTAREA, CHAR, PG_LEFT, PG_RIGTH, FRM_LEFT, FRM_RIGHT, PG_FRAME, PG_PTRAREA
+    char const *(relat[])= { "frame", nullptr, "char", "page-start-margin", "page-left-margin", "frame-start-margin",
+                             "frame-end-margin", "page", "page"
+                           };
+    if (m_relat>=0 && m_relat<=8 && relat[m_relat])
+      state.m_frame.m_propertyList.insert("style:horizontal-rel", relat[m_relat]);
     if (m_position)
       state.m_frame.m_position.m_propertyList.insert("svg:x", double(m_position)*0.05, librevenge::RVNG_POINT);
   }
@@ -948,6 +974,35 @@ void StarFAttributeOrientation::addTo(StarState &state, std::set<StarAttribute c
       default: // nothing
         break;
       }
+      switch ((m_orient-1)/3) {
+      case 1:
+        state.m_frame.m_propertyList.insert("style:vertical-rel", "char");
+        break;
+      case 2:
+        state.m_frame.m_propertyList.insert("style:vertical-rel", "line");
+        break;
+      default:
+        break;
+      }
+    }
+    // the relative position, FRAME, PRTAREA, CHAR, PG_LEFT, PG_RIGTH, FRM_LEFT, FRM_RIGHT, PG_FRAME, PG_PTRAREA
+    switch (m_relat) {
+    case 0: // FRAME
+    case 5: // FRM_LEFT
+    case 6: // FRM_RIGHT
+      state.m_frame.m_propertyList.insert("style:vertical-rel", "frame");
+      break;
+    case 2:
+      state.m_frame.m_propertyList.insert("style:vertical-rel", "char");
+      break;
+    case 3: // PG_LEFT
+    case 4: // PG_RIGH
+    case 7: // PG_FRAME
+    case 8: // PG_PTRAREA
+      state.m_frame.m_propertyList.insert("style:vertical-rel", "page");
+      break;
+    default:
+      break;
     }
     if (m_position)
       state.m_frame.m_position.m_propertyList.insert("svg:y", double(m_position)*0.05, librevenge::RVNG_POINT);
@@ -1211,7 +1266,8 @@ bool StarFAttributeOrientation::read(StarZone &zone, int vers, long endPos, Star
   m_relat=int(input->readULong(1));
   if (m_type==StarAttribute::ATTR_FRM_HORI_ORIENT && vers>=1)
     *input>>m_posToggle;
-
+  // if (m_type==StarAttribute::ATTR_FRM_VERT_ORIENT && m_orient==0 && vers==0)
+  // m_relat=0;
   printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
