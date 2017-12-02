@@ -1955,8 +1955,8 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
       }
       bool dataOk=true;
       if (1<=nVer) {
-        if (nVer==1 && style.m_family==2 && nId==1)
-          nId=(1<<11)+1; // RES_POOLCOLL_TEXT
+        /*if (nVer==1 && style.m_family==2 && nId==1)
+          nId=(1<<11)+1; // RES_POOLCOLL_TEXT*/
         dataOk=input->tell()+2<=endDataPos;
         int val=dataOk ? int(input->readULong(2)) : 0;
         if (val==1) {
