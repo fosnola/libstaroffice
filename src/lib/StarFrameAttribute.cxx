@@ -931,7 +931,7 @@ void StarFAttributeOrientation::addTo(StarState &state, std::set<StarAttribute c
     // NONE,RIGHT,CENTER, LEFT,INSIDE,OUTSIDE,FULL, LEFT_AND_WIDTH
     char const *(wh[])= {nullptr, "right", "center", "left", "inside", "outside", nullptr, "from-left"};
     if (m_orient>=0 && m_orient<=7 && wh[m_orient])
-      state.m_frame.m_propertyList.insert("style:horizontal-pos", wh[m_orient-1]);
+      state.m_frame.m_propertyList.insert("style:horizontal-pos", wh[m_orient]);
 
     switch (m_orient) {
     case 0: // default
