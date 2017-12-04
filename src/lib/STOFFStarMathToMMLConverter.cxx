@@ -763,28 +763,28 @@ std::shared_ptr<Node> Parser::additionExpr(size_t &pos) const
   return term;
 }
 
-std::shared_ptr<Node> Parser::multiplicationExpr(size_t &pos) const
+std::shared_ptr<Node> Parser::multiplicationExpr(size_t &position) const
 {
-  auto actPos=pos;
-  auto lExpr=leftParenthesisExpr(pos, [this](size_t &pos) {
+  auto actPos=position;
+  auto lExpr=leftParenthesisExpr(position, [this](size_t &pos) {
     return this->multiplicationExpr(pos);
   });
   if (lExpr) return lExpr;
-  pos=actPos;
-  auto term=positionExpr(pos);
+  position=actPos;
+  auto term=positionExpr(position);
   if (!term)
     throw "Parser::multiplicationExpr: no data";
   while (true) {
-    actPos=pos;
+    actPos=position;
     std::string spaces;
-    ignoreSpaces(pos, spaces);
-    if (pos+1>=m_dataList.size()) break;
-    auto const &cData=m_dataList[pos];
+    ignoreSpaces(position, spaces);
+    if (position+1>=m_dataList.size()) break;
+    auto const &cData=m_dataList[position];
     if ((cData.m_type==LexerData::Special && m_multiplicationMap.find(cData.m_string)!=m_multiplicationMap.end()) ||
         (cData.m_type==LexerData::Unknown && m_multiplicationStringMap.find(toLower(cData.m_string))!=m_multiplicationStringMap.end())) {
       try {
-        ++pos;
-        auto newChild=positionExpr(pos);
+        ++position;
+        auto newChild=positionExpr(position);
         if (newChild) {
           auto newTerm=std::make_shared<Node>(Node::Multiplication, spaces);
           newTerm->m_function=cData.m_string;
@@ -797,14 +797,14 @@ std::shared_ptr<Node> Parser::multiplicationExpr(size_t &pos) const
       catch (...) {
       }
     }
-    else if (cData.m_type==LexerData::Unknown && icmp(cData.m_string,"boper") && pos+2<=m_dataList.size()) {
-      ++pos;
-      ignoreSpaces(pos);
-      if (pos+1<=m_dataList.size() && !m_dataList[pos].m_string.empty()) {
-        auto oper=m_dataList[pos].m_string;
+    else if (cData.m_type==LexerData::Unknown && icmp(cData.m_string,"boper") && position+2<=m_dataList.size()) {
+      ++position;
+      ignoreSpaces(position);
+      if (position+1<=m_dataList.size() && !m_dataList[position].m_string.empty()) {
+        auto oper=m_dataList[position].m_string;
         try {
-          ++pos;
-          auto newChild=positionExpr(pos);
+          ++position;
+          auto newChild=positionExpr(position);
           if (newChild) {
             auto newTerm=std::make_shared<Node>(Node::Multiplication, spaces);
             newTerm->m_function=cData.m_string;
@@ -819,10 +819,10 @@ std::shared_ptr<Node> Parser::multiplicationExpr(size_t &pos) const
         }
       }
     }
-    pos=actPos;
+    position=actPos;
     break;
   }
-  return rightParenthesisExpr(pos,term);
+  return rightParenthesisExpr(position,term);
 }
 
 std::shared_ptr<Node> Parser::positionExpr(size_t &pos) const
@@ -1120,32 +1120,32 @@ std::shared_ptr<Node> Parser::functionExpr(size_t &pos, bool inPosition) const
   return funcNode;
 }
 
-std::shared_ptr<Node> Parser::parenthesisExpr(size_t &pos) const
+std::shared_ptr<Node> Parser::parenthesisExpr(size_t &position) const
 {
-  auto actPos=pos;
-  auto lExpr=leftParenthesisExpr(pos, [this](size_t &pos) {
+  auto actPos=position;
+  auto lExpr=leftParenthesisExpr(position, [this](size_t &pos) {
     return this->parenthesisExpr(pos);
   });
   if (lExpr) return lExpr;
-  pos=actPos;
+  position=actPos;
   std::string spaces;
-  ignoreSpaces(pos, spaces);
-  if (pos>=m_dataList.size())
+  ignoreSpaces(position, spaces);
+  if (position>=m_dataList.size())
     throw "Parser::parenthesisExpr: no data";
-  auto data=m_dataList[pos];
+  auto data=m_dataList[position];
   if (data.m_type!=LexerData::String &&
       (m_parenthesisMap.find(toLower(data.m_string))!=m_parenthesisMap.end() ||
        data.m_string=="{" || icmp(data.m_string,"left"))) {
-    ++pos;
+    ++position;
     try {
       auto node=std::make_shared<Node>(Node::Parenthesis, spaces);
       bool leftRight=icmp(data.m_string,"left");
       node->m_function=data.m_string;
       if (leftRight) {
-        ignoreSpaces(pos);
-        if (pos>=m_dataList.size())
+        ignoreSpaces(position);
+        if (position>=m_dataList.size())
           throw "Parser::parenthesisExpr: no left parenthesis";
-        node->m_function=m_dataList[pos++].m_string;
+        node->m_function=m_dataList[position++].m_string;
         node->m_data="right";
       }
       else if (data.m_string=="{")
@@ -1153,13 +1153,13 @@ std::shared_ptr<Node> Parser::parenthesisExpr(size_t &pos) const
       else
         node->m_data=m_parenthesisMap.find(toLower(data.m_string))->second;
 
-      auto newChild=sequenceExpr(pos);
+      auto newChild=sequenceExpr(position);
       if (newChild) {
         node->m_childs.push_back(newChild);
-        ignoreSpaces(pos, spaces);
-        if (pos>=m_dataList.size())
+        ignoreSpaces(position, spaces);
+        if (position>=m_dataList.size())
           throw "Parser::parenthesisExpr: can not find right parenthesis";
-        auto parData=m_dataList[pos];
+        auto parData=m_dataList[position];
         if (parData.m_type==LexerData::String || !icmp(parData.m_string, node->m_data))
           throw "Parser::parenthesisExpr: unexpected parenthesis";
         if (!spaces.empty()) {
@@ -1170,12 +1170,12 @@ std::shared_ptr<Node> Parser::parenthesisExpr(size_t &pos) const
           }
           newChild->m_childs.push_back(std::make_shared<Node>(Node::Empty, spaces));
         }
-        ++pos;
+        ++position;
         if (leftRight) {
-          ignoreSpaces(pos);
-          if (pos>=m_dataList.size())
+          ignoreSpaces(position);
+          if (position>=m_dataList.size())
             throw "Parser::parenthesisExpr: no right parenthesis";
-          node->m_data=m_dataList[pos++].m_string;
+          node->m_data=m_dataList[position++].m_string;
         }
         else if (data.m_string=="{")
           node->m_function=node->m_data="";
@@ -1186,11 +1186,11 @@ std::shared_ptr<Node> Parser::parenthesisExpr(size_t &pos) const
     }
     throw "Parser::parenthesisExpr: can not read a parenthesis block";
   }
-  pos=actPos;
-  auto term=elementExpr(pos);
+  position=actPos;
+  auto term=elementExpr(position);
   if (!term)
     throw "Parser::parenthesisExpr: no data";
-  return rightParenthesisExpr(pos, term);
+  return rightParenthesisExpr(position, term);
 }
 
 std::shared_ptr<Node> Parser::leftParenthesisExpr(size_t &pos, std::function<std::shared_ptr<Node>(size_t &)> function) const
