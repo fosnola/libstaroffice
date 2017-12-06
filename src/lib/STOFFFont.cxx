@@ -50,6 +50,7 @@ std::ostream &operator<<(std::ostream &o, STOFFFont const &font)
   if (!font.m_shadowColor.isBlack()) o << "shadow[color]=" << font.m_shadowColor << ",";
   if (font.m_hyphen) o << "hyphen,";
   if (font.m_softHyphen) o << "hyphen[soft],";
+  if (font.m_hardBlank) o << "hard[blank],";
   if (font.m_lineBreak) o << "line[break],";
   return o;
 }
@@ -68,6 +69,10 @@ int STOFFFont::cmp(STOFFFont const &font) const
     return m_hyphen ? 1 : -1;
   if (m_softHyphen != font.m_softHyphen)
     return m_softHyphen ? 1 : -1;
+  if (m_hardBlank != font.m_hardBlank)
+    return m_hardBlank ? 1 : -1;
+  if (m_tab != font.m_tab)
+    return m_tab ? 1 : -1;
   if (m_lineBreak != font.m_lineBreak)
     return m_lineBreak ? 1 : -1;
   return 0;

@@ -49,6 +49,8 @@ public:
     , m_shadowColor(STOFFColor::black())
     , m_hyphen(false)
     , m_softHyphen(false)
+    , m_hardBlank(false)
+    , m_tab(false)
     , m_lineBreak(false)
   {
   }
@@ -86,6 +88,10 @@ public:
   bool m_hyphen;
   /** soft hyphen */
   bool m_softHyphen;
+  /** hard blank */
+  bool m_hardBlank;
+  /** tab */
+  bool m_tab;
   /** line break */
   bool m_lineBreak;
 };

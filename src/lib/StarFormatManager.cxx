@@ -94,7 +94,7 @@ bool FormatDef::send(STOFFListenerPtr listener, StarState &state) const
   if (attrib)
     attrib->send(listener, state);
   else {
-    STOFF_DEBUG_MSG(("StarFormatManagerInternal::FormatDef::send: can not find and data to send\n"));
+    STOFF_DEBUG_MSG(("StarFormatManagerInternal::FormatDef::send: can not find any data to send %d\n", m_values[2]));
   }
   return true;
 }
@@ -1024,6 +1024,8 @@ bool StarFormatManager::readSWFlyFrameList(StarZone &zone, StarObject &doc, std:
   }
   libstoff::DebugStream f;
   f << "Entries(SWFlyFrames)[" << zone.getRecordLevel() << "]:";
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
   // sw_sw3fmts.cxx sub part of Sw3IoImp::InFlyFrames
   long lastPos=zone.getRecordLastPosition();
   while (input->tell()<lastPos) {
@@ -1038,8 +1040,6 @@ bool StarFormatManager::readSWFlyFrameList(StarZone &zone, StarObject &doc, std:
     break;
   }
 
-  ascFile.addPos(pos);
-  ascFile.addNote(f.str().c_str());
   zone.closeSWRecord('F', "SWFlyFrames");
   return true;
 }

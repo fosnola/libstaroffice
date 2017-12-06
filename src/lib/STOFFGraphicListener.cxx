@@ -128,7 +128,7 @@ struct State {
 //! returns true if we are in a text zone, ie. either in a textbox or a table cell
   bool isInTextZone() const
   {
-    return m_inNote || m_isTextBoxOpened || m_isTableCellOpened;
+    return m_inNote || m_inLink || m_isTextBoxOpened || m_isTableCellOpened;
   }
   //! the origin position
   STOFFVec2f m_origin;
@@ -447,8 +447,9 @@ void STOFFGraphicListener::openLink(STOFFLink const &link)
     m_presentationInterface->openLink(propList);
   _pushParsingState();
   m_ps->m_inLink=true;
-// we do not want any close open paragraph in a link
+  // we do not want any close open paragraph in a link
   m_ps->m_isParagraphOpened=true;
+  m_ps->m_isSpanOpened=true;
 }
 
 void STOFFGraphicListener::closeLink()
@@ -457,6 +458,7 @@ void STOFFGraphicListener::closeLink()
     STOFF_DEBUG_MSG(("STOFFGraphicListener::closeLink: closed outside a link\n"));
     return;
   }
+  _flushText();
   if (m_drawingInterface)
     m_drawingInterface->closeLink();
   else

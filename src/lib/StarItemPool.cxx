@@ -906,6 +906,10 @@ StarItemPool::~StarItemPool()
 {
 }
 
+double StarItemPool::getRelativeUnit() const
+{
+  return m_state->m_type==StarItemPool::T_XOutdevPool || m_state->m_type==StarItemPool::T_EditEnginePool ? 0.028346457 : 0.05;
+}
 void StarItemPool::clean()
 {
   m_state->clean();

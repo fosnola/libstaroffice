@@ -49,6 +49,8 @@
 #include "StarState.hxx"
 #include "StarZone.hxx"
 
+#include "SWFieldManager.hxx"
+
 #include "StarObjectSmallText.hxx"
 
 /** Internal: the structures of a StarObjectSmallText */
@@ -141,13 +143,14 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState
     modPosSet.insert(size_t(m_charLimitList[i][1]));
   }
   auto posSetIt=modPosSet.begin();
-  for (size_t c=0; c<m_text.size(); ++c) {
+  for (size_t c=0; c<=m_text.size(); ++c) {
     bool fontChange=false;
-    size_t srcPos=c<m_textSourcePosition.size() ? m_textSourcePosition[c] : 10000;
+    size_t srcPos=c<m_textSourcePosition.size() ? m_textSourcePosition[c] : m_textSourcePosition.empty() ? 0 : 10000;
     while (posSetIt!=modPosSet.end() && *posSetIt <= srcPos) {
       ++posSetIt;
       fontChange=true;
     }
+    std::shared_ptr<SWFieldManagerInternal::Field> field;
     if (fontChange) {
       STOFFFont &font=editState.m_font;
       editState.reinitializeLineData();
@@ -158,15 +161,34 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState
         if (!m_charItemList[f] || !m_charItemList[f]->m_attribute)
           continue;
         m_charItemList[f]->m_attribute->addTo(editState);
+        if (editState.m_field) {
+          if (int(srcPos)==m_charLimitList[f][0])
+            field=editState.m_field;
+          editState.m_field.reset();
+        }
       }
       static bool first=true;
-      if (first && (editState.m_content || editState.m_flyCnt || editState.m_footnote || editState.m_field || !editState.m_link.empty() || !editState.m_refMark.empty())) {
+      if (first && (editState.m_content || editState.m_flyCnt || editState.m_footnote || !editState.m_link.empty() || !editState.m_refMark.empty())) {
         STOFF_DEBUG_MSG(("StarObjectSmallTextInternal::Paragraph::send: sorry, sending content/field/flyCnt/footnote/refMark/link is not implemented\n"));
         first=false;
       }
       listener->setFont(font);
+      if (font.m_lineBreak) {
+        listener->insertEOL(true);
+        continue;
+      }
+      if (font.m_tab) {
+        listener->insertTab();
+        continue;
+      }
     }
-    if (m_text[c]==0x9)
+    if (field) {
+      StarState cState(*editState.m_global);
+      field->send(listener, cState);
+    }
+    else if (c==m_text.size())
+      break;
+    else if (m_text[c]==0x9)
       listener->insertTab();
     else if (m_text[c]==0xa)
       listener->insertEOL(true);
@@ -213,8 +235,8 @@ bool StarObjectSmallText::send(std::shared_ptr<STOFFListener> listener, int leve
   // fixme: this works almost alway, but ...
   auto editPool=findItemPool(StarItemPool::T_EditEnginePool, false);
   auto mainPool=findItemPool(StarItemPool::T_XOutdevPool, false);
-  StarState mainState(mainPool.get(), *this, 0.028346457);
-  StarState editState(editPool.get(), *this, 0.028346457);
+  StarState mainState(mainPool.get(), *this);
+  StarState editState(editPool.get(), *this);
   for (size_t p=0; p<m_textState->m_paragraphList.size(); ++p) {
     m_textState->m_paragraphList[p].send(listener, mainState, editState, level);
     if (p+1!=m_textState->m_paragraphList.size())

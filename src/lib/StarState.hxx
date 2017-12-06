@@ -52,6 +52,7 @@
 
 class StarItemPool;
 class StarObject;
+class StarObjectModel;
 class StarZone;
 class StarObjectNumericRuler;
 class STOFFList;
@@ -113,24 +114,7 @@ public:
     GlobalState &operator=(GlobalState const &) = delete;
   };
   //! constructor
-  StarState(StarItemPool const *pool, StarObject &object, double relUnit=0.05)
-    : m_global(new GlobalState(pool, object, relUnit))
-    , m_styleName("")
-    , m_break(0)
-    , m_cell()
-    , m_frame()
-    , m_graphic()
-    , m_paragraph()
-    , m_font()
-    , m_content(false)
-    , m_flyCnt(false)
-    , m_footnote(false)
-    , m_headerFooter(false)
-    , m_link("")
-    , m_refMark("")
-    , m_field()
-  {
-  }
+  StarState(StarItemPool const *pool, StarObject &object);
   //! constructor which create a copy of the global state
   explicit StarState(GlobalState const &global)
     : m_global(new GlobalState(global.m_pool, global.m_object, global.m_relativeUnit))
@@ -175,6 +159,11 @@ public:
   ~StarState();
   //! reinit the local data: break, font, content, footnote, ...
   void reinitializeLineData();
+  //! return the relative units
+  double convertInPoint(double val) const
+  {
+    return m_global->m_relativeUnit*val;
+  }
   //! global state
   std::shared_ptr<GlobalState> m_global;
   /// the style name

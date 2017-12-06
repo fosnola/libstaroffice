@@ -335,7 +335,7 @@ bool StarObject::readPersistElements(STOFFInputStreamPtr input, std::string cons
   ascii.addNote(f.str().c_str());
   for (int i=0; i<N; ++i) {
     long pos=input->tell();
-    if (readPersistData(zone, endDataPos, true))
+    if (readPersistData(zone, endDataPos))
       continue;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     f.str("");
@@ -360,7 +360,7 @@ bool StarObject::readPersistElements(STOFFInputStreamPtr input, std::string cons
   return true;
 }
 
-bool StarObject::readPersistData(StarZone &zone, long lastPos, bool inPersistElements)
+bool StarObject::readPersistData(StarZone &zone, long lastPos)
 {
   // pstm.cxx SvPersistStream::ReadObj
   STOFFInputStreamPtr input=zone.input();
@@ -417,180 +417,55 @@ bool StarObject::readPersistData(StarZone &zone, long lastPos, bool inPersistEle
     // case 1 SvxFieldData:: or SvInfoObject:: or SvClassElement::
     case 2: { // embobj.cxx SvEmbeddedInfoObject::Load
       long actPos=input->tell();
-      if (inPersistElements) {
-        // SvInfoObject::Load
-        uint8_t vers;
-        *input>>vers;
-        f << "objData,";
-        if (vers) f << "vers=" << int(vers) << ","; // 0 or 1
-        bool objOk=true;
-        for (int i=0; i<2; ++i) {
-          std::vector<uint32_t> text;
-          if (!zone.readString(text)||input->tell()+16>=lastPos) {
-            input->seek(actPos, librevenge::RVNG_SEEK_SET);
-            f << "##stringId" << i << ",";
-            objOk=false;
-            break;
-          }
-          f << libstoff::getString(text).cstr() << ",";
-        }
-        if (!objOk) break;
-        // SvGlobalName::operator<<
-        int val;
-        for (int i=0; i<3; ++i) {
-          val=int(input->readULong(i==0 ? 4 : 2));
-          if (val)
-            f << "data" << i << "=" << std::hex << val << std::dec << ",";
-        }
-        f << "data3=[";
-        for (int i=0; i<8; ++i) {
-          val=int (input->readULong(1));
-          if (val)
-            f<< std::hex << val << std::dec << ",";
-          else
-            f << "_,";
-        }
-        f << "],";
-        if (vers>0) {
-          val=int (input->readULong(1));
-          if (val) f << "deleted,";
-        }
-        if (input->readULong(1)!=2 || input->tell()+17>lastPos) {
-          STOFF_DEBUG_MSG(("StarObject::readPersistData: can not find the object info\n"));
-          input->seek(actPos, librevenge::RVNG_SEEK_SET);
-          f << "##badInfo" << ",";
-          break;
-        }
-        val=int (input->readULong(1));
-        if (val)
-          f << "isLink,";
-        f << "rect=[";
-        for (int i=0; i<4; ++i) f << input->readLong(4) << ",";
-        f << "],";
-        break;
-      }
-      // SvxDateField::Load
-      if (input->tell()+8>lastPos) {
-        STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read date field\n"));
-        f << "###,";
-        break;
-      }
-      f << "date[field],";
-      f << "date=" << input->readULong(4) << ",";
-      f << "type=" << input->readULong(2) << ",";
-      f << "format=" << input->readULong(2) << ",";
-      break;
-    }
-    case 3: { // flditem.cxx:void SvxURLField::Load
-      f << "urlData,";
-      uint16_t format;
-      *input >> format;
-      if (format) f << "format=" << format << ",";
+      // SvInfoObject::Load
+      uint8_t vers;
+      *input>>vers;
+      f << "objData,";
+      if (vers) f << "vers=" << int(vers) << ","; // 0 or 1
+      bool objOk=true;
       for (int i=0; i<2; ++i) {
         std::vector<uint32_t> text;
-        if (!zone.readString(text) || input->tell()>lastPos) {
-          STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read a string\n"));
-          f << "##string";
+        if (!zone.readString(text)||input->tell()+16>=lastPos) {
+          input->seek(actPos, librevenge::RVNG_SEEK_SET);
+          f << "##stringId" << i << ",";
+          objOk=false;
           break;
         }
-        else if (!text.empty())
-          f << (i==0 ? "url" : "representation") << "=" << libstoff::getString(text).cstr() << ",";
-      }
-      if (input->tell()==lastPos)
-        break;
-      uint32_t nFrameMarker;
-      *input>>nFrameMarker;
-      uint16_t val;
-      switch (nFrameMarker) {
-      case 0x21981357:
-        *input>>val;
-        if (val) f << "char[set]=" << val << ",";
-        break;
-      case 0x21981358:
-        for (int i=0; i<2; ++i) {
-          *input>>val;
-          if (val) f << "f" << i << "=" << val << ",";
-        }
-        break;
-      default:
-        input->seek(-4, librevenge::RVNG_SEEK_CUR);
-        break;
-      }
-      break;
-    }
-    case 50: // SdrMeasureField(unsure)
-      f << "measureField,";
-      if (input->tell()+2>lastPos) {
-        STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read measure field\n"));
-        f << "###,";
-        break;
-      }
-      f << "kind=" << input->readULong(2) << ",";
-      break;
-    case 100: // flditem.cxx
-      f << "pageField,";
-      break;
-    case 101:
-      f << "pagesField,";
-      break;
-    case 102:
-      f << "timeField,";
-      break;
-    case 103:
-      f << "fileField,";
-      break;
-    case 104:
-      f << "tableField,";
-      break;
-    case 105: {
-      f << "timeField[extended],";
-      if (input->tell()+12>lastPos) {
-        STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read extended time field\n"));
-        f << "###,";
-        break;
-      }
-      f << "time=" << std::hex << input->readULong(4);
-      f << input->readULong(4) << std::dec << ",";
-      f << "type=" << input->readULong(2) << ",";
-      f << "format=" << input->readULong(2) << ",";
-      break;
-    }
-    case 106: {
-      f << "fileField[extended],";
-      std::vector<uint32_t> text;
-      if (!zone.readString(text) || input->tell()+4>lastPos) {
-        STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read a string\n"));
-        f << "##string";
-        break;
-      }
-      else if (!text.empty())
         f << libstoff::getString(text).cstr() << ",";
-      f << "type=" << input->readULong(2) << ",";
-      f << "format=" << input->readULong(2) << ",";
-      break;
-    }
-    case 107: {
-      f << "authorField,";
-      bool fieldOk=true;
-      for (int i=0; i<3; ++i) {
-        std::vector<uint32_t> text;
-        if (!zone.readString(text) || input->tell()>lastPos) {
-          STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read a string\n"));
-          f << "##string";
-          fieldOk=false;
-          break;
-        }
-        else if (!text.empty())
-          f << (i==0 ? "name" : i==1 ? "first[name]": "last[name]") << "=" << libstoff::getString(text).cstr() << ",";
       }
-      if (!fieldOk) break;
-      if (input->tell()+4>lastPos) {
-        STOFF_DEBUG_MSG(("StarObject::readPersistData: can not read author field\n"));
-        f << "###,";
+      if (!objOk) break;
+      // SvGlobalName::operator<<
+      int val;
+      for (int i=0; i<3; ++i) {
+        val=int(input->readULong(i==0 ? 4 : 2));
+        if (val)
+          f << "data" << i << "=" << std::hex << val << std::dec << ",";
+      }
+      f << "data3=[";
+      for (int i=0; i<8; ++i) {
+        val=int (input->readULong(1));
+        if (val)
+          f<< std::hex << val << std::dec << ",";
+        else
+          f << "_,";
+      }
+      f << "],";
+      if (vers>0) {
+        val=int (input->readULong(1));
+        if (val) f << "deleted,";
+      }
+      if (input->readULong(1)!=2 || input->tell()+17>lastPos) {
+        STOFF_DEBUG_MSG(("StarObject::readPersistData: can not find the object info\n"));
+        input->seek(actPos, librevenge::RVNG_SEEK_SET);
+        f << "##badInfo" << ",";
         break;
       }
-      f << "type=" << input->readULong(2) << ",";
-      f << "format=" << input->readULong(2) << ",";
+      val=int (input->readULong(1));
+      if (val)
+        f << "isLink,";
+      f << "rect=[";
+      for (int i=0; i<4; ++i) f << input->readLong(4) << ",";
+      f << "],";
       break;
     }
     default:
@@ -770,7 +645,7 @@ bool StarObject::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const
   // sd_sdbinfilter.cxx SdBINFilter::Import: one pool followed by a pool style
   // chart sch_docshell.cxx SchChartDocShell::Load
   std::shared_ptr<StarItemPool> pool;
-  if (getDocumentKind()==STOFFDocument::STOFF_K_DRAW) {
+  if (getDocumentKind()==STOFFDocument::STOFF_K_DRAW || getDocumentKind()==STOFFDocument::STOFF_K_PRESENTATION) {
     pool=getNewItemPool(StarItemPool::T_XOutdevPool);
     pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
   }

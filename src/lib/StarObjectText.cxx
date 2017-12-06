@@ -441,14 +441,8 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
       first=false;
     }
   }
-  if (state.m_flyCnt) {
-    STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a flyCnt in mainFont\n"));
-  }
-  if (state.m_footnote) {
-    STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a footnote in mainFont\n"));
-  }
-  if (state.m_field) {
-    STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a field in mainFont\n"));
+  if (state.m_flyCnt || state.m_footnote || state.m_field) {
+    STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a data in mainFont\n"));
   }
   if (!state.m_link.empty()) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: find a link in mainFont\n"));
@@ -494,6 +488,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
     librevenge::RVNGString linkString;
     bool startRefMark=false;
     bool softHyphen=false;
+    bool hardBlank=false;
     if (fontChange) {
       lineState.reinitializeLineData();
       lineState.m_font=mainFont;
@@ -559,6 +554,7 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
         }
       }
       softHyphen=font.m_softHyphen;
+      hardBlank=font.m_hardBlank;
       listener->setFont(font);
       if (c==0) {
         int level=m_level;
@@ -626,10 +622,12 @@ bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
     }
     else if (field) {
       StarState cState(*state.m_global);
-      field->send(listener, state);
+      field->send(listener, cState);
     }
     else if (c==m_text.size())
       break;
+    else if (hardBlank)
+      listener->insertUnicode(0xa0);
     else if (softHyphen)
       listener->insertUnicode(0xad);
     else if (m_text[c]==0x9)
@@ -894,8 +892,7 @@ bool StarObjectText::parse()
     STOFF_DEBUG_MSG(("StarObjectText::parser: can not find the main writer document\n"));
     return false;
   }
-  else
-    readWriterDocument(mainOle,mainName);
+  readWriterDocument(mainOle,mainName);
   return true;
 }
 

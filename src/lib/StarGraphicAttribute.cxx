@@ -288,35 +288,35 @@ void StarGAttributeBool::addTo(StarState &state, std::set<StarAttribute const *>
 void StarGAttributeInt::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_type==XATTR_LINEWIDTH)
-    state.m_graphic.m_propertyList.insert("svg:stroke-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("svg:stroke-width", state.convertInPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==XATTR_LINESTARTWIDTH)
-    state.m_graphic.m_propertyList.insert("draw:marker-start-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:marker-start-width", state.convertInPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==XATTR_LINEENDWIDTH)
-    state.m_graphic.m_propertyList.insert("draw:marker-end-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:marker-end-width", state.convertInPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==XATTR_FILLBMP_SIZEX)
-    state.m_graphic.m_propertyList.insert("draw:fill-image-width", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:fill-image-width", state.convertInPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==XATTR_FILLBMP_SIZEY)
-    state.m_graphic.m_propertyList.insert("draw:fill-image-height", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:fill-image-height", state.convertInPoint(m_value),librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_SHADOWXDIST)
-    state.m_graphic.m_propertyList.insert("draw:shadow-offset-x", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:shadow-offset-x", state.convertInPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_SHADOWYDIST)
-    state.m_graphic.m_propertyList.insert("draw:shadow-offset-y", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:shadow-offset-y", state.convertInPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_TEXT_MAXFRAMEHEIGHT)
-    state.m_graphic.m_propertyList.insert("fo:max-height", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("fo:max-height", state.convertInPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_TEXT_MINFRAMEHEIGHT) // checkme
-    state.m_graphic.m_propertyList.insert("fo:min-height", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("fo:min-height", state.convertInPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_TEXT_MAXFRAMEWIDTH)
-    state.m_graphic.m_propertyList.insert("fo:max-width", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("fo:max-width", state.convertInPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_TEXT_MINFRAMEWIDTH) // checkme
-    state.m_graphic.m_propertyList.insert("fo:min-width", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("fo:min-width", state.convertInPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_CIRCSTARTANGLE)
     state.m_graphic.m_propertyList.insert("draw:start-angle", double(m_value)/100.,  librevenge::RVNG_GENERIC);
   else if (m_type==SDRATTR_CIRCENDANGLE)
     state.m_graphic.m_propertyList.insert("draw:end-angle", double(m_value)/100.,  librevenge::RVNG_GENERIC);
   else if (m_type==SDRATTR_MEASURELINEDIST)
-    state.m_graphic.m_propertyList.insert("draw:line-distance", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:line-distance", state.convertInPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_MEASUREOVERHANG)
-    state.m_graphic.m_propertyList.insert("draw:guide-overhang", libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:guide-overhang", state.convertInPoint(m_value), librevenge::RVNG_POINT);
   else if (m_type==SDRATTR_GRAFRED)
     state.m_graphic.m_propertyList.insert("draw:red", double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==SDRATTR_GRAFGREEN)
@@ -328,7 +328,7 @@ void StarGAttributeInt::addTo(StarState &state, std::set<StarAttribute const *> 
   else if (m_type==SDRATTR_GRAFCONTRAST)
     state.m_graphic.m_propertyList.insert("draw:contrast", double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==SDRATTR_ECKENRADIUS)
-    state.m_graphic.m_propertyList.insert("draw:corner-radius", libstoff::convertMiniMToPoint(m_value),librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:corner-radius", state.convertInPoint(m_value),librevenge::RVNG_POINT);
 }
 
 void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
@@ -390,7 +390,7 @@ void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
   else if (m_type==SDRATTR_TEXT_LEFTDIST || m_type==SDRATTR_TEXT_RIGHTDIST ||
            m_type==SDRATTR_TEXT_UPPERDIST || m_type==SDRATTR_TEXT_LOWERDIST) {
     char const * (wh[])= {"left", "right", "top", "bottom"};
-    state.m_graphic.m_propertyList.insert((std::string("padding-")+wh[(m_type-SDRATTR_TEXT_LEFTDIST)]).c_str(), libstoff::convertMiniMToPoint(m_value), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert((std::string("padding-")+wh[(m_type-SDRATTR_TEXT_LEFTDIST)]).c_str(), state.convertInPoint(m_value), librevenge::RVNG_POINT);
   }
   else if (m_type==SDRATTR_TEXT_FITTOSIZE)
     // TODO: 0: none, 1: proportional, allline, autofit
@@ -890,8 +890,8 @@ void StarGAttributeCrop::addTo(StarState &state, std::set<StarAttribute const *>
       state.m_graphic.m_propertyList.insert("fo:clip", "auto");
     else {
       librevenge::RVNGString clip;
-      clip.sprintf("rect(%fpt,%ftt,%fpt,%fpt)", libstoff::convertMiniMToPoint(m_leftTop[1]), libstoff::convertMiniMToPoint(m_rightBottom[0]),
-                   libstoff::convertMiniMToPoint(m_rightBottom[1]), libstoff::convertMiniMToPoint(m_leftTop[0]));
+      clip.sprintf("rect(%fpt,%ftt,%fpt,%fpt)", state.convertInPoint(m_leftTop[1]), state.convertInPoint(m_rightBottom[0]),
+                   state.convertInPoint(m_rightBottom[1]), state.convertInPoint(m_leftTop[0]));
       state.m_graphic.m_propertyList.insert("fo:clip", clip);
     }
   }
@@ -943,10 +943,10 @@ void StarGAttributeNamedDash::addTo(StarState &state, std::set<StarAttribute con
 {
   if (m_type==XATTR_LINEDASH) {
     state.m_graphic.m_propertyList.insert("draw:dots1", m_numbers[0]);
-    state.m_graphic.m_propertyList.insert("draw:dots1-length", libstoff::convertMiniMToPoint(m_lengths[0]), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:dots1-length", state.convertInPoint(m_lengths[0]), librevenge::RVNG_POINT);
     state.m_graphic.m_propertyList.insert("draw:dots2", m_numbers[1]);
-    state.m_graphic.m_propertyList.insert("draw:dots2-length", libstoff::convertMiniMToPoint(m_lengths[1]), librevenge::RVNG_POINT);
-    state.m_graphic.m_propertyList.insert("draw:distance", libstoff::convertMiniMToPoint(m_distance), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:dots2-length", state.convertInPoint(m_lengths[1]), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:distance", state.convertInPoint(m_distance), librevenge::RVNG_POINT);
   }
 }
 
@@ -986,7 +986,7 @@ void StarGAttributeNamedHatch::addTo(StarState &state, std::set<StarAttribute co
       STOFF_DEBUG_MSG(("StarGraphicAttribute::StarGAttributeNamedHatch::addTo: unknown hash type %d\n", m_hatchType));
     }
     state.m_graphic.m_propertyList.insert("draw:color", m_color.str().c_str());
-    state.m_graphic.m_propertyList.insert("draw:distance", libstoff::convertMiniMToPoint(m_distance),librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:distance", state.convertInPoint(m_distance),librevenge::RVNG_POINT);
     if (m_angle) state.m_graphic.m_propertyList.insert("draw:rotation", double(m_angle)/10, librevenge::RVNG_GENERIC);
   }
 }

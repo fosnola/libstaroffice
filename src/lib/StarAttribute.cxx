@@ -700,11 +700,6 @@ std::shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zon
     f << "textAtrCJKRuby=" << input->readULong(1) << ",";
     break;
 
-  case StarAttribute::ATTR_TXT_HARDBLANK: // ok no data
-    f << "textAtrHardBlank,";
-    if (nVers>=1)
-      f << "char=" << char(input->readULong(1)) << ",";
-    break;
   // frame parameter
   case StarAttribute::ATTR_FRM_PROTECT:
     f << "protect,";
@@ -850,13 +845,6 @@ std::shared_ptr<StarAttribute> StarAttributeManager::readAttribute(StarZone &zon
         f << "value=" << res << ",";
     }
     break;
-
-  case StarAttribute::ATTR_EE_FEATURE_FIELD: {
-    f << "eeFeatureField,vers=" << nVers << ",";
-    // svx_flditem.cxx SvxFieldItem::Create
-    if (!object.readPersistData(zone, lastPos)) break;
-    return getDummyAttribute(nWhich);
-  }
 
   case StarAttribute::ATTR_SCH_SYMBOL_SIZE:
     f << "symbolSize[sch]=" << input->readLong(4) << "x" << input->readLong(4) << ",";

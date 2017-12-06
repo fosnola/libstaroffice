@@ -724,7 +724,7 @@ void StarFAttributeBorder::addTo(StarState &state, std::set<StarAttribute const 
         m_borders[i].addTo(state.m_graphic.m_propertyList, wh[i]);
     }
     for (int i=0; i<4; ++i)
-      state.m_graphic.m_propertyList.insert((std::string("padding-")+wh[i]).c_str(), libstoff::convertMiniMToPoint(m_distances[i]), librevenge::RVNG_POINT);
+      state.m_graphic.m_propertyList.insert((std::string("padding-")+wh[i]).c_str(), state.convertInPoint(m_distances[i]), librevenge::RVNG_POINT);
 
     // paragraph
     for (int i=0; i<4; ++i)
@@ -1018,8 +1018,8 @@ void StarFAttributeShadow::addTo(StarState &state, std::set<StarAttribute const 
     state.m_graphic.m_propertyList.insert("draw:shadow", "visible");
     state.m_graphic.m_propertyList.insert("draw:shadow-color", m_color.str().c_str());
     state.m_graphic.m_propertyList.insert("draw:shadow-opacity", 1.-double(m_transparency)/255., librevenge::RVNG_PERCENT);
-    state.m_graphic.m_propertyList.insert("draw:shadow-offset-x", ((m_location%2)?-1:1)*libstoff::convertMiniMToPoint(m_width), librevenge::RVNG_POINT);
-    state.m_graphic.m_propertyList.insert("draw:shadow-offset-y", (m_location<=2?-1:1)*libstoff::convertMiniMToPoint(m_width), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:shadow-offset-x", ((m_location%2)?-1:1)*state.convertInPoint(m_width), librevenge::RVNG_POINT);
+    state.m_graphic.m_propertyList.insert("draw:shadow-offset-y", (m_location<=2?-1:1)*state.convertInPoint(m_width), librevenge::RVNG_POINT);
   }
   // cell
   if (m_width<=0 || m_location<=0 || m_location>4 || m_transparency<0 || m_transparency>=100)

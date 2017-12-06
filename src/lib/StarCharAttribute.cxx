@@ -373,6 +373,10 @@ void StarCAttributeVoid::addTo(StarState &state, std::set<StarAttribute const *>
 {
   if (m_type==ATTR_TXT_SOFTHYPH)
     state.m_font.m_softHyphen=true;
+  else if (m_type==ATTR_EE_FEATURE_TAB)
+    state.m_font.m_tab=true;
+  else if (m_type==ATTR_EE_FEATURE_LINEBR)
+    state.m_font.m_lineBreak=true;
 }
 
 }
@@ -769,6 +773,38 @@ protected:
   int m_flags;
 };
 
+
+//! a hardBlank attribute
+class StarCAttributeHardBlank final : public StarAttribute
+{
+public:
+  //! constructor
+  StarCAttributeHardBlank(Type type, std::string const &debugName) : StarAttribute(type, debugName), m_char(0)
+  {
+  }
+  //! create a new attribute
+  std::shared_ptr<StarAttribute> create() const final
+  {
+    return std::shared_ptr<StarAttribute>(new StarCAttributeHardBlank(*this));
+  }
+  //! read a zone
+  bool read(StarZone &zone, int vers, long endPos, StarObject &object) final;
+  //! add to a font
+  void addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const final;
+  //! debug function to print the data
+  void printData(libstoff::DebugStream &o) const final
+  {
+    o << m_debugName;
+    if (m_char) o << "=" << char(m_char);
+    o << ",";
+  }
+protected:
+  //! copy constructor
+  StarCAttributeHardBlank(StarCAttributeHardBlank const &) = default;
+  //! the character
+  uint8_t m_char;
+};
+
 //! a INetFmt attribute: ie. a link, ...
 class StarCAttributeINetFmt final : public StarAttribute
 {
@@ -980,6 +1016,11 @@ void StarCAttributeFootnote::addTo(StarState &state, std::set<StarAttribute cons
   state.m_footnote=true;
 }
 
+void StarCAttributeHardBlank::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
+{
+  state.m_font.m_hardBlank=true;
+}
+
 void StarCAttributeINetFmt::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
   if (m_url.empty()) {
@@ -1136,7 +1177,10 @@ bool StarCAttributeField::read(StarZone &zone, int /*nVers*/, long endPos, StarO
   libstoff::DebugStream f;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   SWFieldManager fieldManager;
-  m_field=fieldManager.readField(zone);
+  if (m_type==StarAttribute::ATTR_TXT_FIELD)
+    m_field=fieldManager.readField(zone);
+  else
+    m_field=fieldManager.readPersistField(zone, endPos);
   if (!m_field || input->tell()>endPos) {
     STOFF_DEBUG_MSG(("StarCAttributeField::read: can not find the field\n"));
     printData(f);
@@ -1202,6 +1246,21 @@ bool StarCAttributeFootnote::read(StarZone &zone, int nVers, long endPos, StarOb
   if (nVers>=2)
     m_flags=int(input->readULong(1));
 
+  printData(f);
+  ascFile.addPos(pos);
+  ascFile.addNote(f.str().c_str());
+  return input->tell()<=endPos;
+}
+
+bool StarCAttributeHardBlank::read(StarZone &zone, int nVers, long endPos, StarObject &/*object*/)
+{
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascFile=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
+  if (nVers>=1)
+    *input >> m_char;
   printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
@@ -1412,10 +1471,15 @@ void addInitTo(std::map<int, std::shared_ptr<StarAttribute> > &map)
   map[StarAttribute::ATTR_TXT_FTN]=std::shared_ptr<StarAttribute>(new StarCAttributeFootnote(StarAttribute::ATTR_TXT_FTN,"textAtrFtn"));
   map[StarAttribute::ATTR_TXT_FIELD]=std::shared_ptr<StarAttribute>(new StarCAttributeField(StarAttribute::ATTR_TXT_FIELD,"textAtrField"));
   map[StarAttribute::ATTR_TXT_FLYCNT]=std::shared_ptr<StarAttribute>(new StarCAttributeFlyCnt(StarAttribute::ATTR_TXT_FLYCNT,"textAtrTxtFlyCnt"));
+  map[StarAttribute::ATTR_TXT_HARDBLANK]=std::shared_ptr<StarAttribute>(new StarCAttributeHardBlank(StarAttribute::ATTR_TXT_HARDBLANK,"textAtrHardBlank"));
   map[StarAttribute::ATTR_TXT_INETFMT]=std::shared_ptr<StarAttribute>(new StarCAttributeINetFmt(StarAttribute::ATTR_TXT_INETFMT,"textAtrInetFmt"));
   map[StarAttribute::ATTR_TXT_REFMARK]=std::shared_ptr<StarAttribute>(new StarCAttributeRefMark(StarAttribute::ATTR_TXT_REFMARK,"textAtrRefMark"));
   addAttributeBool(map,StarAttribute::ATTR_CHR_NOLINEBREAK,"char[nolineBreak]",true);
   addAttributeBool(map,StarAttribute::ATTR_SC_HYPHENATE,"hyphenate", false);
+
+  addAttributeVoid(map, StarAttribute::ATTR_EE_FEATURE_TAB, "feature[tab]");
+  addAttributeVoid(map, StarAttribute::ATTR_EE_FEATURE_LINEBR, "feature[linebr]");
+  map[StarAttribute::ATTR_EE_FEATURE_FIELD]=std::shared_ptr<StarAttribute>(new StarCAttributeField(StarAttribute::ATTR_EE_FEATURE_FIELD,"eeFeatureField"));
 
   addAttributeBool(map,StarAttribute::ATTR_CHR_DUMMY1,"char[dummy1]",false);
   addAttributeBool(map,StarAttribute::ATTR_TXT_DUMMY1,"text[dummy1]",false);
@@ -1428,9 +1492,6 @@ void addInitTo(std::map<int, std::shared_ptr<StarAttribute> > &map)
 
   map[StarAttribute::ATTR_FRM_CNTNT]=std::shared_ptr<StarAttribute>(new StarCAttributeContent(StarAttribute::ATTR_FRM_CNTNT,"pageCntnt"));
 
-  // do we need to retrieve these attribute
-  addAttributeVoid(map, StarAttribute::ATTR_EE_FEATURE_TAB, "feature[tab]"); // feature tab ?
-  addAttributeVoid(map, StarAttribute::ATTR_EE_FEATURE_LINEBR, "feature[linebr]"); // feature line break ?
 
 }
 }

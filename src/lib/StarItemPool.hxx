@@ -125,7 +125,8 @@ public:
   std::shared_ptr<StarItem> loadSurrogate(StarZone &zone, uint16_t &nWhich, bool localId, libstoff::DebugStream &f);
   //! try to load a surrogate
   bool loadSurrogate(StarItem &item);
-
+  //! returns the default relative unit
+  double getRelativeUnit() const;
 protected:
   /** define a graphic style */
   void defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName, StarObject &object, std::set<librevenge::RVNGString> &done) const;

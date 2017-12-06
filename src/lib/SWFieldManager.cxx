@@ -316,11 +316,11 @@ bool Field::send(STOFFListenerPtr listener, StarState &state) const
 //! Internal: a fixed date time field
 struct FieldDateTime final : public Field {
   //! constructor
-  FieldDateTime() : Field(), m_dateTime(0), m_offset(0)
+  FieldDateTime() : Field(), m_dateTime(0), m_time(0), m_offset(0)
   {
   }
   //! copy constructor
-  explicit FieldDateTime(Field const &orig) : Field(orig), m_dateTime(0), m_offset(0)
+  explicit FieldDateTime(Field const &orig) : Field(orig), m_dateTime(0), m_time(0), m_offset(0)
   {
   }
   //! destructor
@@ -336,6 +336,8 @@ struct FieldDateTime final : public Field {
   }
   //! the dateTime
   long m_dateTime;
+  //! the time
+  long m_time;
   //! the offset
   long m_offset;
 };
@@ -357,7 +359,6 @@ bool FieldDateTime::send(STOFFListenerPtr listener, StarState &state) const
   else if (m_type==5)
     field.m_propertyList.insert("librevenge:field-type", "text:time");
   else if (m_type==15) {
-    // FIXME: does not works because libodfgen does not regenerate the text zone...
     field.m_propertyList.insert("librevenge:field-type", "text:date");
     field.m_propertyList.insert("text:fixed", true);
     if (m_dateTime) {
@@ -539,6 +540,8 @@ struct FieldINet final : public Field {
   }
   //! destructor
   ~FieldINet() final;
+  //! add to send the zone data
+  bool send(STOFFListenerPtr listener, StarState &state) const final;
   //! print a field
   void print(std::ostream &o) const final
   {
@@ -562,6 +565,30 @@ struct FieldINet final : public Field {
 
 FieldINet::~FieldINet()
 {
+}
+
+bool FieldINet::send(STOFFListenerPtr listener, StarState &state) const
+{
+  if (!listener || !listener->canWriteText()) {
+    STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldINet::send: can not find the listener\n"));
+    return false;
+  }
+  if (m_type!=33)
+    return Field::send(listener, state);
+  if (m_url.empty()) {
+    STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldINet::send: the url is empty\n"));
+    return false;
+  }
+  STOFFLink link;
+  link.m_HRef=m_url.cstr();
+  listener->openLink(link);
+  if (!m_target.empty())
+    listener->insertUnicodeString(m_target);
+  else {
+    STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldINet::send: can not find any representation\n"));
+  }
+  listener->closeLink();
+  return true;
 }
 
 //! Internal: a jump edit field
@@ -1868,6 +1895,244 @@ std::shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZon
   if (cKind!='_')
     zone.closeSWRecord(cKind, "SWFieldType");
   return field;
+}
+
+std::shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readPersistField(StarZone &zone, long lastPos)
+{
+  std::shared_ptr<SWFieldManagerInternal::Field> field;
+  // pstm.cxx SvPersistStream::ReadObj
+  STOFFInputStreamPtr input=zone.input();
+  long pos=input->tell();
+  libstoff::DebugFile &ascii=zone.ascii();
+  libstoff::DebugStream f;
+  f << "Entries(PersistField)["<< zone.getRecordLevel() << "]:";
+  // SvPersistStream::ReadId
+  uint8_t hdr;
+  *input >> hdr;
+  long id=0, classId=0;
+  bool ok=true;
+  if (hdr&0x80) // nId=0
+    ;
+  else {
+    if ((hdr&0xf)==0) {
+      if ((hdr&0x20) || !(hdr&0x40))
+        ok=input->readCompressedLong(id);
+    }
+    else if (hdr&0x10)
+      ok=input->readCompressedLong(id);
+    if (hdr&0x60)
+      ok=input->readCompressedLong(classId);
+  }
+  if (id) f << "id=" << id << ",";
+  if (classId) f << "id[class]=" << classId << ",";
+  if (!ok || !hdr || input->tell()>lastPos) {
+    STOFF_DEBUG_MSG(("SWFieldManager::readPersistField: find unexpected header\n"));
+    f << "###header";
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    return field;
+  }
+  if (hdr&0x80 || (hdr&0x40)==0) {
+    ascii.addPos(pos);
+    ascii.addNote(f.str().c_str());
+    return std::make_shared<SWFieldManagerInternal::Field>();
+  }
+  if (hdr&0x20) {
+    ok=zone.openSCRecord();
+    if (!ok || zone.getRecordLastPosition()>lastPos) {
+      STOFF_DEBUG_MSG(("SWFieldManager::readPersistField: can not open main zone\n"));
+      if (ok) zone.closeSCRecord("PersistField");
+      f << "###,";
+      ascii.addPos(pos);
+      ascii.addNote(f.str().c_str());
+      return field;
+    }
+    lastPos=zone.getRecordLastPosition();
+  }
+  if (hdr&0x40) {
+    switch (classId) {
+    // case 1 SvxFieldData::
+    case 2: {
+      // SvxDateField::Load
+      if (input->tell()+8>lastPos) {
+        STOFF_DEBUG_MSG(("SWFieldManager::readPersistField: can not read date field\n"));
+        f << "###,";
+        break;
+      }
+      auto dateTime=std::make_shared<SWFieldManagerInternal::FieldDateTime>();
+      field=dateTime;
+      dateTime->m_type=15;
+      dateTime->m_dateTime=long(input->readULong(4));
+      dateTime->m_subType=int(input->readULong(2));
+      dateTime->m_format=int(input->readULong(2));
+      if (dateTime->m_dateTime && dateTime->m_subType==1) // type==0: mean fixed
+        dateTime->m_type=4;
+      f << "date[field],";
+      f << "date=" << dateTime->m_dateTime << ",";
+      f << "type=" << dateTime->m_subType << ",";
+      f << "format=" << dateTime->m_format << ",";
+      break;
+    }
+    case 3: { // flditem.cxx:void SvxURLField::Load
+      f << "urlData,";
+      auto inet=std::make_shared<SWFieldManagerInternal::FieldINet>();
+      field=inet;
+      field->m_type=33;
+      field->m_format=int(input->readULong(2));
+      if (field->m_format) f << "format=" << field->m_format << ",";
+      for (int i=0; i<2; ++i) {
+        std::vector<uint32_t> text;
+        if (!zone.readString(text) || input->tell()>lastPos) {
+          STOFF_DEBUG_MSG(("SWFieldManager::readPersistField: can not read a string\n"));
+          f << "##string";
+          break;
+        }
+        else if (!text.empty()) {
+          if (i==0)
+            inet->m_url=libstoff::getString(text);
+          else
+            inet->m_target=libstoff::getString(text);
+          f << (i==0 ? "url" : "representation") << "=" << libstoff::getString(text).cstr() << ",";
+        }
+      }
+      if (input->tell()==lastPos)
+        break;
+      uint32_t nFrameMarker;
+      *input>>nFrameMarker;
+      uint16_t val;
+      switch (nFrameMarker) {
+      case 0x21981357:
+        *input>>val;
+        if (val) f << "char[set]=" << val << ",";
+        break;
+      case 0x21981358:
+        for (int i=0; i<2; ++i) {
+          *input>>val;
+          if (val) f << "f" << i << "=" << val << ",";
+        }
+        break;
+      default:
+        input->seek(-4, librevenge::RVNG_SEEK_CUR);
+        break;
+      }
+      break;
+    }
+    case 50: // SdrMeasureField(unsure)
+      f << "measureField,";
+      if (input->tell()+2>lastPos) {
+        STOFF_DEBUG_MSG(("SWFieldManager::readPersistField: can not read measure field\n"));
+        f << "###,";
+        break;
+      }
+      f << "kind=" << input->readULong(2) << ",";
+      break;
+    case 100: // flditem.cxx
+      field=std::make_shared<SWFieldManagerInternal::FieldPageNumber>();
+      field->m_type=6;
+      f << "pageField,";
+      break;
+    case 101:
+      field=std::make_shared<SWFieldManagerInternal::Field>();
+      field->m_type=9;
+      field->m_subType=0;
+      f << "pagesField,";
+      break;
+    case 102:
+      field=std::make_shared<SWFieldManagerInternal::FieldDateTime>();
+      field->m_type=5;
+      f << "timeField,";
+      break;
+    case 103:
+      field=std::make_shared<SWFieldManagerInternal::Field>();
+      field->m_type=2;
+      f << "fileField,";
+      break;
+    case 104:
+      f << "tableField,";
+      break;
+    case 105: {
+      f << "timeField[extended],";
+      if (input->tell()+8>lastPos) {
+        STOFF_DEBUG_MSG(("SWFieldManager::readPersistField: can not read extended time field\n"));
+        f << "###,";
+        break;
+      }
+      auto dateTime=std::make_shared<SWFieldManagerInternal::FieldDateTime>();
+      field=dateTime;
+      dateTime->m_type=16;
+      dateTime->m_dateTime=long(input->readULong(4));
+      dateTime->m_subType=int(input->readULong(2));
+      dateTime->m_format=int(input->readULong(2));
+      if (dateTime->m_dateTime && dateTime->m_subType==1)  // type==0: mean fixed
+        dateTime->m_type=5;
+
+      f << "date[field],";
+      if (dateTime->m_dateTime)
+        f << "time=" << dateTime->m_dateTime << ",";
+      f << "type=" << dateTime->m_subType << ",";
+      f << "format=" << dateTime->m_format << ",";
+      break;
+    }
+    case 106: {
+      f << "fileField[extended],";
+      field=std::make_shared<SWFieldManagerInternal::Field>();
+      field->m_type=2;
+      std::vector<uint32_t> text;
+      if (!zone.readString(text) || input->tell()+4>lastPos) {
+        STOFF_DEBUG_MSG(("SWFieldManager::readPersistField: can not read a string\n"));
+        f << "##string";
+        break;
+      }
+      else if (!text.empty())
+        f << libstoff::getString(text).cstr() << ",";
+      f << "type=" << input->readULong(2) << ",";
+      field->m_format=int(input->readULong(2));
+      f << "format=" << field->m_format << ",";
+      break;
+    }
+    case 107: {
+      field=std::make_shared<SWFieldManagerInternal::Field>();
+      field->m_type=7;
+      f << "authorField,";
+      bool fieldOk=true;
+      for (int i=0; i<3; ++i) {
+        std::vector<uint32_t> text;
+        if (!zone.readString(text) || input->tell()>lastPos) {
+          STOFF_DEBUG_MSG(("SWFieldManager::readPersistField: can not read a string\n"));
+          f << "##string";
+          fieldOk=false;
+          break;
+        }
+        else if (!text.empty())
+          f << (i==0 ? "name" : i==1 ? "first[name]": "last[name]") << "=" << libstoff::getString(text).cstr() << ",";
+      }
+      if (!fieldOk) break;
+      if (input->tell()+4>lastPos) {
+        STOFF_DEBUG_MSG(("SWFieldManager::readPersistField: can not read author field\n"));
+        f << "###,";
+        break;
+      }
+      f << "type=" << input->readULong(2) << ",";
+      field->m_format=int(input->readULong(2));
+      f << "format=" << field->m_format << ",";
+      break;
+    }
+    default:
+      STOFF_DEBUG_MSG(("SWFieldManager::readPersistField: unknown class id\n"));
+      f << "##classId";
+      break;
+    }
+  }
+  if (input->tell()!=lastPos)
+    ascii.addDelimiter(input->tell(),'|');
+  input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+  if (hdr&0x20)
+    zone.closeSCRecord("PersistField");
+
+  ascii.addPos(pos);
+  ascii.addNote(f.str().c_str());
+  if (field) return field;
+  return std::make_shared<SWFieldManagerInternal::Field>(); // create a dummy field
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
