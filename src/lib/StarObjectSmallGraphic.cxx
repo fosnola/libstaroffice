@@ -44,6 +44,7 @@
 #include "STOFFGraphicStyle.hxx"
 #include "STOFFListener.hxx"
 #include "STOFFSubDocument.hxx"
+#include "STOFFTextListener.hxx"
 
 #include "StarAttribute.hxx"
 #include "StarBitmap.hxx"
@@ -262,7 +263,7 @@ public:
   //! return the object name
   virtual std::string getName() const = 0;
   //! try to send the graphic to the listener
-  virtual bool send(STOFFListenerPtr /*listener*/, STOFFPosition const &/*pos*/, StarObject &/*object*/, bool /*inMasterPage*/)
+  virtual bool send(STOFFListenerPtr /*listener*/, STOFFFrameStyle const &/*pos*/, StarObject &/*object*/, bool /*inMasterPage*/)
   {
     static bool first=true;
     if (first) {
@@ -317,9 +318,13 @@ public:
     return s.str();
   }
   //! return a pool corresponding to an object
-  static std::shared_ptr<StarItemPool> getPool(StarObject &object)
+  StarState getState(StarObject &object, STOFFListenerPtr listener, STOFFFrameStyle const &/*pos*/) const
   {
-    return object.findItemPool(StarItemPool::T_XOutdevPool, false);
+    auto pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
+    StarState state(pool.get(), object);
+    if (std::dynamic_pointer_cast<STOFFTextListener>(listener))
+      state.m_global->m_offset=state.convertVectorInPoint(-1.f*m_anchorPosition);
+    return state;
   }
   //! try to update the graphic style
   void updateStyle(StarState &state, STOFFListenerPtr /*listener*/) const
@@ -470,16 +475,20 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage) final
+  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) final
   {
     if (!listener) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicGroup::send: unexpected listener\n"));
       return false;
     }
-    listener->openGroup(pos);
+    STOFFFrameStyle finalPos(pos);
+    StarState state(getState(object, listener, finalPos));
+    finalPos.m_position.m_offset=state.m_global->m_offset;
+    finalPos.m_position.m_offset=true;
+    listener->openGroup(pos.m_position);
     for (auto &child : m_child) {
       if (child)
-        child->send(listener, pos, object, inMasterPage);
+        child->send(listener, finalPos, object, inMasterPage);
     }
     listener->closeGroup();
     return true;
@@ -532,7 +541,7 @@ public:
   //! destructor
   ~SdrGraphicText() override;
   //! try to update the transformation
-  void updateTransformProperties(librevenge::RVNGPropertyList &list) const
+  void updateTransformProperties(librevenge::RVNGPropertyList &list, double relUnit) const
   {
     if (m_textDrehWink) {
       // rotation around the first point, let do that by hand
@@ -542,9 +551,9 @@ public:
       else {
         STOFFVec2f center=STOFFVec2f(m_textRectangle[0]);
         transform.sprintf("translate(%fpt %fpt) rotate(%f) translate(%fpt %fpt)",
-                          -libstoff::convertMiniMToPoint(center[0]),-libstoff::convertMiniMToPoint(center[1]),
+                          -relUnit*center[0],-relUnit*center[1],
                           m_textDrehWink/100.*M_PI/180., // gradient
-                          libstoff::convertMiniMToPoint(center[0]),libstoff::convertMiniMToPoint(center[1]));
+                          relUnit*center[0],relUnit*center[1]);
       }
       list.insert("draw:transform", transform);
     }
@@ -557,7 +566,7 @@ public:
     return s.str();
   }
   //! try to send the text zone to the listener
-  bool sendTextZone(STOFFListenerPtr listener, StarObject &object)
+  bool sendTextZone(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object)
   {
     // for basic text zone, we use the real textbox, for other zones (text link to a shape) we use the shape box
     STOFFBox2f const &box=(m_identifier!=3 && m_identifier!=16 && m_identifier!=17 && m_identifier!=20 && m_identifier!=21) ? m_bdbox : m_textRectangle;
@@ -565,18 +574,22 @@ public:
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicText::sendTextZone: can not send a shape\n"));
       return false;
     }
+    StarState state(getState(object, listener, pos));
     STOFFPosition position;
-    position.setOrigin(libstoff::convertMiniMToPointVect(box[0]), librevenge::RVNG_POINT);
-    position.setSize(libstoff::convertMiniMToPointVect(box.size()), librevenge::RVNG_POINT);
-    position.setAnchor(STOFFPosition::Page);
-    auto pool=getPool(object);
-    StarState state(pool.get(), object);
+    if (std::dynamic_pointer_cast<STOFFTextListener>(listener)) {
+      position=pos.m_position;
+      pos.addTo(position.m_propertyList);
+    }
+    position.setOrigin(state.convertPointInPoint(box[0]));
+    position.setSize(state.convertVectorInPoint(box.size()));
+    if (position.m_anchorTo==STOFFPosition::Unknown)
+      position.setAnchor(STOFFPosition::Page);
     updateStyle(state, listener);
     // if (!state.m_graphic.m_hasBackground) state.m_graphic.m_propertyList.insert("draw:fill", "none"); checkme
     state.m_graphic.m_propertyList.insert("draw:fill", "none");
     state.m_graphic.m_propertyList.insert("draw:shadow", "hidden"); // the text is not shadowed
     if (m_textDrehWink) {
-      STOFFVec2f orig=libstoff::convertMiniMToPointVect(box[0]);
+      STOFFVec2f orig=state.convertPointInPoint(box[0]);
       state.m_graphic.m_propertyList.insert("librevenge:rotate-cx", orig[0], librevenge::RVNG_POINT);
       state.m_graphic.m_propertyList.insert("librevenge:rotate-cy", orig[1], librevenge::RVNG_POINT);
       state.m_graphic.m_propertyList.insert("librevenge:rotate", -(m_textDrehWink/100.), librevenge::RVNG_GENERIC);
@@ -629,7 +642,7 @@ public:
   //! destructor
   ~SdrGraphicRect() override;
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage) override
+  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) override
   {
     if (!listener || m_textRectangle.size()[0]<=0 || m_textRectangle.size()[1]<=0) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicText::send: can not send a shape\n"));
@@ -638,19 +651,18 @@ public:
     if (inMasterPage && (m_identifier==20 || m_identifier==21))
       return false;
     if (m_identifier!=16 && m_identifier!=17 && m_identifier!=20 && m_identifier!=21) { // basic rect
+      StarState state(getState(object, listener, pos));
       STOFFGraphicShape shape;
       shape.m_command=STOFFGraphicShape::C_Rectangle;
-      shape.m_bdbox=STOFFBox2f(libstoff::convertMiniMToPointVect(m_textRectangle[0]), libstoff::convertMiniMToPointVect(m_textRectangle[1]));
-      updateTransformProperties(shape.m_propertyList);
-      std::shared_ptr<StarItemPool> pool=getPool(object);
-      StarState state(pool.get(), object);
+      shape.m_bdbox=STOFFBox2f(state.convertPointInPoint(m_textRectangle[0]), state.convertPointInPoint(m_textRectangle[1]));
+      updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
       updateStyle(state, listener);
-      listener->insertShape(shape, state.m_graphic, pos);
+      listener->insertShape(shape, state.m_graphic, pos.m_position);
       if (m_outlinerParaObject)
-        sendTextZone(listener, object);
+        sendTextZone(listener, pos, object);
     }
     else
-      sendTextZone(listener, object);
+      sendTextZone(listener, pos, object);
     return true;
   }
   //! basic print function
@@ -711,12 +723,13 @@ public:
     return o;
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/) final
+  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final
   {
     if (!listener || m_captionPolygon.empty()) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicCaption::send: can not send a shape\n"));
       return false;
     }
+    StarState state(getState(object, listener, pos));
     // checkme never seen
     STOFFGraphicShape shape;
     shape.m_command=STOFFGraphicShape::C_Polyline;
@@ -724,13 +737,11 @@ public:
     for (auto const &p : m_captionPolygon)
       polygon.m_points.push_back(StarGraphicStruct::StarPolygon::Point(p, 0));
     librevenge::RVNGPropertyListVector path;
-    polygon.addToPath(path, false);
+    polygon.addToPath(path, false, state.m_global->m_relativeUnit, state.m_global->m_offset);
     shape.m_propertyList.insert("svg:d", path);
-    updateTransformProperties(shape.m_propertyList);
-    auto pool=getPool(object);
-    StarState state(pool.get(), object);
+    updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
     updateStyle(state, listener);
-    listener->insertShape(shape, state.m_graphic, pos);
+    listener->insertShape(shape, state.m_graphic, pos.m_position);
     return true;
   }
   //! a polygon
@@ -762,20 +773,22 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/) final
+  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final
   {
     if (!listener || m_textRectangle.size()[0]<=0 || m_textRectangle.size()[1]<=0) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicCircle::send: can not send a shape\n"));
       return false;
     }
+    StarState state(getState(object, listener, pos));
+
     STOFFGraphicShape shape;
     shape.m_command=STOFFGraphicShape::C_Ellipse;
-    STOFFVec2f center=0.5f*STOFFVec2f(m_textRectangle[0]+m_textRectangle[1]);
-    shape.m_propertyList.insert("svg:cx",20*libstoff::convertMiniMToPoint(center.x()), librevenge::RVNG_TWIP);
-    shape.m_propertyList.insert("svg:cy",20*libstoff::convertMiniMToPoint(center.y()), librevenge::RVNG_TWIP);
-    STOFFVec2f radius=0.5f*STOFFVec2f(m_textRectangle[1]-m_textRectangle[0]);
-    shape.m_propertyList.insert("svg:rx",20*libstoff::convertMiniMToPoint(radius.x()), librevenge::RVNG_TWIP);
-    shape.m_propertyList.insert("svg:ry",20*libstoff::convertMiniMToPoint(radius.y()), librevenge::RVNG_TWIP);
+    STOFFVec2f center=state.convertPointInPoint(0.5f*STOFFVec2f(m_textRectangle[0]+m_textRectangle[1]));
+    shape.m_propertyList.insert("svg:cx",20*center.x(), librevenge::RVNG_TWIP);
+    shape.m_propertyList.insert("svg:cy",20*center.y(), librevenge::RVNG_TWIP);
+    STOFFVec2f radius=state.convertVectorInPoint(0.5f*STOFFVec2f(m_textRectangle[1]-m_textRectangle[0]));
+    shape.m_propertyList.insert("svg:rx",20*radius.x(), librevenge::RVNG_TWIP);
+    shape.m_propertyList.insert("svg:ry",20*radius.y(), librevenge::RVNG_TWIP);
     if (m_identifier!=4) {
       shape.m_propertyList.insert("draw:start-angle", double(m_angles[0]), librevenge::RVNG_GENERIC);
       shape.m_propertyList.insert("draw:end-angle", double(m_angles[1]), librevenge::RVNG_GENERIC);
@@ -784,13 +797,11 @@ public:
       char const *(wh[])= {"full", "section", "arc", "cut"};
       shape.m_propertyList.insert("draw:kind", wh[m_identifier-4]);
     }
-    updateTransformProperties(shape.m_propertyList);
-    auto pool=getPool(object);
-    StarState state(pool.get(), object);
+    updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
     updateStyle(state, listener);
-    listener->insertShape(shape, state.m_graphic, pos);
+    listener->insertShape(shape, state.m_graphic, pos.m_position);
     if (m_outlinerParaObject)
-      sendTextZone(listener, object);
+      sendTextZone(listener, pos, object);
     return true;
   }
   //! try to update the style
@@ -895,12 +906,13 @@ public:
     return o;
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/) final
+  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final
   {
     if (!listener || m_edgePolygon.empty()) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicEdge::send: can not send a shape\n"));
       return false;
     }
+    StarState state(getState(object, listener, pos));
     STOFFGraphicShape shape;
     shape.m_command=STOFFGraphicShape::C_Connector;
     size_t numFlags=m_edgePolygonFlags.size();
@@ -908,13 +920,11 @@ public:
     for (size_t p=0; p<m_edgePolygon.size(); ++p)
       polygon.m_points.push_back(StarGraphicStruct::StarPolygon::Point(m_edgePolygon[p], p<numFlags ? m_edgePolygonFlags[p] : 0));
     librevenge::RVNGPropertyListVector path;
-    polygon.addToPath(path, false);
+    polygon.addToPath(path, false, state.m_global->m_relativeUnit, state.m_global->m_offset);
     shape.m_propertyList.insert("svg:d", path);
-    updateTransformProperties(shape.m_propertyList);
-    auto pool=getPool(object);
-    StarState state(pool.get(), object);
+    updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
     updateStyle(state, listener);
-    listener->insertShape(shape, state.m_graphic, pos);
+    listener->insertShape(shape, state.m_graphic, pos.m_position);
     return true;
   }
   //! the edge polygon
@@ -956,7 +966,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage) final
+  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) final
   {
     if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicGraph::send: can not send a shape\n"));
@@ -971,11 +981,10 @@ public:
       return SdrGraphicRect::send(listener, pos, object, inMasterPage);
     }
     STOFFPosition position;
-    position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
-    position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
-    position.setAnchor(pos.m_anchorTo);
-    auto pool=getPool(object);
-    StarState state(pool.get(), object);
+    StarState state(getState(object, listener, pos));
+    position.setOrigin(state.convertPointInPoint(m_bdbox[0]));
+    position.setSize(state.convertVectorInPoint(m_bdbox.size()));
+    position.setAnchor(pos.m_position.m_anchorTo);
     updateStyle(state, listener);
     if (!m_graphic || m_graphic->m_object.isEmpty()) {
       // CHECKME: we need probably correct the filename, transform ":" in "/", ...
@@ -1059,24 +1068,24 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/) final
+  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final
   {
     STOFFGraphicShape shape;
-    std::shared_ptr<StarItemPool> pool=getPool(object);
-    StarState state(pool.get(), object);
+    StarState state(getState(object, listener, pos));
     updateStyle(state, listener);
     librevenge::RVNGPropertyListVector vect;
     shape.m_command=STOFFGraphicShape::C_Polyline;
     shape.m_propertyList.insert("draw:show-unit", true);
     librevenge::RVNGPropertyList list;
     for (auto &measurePoint : m_measurePoints) {
-      list.insert("svg:x",libstoff::convertMiniMToPoint(measurePoint[0]), librevenge::RVNG_POINT);
-      list.insert("svg:y",libstoff::convertMiniMToPoint(measurePoint[1]), librevenge::RVNG_POINT);
+      auto measure=state.convertPointInPoint(measurePoint);
+      list.insert("svg:x",measure[0], librevenge::RVNG_POINT);
+      list.insert("svg:y",measure[1], librevenge::RVNG_POINT);
       vect.append(list);
     }
     shape.m_propertyList.insert("svg:points", vect);
-    updateTransformProperties(shape.m_propertyList);
-    listener->insertShape(shape, state.m_graphic, pos);
+    updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
+    listener->insertShape(shape, state.m_graphic, pos.m_position);
     return true;
   }
   //! try to update the style
@@ -1134,18 +1143,17 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage) final
+  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) final
   {
     if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: can not send a shape\n"));
       return false;
     }
+    StarState state(getState(object, listener, pos));
     STOFFPosition position;
-    position.setOrigin(libstoff::convertMiniMToPointVect(m_bdbox[0]), librevenge::RVNG_POINT);
-    position.setSize(libstoff::convertMiniMToPointVect(m_bdbox.size()), librevenge::RVNG_POINT);
-    position.setAnchor(pos.m_anchorTo);
-    auto pool=getPool(object);
-    StarState state(pool.get(), object);
+    position.setOrigin(state.convertPointInPoint(m_bdbox[0]));
+    position.setSize(state.convertVectorInPoint(m_bdbox.size()));
+    position.setAnchor(pos.m_position.m_anchorTo);
     updateStyle(state, listener);
     STOFFEmbeddedObject localPicture;
     if (!m_oleNames[0].empty() && m_oleParser) {
@@ -1246,7 +1254,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr /*listener*/, STOFFPosition const &/*pos*/, StarObject &/*object*/, bool /*inMasterPage*/) final
+  bool send(STOFFListenerPtr /*listener*/, STOFFFrameStyle const &/*pos*/, StarObject &/*object*/, bool /*inMasterPage*/) final
   {
     STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPage::send: unexpected call\n"));
     return false;
@@ -1276,7 +1284,7 @@ public:
   {
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool /*inMasterPage*/) final;
+  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final;
   //! basic print function
   std::string print() const final
   {
@@ -1298,7 +1306,7 @@ public:
   std::vector<StarGraphicStruct::StarPolygon> m_pathPolygons;
 };
 
-bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage)
+bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage)
 {
   if (!listener || m_pathPolygons.empty() || m_pathPolygons[0].empty()) {
     STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::send: can not send a shape\n"));
@@ -1306,8 +1314,7 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFPosition const &pos, S
   }
 
   STOFFGraphicShape shape;
-  auto pool=getPool(object);
-  StarState state(pool.get(), object);
+  StarState state(getState(object, listener, pos));
   updateStyle(state, listener);
   librevenge::RVNGPropertyListVector vect;
   bool isClosed=false;
@@ -1327,15 +1334,16 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFPosition const &pos, S
       shape.m_command=STOFFGraphicShape::C_Polyline;
       for (size_t i=0; i<2; ++i) {
         librevenge::RVNGPropertyList list;
-        list.insert("svg:x",libstoff::convertMiniMToPoint(m_pathPolygons[i].m_points[0].m_point[0]), librevenge::RVNG_POINT);
-        list.insert("svg:y",libstoff::convertMiniMToPoint(m_pathPolygons[i].m_points[0].m_point[1]), librevenge::RVNG_POINT);
+        auto pt=state.convertPointInPoint(m_pathPolygons[i].m_points[0].m_point);
+        list.insert("svg:x",pt[0], librevenge::RVNG_POINT);
+        list.insert("svg:y",pt[1], librevenge::RVNG_POINT);
         vect.append(list);
       }
       shape.m_propertyList.insert("svg:points", vect);
-      updateTransformProperties(shape.m_propertyList);
-      listener->insertShape(shape, state.m_graphic, pos);
+      updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
+      listener->insertShape(shape, state.m_graphic, pos.m_position);
       if (m_outlinerParaObject)
-        sendTextZone(listener, object);
+        sendTextZone(listener, pos, object);
       return true;
     }
     if (m_pathPolygons[0].size()!=2) {
@@ -1373,8 +1381,9 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFPosition const &pos, S
     shape.m_command=isClosed ? STOFFGraphicShape::C_Polygon : STOFFGraphicShape::C_Polyline;
     librevenge::RVNGPropertyList list;
     for (size_t i=0; i<m_pathPolygons[0].size(); ++i) {
-      list.insert("svg:x",libstoff::convertMiniMToPoint(m_pathPolygons[0].m_points[i].m_point[0]), librevenge::RVNG_POINT);
-      list.insert("svg:y",libstoff::convertMiniMToPoint(m_pathPolygons[0].m_points[i].m_point[1]), librevenge::RVNG_POINT);
+      auto pt=state.convertPointInPoint(m_pathPolygons[0].m_points[i].m_point);
+      list.insert("svg:x",pt[0], librevenge::RVNG_POINT);
+      list.insert("svg:y",pt[1], librevenge::RVNG_POINT);
       vect.append(list);
     }
     shape.m_propertyList.insert("svg:points", vect);
@@ -1383,13 +1392,13 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFPosition const &pos, S
     shape.m_command=STOFFGraphicShape::C_Path;
     librevenge::RVNGPropertyListVector path;
     for (auto const poly : m_pathPolygons)
-      poly.addToPath(path, isClosed);
+      poly.addToPath(path, isClosed, state.m_global->m_relativeUnit, state.m_global->m_offset);
     shape.m_propertyList.insert("svg:d", path);
   }
-  updateTransformProperties(shape.m_propertyList);
-  listener->insertShape(shape, state.m_graphic, pos);
+  updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
+  listener->insertShape(shape, state.m_graphic, pos.m_position);
   if (m_outlinerParaObject)
-    sendTextZone(listener, object);
+    sendTextZone(listener, pos, object);
   return true;
 }
 
@@ -1491,7 +1500,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage) final
+  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) final
   {
     if (m_identifier && m_group)
       return m_group->send(listener, pos, object, inMasterPage);
@@ -1714,7 +1723,7 @@ std::ostream &operator<<(std::ostream &o, StarObjectSmallGraphic const &graphic)
   return o;
 }
 
-bool StarObjectSmallGraphic::send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inMasterPage)
+bool StarObjectSmallGraphic::send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage)
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectSmallGraphic::send: can not find the listener\n"));
@@ -2753,6 +2762,7 @@ bool StarObjectSmallGraphic::readSVDRObjectPath(StarZone &zone, StarObjectSmallG
   }
   long lastPos=zone.getRecordLastPosition();
   bool ok=true;
+  auto pool=findItemPool(StarItemPool::T_XOutdevPool, false);
   if (vers<=6 && (id==2 || id==8 || id==9)) {
     int nPoly=id==2 ? 2 : id==8 ? 1 : int(input->readULong(2));
     for (int poly=0; poly<nPoly; ++poly) {

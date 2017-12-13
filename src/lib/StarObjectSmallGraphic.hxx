@@ -69,6 +69,8 @@ class SDRUserData;
 struct State;
 }
 
+class STOFFFrameStyle;
+
 class StarZone;
 
 /** \brief the main class to read a small StarOffice graphic zone
@@ -86,7 +88,7 @@ public:
   //! try to read a object zone: "DrOb'
   bool readSdrObject(StarZone &zone);
   //! try to send a object to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, StarObject &object, bool inPageMaster=false);
+  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inPageMaster=false);
   //! small operator<< to print the content of the small graphic object
   friend std::ostream &operator<<(std::ostream &o, StarObjectSmallGraphic const &graphic);
 

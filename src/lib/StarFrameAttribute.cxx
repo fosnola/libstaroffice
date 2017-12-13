@@ -859,12 +859,12 @@ void StarFAttributeFrameSize::addTo(StarState &state, std::set<StarAttribute con
 {
   if (m_type==ATTR_FRM_FRM_SIZE) {
     if (m_width>0) {
-      state.m_frame.m_frameSize[0]=float(m_width)*0.05f;
-      state.m_global->m_page.m_propertiesList[0].insert("fo:page-width", double(state.m_frame.m_frameSize[0]), librevenge::RVNG_POINT);
+      state.m_frame.m_position.setSize(STOFFVec2f(float(m_width)*0.05f, state.m_frame.m_position.m_size[1]));
+      state.m_global->m_page.m_propertiesList[0].insert("fo:page-width", double(state.m_frame.m_position.m_size[0]), librevenge::RVNG_POINT);
     }
     if (m_height>0) {
-      state.m_frame.m_frameSize[1]=float(m_height)*0.05f;
-      state.m_global->m_page.m_propertiesList[0].insert("fo:page-height", double(state.m_frame.m_frameSize[1]), librevenge::RVNG_POINT);
+      state.m_frame.m_position.setSize(STOFFVec2f(state.m_frame.m_position.m_size[0], float(m_height)*0.05f));
+      state.m_global->m_page.m_propertiesList[0].insert("fo:page-height", double(state.m_frame.m_position.m_size[1]), librevenge::RVNG_POINT);
     }
   }
 }

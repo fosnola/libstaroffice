@@ -166,7 +166,7 @@ librevenge::RVNGString getString(std::vector<uint32_t> const &unicode);
 template<typename T>
 bool checkAddOverflow(T x, T y)
 {
-  return (x < 0 && y < std::numeric_limits<T>::min() - x)
+  return (x < 0 && y < std::numeric_limits<T>::lowest() - x)
          || (x > 0 && y > std::numeric_limits<T>::max() - x);
 }
 }
@@ -1133,19 +1133,6 @@ typedef STOFFBox2<long> STOFFBox2l;
 
 namespace libstoff
 {
-// some conversion function
-//! convert 1/100th millimeter to point
-template <class T>
-double convertMiniMToPoint(T const &value)
-{
-  return 0.028346457*double(value);
-}
-//! convert 1/100th millimeter vector to point
-template <class T>
-STOFFVec2f convertMiniMToPointVect(T const &value)
-{
-  return 0.028346457f*STOFFVec2f(value);
-}
 //! convert a date/time in a date time format
 bool convertToDateTime(uint32_t date, uint32_t time, std::string &dateTime);
 //! split a string in two. If the delimiter is not present, string1=string

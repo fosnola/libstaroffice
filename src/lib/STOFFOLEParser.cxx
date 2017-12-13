@@ -804,7 +804,7 @@ bool STOFFOLEParser::readOlePres(STOFFInputStreamPtr ip, STOFFOLEParser::OleCont
   if (extendX > 0 && extendY > 0) {
     STOFFPosition pos;
     pos.m_anchorTo=STOFFPosition::Char;
-    pos.setSize(STOFFVec2f(float(extendX)/20.f, float(extendY)/20.f), librevenge::RVNG_POINT);
+    pos.setSize(STOFFVec2f(float(extendX)/20.f, float(extendY)/20.f));
     content.setPosition(pos);
   }
   long fSize = ip->readLong(4);
@@ -942,7 +942,7 @@ bool STOFFOLEParser::readContents(STOFFInputStreamPtr input, STOFFOLEParser::Ole
   bool sizeSet=false;
   if (dim[0] > 0 && dim[0] < 3000 &&
       dim[1] > 0 && dim[1] < 3000) {
-    pos.setSize(STOFFVec2f(float(dim[0]),float(dim[1])), librevenge::RVNG_POINT);
+    pos.setSize(STOFFVec2f(float(dim[0]),float(dim[1])));
     sizeSet=true;
   }
   else {
@@ -951,7 +951,7 @@ bool STOFFOLEParser::readContents(STOFFInputStreamPtr input, STOFFOLEParser::Ole
   if (naturalSize[0] > 0 && naturalSize[0] < 5000 &&
       naturalSize[1] > 0 && naturalSize[1] < 5000) {
     if (!sizeSet)
-      pos.setSize(STOFFVec2f(float(naturalSize[0]),float(naturalSize[1])), librevenge::RVNG_POINT);
+      pos.setSize(STOFFVec2f(float(naturalSize[0]),float(naturalSize[1])));
   }
   else {
     STOFF_DEBUG_MSG(("STOFFOLEParser: warning: Contents odd naturalsize : %ld %ld\n", naturalSize[0], naturalSize[1]));
@@ -1054,7 +1054,7 @@ bool STOFFOLEParser::readCONTENTS(STOFFInputStreamPtr input, STOFFOLEParser::Ole
     for (long &i : dim) i = input->readLong(4);
 
     bool ok = dim[0] >= 0 && dim[2] > dim[0] && dim[1] >= 0 && dim[3] > dim[2];
-    if (ok && st==0) pos.setSize(STOFFVec2f(float(dim[2]-dim[0]), float(dim[3]-dim[1])), librevenge::RVNG_POINT);
+    if (ok && st==0) pos.setSize(STOFFVec2f(float(dim[2]-dim[0]), float(dim[3]-dim[1])));
     if (st==0) f << ", bdbox(Text)";
     else f << ", bdbox(Data)";
     if (!ok) f << "###";

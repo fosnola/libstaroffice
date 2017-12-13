@@ -38,6 +38,7 @@
 #include "STOFFList.hxx"
 
 #include "StarItemPool.hxx"
+#include "StarObjectModel.hxx"
 #include "StarObjectNumericRuler.hxx"
 
 #include "SWFieldManager.hxx"
@@ -65,6 +66,25 @@ StarState::StarState(StarItemPool const *pool, StarObject &object)
 {
 }
 
+StarState::StarState(StarState::GlobalState const &global)
+  : m_global(new StarState::GlobalState(global.m_pool, global.m_object, global.m_relativeUnit))
+  , m_styleName("")
+  , m_break(0)
+  , m_cell()
+  , m_frame()
+  , m_graphic()
+  , m_paragraph()
+  , m_font()
+  , m_content(false)
+  , m_flyCnt(false)
+  , m_footnote(false)
+  , m_headerFooter(false)
+  , m_link("")
+  , m_refMark("")
+  , m_field()
+{
+  m_global->m_objectModel=global.m_objectModel;
+}
 StarState::~StarState()
 {
 }

@@ -679,34 +679,34 @@ bool StarGraphicStruct::StarGraphic::read(StarZone &zone, long endPos)
 }
 
 // StarPolygon
-void StarPolygon::addToPath(librevenge::RVNGPropertyListVector &path, bool isClosed) const
+void StarPolygon::addToPath(librevenge::RVNGPropertyListVector &path, bool isClosed, double relUnit, STOFFVec2f const &decal) const
 {
   librevenge::RVNGPropertyList element;
   for (size_t i=0; i<m_points.size(); ++i) {
     if (m_points[i].m_flags==2 && i+2<m_points.size() && m_points[i].m_flags==2) {
-      element.insert("svg:x1",libstoff::convertMiniMToPoint(m_points[i].m_point[0]), librevenge::RVNG_POINT);
-      element.insert("svg:y1",libstoff::convertMiniMToPoint(m_points[i].m_point[1]), librevenge::RVNG_POINT);
-      element.insert("svg:x2",libstoff::convertMiniMToPoint(m_points[++i].m_point[0]), librevenge::RVNG_POINT);
-      element.insert("svg:y2",libstoff::convertMiniMToPoint(m_points[i].m_point[1]), librevenge::RVNG_POINT);
-      element.insert("svg:x",libstoff::convertMiniMToPoint(m_points[++i].m_point[0]), librevenge::RVNG_POINT);
-      element.insert("svg:y",libstoff::convertMiniMToPoint(m_points[i].m_point[1]), librevenge::RVNG_POINT);
+      element.insert("svg:x1",relUnit*(m_points[i].m_point[0]-double(decal[0])), librevenge::RVNG_POINT);
+      element.insert("svg:y1",relUnit*(m_points[i].m_point[1]-double(decal[1])), librevenge::RVNG_POINT);
+      element.insert("svg:x2",relUnit*(m_points[++i].m_point[0]-double(decal[0])), librevenge::RVNG_POINT);
+      element.insert("svg:y2",relUnit*(m_points[i].m_point[1]-double(decal[1])), librevenge::RVNG_POINT);
+      element.insert("svg:x",relUnit*(m_points[++i].m_point[0]-double(decal[0])), librevenge::RVNG_POINT);
+      element.insert("svg:y",relUnit*(m_points[i].m_point[1]-double(decal[1])), librevenge::RVNG_POINT);
       element.insert("librevenge:path-action", "C");
     }
     else if (m_points[i].m_flags==2 && i+1<m_points.size()) {
       /* unsure, let asume that this means the previous point is symetric,
          but maybe we can also have a Bezier patch */
-      element.insert("svg:x1",libstoff::convertMiniMToPoint(m_points[i].m_point[0]), librevenge::RVNG_POINT);
-      element.insert("svg:y1",libstoff::convertMiniMToPoint(m_points[i].m_point[1]), librevenge::RVNG_POINT);
-      element.insert("svg:x",libstoff::convertMiniMToPoint(m_points[++i].m_point[0]), librevenge::RVNG_POINT);
-      element.insert("svg:y",libstoff::convertMiniMToPoint(m_points[i].m_point[1]), librevenge::RVNG_POINT);
+      element.insert("svg:x1",relUnit*(m_points[i].m_point[0]-double(decal[0])), librevenge::RVNG_POINT);
+      element.insert("svg:y1",relUnit*(m_points[i].m_point[1]-double(decal[1])), librevenge::RVNG_POINT);
+      element.insert("svg:x",relUnit*(m_points[++i].m_point[0]-double(decal[0])), librevenge::RVNG_POINT);
+      element.insert("svg:y",relUnit*(m_points[i].m_point[1]-double(decal[1])), librevenge::RVNG_POINT);
       element.insert("librevenge:path-action", "S");
     }
     else {
       if (m_points[i].m_flags==2) {
         STOFF_DEBUG_MSG(("StarGraphicStruct::StarPolygon::addToPath: find unexpected flags\n"));
       }
-      element.insert("svg:x",libstoff::convertMiniMToPoint(m_points[i].m_point[0]), librevenge::RVNG_POINT);
-      element.insert("svg:y",libstoff::convertMiniMToPoint(m_points[i].m_point[1]), librevenge::RVNG_POINT);
+      element.insert("svg:x",relUnit*(m_points[i].m_point[0]-double(decal[0])), librevenge::RVNG_POINT);
+      element.insert("svg:y",relUnit*(m_points[i].m_point[1]-double(decal[1])), librevenge::RVNG_POINT);
       element.insert("librevenge:path-action", (i==0 ? "M" : "L"));
     }
     path.append(element);
@@ -717,10 +717,10 @@ void StarPolygon::addToPath(librevenge::RVNGPropertyListVector &path, bool isClo
   }
 }
 
-bool StarPolygon::convert(librevenge::RVNGString &path, librevenge::RVNGString &viewbox) const
+bool StarPolygon::convert(librevenge::RVNGString &path, librevenge::RVNGString &viewbox, double relUnit, STOFFVec2f const &decal) const
 {
   librevenge::RVNGPropertyListVector pathVect;
-  addToPath(pathVect, true);
+  addToPath(pathVect, true, relUnit, decal);
   path=convertPath(pathVect);
   double bounds[4];
   if (path.empty() || !getPathBBox(pathVect, bounds[0], bounds[1], bounds[2], bounds[3]))

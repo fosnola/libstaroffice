@@ -188,7 +188,7 @@ struct GraphZone final : public Zone {
   librevenge::RVNGString m_names[3];
   //! the attributes list
   std::vector<StarWriterStruct::Attribute> m_attributeList;
-  //! the contour
+  //! the contour(useme)
   StarGraphicStruct::StarPolygon m_contour;
 };
 
@@ -687,7 +687,6 @@ bool Content::send(STOFFListenerPtr listener, StarState &state, bool isFlyer) co
       if (!std::dynamic_pointer_cast<TextZone>(m_zoneList[t]))
         continue;
       StarState cState(state.m_global);
-      //cState.m_frame.m_position.setAnchor(STOFFPosition::Frame);
       auto subDoc = std::make_shared<SubDocument>(*this, cState);
       STOFFGraphicStyle style=cState.m_graphic;
       state.m_frame.addTo(style.m_propertyList);
@@ -761,6 +760,7 @@ bool StarObjectText::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &
 
   auto pool=findItemPool(StarItemPool::T_WriterPool, false);
   StarState state(pool.get(), *this);
+  state.m_global->m_objectModel=m_textState->m_model;
   if (m_textState->m_mainContent)
     m_textState->m_mainContent->inventoryPages(state);
   if (m_textState->m_pageStyle)
@@ -773,7 +773,6 @@ bool StarObjectText::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &
     pageSpan.push_back(ps);
   }
   m_textState->m_numPages=numPages;
-
   if (m_textState->m_model) {
     std::vector<STOFFPageSpan> modelPageSpan;
     m_textState->m_model->updatePageSpans(modelPageSpan, m_textState->m_numGraphicPages);
@@ -791,20 +790,24 @@ bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
     STOFF_DEBUG_MSG(("StarObjectText::sendPages: can not find any content\n"));
     return true;
   }
+  /*
   if (m_textState->m_model) {
     // send the graphics which are in the model
     for (int i=0; i<=m_textState->m_numGraphicPages; ++i)
       m_textState->m_model->sendPage(i, listener);
   }
+  */
   auto pool=findItemPool(StarItemPool::T_WriterPool, false);
   // then send the frames relative to the page
   for (auto fly : m_textState->m_flyList) {
     if (!fly) continue;
     StarState state(pool.get(), *this);
+    state.m_global->m_objectModel=m_textState->m_model;
     fly->send(listener, state);
   }
   // finally send the text content
   StarState state(pool.get(), *this);
+  state.m_global->m_objectModel=m_textState->m_model;
   state.m_global->m_numericRuler=m_textState->m_numericRuler;
   m_textState->m_mainContent->send(listener, state);
   return true;
@@ -1526,9 +1529,11 @@ bool StarObjectText::readSWTextZone(StarZone &zone, std::shared_ptr<StarObjectTe
         textZone->m_formatList.push_back(format);
       break;
     }
-    case 'o': { // format: safe to ignore
+    case 'o': { //
       std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
       done=getFormatManager()->readSWFormatDef(zone,'o', format, *this);
+      if (done && format)
+        textZone->m_formatList.push_back(format);
       break;
     }
     case 'v': {
@@ -1619,6 +1624,7 @@ try
 
   // create this pool from the main's SWG pool
   auto pool=getNewItemPool(StarItemPool::T_XOutdevPool);
+  pool->setRelativeUnit(0.05);
   pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
 
   while (!input->isEnd()) {
@@ -1661,6 +1667,7 @@ try
   libstoff::DebugStream f;
   f << "Entries(DrawingLayer):";
   bool ok=true;
+  std::set<long> ids;
   if (nSign!=0x444D && nSign!=0) // 0 seems ok if followed by 0
     input->seek(pos, librevenge::RVNG_SEEK_SET);
   else {
@@ -1673,7 +1680,11 @@ try
     }
     else {
       f << "framePos=[";
-      for (uint16_t i=0; i<n; ++i) f << input->readULong(4) << ",";
+      for (uint16_t i=0; i<n; ++i) {
+        auto id=long(input->readULong(4));
+        ids.insert(id);
+        f << id << ",";
+      }
       f << "],";
     }
   }
@@ -1683,6 +1694,7 @@ try
     STOFF_DEBUG_MSG(("StarObjectText::readDrawingLayer: find extra data\n"));
     f << "###extra";
   }
+  model->updateObjectIds(ids);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   return true;

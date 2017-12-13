@@ -125,7 +125,9 @@ public:
   std::shared_ptr<StarItem> loadSurrogate(StarZone &zone, uint16_t &nWhich, bool localId, libstoff::DebugStream &f);
   //! try to load a surrogate
   bool loadSurrogate(StarItem &item);
-  //! returns the default relative unit
+  //! set the item pool relative unit (if this is different to the default one)
+  void setRelativeUnit(double relUnit);
+  //! returns the set relative unit if this is set, or the default unit corresponding to this pool
   double getRelativeUnit() const;
 protected:
   /** define a graphic style */

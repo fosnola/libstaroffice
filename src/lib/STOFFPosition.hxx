@@ -54,6 +54,9 @@ public:
   //! constructor
   STOFFPosition()
     : m_anchorTo(Unknown)
+    , m_origin()
+    , m_size()
+    , m_offset(0,0)
     , m_propertyList() {}
   //! destructor
   virtual ~STOFFPosition();
@@ -94,23 +97,25 @@ public:
       propList.insert(i.key(), i()->clone());
     }
   }
-  //! utility function to set a origin
-  void setOrigin(STOFFVec2f const &origin, librevenge::RVNGUnit unit)
+  //! utility function to set a origin in point
+  void setOrigin(STOFFVec2f const &origin)
   {
-    m_propertyList.insert("svg:x",double(origin[0]), unit);
-    m_propertyList.insert("svg:y",double(origin[1]), unit);
+    m_origin=origin;
+    m_propertyList.insert("svg:x",double(origin[0]), librevenge::RVNG_POINT);
+    m_propertyList.insert("svg:y",double(origin[1]), librevenge::RVNG_POINT);
   }
-  //! utility function to set a size
-  void setSize(STOFFVec2f const &size, librevenge::RVNGUnit unit)
+  //! utility function to set a size in point
+  void setSize(STOFFVec2f const &size)
   {
+    m_size=size;
     if (size.x()>0)
-      m_propertyList.insert("svg:width",double(size.x()), unit);
+      m_propertyList.insert("svg:width",double(size.x()), librevenge::RVNG_POINT);
     else if (size.x()<0)
-      m_propertyList.insert("fo:min-width",double(-size.x()), unit);
+      m_propertyList.insert("fo:min-width",double(-size.x()), librevenge::RVNG_POINT);
     if (size.y()>0)
-      m_propertyList.insert("svg:height",double(size.y()), unit);
+      m_propertyList.insert("svg:height",double(size.y()), librevenge::RVNG_POINT);
     else if (size.y()<0)
-      m_propertyList.insert("fo:min-height",double(-size.y()), unit);
+      m_propertyList.insert("fo:min-height",double(-size.y()), librevenge::RVNG_POINT);
   }
   //! set the anchor
   void setAnchor(AnchorTo anchor)
@@ -126,7 +131,9 @@ public:
   //! basic operator==
   bool operator==(STOFFPosition const &f) const
   {
-    return m_anchorTo==f.m_anchorTo && m_propertyList.getPropString()==f.m_propertyList.getPropString();
+    return m_anchorTo==f.m_anchorTo && m_origin==f.m_origin && m_size==f.m_size &&
+           m_offset==f.m_offset &&
+           m_propertyList.getPropString()==f.m_propertyList.getPropString();
   }
   //! basic operator!=
   bool operator!=(STOFFPosition const &f) const
@@ -136,6 +143,12 @@ public:
 
   //! anchor position
   AnchorTo m_anchorTo;
+  /** the origin in point */
+  STOFFVec2f m_origin;
+  /** the size in point */
+  STOFFVec2f m_size;
+  //! internal: an offset used to retrieve the local position in a DrawingLayer
+  STOFFVec2f m_offset;
   //! the property list
   librevenge::RVNGPropertyList m_propertyList;
 };

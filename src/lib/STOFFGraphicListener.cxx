@@ -970,8 +970,8 @@ bool STOFFGraphicListener::openHeader(librevenge::RVNGPropertyList const &extras
 
   // we do not have any header interface, so mimick it by creating a textbox
   STOFFPosition pos;
-  pos.setOrigin(STOFFVec2f(20,20), librevenge::RVNG_POINT); // fixme
-  pos.setSize(STOFFVec2f(-20,-10), librevenge::RVNG_POINT);
+  pos.setOrigin(STOFFVec2f(20,20)); // fixme
+  pos.setSize(STOFFVec2f(-20,-10));
   pos.m_anchorTo=STOFFPosition::Page;
   if (!openFrame(pos))
     return false;
@@ -1023,8 +1023,8 @@ bool STOFFGraphicListener::openFooter(librevenge::RVNGPropertyList const &extras
 
   // we do not have any footer interface, so mimick it by creating a textbox
   STOFFPosition pos;
-  pos.setOrigin(STOFFVec2f(20,700), librevenge::RVNG_POINT); // fixme: ypos
-  pos.setSize(STOFFVec2f(-20,-10), librevenge::RVNG_POINT);
+  pos.setOrigin(STOFFVec2f(20,700)); // fixme: ypos
+  pos.setSize(STOFFVec2f(-20,-10));
   pos.m_anchorTo=STOFFPosition::Page;
   if (!openFrame(pos))
     return false;
@@ -1332,8 +1332,8 @@ void STOFFGraphicListener::openTable(STOFFTable const &table)
     if (m_ps->m_isTextBoxOpened) {
       STOFF_DEBUG_MSG(("STOFFGraphicListener::openTable: must not be called inside a textbox\n"));
       STOFFPosition pos;
-      pos.setOrigin(m_ps->m_origin, librevenge::RVNG_POINT);
-      pos.setSize(STOFFVec2f(400,100), librevenge::RVNG_POINT);
+      pos.setOrigin(m_ps->m_origin);
+      pos.setSize(STOFFVec2f(400,100));
       pos.m_anchorTo=STOFFPosition::Page;
       openTable(pos, table);
       return;

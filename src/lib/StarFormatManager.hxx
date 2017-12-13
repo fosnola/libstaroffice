@@ -56,6 +56,7 @@ struct FormatDef {
   FormatDef() : m_attributeList()
   {
     for (int &value : m_values) value=0;
+    m_values[2]=-1; // no objRef
   }
   //! destructor
   ~FormatDef();

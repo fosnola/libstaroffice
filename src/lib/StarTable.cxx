@@ -189,9 +189,9 @@ void TableBox::updatePosition(Table &table, StarState const &state, float xOrigi
     }
   }
   if (m_format) {
-    cState.m_frame.m_frameSize=STOFFVec2i(0,0);
+    cState.m_frame.m_position.m_size=STOFFVec2i(0,0);
     m_format->updateState(cState);
-    if (cState.m_frame.m_frameSize[0]<=0) {
+    if (cState.m_frame.m_position.m_size[0]<=0) {
       if (m_lineList.empty()) {
         static bool first=true;
         if (first) {
@@ -202,10 +202,10 @@ void TableBox::updatePosition(Table &table, StarState const &state, float xOrigi
       }
     }
     else {
-      m_xDimension=STOFFVec2f(xOrigin, xOrigin+cState.m_frame.m_frameSize[0]);
-      table.m_xPositionSet.insert(xOrigin+cState.m_frame.m_frameSize[0]);
-      if (cState.m_frame.m_frameSize[0] < table.m_minColWidth)
-        table.m_minColWidth=cState.m_frame.m_frameSize[0];
+      m_xDimension=STOFFVec2f(xOrigin, xOrigin+cState.m_frame.m_position.m_size[0]);
+      table.m_xPositionSet.insert(xOrigin+cState.m_frame.m_position.m_size[0]);
+      if (cState.m_frame.m_position.m_size[0] < table.m_minColWidth)
+        table.m_minColWidth=cState.m_frame.m_position.m_size[0];
     }
   }
   else if (m_lineList.empty()) {
@@ -591,14 +591,14 @@ bool StarTableInternal::Table::send(STOFFListenerPtr listener, StarState &state)
     table.m_propertyList=cState.m_cell.m_propertyList;
     cState.m_frame.addTo(table.m_propertyList);
 
-    m_minColWidth=cState.m_frame.m_frameSize[0];
+    m_minColWidth=cState.m_frame.m_position.m_size[0];
     // checkme sometime the width is 65535/20, ie. bigger than the page width...
-    if (cState.m_frame.m_frameSize[0]>=float(int(65535/20))) {
-      percentMaxValue=cState.m_frame.m_frameSize[0];
+    if (cState.m_frame.m_position.m_size[0]>=float(int(65535/20))) {
+      percentMaxValue=cState.m_frame.m_position.m_size[0];
       table.m_propertyList.insert("style:width", 1., librevenge::RVNG_PERCENT);
     }
-    else if (cState.m_frame.m_frameSize[0]>0)
-      table.m_propertyList.insert("style:width", double(cState.m_frame.m_frameSize[0]), librevenge::RVNG_POINT);
+    else if (cState.m_frame.m_position.m_size[0]>0)
+      table.m_propertyList.insert("style:width", double(cState.m_frame.m_position.m_size[0]), librevenge::RVNG_POINT);
   }
   m_xPositionSet.insert(0);
   for (auto line : m_lineList) {

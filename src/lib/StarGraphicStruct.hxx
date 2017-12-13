@@ -182,9 +182,9 @@ public:
     return m_points.size();
   }
   //! add the polygon to a path
-  void addToPath(librevenge::RVNGPropertyListVector &path, bool isClosed) const;
+  void addToPath(librevenge::RVNGPropertyListVector &path, bool isClosed, double relUnit, STOFFVec2f const &decal) const;
   //! convert a path in a string and update the bdbox
-  bool convert(librevenge::RVNGString &path, librevenge::RVNGString &viewbox) const;
+  bool convert(librevenge::RVNGString &path, librevenge::RVNGString &viewbox, double relUnit, STOFFVec2f const &decal) const;
   //! operator<<
   friend std::ostream &operator<<(std::ostream &o, StarPolygon const &poly);
   //! the list of points

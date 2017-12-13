@@ -39,6 +39,7 @@
 #  define STAR_OBJECT_MODEL
 
 #include <ostream>
+#include <set>
 #include <vector>
 
 #include "libstaroffice_internal.hxx"
@@ -52,6 +53,7 @@ class Page;
 struct State;
 }
 
+class StarState;
 class StarZone;
 
 /** \brief the main class to read a SdrModel zone
@@ -68,7 +70,11 @@ public:
   ~StarObjectModel() override;
   //! try to read a SdrModel zone: "DrMd"
   bool read(StarZone &zone);
+  /** try to update the object id of page 0
 
+      \note this is used to retrieve an object in a .sdw's DrawingLawer stream
+   */
+  void updateObjectIds(std::set<long> &unusedId);
   /** try to update the page span (to create draw document)*/
   bool updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &numPages, bool usePage0=false) const;
   //! try to send the master pages
@@ -77,6 +83,9 @@ public:
   bool sendPages(STOFFListenerPtr listener);
   //! try to send a page content
   bool sendPage(int pageId, STOFFListenerPtr listener, bool masterPage=false);
+  //! try to send an object
+  bool sendObject(int id, STOFFListenerPtr listener, StarState const &state);
+
   //! small operator<< to print the content of the model
   friend std::ostream &operator<<(std::ostream &o, StarObjectModel const &model);
 protected:

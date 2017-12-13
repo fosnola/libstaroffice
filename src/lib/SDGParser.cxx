@@ -169,14 +169,14 @@ void SDGParser::parse(librevenge::RVNGDrawingInterface *docInterface)
             listener->insertBreak(STOFFListener::PageBreak);
           else
             first=false;
-          position.setOrigin(STOFFVec2f(20,20), librevenge::RVNG_POINT);
+          position.setOrigin(STOFFVec2f(20,20));
           STOFFVec2f size=(image.m_size[0]>0 && image.m_size[1]>0) ? STOFFVec2f(image.m_size) : STOFFVec2f(400,400);
-          position.setSize(size, librevenge::RVNG_POINT);
+          position.setSize(size);
           listener->insertPicture(position, image.m_object, style);
           if (!image.m_link.empty()) {
             std::shared_ptr<SDGParserInternal::SubDocument> doc(new SDGParserInternal::SubDocument(image.m_link));
-            position.setOrigin(STOFFVec2f(20,30+size[1]), librevenge::RVNG_POINT);
-            position.setSize(STOFFVec2f(600,200), librevenge::RVNG_POINT);
+            position.setOrigin(STOFFVec2f(20,30+size[1]));
+            position.setSize(STOFFVec2f(600,200));
             listener->insertTextBox(position, doc, style);
           }
         }

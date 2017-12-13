@@ -47,6 +47,7 @@
 #include "StarGraphicStruct.hxx"
 #include "StarLanguage.hxx"
 #include "StarObject.hxx"
+#include "StarObjectModel.hxx"
 #include "StarState.hxx"
 #include "StarWriterStruct.hxx"
 #include "StarZone.hxx"
@@ -93,6 +94,8 @@ bool FormatDef::send(STOFFListenerPtr listener, StarState &state) const
   }
   if (attrib)
     attrib->send(listener, state);
+  else if (state.m_global->m_objectModel && m_values[2]>=0)
+    state.m_global->m_objectModel->sendObject(m_values[2], listener, state);
   else {
     STOFF_DEBUG_MSG(("StarFormatManagerInternal::FormatDef::send: can not find any data to send %d\n", m_values[2]));
   }
@@ -107,7 +110,7 @@ void FormatDef::printData(libstoff::DebugStream &o) const
   }
   if (m_values[0]) o << "derived=" << m_values[0] << ",";
   if (m_values[1]!=0xFFFF) o << "poolId=" << m_values[1] << ",";
-  if (m_values[2]) o << "objRef=" << m_values[2] << ",";
+  if (m_values[2]>=0) o << "objRef=" << m_values[2] << ",";
 }
 
 //------------------------------------------------------------

@@ -40,6 +40,7 @@
 
 #include <librevenge/librevenge.h>
 
+#include "STOFFFrameStyle.hxx"
 #include "STOFFGraphicListener.hxx"
 #include "STOFFListener.hxx"
 #include "STOFFOLEParser.hxx"
@@ -49,6 +50,7 @@
 #include "StarItemPool.hxx"
 #include "StarObject.hxx"
 #include "StarObjectSmallGraphic.hxx"
+#include "StarState.hxx"
 #include "StarZone.hxx"
 
 #include "StarObjectModel.hxx"
@@ -182,17 +184,17 @@ public:
     return m_masterPageDescList[0].m_masterId;
   }
   //! update pagespan properties
-  void updatePageSpan(STOFFPageSpan &page) const
+  void updatePageSpan(STOFFPageSpan &page, double relUnit) const
   {
     if (m_size[0]>0 && m_size[0]!=0x7fffffff)
-      page.m_propertiesList[0].insert("fo:page-width", libstoff::convertMiniMToPoint(m_size[0]), librevenge::RVNG_POINT);
+      page.m_propertiesList[0].insert("fo:page-width", relUnit*m_size[0], librevenge::RVNG_POINT);
     if (m_size[1]>0 && m_size[1]!=0x7fffffff)
-      page.m_propertiesList[0].insert("fo:page-height", libstoff::convertMiniMToPoint(m_size[1]), librevenge::RVNG_POINT);
+      page.m_propertiesList[0].insert("fo:page-height", relUnit*m_size[1], librevenge::RVNG_POINT);
     for (int i=0; i<4; ++i) {
       if (m_borders[i]<0 || m_borders[i]==0x7fffffff) continue;
       char const *(wh[])= {"left", "top", "right", "bottom"};
       page.m_propertiesList[0].insert((std::string("fo:margin-")+wh[i]).c_str(),
-                                      libstoff::convertMiniMToPoint(m_borders[i]), librevenge::RVNG_POINT);
+                                      relUnit*m_borders[i], librevenge::RVNG_POINT);
     }
     if (m_background) {
       STOFF_DEBUG_MSG(("StarObjectModelInternal::Page::updatePageSpan: sorry sending background object is not implemented\n"));
@@ -259,6 +261,7 @@ struct State {
     , m_layerSetList()
     , m_pageToSendList()
     , m_masterPageToSendSet()
+    , m_idToObjectMap()
   {
   }
   //! small operator<< to print the content of the state
@@ -325,6 +328,9 @@ struct State {
   std::vector<int> m_pageToSendList;
   //! the list of master page to send
   std::set<int> m_masterPageToSendSet;
+  //! a map objectId to object
+  std::map<int, std::shared_ptr<StarObjectSmallGraphic> > m_idToObjectMap;
+
 };
 
 }
@@ -356,12 +362,14 @@ bool StarObjectModel::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int 
   m_modelState->m_pageToSendList.clear();
   m_modelState->m_masterPageToSendSet.clear();
 
+  auto pool=const_cast<StarObjectModel *>(this)->findItemPool(StarItemPool::T_XOutdevPool, false);
+  double const relUnit=pool ? pool->getRelativeUnit() : 0.028346457;
   pageSpan.clear();
   if (usePage0) {
     if (m_modelState->m_pageList.empty() || !m_modelState->m_pageList[0])
       return false;
     STOFFPageSpan ps;
-    m_modelState->m_pageList[0]->updatePageSpan(ps);
+    m_modelState->m_pageList[0]->updatePageSpan(ps, relUnit);
     pageSpan.push_back(ps);
     return true;
   }
@@ -374,7 +382,7 @@ bool StarObjectModel::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int 
     if (id<=0 || (id&1)!=1) continue;
     m_modelState->m_pageToSendList.push_back(int(i));
     STOFFPageSpan ps;
-    page.updatePageSpan(ps);
+    page.updatePageSpan(ps, relUnit);
     if (id<numMasterPage && m_modelState->m_masterPageList[size_t(id)]) {
       m_modelState->m_masterPageToSendSet.insert(id);
       librevenge::RVNGString masterName;
@@ -385,6 +393,30 @@ bool StarObjectModel::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int 
   }
   number=int(m_modelState->m_pageToSendList.size());
   return number!=0;
+}
+
+void StarObjectModel::updateObjectIds(std::set<long> &unusedId)
+{
+  if (m_modelState->m_pageList.empty() || !m_modelState->m_pageList[0])
+    return;
+  int actId=0;
+  for (auto &obj : m_modelState->m_pageList[0]->m_objectList) {
+    while (unusedId.find(long(actId))!=unusedId.end())
+      ++actId;
+    if (obj)
+      m_modelState->m_idToObjectMap[actId]=obj;
+    ++actId;
+  }
+}
+
+bool StarObjectModel::sendObject(int id, STOFFListenerPtr listener, StarState const &state)
+{
+  auto it=m_modelState->m_idToObjectMap.find(id);
+  if (it==m_modelState->m_idToObjectMap.end() || !it->second) {
+    STOFF_DEBUG_MSG(("StarObjectModel::sendObject: can not find object %d\n", id));
+    return false;
+  }
+  return it->second->send(listener, state.m_frame, *this);
 }
 
 bool StarObjectModel::sendPages(STOFFListenerPtr listener)
@@ -410,6 +442,8 @@ bool StarObjectModel::sendMasterPages(STOFFGraphicListenerPtr listener)
     STOFF_DEBUG_MSG(("StarObjectModel::sendMasterPages: can not find the listener\n"));
     return false;
   }
+  auto pool=const_cast<StarObjectModel *>(this)->findItemPool(StarItemPool::T_XOutdevPool, false);
+  double const relUnit=pool ? pool->getRelativeUnit() : 0.028346457;
   auto numMasters=int(m_modelState->m_masterPageList.size());
   for (auto id : m_modelState->m_masterPageToSendSet) {
     if (id<0 || id>=numMasters || !m_modelState->m_masterPageList[size_t(id)]) {
@@ -418,7 +452,7 @@ bool StarObjectModel::sendMasterPages(STOFFGraphicListenerPtr listener)
     }
     auto const &page=*m_modelState->m_masterPageList[size_t(id)];
     STOFFPageSpan ps;
-    page.updatePageSpan(ps);
+    page.updatePageSpan(ps, relUnit);
     librevenge::RVNGString masterName;
     masterName.sprintf("Master%d", id);
     ps.m_propertiesList[0].insert("librevenge:master-page-name", masterName);
@@ -444,12 +478,12 @@ bool StarObjectModel::sendPage(int pageId, STOFFListenerPtr listener, bool maste
   if (pageId>=int(pageList.size()) || !pageList[size_t(pageId)])
     return false;
   StarObjectModelInternal::Page &page=*pageList[size_t(pageId)];
-  STOFFPosition pos;
-  pos.m_anchorTo=STOFFPosition::Page;
-  if (!masterPage) pos.m_propertyList.insert("text:anchor-page-number", pageId+1);
+  STOFFFrameStyle frame;
+  frame.m_position.m_anchorTo=STOFFPosition::Page;
+  if (!masterPage) frame.m_position.m_propertyList.insert("text:anchor-page-number", pageId+1);
   for (auto pag : page.m_objectList) {
     if (pag)
-      pag->send(listener, pos, *this, masterPage);
+      pag->send(listener, frame, *this, masterPage);
   }
   return true;
 }

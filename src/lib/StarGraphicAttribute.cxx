@@ -908,7 +908,7 @@ void StarGAttributeNamedArrow::addTo(StarState &state, std::set<StarAttribute co
     }
     else {
       librevenge::RVNGString path, viewbox;
-      if (m_polygon.convert(path, viewbox)) {
+      if (m_polygon.convert(path, viewbox, state.m_global->m_relativeUnit, STOFFVec2f(0,0))) {
         state.m_graphic.m_propertyList.insert(pathName, path);
         state.m_graphic.m_propertyList.insert(viewboxName, viewbox);
       }

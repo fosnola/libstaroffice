@@ -359,6 +359,7 @@ struct State {
     , m_minorVersion(0)
     , m_loadingVersion(-1)
     , m_name("")
+    , m_relativeUnit(0)
     , m_isSecondaryPool(false)
     , m_secondaryPool()
     , m_currentVersion(0)
@@ -510,6 +511,8 @@ struct State {
   int m_loadingVersion;
   //! the name
   librevenge::RVNGString m_name;
+  //! the relative unit
+  double m_relativeUnit;
   //! a flag to know if a pool is a secondary pool
   bool m_isSecondaryPool;
   //! the secondary pool
@@ -906,8 +909,15 @@ StarItemPool::~StarItemPool()
 {
 }
 
+void StarItemPool::setRelativeUnit(double relUnit)
+{
+  m_state->m_relativeUnit=relUnit;
+}
+
 double StarItemPool::getRelativeUnit() const
 {
+  if (m_state->m_relativeUnit>0)
+    return m_state->m_relativeUnit;
   return m_state->m_type==StarItemPool::T_XOutdevPool || m_state->m_type==StarItemPool::T_EditEnginePool ? 0.028346457 : 0.05;
 }
 void StarItemPool::clean()

@@ -73,6 +73,7 @@ public:
     GlobalState(StarItemPool const *pool, StarObject &object, double relUnit=0.05)
       : m_pool(pool)
       , m_object(object)
+      , m_objectModel()
       , m_numericRuler()
       , m_page()
       , m_pageName("")
@@ -82,6 +83,7 @@ public:
       , m_list()
       , m_listLevel(-1)
       , m_relativeUnit(relUnit)
+      , m_offset(0,0)
     {
     }
     //! destructor
@@ -90,6 +92,8 @@ public:
     StarItemPool const *m_pool;
     /** the object */
     StarObject &m_object;
+    /** the object model(for sdw file)*/
+    std::shared_ptr<StarObjectModel> m_objectModel;
     /// the numeric ruler manager
     std::shared_ptr<StarObjectNumericRuler> m_numericRuler;
     /// the page
@@ -108,7 +112,8 @@ public:
     int m_listLevel;
     /** the relative unit uses to transform rel font height in point, default 1/20 */
     double m_relativeUnit;
-
+    /** an offset: in point */
+    STOFFVec2f m_offset;
   private:
     GlobalState(GlobalState const &) = delete;
     GlobalState &operator=(GlobalState const &) = delete;
@@ -116,24 +121,7 @@ public:
   //! constructor
   StarState(StarItemPool const *pool, StarObject &object);
   //! constructor which create a copy of the global state
-  explicit StarState(GlobalState const &global)
-    : m_global(new GlobalState(global.m_pool, global.m_object, global.m_relativeUnit))
-    , m_styleName("")
-    , m_break(0)
-    , m_cell()
-    , m_frame()
-    , m_graphic()
-    , m_paragraph()
-    , m_font()
-    , m_content(false)
-    , m_flyCnt(false)
-    , m_footnote(false)
-    , m_headerFooter(false)
-    , m_link("")
-    , m_refMark("")
-    , m_field()
-  {
-  }
+  explicit StarState(GlobalState const &global);
   //! constructor which share the global state
   explicit StarState(std::shared_ptr<GlobalState> global)
     : m_global(global)
@@ -153,8 +141,7 @@ public:
     , m_field()
   {
   }
-  //! copy constructor
-  explicit StarState(StarState const &) = default;
+
   //! destructor
   ~StarState();
   //! reinit the local data: break, font, content, footnote, ...
@@ -163,6 +150,16 @@ public:
   double convertInPoint(double val) const
   {
     return m_global->m_relativeUnit*val;
+  }
+  //! return the relative units
+  STOFFVec2f convertPointInPoint(STOFFVec2f const &val) const
+  {
+    return float(m_global->m_relativeUnit)*val+m_global->m_offset;
+  }
+  //! return the relative units
+  STOFFVec2f convertVectorInPoint(STOFFVec2f const &val) const
+  {
+    return float(m_global->m_relativeUnit)*val;
   }
   //! global state
   std::shared_ptr<GlobalState> m_global;
@@ -197,8 +194,6 @@ public:
   librevenge::RVNGString m_refMark;
   /** the field */
   std::shared_ptr<SWFieldManagerInternal::Field> m_field;
-private:
-  StarState &operator=(StarState const &) = delete;
 };
 #endif
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:
