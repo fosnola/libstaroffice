@@ -485,7 +485,7 @@ public:
     StarState state(getState(object, listener, finalPos));
     finalPos.m_position.m_offset=state.m_global->m_offset;
     finalPos.m_position.m_offset=true;
-    listener->openGroup(pos.m_position);
+    listener->openGroup(pos);
     for (auto &child : m_child) {
       if (child)
         child->send(listener, finalPos, object, inMasterPage);
@@ -575,11 +575,9 @@ public:
       return false;
     }
     StarState state(getState(object, listener, pos));
-    STOFFPosition position;
-    if (std::dynamic_pointer_cast<STOFFTextListener>(listener)) {
-      position=pos.m_position;
-      pos.addTo(position.m_propertyList);
-    }
+    STOFFFrameStyle frame=pos;
+    STOFFPosition &position=frame.m_position;
+    pos.addTo(position.m_propertyList);
     position.setOrigin(state.convertPointInPoint(box[0]));
     position.setSize(state.convertVectorInPoint(box.size()));
     if (position.m_anchorTo==STOFFPosition::Unknown)
@@ -589,13 +587,13 @@ public:
     state.m_graphic.m_propertyList.insert("draw:fill", "none");
     state.m_graphic.m_propertyList.insert("draw:shadow", "hidden"); // the text is not shadowed
     if (m_textDrehWink) {
-      STOFFVec2f orig=state.convertPointInPoint(box[0]);
+      STOFFVec2f const &orig=position.m_origin;
       state.m_graphic.m_propertyList.insert("librevenge:rotate-cx", orig[0], librevenge::RVNG_POINT);
       state.m_graphic.m_propertyList.insert("librevenge:rotate-cy", orig[1], librevenge::RVNG_POINT);
       state.m_graphic.m_propertyList.insert("librevenge:rotate", -(m_textDrehWink/100.), librevenge::RVNG_GENERIC);
     }
     std::shared_ptr<SubDocument> doc(new SubDocument(m_outlinerParaObject));
-    listener->insertTextBox(position, doc, state.m_graphic);
+    listener->insertTextBox(frame, doc, state.m_graphic);
     return true;
   }
   //! print object data
@@ -657,7 +655,7 @@ public:
       shape.m_bdbox=STOFFBox2f(state.convertPointInPoint(m_textRectangle[0]), state.convertPointInPoint(m_textRectangle[1]));
       updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
       updateStyle(state, listener);
-      listener->insertShape(shape, state.m_graphic, pos.m_position);
+      listener->insertShape(pos, shape, state.m_graphic);
       if (m_outlinerParaObject)
         sendTextZone(listener, pos, object);
     }
@@ -741,7 +739,7 @@ public:
     shape.m_propertyList.insert("svg:d", path);
     updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
     updateStyle(state, listener);
-    listener->insertShape(shape, state.m_graphic, pos.m_position);
+    listener->insertShape(pos, shape, state.m_graphic);
     return true;
   }
   //! a polygon
@@ -799,7 +797,7 @@ public:
     }
     updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
     updateStyle(state, listener);
-    listener->insertShape(shape, state.m_graphic, pos.m_position);
+    listener->insertShape(pos, shape, state.m_graphic);
     if (m_outlinerParaObject)
       sendTextZone(listener, pos, object);
     return true;
@@ -924,7 +922,7 @@ public:
     shape.m_propertyList.insert("svg:d", path);
     updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
     updateStyle(state, listener);
-    listener->insertShape(shape, state.m_graphic, pos.m_position);
+    listener->insertShape(pos, shape, state.m_graphic);
     return true;
   }
   //! the edge polygon
@@ -980,20 +978,21 @@ public:
       }
       return SdrGraphicRect::send(listener, pos, object, inMasterPage);
     }
-    STOFFPosition position;
     StarState state(getState(object, listener, pos));
+    auto frame=pos;
+    STOFFPosition &position=frame.m_position;
+    pos.addTo(position.m_propertyList);
     position.setOrigin(state.convertPointInPoint(m_bdbox[0]));
     position.setSize(state.convertVectorInPoint(m_bdbox.size()));
-    position.setAnchor(pos.m_position.m_anchorTo);
     updateStyle(state, listener);
     if (!m_graphic || m_graphic->m_object.isEmpty()) {
       // CHECKME: we need probably correct the filename, transform ":" in "/", ...
       STOFFEmbeddedObject link;
       link.m_filenameLink=m_graphNames[1];
-      listener->insertPicture(position, link, state.m_graphic);
+      listener->insertPicture(frame, link, state.m_graphic);
     }
     else
-      listener->insertPicture(position, m_graphic->m_object, state.m_graphic);
+      listener->insertPicture(frame, m_graphic->m_object, state.m_graphic);
 
     return true;
   }
@@ -1085,7 +1084,7 @@ public:
     }
     shape.m_propertyList.insert("svg:points", vect);
     updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
-    listener->insertShape(shape, state.m_graphic, pos.m_position);
+    listener->insertShape(pos, shape, state.m_graphic);
     return true;
   }
   //! try to update the style
@@ -1150,10 +1149,11 @@ public:
       return false;
     }
     StarState state(getState(object, listener, pos));
-    STOFFPosition position;
+    STOFFPosition &position=state.m_frame.m_position;
+    position=pos.m_position;
+    pos.addTo(position.m_propertyList);
     position.setOrigin(state.convertPointInPoint(m_bdbox[0]));
     position.setSize(state.convertVectorInPoint(m_bdbox.size()));
-    position.setAnchor(pos.m_position.m_anchorTo);
     updateStyle(state, listener);
     STOFFEmbeddedObject localPicture;
     if (!m_oleNames[0].empty() && m_oleParser) {
@@ -1162,14 +1162,14 @@ public:
       if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture, localObj) || localPicture.isEmpty()) {
         if (localObj) {
           auto chart=std::dynamic_pointer_cast<StarObjectChart>(localObj);
-          if (chart && chart->send(listener, position, state.m_graphic)) {
+          if (chart && chart->send(listener, state.m_frame, state.m_graphic)) {
             if (m_graphic && !m_graphic->m_object.isEmpty()) {
               STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: find extra graphic for chart %s\n", m_oleNames[0].cstr()));
             }
             return true;
           }
           auto math=std::dynamic_pointer_cast<StarObjectMath>(localObj);
-          if (math && math->send(listener, position, state.m_graphic)) {
+          if (math && math->send(listener, state.m_frame, state.m_graphic)) {
             if (m_graphic && !m_graphic->m_object.isEmpty()) {
               STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: find extra graphic for math %s\n", m_oleNames[0].cstr()));
             }
@@ -1202,7 +1202,7 @@ public:
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: sorry, can not find some graphic representation\n"));
       return SdrGraphicRect::send(listener, pos, object, inMasterPage);
     }
-    listener->insertPicture(position, localPicture, state.m_graphic);
+    listener->insertPicture(state.m_frame, localPicture, state.m_graphic);
 
     return true;
   }
@@ -1341,7 +1341,7 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFFrameStyle const &pos,
       }
       shape.m_propertyList.insert("svg:points", vect);
       updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
-      listener->insertShape(shape, state.m_graphic, pos.m_position);
+      listener->insertShape(pos, shape, state.m_graphic);
       if (m_outlinerParaObject)
         sendTextZone(listener, pos, object);
       return true;
@@ -1396,7 +1396,7 @@ bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFFrameStyle const &pos,
     shape.m_propertyList.insert("svg:d", path);
   }
   updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
-  listener->insertShape(shape, state.m_graphic, pos.m_position);
+  listener->insertShape(pos, shape, state.m_graphic);
   if (m_outlinerParaObject)
     sendTextZone(listener, pos, object);
   return true;

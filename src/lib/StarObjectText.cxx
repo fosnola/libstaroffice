@@ -209,7 +209,7 @@ bool GraphZone::send(STOFFListenerPtr listener, StarState &state) const
   }
   STOFFGraphicStyle style=state.m_graphic;
   state.m_frame.addTo(style.m_propertyList);
-  listener->insertPicture(state.m_frame.getPosition(), localPicture, style);
+  listener->insertPicture(state.m_frame, localPicture, style);
   return true;
 }
 
@@ -251,7 +251,6 @@ bool OLEZone::send(STOFFListenerPtr listener, StarState &state) const
   STOFFEmbeddedObject localPicture;
   std::shared_ptr<StarObject> localObj;
   auto dir=m_oleParser->getDirectory(m_name.cstr());
-  auto position= state.m_frame.getPosition();
   STOFFGraphicStyle style=state.m_graphic;
   state.m_frame.addTo(style.m_propertyList);
   if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture, localObj) || localPicture.isEmpty()) {
@@ -260,10 +259,10 @@ bool OLEZone::send(STOFFListenerPtr listener, StarState &state) const
       return false;
     }
     auto chart=std::dynamic_pointer_cast<StarObjectChart>(localObj);
-    if (chart && chart->send(listener, position, style))
+    if (chart && chart->send(listener, state.m_frame, style))
       return true;
     auto math=std::dynamic_pointer_cast<StarObjectMath>(localObj);
-    if (math && math->send(listener, position, style))
+    if (math && math->send(listener, state.m_frame, style))
       return true;
     if (std::dynamic_pointer_cast<StarObjectText>(localObj)) {
       STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: sorry, unsure how to send a text object %s\n", m_name.cstr()));
@@ -273,7 +272,7 @@ bool OLEZone::send(STOFFListenerPtr listener, StarState &state) const
     }
     return false;
   }
-  listener->insertPicture(position, localPicture, style);
+  listener->insertPicture(state.m_frame, localPicture, style);
 
   return true;
 }
@@ -690,7 +689,7 @@ bool Content::send(STOFFListenerPtr listener, StarState &state, bool isFlyer) co
       auto subDoc = std::make_shared<SubDocument>(*this, cState);
       STOFFGraphicStyle style=cState.m_graphic;
       state.m_frame.addTo(style.m_propertyList);
-      listener->insertTextBox(state.m_frame.getPosition(), subDoc, style);
+      listener->insertTextBox(state.m_frame, subDoc, style);
       return true;
     }
   }

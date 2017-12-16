@@ -83,7 +83,7 @@ StarObjectMath::~StarObjectMath()
 {
 }
 
-bool StarObjectMath::send(STOFFListenerPtr listener, STOFFPosition const &pos, STOFFGraphicStyle const &style)
+bool StarObjectMath::send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, STOFFGraphicStyle const &style)
 {
   if (!listener || m_mathState->m_mml.empty()) {
     STOFF_DEBUG_MSG(("StarObjectMath::send: oops, can not create the graphic representation\n"));

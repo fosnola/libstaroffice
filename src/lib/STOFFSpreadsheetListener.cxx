@@ -55,6 +55,7 @@
 #include "STOFFCell.hxx"
 #include "STOFFChart.hxx"
 #include "STOFFFont.hxx"
+#include "STOFFFrameStyle.hxx"
 #include "STOFFGraphicStyle.hxx"
 #include "STOFFGraphicShape.hxx"
 #include "STOFFInputStream.hxx"
@@ -1058,13 +1059,13 @@ void STOFFSpreadsheetListener::insertComment(STOFFSubDocumentPtr &subDocument, l
 }
 
 void STOFFSpreadsheetListener::insertTextBox
-(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &frameStyle)
+(STOFFFrameStyle const &frame, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &frameStyle)
 {
   if (!m_ds->m_isSheetOpened) {
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertTextBox insert a textbox outside a sheet is not implemented\n"));
     return;
   }
-  if (!openFrame(pos, frameStyle)) return;
+  if (!openFrame(frame, frameStyle)) return;
 
   librevenge::RVNGPropertyList propList;
   if (frameStyle.m_propertyList["librevenge:next-frame-name"])
@@ -1077,13 +1078,13 @@ void STOFFSpreadsheetListener::insertTextBox
   closeFrame();
 }
 
-void STOFFSpreadsheetListener::insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture, STOFFGraphicStyle const &style)
+void STOFFSpreadsheetListener::insertPicture(STOFFFrameStyle const &frame, STOFFEmbeddedObject const &picture, STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isSheetOpened) {
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertPicture insert a picture outside a sheet is not implemented\n"));
     return;
   }
-  if (!openFrame(pos, style)) return;
+  if (!openFrame(frame, style)) return;
 
   librevenge::RVNGPropertyList propList;
   if (picture.addTo(propList))
@@ -1092,7 +1093,7 @@ void STOFFSpreadsheetListener::insertPicture(STOFFPosition const &pos, STOFFEmbe
   closeFrame();
 }
 
-void STOFFSpreadsheetListener::insertEquation(STOFFPosition const &pos, librevenge::RVNGString const &equation,
+void STOFFSpreadsheetListener::insertEquation(STOFFFrameStyle const &frame, librevenge::RVNGString const &equation,
     STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isSheetOpened) {
@@ -1103,7 +1104,7 @@ void STOFFSpreadsheetListener::insertEquation(STOFFPosition const &pos, libreven
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertEquation: oops the equation is empty\n"));
     return;
   }
-  if (!openFrame(pos, style)) return;
+  if (!openFrame(frame, style)) return;
 
   librevenge::RVNGPropertyList propList;
   propList.insert("librevenge:mime-type", "application/mathml+xml");
@@ -1112,20 +1113,20 @@ void STOFFSpreadsheetListener::insertEquation(STOFFPosition const &pos, libreven
   closeFrame();
 }
 
-void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos)
+void STOFFSpreadsheetListener::insertShape(STOFFFrameStyle const &frame, STOFFGraphicShape const &shape, STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isSheetOpened) {
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertShape insert a picture outside a sheet is not implemented\n"));
     return;
   }
   // now check that the anchor is coherent with the actual state
-  if (pos.m_anchorTo==STOFFPosition::Paragraph) {
+  if (frame.m_position.m_anchorTo==STOFFPosition::Paragraph) {
     if (m_ps->m_isParagraphOpened)
       _flushText();
     else
       _openParagraph();
   }
-  else if (pos.m_anchorTo==STOFFPosition::Char || pos.m_anchorTo==STOFFPosition::CharBaseLine) {
+  else if (frame.m_position.m_anchorTo==STOFFPosition::Char || frame.m_position.m_anchorTo==STOFFPosition::CharBaseLine) {
     if (m_ps->m_isSpanOpened)
       _flushText();
     else
@@ -1136,7 +1137,8 @@ void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFF
   }
 
   librevenge::RVNGPropertyList shapeProp, styleProp;
-  pos.addTo(shapeProp);
+  frame.addTo(shapeProp);
+  frame.m_position.addTo(shapeProp);
   shape.addTo(shapeProp);
   style.addTo(styleProp);
   STOFFGraphicStyle::checkForDefault(styleProp);
@@ -1171,7 +1173,7 @@ void STOFFSpreadsheetListener::insertShape(STOFFGraphicShape const &shape, STOFF
 ///////////////////
 // frame
 ///////////////////
-bool STOFFSpreadsheetListener::openGroup(STOFFPosition const &/*pos*/)
+bool STOFFSpreadsheetListener::openGroup(STOFFFrameStyle const &/*frame*/)
 {
   STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openGroup is not implemented\n"));
   return false;
@@ -1181,7 +1183,7 @@ void STOFFSpreadsheetListener::closeGroup()
 {
 }
 
-bool STOFFSpreadsheetListener::openFrame(STOFFPosition const &pos, STOFFGraphicStyle const &style)
+bool STOFFSpreadsheetListener::openFrame(STOFFFrameStyle const &frame, STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isSheetOpened || m_ds->m_isSheetRowOpened) {
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame insert a frame outside a sheet is not implemented\n"));
@@ -1191,8 +1193,8 @@ bool STOFFSpreadsheetListener::openFrame(STOFFPosition const &pos, STOFFGraphicS
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame: called but a frame is already opened\n"));
     return false;
   }
-  STOFFPosition fPos(pos);
-  switch (pos.m_anchorTo) {
+  auto finalFrame=frame;
+  switch (finalFrame.m_position.m_anchorTo) {
   case STOFFPosition::Page:
     break;
   case STOFFPosition::Paragraph:
@@ -1222,7 +1224,7 @@ bool STOFFSpreadsheetListener::openFrame(STOFFPosition const &pos, STOFFGraphicS
         _flushText();
       else
         _openParagraph();
-      fPos.m_anchorTo=STOFFPosition::Paragraph;
+      finalFrame.m_position.m_anchorTo=STOFFPosition::Paragraph;
     }
     break;
   case STOFFPosition::Cell:
@@ -1230,7 +1232,7 @@ bool STOFFSpreadsheetListener::openFrame(STOFFPosition const &pos, STOFFGraphicS
       STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame: called with Cell position not in a sheet cell\n"));
       return false;
     }
-    if (!pos.m_propertyList["table:end-cell-address"]) {
+    if (!finalFrame.m_position.m_propertyList["table:end-cell-address"]) {
       STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::openFrame: can not find the cell name\n"));
       return false;
     }
@@ -1243,7 +1245,7 @@ bool STOFFSpreadsheetListener::openFrame(STOFFPosition const &pos, STOFFGraphicS
   librevenge::RVNGPropertyList propList(style.m_propertyList);
   if (!propList["draw:fill"])
     propList.insert("draw:fill","none");
-  _handleFrameParameters(propList, fPos);
+  _handleFrameParameters(propList, finalFrame);
   m_documentInterface->openFrame(propList);
 
   m_ps->m_isFrameOpened = true;
@@ -1261,9 +1263,11 @@ void STOFFSpreadsheetListener::closeFrame()
 }
 
 void STOFFSpreadsheetListener::_handleFrameParameters
-(librevenge::RVNGPropertyList &propList, STOFFPosition const &pos)
+(librevenge::RVNGPropertyList &propList, STOFFFrameStyle const &frame)
 {
-  pos.addTo(propList);
+  frame.getPosition().addTo(propList);
+  if (propList["text:anchor-page-number"])
+    propList.remove("text:anchor-page-number");
 }
 
 ///////////////////
@@ -1568,13 +1572,13 @@ void STOFFSpreadsheetListener::closeSheetCell()
 // chart
 ///////////////////
 void STOFFSpreadsheetListener::insertChart
-(STOFFPosition const &pos, STOFFChart &chart, STOFFGraphicStyle const &style)
+(STOFFFrameStyle const &frame, STOFFChart &chart, STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isSheetOpened || m_ds->m_isSheetRowOpened) {
     STOFF_DEBUG_MSG(("STOFFSpreadsheetListener::insertChart outside a chart in a sheet is not implemented\n"));
     return;
   }
-  if (!openFrame(pos, style)) return;
+  if (!openFrame(frame, style)) return;
 
   _pushParsingState();
   _startSubDocument();

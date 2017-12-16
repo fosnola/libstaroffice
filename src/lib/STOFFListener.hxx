@@ -205,20 +205,20 @@ public:
   /** adds comment */
   virtual void insertComment(STOFFSubDocumentPtr &subDocument, librevenge::RVNGString const &creator="", librevenge::RVNGString const &date="") = 0;
   /** adds a equation given a position */
-  virtual void insertEquation(STOFFPosition const &pos, librevenge::RVNGString const &equation,
+  virtual void insertEquation(STOFFFrameStyle const &frame, librevenge::RVNGString const &equation,
                               STOFFGraphicStyle const &style=STOFFGraphicStyle()) = 0;
   /** adds a picture with various representationin given position.
    \note by default only send the first picture*/
-  virtual void insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture,
+  virtual void insertPicture(STOFFFrameStyle const &frame, STOFFEmbeddedObject const &picture,
                              STOFFGraphicStyle const &style=STOFFGraphicStyle())=0;
   /** adds a shape picture in given position */
-  virtual void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos) = 0;
+  virtual void insertShape(STOFFFrameStyle const &frame, STOFFGraphicShape const &shape, STOFFGraphicStyle const &style) = 0;
   /** adds a textbox in given position */
-  virtual void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument,
+  virtual void insertTextBox(STOFFFrameStyle const &frame, STOFFSubDocumentPtr subDocument,
                              STOFFGraphicStyle const &frameStyle=STOFFGraphicStyle()) = 0;
 #if 0
   /** adds a textbox in given position */
-  virtual void insertTextBoxInShape(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument,
+  virtual void insertTextBoxInShape(STOFFFrameStyle const &frame, STOFFSubDocumentPtr subDocument,
                                     STOFFGraphicShape const &/*shape*/,
                                     STOFFGraphicStyle const &frameStyle=STOFFGraphicStyle())
   {
@@ -227,15 +227,15 @@ public:
       STOFF_DEBUG_MSG(("STOFFListener::insertTextBoxInShape: umimplemented, revert to basic insertTextBox\n"));
       first=false;
     }
-    insertTextBox(pos, subDocument, frameStyle);
+    insertTextBox(frame, subDocument, frameStyle);
   }
 #endif
   /** low level: tries to open a frame */
-  virtual bool openFrame(STOFFPosition const &pos, STOFFGraphicStyle const &style=STOFFGraphicStyle()) = 0;
+  virtual bool openFrame(STOFFFrameStyle const &frame, STOFFGraphicStyle const &style=STOFFGraphicStyle()) = 0;
   /** low level: tries to close the last opened frame */
   virtual void closeFrame() = 0;
   /** low level: tries to open a group */
-  virtual bool openGroup(STOFFPosition const &pos) = 0;
+  virtual bool openGroup(STOFFFrameStyle const &frame) = 0;
   /** low level: tries to close the last opened group */
   virtual void closeGroup() = 0;
   /** low level: function called to add a subdocument */

@@ -41,6 +41,7 @@
 #include <librevenge/librevenge.h>
 
 #include "STOFFChart.hxx"
+#include "STOFFFrameStyle.hxx"
 #include "STOFFGraphicEncoder.hxx"
 #include "STOFFGraphicListener.hxx"
 #include "STOFFOLEParser.hxx"
@@ -124,11 +125,11 @@ StarObjectChart::~StarObjectChart()
 //
 ////////////////////////////////////////////////////////////
 
-bool StarObjectChart::send(STOFFListenerPtr listener, STOFFPosition const &pos, STOFFGraphicStyle const &style)
+bool StarObjectChart::send(STOFFListenerPtr listener, STOFFFrameStyle const &frame, STOFFGraphicStyle const &style)
 {
   auto sheetListener=std::dynamic_pointer_cast<STOFFSpreadsheetListener>(listener);
   if (sheetListener && m_chartState->m_chart) {
-    sheetListener->insertChart(pos, *m_chartState->m_chart, style);
+    sheetListener->insertChart(frame, *m_chartState->m_chart, style);
     return true;
   }
   if (!listener || !m_chartState->m_model) {
@@ -147,7 +148,7 @@ bool StarObjectChart::send(STOFFListenerPtr listener, STOFFPosition const &pos, 
   graphicListener->endDocument();
   STOFFEmbeddedObject image;
   graphicEncoder.getBinaryResult(image);
-  listener->insertPicture(pos, image, style);
+  listener->insertPicture(frame, image, style);
   return true;
 }
 

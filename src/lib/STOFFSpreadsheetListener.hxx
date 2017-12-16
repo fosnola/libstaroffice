@@ -92,11 +92,11 @@ public:
   /** returns try if a subdocument is open  */
   bool isSubDocumentOpened(libstoff::SubDocumentType &subdocType) const final;
   /** tries to open a frame */
-  bool openFrame(STOFFPosition const &pos, STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
+  bool openFrame(STOFFFrameStyle const &frame, STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
   /** tries to close a frame */
   void closeFrame() final;
   /** open a group (not implemented) */
-  bool openGroup(STOFFPosition const &pos) final;
+  bool openGroup(STOFFFrameStyle const &frame) final;
   /** close a group (not implemented) */
   void closeGroup() final;
 
@@ -144,7 +144,7 @@ public:
 
   // ------- chart -----------------
   /** adds a chart in given position */
-  void insertChart(STOFFPosition const &pos, STOFFChart &chart, STOFFGraphicStyle const &style=STOFFGraphicStyle());
+  void insertChart(STOFFFrameStyle const &frame, STOFFChart &chart, STOFFGraphicStyle const &style=STOFFGraphicStyle());
 
   // ------ text data -----------
 
@@ -206,15 +206,15 @@ public:
   void insertComment(STOFFSubDocumentPtr &subDocument, librevenge::RVNGString const &creator="", librevenge::RVNGString const &date="") final;
 
   /** adds a picture with potential various representationin given position */
-  void insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture,
+  void insertPicture(STOFFFrameStyle const &frame, STOFFEmbeddedObject const &picture,
                      STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
   /** adds a equation given a position */
-  void insertEquation(STOFFPosition const &pos, librevenge::RVNGString const &equation,
+  void insertEquation(STOFFFrameStyle const &frame, librevenge::RVNGString const &equation,
                       STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
   /** adds a shape picture in given position */
-  void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos) final;
+  void insertShape(STOFFFrameStyle const &frame, STOFFGraphicShape const &shape, STOFFGraphicStyle const &style) final;
   /** adds a textbox in given position */
-  void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument,
+  void insertTextBox(STOFFFrameStyle const &frame, STOFFSubDocumentPtr subDocument,
                      STOFFGraphicStyle const &frameStyle=STOFFGraphicStyle()) final;
   // ------- table -----------------
   /** open a table */
@@ -263,7 +263,7 @@ protected:
   void _startSubDocument();
   void _endSubDocument();
 
-  void _handleFrameParameters(librevenge::RVNGPropertyList &propList, STOFFPosition const &pos);
+  void _handleFrameParameters(librevenge::RVNGPropertyList &propList, STOFFFrameStyle const &frame);
 
   void _openParagraph();
   void _closeParagraph();

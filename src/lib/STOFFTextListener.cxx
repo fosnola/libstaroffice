@@ -50,6 +50,7 @@
 
 #include "STOFFCell.hxx"
 #include "STOFFFont.hxx"
+#include "STOFFFrameStyle.hxx"
 #include "STOFFGraphicStyle.hxx"
 #include "STOFFGraphicShape.hxx"
 #include "STOFFInputStream.hxx"
@@ -1150,9 +1151,9 @@ void STOFFTextListener::insertComment(STOFFSubDocumentPtr &subDocument, libreven
 }
 
 void STOFFTextListener::insertTextBox
-(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &frameStyle)
+(STOFFFrameStyle const &frame, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &frameStyle)
 {
-  if (!openFrame(pos, frameStyle)) return;
+  if (!openFrame(frame, frameStyle)) return;
 
   librevenge::RVNGPropertyList propList;
   if (frameStyle.m_propertyList["librevenge:next-frame-name"])
@@ -1165,12 +1166,12 @@ void STOFFTextListener::insertTextBox
   closeFrame();
 }
 
-void STOFFTextListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos)
+void STOFFTextListener::insertShape(STOFFFrameStyle const &frame, STOFFGraphicShape const &shape, STOFFGraphicStyle const &style)
 {
   if (!m_ps->m_isPageSpanOpened)
     _openPageSpan();
   // now check that the anchor is coherent with the actual state
-  switch (pos.m_anchorTo) {
+  switch (frame.m_position.m_anchorTo) {
   case STOFFPosition::Page:
     if (m_ps->m_isParagraphOpened)
       _closeParagraph();
@@ -1200,7 +1201,8 @@ void STOFFTextListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphic
   }
 
   librevenge::RVNGPropertyList shapeProp, styleProp;
-  pos.addTo(shapeProp);
+  frame.addTo(shapeProp);
+  frame.m_position.addTo(shapeProp);
   shape.addTo(shapeProp);
   style.addTo(styleProp);
   STOFFGraphicStyle::checkForDefault(styleProp);
@@ -1235,9 +1237,9 @@ void STOFFTextListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphic
   }
 }
 
-void STOFFTextListener::insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture, STOFFGraphicStyle const &style)
+void STOFFTextListener::insertPicture(STOFFFrameStyle const &frame, STOFFEmbeddedObject const &picture, STOFFGraphicStyle const &style)
 {
-  if (!openFrame(pos, style)) return;
+  if (!openFrame(frame, style)) return;
 
   librevenge::RVNGPropertyList propList;
   if (picture.addTo(propList))
@@ -1245,14 +1247,14 @@ void STOFFTextListener::insertPicture(STOFFPosition const &pos, STOFFEmbeddedObj
   closeFrame();
 }
 
-void STOFFTextListener::insertEquation(STOFFPosition const &pos, librevenge::RVNGString const &equation,
+void STOFFTextListener::insertEquation(STOFFFrameStyle const &frame, librevenge::RVNGString const &equation,
                                        STOFFGraphicStyle const &style)
 {
   if (equation.empty()) {
     STOFF_DEBUG_MSG(("STOFFTextListener::insertEquation: oops the equation is empty\n"));
     return;
   }
-  if (!openFrame(pos, style)) return;
+  if (!openFrame(frame, style)) return;
 
   librevenge::RVNGPropertyList propList;
   propList.insert("librevenge:mime-type", "application/mathml+xml");
@@ -1264,7 +1266,7 @@ void STOFFTextListener::insertEquation(STOFFPosition const &pos, librevenge::RVN
 ///////////////////
 // frame
 ///////////////////
-bool STOFFTextListener::openFrame(STOFFPosition const &pos, STOFFGraphicStyle const &style)
+bool STOFFTextListener::openFrame(STOFFFrameStyle const &frame, STOFFGraphicStyle const &style)
 {
   if (m_ps->m_isTableOpened && !m_ps->m_isTableCellOpened) {
     STOFF_DEBUG_MSG(("STOFFTextListener::openFrame: called in table but cell is not opened\n"));
@@ -1274,8 +1276,8 @@ bool STOFFTextListener::openFrame(STOFFPosition const &pos, STOFFGraphicStyle co
     STOFF_DEBUG_MSG(("STOFFTextListener::openFrame: called but a frame is already opened\n"));
     return false;
   }
-  STOFFPosition fPos(pos);
-  switch (pos.m_anchorTo) {
+  auto finalFrame=frame;
+  switch (finalFrame.m_position.m_anchorTo) {
   case STOFFPosition::Page:
     break;
   case STOFFPosition::Paragraph:
@@ -1305,7 +1307,7 @@ bool STOFFTextListener::openFrame(STOFFPosition const &pos, STOFFGraphicStyle co
         _flushText();
       else
         _openParagraph();
-      fPos.m_anchorTo=STOFFPosition::Paragraph;
+      finalFrame.m_position.m_anchorTo=STOFFPosition::Paragraph;
     }
     break;
   case STOFFPosition::Cell:
@@ -1313,7 +1315,7 @@ bool STOFFTextListener::openFrame(STOFFPosition const &pos, STOFFGraphicStyle co
       STOFF_DEBUG_MSG(("STOFFTextListener::openFrame: called with Cell position not in a table cell\n"));
       return false;
     }
-    if (!pos.m_propertyList["table:end-cell-address"]) {
+    if (!finalFrame.m_position.m_propertyList["table:end-cell-address"]) {
       STOFF_DEBUG_MSG(("STOFFTextListener::openFrame: can not find the cell name\n"));
       return false;
     }
@@ -1326,7 +1328,7 @@ bool STOFFTextListener::openFrame(STOFFPosition const &pos, STOFFGraphicStyle co
   }
 
   librevenge::RVNGPropertyList propList;
-  _handleFrameParameters(propList, fPos, style);
+  _handleFrameParameters(propList, finalFrame, style);
   m_documentInterface->openFrame(propList);
 
   m_ps->m_isFrameOpened = true;
@@ -1343,7 +1345,7 @@ void STOFFTextListener::closeFrame()
   m_ps->m_isFrameOpened = false;
 }
 
-bool STOFFTextListener::openGroup(STOFFPosition const &pos)
+bool STOFFTextListener::openGroup(STOFFFrameStyle const &frame)
 {
   if (!m_ds->m_isDocumentStarted) {
     STOFF_DEBUG_MSG(("STOFFTextListener::openGroup: the document is not started\n"));
@@ -1355,7 +1357,7 @@ bool STOFFTextListener::openGroup(STOFFPosition const &pos)
   }
 
   // now check that the anchor is coherent with the actual state
-  switch (pos.m_anchorTo) {
+  switch (frame.m_position.m_anchorTo) {
   case STOFFPosition::Page:
     break;
   case STOFFPosition::Paragraph:
@@ -1387,7 +1389,7 @@ bool STOFFTextListener::openGroup(STOFFPosition const &pos)
   m_ps->m_isGroupOpened = true;
 
   librevenge::RVNGPropertyList propList;
-  pos.addTo(propList);
+  frame.getPosition().addTo(propList);
   m_documentInterface->openGroup(propList);
 
   return true;
@@ -1405,11 +1407,11 @@ void  STOFFTextListener::closeGroup()
 }
 
 void STOFFTextListener::_handleFrameParameters
-(librevenge::RVNGPropertyList &propList, STOFFPosition const &pos, STOFFGraphicStyle const &style)
+(librevenge::RVNGPropertyList &propList, STOFFFrameStyle const &frame, STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isDocumentStarted)
     return;
-  pos.addTo(propList);
+  frame.getPosition().addTo(propList);
   style.addTo(propList);
 }
 

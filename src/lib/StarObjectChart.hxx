@@ -67,7 +67,7 @@ public:
   //! try to parse the current object
   bool parse();
   //! try to send a object to the listener
-  bool send(STOFFListenerPtr listener, STOFFPosition const &pos, STOFFGraphicStyle const &style=STOFFGraphicStyle());
+  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &frame, STOFFGraphicStyle const &style=STOFFGraphicStyle());
 
 protected:
   //

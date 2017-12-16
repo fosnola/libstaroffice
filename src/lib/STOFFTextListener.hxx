@@ -94,11 +94,11 @@ public:
   /** returns try if a subdocument is open  */
   bool isSubDocumentOpened(libstoff::SubDocumentType &subdocType) const final;
   /** store the position and the style (which will be needed further to insert a textbox or a table with openTable) */
-  bool openFrame(STOFFPosition const &pos, STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
+  bool openFrame(STOFFFrameStyle const &frame, STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
   /** close a frame */
   void closeFrame() final;
   /** open a group */
-  bool openGroup(STOFFPosition const &pos) final;
+  bool openGroup(STOFFFrameStyle const &frame) final;
   /** close a group */
   void closeGroup() final;
   /** open a layer */
@@ -192,14 +192,14 @@ public:
 
   // ------- subdocument -----------------
   /** adds a shape picture in given position */
-  void insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos) final;
+  void insertShape(STOFFFrameStyle const &frame, STOFFGraphicShape const &shape, STOFFGraphicStyle const &style) final;
   /** adds a textbox in given position */
-  void insertTextBox(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
+  void insertTextBox(STOFFFrameStyle const &pos, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
   /** adds a picture with potential various representationin given position */
-  void insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture,
+  void insertPicture(STOFFFrameStyle const &frame, STOFFEmbeddedObject const &picture,
                      STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
   /** adds a equation given a position */
-  void insertEquation(STOFFPosition const &pos, librevenge::RVNGString const &equation,
+  void insertEquation(STOFFFrameStyle const &frame, librevenge::RVNGString const &equation,
                       STOFFGraphicStyle const &style=STOFFGraphicStyle()) final;
   /** insert a note */
   void insertNote(STOFFNote const &note, STOFFSubDocumentPtr &subDocument) final;
@@ -208,12 +208,8 @@ public:
 
   // ------- table -----------------
 
-  /** adds a table in given position */
-  void insertTable(STOFFPosition const &pos, STOFFTable &table, STOFFGraphicStyle const &style=STOFFGraphicStyle());
   /** open a table (using the last parameters of openFrame for the position ) */
   void openTable(STOFFTable const &table) final;
-  /** open a table in a given position */
-  void openTable(STOFFPosition const &pos, STOFFTable const &table);
   /** closes this table */
   void closeTable() final;
   /** open a row with given height ( if h < 0.0, set min-row-height = -h )*/
@@ -260,7 +256,7 @@ protected:
   /** adds in propList the frame parameters.
 
    \note if there is some gradient, first draw a rectangle to print the gradient and them update propList */
-  void _handleFrameParameters(librevenge::RVNGPropertyList &propList, STOFFPosition const &pos, STOFFGraphicStyle const &style);
+  void _handleFrameParameters(librevenge::RVNGPropertyList &propList, STOFFFrameStyle const &frame, STOFFGraphicStyle const &style);
 
   void _openParagraph();
   void _closeParagraph();

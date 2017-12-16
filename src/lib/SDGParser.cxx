@@ -39,6 +39,7 @@
 
 #include <librevenge/librevenge.h>
 
+#include "STOFFFrameStyle.hxx"
 #include "STOFFGraphicListener.hxx"
 #include "STOFFOLEParser.hxx"
 #include "STOFFSubDocument.hxx"
@@ -156,7 +157,8 @@ void SDGParser::parse(librevenge::RVNGDrawingInterface *docInterface)
       createDocument(docInterface);
       STOFFListenerPtr listener=getGraphicListener();
       if (listener) {
-        STOFFPosition position;
+        STOFFFrameStyle frame;
+        auto &position=frame.m_position;
         position.setAnchor(STOFFPosition::Page);
         STOFFGraphicStyle style;
         style.m_propertyList.insert("draw:stroke", "none");
@@ -172,12 +174,12 @@ void SDGParser::parse(librevenge::RVNGDrawingInterface *docInterface)
           position.setOrigin(STOFFVec2f(20,20));
           STOFFVec2f size=(image.m_size[0]>0 && image.m_size[1]>0) ? STOFFVec2f(image.m_size) : STOFFVec2f(400,400);
           position.setSize(size);
-          listener->insertPicture(position, image.m_object, style);
+          listener->insertPicture(frame, image.m_object, style);
           if (!image.m_link.empty()) {
             std::shared_ptr<SDGParserInternal::SubDocument> doc(new SDGParserInternal::SubDocument(image.m_link));
             position.setOrigin(STOFFVec2f(20,30+size[1]));
             position.setSize(STOFFVec2f(600,200));
-            listener->insertTextBox(position, doc, style);
+            listener->insertTextBox(frame, doc, style);
           }
         }
       }

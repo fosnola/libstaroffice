@@ -45,7 +45,7 @@
 
 #include "STOFFCell.hxx"
 #include "STOFFFont.hxx"
-//#include "STOFFGraphicEncoder.hxx"
+#include "STOFFFrameStyle.hxx"
 #include "STOFFGraphicStyle.hxx"
 #include "STOFFGraphicShape.hxx"
 #include "STOFFInputStream.hxx"
@@ -145,7 +145,7 @@ struct State {
   //! a flag to know if openFrame was called
   bool m_isFrameOpened;
   //! the frame position
-  STOFFPosition m_framePosition;
+  STOFFFrameStyle m_framePosition;
   //! the frame style
   STOFFGraphicStyle m_frameStyle;
 
@@ -969,15 +969,16 @@ bool STOFFGraphicListener::openHeader(librevenge::RVNGPropertyList const &extras
   STOFF_DEBUG_MSG(("STOFFGraphicListener::openHeader: Oops I am called\n"));
 
   // we do not have any header interface, so mimick it by creating a textbox
-  STOFFPosition pos;
+  STOFFFrameStyle frame;
+  auto &pos=frame.m_position;
   pos.setOrigin(STOFFVec2f(20,20)); // fixme
   pos.setSize(STOFFVec2f(-20,-10));
   pos.m_anchorTo=STOFFPosition::Page;
-  if (!openFrame(pos))
+  if (!openFrame(frame))
     return false;
   m_ds->m_isHeaderFooterOpened=true;
   librevenge::RVNGPropertyList propList(extras);
-  _handleFrameParameters(propList, pos, STOFFGraphicStyle());
+  _handleFrameParameters(propList, frame, STOFFGraphicStyle());
 
   if (m_drawingInterface)
     m_drawingInterface->startTextObject(propList);
@@ -1022,15 +1023,16 @@ bool STOFFGraphicListener::openFooter(librevenge::RVNGPropertyList const &extras
   STOFF_DEBUG_MSG(("STOFFGraphicListener::openFooter: Oops I am called\n"));
 
   // we do not have any footer interface, so mimick it by creating a textbox
-  STOFFPosition pos;
+  STOFFFrameStyle frame;
+  auto &pos=frame.m_position;
   pos.setOrigin(STOFFVec2f(20,700)); // fixme: ypos
   pos.setSize(STOFFVec2f(-20,-10));
   pos.m_anchorTo=STOFFPosition::Page;
-  if (!openFrame(pos))
+  if (!openFrame(frame))
     return false;
   m_ds->m_isHeaderFooterOpened=true;
   librevenge::RVNGPropertyList propList(extras);
-  _handleFrameParameters(propList, pos, STOFFGraphicStyle());
+  _handleFrameParameters(propList, frame, STOFFGraphicStyle());
 
   if (m_drawingInterface)
     m_drawingInterface->startTextObject(propList);
@@ -1145,7 +1147,7 @@ void STOFFGraphicListener::insertNote(STOFFNote const &, STOFFSubDocumentPtr &su
 ///////////////////
 // picture/textbox
 ///////////////////
-void STOFFGraphicListener::insertPicture(STOFFPosition const &pos, STOFFEmbeddedObject const &picture, STOFFGraphicStyle const &style)
+void STOFFGraphicListener::insertPicture(STOFFFrameStyle const &frame, STOFFEmbeddedObject const &picture, STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isDocumentStarted) {
     STOFF_DEBUG_MSG(("STOFFGraphicListener::insertPicture: the document is not started\n"));
@@ -1164,7 +1166,7 @@ void STOFFGraphicListener::insertPicture(STOFFPosition const &pos, STOFFEmbedded
   else
     m_presentationInterface->setStyle(list);
   list.clear();
-  _handleFrameParameters(list, pos, style);
+  _handleFrameParameters(list, frame, style);
   if (picture.addTo(list)) {
     if (m_drawingInterface)
       m_drawingInterface->drawGraphicObject(list);
@@ -1173,7 +1175,7 @@ void STOFFGraphicListener::insertPicture(STOFFPosition const &pos, STOFFEmbedded
   }
 }
 
-void STOFFGraphicListener::insertEquation(STOFFPosition const &pos, librevenge::RVNGString const &equation,
+void STOFFGraphicListener::insertEquation(STOFFFrameStyle const &frame, librevenge::RVNGString const &equation,
     STOFFGraphicStyle const &style)
 {
   if (equation.empty()) {
@@ -1197,7 +1199,7 @@ void STOFFGraphicListener::insertEquation(STOFFPosition const &pos, librevenge::
   else
     m_presentationInterface->setStyle(list);
   list.clear();
-  _handleFrameParameters(list, pos, style);
+  _handleFrameParameters(list, frame, style);
   librevenge::RVNGPropertyList propList;
   propList.insert("librevenge:mime-type", "application/mathml+xml");
   propList.insert("office:binary-data", equation);
@@ -1207,7 +1209,7 @@ void STOFFGraphicListener::insertEquation(STOFFPosition const &pos, librevenge::
     m_presentationInterface->drawGraphicObject(list);
 }
 
-void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGraphicStyle const &style, STOFFPosition const &pos)
+void STOFFGraphicListener::insertShape(STOFFFrameStyle const &frame, STOFFGraphicShape const &shape, STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isDocumentStarted) {
     STOFF_DEBUG_MSG(("STOFFGraphicListener::insertShape: the document is not started\n"));
@@ -1216,13 +1218,13 @@ void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGrap
   if (!m_ds->m_isPageSpanOpened)
     _openPageSpan();
   // now check that the anchor is coherent with the actual state
-  if (pos.m_anchorTo==STOFFPosition::Paragraph) {
+  if (frame.m_position.m_anchorTo==STOFFPosition::Paragraph) {
     if (m_ps->m_isParagraphOpened)
       _flushText();
     else
       _openParagraph();
   }
-  else if (pos.m_anchorTo==STOFFPosition::Char || pos.m_anchorTo==STOFFPosition::CharBaseLine) {
+  else if (frame.m_position.m_anchorTo==STOFFPosition::Char || frame.m_position.m_anchorTo==STOFFPosition::CharBaseLine) {
     if (m_ps->m_isSpanOpened)
       _flushText();
     else
@@ -1230,7 +1232,8 @@ void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGrap
   }
 
   librevenge::RVNGPropertyList shapeProp, styleProp;
-  pos.addTo(shapeProp);
+  frame.addTo(shapeProp);
+  frame.m_position.addTo(shapeProp);
   shape.addTo(shapeProp);
   style.addTo(styleProp);
   STOFFGraphicStyle::checkForDefault(styleProp);
@@ -1293,7 +1296,7 @@ void STOFFGraphicListener::insertShape(STOFFGraphicShape const &shape, STOFFGrap
 }
 
 void STOFFGraphicListener::insertTextBox
-(STOFFPosition const &pos, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &style)
+(STOFFFrameStyle const &frame, STOFFSubDocumentPtr subDocument, STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isDocumentStarted) {
     STOFF_DEBUG_MSG(("STOFFGraphicListener::insertTextBox: the document is not started\n"));
@@ -1306,10 +1309,10 @@ void STOFFGraphicListener::insertTextBox
     handleSubDocument(subDocument, libstoff::DOC_TEXT_BOX);
     return;
   }
-  if (!openFrame(pos))
+  if (!openFrame(frame))
     return;
   librevenge::RVNGPropertyList propList;
-  _handleFrameParameters(propList, pos, style);
+  _handleFrameParameters(propList, frame, style);
   STOFFGraphicStyle::checkForPadding(propList);
   if (m_drawingInterface)
     m_drawingInterface->startTextObject(propList);
@@ -1331,11 +1334,12 @@ void STOFFGraphicListener::openTable(STOFFTable const &table)
   if (!m_ps->m_isFrameOpened) {
     if (m_ps->m_isTextBoxOpened) {
       STOFF_DEBUG_MSG(("STOFFGraphicListener::openTable: must not be called inside a textbox\n"));
-      STOFFPosition pos;
+      STOFFFrameStyle frame;
+      auto &pos=frame.m_position;
       pos.setOrigin(m_ps->m_origin);
       pos.setSize(STOFFVec2f(400,100));
       pos.m_anchorTo=STOFFPosition::Page;
-      openTable(pos, table);
+      openTable(frame, table);
       return;
     }
     STOFF_DEBUG_MSG(("STOFFGraphicListener::openTable: called outside openFrame\n"));
@@ -1344,7 +1348,7 @@ void STOFFGraphicListener::openTable(STOFFTable const &table)
   openTable(m_ps->m_framePosition, table);
 }
 
-void STOFFGraphicListener::openTable(STOFFPosition const &pos, STOFFTable const &table)
+void STOFFGraphicListener::openTable(STOFFFrameStyle const &frame, STOFFTable const &table)
 {
   if (!m_ps->m_isFrameOpened || m_ps->m_isTableOpened) {
     STOFF_DEBUG_MSG(("STOFFGraphicListener::openTable: no frame is already open...\n"));
@@ -1363,7 +1367,7 @@ void STOFFGraphicListener::openTable(STOFFPosition const &pos, STOFFTable const 
   _startSubDocument();
   m_ps->m_subDocumentType = libstoff::DOC_TABLE;
 
-  _handleFrameParameters(propList, pos, STOFFGraphicStyle());
+  _handleFrameParameters(propList, frame, STOFFGraphicStyle());
   table.addTablePropertiesTo(propList);
   if (m_drawingInterface)
     m_drawingInterface->startTableObject(propList);
@@ -1511,7 +1515,7 @@ void STOFFGraphicListener::closeTableCell()
 ///////////////////
 // frame/group
 ///////////////////
-bool STOFFGraphicListener::openFrame(STOFFPosition const &pos, STOFFGraphicStyle const &style)
+bool STOFFGraphicListener::openFrame(STOFFFrameStyle const &frame, STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isDocumentStarted) {
     STOFF_DEBUG_MSG(("STOFFGraphicListener::openFrame: the document is not started\n"));
@@ -1528,7 +1532,7 @@ bool STOFFGraphicListener::openFrame(STOFFPosition const &pos, STOFFGraphicStyle
   if (!m_ds->m_isPageSpanOpened)
     _openPageSpan();
   m_ps->m_isFrameOpened = true;
-  m_ps->m_framePosition=pos;
+  m_ps->m_framePosition=frame;
   m_ps->m_frameStyle=style;
   return true;
 }
@@ -1542,7 +1546,7 @@ void STOFFGraphicListener::closeFrame()
   m_ps->m_isFrameOpened = false;
 }
 
-bool STOFFGraphicListener::openGroup(STOFFPosition const &pos)
+bool STOFFGraphicListener::openGroup(STOFFFrameStyle const &frame)
 {
   if (!m_ds->m_isDocumentStarted) {
     STOFF_DEBUG_MSG(("STOFFGraphicListener::openGroup: the document is not started\n"));
@@ -1560,7 +1564,7 @@ bool STOFFGraphicListener::openGroup(STOFFPosition const &pos)
   m_ps->m_isGroupOpened = true;
 
   librevenge::RVNGPropertyList propList;
-  pos.addTo(propList);
+  frame.m_position.addTo(propList);
   if (m_drawingInterface)
     m_drawingInterface->openGroup(propList);
   else
@@ -1627,12 +1631,14 @@ void  STOFFGraphicListener::closeLayer()
   _popParsingState();
 }
 
-void STOFFGraphicListener::_handleFrameParameters(librevenge::RVNGPropertyList &list, STOFFPosition const &pos, STOFFGraphicStyle const &style)
+void STOFFGraphicListener::_handleFrameParameters(librevenge::RVNGPropertyList &list, STOFFFrameStyle const &frame, STOFFGraphicStyle const &style)
 {
   if (!m_ds->m_isDocumentStarted)
     return;
-  pos.addTo(list);
+  frame.getPosition().addTo(list);
   style.addTo(list);
+  if (list["text:anchor-page-number"])
+    list.remove("text:anchor-page-number");
 }
 
 ///////////////////

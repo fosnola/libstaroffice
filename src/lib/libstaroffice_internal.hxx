@@ -458,6 +458,7 @@ struct STOFFEmbeddedObject {
 
 // forward declarations of basic classes and smart pointers
 class STOFFFont;
+class STOFFFrameStyle;
 class STOFFGraphicShape;
 class STOFFGraphicStyle;
 class STOFFList;
