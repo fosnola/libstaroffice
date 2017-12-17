@@ -63,7 +63,7 @@ STOFFPosition STOFFFrameStyle::getPosition() const
   return position;
 }
 
-void STOFFFrameStyle::addTo(librevenge::RVNGPropertyList &pList) const
+void STOFFFrameStyle::addStyleTo(librevenge::RVNGPropertyList &pList) const
 {
   librevenge::RVNGPropertyList::Iter i(m_propertyList);
   for (i.rewind(); i.next();) {
@@ -74,6 +74,12 @@ void STOFFFrameStyle::addTo(librevenge::RVNGPropertyList &pList) const
     }
     pList.insert(i.key(), i()->clone());
   }
+}
+
+void STOFFFrameStyle::addTo(librevenge::RVNGPropertyList &pList) const
+{
+  getPosition().addTo(pList);
+  addStyleTo(pList);
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

@@ -1233,7 +1233,6 @@ void STOFFGraphicListener::insertShape(STOFFFrameStyle const &frame, STOFFGraphi
 
   librevenge::RVNGPropertyList shapeProp, styleProp;
   frame.addTo(shapeProp);
-  frame.m_position.addTo(shapeProp);
   shape.addTo(shapeProp);
   style.addTo(styleProp);
   STOFFGraphicStyle::checkForDefault(styleProp);
@@ -1564,7 +1563,7 @@ bool STOFFGraphicListener::openGroup(STOFFFrameStyle const &frame)
   m_ps->m_isGroupOpened = true;
 
   librevenge::RVNGPropertyList propList;
-  frame.m_position.addTo(propList);
+  frame.addTo(propList);
   if (m_drawingInterface)
     m_drawingInterface->openGroup(propList);
   else
@@ -1635,7 +1634,7 @@ void STOFFGraphicListener::_handleFrameParameters(librevenge::RVNGPropertyList &
 {
   if (!m_ds->m_isDocumentStarted)
     return;
-  frame.getPosition().addTo(list);
+  frame.addTo(list);
   style.addTo(list);
   if (list["text:anchor-page-number"])
     list.remove("text:anchor-page-number");

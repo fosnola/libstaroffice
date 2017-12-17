@@ -803,6 +803,12 @@ void StarFAttributeBrush::addTo(StarState &state, std::set<StarAttribute const *
         state.m_cell.m_propertyList.insert("fo:background-color", "transparent");
       }
     }
+    // Frame
+    if (!m_brush.isEmpty()) {
+      STOFFColor color;
+      if (m_brush.getColor(color))
+        state.m_frame.m_propertyList.insert("fo:background-color", color.str().c_str());
+    }
   }
   // cell
   else if (m_type == ATTR_SC_BACKGROUND) {

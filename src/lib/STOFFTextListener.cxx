@@ -1202,7 +1202,6 @@ void STOFFTextListener::insertShape(STOFFFrameStyle const &frame, STOFFGraphicSh
 
   librevenge::RVNGPropertyList shapeProp, styleProp;
   frame.addTo(shapeProp);
-  frame.m_position.addTo(shapeProp);
   shape.addTo(shapeProp);
   style.addTo(styleProp);
   STOFFGraphicStyle::checkForDefault(styleProp);
@@ -1389,7 +1388,7 @@ bool STOFFTextListener::openGroup(STOFFFrameStyle const &frame)
   m_ps->m_isGroupOpened = true;
 
   librevenge::RVNGPropertyList propList;
-  frame.getPosition().addTo(propList);
+  frame.addTo(propList);
   m_documentInterface->openGroup(propList);
 
   return true;
@@ -1411,7 +1410,7 @@ void STOFFTextListener::_handleFrameParameters
 {
   if (!m_ds->m_isDocumentStarted)
     return;
-  frame.getPosition().addTo(propList);
+  frame.addTo(propList);
   style.addTo(propList);
 }
 

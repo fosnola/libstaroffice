@@ -1138,7 +1138,6 @@ void STOFFSpreadsheetListener::insertShape(STOFFFrameStyle const &frame, STOFFGr
 
   librevenge::RVNGPropertyList shapeProp, styleProp;
   frame.addTo(shapeProp);
-  frame.m_position.addTo(shapeProp);
   shape.addTo(shapeProp);
   style.addTo(styleProp);
   STOFFGraphicStyle::checkForDefault(styleProp);
@@ -1265,7 +1264,7 @@ void STOFFSpreadsheetListener::closeFrame()
 void STOFFSpreadsheetListener::_handleFrameParameters
 (librevenge::RVNGPropertyList &propList, STOFFFrameStyle const &frame)
 {
-  frame.getPosition().addTo(propList);
+  frame.addTo(propList);
   if (propList["text:anchor-page-number"])
     propList.remove("text:anchor-page-number");
 }

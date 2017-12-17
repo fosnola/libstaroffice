@@ -54,6 +54,8 @@ public:
   }
   //! add to the propList
   void addTo(librevenge::RVNGPropertyList &propList) const;
+  //! add style to the propList
+  void addStyleTo(librevenge::RVNGPropertyList &propList) const;
   //! return a position corresponding to the current style
   STOFFPosition getPosition() const;
   //! operator<<

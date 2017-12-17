@@ -329,7 +329,7 @@ public:
   //! try to update the graphic style
   void updateStyle(StarState &state, STOFFListenerPtr /*listener*/) const
   {
-    state.m_frame.addTo(state.m_graphic.m_propertyList);
+    state.m_frame.addStyleTo(state.m_graphic.m_propertyList);
     if (m_flags[0] && m_flags[1])
       state.m_graphic.m_propertyList.insert("style:protect", "position size");
     else if (m_flags[0])
@@ -577,7 +577,6 @@ public:
     StarState state(getState(object, listener, pos));
     STOFFFrameStyle frame=pos;
     STOFFPosition &position=frame.m_position;
-    pos.addTo(position.m_propertyList);
     position.setOrigin(state.convertPointInPoint(box[0]));
     position.setSize(state.convertVectorInPoint(box.size()));
     if (position.m_anchorTo==STOFFPosition::Unknown)
@@ -587,6 +586,7 @@ public:
     state.m_graphic.m_propertyList.insert("draw:fill", "none");
     state.m_graphic.m_propertyList.insert("draw:shadow", "hidden"); // the text is not shadowed
     if (m_textDrehWink) {
+      // checkme: this can not work for a text listener. We must create a rectangle with text instead
       STOFFVec2f const &orig=position.m_origin;
       state.m_graphic.m_propertyList.insert("librevenge:rotate-cx", orig[0], librevenge::RVNG_POINT);
       state.m_graphic.m_propertyList.insert("librevenge:rotate-cy", orig[1], librevenge::RVNG_POINT);
@@ -981,7 +981,6 @@ public:
     StarState state(getState(object, listener, pos));
     auto frame=pos;
     STOFFPosition &position=frame.m_position;
-    pos.addTo(position.m_propertyList);
     position.setOrigin(state.convertPointInPoint(m_bdbox[0]));
     position.setSize(state.convertVectorInPoint(m_bdbox.size()));
     updateStyle(state, listener);
@@ -1151,7 +1150,6 @@ public:
     StarState state(getState(object, listener, pos));
     STOFFPosition &position=state.m_frame.m_position;
     position=pos.m_position;
-    pos.addTo(position.m_propertyList);
     position.setOrigin(state.convertPointInPoint(m_bdbox[0]));
     position.setSize(state.convertVectorInPoint(m_bdbox.size()));
     updateStyle(state, listener);
