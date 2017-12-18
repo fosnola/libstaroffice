@@ -1,3 +1,8 @@
+0.0.6:
+- 12/17/2017:
+   - all: retrieve formula and charts(as graphic)
+   - .sdw: try to retrieve more attachments.
+   
 0.0.5:
 - 10/30/2017:
    - require C++11 for build.

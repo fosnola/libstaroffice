@@ -1,5 +1,11 @@
 CHANGES:
 
+12/17/2017:
+   - retrieve StarMath's formula,
+   - retrieve the chart as graphic,
+   - retrieve some fields in sda/sdc/sdp text-boxes,
+   - .sdw: retrieve more attachment.
+   
 10/30/2017:
    - Require C++11 for build.
    - correct a problem detected with fuzzing...
