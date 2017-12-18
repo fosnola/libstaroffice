@@ -1,0 +1,37 @@
+startDocument()
+  setDocumentMetaData(dc:creator:  , dc:date: 2017-11-27T16:09:11.45, meta:creation-date: 2017-11-27T16:06:50.92, meta:initial-creator:  , meta:print-date: 1601-01-01T00:00:00.00)
+  startMasterPage(fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:page-height: 841.8898pt, fo:page-width: 595.2756pt, librevenge:master-page-name: Master1, librevenge:num-pages: 1, style:print-orientation: portrait)
+    setStyle(draw:fill: none, draw:stroke: none, fo:min-height: 50.0000pt, fo:min-width: 50.0000pt, fo:padding-bottom: 0.0000pt, fo:padding-left: 0.0000pt, fo:padding-right: 0.0000pt, fo:padding-top: 0.0000pt, style:display-name: Home~LT~Hintergrund)
+    setStyle(draw:auto-grow-height: false, draw:textarea-horizontal-align: center, draw:textarea-vertical-align: middle, fo:min-height: 841.9181pt, librevenge:parent-display-name: Home~LT~Hintergrund, style:print-content: true, style:protect: position size)
+    drawRectangle (fo:min-height: 50.0000pt, fo:min-width: 50.0000pt, svg:height: 841.8898pt, svg:width: 595.2756pt, svg:x: 0.0000pt, svg:y: 0.0000pt, text:anchor-type: page)
+  endMasterPage
+  setStyle(draw:angle: 0.0000, draw:border: 0.0000%, draw:color: #000000, draw:distance: 0.5669pt, draw:dots1: 1, draw:dots1-length: 0.5669pt, draw:dots2: 1, draw:dots2-length: 0.5669pt, draw:end-color: #ffffff, draw:fill: solid, draw:fill-color: #00b8ff, draw:fill-image: Qk12CAAAAAAAAHYAAAAoAAAAQAAAAEAAAAABAAQAU0QAAQAIAAAAAAAAAAAAABAAAAAAAAAAxAAAAEAIAAAAAAAAeF7tU0kKwzAM9K9zjI+95VzoC3rpF/wAgf8TCqqWNDaVWoVCbh6bOHgYjZHHKTGyzJSzLjzop5RCK++gzISoCw/eos80MDpwcgdmCpqHt+18cbHs/OLKXX69K0jh65V+fPBXBe1GvBrwgfr6TR/xYsD2nh6g/uKBUNlA+mH8b8xDxJOB2Fu9yKF6vAg2flV729+DPKq91T+lAIb8lgZ7v3L8PSvO/ff0l3y0qP2Vvy6pTR/l238eePKzHOVHB6YXCtyrsQ==, draw:marker-end-center: false, draw:marker-end-width: 8.5039pt, draw:marker-start-center: false, draw:marker-start-width: 8.5039pt, draw:shadow: hidden, draw:shadow-color: #808080, draw:shadow-offset-x: 8.5039pt, draw:shadow-offset-y: 8.5039pt, draw:start-color: #000000, draw:stroke: solid, draw:style: single, fo:min-height: 50.0000pt, fo:min-width: 50.0000pt, fo:padding-bottom: 0.0000pt, fo:padding-left: 0.0000pt, fo:padding-right: 0.0000pt, fo:padding-top: 0.0000pt, librevenge:end-opacity: 100.0000%, librevenge:mime-type: image/bm, librevenge:start-opacity: 100.0000%, style:display-name: Standard, svg:cx: 50.0000%, svg:cy: 50.0000%, svg:stroke-color: #000000, svg:stroke-width: 0.0000pt)
+  startPage(fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:page-height: 841.8898pt, fo:page-width: 595.2756pt, librevenge:enforce-frame: true, librevenge:is-last-page-span: true, librevenge:master-page-name: Master1, librevenge:num-pages: 1, style:print-orientation: portrait, svg:x: 0.0000pt, svg:y: 0.0000pt)
+    startTextObject (draw:fill: none, draw:fill-color: #ffffff, draw:shadow: hidden, draw:stroke: none, fo:min-height: 131.2441pt, librevenge:parent-display-name: Standard, style:print-content: true, svg:height: 131.2441pt, svg:stroke-color: #000000, svg:width: 226.4882pt, svg:x: 118.5165pt, svg:y: 10.4882pt, text:anchor-type: page)
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 23.9811pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: Times New Roman, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertText (Text)
+        closeSpan
+        openSpan(fo:color: #000000, fo:font-size: 23.9811pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: Times New Roman, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertTab
+        closeSpan
+        openSpan(fo:color: #000000, fo:font-size: 23.9811pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: Times New Roman, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          insertField(librevenge:day: 27, librevenge:field-type: text:date, librevenge:month: 11, librevenge:year: 2017, text:fixed: true)
+          insertField(librevenge:field-type: text:date)
+          insertField(librevenge:field-type: text:time, librevenge:hours: 16, librevenge:minutes: 8, librevenge:seconds: 18, text:fixed: true)
+          insertField(librevenge:field-type: text:time)
+          insertField(librevenge:field-type: text:author-name)
+          insertField(librevenge:field-type: text:page-number)
+          insertField(librevenge:field-type: text:file-name, text:display: full)
+        closeSpan
+      closeParagraph
+      openParagraph (fo:line-height: 100.0000%, fo:margin-bottom: 0.0000pt, fo:margin-left: 0.0000pt, fo:margin-right: 0.0000pt, fo:margin-top: 0.0000pt, fo:text-align: left, fo:text-indent: 0.0000pt, style:auto-text-indent: false)
+        openSpan(fo:color: #000000, fo:font-size: 23.9811pt, fo:font-weight: normal, fo:text-shadow: none, style:font-name: Times New Roman, style:font-pitch: variable, style:text-line-through-type: none, style:text-outline: false, style:text-underline-type: none)
+          openLink(xlink:href: http://link/, xlink:type: simple)
+            insertText (link)
+          closeLink
+        closeSpan
+      closeParagraph
+    endTextObject
+  endPage
+endDocument
