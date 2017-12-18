@@ -28,7 +28,7 @@ Menge Daten D</tspan>
 <tspan font-family="times" font-weight="normal" font-size="15.9874" fill="#000000" >
  L  Lebenslauf  Produkt</tspan>
 </text>
-<ellipse cx="103.5213" cy="96.4346" rx="323.1213" ry="76.6205" style="stroke-width: 1.1339; "/>
+<ellipse cx="103.5213" cy="96.4346" rx="323.1212" ry="76.6205" style="stroke-width: 1.1339; "/>
 <text x="209.1118" y="232.8945">
 <tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >
  </tspan>
@@ -116,7 +116,7 @@ Fig 1</tspan>
 <polyline points="0,0 10,5 0,10 1,5" fill="solid" />
 </marker>
 </defs>
-<line x1="322.3276"  y1="598.8756" x2="322.3276"  y2="634.1386"
+<line x1="322.3275"  y1="598.8756" x2="322.3275"  y2="634.1385"
 style="marker-end: url(#endMarker3); "/>
 <text x="232.8094" y="628.3842">
 <tspan font-family="times" font-weight="normal" font-size="23.9811" fill="#000000" >

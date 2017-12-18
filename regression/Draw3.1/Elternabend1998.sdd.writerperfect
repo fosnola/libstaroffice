@@ -29,10 +29,10 @@
     <draw:hatch draw:color="#000000" draw:distance="0.5669pt" draw:name="Hatch_0" draw:rotation="0" draw:style="single"/>
     <draw:opacity draw:angle="0" draw:border="0.0000%" draw:cx="50.0000%" draw:cy="50.0000%" draw:name="Transparency_0"/>
     <style:style style:display-name="Standard~LT~Hintergrund" style:family="graphic" style:name="GraphicStyle_0" style:parent-style-name="standard">
-      <style:graphic-properties draw:fill="none" draw:stroke="none" fo:min-width="1.0000in" fo:padding-bottom="0.0000pt" fo:padding-left="0.0000pt" fo:padding-right="0.0000pt" fo:padding-top="0.0000pt"/>
+      <style:graphic-properties draw:fill="none" draw:stroke="none" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding-bottom="0.0000pt" fo:padding-left="0.0000pt" fo:padding-right="0.0000pt" fo:padding-top="0.0000pt"/>
     </style:style>
     <style:style style:display-name="Standard" style:family="graphic" style:name="GraphicStyle_2" style:parent-style-name="standard">
-      <style:graphic-properties draw:fill="solid" draw:fill-color="#d3d3d3" draw:fill-gradient-name="Gradient_0" draw:fill-hatch-name="Hatch_0" draw:fill-image-name="Bitmap_0" draw:marker-end-center="false" draw:marker-end-width="8.5039pt" draw:marker-start-center="false" draw:marker-start-width="8.5039pt" draw:opacity-name="Transparency_0" draw:shadow="hidden" draw:shadow-color="#bebebe" draw:shadow-offset-x="8.5039pt" draw:shadow-offset-y="8.5039pt" draw:stroke="solid" fo:min-width="1.0000in" fo:padding-bottom="0.0000pt" fo:padding-left="0.0000pt" fo:padding-right="0.0000pt" fo:padding-top="0.0000pt" svg:stroke-color="#000000" svg:stroke-width="0.0000pt"/>
+      <style:graphic-properties draw:fill="solid" draw:fill-color="#d3d3d3" draw:fill-gradient-name="Gradient_0" draw:fill-hatch-name="Hatch_0" draw:fill-image-name="Bitmap_0" draw:marker-end-center="false" draw:marker-end-width="8.5039pt" draw:marker-start-center="false" draw:marker-start-width="8.5039pt" draw:opacity-name="Transparency_0" draw:shadow="hidden" draw:shadow-color="#bebebe" draw:shadow-offset-x="8.5039pt" draw:shadow-offset-y="8.5039pt" draw:stroke="solid" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding-bottom="0.0000pt" fo:padding-left="0.0000pt" fo:padding-right="0.0000pt" fo:padding-top="0.0000pt" svg:stroke-color="#000000" svg:stroke-width="0.0000pt"/>
     </style:style>
   </office:styles>
   <office:automatic-styles>
@@ -107,7 +107,7 @@
   </office:automatic-styles>
   <office:master-styles>
     <style:master-page draw:style-name="DP1" style:display-name="Master1" style:name="PM0" style:page-layout-name="PL0">
-      <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_M1" svg:height="700.1575pt" svg:width="453.5433pt" svg:x="70.8661pt" svg:y="70.8661pt" text:anchor-type="page"/>
+      <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_M1" fo:min-height="50.0000pt" fo:min-width="50.0000pt" svg:height="700.1575pt" svg:width="453.5433pt" svg:x="70.8661pt" svg:y="70.8661pt" text:anchor-type="page"/>
     </style:master-page>
   </office:master-styles>
   <office:body>
@@ -130,7 +130,7 @@
             </text:p>
           </draw:text-box>
         </draw:frame>
-        <draw:ellipse draw:end-angle="135.0000" draw:kind="arc" draw:layer="layout" draw:start-angle="45.0000" draw:style-name="gr_5" svg:height="8.0626in" svg:width="7.7953in" svg:x="0.2362in" svg:y="2.5591in" text:anchor-page-number="2" text:anchor-type="page"/>
+        <draw:ellipse draw:end-angle="135.0000" draw:kind="arc" draw:layer="layout" draw:start-angle="45.0000" draw:style-name="gr_5" fo:min-height="50.0000pt" fo:min-width="50.0000pt" svg:height="8.0626in" svg:width="7.7953in" svg:x="0.2362in" svg:y="2.5591in" text:anchor-page-number="2" text:anchor-type="page"/>
         <draw:frame draw:fill="none" draw:layer="layout" draw:style-name="gr_6" draw:textarea-vertical-align="middle" svg:height="97.7669pt" svg:width="409.5496pt" svg:x="1.2898in" svg:y="2.4705in">
           <draw:text-box>
             <text:p text:style-name="S0">
@@ -161,17 +161,40 @@
               <text:span text:style-name="Span7">Unser Elternabend findet am</text:span>
             </text:p>
             <text:p text:style-name="S0">
-              <text:span text:style-name="Span7">ÿÿÿÿ</text:span>
+              <text:span text:style-name="Span7">
+                <text:tab/>
+                <text:tab/>
+                <text:tab/>
+                <text:tab/>
+              </text:span>
               <text:span text:style-name="Span9">Donnerstag, den</text:span>
             </text:p>
             <text:p text:style-name="S0">
-              <text:span text:style-name="Span9">ÿÿÿÿ5. März 1998</text:span>
+              <text:span text:style-name="Span9">
+                <text:tab/>
+                <text:tab/>
+                <text:tab/>
+                <text:tab/>
+              </text:span>
+              <text:span text:style-name="Span9">5. März 1998</text:span>
             </text:p>
             <text:p text:style-name="S0">
-              <text:span text:style-name="Span9">ÿÿÿÿum 19.15 Uhr</text:span>
+              <text:span text:style-name="Span9">
+                <text:tab/>
+                <text:tab/>
+                <text:tab/>
+                <text:tab/>
+              </text:span>
+              <text:span text:style-name="Span9">um 19.15 Uhr</text:span>
             </text:p>
             <text:p text:style-name="S0">
-              <text:span text:style-name="Span9">ÿÿÿÿin der Insel, Tennenlohe</text:span>
+              <text:span text:style-name="Span9">
+                <text:tab/>
+                <text:tab/>
+                <text:tab/>
+                <text:tab/>
+              </text:span>
+              <text:span text:style-name="Span9">in der Insel, Tennenlohe</text:span>
             </text:p>
             <text:p text:style-name="S0">
               <text:span text:style-name="Span7">statt.</text:span>
@@ -195,11 +218,19 @@
               <text:span text:style-name="Span8"/>
             </text:p>
             <text:p text:style-name="S0">
-              <text:span text:style-name="Span7">ÿÿÿ</text:span>
+              <text:span text:style-name="Span7">
+                <text:tab/>
+                <text:tab/>
+                <text:tab/>
+              </text:span>
               <text:span text:style-name="Span10">Freundliche Grüsse</text:span>
             </text:p>
             <text:p text:style-name="S0">
-              <text:span text:style-name="Span11">ÿÿÿ</text:span>
+              <text:span text:style-name="Span11">
+                <text:tab/>
+                <text:tab/>
+                <text:tab/>
+              </text:span>
               <text:span text:style-name="Span10">und Gut Pfad</text:span>
             </text:p>
             <text:p text:style-name="S0">
@@ -209,7 +240,13 @@
               <text:span text:style-name="Span8"/>
             </text:p>
             <text:p text:style-name="S0">
-              <text:span text:style-name="Span7">ÿÿÿÿwünschen</text:span>
+              <text:span text:style-name="Span7">
+                <text:tab/>
+                <text:tab/>
+                <text:tab/>
+                <text:tab/>
+              </text:span>
+              <text:span text:style-name="Span7">wünschen</text:span>
               <text:span text:style-name="Span9"> </text:span>
               <text:span text:style-name="Span10">Katrin </text:span>
               <text:span text:style-name="Span7">und</text:span>
@@ -217,7 +254,11 @@
               <text:span text:style-name="Span10">Gerald </text:span>
             </text:p>
             <text:p text:style-name="S0">
-              <text:span text:style-name="Span12">ÿÿÿ</text:span>
+              <text:span text:style-name="Span12">
+                <text:tab/>
+                <text:tab/>
+                <text:tab/>
+              </text:span>
             </text:p>
           </draw:text-box>
         </draw:frame>

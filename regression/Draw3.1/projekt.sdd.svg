@@ -79,7 +79,7 @@ Arbeit in Kleingruppen</tspan>
 <polyline points="10,0 0,5 10,10 9,5" fill="solid" />
 </marker>
 </defs>
-<line x1="295.5118"  y1="423.0142" x2="295.5118"  y2="394.4976"
+<line x1="295.5118"  y1="423.0142" x2="295.5118"  y2="394.4977"
 style="marker-start: url(#startMarker4); "/>
 <defs>
 <marker id="startMarker5"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
@@ -147,7 +147,7 @@ Einzel- und Gruppenarbeit</tspan>
 <polyline points="10,0 0,5 10,10 9,5" fill="solid" />
 </marker>
 </defs>
-<line x1="244.4882"  y1="641.9906" x2="244.4882"  y2="622.4882"
+<line x1="244.4882"  y1="641.9905" x2="244.4882"  y2="622.4882"
 style="marker-start: url(#startMarker10); "/>
 <defs>
 <marker id="startMarker11"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"
@@ -155,7 +155,7 @@ style="marker-start: url(#startMarker10); "/>
 <polyline points="10,0 0,5 10,10 9,5" fill="solid" />
 </marker>
 </defs>
-<line x1="268.4976"  y1="641.2536" x2="268.4976"  y2="623.9906"
+<line x1="268.4977"  y1="641.2535" x2="268.4977"  y2="623.9905"
 style="marker-start: url(#startMarker11); "/>
 <defs>
 <marker id="startMarker12"  markerUnits="strokeWidth" orient="auto" markerWidth="8" markerHeight="6"

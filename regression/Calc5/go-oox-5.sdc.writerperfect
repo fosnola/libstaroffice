@@ -3686,7 +3686,7 @@
             </text:p>
           </table:table-cell>
           <table:table-cell calcext:value-type="float" office:value="1.00000000" office:value-type="float" table:style-name="Sheet2_cell25"/>
-          <table:table-cell calcext:value-type="float" office:value="1.00000000" office:value-type="float" table:formula="of:=True()" table:style-name="Sheet2_cell26"/>
+          <table:table-cell calcext:value-type="float" office:value="1.00000000" office:value-type="float" table:formula="of:=true()" table:style-name="Sheet2_cell26"/>
           <table:table-cell table:style-name="Sheet2_cell1"/>
           <table:table-cell table:number-columns-repeated="2" table:style-name="Sheet2_cell15"/>
         </table:table-row>

@@ -126,28 +126,46 @@
       <style:table-row-properties fo:keep-together="auto"/>
     </style:style>
     <style:style style:family="table-cell" style:name="Table0_cell0">
-      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="0.05pt solid #000000" fo:padding="0.0382in"/>
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="0.05pt solid #000000" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding="0.0382in" fo:text-align="justify"/>
     </style:style>
     <style:style style:family="table-cell" style:name="Table0_cell1">
-      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="0.05pt solid #000000" fo:padding="0.0382in"/>
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="0.05pt solid #000000" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding="0.0382in" fo:text-align="justify"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell10">
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="none" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding="0.0382in" fo:text-align="justify"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell11">
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="none" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding="0.0382in" fo:text-align="justify"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell12">
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="none" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding="0.0382in" fo:text-align="justify"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell13">
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="none" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding="0.0382in" fo:text-align="justify"/>
     </style:style>
     <style:style style:family="table-cell" style:name="Table0_cell2">
-      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="none" fo:padding="0.0382in"/>
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="0.05pt solid #000000" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding="0.0382in" fo:text-align="justify"/>
     </style:style>
     <style:style style:family="table-cell" style:name="Table0_cell3">
-      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="none" fo:padding="0.0382in" style:vertical-align="bottom"/>
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="0.05pt solid #000000" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding="0.0382in" fo:text-align="justify"/>
     </style:style>
     <style:style style:family="table-cell" style:name="Table0_cell4">
-      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="none" fo:padding="0.0382in"/>
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="none" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding="0.0382in" fo:text-align="justify"/>
     </style:style>
     <style:style style:family="table-cell" style:name="Table0_cell5">
-      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="none" fo:padding="0.0382in" style:vertical-align="top"/>
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="0.05pt solid #000000" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding="0.0382in" fo:text-align="justify"/>
     </style:style>
     <style:style style:family="table-cell" style:name="Table0_cell6">
-      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="none" fo:padding="0.0382in" style:vertical-align="bottom"/>
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="none" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding="0.0382in" fo:text-align="justify"/>
     </style:style>
     <style:style style:family="table-cell" style:name="Table0_cell7">
-      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="none" fo:padding="0.0382in" style:vertical-align="top"/>
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="none" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding="0.0382in" fo:text-align="justify"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell8">
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="none" fo:border-top="none" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding="0.0382in" fo:text-align="justify"/>
+    </style:style>
+    <style:style style:family="table-cell" style:name="Table0_cell9">
+      <style:table-cell-properties fo:border-bottom="0.05pt solid #000000" fo:border-left="0.05pt solid #000000" fo:border-right="0.05pt solid #000000" fo:border-top="none" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding="0.0382in" fo:text-align="justify"/>
     </style:style>
   </office:automatic-styles>
   <office:master-styles>
@@ -175,12 +193,12 @@
               <text:span text:style-name="Span0">Jahr</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell1">
             <text:p text:style-name="S0">
               <text:span text:style-name="Span0">Gründungen</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
             <text:p text:style-name="S0">
               <text:span text:style-name="Span0">Ungefähre Anzahl der Organisationen</text:span>
               <text:note text:id="ftn1" text:note-class="footnote">
@@ -194,19 +212,19 @@
               <text:span text:style-name="Span0"> </text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell1">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
             <text:p text:style-name="S0">
               <text:span text:style-name="Span0">Akkreditiert bei der UNO (circa-Angaben)</text:span>
             </text:p>
           </table:table-cell>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
             <text:p text:style-name="S2">
               <text:span text:style-name="Span2">Vor 1800</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell1">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell5">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span2">Religiöse Gemeinschaften: Kirchen, Orden</text:span>
             </text:p>
@@ -214,38 +232,38 @@
               <text:span text:style-name="Span2">Freimaurerlogen etc.</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell0"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell1"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell6">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span2">1800</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell9"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
           <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell9"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span2">1823 Internationale Gesellschaft gegen Sklaverei</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell9"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span2">1830 Dt. Zollverein</text:span>
             </text:p>
@@ -253,62 +271,62 @@
               <text:span text:style-name="Span2">1830 Junges Italien</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell9"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
           <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell9"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell6">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span2">1850</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span2">1855 YMCA</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell10">
             <text:p text:style-name="S0">
               <text:span text:style-name="Span2">5</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell5"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell11"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span3">1863 Internationales Rotes Kreuz</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell9"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
           <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell5"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell11"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span2">1883 Swedish Peace and Arbitration Society (SPAS) </text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell9"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span2">1890 International Organization of Labour</text:span>
             </text:p>
@@ -319,76 +337,76 @@
               <text:span text:style-name="Span2">1892 International Peace Bureau</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell9"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell6">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span2">1900</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell10">
             <text:p text:style-name="S0">
               <text:span text:style-name="Span2">163</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell6"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell12"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span2">1915 Womens int. league for peace and freedom</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell9"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
           <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell10">
             <text:p text:style-name="S0">
               <text:span text:style-name="Span2">518</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell6"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell12"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
           <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell9"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span3">1945 CARE</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell9"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell6">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span2">1950</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span3">1950 World Vision International</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell10">
             <text:p text:style-name="S0">
               <text:span text:style-name="Span2">1390</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell5">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell11">
             <text:p text:style-name="S0">
               <text:span text:style-name="Span2">90</text:span>
               <text:note text:id="ftn2" text:note-class="footnote">
@@ -403,8 +421,8 @@
           </table:table-cell>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span3">1961 Amnesty International</text:span>
             </text:p>
@@ -418,16 +436,16 @@
               <text:span text:style-name="Span2">1967 Terre des hommes</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell6">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell12">
             <text:p text:style-name="S0">
               <text:span text:style-name="Span2">400</text:span>
             </text:p>
           </table:table-cell>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span3">1971 Greenpeace</text:span>
             </text:p>
@@ -435,18 +453,18 @@
               <text:span text:style-name="Span3">1971 Medecins sans frontières</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell5"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell11"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
           <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell8"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell9"/>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell2"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span3">1990 Eurostep</text:span>
             </text:p>
@@ -454,30 +472,30 @@
               <text:span text:style-name="Span3">1995 Oxfam International </text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell10">
             <text:p text:style-name="S0">
               <text:span text:style-name="Span2">5427</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell5">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell11">
             <text:p text:style-name="S0">
               <text:span text:style-name="Span2">1000</text:span>
             </text:p>
           </table:table-cell>
         </table:table-row>
         <table:table-row table:style-name="Table0_row0">
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell3">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell6">
             <text:p text:style-name="S3">
               <text:span text:style-name="Span2">2000</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell4"/>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell7"/>
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell13">
             <text:p text:style-name="S0">
               <text:span text:style-name="Span2">10800-15000</text:span>
             </text:p>
           </table:table-cell>
-          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell6">
+          <table:table-cell table:number-columns-spanned="1" table:number-rows-spanned="1" table:style-name="Table0_cell12">
             <text:p text:style-name="S0">
               <text:span text:style-name="Span2">1500</text:span>
             </text:p>

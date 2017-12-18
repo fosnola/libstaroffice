@@ -41,10 +41,10 @@
     <draw:stroke-dash draw:distance="14.1732pt" draw:dots1="1" draw:dots1-length="14.1732pt" draw:dots2="1" draw:dots2-length="14.1732pt" draw:name="Dash_1"/>
     <draw:stroke-dash draw:distance="3.4016pt" draw:dots1="2" draw:dots1-length="1.4173pt" draw:dots2="3" draw:dots2-length="7.0866pt" draw:name="Dash_2"/>
     <style:style style:display-name="standard~LT~Hintergrund" style:family="graphic" style:name="GraphicStyle_0" style:parent-style-name="standard">
-      <style:graphic-properties draw:fill="none" draw:stroke="none" fo:min-width="1.0000in" fo:padding-bottom="0.0000pt" fo:padding-left="0.0000pt" fo:padding-right="0.0000pt" fo:padding-top="0.0000pt"/>
+      <style:graphic-properties draw:fill="none" draw:stroke="none" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding-bottom="0.0000pt" fo:padding-left="0.0000pt" fo:padding-right="0.0000pt" fo:padding-top="0.0000pt"/>
     </style:style>
     <style:style style:display-name="standard" style:family="graphic" style:name="GraphicStyle_2" style:parent-style-name="standard">
-      <style:graphic-properties draw:fill="solid" draw:fill-color="#c0c0c0" draw:fill-gradient-name="Gradient_0" draw:fill-hatch-name="Hatch_0" draw:fill-image-name="Bitmap_0" draw:marker-end-center="false" draw:marker-end-width="8.5039pt" draw:marker-start-center="false" draw:marker-start-width="8.5039pt" draw:opacity-name="Transparency_0" draw:shadow="hidden" draw:shadow-color="#808080" draw:shadow-offset-x="8.5039pt" draw:shadow-offset-y="8.5039pt" draw:stroke="solid" fo:min-width="1.0000in" fo:padding-bottom="0.0000pt" fo:padding-left="0.0000pt" fo:padding-right="0.0000pt" fo:padding-top="0.0000pt" svg:stroke-color="#000000" svg:stroke-width="0.0000pt"/>
+      <style:graphic-properties draw:fill="solid" draw:fill-color="#c0c0c0" draw:fill-gradient-name="Gradient_0" draw:fill-hatch-name="Hatch_0" draw:fill-image-name="Bitmap_0" draw:marker-end-center="false" draw:marker-end-width="8.5039pt" draw:marker-start-center="false" draw:marker-start-width="8.5039pt" draw:opacity-name="Transparency_0" draw:shadow="hidden" draw:shadow-color="#808080" draw:shadow-offset-x="8.5039pt" draw:shadow-offset-y="8.5039pt" draw:stroke="solid" fo:min-height="50.0000pt" fo:min-width="50.0000pt" fo:padding-bottom="0.0000pt" fo:padding-left="0.0000pt" fo:padding-right="0.0000pt" fo:padding-top="0.0000pt" svg:stroke-color="#000000" svg:stroke-width="0.0000pt"/>
     </style:style>
   </office:styles>
   <office:automatic-styles>
@@ -83,19 +83,19 @@
   </office:automatic-styles>
   <office:master-styles>
     <style:master-page draw:style-name="DP1" style:display-name="Master1" style:name="PM0" style:page-layout-name="PL0">
-      <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_M1" svg:height="481.8898pt" svg:width="728.5039pt" svg:x="56.6929pt" svg:y="56.6929pt" text:anchor-type="page"/>
+      <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_M1" fo:min-height="50.0000pt" fo:min-width="50.0000pt" svg:height="481.8898pt" svg:width="728.5039pt" svg:x="56.6929pt" svg:y="56.6929pt" text:anchor-type="page"/>
     </style:master-page>
   </office:master-styles>
   <office:body>
     <office:drawing>
       <draw:page draw:master-page-name="PM0" draw:name="page1" draw:style-name="DP1">
-        <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_3" svg:height="115.2850pt" svg:width="171.7512pt" svg:x="90.5953pt" svg:y="85.8898pt" text:anchor-page-number="2" text:anchor-type="page"/>
-        <draw:line draw:layer="layout" draw:style-name="gr_4" svg:x1="123.5339pt" svg:x2="462.3591pt" svg:y1="272.9480pt" svg:y2="155.3102pt" text:anchor-page-number="2" text:anchor-type="page"/>
-        <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_5" svg:height="102.3591pt" svg:width="178.8094pt" svg:x="531.7795pt" svg:y="102.3591pt" text:anchor-page-number="2" text:anchor-type="page"/>
-        <draw:line draw:layer="layout" draw:style-name="gr_6" svg:x1="137.6504pt" svg:x2="340.0158pt" svg:y1="351.7795pt" svg:y2="289.4173pt" text:anchor-page-number="2" text:anchor-type="page"/>
-        <draw:line draw:layer="layout" draw:style-name="gr_7" svg:x1="184.7055pt" svg:x2="331.7669pt" svg:y1="425.8772pt" svg:y2="391.7764pt" text:anchor-page-number="2" text:anchor-type="page"/>
-        <draw:line draw:layer="layout" draw:style-name="gr_8" svg:x1="402.3496pt" svg:x2="556.4693pt" svg:y1="384.7181pt" svg:y2="318.8126pt" text:anchor-page-number="2" text:anchor-type="page"/>
-        <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_9" svg:height="134.1354pt" svg:width="115.2850pt" svg:x="574.1292pt" svg:y="255.2882pt" text:anchor-page-number="2" text:anchor-type="page"/>
+        <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_3" fo:min-height="50.0000pt" fo:min-width="50.0000pt" svg:height="115.2850pt" svg:width="171.7512pt" svg:x="90.5953pt" svg:y="85.8898pt" text:anchor-page-number="2" text:anchor-type="page"/>
+        <draw:line draw:layer="layout" draw:style-name="gr_4" fo:min-height="50.0000pt" fo:min-width="50.0000pt" svg:x1="123.5339pt" svg:x2="462.3590pt" svg:y1="272.9480pt" svg:y2="155.3102pt" text:anchor-page-number="2" text:anchor-type="page"/>
+        <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_5" fo:min-height="50.0000pt" fo:min-width="50.0000pt" svg:height="102.3591pt" svg:width="178.8094pt" svg:x="531.7795pt" svg:y="102.3591pt" text:anchor-page-number="2" text:anchor-type="page"/>
+        <draw:line draw:layer="layout" draw:style-name="gr_6" fo:min-height="50.0000pt" fo:min-width="50.0000pt" svg:x1="137.6504pt" svg:x2="340.0157pt" svg:y1="351.7795pt" svg:y2="289.4173pt" text:anchor-page-number="2" text:anchor-type="page"/>
+        <draw:line draw:layer="layout" draw:style-name="gr_7" fo:min-height="50.0000pt" fo:min-width="50.0000pt" svg:x1="184.7055pt" svg:x2="331.7669pt" svg:y1="425.8772pt" svg:y2="391.7764pt" text:anchor-page-number="2" text:anchor-type="page"/>
+        <draw:line draw:layer="layout" draw:style-name="gr_8" fo:min-height="50.0000pt" fo:min-width="50.0000pt" svg:x1="402.3496pt" svg:x2="556.4693pt" svg:y1="384.7181pt" svg:y2="318.8126pt" text:anchor-page-number="2" text:anchor-type="page"/>
+        <draw:rect draw:corner-radius="0.0000in" draw:layer="layout" draw:style-name="gr_9" fo:min-height="50.0000pt" fo:min-width="50.0000pt" svg:height="134.1354pt" svg:width="115.2850pt" svg:x="574.1292pt" svg:y="255.2882pt" text:anchor-page-number="2" text:anchor-type="page"/>
       </draw:page>
     </office:drawing>
   </office:body>

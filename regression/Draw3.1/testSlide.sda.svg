@@ -38,7 +38,7 @@ style=""/>
   <linearGradient xlink:href="#grad5" id="grad6" x1="0" y1="0" x2="0" y2="1" gradientTransform="rotate(135 .5 .5)" gradientUnits="objectBoundingBox" >
   </linearGradient>
 </defs>
-<polygon points="470.9764 821.7921, 591.2221 581.2441, 591.2221 821.7921, 470.9764 821.7921"
+<polygon points="470.9764 821.7921, 591.2220 581.2441, 591.2220 821.7921, 470.9764 821.7921"
 style=""/>
 <text x="61.1717" y="200.4378">
 <tspan font-family="Times" font-weight="normal" font-size="31.9748" fill="#ffffff" >
@@ -48,12 +48,12 @@ Doubleclick to add a title</tspan>
 <line x1="80.1354"  y1="260.5323" x2="300.6142"  y2="400.8472"
 style="stroke: #000000; stroke-dasharray: none; fill: none; "/>
 <ellipse cx="267.6472" cy="219.7984" rx="106.2992" ry="63.7795" style="stroke: #000000; stroke-dasharray: none; fill: none; "/>
-<ellipse cx="337.3228" cy="300.1039" rx="21.2598" ry="56.6929" style="stroke: #000000; stroke-dasharray: none; fill: none; "/>
+<ellipse cx="337.3229" cy="300.1040" rx="21.2598" ry="56.6929" style="stroke: #000000; stroke-dasharray: none; fill: none; "/>
 <ellipse cx="468.3969" cy="290.3244" rx="42.5197" ry="42.5197" style="stroke: #000000; stroke-dasharray: none; fill: none; "/>
 <ellipse cx="286.2142" cy="395.8016" rx="63.7795" ry="42.5197" style="stroke: #000000; stroke-dasharray: none; fill: none; "/>
-<line x1="340.1575"  y1="382.6772" x2="467.7165"  y2="269.2913"
+<line x1="340.1575"  y1="382.6772" x2="467.7165"  y2="269.2914"
 style="stroke: #000000; stroke-dasharray: none; fill: none; "/>
-<polyline points="113.3858 311.8110, 85.0394 325.9843, 42.5197 396.8504, 70.8661 396.8504, 85.0394 411.0236, 127.5591 411.0236, 141.7323 439.3701, 127.5591 481.8898, 226.7717 481.8898, 269.2913 382.6772, 240.9449 325.9843, 170.0787 368.5039, 141.7323 368.5039, 141.7323 382.6772, 325.9843 481.8898"
+<polyline points="113.3858 311.8110, 85.0394 325.9843, 42.5197 396.8504, 70.8661 396.8504, 85.0394 411.0236, 127.5591 411.0236, 141.7323 439.3701, 127.5591 481.8898, 226.7717 481.8898, 269.2914 382.6772, 240.9449 325.9843, 170.0787 368.5039, 141.7323 368.5039, 141.7323 382.6772, 325.9843 481.8898"
 style="stroke: #000000; stroke-dasharray: none; fill: none; "/>
 <polygon points="255.1181 141.7323, 240.9449 184.2520, 198.4252 226.7717, 198.4252 255.1181, 325.9843 184.2520, 255.1181 141.7323"
 style="stroke: #000000; stroke-dasharray: none; fill: none; "/>

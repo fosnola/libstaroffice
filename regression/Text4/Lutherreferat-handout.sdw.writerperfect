@@ -51,6 +51,9 @@
     <text:linenumbering-configuration style:num-format="1" text:increment="5" text:number-lines="false" text:number-position="left" text:offset="0.1965in"/>
     <text:notes-configuration style:num-format="1" text:citation-body-style-name="Footnote_anchor" text:citation-style-name="Footnote_Symbol" text:footnotes-position="page" text:note-class="footnote" text:start-numbering-at="document" text:start-value="0"/>
     <text:notes-configuration style:num-format="i" text:citation-body-style-name="Endnote_anchor" text:citation-style-name="Endnote_Symbol" text:master-page-name="Endnote" text:note-class="endnote" text:start-value="0"/>
+    <style:style style:family="graphic" style:name="GraphicStyle_0" style:parent-style-name="standard">
+      <style:graphic-properties style:horizontal-rel="frame" style:vertical-rel="frame"/>
+    </style:style>
   </office:styles>
   <office:automatic-styles>
     <style:page-layout style:name="PL0">
@@ -136,6 +139,15 @@
         <style:text-properties/>
       </text:list-level-style-bullet>
     </text:list-style>
+    <text:list-style style:name="UL1">
+      <text:list-level-style-bullet text:bullet-char="" text:level="1" text:style-name="Bullet_Symbols">
+        <style:list-level-properties fo:text-align="left" style:font-name="starbats"/>
+        <style:text-properties/>
+      </text:list-level-style-bullet>
+    </text:list-style>
+    <style:style style:family="graphic" style:name="gr_1" style:parent-style-name="GraphicStyle_0">
+      <style:graphic-properties draw:ole-draw-aspect="1" draw:shadow="hidden" fo:min-width="1.0000in" style:wrap="parallel"/>
+    </style:style>
   </office:automatic-styles>
   <office:master-styles>
     <style:master-page style:display-name="Standard" style:name="PM0" style:page-layout-name="PL0"/>
@@ -430,23 +442,29 @@
       <text:p text:style-name="S3">
         <text:span text:style-name="Span0">Zusammenfassende Thesen zum Reichstag:</text:span>
       </text:p>
-      <text:list text:style-name="UL0">
-        <text:list-item>
-          <text:p text:style-name="S9">
-            <text:span text:style-name="Span0">Die Stände zweifelten nicht an der Rechtmäßigkeit der Bulle, auch wenn ihre massiven Beschwerden gegenüber der Kurie (Gravamina) sich mit Luthers kirchenpolitischen Zielsetzungen deckten.</text:span>
-          </text:p>
-        </text:list-item>
-        <text:list-item>
-          <text:p text:style-name="S9">
-            <text:span text:style-name="Span0">Die Luthersache hatte keinen Einfluß auf die eigentlichen Verhandlungen der Tagesordnung, es wurde jedoch erkannt, daß bei jener revolutionären Stimmung in der Bevölkerung keine unpopulären Entscheidungen getroffen werden konnten.</text:span>
-          </text:p>
-        </text:list-item>
-        <text:list-item>
-          <text:p text:style-name="S9">
-            <text:span text:style-name="Span0">Die Auswirkungen und die Macht der reformatorischen Massenbewegung, ebenso wie der Umfang von Luthers Lehre wurden am Reichstag noch nicht vollständig erkannt; außerdem wurde an eine Religionsspaltung noch nicht gedacht.</text:span>
-          </text:p>
-        </text:list-item>
-      </text:list>
+      <text:p text:style-name="S3">
+        <draw:frame draw:layer="layout" draw:name="Object0" draw:style-name="gr_1" svg:height="147.9500pt" svg:width="473.2000pt" svg:x="3.2000pt" svg:y="5.6000pt" text:anchor-type="paragraph">
+          <draw:text-box>
+            <text:list text:style-name="UL1">
+              <text:list-item>
+                <text:p text:style-name="S9">
+                  <text:span text:style-name="Span0">Die Stände zweifelten nicht an der Rechtmäßigkeit der Bulle, auch wenn ihre massiven Beschwerden gegenüber der Kurie (Gravamina) sich mit Luthers kirchenpolitischen Zielsetzungen deckten.</text:span>
+                </text:p>
+              </text:list-item>
+              <text:list-item>
+                <text:p text:style-name="S9">
+                  <text:span text:style-name="Span0">Die Luthersache hatte keinen Einfluß auf die eigentlichen Verhandlungen der Tagesordnung, es wurde jedoch erkannt, daß bei jener revolutionären Stimmung in der Bevölkerung keine unpopulären Entscheidungen getroffen werden konnten.</text:span>
+                </text:p>
+              </text:list-item>
+              <text:list-item>
+                <text:p text:style-name="S9">
+                  <text:span text:style-name="Span0">Die Auswirkungen und die Macht der reformatorischen Massenbewegung, ebenso wie der Umfang von Luthers Lehre wurden am Reichstag noch nicht vollständig erkannt; außerdem wurde an eine Religionsspaltung noch nicht gedacht.</text:span>
+                </text:p>
+              </text:list-item>
+            </text:list>
+          </draw:text-box>
+        </draw:frame>
+      </text:p>
       <text:p text:style-name="S3">
         <text:span text:style-name="Span0"/>
       </text:p>
