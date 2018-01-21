@@ -496,7 +496,7 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
     auto depl=int(input->readULong(4));
     if (depl==0) continue;
     f << std::hex << depl << std::dec << ":" << type << ",";
-    if (depl<8+8*N || depl+4>pSetSize || posToTypeMap.find(pos+depl)!=posToTypeMap.end()) {
+    if (depl<8+8*N || depl>pSetSize-4 || posToTypeMap.find(pos+depl)!=posToTypeMap.end()) {
       f << "###";
       continue;
     }
