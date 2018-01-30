@@ -408,19 +408,6 @@ void STOFFChart::Axis::addContentTo(int coord, librevenge::RVNGPropertyList &pro
     grid.insert("chart:class", "major");
     childs.append(grid);
   }
-  if (m_cellRanges[0].valid(m_cellRanges[1])) {
-    librevenge::RVNGPropertyList range;
-    range.insert("librevenge:sheet-name", m_cellRanges[0].m_sheetName);
-    range.insert("librevenge:start-row", m_cellRanges[0].m_pos[1]);
-    range.insert("librevenge:start-column", m_cellRanges[0].m_pos[0]);
-    if (m_cellRanges[0].m_sheetName!=m_cellRanges[1].m_sheetName)
-      range.insert("librevenge:end-sheet-name", m_cellRanges[1].m_sheetName);
-    range.insert("librevenge:end-row", m_cellRanges[1].m_pos[1]);
-    range.insert("librevenge:end-column", m_cellRanges[1].m_pos[0]);
-    librevenge::RVNGPropertyListVector vect;
-    vect.append(range);
-    propList.insert("chart:values-cell-range-address", vect);
-  }
   if (m_labelRanges[0].valid(m_labelRanges[1]) && m_showLabel) {
     librevenge::RVNGPropertyList range;
     range.insert("librevenge:sheet-name", m_labelRanges[0].m_sheetName);
@@ -432,7 +419,10 @@ void STOFFChart::Axis::addContentTo(int coord, librevenge::RVNGPropertyList &pro
     range.insert("librevenge:end-column", m_labelRanges[1].m_pos[0]);
     librevenge::RVNGPropertyListVector vect;
     vect.append(range);
-    propList.insert("chart:label-cell-address", vect);
+    librevenge::RVNGPropertyList categories;
+    categories.insert("librevenge:type", "categories");
+    categories.insert("table:cell-range-address", vect);
+    childs.append(categories);
   }
   if (m_showTitle && (!m_title.empty() || !m_subTitle.empty())) {
     auto finalString(m_title);
@@ -500,8 +490,6 @@ std::ostream &operator<<(std::ostream &o, STOFFChart::Axis const &axis)
   }
   if (axis.m_showGrid) o << "show[grid],";
   if (axis.m_showLabel) o << "show[label],";
-  if (axis.m_cellRanges[0].valid(axis.m_cellRanges[1]))
-    o << "cell[range]=" << axis.m_cellRanges[0] << ":" << axis.m_cellRanges[1] << ",";
   if (axis.m_labelRanges[0].valid(axis.m_labelRanges[1]))
     o << "label[range]=" << axis.m_labelRanges[0] << ":" << axis.m_labelRanges[1] << ",";
   if (axis.m_showTitle) {

@@ -118,8 +118,6 @@ public:
     bool m_showGrid;
     //! show or not the label
     bool m_showLabel;
-    //! the cell/label range if defined
-    Position m_cellRanges[2];
     //! the label range if defined
     Position m_labelRanges[2];
 
