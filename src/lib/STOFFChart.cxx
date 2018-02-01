@@ -667,7 +667,7 @@ void STOFFChart::Serie::addStyleTo(librevenge::RVNGPropertyList &propList) const
 {
   m_style.addTo(propList);
   if (m_pointType != STOFFChart::Serie::P_None) {
-    char const *(what[]) = {
+    char const *what[] = {
       "none", "automatic", "square", "diamond", "arrow-down",
       "arrow-up", "arrow-right", "arrow-left", "bow-tie", "hourglass",
       "circle", "star", "x", "plus", "asterisk",
@@ -739,7 +739,7 @@ std::ostream &operator<<(std::ostream &o, STOFFChart::Serie const &serie)
   if (!serie.m_legendText.empty())
     o << "label[text]=" << serie.m_legendText.cstr() << ",";
   if (serie.m_pointType != STOFFChart::Serie::P_None) {
-    char const *(what[]) = {
+    char const *what[] = {
       "none", "automatic", "square", "diamond", "arrow-down",
       "arrow-up", "arrow-right", "arrow-left", "bow-tie", "hourglass",
       "circle", "star", "x", "plus", "asterisk",

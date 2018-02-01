@@ -344,7 +344,7 @@ std::ostream &operator<<(std::ostream &o, DatabaseName const &dbase)
 {
   for (int i=0; i<2; ++i) {
     if (dbase.m_names[i].empty()) continue;
-    char const *(wh[])= {"name[database]", "name[table]"};
+    char const *wh[]= {"name[database]", "name[table]"};
     o << wh[i] << "=" << dbase.m_names[i].cstr() << ",";
   }
   if (!dbase.m_sql.empty()) o << "sql=" << dbase.m_sql.cstr() << ",";
@@ -448,7 +448,7 @@ std::ostream &operator<<(std::ostream &o, DocStats const &stats)
 {
   for (int i=0; i<7; ++i) {
     if (!stats.m_numbers[i]) continue;
-    char const *(wh[])= {"table", "graph", "ole", "page", "paragraph", "word", "char"};
+    char const *wh[]= {"table", "graph", "ole", "page", "paragraph", "word", "char"};
     o << "num[" << wh[i] << "]=" << stats.m_numbers[i] << ",";
   }
   if (stats.m_isModified) o << "modified,";
@@ -699,13 +699,13 @@ std::ostream &operator<<(std::ostream &o, NoteInfo const &info)
   if (info.m_type) o << "type=" << info.m_type << ",";
   for (int i=0; i<4; ++i) {
     if (info.m_idx[i]==0xFFFF) continue;
-    char const *(wh[])= {"pageId", "collIdx", "charIdx", "anchorCharIdx"};
+    char const *wh[]= {"pageId", "collIdx", "charIdx", "anchorCharIdx"};
     o << wh[i] << "=" << info.m_idx[i] << ",";
   }
   if (info.m_ftnOffset) o << "ftnOffset=" << info.m_ftnOffset << ",";
   for (int i=0; i<4; ++i) {
     if (info.m_strings[i].empty()) continue;
-    char const *(wh[])= {"prefix", "suffix", "quoValis", "ergoSum"};
+    char const *wh[]= {"prefix", "suffix", "quoValis", "ergoSum"};
     o << wh[i] << "=" << info.m_strings[i].cstr() << ",";
   }
   if (info.m_posType) o << "type[pos]=" << info.m_posType << ",";
@@ -749,7 +749,7 @@ std::ostream &operator<<(std::ostream &o, PrintData const &info)
   if (info.m_colRow[1]!=1) o << "rows=" << info.m_colRow[1] << ",";
   for (int i=0; i<6; ++i) {
     if (!info.m_spacings[i]) continue;
-    char const *(wh[])= {"left", "right", "top", "bottom", "horizontal", "vertical"};
+    char const *wh[]= {"left", "right", "top", "bottom", "horizontal", "vertical"};
     o << wh[i] << "=" << info.m_spacings[i] << ",";
   }
   return o;
@@ -1043,7 +1043,7 @@ std::ostream &operator<<(std::ostream &o, TOX const &tox)
   if (tox.m_captionDisplay) o << "captionDisplay=" << tox.m_captionDisplay << ",";
   for (int i=0; i<3; ++i) {
     if (tox.m_stringIds[i]==0xFFFF) continue;
-    char const *(wh[])= {"stringId", "seqStringId", "sectStringId"};
+    char const *wh[]= {"stringId", "seqStringId", "sectStringId"};
     o << wh[i] << "=" << tox.m_stringIds[i] << ",";
   }
   if (tox.m_styleId!=0xFFFF) o << "styleId=" << tox.m_styleId << ",";

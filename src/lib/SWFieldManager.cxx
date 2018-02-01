@@ -76,17 +76,17 @@ Field::~Field()
 void Field::print(std::ostream &o) const
 {
   if (m_type>=0 && m_type<40) {
-    char const *(wh[])= {"db", "user", "filename", "dbName",
-                         "inDate40", "inTime40", "pageNumber", "author",
-                         "chapter", "docStat", "getExp", "setExp",
-                         "getRef", "hiddenText", "postIt", "fixDate",
-                         "fixTime", "reg", "varReg", "setRef", // checkme: 17-19
-                         "input", "macro", "dde", "tbl",
-                         "hiddenPara", "docInfo", "templName", "dbNextSet", // checkme: 27
-                         "dbNumSet", "dbSetNumber", "extUser", "pageSet", // checkme: 29,31
-                         "pageGet", "INet", "jumpEdit", "script", // checkme: 32-33,35
-                         "dateTime", "authority", "combinedChar", "dropDown" // checkme: 36-39
-                        };
+    char const *wh[]= {"db", "user", "filename", "dbName",
+                       "inDate40", "inTime40", "pageNumber", "author",
+                       "chapter", "docStat", "getExp", "setExp",
+                       "getRef", "hiddenText", "postIt", "fixDate",
+                       "fixTime", "reg", "varReg", "setRef", // checkme: 17-19
+                       "input", "macro", "dde", "tbl",
+                       "hiddenPara", "docInfo", "templName", "dbNextSet", // checkme: 27
+                       "dbNumSet", "dbSetNumber", "extUser", "pageSet", // checkme: 29,31
+                       "pageGet", "INet", "jumpEdit", "script", // checkme: 32-33,35
+                       "dateTime", "authority", "combinedChar", "dropDown" // checkme: 36-39
+                      };
     o << wh[m_type];
     if (m_subType>=0) o << "[" << m_subType << "]";
     o << ",";
@@ -131,7 +131,7 @@ bool Field::send(STOFFListenerPtr listener, StarState &state) const
   else if (m_type==2) {
     field.m_propertyList.insert("librevenge:field-type", "text:file-name");
     if (m_format>=0 && m_format<=5) {
-      char const *(wh[])= {"name-and-extension", "full", "path", "name", "name"/*uiname*/, "area" /* range*/ };
+      char const *wh[]= {"name-and-extension", "full", "path", "name", "name"/*uiname*/, "area" /* range*/ };
       field.m_propertyList.insert("text:display", wh[m_format]);
     }
     else {
@@ -152,7 +152,7 @@ bool Field::send(STOFFListenerPtr listener, StarState &state) const
   else if (m_type==8) {
     field.m_propertyList.insert("librevenge:field-type", "text:chapter");
     if (m_format>=0 && m_format<=2) {
-      char const *(wh[])= {"number", "name", "number-and-name"};
+      char const *wh[]= {"number", "name", "number-and-name"};
       field.m_propertyList.insert("text:display", wh[m_format]);
     }
     else {
@@ -163,7 +163,7 @@ bool Field::send(STOFFListenerPtr listener, StarState &state) const
   }
   else if (m_type==9) {
     if (m_subType>=0 && m_subType<=6) {
-      char const *(wh[])= {
+      char const *wh[]= {
         "text:page-count", "text:paragraph-count", "text:word-count", "text:character-count", "text:table-count",
         "text:image-count","text:object-count"
       };
@@ -199,10 +199,10 @@ bool Field::send(STOFFListenerPtr listener, StarState &state) const
     field.m_propertyList.insert("librevenge:field-type", "text:reference-ref");
     field.m_propertyList.insert("text:ref-name", m_name);
     if (m_format>=0 && m_format<=10) {
-      char const *(wh[])= {"page", "chapter", "text", "direction",
-                           "text"/* as page style*/, "category-and-value", "caption", "number",
-                           "number"/* new ref*/, "number"/*no context*/, "number"/*full context*/
-                          };
+      char const *wh[]= {"page", "chapter", "text", "direction",
+                         "text"/* as page style*/, "category-and-value", "caption", "number",
+                         "number"/* new ref*/, "number"/*no context*/, "number"/*full context*/
+                        };
       field.m_propertyList.insert("text:reference-format",wh[m_format]);
     }
     else {
@@ -231,7 +231,7 @@ bool Field::send(STOFFListenerPtr listener, StarState &state) const
     }
     else if (subType==9) {
       if (m_format>=0 && m_format<=2) {
-        char const *(wh[])= {
+        char const *wh[]= {
           "text:creator", "text:modification-time", "text:modification-date"
         };
         field.m_propertyList.insert("librevenge:field-type", wh[m_format]);
@@ -242,7 +242,7 @@ bool Field::send(STOFFListenerPtr listener, StarState &state) const
     }
     else if (subType==10) {
       if (m_format>=0 && m_format<=2) {
-        char const *(wh[])= {
+        char const *wh[]= {
           "text:printed-by", "text:print-time", "text:print-date"
         };
         field.m_propertyList.insert("librevenge:field-type", wh[m_format]);
@@ -252,7 +252,7 @@ bool Field::send(STOFFListenerPtr listener, StarState &state) const
       }
     }
     else if (subType>=0 && subType<=12) {
-      char const *(wh[])= {
+      char const *wh[]= {
         "text:title", "text:subject", "text:keywords", "text:description",
         "text:Info1", "text:Info2", "text:Info3", "text:Info4",
         "text:editing-cycles", "", "",  "text:editing-cycles",
@@ -281,7 +281,7 @@ bool Field::send(STOFFListenerPtr listener, StarState &state) const
   else if (m_type==26) {
     int subType=m_format&0x7FF;
     if (subType>=0 && subType<=5) {
-      char const *(wh[])= {"name-and-extension", "full", "path", "name", "title"/*uiname*/, "area" /* range*/ };
+      char const *wh[]= {"name-and-extension", "full", "path", "name", "title"/*uiname*/, "area" /* range*/ };
       field.m_propertyList.insert("librevenge:field-type", "text:template-name");
       field.m_propertyList.insert("text:display", wh[subType]);
     }
@@ -292,7 +292,7 @@ bool Field::send(STOFFListenerPtr listener, StarState &state) const
   }
   else if (m_type==30) {
     if (m_subType>=0 && m_subType<=16) {
-      char const *(wh[])= {
+      char const *wh[]= {
         "text:sender-company", "text:sender-firstname", "text:send-lastname", "text:sender-initials", "text:sender-street",
         "text:sender-country", "text:sender-postal-code", "text:sender-city", "text:sender-title", "text:sender-position",
         "text:sender-phone-private", "text:sender-phone-work", "text:sender-fax", "text:sender-email", "text:sender-state-or-province",
@@ -634,7 +634,7 @@ bool FieldJumpEdit::send(STOFFListenerPtr listener, StarState &state) const
     field.m_propertyList.insert("librevenge:field-type", "text:placeholder");
     field.m_propertyList.insert("librevenge:field-content", m_content);
     if (m_format>=0 && m_format<=4) {
-      char const *(wh[])= {"text", "table", "text-box", "image", "object"};
+      char const *wh[]= {"text", "table", "text-box", "image", "object"};
       field.m_propertyList.insert("text:placeholder-type",wh[m_format]);
     }
     else {

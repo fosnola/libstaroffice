@@ -252,7 +252,7 @@ bool StarObjectDraw::readPresentationData(StarZone &zone)
     bool bVal;
     *input>>bVal;
     if (!bVal) continue;
-    char const *(wh[])= {"pres[all]", "pres[end]", "pres[manual]", "mouse[visible]", "mouse[asPen]"};
+    char const *wh[]= {"pres[all]", "pres[end]", "pres[manual]", "mouse[visible]", "mouse[asPen]"};
     f << wh[i] << ",";
   }
   auto firstPage=int(input->readULong(4));
@@ -644,7 +644,7 @@ bool StarObjectDraw::readSdrFrameView(StarZone &zone)
   }
   if (input->readLong(1)) f << "ruler,";
   for (int i=0; i<3; ++i) {
-    char const *(wh[])= {"visible","printtable","helpLine"};
+    char const *wh[]= {"visible","printtable","helpLine"};
     f << "layers[" << wh[i] << "]=[";
     int prevFl=-1, numSame=0;
     for (int j=0; j<=32; ++j) {

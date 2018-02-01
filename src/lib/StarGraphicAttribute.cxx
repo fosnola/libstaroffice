@@ -335,7 +335,7 @@ void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
 {
   if (m_type==XATTR_LINESTYLE) {
     if (m_value<=2) {
-      char const *(wh[])= {"none", "solid", "dash"};
+      char const *wh[]= {"none", "solid", "dash"};
       state.m_graphic.m_propertyList.insert("draw:stroke", wh[m_value]);
     }
     else {
@@ -344,7 +344,7 @@ void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
   }
   else if (m_type==XATTR_FILLSTYLE) {
     if (m_value<=4) {
-      char const *(wh[])= {"none", "solid", "gradient", "hatch", "bitmap"};
+      char const *wh[]= {"none", "solid", "gradient", "hatch", "bitmap"};
       state.m_graphic.m_propertyList.insert("draw:fill", wh[m_value]);
     }
     else {
@@ -357,7 +357,7 @@ void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
     state.m_graphic.m_propertyList.insert("draw:opacity", 1-double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==XATTR_LINEJOINT) {
     if (m_value<=4) {
-      char const *(wh[])= {"none", "middle", "bevel", "miter", "round"};
+      char const *wh[]= {"none", "middle", "bevel", "miter", "round"};
       state.m_graphic.m_propertyList.insert("draw:stroke-linejoin", wh[m_value]);
     }
     else {
@@ -366,7 +366,7 @@ void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
   }
   else if (m_type==XATTR_FILLBMP_POS) {
     if (m_value<9) {
-      char const *(wh[])= {"top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right"};
+      char const *wh[]= {"top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right"};
       state.m_graphic.m_propertyList.insert("draw:fill-image-ref-point", wh[m_value]);
     }
     else {
@@ -389,7 +389,7 @@ void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
     state.m_graphic.m_propertyList.insert("draw:shadow-opacity", 1.0-double(m_value)/255., librevenge::RVNG_PERCENT);
   else if (m_type==SDRATTR_TEXT_LEFTDIST || m_type==SDRATTR_TEXT_RIGHTDIST ||
            m_type==SDRATTR_TEXT_UPPERDIST || m_type==SDRATTR_TEXT_LOWERDIST) {
-    char const * (wh[])= {"left", "right", "top", "bottom"};
+    char const *wh[] = {"left", "right", "top", "bottom"};
     state.m_graphic.m_propertyList.insert((std::string("padding-")+wh[(m_type-SDRATTR_TEXT_LEFTDIST)]).c_str(), state.convertInPoint(m_value), librevenge::RVNG_POINT);
   }
   else if (m_type==SDRATTR_TEXT_FITTOSIZE)
@@ -397,7 +397,7 @@ void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
     state.m_graphic.m_propertyList.insert("draw:fit-to-size", m_value!=0);
   else if (m_type==SDRATTR_TEXT_HORZADJUST) {
     if (m_value<4) {
-      char const *(wh[])= {"left", "center", "right", "justify"};
+      char const *wh[]= {"left", "center", "right", "justify"};
       state.m_graphic.m_propertyList.insert("draw:textarea-horizontal-align", wh[m_value]);
     }
     else {
@@ -406,7 +406,7 @@ void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
   }
   else if (m_type==SDRATTR_TEXT_VERTADJUST) {
     if (m_value<4) {
-      char const *(wh[])= {"top", "middle", "bottom", "justify"};
+      char const *wh[]= {"top", "middle", "bottom", "justify"};
       state.m_graphic.m_propertyList.insert("draw:textarea-vertical-align", wh[m_value]);
     }
     else {
@@ -424,7 +424,7 @@ void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
   }
   else if (m_type==SDRATTR_TEXT_ANIDIRECTION) {
     if (m_value<4) {
-      char const *(wh[])= {"left", "right", "up", "down"};
+      char const *wh[]= {"left", "right", "up", "down"};
       state.m_graphic.m_propertyList.insert("text:animation-direction", wh[m_value]);
     }
     else {
@@ -433,7 +433,7 @@ void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
   }
   else if (m_type==SDRATTR_TEXT_ANIKIND) {
     if (m_value<5) {
-      char const *(wh[])= {"none", "none" /*blink*/, "scroll", "alternate", "slide"};
+      char const *wh[]= {"none", "none" /*blink*/, "scroll", "alternate", "slide"};
       state.m_graphic.m_propertyList.insert("text:animation", wh[m_value]);
       if (m_value) {
         if (!state.m_graphic.m_propertyList["text:animation-direction"])
@@ -448,7 +448,7 @@ void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
   }
   else if (m_type==SDRATTR_CIRCKIND) {
     if (m_value<4) {
-      char const *(wh[])= {"full", "section", "cut", "arc"};
+      char const *wh[]= {"full", "section", "cut", "arc"};
       state.m_graphic.m_propertyList.insert("draw:kind", wh[m_value]);
     }
     else {
@@ -461,7 +461,7 @@ void StarGAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
     state.m_graphic.m_propertyList.insert("draw:opacity", 1.0-double(m_value)/100., librevenge::RVNG_PERCENT);
   else if (m_type==SDRATTR_GRAFMODE) {
     if (m_value<4) {
-      char const *(wh[])= {"standard", "greyscale", "mono", "watermark"};
+      char const *wh[]= {"standard", "greyscale", "mono", "watermark"};
       state.m_graphic.m_propertyList.insert("draw:color-mode", wh[m_value]);
     }
     else {
@@ -957,7 +957,7 @@ void StarGAttributeNamedGradient::addTo(StarState &state, std::set<StarAttribute
     if (!m_enable)
       return;
     if (m_gradientType>=0 && m_gradientType<=5) {
-      char const *(wh[])= {"linear", "axial", "radial", "ellipsoid", "square", "rectangle"};
+      char const *wh[]= {"linear", "axial", "radial", "ellipsoid", "square", "rectangle"};
       state.m_graphic.m_propertyList.insert("draw:style", wh[m_gradientType]);
     }
     else {
@@ -979,7 +979,7 @@ void StarGAttributeNamedHatch::addTo(StarState &state, std::set<StarAttribute co
 {
   if (m_type==XATTR_FILLHATCH && m_distance>0) {
     if (m_hatchType>=0 && m_hatchType<3) {
-      char const *(wh[])= {"single", "double", "triple"};
+      char const *wh[]= {"single", "double", "triple"};
       state.m_graphic.m_propertyList.insert("draw:style", wh[m_hatchType]);
     }
     else {

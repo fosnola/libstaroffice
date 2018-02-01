@@ -62,7 +62,7 @@ void STOFFHeaderFooter::send(STOFFListener *listener, bool isHeader) const
     return;
   }
   for (int i=0; i<4; ++i) {
-    char const *(wh[])= {"region-left", "region-center", "region-right", ""};
+    char const *wh[]= {"region-left", "region-center", "region-right", ""};
     if (!m_subDocument[i]) continue;
     if (isHeader)
       listener->insertHeaderRegion(m_subDocument[i], wh[i]);

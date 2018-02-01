@@ -230,7 +230,7 @@ bool STOFFInputStream::readColor(STOFFColor &color)
     color=STOFFColor(col[0],col[1],col[2]);
     return true;
   }
-  static uint32_t const(listColors[]) = {
+  static uint32_t const listColors[] = {
     0,                          // COL_BLACK
     0x000080,                           // COL_BLUE
     0x008000,                          // COL_GREEN

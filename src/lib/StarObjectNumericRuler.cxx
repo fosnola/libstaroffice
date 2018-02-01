@@ -233,7 +233,7 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
       return true;
     }
     if (string.empty()) continue;
-    static char const *(wh[])= {"prefix", "postfix", "fontname", "fontstyle"};
+    static char const *wh[]= {"prefix", "postfix", "fontname", "fontstyle"};
     f << wh[i] << "=" << libstoff::getString(string).cstr() << ",";
     if (i==0) level.m_propertyList.insert("style:num-prefix",libstoff::getString(string));
     else if (i==1) level.m_propertyList.insert("style:num-suffix",libstoff::getString(string));
@@ -270,7 +270,7 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
   }
   if (format!=0xFFFF) f << "nFmt=" << format << ",";
   if (eType<=4 || eType==9 || eType==10) {
-    char const *(wh[])= {"A", "a", "I", "i", "1", "", "", "", "", "A"/*UPPER_LETTER_N*/, "a"/*LOWER_LETTER_N*/};
+    char const *wh[]= {"A", "a", "I", "i", "1", "", "", "", "", "A"/*UPPER_LETTER_N*/, "a"/*LOWER_LETTER_N*/};
     level.m_propertyList.insert("style:num-format", wh[eType]);
     level.m_type=STOFFListLevel::NUMBER;
     f << "type=" << wh[eType] << ",";
@@ -303,7 +303,7 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
   if (maxLevel) f << "nUpperLevel=" << maxLevel << ",";
   if (level.m_startValue) f << "start=" << level.m_startValue << ",";
   if (adjust>=0 && adjust<=5) {
-    char const *(wh[])= {"left", "right", "justify", "center", "justify"/*block line*/, "end"};
+    char const *wh[]= {"left", "right", "justify", "center", "justify"/*block line*/, "end"};
     level.m_propertyList.insert("fo:text-align", wh[adjust]);
     f << wh[adjust] << ",";
   }
@@ -569,7 +569,7 @@ bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long l
     case 16: // bold dash-dot
     case 17: // bold dash-dot-dot
     case 18: { // bold wave
-      char const *(wh[])= {"solid", "dotted", "dash", "long-dash", "dot-dash", "dot-dot-dash", "wave"};
+      char const *wh[]= {"solid", "dotted", "dash", "long-dash", "dot-dash", "dot-dot-dash", "wave"};
       font.m_propertyList.insert("style:text-underline-type", "single");
       font.m_propertyList.insert("style:text-underline-style", wh[underline-12]);
       font.m_propertyList.insert("style:text-underline-width", "thick");
@@ -629,7 +629,7 @@ bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long l
   if (scale) f << "scale=" << scale << ",";
 
   if (style<=4) {
-    char const *(wh[])= {"A", "a", "I", "i", "1"};
+    char const *wh[]= {"A", "a", "I", "i", "1"};
     level.m_propertyList.insert("style:num-format", wh[style]);
     level.m_type=STOFFListLevel::NUMBER;
   }
@@ -655,7 +655,7 @@ bool StarObjectNumericRuler::readAttributeLevel(StarZone &zone, int vers, long l
     level.m_propertyList.insert("text:bullet-char", bullet);
   }
   if (alignement>=0 && alignement<6) {
-    char const *(wh[])= {"left", "right", "justify", "center", "justify"/*block line*/, "end"};
+    char const *wh[]= {"left", "right", "justify", "center", "justify"/*block line*/, "end"};
     level.m_propertyList.insert("fo:text-align", wh[alignement]);
   }
   else if (alignement>=0) {

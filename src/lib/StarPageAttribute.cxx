@@ -425,7 +425,7 @@ protected:
       if (m_wishWidth) o << "wish[width]=" << m_wishWidth << ",";
       for (int i=0; i<4; ++i) {
         if (!m_margins[i]) continue;
-        char const *(wh[])= {"left", "top", "right", "bottom" };
+        char const *wh[]= {"left", "top", "right", "bottom" };
         o << wh[i] << "=" << m_margins[i] << ",";
       }
     }
@@ -589,14 +589,14 @@ public:
     o << m_debugName << "=[";
     if (!m_name.empty()) o << m_name.cstr();
     if (m_pageType>=0 && m_pageType<8) {
-      char const *(wh[])= {"charUpper", "charLower", "romanUpper", "romanLower", "arabic", "none", "specialChar", "pageDesc"};
+      char const *wh[]= {"charUpper", "charLower", "romanUpper", "romanLower", "arabic", "none", "specialChar", "pageDesc"};
       o << "number=" << wh[m_pageType] << ",";
     }
     else
       o << "number[type]=" << m_pageType << ",";
     if (m_landscape) o << "landscape,";
     if (m_used>=0 && m_used<6) {
-      char const *(wh[])= {"left", "right", "all", "mirror", "header[share]", "footer[share]"};
+      char const *wh[]= {"left", "right", "all", "mirror", "header[share]", "footer[share]"};
       o << wh[m_used] << ",";
     }
     else
@@ -836,7 +836,7 @@ void StarPAttributePage::addTo(StarState &state, std::set<StarAttribute const *>
   if (!m_name.empty()) state.m_global->m_page.m_propertiesList[0].insert("draw:name", m_name);
   state.m_global->m_page.m_propertiesList[0].insert("style:print-orientation", m_landscape ? "landscape" : "portrait");
   if (m_pageType>=0 && m_pageType<6) {
-    char const *(wh[])= {"a", "A", "i", "I", "1", ""};
+    char const *wh[]= {"a", "A", "i", "I", "1", ""};
     state.m_global->m_page.m_propertiesList[0].insert("style:num-format", wh[m_pageType]);
   }
 }

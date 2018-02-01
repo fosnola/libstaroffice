@@ -533,7 +533,7 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
     f << "SfxDocInfo-A" << i << ":";
     auto dSz=int(input->readULong(2));
     int expectedSz= i < 3 ? 33 : i < 5 ? 65 : i==5 ? 257 : i==6 ? 129 : i<15 ? 21 : 2;
-    static char const *(wh[])= {
+    static char const *wh[]= {
       "time[creation]","time[mod]","time[print]","title","subject","comment","keyword",
       "user0[name]", "user0[data]","user1[name]", "user1[data]","user2[name]", "user2[data]","user3[name]", "user3[data]",
       "template[name]", "template[filename]"
@@ -559,7 +559,7 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
     if (StarEncoding::convert(string, encoding, finalString, srcPositions)) {
       auto attrib=libstoff::getString(finalString);
       f << attrib.cstr() << ",";
-      static char const *(attribNames[]) = {
+      static char const *attribNames[] = {
         "meta:initial-creator", "dc:creator", "", "dc:title", "dc:subject", "dc:description"/*comment*/, "meta:keywords",
         "", "user", "", "user", "", "user", "", "user",
         "librevenge:template-name", "librevenge:template-filename"
@@ -590,7 +590,7 @@ bool StarObject::readSfxDocumentInformation(STOFFInputStreamPtr input, std::stri
       f << "date=" << date << ", time=" << time << ",";
       std::string dateTime;
       if (date && libstoff::convertToDateTime(date,time, dateTime)) {
-        static char const *(attribNames[])= { "meta:creation-date", "dc:date", "meta:print-date" };
+        static char const *attribNames[]= { "meta:creation-date", "dc:date", "meta:print-date" };
         m_metaData.insert(attribNames[i], dateTime.c_str());
       }
     }

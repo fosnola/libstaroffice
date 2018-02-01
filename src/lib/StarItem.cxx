@@ -69,7 +69,7 @@ std::string StarItemSet::printChild() const
 std::ostream &operator<<(std::ostream &o, StarItemStyle const &style)
 {
   for (int i=0; i<4; ++i) {
-    static char const *(wh[])= {"name","parent","follow","help"};
+    static char const *wh[]= {"name","parent","follow","help"};
     if (!style.m_names[i].empty())
       o << wh[i] << "=" << style.m_names[i].cstr() << ",";
   }

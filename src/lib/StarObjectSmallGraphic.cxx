@@ -303,14 +303,14 @@ public:
   std::string getName() const override
   {
     if (m_identifier>0 && m_identifier<=32) {
-      char const *(wh[])= {"none", "group", "line", "rect", "circle",
-                           "sector", "arc", "ccut", "poly", "polyline",
-                           "pathline", "pathfill", "freeline", "freefill", "splineline",
-                           "splinefill", "text", "textextended", "fittext", "fitalltext",
-                           "titletext", "outlinetext", "graf", "ole2", "edge",
-                           "caption", "pathpoly", "pathpline", "page", "measure",
-                           "dummy","frame", "uno"
-                          };
+      char const *wh[]= {"none", "group", "line", "rect", "circle",
+                         "sector", "arc", "ccut", "poly", "polyline",
+                         "pathline", "pathfill", "freeline", "freefill", "splineline",
+                         "splinefill", "text", "textextended", "fittext", "fitalltext",
+                         "titletext", "outlinetext", "graf", "ole2", "edge",
+                         "caption", "pathpoly", "pathpline", "page", "measure",
+                         "dummy","frame", "uno"
+                        };
       return wh[m_identifier];
     }
     std::stringstream s;
@@ -355,7 +355,7 @@ public:
     if (graph.m_anchorPosition!=STOFFVec2i(0,0)) o << "anchor[pos]=" << graph.m_anchorPosition << ",";
     for (int i=0; i<6; ++i) {
       if (!graph.m_flags[i]) continue;
-      char const *(wh[])= {"move[protected]", "size[protected]", "print[no]", "mark[protected]", "empty", "notVisibleAsMaster"};
+      char const *wh[]= {"move[protected]", "size[protected]", "print[no]", "mark[protected]", "empty", "notVisibleAsMaster"};
       o << wh[i] << ",";
     }
     if (!graph.m_polygon.empty()) {
@@ -792,7 +792,7 @@ public:
       shape.m_propertyList.insert("draw:end-angle", double(m_angles[1]), librevenge::RVNG_GENERIC);
     }
     if (m_identifier>=4 && m_identifier<=7) {
-      char const *(wh[])= {"full", "section", "arc", "cut"};
+      char const *wh[]= {"full", "section", "arc", "cut"};
       shape.m_propertyList.insert("draw:kind", wh[m_identifier-4]);
     }
     updateTransformProperties(shape.m_propertyList, state.m_global->m_relativeUnit);
@@ -1481,9 +1481,9 @@ public:
   std::string getName() const final
   {
     if (m_identifier>0 && m_identifier<=7) {
-      char const *(wh[])= {"none", "group",  "objectId", "objectAdjustId", "dataRowId",
-                           "dataPointId", "lightfactorId", "axisId"
-                          };
+      char const *wh[]= {"none", "group",  "objectId", "objectAdjustId", "dataRowId",
+                         "dataPointId", "lightfactorId", "axisId"
+                        };
       return wh[m_identifier];
     }
     std::stringstream s;
@@ -1574,7 +1574,7 @@ public:
   std::string getName() const override
   {
     if (m_identifier>0 && m_identifier<=2) {
-      char const *(wh[])= {"none", "animationInfo",  "imapInfo" };
+      char const *wh[]= {"none", "animationInfo",  "imapInfo" };
       return wh[m_identifier];
     }
     std::stringstream s;
@@ -1638,14 +1638,14 @@ public:
     if (graph.m_limits[1]!=STOFFVec2i(0,0)) o << "end=" << graph.m_limits[1] << ",";
     for (int i=0; i<8; ++i) {
       if (!graph.m_values[i]) continue;
-      char const *(wh[])= {"pres[effect]", "speed", "clickAction", "pres[effect,second]", "speed[second]",
-                           "invisible", "verb", "text[effect]"
-                          };
+      char const *wh[]= {"pres[effect]", "speed", "clickAction", "pres[effect,second]", "speed[second]",
+                         "invisible", "verb", "text[effect]"
+                        };
       o << wh[i] << "=" << graph.m_values[i] << ",";
     }
     for (int i=0; i<3; ++i) {
       if (!graph.m_flags[i]) continue;
-      char const *(wh[])= {"active", "dim[previous]", "isMovie"};
+      char const *wh[]= {"active", "dim[previous]", "isMovie"};
       o << wh[i] << ",";
     }
     for (int i=0; i<2; ++i) {
@@ -1654,12 +1654,12 @@ public:
     }
     for (int i=0; i<3; ++i) {
       if (graph.m_names[i].empty()) continue;
-      char const *(wh[])= {"sound[file]", "bookmark", "sound[file,second]"};
+      char const *wh[]= {"sound[file]", "bookmark", "sound[file,second]"};
       o << wh[i] << "=" << graph.m_names[i].cstr() << ",";
     }
     for (int i=0; i<5; ++i) {
       if (!graph.m_booleans[i]) continue;
-      char const *(wh[])= {"hasSound", "playFull","hasSound[second]", "playFull[second]","dim[hide]"};
+      char const *wh[]= {"hasSound", "playFull","hasSound[second]", "playFull[second]","dim[hide]"};
       o << wh[i] << ",";
     }
     if (graph.m_order) o << "order=" << graph.m_order << ",";
@@ -2025,9 +2025,9 @@ bool StarObjectSmallGraphic::readSVDRObjectAttrib(StarZone &zone, StarObjectSmal
   f << "[";
   for (int i=0; i<6; ++i) {
     if (vers<11) input->seek(2, librevenge::RVNG_SEEK_CUR);
-    uint16_t const(what[])= {1017/*XATTRSET_LINE*/, 1047/*XATTRSET_FILL*/, 1066/*XATTRSET_TEXT*/, 1079/*SDRATTRSET_SHADOW*/,
-                             1096 /*SDRATTRSET_OUTLINER*/, 1126 /*SDRATTRSET_MISC*/
-                            };
+    uint16_t const what[]= {1017/*XATTRSET_LINE*/, 1047/*XATTRSET_FILL*/, 1066/*XATTRSET_TEXT*/, 1079/*SDRATTRSET_SHADOW*/,
+                            1096 /*SDRATTRSET_OUTLINER*/, 1126 /*SDRATTRSET_MISC*/
+                           };
     uint16_t nWhich=what[i];
     auto item=pool->loadSurrogate(zone, nWhich, false, f);
     if (input->tell()>lastPos) { // null is ok
@@ -2979,7 +2979,7 @@ bool StarObjectSmallGraphic::readSDRObjectConnection(StarZone &zone)
   for (int i=0; i<6; ++i) {
     bool val;
     *input>>val;
-    char const *(wh[])= {"bestConn", "bestVertex", "xDistOvr", "yDistOvr", "autoVertex", "autoCorner"};
+    char const *wh[]= {"bestConn", "bestVertex", "xDistOvr", "yDistOvr", "autoVertex", "autoCorner"};
     if (val)
       f << wh[i] << ",";
   }

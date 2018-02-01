@@ -129,7 +129,7 @@ std::ostream &operator<<(std::ostream &o, NoteDesc const &desc)
     o << "endnote,";
   for (int i=0; i<4; ++i) {
     if (desc.m_distances[i]>=0 && desc.m_distances[i]<=0) continue;
-    char const *(wh[])= {"width", "height", "top[dist]", "bottom[dist]"};
+    char const *wh[]= {"width", "height", "top[dist]", "bottom[dist]"};
     o << wh[i] << "=" << desc.m_distances[i] << ",";
   }
   if (desc.m_adjust) o << "adjust=" << desc.m_adjust << ",";

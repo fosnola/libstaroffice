@@ -471,7 +471,7 @@ public:
   {
     o << m_debugName << "=[";
     for (int i=0; i<3; ++i) {
-      char const *(wh[])= {"left", "right", "firstLine"};
+      char const *wh[]= {"left", "right", "firstLine"};
       if (m_propMargins[i]!=100)
         o << wh[i] << "=" << m_propMargins[i] << "%,";
       else if (m_margins[i])
@@ -624,7 +624,7 @@ public:
     if (m_surround) o << "surround=" << m_surround << ",";
     for (int i=0; i<4; ++i) {
       if (!m_bools[i]) continue;
-      char const *(wh[]) = {"ideal", "anchor[only]", "contour", "outside"};
+      char const *wh[] = {"ideal", "anchor[only]", "contour", "outside"};
       o << wh[i] << ",";
     }
     o << "],";
@@ -664,7 +664,7 @@ public:
   {
     o << m_debugName << "=[";
     for (int i=0; i<2; ++i) {
-      char const *(wh[])= {"top", "bottom" };
+      char const *wh[]= {"top", "bottom" };
       if (m_propMargins[i]!=100)
         o << wh[i] << "=" << m_propMargins[i] << "%,";
       else if (m_margins[i])
@@ -687,12 +687,12 @@ void StarFAttributeAnchor::addTo(StarState &state, std::set<StarAttribute const 
      RND_STD_HEADER, RND_STD_FOOTER, RND_STD_HEADERL, RND_STD_HEADERR,
      RND_STD_FOOTERL, RND_STD_FOOTERR,
      RND_DRAW_OBJECT   */
-  STOFFPosition::AnchorTo const(wh[])= {STOFFPosition::Paragraph, STOFFPosition::CharBaseLine,  STOFFPosition::Page, STOFFPosition::Frame, STOFFPosition::Char };
+  STOFFPosition::AnchorTo const wh[]= {STOFFPosition::Paragraph, STOFFPosition::CharBaseLine,  STOFFPosition::Page, STOFFPosition::Frame, STOFFPosition::Char };
   if (m_anchor>=0 && m_anchor < int(STOFF_N_ELEMENTS(wh))) {
     state.m_frame.m_position.setAnchor(wh[m_anchor]);
-    char const *(defaultXRel[]) = {"paragraph", "paragraph", "page", "frame", "paragraph" };
-    char const *(defaultYRel[]) = {"paragraph", "baseline", "page", "frame", "paragraph" };
-    char const *(defaultYPos[]) = {nullptr, "bottom", nullptr, nullptr, "from-top"};
+    char const *defaultXRel[] = {"paragraph", "paragraph", "page", "frame", "paragraph" };
+    char const *defaultYRel[] = {"paragraph", "baseline", "page", "frame", "paragraph" };
+    char const *defaultYPos[] = {nullptr, "bottom", nullptr, nullptr, "from-top"};
     if (!state.m_frame.m_propertyList["style:horizontal-rel"] && defaultXRel[m_anchor])
       state.m_frame.m_propertyList.insert("style:horizontal-rel",  defaultXRel[m_anchor]);
     if (!state.m_frame.m_propertyList["style:vertical-rel"] && defaultYRel[m_anchor])
@@ -714,7 +714,7 @@ void StarFAttributeAnchor::addTo(StarState &state, std::set<StarAttribute const 
 
 void StarFAttributeBorder::addTo(StarState &state, std::set<StarAttribute const *> &/*done*/) const
 {
-  char const * (wh[])= {"top", "left", "right", "bottom"};
+  char const *wh[] = {"top", "left", "right", "bottom"};
   if (m_type==ATTR_FRM_BOX) {
     // checkme what is m_distance
 
@@ -935,7 +935,7 @@ void StarFAttributeOrientation::addTo(StarState &state, std::set<StarAttribute c
 {
   if (m_type==StarAttribute::ATTR_FRM_HORI_ORIENT) {
     // NONE,RIGHT,CENTER, LEFT,INSIDE,OUTSIDE,FULL, LEFT_AND_WIDTH
-    char const *(wh[])= {nullptr, "right", "center", "left", "inside", "outside", nullptr, "from-left"};
+    char const *wh[]= {nullptr, "right", "center", "left", "inside", "outside", nullptr, "from-left"};
     if (m_orient>=0 && m_orient<=7 && wh[m_orient])
       state.m_frame.m_propertyList.insert("style:horizontal-pos", wh[m_orient]);
 
@@ -945,7 +945,7 @@ void StarFAttributeOrientation::addTo(StarState &state, std::set<StarAttribute c
     case 1:
     case 2:
     case 3: { // CHECKME
-      char const *(align[])= {"start", "center", "left"};
+      char const *align[]= {"start", "center", "left"};
       state.m_frame.m_propertyList.insert("fo:text-align", align[m_orient-1]);
       break;
     }
@@ -956,9 +956,9 @@ void StarFAttributeOrientation::addTo(StarState &state, std::set<StarAttribute c
       break;
     }
     // the relative position, FRAME, PRTAREA, CHAR, PG_LEFT, PG_RIGTH, FRM_LEFT, FRM_RIGHT, PG_FRAME, PG_PTRAREA
-    char const *(relat[])= { "frame", nullptr, "char", "page-start-margin", "page-left-margin", "frame-start-margin",
-                             "frame-end-margin", "page", "page"
-                           };
+    char const *relat[]= { "frame", nullptr, "char", "page-start-margin", "page-left-margin", "frame-start-margin",
+                           "frame-end-margin", "page", "page"
+                         };
     if (m_relat>=0 && m_relat<=8 && relat[m_relat])
       state.m_frame.m_propertyList.insert("style:horizontal-rel", relat[m_relat]);
     if (m_position)
@@ -1044,7 +1044,7 @@ void StarFAttributeSurround::addTo(StarState &state, std::set<StarAttribute cons
   int surround = m_surround; // NONE, THROUGH, PARALLEL, IDEAL, LEFT, RIGHT, END
   if (m_bools[0] && surround>1) surround=3;
   if (surround>=0 && surround<=5) {
-    char const *(wh[])= {"none", "run-through", "parallel", "dynamic", "left", "right"};
+    char const *wh[]= {"none", "run-through", "parallel", "dynamic", "left", "right"};
     state.m_frame.m_propertyList.insert("style:wrap", wh[surround]);
   }
   // checkme what is bAnchorOnly : m_bools[1]

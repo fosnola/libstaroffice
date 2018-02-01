@@ -80,9 +80,9 @@ void STOFFGraphicStyle::addTo(librevenge::RVNGPropertyList &pList) const
 void STOFFGraphicStyle::checkForPadding(librevenge::RVNGPropertyList &propList)
 {
   if (propList["librevenge:parent-display-name"]) return;
-  char const *(wh[])= { "fo:padding-top", "fo:padding-bottom",
-                        "fo:padding-left", "fo:padding-right"
-                      };
+  char const *wh[]= { "fo:padding-top", "fo:padding-bottom",
+                      "fo:padding-left", "fo:padding-right"
+                    };
   for (auto const &what : wh) {
     if (propList[what])
       continue;

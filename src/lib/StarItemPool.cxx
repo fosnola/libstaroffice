@@ -561,7 +561,7 @@ void State::init(StarItemPool::Type type)
     m_verStart=1; // SCHATTR_START
     m_verEnd=100; // SCHATTR_NONPERSISTENT_START
     // svx_eerdll.cxx GlobalEditData::GetDefItems
-    static int const(what[])= {
+    static int const what[]= {
       StarAttribute::ATTR_SCH_DATADESCR_DESCR, StarAttribute::ATTR_SCH_DATADESCR_SHOW_SYM, StarAttribute::ATTR_SCH_LEGEND_POS, StarAttribute::ATTR_SCH_TEXT_ORIENT,
       StarAttribute::ATTR_SCH_TEXT_ORDER, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MIN, StarAttribute::ATTR_SCH_Y_AXIS_MIN, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_MAX,
       StarAttribute::ATTR_SCH_Y_AXIS_MAX, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_STEP_MAIN, StarAttribute::ATTR_SCH_Y_AXIS_STEP_MAIN, StarAttribute::ATTR_SCH_Y_AXIS_AUTO_STEP_HELP,
@@ -621,7 +621,7 @@ void State::init(StarItemPool::Type type)
     for (int i=25; i<=28; ++i)  list.push_back(3994+i+15);
     addVersionMap(4, 3994, list);
     // svx_eerdll.cxx GlobalEditData::GetDefItems
-    static int const(what[])= {
+    static int const what[]= {
       StarAttribute::ATTR_SC_WRITINGDIR, StarAttribute::ATTR_EE_PARA_XMLATTRIBS, StarAttribute::ATTR_PARA_HANGINGPUNCTUATION, StarAttribute::ATTR_PARA_FORBIDDEN_RULES,
       StarAttribute::ATTR_EE_PARA_ASIANCJKSPACING, StarAttribute::ATTR_EE_PARA_NUMBULLET, StarAttribute::ATTR_SC_HYPHENATE, StarAttribute::ATTR_EE_PARA_BULLETSTATE,
       StarAttribute::ATTR_EE_PARA_OUTLLR_SPACE, StarAttribute::ATTR_EE_PARA_OUTLLEVEL, StarAttribute::ATTR_EE_PARA_BULLET, StarAttribute::ATTR_FRM_LR_SPACE,
@@ -691,7 +691,7 @@ void State::init(StarItemPool::Type type)
     for (int i = 0; i <= 34; i++) list.push_back(100+i);
     for (int i = 35; i <= 82; i++) list.push_back(100+i+1);
     addVersionMap(9, 100, list);
-    static int const(what[])= {
+    static int const what[]= {
       StarAttribute::ATTR_CHR_FONT, StarAttribute::ATTR_CHR_FONTSIZE, StarAttribute::ATTR_CHR_WEIGHT, StarAttribute::ATTR_CHR_POSTURE,
       StarAttribute::ATTR_CHR_UNDERLINE, StarAttribute::ATTR_CHR_CROSSEDOUT, StarAttribute::ATTR_CHR_CONTOUR, StarAttribute::ATTR_CHR_SHADOWED,
       StarAttribute::ATTR_CHR_COLOR, StarAttribute::ATTR_CHR_LANGUAGE, StarAttribute::ATTR_CHR_CJK_FONT, StarAttribute::ATTR_CHR_CJK_FONTSIZE,
@@ -781,7 +781,7 @@ void State::init(StarItemPool::Type type)
     for (int i=1127; i<=1140; ++i) list.push_back(i+45);
     addVersionMap(4, 1000, list);
 
-    static int const(what[])= {
+    static int const what[]= {
       StarAttribute::XATTR_LINESTYLE, StarAttribute::XATTR_LINEDASH, StarAttribute::XATTR_LINEWIDTH, StarAttribute::XATTR_LINECOLOR,
       StarAttribute::XATTR_LINESTART, StarAttribute::XATTR_LINEEND, StarAttribute::XATTR_LINESTARTWIDTH, StarAttribute::XATTR_LINEENDWIDTH,
       StarAttribute::XATTR_LINESTARTCENTER, StarAttribute::XATTR_LINEENDCENTER, StarAttribute::XATTR_LINETRANSPARENCE, StarAttribute::XATTR_LINEJOINT,

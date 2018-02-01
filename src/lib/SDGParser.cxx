@@ -342,7 +342,7 @@ bool SDGParser::readBitmap(StarZone &zone)
       f << "empty,";
       for (int i=0; i<3; ++i) {
         val=int(input->readULong(2));
-        int const(expected[])= {0x2509, 0x201, 0xacb2};
+        int const expected[]= {0x2509, 0x201, 0xacb2};
         if (val!=expected[i])
           f << "f" << i << "=" << std::hex << val << std::dec << ",";
       }

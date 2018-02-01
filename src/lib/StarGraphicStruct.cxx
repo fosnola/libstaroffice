@@ -440,7 +440,7 @@ bool StarBrush::getPattern(STOFFEmbeddedObject &object, STOFFVec2i &sz) const
   object=STOFFEmbeddedObject();
   if (m_style==0 || m_style>=11)
     return false;
-  static uint16_t const(s_pattern[4*10]) = {
+  static uint16_t const s_pattern[4*10] = {
     0xffff, 0xffff, 0xffff, 0xffff, // solid
     0xff00, 0x0000, 0xff00, 0x0000, // hori
     0x8888, 0x8888, 0x8888, 0x8888, // vertical
@@ -475,10 +475,10 @@ std::ostream &operator<<(std::ostream &o, StarBrush const &brush)
   if (!brush.m_color.isWhite()) o << "col=" << brush.m_color << ",";
   if (!brush.m_fillColor.isWhite()) o << "col[fill]=" << brush.m_fillColor << ",";
   if (brush.m_style>0 && brush.m_style<=11) {
-    char const *(wh[]) = {"none", "solid", "horizontal", "vertical",
-                          "cross", "diagcross", "updiag", "downdiag",
-                          "brush25", "brush50", "brush75", "bitmap"
-                         };
+    char const *wh[] = {"none", "solid", "horizontal", "vertical",
+                        "cross", "diagcross", "updiag", "downdiag",
+                        "brush25", "brush50", "brush75", "bitmap"
+                       };
     o << wh[brush.m_style] << ",";
   }
   else {
@@ -486,7 +486,7 @@ std::ostream &operator<<(std::ostream &o, StarBrush const &brush)
     o << "##style=" << brush.m_style << ",";
   }
   if (brush.m_position>=0 && brush.m_position<=11) {
-    char const *(wh[])= {"none", "lt", "mt", "rt", "lm", "mm", "rm", "lb", "mb", "rb", "area", "tile"};
+    char const *wh[]= {"none", "lt", "mt", "rt", "lm", "mm", "rm", "lb", "mb", "rb", "area", "tile"};
     o << "pos=" << wh[brush.m_position] << ",";
   }
   else {

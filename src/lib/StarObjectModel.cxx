@@ -192,7 +192,7 @@ public:
       page.m_propertiesList[0].insert("fo:page-height", relUnit*m_size[1], librevenge::RVNG_POINT);
     for (int i=0; i<4; ++i) {
       if (m_borders[i]<0 || m_borders[i]==0x7fffffff) continue;
-      char const *(wh[])= {"left", "top", "right", "bottom"};
+      char const *wh[]= {"left", "top", "right", "bottom"};
       page.m_propertiesList[0].insert((std::string("fo:margin-")+wh[i]).c_str(),
                                       relUnit*m_borders[i], librevenge::RVNG_POINT);
     }
@@ -669,7 +669,7 @@ bool StarObjectModel::read(StarZone &zone)
           break;
         }
         if (string.empty()) continue;
-        static char const *(wh[])= {"cTableName", "dashName", "lineEndName", "hashName", "gradientName", "bitmapName"};
+        static char const *wh[]= {"cTableName", "dashName", "lineEndName", "hashName", "gradientName", "bitmapName"};
         f << wh[i] << "=" << libstoff::getString(string).cstr() << ",";
       }
     }

@@ -133,16 +133,16 @@ struct NumberFormatter {
       if (!item.m_text.empty()) o << item.m_text.cstr();
       o << ":";
       if (item.m_type<0 && item.m_type>=-21) {
-        char const *(wh[])= {"", "string", "del", "blank", "star", "digit",
-                             "decimSep", "thSep", "exp", "frac", "empty",
-                             "fracBlank", "currency", "currDel", "currext",
-                             "calendar", "caldel", "dateSep", "timeSep",
-                             "time100secSep", "percent", "frac_fdiv"
-                            };
+        char const *wh[]= {"", "string", "del", "blank", "star", "digit",
+                           "decimSep", "thSep", "exp", "frac", "empty",
+                           "fracBlank", "currency", "currDel", "currext",
+                           "calendar", "caldel", "dateSep", "timeSep",
+                           "time100secSep", "percent", "frac_fdiv"
+                          };
         o << wh[-item.m_type];
       }
       else if (item.m_type>0 && item.m_type<50) {
-        char const *(wh[])= {
+        char const *wh[]= {
           "", "E", "AMPM", "AP", "MI", "MMI", "M", "MM", // exp, 2a/p, 2min, 2month
           "MMM", "MMMM", "H", "HH", "S", "SS", "Q", "QQ", // 2month, 2hours, 2sec, 2quarter
           "D", "DD", "DDD", "DDDD", "YY", "YYYY", "NN", "NNNN", //4 day, 2 year, 2 day of week
@@ -260,7 +260,7 @@ struct NumberFormatter {
     if (!form.m_isUsed) o << "unused,";
     for (int i=0; i<2; ++i) {
       if (!form.m_limitsOp[i]) continue;
-      char const *(wh[])= {"none", "=", "<>", "<", "<=", ">", ">="};
+      char const *wh[]= {"none", "=", "<>", "<", "<=", ">", ">="};
       if (form.m_limitsOp[i]>0 && form.m_limitsOp[i]<=6)
         o << "lim" << i << "=[" << wh[form.m_limitsOp[i]] << form.m_limits[i] << "],";
       else {
@@ -1213,9 +1213,9 @@ void StarFormatManager::updateNumberingProperties(STOFFCell &cell) const
     cell.setFormat(format);
     propList.insert("librevenge:value-type", "date");
     propList.insert("number:automatic-order", "true");
-    char const *(wh[])= {"%m/%d/%y", "%a %d/%b %y", "%m/%y", "%b %d", "%B",
-                         "%Q Quarter %y", "%m/%d/%Y"
-                        };
+    char const *wh[]= {"%m/%d/%y", "%a %d/%b %y", "%m/%y", "%b %d", "%B",
+                       "%Q Quarter %y", "%m/%d/%Y"
+                      };
     if (format.convertDTFormat(wh[formatId-30], pVect))
       propList.insert("librevenge:format", pVect);
     return;
@@ -1230,7 +1230,7 @@ void StarFormatManager::updateNumberingProperties(STOFFCell &cell) const
     cell.setFormat(format);
     propList.insert("librevenge:value-type", "time");
     propList.insert("number:automatic-order", "true");
-    char const *(wh[])= {"%H:%M", "%H:%M:%S", "%I:%M %p","%I:%M:%S %p", "%H:%M:%S", "%M:%s" };
+    char const *wh[]= {"%H:%M", "%H:%M:%S", "%I:%M %p","%I:%M:%S %p", "%H:%M:%S", "%M:%s" };
     if (format.convertDTFormat(wh[formatId-40], pVect))
       propList.insert("librevenge:format", pVect);
     return;

@@ -222,7 +222,7 @@ void StarPAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
     state.m_paragraph.m_propertyList.insert("fo:widows", int(m_value));
   else if (m_type==ATTR_PARA_VERTALIGN) {
     if (m_value<=4) {
-      char const *(wh[])= {"auto", "baseline", "top", "middle", "bottom"};
+      char const *wh[]= {"auto", "baseline", "top", "middle", "bottom"};
       state.m_paragraph.m_propertyList.insert("style:vertical-align", wh[m_value]);
     }
     else {
@@ -592,7 +592,7 @@ public:
     {
       o << "pos=" << m_pos;
       if (m_type>=0 && m_type<5) {
-        char const *(wh[])= {"L", "R", "D", "C", "Def"};
+        char const *wh[]= {"L", "R", "D", "C", "Def"};
         o << wh[m_type];
       }
       else
@@ -674,7 +674,7 @@ void StarPAttributeBulletNumeric::addTo(StarState &state, std::set<StarAttribute
   if (m_type==ATTR_EE_PARA_NUMBULLET) {
     STOFFListLevel level;
     if (m_numType<=4) {
-      char const *(wh[])= {"A", "a", "I", "i", "1"};
+      char const *wh[]= {"A", "a", "I", "i", "1"};
       level.m_propertyList.insert("style:num-format", wh[m_numType]);
       level.m_type=STOFFListLevel::NUMBER;
     }

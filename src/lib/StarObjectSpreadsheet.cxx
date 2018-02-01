@@ -1172,7 +1172,7 @@ try
                 break;
               }
               if (string.empty()) continue;
-              static char const*(wh[])= {"serviceName","source","name","user","pass"};
+              static char const *wh[]= {"serviceName","source","name","user","pass"};
               f << wh[j] << "=" << libstoff::getString(string).cstr() << ",";
             }
             break;
@@ -1946,7 +1946,7 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
           break;
         }
         if (!string.empty()) {
-          static char const *(wh[])= {"name", "comment", "pass"};
+          static char const *wh[]= {"name", "comment", "pass"};
           f << wh[i] << "=" << libstoff::getString(string).cstr() << ",";
           if (i==0 && !m_spreadsheetState->m_tableList.empty() && m_spreadsheetState->m_tableList.back())
             m_spreadsheetState->m_tableList.back()->m_name=libstoff::getString(string);
@@ -2036,7 +2036,7 @@ bool StarObjectSpreadsheet::readSCTable(StarZone &zone, StarObjectSpreadsheetInt
           break;
         }
         if (string.empty()) continue;
-        static char const *(wh[])= {"doc", "flt", "tab"};
+        static char const *wh[]= {"doc", "flt", "tab"};
         f << "link[" << wh[i] << "]=" << libstoff::getString(string).cstr() << ",";
       }
       if (!ok) break;
@@ -2121,7 +2121,7 @@ bool StarObjectSpreadsheet::readSCColumn(StarZone &zone, StarObjectSpreadsheetIn
             break;
           }
           if (string.empty()) continue;
-          static char const *(wh[])= {"note","date","author"};
+          static char const *wh[]= {"note","date","author"};
           cell.m_notes[j]=libstoff::getString(string);
           f << wh[j] << "=" << cell.m_notes[j].cstr()  << ",";
         }

@@ -280,7 +280,7 @@ void StarCAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
     case 16: // bold dash-dot
     case 17: // bold dash-dot-dot
     case 18: { // bold wave
-      char const *(wh[])= {"solid", "dotted", "dash", "long-dash", "dot-dash", "dot-dot-dash", "wave"};
+      char const *wh[]= {"solid", "dotted", "dash", "long-dash", "dot-dash", "dot-dot-dash", "wave"};
       state.m_font.m_propertyList.insert("style:text-underline-type", "single");
       state.m_font.m_propertyList.insert("style:text-underline-style", wh[m_value-12]);
       state.m_font.m_propertyList.insert("style:text-underline-width", "thick");
@@ -573,9 +573,9 @@ public:
     if (m_size!=240) o << "sz=" << m_size << ",";
     if (m_proportion!=100) o << "prop=" << m_proportion << ",";
     if (m_unit>=0 && m_unit<=14) {
-      char const *(wh[])= {"mm/100", "mm/10", "mm", "cm", "in/1000", "in/100", "in/10", "in",
-                           "pt", "twip", "pixel", "sys[font]", "app[font]", "rel", "abs"
-                          };
+      char const *wh[]= {"mm/100", "mm/10", "mm", "cm", "in/1000", "in/100", "in/10", "in",
+                         "pt", "twip", "pixel", "sys[font]", "app[font]", "rel", "abs"
+                        };
       o << wh[m_unit] << ",";
     }
     else {

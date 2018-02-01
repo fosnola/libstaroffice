@@ -253,7 +253,7 @@ void StarCAttributeUInt::addTo(StarState &state, std::set<StarAttribute const *>
   }
   else if (m_type==ATTR_SC_WRITINGDIR) {
     if (m_value<=4) {
-      char const *(wh[])= {"lr-tb", "rl-tb", "tb-rl", "tb-lr", "page"};
+      char const *wh[]= {"lr-tb", "rl-tb", "tb-rl", "tb-lr", "page"};
       state.m_cell.m_propertyList.insert("style:writing-mode", wh[m_value]);
     }
     else {
@@ -316,7 +316,7 @@ public:
   {
     o << m_debugName << "=[";
     for (int i=0; i<4; ++i) {
-      char const *(wh[])= {"top", "left", "right", "bottom"};
+      char const *wh[]= {"top", "left", "right", "bottom"};
       if (m_margins[i]) o << "margin[" << wh[i] << "]=" << m_margins[i] << ",";
     }
     o << "],";
@@ -483,7 +483,7 @@ void StarCAttributeMargins::addTo(StarState &state, std::set<StarAttribute const
   if (m_type!=ATTR_SC_MARGIN)
     return;
   for (int i=0; i<4; ++i) {
-    char const *(wh[])= {"top", "left", "right", "bottom"};
+    char const *wh[]= {"top", "left", "right", "bottom"};
     state.m_cell.m_propertyList.insert((std::string("fo:padding-")+wh[i]).c_str(), double(m_margins[i])/20., librevenge::RVNG_POINT);
   }
 }

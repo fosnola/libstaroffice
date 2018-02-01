@@ -216,7 +216,7 @@ bool Token::updateFunction()
     instr.m_content=nOp==33 ? "and" : "or";
   }
   else if (nOp>=21 && nOp<=37) {
-    static char const *(wh[])=
+    static char const *wh[]=
     {"+", "-", "*", "/", "&", "^", "=", "<>", "<", ">", "<=", ">=", "OR", "AND", "!", "~", ":"};
     m_content=StarCellFormulaInternal::Token::C_FunctionOperator;
     m_longValue=2;
@@ -238,7 +238,7 @@ bool Token::updateFunction()
   }
   // function no parameter
   else if (nOp>=46 && nOp<=53) {  // 60 endNoPar
-    static char const *(wh[])= {
+    static char const *wh[]= {
       "Pi", "Random", "True", "False", "Today"/*getActDate*/, "Now"/*getActTime*/,
       "NA", "Current"
     };
@@ -255,7 +255,7 @@ bool Token::updateFunction()
   else if (nOp>=61 && nOp<=131) { // 200 endOnePar
     m_content=StarCellFormulaInternal::Token::C_FunctionOperator;
     m_longValue=1;
-    static char const *(wh[])= {
+    static char const *wh[]= {
       "Degrees", "Radians", "Sin", "Cos", "Tan", "Cot", "Asin", "Acos", "Atan", "ACot", // 70
       "SinH", "CosH", "TanH", "CotH", "AsinH", "ACosH", "ATanH", "ACosH", // 78
       "Exp", "Ln", "Sqrt", "Fact", // 82
@@ -273,7 +273,7 @@ bool Token::updateFunction()
   // multiple
   else if (nOp>=201 && nOp<=386) {
     m_content=StarCellFormulaInternal::Token::C_FunctionOperator;
-    static char const *(wh[])= {
+    static char const *wh[]= {
       "Atan2", "Ceil", "Floor", "Round", "RoundUp", "RoundDown", "Trunc", "Log", // 208
       "Power", "GCD", "LCM", "Mod", "SumProduct", "SumSQ", "SumX2MY2", "SumX2PY2", "SumXMY2", // 217
       "Date", "Time", "Days", "Days360", "Min", "Max", "Sum", "Product", "Average", "Count", // 227

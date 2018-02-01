@@ -497,7 +497,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
       zone.closeSCHHeader("SCHAttributes");
       return true;
     }
-    static char const *(wh[])= {"mainTitle", "subTitle", "xAxisTitle", "yAxisTitle", "zAxisTitle" };
+    static char const *wh[]= {"mainTitle", "subTitle", "xAxisTitle", "yAxisTitle", "zAxisTitle" };
     f << wh[i] << "=" << libstoff::getString(string).cstr();
     if (bShow) f << ":show";
     f << ",";
@@ -507,7 +507,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
       bool bShow;
       *input>>bShow;
       if (!bShow) continue;
-      static char const *(wh[])= {"Axis", "GridMain", "GridHelp", "Descr"};
+      static char const *wh[]= {"Axis", "GridMain", "GridHelp", "Descr"};
       f << "show" << char('X'+i) << wh[j] << ",";
     }
   }
@@ -524,7 +524,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
     }
     pool=getNewItemPool(StarItemPool::T_Unknown);
   }
-  static STOFFVec2i const(titleLimitsVec[])= {
+  static STOFFVec2i const titleLimitsVec[]= {
     STOFFVec2i(4,4) /*SCHATTR_TEXT_ORIENT*/, STOFFVec2i(53,53) /*SCHATTR_TEXT_ORIENT*/,
     STOFFVec2i(100,100)/*SCHATTR_USER_DEFINED_ATTR*/, STOFFVec2i(1000,1016) /*XATTR_LINE_FIRST, XATTR_LINE_LAST*/,
     STOFFVec2i(1018,1046) /*XATTR_FILL_FIRST, XATTR_FILL_LAST*/, STOFFVec2i(1067,1078) /*XATTR_SHADOW_FIRST, XATTR_SHADOW_LAST*/,
@@ -532,14 +532,14 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
   };
   std::vector<STOFFVec2i> titleLimits;
   for (auto i : titleLimitsVec) titleLimits.push_back(i);
-  static STOFFVec2i const(allAxisLimitsVec[])= {
+  static STOFFVec2i const allAxisLimitsVec[]= {
     STOFFVec2i(4,4) /*SCHATTR_TEXT_ORIENT*/, STOFFVec2i(53,54) /*SCHATTR_TEXT_ORIENT, SCHATTR_TEXT_OVERLAP*/,
     STOFFVec2i(85,85) /* SCHATTR_AXIS_SHOWDESCR */, STOFFVec2i(1000,1016) /*XATTR_LINE_FIRST, XATTR_LINE_LAST*/,
     STOFFVec2i(3994,4037) /*EE_ITEMS_START, EE_ITEMS_END*/, STOFFVec2i(30587,30587) /* SID_TEXTBREAK*/
   };
   std::vector<STOFFVec2i> allAxisLimits;
   for (auto i : allAxisLimitsVec) allAxisLimits.push_back(i);
-  static STOFFVec2i const(compatAxisLimitsVec[])= {
+  static STOFFVec2i const compatAxisLimitsVec[]= {
     STOFFVec2i(4,39) /*SCHATTR_TEXT_START, SCHATTR_AXISTYPE*/, STOFFVec2i(53,54)/*SCHATTR_TEXT_DEGREES,SCHATTR_TEXT_OVERLAP*/,
     STOFFVec2i(70,95) /*SCHATTR_AXIS_START,SCHATTR_AXIS_END*/, STOFFVec2i(1000,1016) /*XATTR_LINE_FIRST, XATTR_LINE_LAST*/,
     STOFFVec2i(3994,4037) /*EE_ITEMS_START, EE_ITEMS_END*/, STOFFVec2i(30587,30587) /* SID_TEXTBREAK*/,
@@ -866,7 +866,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
   }
 
   if (version>=12) {
-    static STOFFVec2i const(axisLimitsVec[])= {
+    static STOFFVec2i const axisLimitsVec[]= {
       STOFFVec2i(4,6) /*SCHATTR_TEXT_START, SCHATTR_TEXT_END*/, STOFFVec2i(39,39) /*SCHATTR_AXISTYPE*/,
       STOFFVec2i(53,54)/*SCHATTR_TEXT_DEGREES,SCHATTR_TEXT_OVERLAP*/, STOFFVec2i(70,95) /*SCHATTR_AXIS_START,SCHATTR_AXIS_END*/,
       STOFFVec2i(100,100) /* SCHATTR_USER_DEFINED_ATTR */, STOFFVec2i(1000,1016) /*XATTR_LINE_FIRST, XATTR_LINE_LAST*/,
@@ -979,7 +979,7 @@ bool StarObjectChart::readSCHMemChart(StarZone &zone)
     }
     if (string.empty()) continue;
     if (i<5) {
-      static char const *(wh[])= {"mainTitle","subTitle","xAxisTitle","yAxisTitle","zAxisTitle"};
+      static char const *wh[]= {"mainTitle","subTitle","xAxisTitle","yAxisTitle","zAxisTitle"};
       f << wh[i] << "=" << libstoff::getString(string).cstr() << ",";
     }
     else if (i<5+int(nCol))

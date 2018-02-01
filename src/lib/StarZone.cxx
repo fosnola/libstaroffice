@@ -220,7 +220,7 @@ bool StarZone::readSWHeader()
   m_input->seek(0, librevenge::RVNG_SEEK_SET);
   for (int i=0; i<7; ++i) {
     auto c=char(m_input->readULong(1));
-    static char const(expected[])= {'S','W',char(0),'H', 'D', 'R', char(0)};
+    static char const expected[]= {'S','W',char(0),'H', 'D', 'R', char(0)};
     if (c==expected[i]) continue;
     if (i!=2) {
       STOFF_DEBUG_MSG(("StarZone::readSWHeader: can not read the header\n"));

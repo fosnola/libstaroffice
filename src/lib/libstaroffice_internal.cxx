@@ -164,15 +164,15 @@ std::string numberingValueToString(NumberingType type, int value)
     return s;
   case LOWERCASE_ROMAN:
   case UPPERCASE_ROMAN: {
-    static char const *(romanS[]) = {"M", "CM", "D", "CD", "C", "XC", "L",
-                                     "XL", "X", "IX", "V", "IV", "I"
-                                    };
-    static char const *(romans[]) = {"m", "cm", "d", "cd", "c", "xc", "l",
-                                     "xl", "x", "ix", "v", "iv", "i"
-                                    };
-    static int const(romanV[]) = {1000, 900, 500, 400,  100, 90, 50,
-                                  40, 10, 9, 5, 4, 1
-                                 };
+    static char const *romanS[] = {"M", "CM", "D", "CD", "C", "XC", "L",
+                                   "XL", "X", "IX", "V", "IV", "I"
+                                  };
+    static char const *romans[] = {"m", "cm", "d", "cd", "c", "xc", "l",
+                                   "xl", "x", "ix", "v", "iv", "i"
+                                  };
+    static int const romanV[] = {1000, 900, 500, 400,  100, 90, 50,
+                                 40, 10, 9, 5, 4, 1
+                                };
     if (value <= 0 || value >= 4000) {
       STOFF_DEBUG_MSG(("libstoff::numberingValueToString: out of range value for type %d\n", int(type)));
       return (type == LOWERCASE_ROMAN) ? "i" : "I";
