@@ -516,14 +516,14 @@ template <class T> struct STOFFVariable {
       m_data = orig.m_data;
       m_set = orig.m_set;
     }
-    return *this;
+    return std::forward<STOFFVariable &>(*this);
   }
   //! set a value
   STOFFVariable &operator=(T const &val)
   {
     m_data = val;
     m_set = true;
-    return *this;
+    return std::forward<STOFFVariable &>(*this);
   }
   //! update the current value if orig is set
   void insert(STOFFVariable const &orig)
