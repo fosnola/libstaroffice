@@ -199,10 +199,11 @@ try
        if the user mask does correspond to the real mask.
     */
     input=StarEncryption::decodeStream(input, StarEncryption::getMaskToDecodeStream(firstByte, 0x44));
-    if (input) {
-      zone.setInput(input);
-      input->seek(0, librevenge::RVNG_SEEK_SET);
+    if (!input) {
+      STOFF_DEBUG_MSG(("StarObjectDraw::readDrawDocument: decryption failed\n"));
+      return false;
     }
+    zone.setInput(input);
   }
   input->seek(0, librevenge::RVNG_SEEK_SET);
   std::shared_ptr<StarObjectModel> model(new StarObjectModel(*this, true));
