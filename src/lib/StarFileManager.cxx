@@ -1299,7 +1299,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
         break;
       case 3:
         *input >> nTmp;
-        for (int poly=0; poly<int(nTmp); ++poly) {
+        for (int poly=0; poly<int(nTmp) && !input->isEnd(); ++poly) {
           *input >> nTmp1;
           if (nTmp1<0 || nTmp1>(endDataPos-input->tell())/8) {
             STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad number of points\n"));
