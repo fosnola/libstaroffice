@@ -1076,7 +1076,7 @@ bool StarFileManager::readSVGDI(StarZone &zone)
       f << (type==12 ? "polypoly" : type==1024 ? "transparent[comment]" :
             type==1025 ? "hatch[comment]" : "gradient[comment]") << ",";
       *input >> nTmp;
-      for (int poly=0; poly<int(nTmp); ++poly) {
+      for (int poly=0; poly<int(nTmp) && !input->isEnd(); ++poly) {
         *input >> nTmp1;
         if (nTmp1<0 || nTmp1>(endDataPos-input->tell())/8) {
           STOFF_DEBUG_MSG(("StarFileManager::readSVGDI: bad number of points\n"));
