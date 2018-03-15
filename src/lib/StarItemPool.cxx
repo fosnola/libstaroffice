@@ -220,7 +220,8 @@ struct SfxMultiRecord {
       STOFF_DEBUG_MSG(("StarItemPoolInternal::SfxMultiRecord::getLastContentPosition: argh, find unexpected index\n"));
       return m_endPos;
     }
-    return m_startPos+long(m_offsetList[size_t(m_actualRecord)]>>8)-14;
+    const long pos = m_startPos+long(m_offsetList[size_t(m_actualRecord)]>>8)-14;
+    return m_zone->input()->checkPosition(pos) ? pos : m_endPos;
   }
 
   //! basic operator<< ; print header data
