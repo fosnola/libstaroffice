@@ -22,6 +22,8 @@
 #ifndef STOFF_STRING_STREAM_HXX
 #define STOFF_STRING_STREAM_HXX
 
+#include <memory>
+
 #include <librevenge-stream/librevenge-stream.h>
 
 class STOFFStringStreamPrivate;
@@ -82,7 +84,7 @@ public:
 
 private:
   /// the string stream data
-  STOFFStringStreamPrivate *m_data;
+  std::unique_ptr<STOFFStringStreamPrivate> m_data;
   STOFFStringStream(const STOFFStringStream &); // copy is not allowed
   STOFFStringStream &operator=(const STOFFStringStream &); // assignment is not allowed
 };

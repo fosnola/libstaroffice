@@ -72,7 +72,6 @@ STOFFStringStream::STOFFStringStream(const unsigned char *data, const unsigned i
 
 STOFFStringStream::~STOFFStringStream()
 {
-  if (m_data) delete m_data;
 }
 
 void STOFFStringStream::append(const unsigned char *data, const unsigned int dataSize)
