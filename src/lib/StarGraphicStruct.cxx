@@ -67,7 +67,7 @@ static void writeU32(unsigned char *buffer, unsigned &position, const unsigned v
 }
 
 //! Internal: helper function to create a BMP for a color bitmap (freely inspired from libpwg::WPGBitmap.cpp)
-static unsigned char *createAndInitBMPData(STOFFVec2i const &sz, unsigned &dibFileSize, unsigned &bufferPosition)
+static std::unique_ptr<unsigned char[]> createAndInitBMPData(STOFFVec2i const &sz, unsigned &dibFileSize, unsigned &bufferPosition)
 {
   if (sz[0]*sz[1]<=0) {
     STOFF_DEBUG_MSG(("StarGraphicStruct::createAndInitBMPData: the image size seems bad\n"));
@@ -84,39 +84,39 @@ static unsigned char *createAndInitBMPData(STOFFVec2i const &sz, unsigned &dibFi
   if (tmpDIBImageSize > dibFileSize) // overflow !!!
     return nullptr;
 
-  auto *tmpDIBBuffer = new unsigned char[dibFileSize];
+  std::unique_ptr<unsigned char[]> tmpDIBBuffer{new unsigned char[dibFileSize]};
   if (!tmpDIBBuffer) {
     STOFF_DEBUG_MSG(("StarGraphicStruct::createAndInitBMPData: fail to allocated the data buffer\n"));
     return nullptr;
   }
   bufferPosition = 0;
   // Create DIB file header
-  writeU16(tmpDIBBuffer, bufferPosition, 0x4D42);  // Type
-  writeU32(tmpDIBBuffer, bufferPosition, unsigned(dibFileSize)); // Size
-  writeU16(tmpDIBBuffer, bufferPosition, 0); // Reserved1
-  writeU16(tmpDIBBuffer, bufferPosition, 0); // Reserved2
-  writeU32(tmpDIBBuffer, bufferPosition, unsigned(tmpDIBOffsetBits)); // OffsetBits
+  writeU16(tmpDIBBuffer.get(), bufferPosition, 0x4D42);  // Type
+  writeU32(tmpDIBBuffer.get(), bufferPosition, unsigned(dibFileSize)); // Size
+  writeU16(tmpDIBBuffer.get(), bufferPosition, 0); // Reserved1
+  writeU16(tmpDIBBuffer.get(), bufferPosition, 0); // Reserved2
+  writeU32(tmpDIBBuffer.get(), bufferPosition, unsigned(tmpDIBOffsetBits)); // OffsetBits
 
   // Create DIB Info header
-  writeU32(tmpDIBBuffer, bufferPosition, headerSize); // Size
-  writeU32(tmpDIBBuffer, bufferPosition, unsigned(sz[0]));  // Width
-  writeU32(tmpDIBBuffer, bufferPosition, unsigned(sz[1])); // Height
-  writeU16(tmpDIBBuffer, bufferPosition, 1); // Planes
-  writeU16(tmpDIBBuffer, bufferPosition, 32); // BitCount
-  writeU32(tmpDIBBuffer, bufferPosition, 0); // Compression
-  writeU32(tmpDIBBuffer, bufferPosition, unsigned(tmpDIBImageSize)); // SizeImage
-  writeU32(tmpDIBBuffer, bufferPosition, 5904); // XPelsPerMeter: 300ppi
-  writeU32(tmpDIBBuffer, bufferPosition, 5904); // YPelsPerMeter: 300ppi
-  writeU32(tmpDIBBuffer, bufferPosition, 0); // ColorsUsed
-  writeU32(tmpDIBBuffer, bufferPosition, 0); // ColorsImportant
+  writeU32(tmpDIBBuffer.get(), bufferPosition, headerSize); // Size
+  writeU32(tmpDIBBuffer.get(), bufferPosition, unsigned(sz[0]));  // Width
+  writeU32(tmpDIBBuffer.get(), bufferPosition, unsigned(sz[1])); // Height
+  writeU16(tmpDIBBuffer.get(), bufferPosition, 1); // Planes
+  writeU16(tmpDIBBuffer.get(), bufferPosition, 32); // BitCount
+  writeU32(tmpDIBBuffer.get(), bufferPosition, 0); // Compression
+  writeU32(tmpDIBBuffer.get(), bufferPosition, unsigned(tmpDIBImageSize)); // SizeImage
+  writeU32(tmpDIBBuffer.get(), bufferPosition, 5904); // XPelsPerMeter: 300ppi
+  writeU32(tmpDIBBuffer.get(), bufferPosition, 5904); // YPelsPerMeter: 300ppi
+  writeU32(tmpDIBBuffer.get(), bufferPosition, 0); // ColorsUsed
+  writeU32(tmpDIBBuffer.get(), bufferPosition, 0); // ColorsImportant
 
   // Create DIB V3 Info header
 
   /* this is needed to create alpha picture ; but as both LibreOffice/OpenOffice ignore the alpha channel... */
-  writeU32(tmpDIBBuffer, bufferPosition, 0x00FF0000); /* biRedMask */
-  writeU32(tmpDIBBuffer, bufferPosition, 0x0000FF00); /* biGreenMask */
-  writeU32(tmpDIBBuffer, bufferPosition, 0x000000FF); /* biBlueMask */
-  writeU32(tmpDIBBuffer, bufferPosition, 0xFF000000); /* biAlphaMask */
+  writeU32(tmpDIBBuffer.get(), bufferPosition, 0x00FF0000); /* biRedMask */
+  writeU32(tmpDIBBuffer.get(), bufferPosition, 0x0000FF00); /* biGreenMask */
+  writeU32(tmpDIBBuffer.get(), bufferPosition, 0x000000FF); /* biBlueMask */
+  writeU32(tmpDIBBuffer.get(), bufferPosition, 0xFF000000); /* biAlphaMask */
 
   return tmpDIBBuffer;
 }
@@ -127,7 +127,7 @@ inline bool getBMPData(std::vector<std::vector<STOFFColor> > const &orig, librev
   if (orig.empty() || orig[0].empty()) return false;
   STOFFVec2i sz(int(orig[0].size()),int(orig.size()));
   unsigned tmpBufferPosition, tmpDIBFileSize;
-  unsigned char *tmpDIBBuffer=createAndInitBMPData(sz, tmpDIBFileSize, tmpBufferPosition);
+  auto tmpDIBBuffer=createAndInitBMPData(sz, tmpDIBFileSize, tmpBufferPosition);
   if (!tmpDIBBuffer) return false;
 
   // Write DIB Image data
@@ -143,9 +143,7 @@ inline bool getBMPData(std::vector<std::vector<STOFFColor> > const &orig, librev
     }
   }
   data.clear();
-  data.append(tmpDIBBuffer, tmpDIBFileSize);
-  // Cleanup things before returning
-  delete [] tmpDIBBuffer;
+  data.append(tmpDIBBuffer.get(), tmpDIBFileSize);
 
   return true;
 }
@@ -155,7 +153,7 @@ static bool getBMPData(uint16_t const *pattern, STOFFColor const &col0,  STOFFCo
   if (!pattern) return false;
   STOFFVec2i sz(8,8);
   unsigned tmpBufferPosition, tmpDIBFileSize;
-  unsigned char *tmpDIBBuffer=createAndInitBMPData(sz, tmpDIBFileSize, tmpBufferPosition);
+  auto tmpDIBBuffer=createAndInitBMPData(sz, tmpDIBFileSize, tmpBufferPosition);
   if (!tmpDIBBuffer) return false;
 
   uint32_t cols[2]= {col0.value(), col1.value()};
@@ -172,9 +170,7 @@ static bool getBMPData(uint16_t const *pattern, STOFFColor const &col0,  STOFFCo
     }
   }
   data.clear();
-  data.append(tmpDIBBuffer, tmpDIBFileSize);
-  // Cleanup things before returning
-  delete [] tmpDIBBuffer;
+  data.append(tmpDIBBuffer.get(), tmpDIBFileSize);
 
   return true;
 }
