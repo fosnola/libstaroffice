@@ -202,13 +202,12 @@ STOFFInputStreamPtr StarEncryption::decodeStream(STOFFInputStreamPtr input, uint
     STOFF_DEBUG_MSG(("StarEncryption::decodeStream: can not read the original stream\n"));
     return res;
   }
-  auto *finalData=new uint8_t[numRead];
+  std::unique_ptr<uint8_t[]> finalData{new uint8_t[numRead]};
   if (!finalData) return res;
-  uint8_t *finalDataPtr=finalData;
+  uint8_t *finalDataPtr=finalData.get();
   for (long l=0; l<dataSize; ++l, ++data)
     *(finalDataPtr++) = uint8_t((*data>>4)|(*data<<4))^mask;
-  std::shared_ptr<STOFFStringStream> stream(new STOFFStringStream(reinterpret_cast<const unsigned char *>(finalData),static_cast<unsigned int>(dataSize)));
-  delete[] finalData;
+  std::shared_ptr<STOFFStringStream> stream(new STOFFStringStream(reinterpret_cast<const unsigned char *>(finalData.get()),static_cast<unsigned int>(dataSize)));
   if (!stream) return res;
   res.reset(new STOFFInputStream(stream, input->readInverted()));
   if (res) res->seek(0, librevenge::RVNG_SEEK_SET);
