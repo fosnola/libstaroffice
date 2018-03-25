@@ -203,7 +203,6 @@ STOFFInputStreamPtr StarEncryption::decodeStream(STOFFInputStreamPtr input, uint
     return res;
   }
   std::unique_ptr<uint8_t[]> finalData{new uint8_t[numRead]};
-  if (!finalData) return res;
   uint8_t *finalDataPtr=finalData.get();
   for (long l=0; l<dataSize; ++l, ++data)
     *(finalDataPtr++) = uint8_t((*data>>4)|(*data<<4))^mask;
