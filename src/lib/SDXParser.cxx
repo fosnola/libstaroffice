@@ -243,7 +243,7 @@ void SDXParser::createDocument(librevenge::RVNGTextInterface *documentInterface)
 ////////////////////////////////////////////////////////////
 // read the header
 ////////////////////////////////////////////////////////////
-bool SDXParser::checkHeader(STOFFHeader */*header*/, bool /*strict*/)
+bool SDXParser::checkHeader(STOFFHeader* /*header*/, bool /*strict*/)
 {
   *m_state = SDXParserInternal::State();
 
