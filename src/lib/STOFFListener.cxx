@@ -38,7 +38,7 @@
 
 #include "STOFFList.hxx"
 
-STOFFListener::STOFFListener(STOFFListManagerPtr listManager)
+STOFFListener::STOFFListener(STOFFListManagerPtr &listManager)
   : m_listManager(listManager)
 {
   if (!m_listManager)

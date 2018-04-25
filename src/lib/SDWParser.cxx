@@ -72,7 +72,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SDWParser::SDWParser(STOFFInputStreamPtr input, STOFFHeader *header)
+SDWParser::SDWParser(STOFFInputStreamPtr &input, STOFFHeader *header)
   : STOFFTextParser(input, header)
   , m_password(nullptr)
   , m_oleParser()

@@ -60,7 +60,7 @@ class STOFFTextListener final : public STOFFListener
 {
 public:
   /** constructor */
-  STOFFTextListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGTextInterface *documentInterface);
+  STOFFTextListener(STOFFListManagerPtr &listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGTextInterface *documentInterface);
   /** destructor */
   ~STOFFTextListener() final;
 

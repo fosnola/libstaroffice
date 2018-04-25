@@ -57,7 +57,7 @@ class StarZone
 {
 public:
   //! constructor
-  StarZone(STOFFInputStreamPtr input, std::string const &ascName, std::string const &zoneName, char const *password);
+  StarZone(STOFFInputStreamPtr const &input, std::string const &ascName, std::string const &zoneName, char const *password);
   //! destructor
   virtual ~StarZone();
   //! read the zone header present in a SW file

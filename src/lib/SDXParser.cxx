@@ -76,7 +76,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SDXParser::SDXParser(STOFFInputStreamPtr input, STOFFHeader *header)
+SDXParser::SDXParser(STOFFInputStreamPtr &input, STOFFHeader *header)
   : STOFFTextParser(input, header)
   , m_password(nullptr)
   , m_oleParser()
@@ -243,7 +243,7 @@ void SDXParser::createDocument(librevenge::RVNGTextInterface *documentInterface)
 ////////////////////////////////////////////////////////////
 // read the header
 ////////////////////////////////////////////////////////////
-bool SDXParser::checkHeader(STOFFHeader* /*header*/, bool /*strict*/)
+bool SDXParser::checkHeader(STOFFHeader * /*header*/, bool /*strict*/)
 {
   *m_state = SDXParserInternal::State();
 

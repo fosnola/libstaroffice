@@ -749,7 +749,7 @@ public:
     addTo(state, done);
   }
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state) const
+  bool send(STOFFListenerPtr &listener, StarState &state) const
   {
     std::set<StarAttribute const *> done;
     return send(listener, state, done);
@@ -759,7 +759,7 @@ public:
   {
   }
   //! try to send the child zone(internal)
-  virtual bool send(STOFFListenerPtr /*listener*/, StarState &/*state*/, std::set<StarAttribute const *> &/*done*/) const
+  virtual bool send(STOFFListenerPtr &/*listener*/, StarState &/*state*/, std::set<StarAttribute const *> &/*done*/) const
   {
     return false;
   }
@@ -1044,7 +1044,7 @@ protected:
   //! add to a state
   void addTo(StarState &state, std::set<StarAttribute const *> &done) const override;
   //! try to send the sone data
-  bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const override;
+  bool send(STOFFListenerPtr &listener, StarState &state, std::set<StarAttribute const *> &done) const override;
 
   //! copy constructor
   StarAttributeItemSet(StarAttributeItemSet const &) = default;

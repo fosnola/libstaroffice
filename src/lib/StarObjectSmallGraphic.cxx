@@ -166,7 +166,7 @@ public:
     return o;
   }
   //! try to send the text to the listener
-  bool send(STOFFListenerPtr listener)
+  bool send(STOFFListenerPtr &listener)
   {
     if (!listener) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::OutlinerParaObject::send: no listener\n"));
@@ -204,7 +204,7 @@ public:
 class SubDocument final : public STOFFSubDocument
 {
 public:
-  explicit SubDocument(std::shared_ptr<OutlinerParaObject> text)
+  explicit SubDocument(std::shared_ptr<OutlinerParaObject> &text)
     : STOFFSubDocument(nullptr, STOFFInputStreamPtr(), STOFFEntry())
     , m_text(text) {}
 
@@ -263,7 +263,7 @@ public:
   //! return the object name
   virtual std::string getName() const = 0;
   //! try to send the graphic to the listener
-  virtual bool send(STOFFListenerPtr /*listener*/, STOFFFrameStyle const &/*pos*/, StarObject &/*object*/, bool /*inMasterPage*/)
+  virtual bool send(STOFFListenerPtr &/*listener*/, STOFFFrameStyle const &/*pos*/, StarObject &/*object*/, bool /*inMasterPage*/)
   {
     static bool first=true;
     if (first) {
@@ -323,7 +323,7 @@ public:
     auto pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
     StarState state(pool.get(), object);
     if (std::dynamic_pointer_cast<STOFFTextListener>(listener))
-      state.m_global->m_offset=state.convertVectorInPoint(-1.f*m_anchorPosition);
+      state.m_global->m_offset=state.convertVectorInPoint(STOFFVec2f(float(-m_anchorPosition[0]),float(-m_anchorPosition[1])));
     return state;
   }
   //! try to update the graphic style
@@ -475,7 +475,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) final
+  bool send(STOFFListenerPtr &listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) final
   {
     if (!listener) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicGroup::send: unexpected listener\n"));
@@ -566,7 +566,7 @@ public:
     return s.str();
   }
   //! try to send the text zone to the listener
-  bool sendTextZone(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object)
+  bool sendTextZone(STOFFListenerPtr &listener, STOFFFrameStyle const &pos, StarObject &object)
   {
     // for basic text zone, we use the real textbox, for other zones (text link to a shape) we use the shape box
     STOFFBox2f const &box=(m_identifier!=3 && m_identifier!=16 && m_identifier!=17 && m_identifier!=20 && m_identifier!=21) ? m_bdbox : m_textRectangle;
@@ -640,7 +640,7 @@ public:
   //! destructor
   ~SdrGraphicRect() override;
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) override
+  bool send(STOFFListenerPtr &listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) override
   {
     if (!listener || m_textRectangle.size()[0]<=0 || m_textRectangle.size()[1]<=0) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicText::send: can not send a shape\n"));
@@ -721,7 +721,7 @@ public:
     return o;
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final
+  bool send(STOFFListenerPtr &listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final
   {
     if (!listener || m_captionPolygon.empty()) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicCaption::send: can not send a shape\n"));
@@ -771,7 +771,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final
+  bool send(STOFFListenerPtr &listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final
   {
     if (!listener || m_textRectangle.size()[0]<=0 || m_textRectangle.size()[1]<=0) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicCircle::send: can not send a shape\n"));
@@ -904,7 +904,7 @@ public:
     return o;
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final
+  bool send(STOFFListenerPtr &listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final
   {
     if (!listener || m_edgePolygon.empty()) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicEdge::send: can not send a shape\n"));
@@ -964,7 +964,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) final
+  bool send(STOFFListenerPtr &listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) final
   {
     if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicGraph::send: can not send a shape\n"));
@@ -1066,7 +1066,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final
+  bool send(STOFFListenerPtr &listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final
   {
     STOFFGraphicShape shape;
     StarState state(getState(object, listener, pos));
@@ -1141,7 +1141,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) final
+  bool send(STOFFListenerPtr &listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) final
   {
     if (!listener || m_bdbox.size()[0]<=0 || m_bdbox.size()[1]<=0) {
       STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicOLE::send: can not send a shape\n"));
@@ -1252,7 +1252,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr /*listener*/, STOFFFrameStyle const &/*pos*/, StarObject &/*object*/, bool /*inMasterPage*/) final
+  bool send(STOFFListenerPtr &/*listener*/, STOFFFrameStyle const &/*pos*/, StarObject &/*object*/, bool /*inMasterPage*/) final
   {
     STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPage::send: unexpected call\n"));
     return false;
@@ -1282,7 +1282,7 @@ public:
   {
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final;
+  bool send(STOFFListenerPtr &listener, STOFFFrameStyle const &pos, StarObject &object, bool /*inMasterPage*/) final;
   //! basic print function
   std::string print() const final
   {
@@ -1304,7 +1304,7 @@ public:
   std::vector<StarGraphicStruct::StarPolygon> m_pathPolygons;
 };
 
-bool SdrGraphicPath::send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage)
+bool SdrGraphicPath::send(STOFFListenerPtr &listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage)
 {
   if (!listener || m_pathPolygons.empty() || m_pathPolygons[0].empty()) {
     STOFF_DEBUG_MSG(("StarObjectSmallGraphicInternal::SdrGraphicPath::send: can not send a shape\n"));
@@ -1498,7 +1498,7 @@ public:
     return s.str();
   }
   //! try to send the graphic to the listener
-  bool send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) final
+  bool send(STOFFListenerPtr &listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage) final
   {
     if (m_identifier && m_group)
       return m_group->send(listener, pos, object, inMasterPage);
@@ -1721,7 +1721,7 @@ std::ostream &operator<<(std::ostream &o, StarObjectSmallGraphic const &graphic)
   return o;
 }
 
-bool StarObjectSmallGraphic::send(STOFFListenerPtr listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage)
+bool StarObjectSmallGraphic::send(STOFFListenerPtr &listener, STOFFFrameStyle const &pos, StarObject &object, bool inMasterPage)
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectSmallGraphic::send: can not find the listener\n"));
@@ -2979,9 +2979,9 @@ bool StarObjectSmallGraphic::readSDRObjectConnection(StarZone &zone)
   for (int i=0; i<6; ++i) {
     bool val;
     *input>>val;
+    if (!val) continue;
     char const *wh[]= {"bestConn", "bestVertex", "xDistOvr", "yDistOvr", "autoVertex", "autoCorner"};
-    if (val)
-      f << wh[i] << ",";
+    f << wh[i] << ",";
   }
   input->seek(8, librevenge::RVNG_SEEK_CUR);
   ascFile.addPos(pos);

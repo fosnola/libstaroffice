@@ -346,13 +346,13 @@ namespace StarPageAttribute
 class SubDocument final : public STOFFSubDocument
 {
 public:
-  explicit SubDocument(std::shared_ptr<StarObjectSmallText> text)
+  explicit SubDocument(std::shared_ptr<StarObjectSmallText> const &text)
     : STOFFSubDocument(nullptr, STOFFInputStreamPtr(), STOFFEntry())
     , m_smallText(text)
     , m_format()
     , m_object(nullptr)
     , m_pool(nullptr) {}
-  SubDocument(std::shared_ptr<StarFormatManagerInternal::FormatDef> format, StarItemPool const *pool, StarObject *object)
+  SubDocument(std::shared_ptr<StarFormatManagerInternal::FormatDef> const &format, StarItemPool const *pool, StarObject *object)
     : STOFFSubDocument(nullptr, STOFFInputStreamPtr(), STOFFEntry())
     , m_smallText()
     , m_format(format)

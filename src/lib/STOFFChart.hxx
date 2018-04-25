@@ -223,7 +223,7 @@ public:
     enum ContentType { C_Cell, C_Text };
 
     //! constructor
-    TextZone(Type type);
+    explicit TextZone(Type type);
     //! destructor
     ~TextZone();
     //! returns true if the textbox is valid

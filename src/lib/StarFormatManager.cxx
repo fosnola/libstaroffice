@@ -260,9 +260,10 @@ struct NumberFormatter {
     if (!form.m_isUsed) o << "unused,";
     for (int i=0; i<2; ++i) {
       if (!form.m_limitsOp[i]) continue;
-      char const *wh[]= {"none", "=", "<>", "<", "<=", ">", ">="};
-      if (form.m_limitsOp[i]>0 && form.m_limitsOp[i]<=6)
+      if (form.m_limitsOp[i]>0 && form.m_limitsOp[i]<=6) {
+        char const *wh[]= {"none", "=", "<>", "<", "<=", ">", ">="};
         o << "lim" << i << "=[" << wh[form.m_limitsOp[i]] << form.m_limits[i] << "],";
+      }
       else {
         STOFF_DEBUG_MSG(("StarFormatManagerInternal::NumberFormatter::operator<< unknown limit op\n"));
         o << "lim" << i << "=###" << form.m_limitsOp[i] << ":" << form.m_limits[i] << ",";

@@ -65,7 +65,7 @@ class SDAParser final : public STOFFGraphicParser
 {
 public:
   //! constructor
-  SDAParser(STOFFInputStreamPtr input, STOFFHeader *header);
+  SDAParser(STOFFInputStreamPtr &input, STOFFHeader *header);
   //! destructor
   ~SDAParser() final;
   //! set the document password

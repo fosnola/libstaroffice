@@ -350,7 +350,8 @@ bool StarFileManager::readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser
         ps.m_pageSpan=1;
         pageList.push_back(ps);
       }
-      STOFFSpreadsheetListenerPtr spreadsheetListener(new STOFFSpreadsheetListener(STOFFListManagerPtr(), pageList, &spreadsheetEncoder));
+      STOFFListManagerPtr listManager;
+      STOFFSpreadsheetListenerPtr spreadsheetListener(new STOFFSpreadsheetListener(listManager, pageList, &spreadsheetEncoder));
       spreadsheetListener->startDocument();
       spreadsheet.send(spreadsheetListener);
       spreadsheetListener->endDocument();
@@ -599,9 +600,7 @@ try
       return false;
     }
     int32_t nType;
-    uint16_t nMapMode;
-    int32_t sizeX, sizeY, nOffsX, nOffsY, nScaleNumX, nScaleDenomX, nScaleNumY, nScaleDenomY;
-    bool mbSimple;
+    int32_t sizeX, sizeY;
     *input >> nType >> nLen >> sizeX>> sizeY;
     if (nType)
       f << "type=" << nType << ",";
@@ -612,6 +611,9 @@ try
       STOFF_DEBUG_MSG(("StarFileManager::readEmbeddedPicture: can not open the mapmod header\n"));
     }
     else {
+      uint16_t nMapMode;
+      int32_t nOffsX, nOffsY, nScaleNumX, nScaleDenomX, nScaleNumY, nScaleDenomY;
+      bool mbSimple;
       *input >> nMapMode >> nOffsX>> nOffsY;
       if (nMapMode) f << "mapMode=" << nMapMode << ",";
       if (nOffsX || nOffsY)

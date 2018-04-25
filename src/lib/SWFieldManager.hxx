@@ -72,7 +72,7 @@ struct Field {
     return o;
   }
   //! add to send the zone data
-  virtual bool send(STOFFListenerPtr listener, StarState &state) const;
+  virtual bool send(STOFFListenerPtr &listener, StarState &state) const;
   //! print a field
   virtual void print(std::ostream &o) const;
   //! the field type

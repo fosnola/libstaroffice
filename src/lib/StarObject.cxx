@@ -77,7 +77,7 @@ private:
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarObject::StarObject(char const *passwd, std::shared_ptr<STOFFOLEParser> oleParser, std::shared_ptr<STOFFOLEParser::OleDirectory> directory)
+StarObject::StarObject(char const *passwd, std::shared_ptr<STOFFOLEParser> &oleParser, std::shared_ptr<STOFFOLEParser::OleDirectory> &directory)
   : m_password(passwd)
   , m_oleParser(oleParser)
   , m_directory(directory)

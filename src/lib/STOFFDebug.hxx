@@ -76,7 +76,7 @@ public:
     , m_skipZones() { }
 
   //! resets the input
-  void setStream(STOFFInputStreamPtr ip)
+  void setStream(STOFFInputStreamPtr &ip)
   {
     m_input = ip;
   }

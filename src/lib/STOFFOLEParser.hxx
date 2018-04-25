@@ -184,7 +184,7 @@ public:
   /** Internal: internal method to keep ole directory and their content */
   struct OleDirectory {
     //! constructor
-    OleDirectory(STOFFInputStreamPtr input, std::string const &dir)
+    OleDirectory(STOFFInputStreamPtr &input, std::string const &dir)
       : m_input(input)
       , m_dir(dir)
       , m_contentList()

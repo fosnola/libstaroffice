@@ -40,7 +40,7 @@
 
 #include "STOFFParser.hxx"
 
-STOFFParserState::STOFFParserState(STOFFParserState::Type type, STOFFInputStreamPtr input, STOFFHeader *header)
+STOFFParserState::STOFFParserState(STOFFParserState::Type type, STOFFInputStreamPtr &input, STOFFHeader *header)
   : m_type(type)
   , m_kind(STOFFDocument::STOFF_K_TEXT)
   , m_version(0)

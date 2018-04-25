@@ -52,7 +52,7 @@ public:
   //! the parser state type
   enum Type { Graphic, Presentation, Spreadsheet, Text };
   //! Constructor
-  STOFFParserState(Type type, STOFFInputStreamPtr input, STOFFHeader *header);
+  STOFFParserState(Type type, STOFFInputStreamPtr &input, STOFFHeader *header);
   //! destructor
   ~STOFFParserState();
   //! the state type
@@ -148,7 +148,7 @@ protected:
   //! constructor (protected)
   STOFFParser(STOFFParserState::Type type, STOFFInputStreamPtr input, STOFFHeader *header);
   //! constructor using a state
-  explicit STOFFParser(STOFFParserStatePtr state) : m_parserState(state), m_asciiName("") { }
+  explicit STOFFParser(STOFFParserStatePtr &state) : m_parserState(state), m_asciiName("") { }
 
   //! sets the document's version
   void setVersion(int vers)
@@ -198,9 +198,9 @@ public:
   virtual void parse(librevenge::RVNGTextInterface *documentInterface) = 0;
 protected:
   //! constructor (protected)
-  STOFFTextParser(STOFFInputStreamPtr input, STOFFHeader *header) : STOFFParser(STOFFParserState::Text, input, header) {}
+  STOFFTextParser(STOFFInputStreamPtr &input, STOFFHeader *header) : STOFFParser(STOFFParserState::Text, input, header) {}
   //! constructor using a state
-  explicit STOFFTextParser(STOFFParserStatePtr state) : STOFFParser(state) {}
+  explicit STOFFTextParser(STOFFParserStatePtr &state) : STOFFParser(state) {}
   //! destructor
   ~STOFFTextParser() override;
 };
@@ -215,9 +215,9 @@ public:
   virtual void parse(librevenge::RVNGPresentationInterface *documentInterface);
 protected:
   //! constructor (protected)
-  STOFFGraphicParser(STOFFInputStreamPtr input, STOFFHeader *header) : STOFFParser(STOFFParserState::Graphic, input, header) {}
+  STOFFGraphicParser(STOFFInputStreamPtr &input, STOFFHeader *header) : STOFFParser(STOFFParserState::Graphic, input, header) {}
   //! constructor using a state
-  explicit STOFFGraphicParser(STOFFParserStatePtr state) : STOFFParser(state) {}
+  explicit STOFFGraphicParser(STOFFParserStatePtr &state) : STOFFParser(state) {}
   //! destructor
   ~STOFFGraphicParser() override;
 };
@@ -230,9 +230,9 @@ public:
   virtual void parse(librevenge::RVNGSpreadsheetInterface *documentInterface) = 0;
 protected:
   //! constructor (protected)
-  STOFFSpreadsheetParser(STOFFInputStreamPtr input, STOFFHeader *header) : STOFFParser(STOFFParserState::Spreadsheet, input, header) {}
+  STOFFSpreadsheetParser(STOFFInputStreamPtr &input, STOFFHeader *header) : STOFFParser(STOFFParserState::Spreadsheet, input, header) {}
   //! constructor using a state
-  explicit STOFFSpreadsheetParser(STOFFParserStatePtr state) : STOFFParser(state) {}
+  explicit STOFFSpreadsheetParser(STOFFParserStatePtr &state) : STOFFParser(state) {}
   //! destructor
   ~STOFFSpreadsheetParser() override;
 };

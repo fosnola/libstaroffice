@@ -46,7 +46,7 @@
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-StarZone::StarZone(STOFFInputStreamPtr inputStream, std::string const &ascName, std::string const &zoneName, char const *password)
+StarZone::StarZone(STOFFInputStreamPtr const &inputStream, std::string const &ascName, std::string const &zoneName, char const *password)
   : m_input(inputStream)
   , m_ascii(inputStream)
   , m_version(0)

@@ -65,7 +65,7 @@ class STOFFSpreadsheetListener : public STOFFListener
 {
 public:
   /** constructor */
-  STOFFSpreadsheetListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface);
+  STOFFSpreadsheetListener(STOFFListManagerPtr &listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface);
   /** destructor */
   ~STOFFSpreadsheetListener() final;
 

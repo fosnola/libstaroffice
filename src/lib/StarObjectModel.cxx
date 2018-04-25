@@ -978,7 +978,6 @@ std::shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(Star
   pos=input->tell();
   f.str("");
   f << "SdrPageDefA[" << zone.getRecordLevel() << "]:";
-  bool ok=true;
   if (version>=11) {
     magic="";
     for (int i=0; i<4; ++i) magic+=char(input->readULong(1));
@@ -999,25 +998,22 @@ std::shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(Star
     f.str("");
     f << "SdrPageDefData[" << zone.getRecordLevel() << "]:";
   }
-  if (ok) {
-    int32_t nWdt, nHgt;
-    int32_t borders[4];
-    uint16_t n;
-    *input >> nWdt >> nHgt >> borders[0] >> borders[1] >> borders[2] >> borders[3] >> n;
-    f << "dim=" << nWdt << "x" << nHgt << ",";
-    f << "border=[" << borders[0] << "x" << borders[1] << "-" << borders[2] << "x" << borders[3] << "],";
-    page->m_size=STOFFVec2i(int(nWdt), int(nHgt));
-    for (int i=0; i<4; ++i) page->m_borders[i]=int(borders[i]);
-    if (n) f << "n=" << n << ","; // link to page name?
-  }
+  int32_t nWdt, nHgt;
+  int32_t borders[4];
+  uint16_t n;
+  *input >> nWdt >> nHgt >> borders[0] >> borders[1] >> borders[2] >> borders[3] >> n;
+  f << "dim=" << nWdt << "x" << nHgt << ",";
+  f << "border=[" << borders[0] << "x" << borders[1] << "-" << borders[2] << "x" << borders[3] << "],";
+  page->m_size=STOFFVec2i(int(nWdt), int(nHgt));
+  for (int i=0; i<4; ++i) page->m_borders[i]=int(borders[i]);
+  if (n) f << "n=" << n << ","; // link to page name?
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  if (version>=11) {
+  if (version>=11)
     zone.closeRecord("SdrPageDefData");
-    ok=true;
-  }
 
   long lastPos=zone.getRecordLastPosition();
+  bool ok=true;
   while (ok) {
     pos=input->tell();
     if (pos+4>lastPos)
@@ -1035,7 +1031,6 @@ std::shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(Star
     pos=input->tell();
     f.str("");
     f << "SdrPageDef[masterPage]:";
-    uint16_t n;
     *input >> n;
     if (pos+2+2*n>lastPos) {
       STOFF_DEBUG_MSG(("StarObjectModel::readSdrPage: n is bad\n"));
@@ -1106,7 +1101,7 @@ std::shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(Star
   zone.closeRecord("SdrPageDefA1");
   if (ok && hasExtraData) {
     lastPos=zone.getRecordLastPosition();
-    int n=0;;
+    n=0;
     while (input->tell()<lastPos) {
       pos=input->tell();
       if (!zone.openRecord()) break;

@@ -132,7 +132,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SDGParser::SDGParser(STOFFInputStreamPtr input, STOFFHeader *header)
+SDGParser::SDGParser(STOFFInputStreamPtr &input, STOFFHeader *header)
   : STOFFGraphicParser(input, header)
   , m_password(nullptr)
   , m_state(new SDGParserInternal::State)

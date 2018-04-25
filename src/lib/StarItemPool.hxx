@@ -104,13 +104,13 @@ public:
   /** update a itemset by adding attribute corresponding to its styles*/
   void updateUsingStyles(StarItemSet &itemSet) const;
   /** define a graphic style */
-  void defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName, StarObject &object) const
+  void defineGraphicStyle(STOFFListenerPtr &listener, librevenge::RVNGString const &styleName, StarObject &object) const
   {
     std::set<librevenge::RVNGString> done;
     defineGraphicStyle(listener, styleName, object, done);
   }
   /** define a paragraph style */
-  void defineParagraphStyle(STOFFListenerPtr listener, librevenge::RVNGString const &styleName, StarObject &object) const
+  void defineParagraphStyle(STOFFListenerPtr &listener, librevenge::RVNGString const &styleName, StarObject &object) const
   {
     std::set<librevenge::RVNGString> done;
     defineParagraphStyle(listener, styleName, object, done);

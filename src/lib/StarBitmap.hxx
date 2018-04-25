@@ -65,7 +65,7 @@ public:
   //! constructor
   StarBitmap();
   //! constructor for pixmap 32*32
-  StarBitmap(uint32_t const((&pixels)[32]), STOFFColor const((&colors)[2]));
+  explicit StarBitmap(uint32_t const((&pixels)[32]), STOFFColor const((&colors)[2]));
   //! destructor
   virtual ~StarBitmap();
 

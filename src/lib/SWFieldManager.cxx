@@ -107,7 +107,7 @@ void Field::print(std::ostream &o) const
     o << "level=" << m_level << ",";
 }
 
-bool Field::send(STOFFListenerPtr listener, StarState &state) const
+bool Field::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::Field::send: can not find the listener\n"));
@@ -326,7 +326,7 @@ struct FieldDateTime final : public Field {
   //! destructor
   ~FieldDateTime() final;
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! print a field
   void print(std::ostream &o) const final
   {
@@ -346,7 +346,7 @@ FieldDateTime::~FieldDateTime()
 {
 }
 
-bool FieldDateTime::send(STOFFListenerPtr listener, StarState &state) const
+bool FieldDateTime::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldDateTime::send: can not find the listener\n"));
@@ -401,7 +401,7 @@ struct FieldDBField final : public Field {
   //! destructor
   ~FieldDBField() final;
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! print a field
   void print(std::ostream &o) const final
   {
@@ -422,7 +422,7 @@ FieldDBField::~FieldDBField()
 {
 }
 
-bool FieldDBField::send(STOFFListenerPtr listener, StarState &state) const
+bool FieldDBField::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldDBField::send: can not find the listener\n"));
@@ -463,7 +463,7 @@ struct FieldHiddenText final : public Field {
   //! destructor
   ~FieldHiddenText() final;
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! print a field
   void print(std::ostream &o) const final
   {
@@ -481,7 +481,7 @@ FieldHiddenText::~FieldHiddenText()
 {
 }
 
-bool FieldHiddenText::send(STOFFListenerPtr listener, StarState &state) const
+bool FieldHiddenText::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldHiddenText::send: can not find the listener\n"));
@@ -541,7 +541,7 @@ struct FieldINet final : public Field {
   //! destructor
   ~FieldINet() final;
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! print a field
   void print(std::ostream &o) const final
   {
@@ -567,7 +567,7 @@ FieldINet::~FieldINet()
 {
 }
 
-bool FieldINet::send(STOFFListenerPtr listener, StarState &state) const
+bool FieldINet::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldINet::send: can not find the listener\n"));
@@ -608,7 +608,7 @@ struct FieldJumpEdit final : public Field {
   //! destructor
   ~FieldJumpEdit() final;
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! print a field
   void print(std::ostream &o) const final
   {
@@ -623,7 +623,7 @@ FieldJumpEdit::~FieldJumpEdit()
 {
 }
 
-bool FieldJumpEdit::send(STOFFListenerPtr listener, StarState &state) const
+bool FieldJumpEdit::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldJumpEdit::send: can not find the listener\n"));
@@ -666,7 +666,7 @@ struct FieldPageNumber final : public Field {
   //! destructor
   ~FieldPageNumber() final;
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! print a field
   void print(std::ostream &o) const final
   {
@@ -688,7 +688,7 @@ FieldPageNumber::~FieldPageNumber()
 {
 }
 
-bool FieldPageNumber::send(STOFFListenerPtr listener, StarState &state) const
+bool FieldPageNumber::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldPageNumber::send: can not find the listener\n"));
@@ -728,7 +728,7 @@ struct FieldPostIt final : public Field {
   //! destructor
   ~FieldPostIt() final;
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! print a field
   void print(std::ostream &o) const final
   {
@@ -808,7 +808,7 @@ struct FieldSetExp final : public Field {
   //! destructor
   ~FieldSetExp() final;
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! print a field
   void print(std::ostream &o) const final
   {
@@ -838,7 +838,7 @@ FieldSetExp::~FieldSetExp()
 {
 }
 
-bool FieldSetExp::send(STOFFListenerPtr listener, StarState &state) const
+bool FieldSetExp::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldSetExp::send: can not find the listener\n"));
@@ -891,7 +891,7 @@ struct FieldSetField final : public Field {
   //! destructor
   ~FieldSetField() final;
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! print a field
   void print(std::ostream &o) const final
   {
@@ -915,7 +915,7 @@ FieldSetField::~FieldSetField()
 {
 }
 
-bool FieldSetField::send(STOFFListenerPtr listener, StarState &state) const
+bool FieldSetField::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldSetField::send: can not find the listener\n"));
@@ -991,7 +991,7 @@ void SubDocument::parse(STOFFListenerPtr &listener, libstoff::SubDocumentType /*
     listener->insertUnicodeString(m_text);
 }
 
-bool FieldPostIt::send(STOFFListenerPtr listener, StarState &state) const
+bool FieldPostIt::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("SWFieldManagerInternal::FieldPostIt::send: can not find the listener\n"));
@@ -1848,6 +1848,7 @@ std::shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZon
         f2<< "###";
         ascFile.addPos(actPos);
         ascFile.addNote(f2.str().c_str());
+        ok=false;
         break;
       }
       ascFile.addPos(actPos);

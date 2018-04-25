@@ -389,7 +389,7 @@ namespace StarCharAttribute
 class SubDocument final : public STOFFSubDocument
 {
 public:
-  SubDocument(std::shared_ptr<StarObjectTextInternal::Content> content, std::shared_ptr<StarState::GlobalState> state) :
+  SubDocument(std::shared_ptr<StarObjectTextInternal::Content> const &content, std::shared_ptr<StarState::GlobalState> const &state) :
     STOFFSubDocument(nullptr, STOFFInputStreamPtr(), STOFFEntry()), m_content(content), m_state(state) {}
 
   //! destructor
@@ -655,7 +655,7 @@ public:
     o << "],";
   }
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state, std::set<StarAttribute const *> &done) const final;
 protected:
   //! copy constructor
   StarCAttributeContent(StarCAttributeContent const &) = default;
@@ -714,7 +714,7 @@ public:
     o << m_debugName << ",";
   }
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state, std::set<StarAttribute const *> &done) const final;
 protected:
   //! copy constructor
   StarCAttributeFlyCnt(StarCAttributeFlyCnt const &) = default;
@@ -757,7 +757,7 @@ public:
     o << "],";
   }
   //! add to send the zone data
-  bool send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state, std::set<StarAttribute const *> &done) const final;
 protected:
   //! copy constructor
   StarCAttributeFootnote(StarCAttributeFootnote const &) = default;
@@ -1368,7 +1368,7 @@ bool StarCAttributeRefMark::read(StarZone &zone, int /*nVers*/, long endPos, Sta
   return input->tell()<=endPos;
 }
 
-bool StarCAttributeContent::send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const
+bool StarCAttributeContent::send(STOFFListenerPtr &listener, StarState &state, std::set<StarAttribute const *> &done) const
 {
   if (done.find(this)!=done.end()) {
     STOFF_DEBUG_MSG(("StarCAttributeContent::send: find a loop\n"));
@@ -1384,7 +1384,7 @@ bool StarCAttributeContent::send(STOFFListenerPtr listener, StarState &state, st
   return true;
 }
 
-bool StarCAttributeFlyCnt::send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const
+bool StarCAttributeFlyCnt::send(STOFFListenerPtr &listener, StarState &state, std::set<StarAttribute const *> &done) const
 {
   if (done.find(this)!=done.end()) {
     STOFF_DEBUG_MSG(("StarCAttributeFlyCnt::send: find a loop\n"));
@@ -1402,7 +1402,7 @@ bool StarCAttributeFlyCnt::send(STOFFListenerPtr listener, StarState &state, std
   return m_format->send(listener, state);
 }
 
-bool StarCAttributeFootnote::send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const
+bool StarCAttributeFootnote::send(STOFFListenerPtr &listener, StarState &state, std::set<StarAttribute const *> &done) const
 {
   if (done.find(this)!=done.end()) {
     STOFF_DEBUG_MSG(("StarCAttributeFootnote::send: find a loop\n"));

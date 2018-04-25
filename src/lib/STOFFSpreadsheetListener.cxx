@@ -237,7 +237,7 @@ State::State()
 }
 }
 
-STOFFSpreadsheetListener::STOFFSpreadsheetListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface)
+STOFFSpreadsheetListener::STOFFSpreadsheetListener(STOFFListManagerPtr &listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGSpreadsheetInterface *documentInterface)
   : STOFFListener(listManager)
   , m_ds(new STOFFSpreadsheetListenerInternal::DocumentState(pageList))
   , m_ps(new STOFFSpreadsheetListenerInternal::State)

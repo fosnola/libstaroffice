@@ -65,7 +65,7 @@ class StarObject
 {
 public:
   //! constructor
-  StarObject(char const *passwd, std::shared_ptr<STOFFOLEParser> oleParser, std::shared_ptr<STOFFOLEParser::OleDirectory> directory);
+  StarObject(char const *passwd, std::shared_ptr<STOFFOLEParser> &oleParser, std::shared_ptr<STOFFOLEParser::OleDirectory> &directory);
   //! destructor
   virtual ~StarObject();
 

@@ -65,7 +65,7 @@ class SDGParser final : public STOFFGraphicParser
 {
 public:
   //! constructor
-  SDGParser(STOFFInputStreamPtr input, STOFFHeader *header);
+  SDGParser(STOFFInputStreamPtr &input, STOFFHeader *header);
   //! destructor
   ~SDGParser() final;
   //! set the document password

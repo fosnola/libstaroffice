@@ -412,7 +412,7 @@ struct STOFFEmbeddedObject {
   }
   //! constructor
   STOFFEmbeddedObject(librevenge::RVNGBinaryData const &binaryData,
-                      std::string type="image/pict") : m_dataList(), m_typeList(), m_filenameLink("")
+                      std::string const &type="image/pict") : m_dataList(), m_typeList(), m_filenameLink("")
   {
     add(binaryData, type);
   }
@@ -430,7 +430,7 @@ struct STOFFEmbeddedObject {
     return true;
   }
   //! add a picture
-  void add(librevenge::RVNGBinaryData const &binaryData, std::string type="image/pict")
+  void add(librevenge::RVNGBinaryData const &binaryData, std::string const &type="image/pict")
   {
     size_t pos=m_dataList.size();
     if (pos<m_typeList.size()) pos=m_typeList.size();

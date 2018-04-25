@@ -316,18 +316,14 @@ public:
   {
     o << m_debugName << "=[";
     for (int i=0; i<4; ++i) {
+      if (!m_margins[i]) continue;
       char const *wh[]= {"top", "left", "right", "bottom"};
-      if (m_margins[i]) o << "margin[" << wh[i] << "]=" << m_margins[i] << ",";
+      o << "margin[" << wh[i] << "]=" << m_margins[i] << ",";
     }
     o << "],";
   }
 
 protected:
-  //! copy constructor
-  StarCAttributeMargins(StarCAttributeMargins const &orig) : StarAttribute(orig)
-  {
-    for (int i=0; i<4; ++i) m_margins[i]=orig.m_margins[i];
-  }
   //! the top, left, right, bottom margins
   int m_margins[4];
 };

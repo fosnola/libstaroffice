@@ -65,7 +65,7 @@ class SDCParser final : public STOFFSpreadsheetParser
 {
 public:
   //! constructor
-  SDCParser(STOFFInputStreamPtr input, STOFFHeader *header);
+  SDCParser(STOFFInputStreamPtr &input, STOFFHeader *header);
   //! destructor
   ~SDCParser() final;
   //! set the document password

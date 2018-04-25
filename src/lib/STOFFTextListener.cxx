@@ -230,7 +230,7 @@ State::State()
 }
 }
 
-STOFFTextListener::STOFFTextListener(STOFFListManagerPtr listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGTextInterface *documentInterface)
+STOFFTextListener::STOFFTextListener(STOFFListManagerPtr &listManager, std::vector<STOFFPageSpan> const &pageList, librevenge::RVNGTextInterface *documentInterface)
   : STOFFListener(listManager)
   , m_ds(new STOFFTextListenerInternal::TextState(pageList))
   , m_ps(new STOFFTextListenerInternal::State)

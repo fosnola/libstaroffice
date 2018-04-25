@@ -123,7 +123,7 @@ public:
   //! constructor which create a copy of the global state
   explicit StarState(GlobalState const &global);
   //! constructor which share the global state
-  explicit StarState(std::shared_ptr<GlobalState> global)
+  explicit StarState(std::shared_ptr<GlobalState> &global)
     : m_global(global)
     , m_styleName("")
     , m_break(0)

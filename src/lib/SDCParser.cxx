@@ -71,7 +71,7 @@ struct State {
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
-SDCParser::SDCParser(STOFFInputStreamPtr input, STOFFHeader *header)
+SDCParser::SDCParser(STOFFInputStreamPtr &input, STOFFHeader *header)
   : STOFFSpreadsheetParser(input, header)
   , m_password(nullptr)
   , m_oleParser()

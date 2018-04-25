@@ -65,7 +65,7 @@ class SDWParser final : public STOFFTextParser
 {
 public:
   //! constructor
-  SDWParser(STOFFInputStreamPtr input, STOFFHeader *header);
+  SDWParser(STOFFInputStreamPtr &input, STOFFHeader *header);
   //! destructor
   ~SDWParser() final;
   //! set the document password

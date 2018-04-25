@@ -144,18 +144,18 @@ void Content::inventoryPages(StarState &state) const
 //! Internal: a formatZone of StarObjectTextInteral
 struct FormatZone final : public Zone {
   //! constructor
-  explicit FormatZone(std::shared_ptr<StarFormatManagerInternal::FormatDef> format)
+  explicit FormatZone(std::shared_ptr<StarFormatManagerInternal::FormatDef> &format)
     : Zone()
     , m_format(format)
   {
   }
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! the format
   std::shared_ptr<StarFormatManagerInternal::FormatDef> m_format;
 };
 
-bool FormatZone::send(STOFFListenerPtr listener, StarState &state) const
+bool FormatZone::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::FormatZone::send: call without listener\n"));
@@ -173,7 +173,7 @@ bool FormatZone::send(STOFFListenerPtr listener, StarState &state) const
 //! Internal: a graphZone of StarObjectTextInteral
 struct GraphZone final : public Zone {
   //! constructor
-  explicit GraphZone(std::shared_ptr<STOFFOLEParser> oleParser)
+  explicit GraphZone(std::shared_ptr<STOFFOLEParser> &oleParser)
     : Zone()
     , m_oleParser(oleParser)
     , m_attributeList()
@@ -181,7 +181,7 @@ struct GraphZone final : public Zone {
   {
   }
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! the ole parser
   std::shared_ptr<STOFFOLEParser> m_oleParser;
   //! the graph name, the fltName, the replace text
@@ -192,7 +192,7 @@ struct GraphZone final : public Zone {
   StarGraphicStruct::StarPolygon m_contour;
 };
 
-bool GraphZone::send(STOFFListenerPtr listener, StarState &state) const
+bool GraphZone::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::GraphZone::send: call without listener\n"));
@@ -225,7 +225,7 @@ struct OLEZone final : public Zone {
   {
   }
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! the OLE name
   librevenge::RVNGString m_name;
   //! the replacement text
@@ -234,7 +234,7 @@ struct OLEZone final : public Zone {
   std::shared_ptr<STOFFOLEParser> m_oleParser;
 };
 
-bool OLEZone::send(STOFFListenerPtr listener, StarState &state) const
+bool OLEZone::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: call without listener\n"));
@@ -293,7 +293,7 @@ struct SectionZone final : public Zone {
   {
   }
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! the section name
   librevenge::RVNGString m_name;
   //! the section condition
@@ -310,7 +310,7 @@ struct SectionZone final : public Zone {
   std::shared_ptr<Content> m_content;
 };
 
-bool SectionZone::send(STOFFListenerPtr listener, StarState &state) const
+bool SectionZone::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::SectionZone::send: call without listener\n"));
@@ -344,7 +344,7 @@ struct TextZone final : public Zone {
   //! try to inventory the different pages
   void inventoryPage(StarState &state) const final;
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! the text
   std::vector<uint32_t> m_text;
   //! the text initial position
@@ -398,7 +398,7 @@ void TextZone::inventoryPage(StarState &state) const
     state.m_global->m_pageNameList.push_back("");
 }
 
-bool TextZone::send(STOFFListenerPtr listener, StarState &state) const
+bool TextZone::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener || !listener->canWriteText()) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::TextZone::send: call without listener\n"));
@@ -656,12 +656,12 @@ struct Table final : public Zone {
   {
   }
   //! try to send the data to a listener
-  bool send(STOFFListenerPtr listener, StarState &state) const final;
+  bool send(STOFFListenerPtr &listener, StarState &state) const final;
   //! the table
   std::shared_ptr<StarTable> m_table;
 };
 
-bool Table::send(STOFFListenerPtr listener, StarState &state) const
+bool Table::send(STOFFListenerPtr &listener, StarState &state) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::Table::send: call without listener\n"));
@@ -674,7 +674,7 @@ bool Table::send(STOFFListenerPtr listener, StarState &state) const
   return m_table->send(listener, state);
 }
 
-bool Content::send(STOFFListenerPtr listener, StarState &state, bool isFlyer) const
+bool Content::send(STOFFListenerPtr &listener, StarState &state, bool isFlyer) const
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectTextInternal::Content::send: call without listener\n"));
@@ -779,7 +779,7 @@ bool StarObjectText::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &
   return numPages>0;
 }
 
-bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
+bool StarObjectText::sendPages(STOFFTextListenerPtr &listener)
 {
   if (!listener) {
     STOFF_DEBUG_MSG(("StarObjectText::sendPages: can not find the listener\n"));
@@ -808,7 +808,8 @@ bool StarObjectText::sendPages(STOFFTextListenerPtr listener)
   StarState state(pool.get(), *this);
   state.m_global->m_objectModel=m_textState->m_model;
   state.m_global->m_numericRuler=m_textState->m_numericRuler;
-  m_textState->m_mainContent->send(listener, state);
+  STOFFListenerPtr basicListener(listener);
+  m_textState->m_mainContent->send(basicListener, state);
   return true;
 }
 

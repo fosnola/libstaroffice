@@ -536,7 +536,7 @@ bool StarAttributeVoid::read(StarZone &zone, int /*vers*/, long /*endPos*/, Star
   return true;
 }
 
-bool StarAttributeItemSet::send(STOFFListenerPtr listener, StarState &state, std::set<StarAttribute const *> &done) const
+bool StarAttributeItemSet::send(STOFFListenerPtr &listener, StarState &state, std::set<StarAttribute const *> &done) const
 {
   if (done.find(this)!=done.end()) {
     STOFF_DEBUG_MSG(("StarAttributeItemSet::send: find a cycle\n"));
