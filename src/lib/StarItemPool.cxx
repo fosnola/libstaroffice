@@ -109,7 +109,7 @@ struct SfxMultiRecord {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       return false;
     }
-    if (m_zoneType==char(0xff)) {
+    if (m_zoneType=='\xff') {
       STOFF_DEBUG_MSG(("StarItemPoolInternal::SfxMultiRecord: oops end header\n"));
       m_extra="###emptyZone,";
       return true; /* empty zone*/

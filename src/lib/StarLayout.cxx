@@ -372,7 +372,7 @@ bool StarLayout::readD0(StarZone &zone, StarObject &object)
     f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeSWRecord(char(0xd0), "StarLayout");
+    zone.closeSWRecord('\xd0', "StarLayout");
     return true;
   }
   f << "g0=" << input->readULong(m_version<0xa ? 1 : 2) << ",";
@@ -428,7 +428,7 @@ bool StarLayout::readD0(StarZone &zone, StarObject &object)
     ascFile.addNote("StarLayout[D0]:###extra");
     input->seek(lastPos, librevenge::RVNG_SEEK_SET);
   }
-  zone.closeSWRecord(char(0xd0), "StarLayout");
+  zone.closeSWRecord('\xd0', "StarLayout");
   return true;
 }
 
@@ -488,7 +488,7 @@ bool StarLayout::readD8(StarZone &zone, StarObject &object)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  zone.closeSWRecord(char(0xd8), "StarLayout");
+  zone.closeSWRecord('\xd8', "StarLayout");
   return true;
 }
 
