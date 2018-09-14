@@ -84,7 +84,7 @@ bool StarLayout::read(StarZone &zone, StarObject &object)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='U' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarLayout::read: can not read a layout\n"));
@@ -129,7 +129,7 @@ bool StarLayout::readC1(StarZone &zone, StarObject &object)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   int mainType=input->peek();
   if ((mainType!=0xc1 && mainType!=0xcc && mainType!=0xcd) || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -210,7 +210,7 @@ bool StarLayout::readC2(StarZone &zone, StarObject &object)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   int mainType=input->peek();
   if ((mainType!=0xc2 && mainType!=0xc3 && mainType!=0xc6 && mainType!=0xc8 && mainType!=0xc9 && mainType!=0xce &&
        mainType!=0xd2 && mainType!=0xd3 && mainType!=0xd4 && mainType!=0xd7 && mainType!=0xe3 && mainType!=0xf2)
@@ -313,7 +313,7 @@ bool StarLayout::readC4(StarZone &zone, StarObject &/*object*/)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   int mainType=input->peek();
   if ((mainType!=0xc4 && mainType!=0xc7) || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -356,7 +356,7 @@ bool StarLayout::readD0(StarZone &zone, StarObject &object)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!=0xd0 || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarLayout::readD0: can not read a layout\n"));
@@ -372,7 +372,7 @@ bool StarLayout::readD0(StarZone &zone, StarObject &object)
     f << "###";
     ascFile.addPos(pos);
     ascFile.addNote(f.str().c_str());
-    zone.closeSWRecord(char(0xd0), "StarLayout");
+    zone.closeSWRecord(static_cast<unsigned char>(0xd0), "StarLayout");
     return true;
   }
   f << "g0=" << input->readULong(m_version<0xa ? 1 : 2) << ",";
@@ -428,7 +428,7 @@ bool StarLayout::readD0(StarZone &zone, StarObject &object)
     ascFile.addNote("StarLayout[D0]:###extra");
     input->seek(lastPos, librevenge::RVNG_SEEK_SET);
   }
-  zone.closeSWRecord(char(0xd0), "StarLayout");
+  zone.closeSWRecord(static_cast<unsigned char>(0xd0), "StarLayout");
   return true;
 }
 
@@ -438,7 +438,7 @@ bool StarLayout::readD8(StarZone &zone, StarObject &object)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!=0xd8 || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarLayout::readD8: can not read a layout\n"));
@@ -488,7 +488,7 @@ bool StarLayout::readD8(StarZone &zone, StarObject &object)
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
 
-  zone.closeSWRecord(char(0xd8), "StarLayout");
+  zone.closeSWRecord(static_cast<unsigned char>(0xd8), "StarLayout");
   return true;
 }
 
@@ -605,7 +605,7 @@ bool StarLayout::readChild(StarZone &zone, StarObject &object)
     break;
   }
   if (done && input->tell()>pos && input->tell()<=zone.getRecordLastPosition()) return true;
-  char type;
+  unsigned char type;
   if ((input->peek()&0xE0)!=0xc0 || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;

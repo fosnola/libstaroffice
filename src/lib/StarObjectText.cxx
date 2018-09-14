@@ -959,7 +959,7 @@ bool StarObjectText::readSWContent(StarZone &zone, std::shared_ptr<StarObjectTex
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!='N' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1043,7 +1043,7 @@ bool StarObjectText::readSWContent(StarZone &zone, std::shared_ptr<StarObjectTex
     case 'l': // related to link
     case 'o': { // format: safe to ignore
       std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
-      done=getFormatManager()->readSWFormatDef(zone,char(cType),format, *this);
+      done=getFormatManager()->readSWFormatDef(zone,static_cast<unsigned char>(cType),format, *this);
       if (done && format) {
         std::shared_ptr<StarObjectTextInternal::FormatZone> formatZone;
         formatZone.reset(new StarObjectTextInternal::FormatZone(format));
@@ -1089,7 +1089,7 @@ bool StarObjectText::readSWGraphNode(StarZone &zone, std::shared_ptr<StarObjectT
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!='G' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1206,7 +1206,7 @@ bool StarObjectText::readSWImageMap(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!='X' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1290,7 +1290,7 @@ bool StarObjectText::readSWJobSetUp(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!='J' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1318,7 +1318,7 @@ bool StarObjectText::readSWOLENode(StarZone &zone, std::shared_ptr<StarObjectTex
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!='O' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1367,7 +1367,7 @@ bool StarObjectText::readSWSection(StarZone &zone, std::shared_ptr<StarObjectTex
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!='I' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1446,7 +1446,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone, std::shared_ptr<StarObjectTe
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!='T' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1815,7 +1815,7 @@ try
       continue;
 
     input->seek(pos, librevenge::RVNG_SEEK_SET);
-    char type;
+    unsigned char type;
     if (!zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;

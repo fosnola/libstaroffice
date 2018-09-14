@@ -102,7 +102,7 @@ struct SfxMultiRecord {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       return false;
     }
-    if (m_zoneType==char(0xff)) {
+    if (m_zoneType==static_cast<unsigned char>(0xff)) {
       STOFF_DEBUG_MSG(("StarFileManagerInternal::SfxMultiRecord: oops end header\n"));
       m_extra="###emptyZone,";
       return true; /* empty zone*/
@@ -247,7 +247,7 @@ protected:
   //! the main zone
   StarZone &m_zone;
   //! the zone type
-  char m_zoneType;
+  unsigned char m_zoneType;
   //! true if a SfxRecord has been opened
   bool m_zoneOpened;
   //! the record type

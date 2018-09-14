@@ -236,7 +236,7 @@ bool TableBox::read(Table &table, StarZone &zone, StarObjectText &object, STOFFB
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!='t' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -368,7 +368,7 @@ bool TableLine::read(Table &table, StarZone &zone, StarObjectText &object, STOFF
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!='L' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -508,7 +508,7 @@ bool Table::read(StarZone &zone, StarObjectText &object)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!='E' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);

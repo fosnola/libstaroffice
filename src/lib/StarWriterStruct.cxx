@@ -60,7 +60,7 @@ bool Attribute::read(StarZone &zone, StarObject &object)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='A' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarWriterStruct::Attribute::read: can not read a attribute\n"));
@@ -110,7 +110,7 @@ bool Attribute::readList(StarZone &zone, std::vector<Attribute> &attribList, Sta
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='S') return false;
   if (!zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -156,7 +156,7 @@ bool Bookmark::read(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='B' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarWriterStruct::Bookmark::read: can not read a mark\n"));
@@ -210,7 +210,7 @@ bool Bookmark::readList(StarZone &zone, std::vector<Bookmark> &markList)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='a') return false;
   if (!zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -258,7 +258,7 @@ bool DatabaseName::read(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='D' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarWriterStruct::DatabaseName::read: can not read a databaseName\n"));
@@ -366,7 +366,7 @@ bool Dictionary::read(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='j' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarWriterStruct::Dictionary::read: can not read a dictionary\n"));
@@ -418,7 +418,7 @@ bool DocStats::read(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='d' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarWriterStruct::DocStats::read: can not read a docStats\n"));
@@ -463,7 +463,7 @@ bool Macro::read(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='m' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarWriterStruct::Macro::read: can not read a macro\n"));
@@ -498,7 +498,7 @@ bool Macro::readList(StarZone &zone, std::vector<Macro> &macroList)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='u') return false;
   if (!zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -543,7 +543,7 @@ bool Mark::read(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='K' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarWriterStruct::Mark::read: can not read a mark\n"));
@@ -578,7 +578,7 @@ bool NodeRedline::read(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='v' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarWriterStruct::NodeRedline::read: can not read a nodeRedline\n"));
@@ -615,7 +615,7 @@ bool NoteInfo::read(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!=(m_isFootnote ? '1' : '4') || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarWriterStruct::NoteInfo::read: can not read a noteInfo\n"));
@@ -722,7 +722,7 @@ bool PrintData::read(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='8' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarWriterStruct::PrintData::read: can not read a printData\n"));
@@ -763,7 +763,7 @@ bool Redline::read(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='D' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarWriterStruct::Redline::read: can not read a redline\n"));
@@ -797,7 +797,7 @@ bool Redline::readList(StarZone &zone, std::vector<Redline> &redlineList)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='R') return false;
   if (!zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -832,7 +832,7 @@ bool Redline::readListList(StarZone &zone, std::vector<std::vector<Redline> > &r
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='V') return false;
   if (!zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -881,7 +881,7 @@ bool TOX::read(StarZone &zone, StarObject &object)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='x' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarWriterStruct::TOX::read::read: can not read a nodeRedline\n"));
@@ -1011,7 +1011,7 @@ bool TOX::readList(StarZone &zone, std::vector<TOX> &toxList, StarObject &object
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='u') return false;
   if (!zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1086,7 +1086,7 @@ bool TOX51::read(StarZone &zone, StarObject &/*object*/)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='x' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarWriterStruct::TOX51::read: can not read a tox51\n"));
@@ -1163,7 +1163,7 @@ bool TOX51::readList(StarZone &zone, std::vector<TOX51> &toxList, StarObject &ob
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='y') return false;
   if (!zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);

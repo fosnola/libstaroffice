@@ -1022,11 +1022,11 @@ SWFieldManager::~SWFieldManager()
 {
 }
 
-std::shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zone, char cKind)
+std::shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZone &zone, unsigned char cKind)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   std::shared_ptr<SWFieldManagerInternal::Field> field;
   if (cKind!='_' && (input->peek()!=cKind || !zone.openSWRecord(type))) {
@@ -1839,7 +1839,7 @@ std::shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZon
       long actPos=input->tell();
       input->seek(actPos, librevenge::RVNG_SEEK_SET);
 
-      char authType;
+      unsigned char authType;
       libstoff::DebugStream f2;
       f2<<"SWFieldType[auth-A" << i << "]:";
       if (input->peek()!='E' || !zone.openSWRecord(authType)) {

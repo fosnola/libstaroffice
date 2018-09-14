@@ -172,9 +172,9 @@ public:
   //
 
   //! try to open a SW record: type + size (24 bytes)
-  bool openSWRecord(char &type);
+  bool openSWRecord(unsigned char &type);
   //! try to close a record
-  bool closeSWRecord(char type, std::string const &debugName)
+  bool closeSWRecord(unsigned char type, std::string const &debugName)
   {
     return closeRecord(type, debugName);
   }
@@ -184,9 +184,9 @@ public:
   //
 
   //! try to open a Sfx record: type + size (24 bytes)
-  bool openSfxRecord(char &type);
+  bool openSfxRecord(unsigned char &type);
   //! try to close a record
-  bool closeSfxRecord(char type, std::string const &debugName)
+  bool closeSfxRecord(unsigned char type, std::string const &debugName)
   {
     return closeRecord(type, debugName);
   }
@@ -268,7 +268,7 @@ protected:
   //! try to read the record sizes
   bool readRecordSizes(long pos);
   //! try to close a record
-  bool closeRecord(char type, std::string const &debugName);
+  bool closeRecord(unsigned char type, std::string const &debugName);
 
   //
   // data
@@ -296,7 +296,7 @@ protected:
   std::string m_zoneName;
 
   //! the type stack
-  std::stack<char> m_typeStack;
+  std::stack<unsigned char> m_typeStack;
   //! the position stack
   std::stack<long> m_positionStack;
   //! other position to end position zone

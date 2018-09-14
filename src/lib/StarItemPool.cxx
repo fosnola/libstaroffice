@@ -109,7 +109,7 @@ struct SfxMultiRecord {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       return false;
     }
-    if (m_zoneType==char(0xff)) {
+    if (m_zoneType==static_cast<unsigned char>(0xff)) {
       STOFF_DEBUG_MSG(("StarItemPoolInternal::SfxMultiRecord: oops end header\n"));
       m_extra="###emptyZone,";
       return true; /* empty zone*/
@@ -253,7 +253,7 @@ protected:
   //! the main zone
   StarZone *m_zone;
   //! the zone type
-  char m_zoneType;
+  unsigned char m_zoneType;
   //! true if a SfxRecord has been opened
   bool m_zoneOpened;
   //! the record type
@@ -1255,7 +1255,7 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
     if (m_state->m_minorVersion) f << "vers[minor]=" << m_state->m_minorVersion << ",";
     input->seek(4, librevenge::RVNG_SEEK_CUR); // 0,0
   }
-  char type; // always 1
+  unsigned char type; // always 1
   if (input->peek()!=1 || !zone.openSfxRecord(type)) {
     STOFF_DEBUG_MSG(("StarItemPool::readV2: can not open the sfx record\n"));
     m_state->m_majorVersion=0;
@@ -1271,7 +1271,7 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
     return true;
   }
   // string part
-  char type1;
+  unsigned char type1;
   if (input->peek()!=16 || !zone.openSfxRecord(type1)) {
     STOFF_DEBUG_MSG(("StarItemPool::readV2: can not open the string sfx record\n"));
     f << "###openString";
@@ -1800,7 +1800,7 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
   libstoff::DebugStream f;
   int poolVersion=input->peek()==3 ? 2 : 1;
   f << "Entries(SfxStylePool)[" << zone.getRecordLevel() << "]:pool[vers]=" << poolVersion << ",";
-  char type=3; // to make clang analyzer happy
+  unsigned char type=3; // to make clang analyzer happy
   uint16_t charSet=0, nCount;
 
   bool helpIdSize32=true, ok=true;
@@ -1834,7 +1834,7 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
     pos=input->tell();
     f.str("");
     f << "SfxStylePool[header]:";
-    char type1;
+    unsigned char type1;
     if (!zone.openSfxRecord(type1)) {
       STOFF_DEBUG_MSG(("StarItemPool::readStyles: can not open the header zone\n"));
       f << "###";

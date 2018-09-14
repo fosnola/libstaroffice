@@ -96,7 +96,7 @@ public:
   virtual ~StarFormatManager();
 
   //! try to read a format zone : 'f' or 'l' or 'o' or 'r' or 's'(in TOCX)
-  bool readSWFormatDef(StarZone &zone, char kind, std::shared_ptr<StarFormatManagerInternal::FormatDef> &format, StarObject &doc);
+  bool readSWFormatDef(StarZone &zone, unsigned char kind, std::shared_ptr<StarFormatManagerInternal::FormatDef> &format, StarObject &doc);
   //! store a named format zone
   void storeSWFormatDef(librevenge::RVNGString const &name, std::shared_ptr<StarFormatManagerInternal::FormatDef> &format);
   //! try to return a named format zone(if possible)

@@ -103,7 +103,7 @@ bool StarZone::readString(std::vector<uint32_t> &string, std::vector<size_t> &sr
 bool StarZone::readStringsPool()
 {
   long pos=m_input->tell();
-  char type;
+  unsigned char type;
   if (m_input->peek()!='!' || !openSWRecord(type)) {
     m_input->seek(pos, librevenge::RVNG_SEEK_SET);
     return false;
@@ -504,12 +504,12 @@ bool StarZone::openSCRecord()
   return true;
 }
 
-bool StarZone::openSWRecord(char &type)
+bool StarZone::openSWRecord(unsigned char &type)
 {
   long pos=m_input->tell();
   if (!m_input->checkPosition(pos+4)) return false;
   unsigned long val=m_input->readULong(4);
-  type=char(val&0xff);
+  type=static_cast<unsigned char>(val&0xff);
   if (!type) {
     STOFF_DEBUG_MSG(("StarZone::openSWRecord: type can not be null\n"));
     return false;
@@ -547,13 +547,13 @@ bool StarZone::openSWRecord(char &type)
   return true;
 }
 
-bool StarZone::openSfxRecord(char &type)
+bool StarZone::openSfxRecord(unsigned char &type)
 {
   long pos=m_input->tell();
   if (!m_input->checkPosition(pos+4)) return false;
   // filerec.cxx SfxMiniRecordReader::SfxMiniRecordReader
   unsigned long val=m_input->readULong(4);
-  type=char(val&0xff);
+  type=static_cast<unsigned char>(val&0xff);
   // checkme: can type be null
   unsigned long sz=(val>>8);
   long endPos=0;
@@ -575,11 +575,11 @@ bool StarZone::openSfxRecord(char &type)
   return true;
 }
 
-bool StarZone::closeRecord(char type, std::string const &debugName)
+bool StarZone::closeRecord(unsigned char type, std::string const &debugName)
 {
   m_flagEndZone=0;
   while (!m_typeStack.empty()) {
-    char typ=m_typeStack.top();
+    unsigned char typ=m_typeStack.top();
     long pos=m_positionStack.top();
 
     m_typeStack.pop();
@@ -644,7 +644,7 @@ bool StarZone::readRecordSizes(long pos)
     m_input->seek(pos, librevenge::RVNG_SEEK_SET);
   libstoff::DebugStream f;
   f << m_zoneName << "[RecSize]:";
-  char type;
+  unsigned char type;
   bool ok=openSWRecord(type);
   if (!ok || type!='%') {
     STOFF_DEBUG_MSG(("StarZone::readRecordSizes: can not open the record(recsize)\n"));

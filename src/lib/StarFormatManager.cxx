@@ -592,11 +592,11 @@ std::shared_ptr<StarFormatManagerInternal::FormatDef> StarFormatManager::getSWFo
   STOFF_DEBUG_MSG(("StarFormatManager::getSWFormatDef: can not find any format corresponding to %s\n", name.cstr()));
   return std::shared_ptr<StarFormatManagerInternal::FormatDef>();
 }
-bool StarFormatManager::readSWFormatDef(StarZone &zone, char kind, std::shared_ptr<StarFormatManagerInternal::FormatDef> &format, StarObject &doc)
+bool StarFormatManager::readSWFormatDef(StarZone &zone, unsigned char kind, std::shared_ptr<StarFormatManagerInternal::FormatDef> &format, StarObject &doc)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!=kind || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -686,7 +686,7 @@ bool StarFormatManager::readSWNumberFormatterList(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!='q' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1020,7 +1020,7 @@ bool StarFormatManager::readSWFlyFrameList(StarZone &zone, StarObject &doc, std:
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!='F' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1036,7 +1036,7 @@ bool StarFormatManager::readSWFlyFrameList(StarZone &zone, StarObject &doc, std:
     pos=input->tell();
     int rType=input->peek();
     std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
-    if ((rType=='o' || rType=='l') && readSWFormatDef(zone, char(rType), format, doc)) {
+    if ((rType=='o' || rType=='l') && readSWFormatDef(zone, static_cast<unsigned char>(rType), format, doc)) {
       if (format) listFormats.push_back(format);
       continue;
     }
@@ -1052,7 +1052,7 @@ bool StarFormatManager::readSWPatternLCL(StarZone &zone)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!='P' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);

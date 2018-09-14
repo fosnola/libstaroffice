@@ -116,7 +116,7 @@ public:
 
 
   //! try to read a field type
-  std::shared_ptr<SWFieldManagerInternal::Field> readField(StarZone &zone, char cKind='_');
+  std::shared_ptr<SWFieldManagerInternal::Field> readField(StarZone &zone, unsigned char cKind='_');
   //! try to read a persist field type
   std::shared_ptr<SWFieldManagerInternal::Field> readPersistField(StarZone &zone, long lastPos);
 

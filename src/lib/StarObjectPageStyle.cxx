@@ -92,7 +92,7 @@ bool NoteDesc::read(StarZone &zone)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!=(m_isFootnote ? '1' : '2') || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarObjectPageStyleInternal::NoteDesc::read: can not read a noteDesc\n"));
@@ -216,7 +216,7 @@ bool PageDesc::read(StarZone &zone, StarObject &object)
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
   long pos=input->tell();
-  char type;
+  unsigned char type;
   if (input->peek()!='p' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     STOFF_DEBUG_MSG(("StarObjectPageStyleInternal::PageDesc::read: can not read a pageDesc\n"));
@@ -472,7 +472,7 @@ try
   libstoff::DebugFile &ascFile=zone.ascii();
   while (!input->isEnd()) {
     long pos=input->tell();
-    char type;
+    unsigned char type;
     if (!zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;

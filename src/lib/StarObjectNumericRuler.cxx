@@ -147,7 +147,7 @@ try
     }
     if (done && input->tell()>pos)
       continue;
-    char type;
+    unsigned char type;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     if (!zone.openSWRecord(type)) {
       input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -210,7 +210,7 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if (input->peek()!='n' || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -357,7 +357,7 @@ bool StarObjectNumericRuler::readList(StarZone &zone, std::shared_ptr<STOFFList>
 {
   STOFFInputStreamPtr input=zone.input();
   libstoff::DebugFile &ascFile=zone.ascii();
-  char type;
+  unsigned char type;
   long pos=input->tell();
   if ((input->peek()!='0' && input->peek()!='R') || !zone.openSWRecord(type)) {
     input->seek(pos, librevenge::RVNG_SEEK_SET);
