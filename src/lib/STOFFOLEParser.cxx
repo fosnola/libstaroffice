@@ -628,7 +628,7 @@ bool STOFFOLEParser::readCompObj(STOFFInputStreamPtr ip, STOFFOLEParser::OleDire
       st = f.str();
     }
     else {
-      for (int i = 0; i < sz; i++)
+      for (long i = 0; i < sz; i++)
         st += char(ip->readULong(1));
     }
 

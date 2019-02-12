@@ -2424,7 +2424,7 @@ bool StarObjectSpreadsheet::readSCChangeTrack(StarZone &zone, int /*version*/, l
   if (delta) f << "delta=" << delta << ",";
   long endData=zone.getRecordLastPosition();
   std::vector<uint32_t> string;
-  for (int16_t i=0; i<count; ++i) {
+  for (uint16_t i=0; i<count; ++i) {
     if (!zone.readString(string) || input->tell() > endData) {
       STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCChangeTrack: can not open some string\n"));
       f << "###string";
