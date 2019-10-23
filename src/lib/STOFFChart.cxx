@@ -227,7 +227,7 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
 
   // legend
   if (m_legend.m_show) {
-    bool autoPlace=m_legendPosition==STOFFBox2f()||m_dimension==STOFFVec2i();
+    bool autoPlace=m_legendPosition==STOFFBox2f()||m_dimension==STOFFVec2f();
     style=librevenge::RVNGPropertyList();
     m_legend.addStyleTo(style);
     style.insert("librevenge:chart-id", styleId);
@@ -267,7 +267,7 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
   }
   // plot area
   style=librevenge::RVNGPropertyList();
-  bool autoPlace=m_plotAreaPosition==STOFFBox2f()||m_dimension==STOFFVec2i();
+  bool autoPlace=m_plotAreaPosition==STOFFBox2f()||m_dimension==STOFFVec2f();
   m_plotAreaStyle.addTo(style);
   style.insert("librevenge:chart-id", styleId);
   style.insert("chart:include-hidden-cells","false");
