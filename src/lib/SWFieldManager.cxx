@@ -293,7 +293,7 @@ bool Field::send(STOFFListenerPtr &listener, StarState &state) const
   else if (m_type==30) {
     if (m_subType>=0 && m_subType<=16) {
       char const *wh[]= {
-        "text:sender-company", "text:sender-firstname", "text:send-lastname", "text:sender-initials", "text:sender-street",
+        "text:sender-company", "text:sender-firstname", "text:sender-lastname", "text:sender-initials", "text:sender-street",
         "text:sender-country", "text:sender-postal-code", "text:sender-city", "text:sender-title", "text:sender-position",
         "text:sender-phone-private", "text:sender-phone-work", "text:sender-fax", "text:sender-email", "text:sender-state-or-province",
         "text:sender-lastname" /*father name*/, "text:sender-street" /* appartement*/
