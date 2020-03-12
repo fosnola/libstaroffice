@@ -61,7 +61,7 @@ struct State;
 }
 
 /** This class contents the main functions needed to create a spreadsheet processing Document */
-class STOFFSpreadsheetListener : public STOFFListener
+class STOFFSpreadsheetListener final : public STOFFListener
 {
 public:
   /** constructor */
