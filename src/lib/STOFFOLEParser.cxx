@@ -506,7 +506,7 @@ bool STOFFOLEParser::readSummaryInformation(STOFFInputStreamPtr input, std::stri
   ascii.addPos(pos);
   ascii.addNote(f.str().c_str());
 
-  for (auto const posToType : posToTypeMap) {
+  for (auto const &posToType : posToTypeMap) {
     pos=posToType.first;
     input->seek(pos, librevenge::RVNG_SEEK_SET);
     f.str("");
