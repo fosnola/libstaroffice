@@ -1315,7 +1315,6 @@ bool StarFAttributeSurround::read(StarZone &zone, int vers, long endPos, StarObj
   long pos=input->tell();
   libstoff::DebugFile &ascFile=zone.ascii();
   libstoff::DebugStream f;
-  bool ok=true;
   f << "Entries(StarAttribute)[" << zone.getRecordLevel() << "]:";
   m_surround = int(input->readULong(1));
   if (vers<5) // ideal
@@ -1329,7 +1328,7 @@ bool StarFAttributeSurround::read(StarZone &zone, int vers, long endPos, StarObj
   printData(f);
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
-  return ok && input->tell()<=endPos;
+  return input->tell()<=endPos;
 }
 
 bool StarFAttributeULSpace::read(StarZone &zone, int vers, long endPos, StarObject &/*object*/)

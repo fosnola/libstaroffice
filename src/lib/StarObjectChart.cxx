@@ -208,7 +208,6 @@ try
   libstoff::DebugFile &ascFile=zone.ascii();
   ascFile.open(name);
 
-  auto chart=std::make_shared<StarObjectChartInternal::Chart>();
   libstoff::DebugStream f;
   f << "Entries(SCChartDocument):";
   // sch_docshell.cxx: SchChartDocShell::Load

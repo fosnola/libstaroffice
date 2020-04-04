@@ -484,7 +484,7 @@ public:
     STOFFFrameStyle finalPos(pos);
     StarState state(getState(object, listener, finalPos));
     finalPos.m_position.m_offset=state.m_global->m_offset;
-    finalPos.m_position.m_offset=true;
+    //finalPos.m_position.m_offset=true;
     listener->openGroup(pos);
     for (auto &child : m_child) {
       if (child)
@@ -2760,7 +2760,7 @@ bool StarObjectSmallGraphic::readSVDRObjectPath(StarZone &zone, StarObjectSmallG
   }
   long lastPos=zone.getRecordLastPosition();
   bool ok=true;
-  auto pool=findItemPool(StarItemPool::T_XOutdevPool, false);
+  findItemPool(StarItemPool::T_XOutdevPool, false); // useme ?
   if (vers<=6 && (id==2 || id==8 || id==9)) {
     int nPoly=id==2 ? 2 : id==8 ? 1 : int(input->readULong(2));
     for (int poly=0; poly<nPoly; ++poly) {

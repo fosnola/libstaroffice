@@ -1398,7 +1398,7 @@ bool StarObjectText::readSWSection(StarZone &zone, std::shared_ptr<StarObjectTex
   if (fl&0x10) f << "hidden,";
   if (fl&0x20) f << "protect,";
   if (fl&0x40) f << "condHidden,";
-  if (fl&0x40) f << "connectFlag,";
+  if (fl&0x80) f << "connectFlag,";
   section->m_type=int(input->readULong(2));
   if (section->m_type) f << "nType=" << section->m_type << ",";
   zone.closeFlagZone();
@@ -1490,8 +1490,6 @@ bool StarObjectText::readSWTextZone(StarZone &zone, std::shared_ptr<StarObjectTe
   ascFile.addNote(f.str().c_str());
 
   long lastPos=zone.getRecordLastPosition();
-  std::vector<std::shared_ptr<StarAttribute> > attributeList;
-  std::vector<STOFFVec2i> limitsList;
   while (input->tell()<lastPos) {
     pos=input->tell();
 

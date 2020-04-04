@@ -68,6 +68,6 @@ void STOFFSection::addTo(librevenge::RVNGPropertyList &pList) const
 int STOFFSection::numColumns() const
 {
   librevenge::RVNGPropertyListVector const *columns=m_propertyList.child("style:columns");
-  return (!columns || columns->count()<=0) ? 1 : int(columns->count());
+  return (!columns || columns->count()==0) ? 1 : int(columns->count());
 }
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

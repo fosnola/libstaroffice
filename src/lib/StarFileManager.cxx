@@ -684,7 +684,6 @@ try
       dataType=graphic.m_object.m_typeList.empty() ? "image/pict" : graphic.m_object.m_typeList[0];
       if (!graphic.m_object.m_dataList.empty())
         data=graphic.m_object.m_dataList[0];
-      extension="pict";
       return true;
     }
     dataType="image/pict";
