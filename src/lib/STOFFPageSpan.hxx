@@ -80,6 +80,10 @@ public:
 public:
   //! constructor
   STOFFPageSpan();
+  STOFFPageSpan(STOFFPageSpan const &)=default;
+  STOFFPageSpan(STOFFPageSpan &&)=default;
+  STOFFPageSpan &operator=(STOFFPageSpan const &)=default;
+  STOFFPageSpan &operator=(STOFFPageSpan &&)=default;
   //! destructor
   ~STOFFPageSpan();
 

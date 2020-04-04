@@ -83,6 +83,10 @@ struct GraphicState {
     , m_section()
   {
   }
+  GraphicState(GraphicState const &)=default;
+  GraphicState(GraphicState &&)=default;
+  GraphicState &operator=(GraphicState const &)=default;
+  GraphicState &operator=(GraphicState &&)=default;
   //! destructor
   ~GraphicState()
   {

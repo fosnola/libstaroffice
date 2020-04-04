@@ -51,6 +51,11 @@ public:
     : m_propertyList()
   {
   }
+  STOFFSection(STOFFSection const &)=default;
+  STOFFSection(STOFFSection &&)=default;
+  STOFFSection &operator=(STOFFSection const &)=default;
+  STOFFSection &operator=(STOFFSection &&)=default;
+
   //! destructor
   ~STOFFSection();
   //! returns the number of columns

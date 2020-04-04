@@ -416,6 +416,10 @@ struct STOFFEmbeddedObject {
   {
     add(binaryData, type);
   }
+  STOFFEmbeddedObject(STOFFEmbeddedObject const &)=default;
+  STOFFEmbeddedObject(STOFFEmbeddedObject &&)=default;
+  STOFFEmbeddedObject &operator=(STOFFEmbeddedObject const &)=default;
+  STOFFEmbeddedObject &operator=(STOFFEmbeddedObject &&)=default;
   //! destructor
   ~STOFFEmbeddedObject();
   //! return true if the picture contains no data

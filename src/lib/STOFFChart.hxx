@@ -176,6 +176,10 @@ public:
     };
     //! constructor
     Serie();
+    Serie(Serie const &)=default;
+    Serie(Serie &&)=default;
+    Serie &operator=(Serie const &)=default;
+    Serie &operator=(Serie &&)=default;
     //! destructor
     virtual ~Serie();
     //! return true if the serie style is 1D

@@ -57,6 +57,10 @@ struct STOFFListLevel {
     , m_startValue(0)
   {
   }
+  STOFFListLevel(STOFFListLevel const &)=default;
+  STOFFListLevel(STOFFListLevel &&)=default;
+  STOFFListLevel &operator=(STOFFListLevel const &)=default;
+  STOFFListLevel &operator=(STOFFListLevel &&)=default;
   /** destructor */
   ~STOFFListLevel();
 

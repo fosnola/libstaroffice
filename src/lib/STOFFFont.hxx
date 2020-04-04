@@ -54,6 +54,10 @@ public:
     , m_lineBreak(false)
   {
   }
+  STOFFFont(STOFFFont const &)=default;
+  STOFFFont(STOFFFont &&)=default;
+  STOFFFont &operator=(STOFFFont const &)=default;
+  STOFFFont &operator=(STOFFFont &&)=default;
   /** destructor */
   ~STOFFFont();
   //! add to the propList
