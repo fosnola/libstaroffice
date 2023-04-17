@@ -2044,7 +2044,7 @@ bool Parser::convert(librevenge::RVNGString const &starMath, std::vector<LexerDa
           done=true;
         }
         else if (len>=2 && c=='>' && dataList.back().m_string=="?" &&
-                 dataList[len-2].LexerData::Special && dataList[len-2].m_string=="<") {
+                 dataList[len-2].m_type==LexerData::Special && dataList[len-2].m_string=="<") {
           dataList[len-2].m_type=LexerData::PlaceHolder;
           dataList[len-2].m_string="<?>";
           dataList.resize(len-1);
