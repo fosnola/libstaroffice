@@ -311,7 +311,7 @@ bool NumberFormatter::FormatItem::updateNumberingProperties(librevenge::RVNGProp
     if (m_text.empty()) break;
     auto fChar=int(m_text.cstr()[0]);
     if (fChar>=32) {
-      static int cCharWidths[ 128-32 ] = {
+      static const int cCharWidths[ 128-32 ] = {
         1,1,1,2,2,3,2,1,1,1,1,2,1,1,1,1,
         2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,
         3,2,2,2,2,2,2,3,2,1,2,2,2,3,3,3,

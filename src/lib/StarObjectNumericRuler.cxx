@@ -233,7 +233,7 @@ bool StarObjectNumericRuler::readLevel(StarZone &zone, STOFFListLevel &level)
       return true;
     }
     if (string.empty()) continue;
-    static char const *wh[]= {"prefix", "postfix", "fontname", "fontstyle"};
+    static char const* const wh[]= {"prefix", "postfix", "fontname", "fontstyle"};
     f << wh[i] << "=" << libstoff::getString(string).cstr() << ",";
     if (i==0) level.m_propertyList.insert("style:num-prefix",libstoff::getString(string));
     else if (i==1) level.m_propertyList.insert("style:num-suffix",libstoff::getString(string));
