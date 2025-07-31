@@ -669,7 +669,7 @@ bool StarObjectModel::read(StarZone &zone)
           break;
         }
         if (string.empty()) continue;
-        static char const *wh[]= {"cTableName", "dashName", "lineEndName", "hashName", "gradientName", "bitmapName"};
+        static char const* const wh[]= {"cTableName", "dashName", "lineEndName", "hashName", "gradientName", "bitmapName"};
         f << wh[i] << "=" << libstoff::getString(string).cstr() << ",";
       }
     }

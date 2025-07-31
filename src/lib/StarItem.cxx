@@ -70,7 +70,7 @@ std::ostream &operator<<(std::ostream &o, StarItemStyle const &style)
 {
   for (int i=0; i<4; ++i) {
     if (style.m_names[i].empty()) continue;
-    static char const *wh[]= {"name","parent","follow","help"};
+    static char const* const wh[]= {"name","parent","follow","help"};
     o << wh[i] << "=" << style.m_names[i].cstr() << ",";
   }
   switch (style.m_family&0xff) {

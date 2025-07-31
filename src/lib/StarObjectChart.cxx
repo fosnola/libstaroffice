@@ -496,7 +496,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
       zone.closeSCHHeader("SCHAttributes");
       return true;
     }
-    static char const *wh[]= {"mainTitle", "subTitle", "xAxisTitle", "yAxisTitle", "zAxisTitle" };
+    static char const* const wh[]= {"mainTitle", "subTitle", "xAxisTitle", "yAxisTitle", "zAxisTitle" };
     f << wh[i] << "=" << libstoff::getString(string).cstr();
     if (bShow) f << ":show";
     f << ",";
@@ -506,7 +506,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
       bool bShow;
       *input>>bShow;
       if (!bShow) continue;
-      static char const *wh[]= {"Axis", "GridMain", "GridHelp", "Descr"};
+      static char const* const wh[]= {"Axis", "GridMain", "GridHelp", "Descr"};
       f << "show" << char('X'+i) << wh[j] << ",";
     }
   }
@@ -772,7 +772,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
       for (int i=0; i<7; ++i) {
         *input >> nInt16;
         if (!nInt16) continue;
-        static char const *wh[]= {"useRelPosForChartGroup","adjMargForLegend","adjMargForTitle","adjMargForSubTitle",
+        static char const* const wh[]= {"useRelPosForChartGroup","adjMargForLegend","adjMargForTitle","adjMargForSubTitle",
                                   "adjMargForXAxisTitle","adjMargForYAxisTitle","adjMargForZAxisTitle"
                                  };
         f << wh[i] << ",";
@@ -797,7 +797,7 @@ bool StarObjectChart::readSCHAttributes(StarZone &zone)
         bool hasMoved;
         *input>>hasMoved;
         if (!hasMoved) continue;
-        static char const *wh[]= {"diagram", "title", "subTitle", "legend", "XAxis", "YAxis", "ZAxis"};
+        static char const* const wh[]= {"diagram", "title", "subTitle", "legend", "XAxis", "YAxis", "ZAxis"};
         f << wh[i] << "HasMoved,";
       }
     }
@@ -978,7 +978,7 @@ bool StarObjectChart::readSCHMemChart(StarZone &zone)
     }
     if (string.empty()) continue;
     if (i<5) {
-      static char const *wh[]= {"mainTitle","subTitle","xAxisTitle","yAxisTitle","zAxisTitle"};
+      static char const* const wh[]= {"mainTitle","subTitle","xAxisTitle","yAxisTitle","zAxisTitle"};
       f << wh[i] << "=" << libstoff::getString(string).cstr() << ",";
     }
     else if (i<5+int(nCol))

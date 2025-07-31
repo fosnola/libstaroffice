@@ -886,7 +886,7 @@ bool StarFileManager::readJobSetUp(StarZone &zone, bool useJobLen)
         name+=ch;
       }
       if (!name.empty()) {
-        static char const *wh[]= { "printerName", "deviceName", "portName", "driverName" };
+        static char const* const wh[]= { "printerName", "deviceName", "portName", "driverName" };
         f << wh[i] << "=" << name << ",";
       }
       input->seek(actPos+length, librevenge::RVNG_SEEK_SET);
