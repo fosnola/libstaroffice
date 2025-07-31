@@ -252,7 +252,7 @@ protected:
    \note it only sets the image size with setNaturalSize.*/
   static bool readOlePres(STOFFInputStreamPtr ip, OleContent &content);
 
-  //! theOle10Native : basic Windows© picture, with no size
+  //! theOle10Native : basic WindowsÂ© picture, with no size
   static bool isOle10Native(STOFFInputStreamPtr ip, std::string const &oleName);
   /** extracts the picture if it is possible.
 
