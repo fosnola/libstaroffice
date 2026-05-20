@@ -511,7 +511,6 @@ bool StarBitmap::readBitmapInformation(StarZone &zone, StarBitmapInternal::Bitma
 bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::Bitmap &bitmap, long lastPos)
 {
   // bitmap2.cxx Bitmap::ImplReadDIBBits
-
   uint32_t RGBMask[3]= {0,0,0};
   int RGBShift[3]= {0,0,0};
   if (bitmap.m_bitCount==16 || bitmap.m_bitCount==32) { // RGBMask
@@ -541,6 +540,8 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
     }
   }
 
+  // I suppose 50000x50000 must be large enough for a StarOffice's image
+  int const MAX_SIZE=50000;
   if ((bitmap.m_bitCount==8 && bitmap.m_compression==1) || (bitmap.m_bitCount==4 && bitmap.m_compression==2)) { // bRLE
     if (bitmap.m_sizeImage && static_cast<unsigned long>(input->tell())+static_cast<unsigned long>(bitmap.m_sizeImage) > static_cast<unsigned long>(lastPos)) {
       STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: image size is bad\n"));
@@ -548,9 +549,14 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
     }
     if (bitmap.m_sizeImage) lastPos= input->tell() + long(bitmap.m_sizeImage);
     bool bit4=bitmap.m_compression==2;
-    size_t wPos=0, lastWPos=size_t(bitmap.m_height*bitmap.m_width);
+    size_t wPos=0, lastWPos=size_t(bitmap.m_height)*size_t(bitmap.m_width);
     if (lastWPos == 0 || lastWPos / bitmap.m_height != bitmap.m_width) {
       STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: bitmap dimensions are too big\n"));
+      return false;
+    }
+    if (bitmap.m_width>MAX_SIZE || bitmap.m_height>MAX_SIZE) {
+      STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: bitmap dimensions are too big (%x,%x)\n",bitmap.m_width,bitmap.m_height));
+      input->seek(lastWPos, librevenge::RVNG_SEEK_SET);
       return false;
     }
     bitmap.m_indexDataList.resize(size_t(lastWPos),0);
@@ -633,13 +639,19 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
   alignWidth=(((alignWidth+31)>>5)<<2);
   long actPos=input->tell();
   if (alignWidth==0 || uint32_t(lastPos-actPos)/alignWidth < bitmap.m_height ||
-      actPos+long(bitmap.m_height*alignWidth)>lastPos) {
+      actPos+long(bitmap.m_height)*long(alignWidth)>lastPos) {
     STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: the zone seems too short\n"));
     return false;
   }
+  if (bitmap.m_width>MAX_SIZE || bitmap.m_height>MAX_SIZE) {
+    STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: bitmap dimensions are too big (%x,%x)\n",bitmap.m_width,bitmap.m_height));
+    input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+    return false;
+  }
+
   switch (bitmap.m_bitCount) {
   case 1: {
-    bitmap.m_indexDataList.resize(size_t(bitmap.m_height*bitmap.m_width));
+    bitmap.m_indexDataList.resize(size_t(bitmap.m_height)*size_t(bitmap.m_width));
     size_t wPos=0;
     for (uint32_t y=0; y<bitmap.m_height; ++y) {
       actPos=input->tell();
@@ -657,7 +669,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
     break;
   }
   case 4: {
-    bitmap.m_indexDataList.resize(size_t(bitmap.m_height*bitmap.m_width));
+    bitmap.m_indexDataList.resize(size_t(bitmap.m_height)*size_t(bitmap.m_width));
     size_t wPos=0;
     for (uint32_t y=0; y<bitmap.m_height; ++y) {
       actPos=input->tell();
@@ -672,7 +684,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
     break;
   }
   case 8: {
-    bitmap.m_indexDataList.resize(size_t(bitmap.m_height*bitmap.m_width));
+    bitmap.m_indexDataList.resize(size_t(bitmap.m_height)*size_t(bitmap.m_width));
     size_t wPos=0;
     for (uint32_t y=0; y<bitmap.m_height; ++y) {
       actPos=input->tell();
@@ -683,7 +695,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
     break;
   }
   case 16: {
-    bitmap.m_colorDataList.resize(size_t(bitmap.m_height*bitmap.m_width));
+    bitmap.m_colorDataList.resize(size_t(bitmap.m_height)*size_t(bitmap.m_width));
     size_t wPos=0;
     for (uint32_t y=0; y<bitmap.m_height; ++y) {
       actPos=input->tell();
@@ -701,7 +713,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
   case 32: {
     unsigned char col[4]= {0,0,0,255};
     int const numComponent= bitmap.m_bitCount==24 ? 3 : 4;
-    bitmap.m_colorDataList.resize(size_t(bitmap.m_height*bitmap.m_width));
+    bitmap.m_colorDataList.resize(size_t(bitmap.m_height)*size_t(bitmap.m_width));
     size_t wPos=0;
     for (uint32_t y=0; y<bitmap.m_height; ++y) {
       actPos=input->tell();
@@ -715,7 +727,7 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
   }
   default:
     STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: find unexpected bit count %d\n", int(bitmap.m_bitCount)));
-    input->seek(actPos+long(bitmap.m_height*alignWidth), librevenge::RVNG_SEEK_SET);
+    input->seek(actPos+long(bitmap.m_height)*long(alignWidth), librevenge::RVNG_SEEK_SET);
     break;
   }
   return true;

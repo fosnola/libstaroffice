@@ -130,7 +130,7 @@ void DebugFile::write()
     ++noteIter;
   }
 
-  long actualPos = 0;
+  long actualPos = 0, lastAddr=-1;
   int numSkip = int(m_skipZones.size()), actSkip = (numSkip == 0) ? -1 : 0;
   long actualSkipEndPos = (numSkip == 0) ? -1 : m_skipZones[0].x();
 
@@ -143,6 +143,7 @@ void DebugFile::write()
     while (actualSkipEndPos != -1 && actualPos >= actualSkipEndPos) {
       printAdr = true;
       actualPos = m_skipZones[size_t(actSkip)].y()+1;
+      lastAddr=actualPos-1;
       m_file << "\nSkip : " << std::hex << std::setw(6) << actualSkipEndPos << "-"
              << actualPos-1 << "\n\n";
       m_input->seek(actualPos, librevenge::RVNG_SEEK_SET);
@@ -157,8 +158,10 @@ void DebugFile::write()
       ++noteIter;
     }
     bool printNote = noteIter != m_notes.end() && noteIter->m_pos == actualPos;
-    if (printAdr || (printNote && noteIter->m_breaking))
+    if (printAdr || (printNote && noteIter->m_breaking)) {
       m_file << "\n" << std::setw(6) << actualPos << " ";
+      lastAddr=actualPos;
+    }
     while (noteIter != m_notes.end() && noteIter->m_pos == actualPos) {
       if (noteIter->m_text.empty()) {
         ++noteIter;
@@ -174,6 +177,14 @@ void DebugFile::write()
     long ch = long(m_input->readULong(1));
     m_file << std::setw(2) << ch;
     actualPos++;
+    if (actualPos>lastAddr+20000) {
+      m_file << "[end skipped]....\n";
+      if (noteIter != m_notes.end()) {
+        m_input->seek(actualPos, librevenge::RVNG_SEEK_SET);
+        actualPos=noteIter->m_pos;
+      }
+      else break;
+    }
 
   }
   while (!m_input->isEnd());
