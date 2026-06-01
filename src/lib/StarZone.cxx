@@ -43,6 +43,8 @@
 
 #include "StarZone.hxx"
 
+constexpr size_t MAX_RECORD_NESTING = 1 << 10;
+
 ////////////////////////////////////////////////////////////
 // constructor/destructor, ...
 ////////////////////////////////////////////////////////////
@@ -404,6 +406,10 @@ bool StarZone::openSDRHeader(std::string &magic)
 {
   long pos=m_input->tell();
   if (!m_input->checkPosition(pos+4)) return false;
+  if (m_positionStack.size()>=MAX_RECORD_NESTING) {
+    STOFF_DEBUG_MSG(("StarZone::openSDRHeader: the record is nested too deeply\n"));
+    return false;
+  }
   // svdio.cxx: SdrIOHeader::Read
   magic="";
   for (int i=0; i<4; ++i) magic+=char(m_input->readULong(1));
@@ -508,6 +514,10 @@ bool StarZone::openSWRecord(unsigned char &type)
 {
   long pos=m_input->tell();
   if (!m_input->checkPosition(pos+4)) return false;
+  if (m_positionStack.size()>=MAX_RECORD_NESTING) {
+    STOFF_DEBUG_MSG(("StarZone::openSWRecord: the record is nested too deeply\n"));
+    return false;
+  }
   unsigned long val=m_input->readULong(4);
   type=static_cast<unsigned char>(val&0xff);
   if (!type) {
