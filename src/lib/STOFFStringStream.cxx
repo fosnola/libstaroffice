@@ -86,20 +86,21 @@ const unsigned char *STOFFStringStream::read(unsigned long numBytes, unsigned lo
   if (numBytes == 0 || !m_data)
     return nullptr;
 
-  long numBytesToRead;
+  if (m_data->m_offset < 0)
+    return nullptr;
 
-  if (static_cast<unsigned long>(m_data->m_offset)+numBytes < m_data->m_buffer.size())
-    numBytesToRead = long(numBytes);
-  else
-    numBytesToRead = long(m_data->m_buffer.size()) - m_data->m_offset;
+  unsigned long const bufSize = m_data->m_buffer.size();
+  unsigned long const pos = static_cast<unsigned long>(m_data->m_offset);
+  unsigned long const remaining = pos < bufSize ? bufSize - pos : 0;
+  unsigned long const numBytesToRead = numBytes < remaining ? numBytes : remaining;
 
-  numBytesRead = static_cast<unsigned long>(numBytesToRead); // about as paranoid as we can be..
+  numBytesRead = numBytesToRead; // about as paranoid as we can be..
 
   if (numBytesToRead == 0)
     return nullptr;
 
   long oldOffset = m_data->m_offset;
-  m_data->m_offset += numBytesToRead;
+  m_data->m_offset += long(numBytesToRead);
 
   return &m_data->m_buffer[size_t(oldOffset)];
 
