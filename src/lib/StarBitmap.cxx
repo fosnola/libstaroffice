@@ -559,6 +559,12 @@ bool StarBitmap::readBitmapData(STOFFInputStreamPtr &input, StarBitmapInternal::
       input->seek(lastWPos, librevenge::RVNG_SEEK_SET);
       return false;
     }
+    // two bytes of compressed data stand for at most 255 pixels
+    long const available=lastPos-input->tell();
+    if (available<=0 || lastWPos/255 > size_t(available)/2) {
+      STOFF_DEBUG_MSG(("StarBitmap::readBitmapData: the zone is too short for a %dx%d bitmap\n",int(bitmap.m_width),int(bitmap.m_height)));
+      return false;
+    }
     bitmap.m_indexDataList.resize(size_t(lastWPos),0);
     uint32_t x=0, y=0;
     while (true) {
