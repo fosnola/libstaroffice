@@ -2888,10 +2888,18 @@ bool StarObjectSpreadsheet::readSCMatrix(StarZone &zone, int /*version*/, long l
   uint16_t nCol, nRow;
   *input >> nCol >> nRow;
   f << "dim=" << nCol << "x" << nRow << ",";
-  int nCell=int(nCol)*int(nRow);
+  // each cell begins with a type byte
+  long nCell=long(nCol)*long(nRow);
+  if (input->tell()+nCell > lastPos) {
+    STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSCMatrix: can not read the values\n"));
+    f << "###dim";
+    ascFile.addPos(pos);
+    ascFile.addNote(f.str().c_str());
+    return false;
+  }
   bool ok=true;
   f << "values=[";
-  for (int i=0; i<nCell; ++i) {
+  for (long i=0; i<nCell; ++i) {
     uint8_t type;
     *input>>type;
     if ((i%nCol)==0) f << "[";
