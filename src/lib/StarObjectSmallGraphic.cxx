@@ -1159,6 +1159,7 @@ public:
       std::shared_ptr<StarObject> localObj;
       if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture, localObj) || localPicture.isEmpty()) {
         if (localObj) {
+          STOFFOLEParser::OleDirectoryInUse inUse(dir);
           auto chart=std::dynamic_pointer_cast<StarObjectChart>(localObj);
           if (chart && chart->send(listener, state.m_frame, state.m_graphic)) {
             if (m_graphic && !m_graphic->m_object.isEmpty()) {
