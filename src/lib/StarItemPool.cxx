@@ -382,6 +382,17 @@ struct State {
   void clean()
   {
     if (m_secondaryPool) m_secondaryPool->clean();
+    // an attribute can store an item which refers back to it, so the items
+    // go first
+    for (auto &slot : m_slotIdToValuesMap) {
+      if (slot.second.m_default) slot.second.m_default->clean();
+      for (auto &value : slot.second.m_idValueMap) {
+        if (value.second) value.second->clean();
+      }
+    }
+    for (auto &def : m_idToDefaultMap) {
+      if (def.second) def.second->clean();
+    }
     m_versionList.clear();
     m_idToAttributeList.clear();
     m_slotIdToValuesMap.clear();

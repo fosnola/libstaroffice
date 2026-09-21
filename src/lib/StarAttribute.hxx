@@ -740,6 +740,10 @@ public:
   }
   //! create a new attribute
   virtual std::shared_ptr<StarAttribute> create() const=0;
+  //! release the items the attribute stores
+  virtual void clean()
+  {
+  }
   //! read an attribute zone
   virtual bool read(StarZone &zone, int vers, long endPos, StarObject &document)=0;
   //! add to a state
@@ -1039,6 +1043,11 @@ public:
   bool read(StarZone &zone, int vers, long endPos, StarObject &object) override;
   //! debug function to print the data
   void print(libstoff::DebugStream &o, std::set<StarAttribute const *> &done) const override;
+  //! release the items the attribute stores
+  void clean() override
+  {
+    m_itemSet.m_whichToItemMap.clear();
+  }
 
 protected:
   //! add to a state
