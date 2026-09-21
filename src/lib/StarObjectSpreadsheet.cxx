@@ -1633,8 +1633,7 @@ try
       }
       uint32_t nRange;
       *input >> nRange;
-      if (uint32_t(zone.getRecordLastPosition()-input->tell())<nRange ||
-          static_cast<unsigned long>(input->tell())+8*static_cast<unsigned long>(nRange)<=static_cast<unsigned long>(zone.getRecordLastPosition())) {
+      if (input->tell()+8*long(nRange)<=zone.getRecordLastPosition()) {
         f << "ranges=[";
         for (uint32_t j=0; j<nRange; ++j)
           f << std::hex << input->readULong(4) << "<->" << input->readULong(4) << std::dec << ",";
