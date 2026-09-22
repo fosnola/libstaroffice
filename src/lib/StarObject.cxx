@@ -55,14 +55,17 @@ struct State {
   //! constructor
   State()
     : m_poolList()
+    , m_createdPoolList(new std::vector<std::weak_ptr<StarItemPool> >)
     , m_attributeManager(new StarAttributeManager)
     , m_formatManager(new StarFormatManager)
   {
   }
   //! copy constructor
   State(State const &) = default;
-  //! the list of pool
+  //! the list of pool known by this object
   std::vector<std::shared_ptr<StarItemPool> > m_poolList;
+  //! every pool created under the document, shared with the states copied from this one
+  std::shared_ptr<std::vector<std::weak_ptr<StarItemPool> > > m_createdPoolList;
   //! the attribute manager
   std::shared_ptr<StarAttributeManager> m_attributeManager;
   //! the format manager
@@ -105,10 +108,12 @@ StarObject::~StarObject()
 
 void StarObject::cleanPools()
 {
-  for (auto &p : m_state->m_poolList) {
-    if (p)
-      p->clean();
+  for (auto &p : *m_state->m_createdPoolList) {
+    auto pool=p.lock();
+    if (pool)
+      pool->clean();
   }
+  m_state->m_createdPoolList->clear();
   m_state->m_poolList.clear();
 }
 
@@ -143,6 +148,7 @@ std::shared_ptr<StarItemPool> StarObject::getNewItemPool(StarItemPool::Type type
 {
   std::shared_ptr<StarItemPool> pool(new StarItemPool(*this, type));
   m_state->m_poolList.push_back(pool);
+  m_state->m_createdPoolList->push_back(pool);
   return pool;
 }
 

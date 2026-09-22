@@ -323,7 +323,7 @@ public:
     auto pool=object.findItemPool(StarItemPool::T_XOutdevPool, false);
     StarState state(pool.get(), object);
     if (std::dynamic_pointer_cast<STOFFTextListener>(listener))
-      state.m_global->m_offset=state.convertVectorInPoint(STOFFVec2f(float(-m_anchorPosition[0]),float(-m_anchorPosition[1])));
+      state.m_global->m_offset=state.convertVectorInPoint(STOFFVec2f(-float(m_anchorPosition[0]),-float(m_anchorPosition[1])));
     return state;
   }
   //! try to update the graphic style
@@ -1159,6 +1159,7 @@ public:
       std::shared_ptr<StarObject> localObj;
       if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture, localObj) || localPicture.isEmpty()) {
         if (localObj) {
+          STOFFOLEParser::OleDirectoryInUse inUse(dir);
           auto chart=std::dynamic_pointer_cast<StarObjectChart>(localObj);
           if (chart && chart->send(listener, state.m_frame, state.m_graphic)) {
             if (m_graphic && !m_graphic->m_object.isEmpty()) {

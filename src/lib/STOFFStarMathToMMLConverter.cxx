@@ -2095,7 +2095,7 @@ bool Parser::convert(librevenge::RVNGString const &starMath, std::vector<LexerDa
         }
         else {
           newData.m_string=actData.m_string+dataList[++i].m_string;
-          if (!std::isalpha(dataList[i+1].m_string[0])) // ()[]
+          if (!std::isalpha(dataList[i].m_string[0])) // ()[]
             newData.m_type=LexerData::Special;
         }
         lexList.push_back(newData);

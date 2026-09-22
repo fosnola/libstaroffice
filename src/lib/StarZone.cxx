@@ -534,6 +534,12 @@ bool StarZone::openSWRecord(unsigned char &type)
     else {
       STOFF_DEBUG_MSG(("StarZone::openSWRecord: can not find size for a zone, we may have some problem\n"));
     }
+    // the size table is read from the file, so it can give a record which
+    // ends before the four bytes of header just read
+    if (endPos && endPos<pos+4) {
+      STOFF_DEBUG_MSG(("StarZone::openSWRecord: the recorded size is too small\n"));
+      return false;
+    }
   }
   else {
     if (sz<4) {

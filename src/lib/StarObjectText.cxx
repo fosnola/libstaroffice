@@ -258,6 +258,7 @@ bool OLEZone::send(STOFFListenerPtr &listener, StarState &state) const
       STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: sorry, can not find object %s\n", m_name.cstr()));
       return false;
     }
+    STOFFOLEParser::OleDirectoryInUse inUse(dir);
     auto chart=std::dynamic_pointer_cast<StarObjectChart>(localObj);
     if (chart && chart->send(listener, state.m_frame, style))
       return true;

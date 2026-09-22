@@ -232,6 +232,26 @@ public:
     mutable bool m_inUse;
   };
 
+  /** marks a directory as in use for the lifetime of this object */
+  struct OleDirectoryInUse {
+    //! constructor
+    explicit OleDirectoryInUse(std::shared_ptr<OleDirectory> dir)
+      : m_dir(dir)
+    {
+      if (m_dir) m_dir->m_inUse=true;
+    }
+    //! destructor
+    ~OleDirectoryInUse()
+    {
+      if (m_dir) m_dir->m_inUse=false;
+    }
+    //! the directory
+    std::shared_ptr<OleDirectory> m_dir;
+  private:
+    OleDirectoryInUse(OleDirectoryInUse const &orig) = delete;
+    OleDirectoryInUse &operator=(OleDirectoryInUse const &orig) = delete;
+  };
+
 protected:
   //! the summary information
   static bool readSummaryInformation(STOFFInputStreamPtr input, std::string const &oleName,
