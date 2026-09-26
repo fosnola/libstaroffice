@@ -420,6 +420,7 @@ bool StarFileManager::readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser
       }
       asciiFile.reset();
     }
+    object.cleanPools();
   }
   // finally look if some content have image
   for (auto &content : ole->m_contentList) {
