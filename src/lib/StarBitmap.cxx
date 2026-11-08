@@ -337,6 +337,15 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
       break;
     }
     (void)inflateEnd(&strm);
+    converted.resize(size_t(strm.total_out));
+    if (converted.empty()) {
+      STOFF_DEBUG_MSG(("StarBitmap::readBitmap: the stream decodes to nothing\n"));
+      f << "###inflateEmpty,";
+      ascFile.addPos(pos);
+      ascFile.addNote(f.str().c_str());
+      input->seek(lastPos, librevenge::RVNG_SEEK_SET);
+      return true;
+    }
     std::shared_ptr<librevenge::RVNGInputStream> newStream(new STOFFStringStream(&converted[0], unsigned(converted.size())));
     dInput.reset(new STOFFInputStream(newStream, input->readInverted()));
     dataPos=offset=0;
