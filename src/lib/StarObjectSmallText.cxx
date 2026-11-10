@@ -108,7 +108,7 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState
         done=true;
       }
 #endif
-      for (auto it : style->m_itemSet.m_whichToItemMap) {
+      for (auto const &it : style->m_itemSet.m_whichToItemMap) {
         if (it.second && it.second->m_attribute)
           it.second->m_attribute->addTo(mainState);
       }
