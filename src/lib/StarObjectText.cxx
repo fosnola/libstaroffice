@@ -917,20 +917,18 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
   // chart sch_docshell.cxx SchChartDocShell::Load
   auto pool=getNewItemPool(StarItemPool::T_WriterPool);
   auto mainPool=pool;
+  bool extraPool=false;
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
     long pos=input->tell();
-    bool extraPool=false;
-    if (!pool) {
-      extraPool=true;
+    if (extraPool)
       pool=getNewItemPool(StarItemPool::T_Unknown);
-    }
-    if (pool && pool->read(zone)) {
+    if (pool->read(zone)) {
       if (extraPool) {
         STOFF_DEBUG_MSG(("StarObjectText::readSfxStyleSheets: create extra pool of type %d\n", int(pool->getType())));
       }
       if (!mainPool) mainPool=pool;
-      pool.reset();
+      extraPool=true;
       continue;
     }
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1626,20 +1624,18 @@ try
   pool->setRelativeUnit(0.05);
   pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
 
+  bool extraPool=false;
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
     long pos=input->tell();
-    bool extraPool=false;
-    if (!pool) {
-      extraPool=true;
+    if (extraPool)
       pool=getNewItemPool(StarItemPool::T_Unknown);
-    }
-    if (pool && pool->read(zone)) {
+    if (pool->read(zone)) {
       if (extraPool) {
         STOFF_DEBUG_MSG(("StarObjectText::readDrawingLayer: create extra pool for %d of type %d\n",
                          int(getDocumentKind()), int(pool->getType())));
       }
-      pool.reset();
+      extraPool=true;
       continue;
     }
     input->seek(pos, librevenge::RVNG_SEEK_SET);

@@ -656,21 +656,19 @@ bool StarObject::readSfxStyleSheets(STOFFInputStreamPtr input, std::string const
     pool->addSecondaryPool(getNewItemPool(StarItemPool::T_EditEnginePool));
   }
   auto mainPool=pool;
+  bool extraPool=!pool;
   while (!input->isEnd()) {
     // REMOVEME: remove this loop, when creation of secondary pool is checked
     long pos=input->tell();
-    bool extraPool=false;
-    if (!pool) {
-      extraPool=true;
+    if (extraPool)
       pool=getNewItemPool(StarItemPool::T_Unknown);
-    }
-    if (pool && pool->read(zone)) {
+    if (pool->read(zone)) {
       if (extraPool) {
         STOFF_DEBUG_MSG(("StarObject::readSfxStyleSheets: create extra pool for %d of type %d\n",
                          int(getDocumentKind()), int(pool->getType())));
       }
       if (!mainPool) mainPool=pool;
-      pool.reset();
+      extraPool=true;
       continue;
     }
     input->seek(pos, librevenge::RVNG_SEEK_SET);
