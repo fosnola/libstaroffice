@@ -420,9 +420,9 @@ bool SDGParser::checkHeader(STOFFHeader *header, bool /*strict*/)
   *m_state = SDGParserInternal::State();
 
   STOFFInputStreamPtr input = getInput();
-  input->setReadInverted(true);
   if (!input || !input->hasDataFork() || input->isStructured() || input->size()<30)
     return false;
+  input->setReadInverted(true);
   input->seek(0, librevenge::RVNG_SEEK_SET);
   if (input->readULong(4)!=0x33414753) // SGA3
     return false;
