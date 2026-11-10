@@ -259,7 +259,7 @@ bool PageDesc::read(StarZone &zone, StarObject &object)
       done=StarWriterStruct::Attribute::readList(zone, attributeList, object);
       if (!done) break;
       if (whichAttrib<2) // first master, second left
-        m_attributes[whichAttrib++]=attributeList;
+        m_attributes[whichAttrib++]=std::move(attributeList);
       else {
         STOFF_DEBUG_MSG(("StarObjectPageStyleInternal::PageDesc::read: unexpected attribute list\n"));
       }
@@ -270,7 +270,7 @@ bool PageDesc::read(StarZone &zone, StarObject &object)
       std::shared_ptr<NoteDesc> desc(new NoteDesc(rType=='1'));
       done=desc->read(zone);
       if (done)
-        m_noteDesc[rType=='1' ? 0 : 1]=desc;
+        m_noteDesc[rType=='1' ? 0 : 1]=std::move(desc);
       break;
     }
     default:

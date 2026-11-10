@@ -64,7 +64,7 @@ StarEncryption::StarEncryption(std::string const &password) : m_password()
     m_password.clear();
     return;
   }
-  m_password=data;
+  m_password=std::move(data);
 }
 
 StarEncryption::~StarEncryption()
@@ -166,7 +166,7 @@ bool StarEncryption::guessPassword(uint32_t date, uint32_t time, std::vector<uin
     STOFF_DEBUG_MSG(("StarEncryption::guessPassword: find %d password with %d end space\n", numMaxSpace, maxSpace));
     return false;
   }
-  m_password=bestCryptPassword;
+  m_password=std::move(bestCryptPassword);
   return true;
 }
 

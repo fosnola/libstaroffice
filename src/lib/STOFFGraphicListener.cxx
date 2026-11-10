@@ -831,7 +831,7 @@ void STOFFGraphicListener::_changeList()
       return;
     }
     m_listManager->needToSend(newListId, m_ds->m_sentListMarkers);
-    m_ps->m_list = theList;
+    m_ps->m_list = std::move(theList);
     m_ps->m_list->setLevel(int(newLevel));
   }
 
@@ -997,7 +997,7 @@ bool STOFFGraphicListener::insertHeaderRegion(STOFFSubDocumentPtr subDocument, l
     STOFF_DEBUG_MSG(("STOFFGraphicListener::insertHeaderRegion: Oops can not open a new region\n"));
     return false;
   }
-  handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER_REGION);
+  handleSubDocument(std::move(subDocument), libstoff::DOC_HEADER_FOOTER_REGION);
   return true;
 }
 
@@ -1051,7 +1051,7 @@ bool STOFFGraphicListener::insertFooterRegion(STOFFSubDocumentPtr subDocument, l
     STOFF_DEBUG_MSG(("STOFFGraphicListener::insertHeaderRegion: Oops can not open a new region\n"));
     return false;
   }
-  handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER_REGION);
+  handleSubDocument(std::move(subDocument), libstoff::DOC_HEADER_FOOTER_REGION);
   return true;
 }
 
@@ -1309,7 +1309,7 @@ void STOFFGraphicListener::insertTextBox
     _openPageSpan();
   if (m_ps->m_isTextBoxOpened) {
     STOFF_DEBUG_MSG(("STOFFGraphicListener::insertTextBox: can not insert a textbox in a textbox\n"));
-    handleSubDocument(subDocument, libstoff::DOC_TEXT_BOX);
+    handleSubDocument(std::move(subDocument), libstoff::DOC_TEXT_BOX);
     return;
   }
   if (!openFrame(frame))

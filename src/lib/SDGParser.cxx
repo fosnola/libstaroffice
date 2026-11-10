@@ -230,7 +230,7 @@ void SDGParser::createDocument(librevenge::RVNGDrawingInterface *documentInterfa
   std::vector<STOFFPageSpan> pageList;
   STOFFPageSpan ps(getPageSpan());
   ps.m_pageSpan=numImages ? numImages : 1;
-  pageList.push_back(ps);
+  pageList.push_back(std::move(ps));
   STOFFGraphicListenerPtr listen(new STOFFGraphicListener(getParserState()->m_listManager, pageList, documentInterface));
   setGraphicListener(listen);
 
@@ -385,7 +385,7 @@ bool SDGParser::readBitmap(StarZone &zone)
     if (findText) break;
   }
   if (!image.m_object.isEmpty())
-    m_state->m_imagesList.push_back(image);
+    m_state->m_imagesList.push_back(std::move(image));
   if (input->checkPosition(input->tell()+2)) {
     long actPos=input->tell();
     val=int(input->readULong(2));

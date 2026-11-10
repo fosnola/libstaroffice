@@ -144,7 +144,7 @@ void SDWParser::createDocument(librevenge::RVNGTextInterface *documentInterface)
   if (!m_state->m_mainText || !m_state->m_mainText->updatePageSpans(pageList, m_state->m_numPages)) {
     STOFFPageSpan ps(getPageSpan());
     ps.m_pageSpan=1;
-    pageList.push_back(ps);
+    pageList.push_back(std::move(ps));
     m_state->m_numPages = 1;
   }
   STOFFTextListenerPtr listen(new STOFFTextListener(getParserState()->m_listManager, pageList, documentInterface));

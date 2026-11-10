@@ -210,7 +210,7 @@ bool StarObject::parse()
     }
     if (base=="SfxPreview") {
       content.setParsed(true);
-      readSfxPreview(ole, name);
+      readSfxPreview(std::move(ole), name);
       continue;
     }
     if (base=="SfxDocumentInfo") {
@@ -279,7 +279,7 @@ bool StarObject::readItemSet(StarZone &zone, std::vector<STOFFVec2i> const &/*li
     pos=input->tell();
     auto item=pool->readItem(zone, isDirect, lastPos);
     if (item && input->tell()<=lastPos) {
-      itemSet.add(item);
+      itemSet.add(std::move(item));
       continue;
     }
     input->seek(pos, librevenge::RVNG_SEEK_SET);

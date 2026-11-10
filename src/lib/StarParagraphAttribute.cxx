@@ -685,7 +685,7 @@ void StarPAttributeBulletNumeric::addTo(StarState &state, std::set<StarAttribute
       libstoff::appendUnicode(0x2022, bullet); // checkme
       level.m_propertyList.insert("text:bullet-char", bullet);
     }
-    state.m_paragraph.m_listLevel=level;
+    state.m_paragraph.m_listLevel=std::move(level);
   }
 }
 

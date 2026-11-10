@@ -77,7 +77,7 @@ StarZone::~StarZone()
 void StarZone::setInput(STOFFInputStreamPtr ip)
 {
   m_input=ip;
-  m_ascii.setStream(ip);
+  m_ascii.setStream(std::move(ip));
 }
 
 bool StarZone::readString(std::vector<uint32_t> &string, std::vector<size_t> &srcPositions, int encoding, bool chckEncryption) const

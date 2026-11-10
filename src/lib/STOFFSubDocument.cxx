@@ -37,7 +37,7 @@
 
 STOFFSubDocument::STOFFSubDocument(STOFFParser *pars, STOFFInputStreamPtr ip, STOFFEntry const &z)
   : m_parser(pars)
-  , m_input(ip)
+  , m_input(std::move(ip))
   , m_zone(z)
 {
 }

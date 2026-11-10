@@ -261,7 +261,7 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
     interface->openChartTextObject(textZone);
     if (zone.m_contentType==TextZone::C_Text) {
       std::shared_ptr<STOFFSubDocument> doc(new STOFFChartInternal::SubDocument(this, zone.m_type));
-      listener->handleSubDocument(doc, libstoff::DOC_CHART_ZONE);
+      listener->handleSubDocument(std::move(doc), libstoff::DOC_CHART_ZONE);
     }
     interface->closeChartTextObject();
   }

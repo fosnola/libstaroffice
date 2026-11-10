@@ -978,7 +978,7 @@ bool StarPAttributeFrameHF::read(StarZone &zone, int /*vers*/, long endPos, Star
   if (input->tell()<endPos) {
     std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
     if (object.getFormatManager()->readSWFormatDef(zone,'r',format, object))
-      m_format=format;
+      m_format=std::move(format);
   }
   printData(f);
   ascFile.addPos(pos);
@@ -1037,7 +1037,7 @@ bool StarPAttributePageHF::read(StarZone &zone, int /*vers*/, long endPos, StarO
       input->seek(actPos, librevenge::RVNG_SEEK_SET);
       ok=false;
     }
-    z=smallText;
+    z=std::move(smallText);
   }
   printData(f);
   ascFile.addPos(pos);

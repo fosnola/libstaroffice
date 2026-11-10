@@ -258,7 +258,7 @@ bool OLEZone::send(STOFFListenerPtr &listener, StarState &state) const
       STOFF_DEBUG_MSG(("StarObjectTextInternal::OLEZone::send: sorry, can not find object %s\n", m_name.cstr()));
       return false;
     }
-    STOFFOLEParser::OleDirectoryInUse inUse(dir);
+    STOFFOLEParser::OleDirectoryInUse inUse(std::move(dir));
     auto chart=std::dynamic_pointer_cast<StarObjectChart>(localObj);
     if (chart && chart->send(listener, state.m_frame, style))
       return true;
@@ -770,7 +770,7 @@ bool StarObjectText::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int &
     STOFFPageSpan ps;
     ps.m_pageSpan=numPages;
     pageSpan.clear();
-    pageSpan.push_back(ps);
+    pageSpan.push_back(std::move(ps));
   }
   m_textState->m_numPages=numPages;
   if (m_textState->m_model) {
@@ -849,7 +849,7 @@ bool StarObjectText::parse()
         StarZone zone(ole, name, "StarNumericList", getPassword());
         std::shared_ptr<StarObjectNumericRuler> numericRuler(new StarObjectNumericRuler(*this,true));
         if (numericRuler->read(zone))
-          m_textState->m_numericRuler=numericRuler;
+          m_textState->m_numericRuler=std::move(numericRuler);
       }
       catch (...) {
       }
@@ -860,7 +860,7 @@ bool StarObjectText::parse()
         StarZone zone(ole, name, "StarPageStyleSheets", getPassword());
         std::shared_ptr<StarObjectPageStyle> pageStyle(new StarObjectPageStyle(*this,true));
         if (pageStyle->read(zone))
-          m_textState->m_pageStyle=pageStyle;
+          m_textState->m_pageStyle=std::move(pageStyle);
       }
       catch (...) {
       }
@@ -868,7 +868,7 @@ bool StarObjectText::parse()
     }
 
     if (base=="DrawingLayer") {
-      readDrawingLayer(ole,name);
+      readDrawingLayer(std::move(ole),name);
       continue;
     }
     if (base=="SfxStyleSheets") {
@@ -896,7 +896,7 @@ bool StarObjectText::parse()
     STOFF_DEBUG_MSG(("StarObjectText::parser: can not find the main writer document\n"));
     return false;
   }
-  readWriterDocument(mainOle,mainName);
+  readWriterDocument(std::move(mainOle),mainName);
   return true;
 }
 
@@ -1008,7 +1008,7 @@ bool StarObjectText::readSWContent(StarZone &zone, std::shared_ptr<StarObjectTex
       done=table->read(zone, *this);
       if (done) {
         std::shared_ptr<StarObjectTextInternal::Table> tableZone(new StarObjectTextInternal::Table);
-        tableZone->m_table=table;
+        tableZone->m_table=std::move(table);
         content->m_zoneList.push_back(tableZone);
       }
       break;
@@ -1515,7 +1515,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone, std::shared_ptr<StarObjectTe
     case 'R': {
       std::shared_ptr<STOFFList> list;
       done=StarObjectNumericRuler::readList(zone,list);
-      if (done && list) textZone->m_list=list;
+      if (done && list) textZone->m_list=std::move(list);
       break;
     }
     case 'S':
@@ -1525,7 +1525,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone, std::shared_ptr<StarObjectTe
       std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
       done=getFormatManager()->readSWFormatDef(zone,'l', format, *this);
       if (done && format)
-        textZone->m_formatList.push_back(format);
+        textZone->m_formatList.push_back(std::move(format));
       break;
     }
     case 'o': { //

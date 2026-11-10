@@ -297,7 +297,7 @@ bool TableBox::read(Table &table, StarZone &zone, StarObjectText &object, STOFFB
         if (boxCPos[0][i]>maxPos[i])
           maxPos[i]=boxCPos[0][i];
       }
-      m_lineList.push_back(line);
+      m_lineList.push_back(std::move(line));
       continue;
     }
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -424,7 +424,7 @@ bool TableLine::read(Table &table, StarZone &zone, StarObjectText &object, STOFF
         if (boxCPos[0][i]>maxPos[i])
           maxPos[i]=boxCPos[0][i];
       }
-      m_boxList.push_back(box);
+      m_boxList.push_back(std::move(box));
       continue;
     }
     input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -565,7 +565,7 @@ bool Table::read(StarZone &zone, StarObjectText &object)
     cPos.max()[0]=200;
     if (line->read(*this, zone, object, cPos)) {
       if (cPos.min()[0]>maxCol) maxCol=cPos.min()[0];
-      m_lineList.push_back(line);
+      m_lineList.push_back(std::move(line));
       continue;
     }
     STOFF_DEBUG_MSG(("StarTableInternal::Table::read: can not read a table line\n"));
@@ -674,7 +674,7 @@ bool StarTable::read(StarZone &zone, StarObjectText &object)
 
 bool StarTable::send(STOFFListenerPtr listener, StarState &state) const
 {
-  return m_table->send(listener, state);
+  return m_table->send(std::move(listener), state);
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

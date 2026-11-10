@@ -658,7 +658,7 @@ bool STOFFTextListener::insertHeaderRegion(STOFFSubDocumentPtr subDocument, libr
     return false;
   }
   m_ds->m_isHeaderFooterRegionOpened=true;
-  handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER_REGION);
+  handleSubDocument(std::move(subDocument), libstoff::DOC_HEADER_FOOTER_REGION);
   m_ds->m_isHeaderFooterRegionOpened=false;
   return true;
 }
@@ -693,7 +693,7 @@ bool STOFFTextListener::insertFooterRegion(STOFFSubDocumentPtr subDocument, libr
     return false;
   }
   m_ds->m_isHeaderFooterRegionOpened=true;
-  handleSubDocument(subDocument, libstoff::DOC_HEADER_FOOTER_REGION);
+  handleSubDocument(std::move(subDocument), libstoff::DOC_HEADER_FOOTER_REGION);
   m_ds->m_isHeaderFooterRegionOpened=false;
   return true;
 }
@@ -967,7 +967,7 @@ void STOFFTextListener::_changeList()
       return;
     }
     m_listManager->needToSend(newListId, m_ds->m_sentListMarkers);
-    m_ps->m_list = theList;
+    m_ps->m_list = std::move(theList);
     m_ps->m_list->setLevel(static_cast<int>(newLevel));
   }
 
@@ -1160,7 +1160,7 @@ void STOFFTextListener::insertTextBox
     propList.insert("librevenge:next-frame-name",frameStyle.m_propertyList["librevenge:next-frame-name"]->getStr());
   STOFFGraphicStyle::checkForPadding(propList);
   m_documentInterface->openTextBox(propList);
-  handleSubDocument(subDocument, libstoff::DOC_TEXT_BOX);
+  handleSubDocument(std::move(subDocument), libstoff::DOC_TEXT_BOX);
   m_documentInterface->closeTextBox();
 
   closeFrame();

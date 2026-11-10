@@ -347,7 +347,7 @@ bool StarBitmap::readBitmap(StarZone &zone, bool inFileHeader, long lastPos, lib
       return true;
     }
     std::shared_ptr<librevenge::RVNGInputStream> newStream(new STOFFStringStream(&converted[0], unsigned(converted.size())));
-    dInput.reset(new STOFFInputStream(newStream, input->readInverted()));
+    dInput.reset(new STOFFInputStream(std::move(newStream), input->readInverted()));
     dataPos=offset=0;
     endDataPos=dInput->size();
 #else

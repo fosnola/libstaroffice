@@ -95,7 +95,7 @@ bool FormatDef::send(STOFFListenerPtr listener, StarState &state) const
   if (attrib)
     attrib->send(listener, state);
   else if (state.m_global->m_objectModel && m_values[2]>=0)
-    state.m_global->m_objectModel->sendObject(m_values[2], listener, state);
+    state.m_global->m_objectModel->sendObject(m_values[2], std::move(listener), state);
   else {
     STOFF_DEBUG_MSG(("StarFormatManagerInternal::FormatDef::send: can not find any data to send %d\n", m_values[2]));
   }
@@ -960,7 +960,7 @@ bool StarFormatManager::readNumberFormatter(StarZone &zone)
         f << "###[" << subForm << "],";
         break;
       }
-      subFormat=subForm;
+      subFormat=std::move(subForm);
     }
     form.m_extra=f.str();
     if (ok && m_state->m_idNumberFormatMap.find(unsigned(id))==m_state->m_idNumberFormatMap.end())
@@ -1037,7 +1037,7 @@ bool StarFormatManager::readSWFlyFrameList(StarZone &zone, StarObject &doc, std:
     int rType=input->peek();
     std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
     if ((rType=='o' || rType=='l') && readSWFormatDef(zone, static_cast<unsigned char>(rType), format, doc)) {
-      if (format) listFormats.push_back(format);
+      if (format) listFormats.push_back(std::move(format));
       continue;
     }
     input->seek(pos, librevenge::RVNG_SEEK_SET);

@@ -236,7 +236,7 @@ public:
   struct OleDirectoryInUse {
     //! constructor
     explicit OleDirectoryInUse(std::shared_ptr<OleDirectory> dir)
-      : m_dir(dir)
+      : m_dir(std::move(dir))
     {
       if (m_dir) m_dir->m_inUse=true;
     }

@@ -63,7 +63,7 @@ public:
   }
   //! constructor from attribute
   StarItem(std::shared_ptr<StarAttribute> attribute, int which)
-    : m_attribute(attribute)
+    : m_attribute(std::move(attribute))
     , m_which(which)
     , m_surrogateId(0)
     , m_localId(false)

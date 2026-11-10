@@ -45,7 +45,7 @@
 #include "STOFFInputStream.hxx"
 
 STOFFInputStream::STOFFInputStream(std::shared_ptr<librevenge::RVNGInputStream> inp, bool inverted)
-  : m_stream(inp)
+  : m_stream(std::move(inp))
   , m_streamSize(0)
   , m_inverseRead(inverted)
 {
@@ -538,7 +538,7 @@ std::shared_ptr<STOFFInputStream> STOFFInputStream::getSubStreamByName(std::stri
 
   if (!res)
     return empty;
-  std::shared_ptr<STOFFInputStream> inp(new STOFFInputStream(res,m_inverseRead));
+  std::shared_ptr<STOFFInputStream> inp(new STOFFInputStream(std::move(res),m_inverseRead));
   inp->seek(0, librevenge::RVNG_SEEK_SET);
   return inp;
 }
@@ -558,7 +558,7 @@ std::shared_ptr<STOFFInputStream> STOFFInputStream::getSubStreamById(unsigned id
 
   if (!res)
     return empty;
-  std::shared_ptr<STOFFInputStream> inp(new STOFFInputStream(res,m_inverseRead));
+  std::shared_ptr<STOFFInputStream> inp(new STOFFInputStream(std::move(res),m_inverseRead));
   inp->seek(0, librevenge::RVNG_SEEK_SET);
   return inp;
 }

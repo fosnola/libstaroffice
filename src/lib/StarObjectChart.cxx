@@ -183,7 +183,7 @@ bool StarObjectChart::parse()
       continue;
     }
     if (base=="StarChartDocument") {
-      readChartDocument(ole,name);
+      readChartDocument(std::move(ole),name);
       continue;
     }
     if (base!="BasicManager2") {
@@ -255,7 +255,7 @@ try
     ascFile.addNote("SCChartDocument:###SdrModel");
     return true;
   }
-  m_chartState->m_model=model;
+  m_chartState->m_model=std::move(model);
   pos=input->tell();
   if (input->isEnd()) {
     STOFF_DEBUG_MSG(("StarObjectChart::readChartDocument: find no attribute\n"));

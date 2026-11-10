@@ -323,7 +323,7 @@ bool StarFileManager::readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser
       if (!draw.updatePageSpans(pageList, numPages)) {
         STOFFPageSpan ps;
         ps.m_pageSpan=1;
-        pageList.push_back(ps);
+        pageList.push_back(std::move(ps));
       }
       STOFFGraphicListenerPtr graphicListener(new STOFFGraphicListener(STOFFListManagerPtr(), pageList, &graphicEncoder));
       graphicListener->startDocument();
@@ -408,7 +408,7 @@ bool StarFileManager::readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser
 
       bool ok=false;
       if (base=="OutPlace Object")
-        ok=readOutPlaceObject(stream, asciiFile);
+        ok=readOutPlaceObject(std::move(stream), asciiFile);
       if (!ok) {
         libstoff::DebugStream f;
         if (base=="Standard") // can be Standard or STANDARD
@@ -491,7 +491,7 @@ void StarFileManager::checkUnparsed(STOFFInputStreamPtr input, std::shared_ptr<S
 
       if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
         librevenge::RVNGBinaryData data;
-        readImageDocument(ole,data,name);
+        readImageDocument(std::move(ole),data,name);
         continue;
       }
       if (base.compare(0,3,"Pic")==0) {
@@ -565,7 +565,7 @@ bool StarFileManager::readEmbeddedPicture(std::shared_ptr<STOFFOLEParser> olePar
   }
   librevenge::RVNGBinaryData data;
   std::string type;
-  if (!readEmbeddedPicture(ole,data,type,name))
+  if (!readEmbeddedPicture(std::move(ole),data,type,name))
     return false;
   image.add(data, type);
   return true;

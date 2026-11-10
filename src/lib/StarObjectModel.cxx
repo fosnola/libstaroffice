@@ -389,7 +389,7 @@ bool StarObjectModel::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int 
       masterName.sprintf("Master%d", id);
       ps.m_propertiesList[0].insert("librevenge:master-page-name", masterName);
     }
-    pageSpan.push_back(ps);
+    pageSpan.push_back(std::move(ps));
   }
   number=int(m_modelState->m_pageToSendList.size());
   return number!=0;
@@ -722,7 +722,7 @@ bool StarObjectModel::read(StarZone &zone)
     if (magic=="DrLS") {
       StarObjectModelInternal::LayerSet layers;
       if (readSdrLayerSet(zone, layers)) {
-        m_modelState->m_layerSetList.push_back(layers);
+        m_modelState->m_layerSetList.push_back(std::move(layers));
         continue;
       }
     }
@@ -732,7 +732,7 @@ bool StarObjectModel::read(StarZone &zone)
         if (magic=="DrPg")
           m_modelState->m_pageList.push_back(page);
         else
-          m_modelState->m_masterPageList.push_back(page);
+          m_modelState->m_masterPageList.push_back(std::move(page));
         continue;
       }
     }
@@ -1090,7 +1090,7 @@ std::shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(Star
     if (background) {
       std::shared_ptr<StarObjectSmallGraphic> smallGraphic(new StarObjectSmallGraphic(*this, true));
       if (smallGraphic->readSdrObject(zone))
-        page->m_background=smallGraphic;
+        page->m_background=std::move(smallGraphic);
       else {
         STOFF_DEBUG_MSG(("StarObjectModel::readSdrPage: can not find backgroound object\n"));
         input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1245,7 +1245,7 @@ bool StarObjectModel::readSdrMPageDesc(StarZone &zone, StarObjectModelInternal::
     layers.push_back(int(input->readULong(1)));
   StarObjectModelInternal::convertUint8ListToBoolList(layers, desc.m_layerList);
   f << desc;
-  page.m_masterPageDescList.push_back(desc);
+  page.m_masterPageDescList.push_back(std::move(desc));
   ascFile.addPos(pos);
   ascFile.addNote(f.str().c_str());
   zone.closeSDRHeader("SdrMPageDesc");

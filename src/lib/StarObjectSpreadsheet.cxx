@@ -317,14 +317,14 @@ public:
       if (it->first[0]!=actPos[1]+1 || newAttrib.get()!=actAttribute.get()) {
         if (actAttribute)
           m_colToAttributeMap[actPos]=actAttribute;
-        actAttribute=newAttrib;
+        actAttribute=std::move(newAttrib);
         actPos=STOFFVec2i(it->first[0], it->first[0]-1);
       }
       actPos[1]=it->first[1];
       ++it;
     }
     if (actAttribute)
-      m_colToAttributeMap[actPos]=actAttribute;
+      m_colToAttributeMap[actPos]=std::move(actAttribute);
   }
   //! map col -> cell
   std::map<int, std::shared_ptr<Cell> > m_colToCellMap;
@@ -784,7 +784,7 @@ bool StarObjectSpreadsheet::parse()
       continue;
     }
     if (base=="StarCalcDocument") {
-      mainOle=ole;
+      mainOle=std::move(ole);
       mainName=name;
       continue;
     }
@@ -806,7 +806,7 @@ bool StarObjectSpreadsheet::parse()
     return false;
   }
   else
-    readCalcDocument(mainOle,mainName);
+    readCalcDocument(std::move(mainOle),mainName);
   return true;
 }
 
@@ -1386,7 +1386,7 @@ try
               f << "###model";
             }
             else
-              m_spreadsheetState->m_model=model;
+              m_spreadsheetState->m_model=std::move(model);
           }
           else
             input->seek(pos, librevenge::RVNG_SEEK_SET);
@@ -1720,7 +1720,7 @@ bool StarObjectSpreadsheet::readSfxStyleSheets(STOFFInputStreamPtr input, std::s
       f << (nId==0x4211 ? "pool" : "pool[edit]") << ",";
       auto pool=getNewItemPool(nId==0x4211 ? StarItemPool::T_SpreadsheetPool : StarItemPool::T_EditEnginePool);
       if (pool && pool->read(zone)) {
-        if (nId==0x4214 || !mainPool) mainPool=pool;
+        if (nId==0x4214 || !mainPool) mainPool=std::move(pool);
       }
       else {
         STOFF_DEBUG_MSG(("StarObjectSpreadsheet::readSfxStyleSheets: can not readPoolZone\n"));
@@ -2375,7 +2375,7 @@ bool StarObjectSpreadsheet::readSCData(StarZone &zone, StarObjectSpreadsheetInte
       }
       format.m_format=STOFFCell::F_TEXT;
       cell.m_content.m_contentType=STOFFCellContent::C_TEXT;
-      cell.m_textZone=textZone;
+      cell.m_textZone=std::move(textZone);
       break;
     }
     default:

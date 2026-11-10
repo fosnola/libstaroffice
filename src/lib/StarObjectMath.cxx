@@ -119,7 +119,7 @@ bool StarObjectMath::parse()
     else base = name.substr(pos+1);
     ole->setReadInverted(true);
     if (base=="StarMathDocument") {
-      readMathDocument(ole,name);
+      readMathDocument(std::move(ole),name);
       continue;
     }
     libstoff::DebugFile asciiFile(ole);

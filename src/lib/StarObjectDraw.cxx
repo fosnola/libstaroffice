@@ -109,7 +109,7 @@ bool StarObjectDraw::sendMasterPages(STOFFGraphicListenerPtr listener)
 {
   if (!m_drawState->m_model)
     return false;
-  return m_drawState->m_model->sendMasterPages(listener);
+  return m_drawState->m_model->sendMasterPages(std::move(listener));
 }
 
 bool StarObjectDraw::sendPages(STOFFGraphicListenerPtr listener)
@@ -165,7 +165,7 @@ bool StarObjectDraw::parse()
     if (base!="BasicManager2") {
       STOFF_DEBUG_MSG(("StarObjectDraw::parse: find unexpected ole %s\n", name.c_str()));
     }
-    libstoff::DebugFile asciiFile(ole);
+    libstoff::DebugFile asciiFile(std::move(ole));
     asciiFile.open(name);
 
     libstoff::DebugStream f;
@@ -180,7 +180,7 @@ bool StarObjectDraw::parse()
     return false;
   }
   else
-    readDrawDocument(mainOle,mainName);
+    readDrawDocument(std::move(mainOle),mainName);
 
   return true;
 }
@@ -213,7 +213,7 @@ try
     ascFile.addNote("Entries(SCDrawDocument):###");
     return false;
   }
-  m_drawState->m_model=model;
+  m_drawState->m_model=std::move(model);
 #if 0
   std::cerr << *model << "\n";
 #endif

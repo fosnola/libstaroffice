@@ -851,7 +851,7 @@ bool Redline::readListList(StarZone &zone, std::vector<std::vector<Redline> > &r
       input->seek(pos, librevenge::RVNG_SEEK_SET);
       break;
     }
-    redlineListList.push_back(redlineList);
+    redlineListList.push_back(std::move(redlineList));
   }
 
   zone.closeSWRecord(type, "StarRedline");
@@ -994,7 +994,7 @@ bool TOX::read(StarZone &zone, StarObject &object)
         f << "###format,";
         break;
       }
-      m_formatList.push_back(format);
+      m_formatList.push_back(std::move(format));
     }
   }
 

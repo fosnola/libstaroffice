@@ -573,13 +573,13 @@ std::shared_ptr<Node> Parser::expr() const
       if (!child || pos==actPos)
         throw "parser::expr: no child";
       if (!actTerm)
-        actTerm=child;
+        actTerm=std::move(child);
       else {
         if (actTerm->m_type!=Node::Sequence) {
           auto newTerm=std::make_shared<Node>(Node::Sequence);
           if (actTerm->m_type!=Node::Empty)
             newTerm->m_childs.push_back(actTerm);
-          actTerm=newTerm;
+          actTerm=std::move(newTerm);
         }
         if (child->m_type==Node::Sequence)
           actTerm->m_childs.insert(actTerm->m_childs.end(), child->m_childs.begin(), child->m_childs.end());
@@ -611,10 +611,10 @@ std::shared_ptr<Node> Parser::expr() const
     STOFF_DEBUG_MSG(("STOFFStarMathToMMLConverterInternal::parser::exp: must convert %s[%d] in string\n", data.m_string.c_str(), int(pos-1)));
     auto node=std::make_shared<Node>(Node::String, spaces);
     node->m_data=data.m_string;
-    actTerm->m_childs.push_back(node);
+    actTerm->m_childs.push_back(std::move(node));
   }
   if (actTerm)
-    root->m_childs.push_back(actTerm);
+    root->m_childs.push_back(std::move(actTerm));
   if (root->m_childs.empty())
     return std::make_shared<Node>(Node::Empty);
   if (root->m_childs.size()==1)
@@ -662,7 +662,7 @@ std::shared_ptr<Node> Parser::sequenceExpr(size_t &pos, bool newLineIsBad, int s
       if (!child)
         ok=false;
       else if (child->m_type!=Node::Empty)
-        seq->m_childs.push_back(child);
+        seq->m_childs.push_back(std::move(child));
     }
     catch (...) {
       ok=false;
@@ -704,7 +704,7 @@ std::shared_ptr<Node> Parser::relationExpr(size_t &pos) const
         if (term) {
           listTerm.push_back(term);
           listOp.push_back(data.m_string);
-          listSpaces.push_back(spaces);
+          listSpaces.push_back(std::move(spaces));
           continue;
         }
       }
@@ -722,7 +722,7 @@ std::shared_ptr<Node> Parser::relationExpr(size_t &pos) const
     newTerm->m_function=listOp[c-1];
     newTerm->m_childs.push_back(listTerm[c-1]);
     newTerm->m_childs.push_back(term);
-    term=newTerm;
+    term=std::move(newTerm);
   }
   return term;
 }
@@ -749,8 +749,8 @@ std::shared_ptr<Node> Parser::additionExpr(size_t &pos) const
           auto newTerm=std::make_shared<Node>(Node::Addition, spaces);
           newTerm->m_function=data.m_string;
           newTerm->m_childs.push_back(term);
-          newTerm->m_childs.push_back(newChild);
-          term=newTerm;
+          newTerm->m_childs.push_back(std::move(newChild));
+          term=std::move(newTerm);
           continue;
         }
       }
@@ -790,7 +790,7 @@ std::shared_ptr<Node> Parser::multiplicationExpr(size_t &position) const
           newTerm->m_function=cData.m_string;
           newTerm->m_childs.push_back(term);
           newTerm->m_childs.push_back(newChild);
-          term=newTerm;
+          term=std::move(newTerm);
           continue;
         }
       }
@@ -810,7 +810,7 @@ std::shared_ptr<Node> Parser::multiplicationExpr(size_t &position) const
             newTerm->m_function=cData.m_string;
             newTerm->m_data=oper;
             newTerm->m_childs.push_back(term);
-            newTerm->m_childs.push_back(newChild);
+            newTerm->m_childs.push_back(std::move(newChild));
             term=newTerm;
             continue;
           }
@@ -822,7 +822,7 @@ std::shared_ptr<Node> Parser::multiplicationExpr(size_t &position) const
     position=actPos;
     break;
   }
-  return rightParenthesisExpr(position,term);
+  return rightParenthesisExpr(position,std::move(term));
 }
 
 std::shared_ptr<Node> Parser::positionExpr(size_t &pos) const
@@ -885,7 +885,7 @@ std::shared_ptr<Node> Parser::positionExpr(size_t &pos) const
               seq=std::make_shared<Node>(Node::Sequence);
               seq->m_childs.push_back(newChild);
             }
-            seq->m_childs.push_back(sibling);
+            seq->m_childs.push_back(std::move(sibling));
             continue;
           }
           catch (...) {
@@ -893,9 +893,9 @@ std::shared_ptr<Node> Parser::positionExpr(size_t &pos) const
           break;
         }
         pos=cPos;
-        if (seq) newChild=seq;
+        if (seq) newChild=std::move(seq);
       }
-      nodes[id]=newChild;
+      nodes[id]=std::move(newChild);
       findSome=true;
       continue;
     }
@@ -908,7 +908,7 @@ std::shared_ptr<Node> Parser::positionExpr(size_t &pos) const
     return term;
   auto mainNode=std::make_shared<Node>(Node::Position);
   mainNode->m_childs.resize(numPositions+1);
-  mainNode->m_childs[0]=term;
+  mainNode->m_childs[0]=std::move(term);
   for (size_t i=0; i<numPositions; ++i)
     mainNode->m_childs[i+1]=nodes[i];
   return mainNode;
@@ -928,13 +928,13 @@ std::shared_ptr<Node> Parser::unaryOperatorExpr(size_t &pos, bool inPosition) co
     if (!term)
       throw "Parser::unaryOperatorExpr: no unary data";
     if (data.m_string=="-" && term->m_type==Node::Number && !term->m_data.empty() && term->m_data[0]!='-') {
-      term->m_spaces = spaces;
+      term->m_spaces = std::move(spaces);
       term->m_data.insert(0,1,'-');
       return term;
     }
     auto res=std::make_shared<Node>(Node::UnaryOperator, spaces);
     res->m_function=data.m_string;
-    res->m_childs.push_back(term);
+    res->m_childs.push_back(std::move(term));
     return res;
   }
   pos=actPos;
@@ -1059,7 +1059,7 @@ std::shared_ptr<Node> Parser::functionExpr(size_t &pos, bool inPosition) const
       break;
     }
     for (auto n : minMax)
-      funcNode->m_childs.push_back(n);
+      funcNode->m_childs.push_back(std::move(n));
   }
   else if (stackMatrixType) { // space case must be { data }
     ignoreSpaces(pos);
@@ -1073,7 +1073,7 @@ std::shared_ptr<Node> Parser::functionExpr(size_t &pos, bool inPosition) const
       while (pos+1<m_dataList.size()) {
         try {
           auto term=sequenceExpr(pos, false, stackMatrixType);
-          actNode->m_childs.push_back(term);
+          actNode->m_childs.push_back(std::move(term));
         }
         catch (...) {
         }
@@ -1093,7 +1093,7 @@ std::shared_ptr<Node> Parser::functionExpr(size_t &pos, bool inPosition) const
         break;
       }
       if (stackMatrixType==2)
-        funcNode->m_childs.push_back(actNode);
+        funcNode->m_childs.push_back(std::move(actNode));
       if (pos>=m_dataList.size() || m_dataList[pos].m_type!=LexerData::Special || m_dataList[pos].m_string!="}")
         ok=false;
       ++pos;
@@ -1106,7 +1106,7 @@ std::shared_ptr<Node> Parser::functionExpr(size_t &pos, bool inPosition) const
     try {
       auto newChild=type==Node::Accent ? unaryOperatorExpr(pos, inPosition) : relationExpr(pos);
       if (newChild) {
-        funcNode->m_childs.push_back(newChild);
+        funcNode->m_childs.push_back(std::move(newChild));
         continue;
       }
     }
@@ -1166,7 +1166,7 @@ std::shared_ptr<Node> Parser::parenthesisExpr(size_t &position) const
           if (newChild->m_type!=Node::Sequence) {
             auto newRoot=std::make_shared<Node>(Node::Sequence);
             newRoot->m_childs.push_back(newChild);
-            newChild=newRoot;
+            newChild=std::move(newRoot);
           }
           newChild->m_childs.push_back(std::make_shared<Node>(Node::Empty, spaces));
         }
@@ -1190,7 +1190,7 @@ std::shared_ptr<Node> Parser::parenthesisExpr(size_t &position) const
   auto term=elementExpr(position);
   if (!term)
     throw "Parser::parenthesisExpr: no data";
-  return rightParenthesisExpr(position, term);
+  return rightParenthesisExpr(position, std::move(term));
 }
 
 std::shared_ptr<Node> Parser::leftParenthesisExpr(size_t &pos, std::function<std::shared_ptr<Node>(size_t &)> function) const
@@ -1208,7 +1208,7 @@ std::shared_ptr<Node> Parser::leftParenthesisExpr(size_t &pos, std::function<std
       auto newChild=function(pos);
       if (newChild) {
         node->m_function=data.m_string.c_str()+1;
-        node->m_childs.push_back(newChild);
+        node->m_childs.push_back(std::move(newChild));
         return node;
       }
     }
@@ -1239,7 +1239,7 @@ std::shared_ptr<Node> Parser::rightParenthesisExpr(size_t &pos, std::shared_ptr<
       auto node=std::make_shared<Node>(Node::ParenthesisRight, spaces);
       node->m_function=data.m_string.c_str()+1;
       node->m_childs.push_back(term);
-      term=node;
+      term=std::move(node);
       continue;
     }
     pos=actPos;
@@ -1464,7 +1464,7 @@ bool Parser::convertInMML(Node const &node, bool addRow)
         STOFF_DEBUG_MSG(("STOFFStarMathToMMLConverterInternal::Parser::convertInMML: unknown font %s\n", node.m_data.c_str()));
         childDone=false;
       }
-      m_fontName=oldName;
+      m_fontName=std::move(oldName);
     }
     else if (icmp(node.m_function,"size")) {
       auto oldSize=m_fontSize;
@@ -2098,7 +2098,7 @@ bool Parser::convert(librevenge::RVNGString const &starMath, std::vector<LexerDa
           if (!std::isalpha(dataList[i].m_string[0])) // ()[]
             newData.m_type=LexerData::Special;
         }
-        lexList.push_back(newData);
+        lexList.push_back(std::move(newData));
         continue;
       }
     }

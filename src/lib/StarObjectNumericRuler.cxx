@@ -138,7 +138,7 @@ try
         m_numericRulerState->m_nameToListMap[list->m_name]=list;
         auto simpName=libstoff::simplifyString(list->m_name);
         if (m_numericRulerState->m_simplifyNameToListMap.find(simpName)==m_numericRulerState->m_simplifyNameToListMap.end())
-          m_numericRulerState->m_simplifyNameToListMap[simpName]=list;
+          m_numericRulerState->m_simplifyNameToListMap[simpName]=std::move(list);
       }
       break;
     }

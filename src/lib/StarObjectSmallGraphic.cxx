@@ -805,7 +805,7 @@ public:
   //! try to update the style
   void updateStyle(StarState &state, STOFFListenerPtr listener) const
   {
-    SdrGraphicRect::updateStyle(state, listener);
+    SdrGraphicRect::updateStyle(state, std::move(listener));
     if (m_circleItem && m_circleItem->m_attribute)
       m_circleItem->m_attribute->addTo(state);
   }
@@ -998,7 +998,7 @@ public:
   //! try to update the style
   void updateStyle(StarState &state, STOFFListenerPtr listener) const
   {
-    SdrGraphicRect::updateStyle(state, listener);
+    SdrGraphicRect::updateStyle(state, std::move(listener));
     if (m_graphItem && m_graphItem->m_attribute)
       m_graphItem->m_attribute->addTo(state);
   }
@@ -1089,7 +1089,7 @@ public:
   //! try to update the style
   void updateStyle(StarState &state, STOFFListenerPtr listener) const
   {
-    SdrGraphicText::updateStyle(state, listener);
+    SdrGraphicText::updateStyle(state, std::move(listener));
     if (m_measureItem && m_measureItem->m_attribute)
       m_measureItem->m_attribute->addTo(state);
   }
@@ -1159,7 +1159,7 @@ public:
       std::shared_ptr<StarObject> localObj;
       if (!dir || !StarFileManager::readOLEDirectory(m_oleParser, dir, localPicture, localObj) || localPicture.isEmpty()) {
         if (localObj) {
-          STOFFOLEParser::OleDirectoryInUse inUse(dir);
+          STOFFOLEParser::OleDirectoryInUse inUse(std::move(dir));
           auto chart=std::dynamic_pointer_cast<StarObjectChart>(localObj);
           if (chart && chart->send(listener, state.m_frame, state.m_graphic)) {
             if (m_graphic && !m_graphic->m_object.isEmpty()) {
@@ -1788,7 +1788,7 @@ bool StarObjectSmallGraphic::readSdrObject(StarZone &zone)
     graphic=readFmFormObject(zone, int(identifier));
   // to do magic=="E3D1" // E3dInventor
   if (graphic)
-    m_graphicState->m_graphic=graphic;
+    m_graphicState->m_graphic=std::move(graphic);
   else {
     STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSdrObject: can not read an object\n"));
     f << "###";
@@ -2037,7 +2037,7 @@ bool StarObjectSmallGraphic::readSVDRObjectAttrib(StarZone &zone, StarObjectSmal
       break;
     }
     if (item)
-      graphic.m_itemList.push_back(item);
+      graphic.m_itemList.push_back(std::move(item));
     if (vers<5 && i==3) break;
     if (vers<6 && i==4) break;
   }
@@ -2112,7 +2112,7 @@ bool StarObjectSmallGraphic::readSVDRObjectCaption(StarZone &zone, StarObjectSma
     if (!item || input->tell()>lastPos)
       f << "###";
     else
-      graphic.m_captionItem=item;
+      graphic.m_captionItem=std::move(item);
   }
   f << graphic;
   if (!ok) {
@@ -2156,7 +2156,7 @@ bool StarObjectSmallGraphic::readSVDRObjectCircle(StarZone &zone, StarObjectSmal
       f << "###";
     }
     else
-      graphic.m_circleItem=item;
+      graphic.m_circleItem=std::move(item);
   }
   zone.closeRecord("SVDR");
 
@@ -2436,7 +2436,7 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
         input->seek(endPictPos, librevenge::RVNG_SEEK_SET);
       }
       else
-        graphic.m_graphic=smallGraphic;
+        graphic.m_graphic=std::move(smallGraphic);
     }
     if (ok && vers>=6) {
       int dim[4];
@@ -2519,7 +2519,7 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
         f << "###";
       }
       else
-        graphic.m_graphItem=item;
+        graphic.m_graphItem=std::move(item);
     }
   }
   f << graphic;
@@ -2600,7 +2600,7 @@ bool StarObjectSmallGraphic::readSVDRObjectGroup(StarZone &zone, StarObjectSmall
       ok=false;
       break;
     }
-    graphic.m_child.push_back(child);
+    graphic.m_child.push_back(std::move(child));
   }
   if (ok && vers>=2) {
     graphic.m_groupDrehWink=int(input->readLong(4));
@@ -2658,7 +2658,7 @@ bool StarObjectSmallGraphic::readSVDRObjectMeasure(StarZone &zone, StarObjectSma
     f << "###";
   }
   else
-    graphic.m_measureItem=item;
+    graphic.m_measureItem=std::move(item);
   zone.closeRecord("SVDR");
 
   std::string extra=f.str();
@@ -2720,7 +2720,7 @@ bool StarObjectSmallGraphic::readSVDRObjectOLE(StarZone &zone, StarObjectSmallGr
         }
       }
       else
-        graphic.m_graphic=smallGraphic;
+        graphic.m_graphic=std::move(smallGraphic);
     }
   }
   if (input->tell()!=lastPos) {
@@ -2912,7 +2912,7 @@ bool StarObjectSmallGraphic::readSVDRObjectText(StarZone &zone, StarObjectSmallG
         f << "##paraObject";
       }
       else {
-        graphic.m_outlinerParaObject=paraObject;
+        graphic.m_outlinerParaObject=std::move(paraObject);
         pos=input->tell();
       }
     }
@@ -3092,7 +3092,7 @@ bool StarObjectSmallGraphic::readSDROutlinerParaObject(StarZone &zone, StarObjec
       }
       pos=input->tell();
       StarObjectSmallGraphicInternal::OutlinerParaObject::Zone paraZone;
-      paraZone.m_text=smallText;
+      paraZone.m_text=std::move(smallText);
       f << "sync=" << input->readULong(4) << ",";
       paraZone.m_depth=int(input->readULong(2));
       bool ok=true;
@@ -3142,7 +3142,7 @@ bool StarObjectSmallGraphic::readSDROutlinerParaObject(StarZone &zone, StarObjec
         ascFile.addNote(f.str().c_str());
         return false;
       }
-      object.m_zones.push_back(paraZone);
+      object.m_zones.push_back(std::move(paraZone));
       if (i+1!=N) f << "sync=" << input->readULong(4) << ",";
     }
     if (vers==3) {
@@ -3336,7 +3336,7 @@ bool StarObjectSmallGraphic::readSDRUserDataList(StarZone &zone, bool inRecord,
       STOFF_DEBUG_MSG(("StarObjectSmallGraphic::readSDRUserDataList: can not find a glue point\n"));
       break;
     }
-    dataList.push_back(data);
+    dataList.push_back(std::move(data));
   }
   if (inRecord) zone.closeRecord("SdrUserData");
   return true;
@@ -3412,7 +3412,7 @@ std::shared_ptr<StarObjectSmallGraphicInternal::SDRUserData> StarObjectSmallGrap
     auto group=std::make_shared<StarObjectSmallGraphicInternal::SdrGraphicGroup>(1);
     if (readSVDRObjectGroup(zone, *group)) {
       graphic = std::make_shared<StarObjectSmallGraphicInternal::SCHUGraphic>(identifier);
-      graphic->m_group=group;
+      graphic->m_group=std::move(group);
     }
     return graphic;
   }

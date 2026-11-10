@@ -171,7 +171,7 @@ void SDAParser::createDocument(librevenge::RVNGDrawingInterface *documentInterfa
   if (!m_state->m_mainGraphic || !m_state->m_mainGraphic->updatePageSpans(pageList, m_state->m_numPages)) {
     STOFFPageSpan ps(getPageSpan());
     ps.m_pageSpan=1;
-    pageList.push_back(ps);
+    pageList.push_back(std::move(ps));
     m_state->m_numPages = 1;
   }
   STOFFGraphicListenerPtr listen(new STOFFGraphicListener(getParserState()->m_listManager, pageList, documentInterface));
@@ -181,7 +181,7 @@ void SDAParser::createDocument(librevenge::RVNGDrawingInterface *documentInterfa
 
   listen->startDocument();
   if (m_state->m_mainGraphic)
-    m_state->m_mainGraphic->sendMasterPages(listen);
+    m_state->m_mainGraphic->sendMasterPages(std::move(listen));
 }
 
 void SDAParser::createDocument(librevenge::RVNGPresentationInterface *documentInterface)
@@ -192,7 +192,7 @@ void SDAParser::createDocument(librevenge::RVNGPresentationInterface *documentIn
   if (!m_state->m_mainGraphic || !m_state->m_mainGraphic->updatePageSpans(pageList, m_state->m_numPages)) {
     STOFFPageSpan ps(getPageSpan());
     ps.m_pageSpan=1;
-    pageList.push_back(ps);
+    pageList.push_back(std::move(ps));
     m_state->m_numPages = 1;
   }
   STOFFGraphicListenerPtr listen(new STOFFGraphicListener(getParserState()->m_listManager, pageList, documentInterface));
@@ -202,7 +202,7 @@ void SDAParser::createDocument(librevenge::RVNGPresentationInterface *documentIn
 
   listen->startDocument();
   if (m_state->m_mainGraphic)
-    m_state->m_mainGraphic->sendMasterPages(listen);
+    m_state->m_mainGraphic->sendMasterPages(std::move(listen));
 }
 
 ////////////////////////////////////////////////////////////
@@ -235,7 +235,7 @@ bool SDAParser::checkHeader(STOFFHeader *header, bool /*strict*/)
       return false;
     STOFFOLEParser oleParser;
     std::string clipName;
-    isPres=oleParser.getCompObjName(input, clipName) && clipName.substr(0,11)=="StarImpress";
+    isPres=oleParser.getCompObjName(std::move(input), clipName) && clipName.substr(0,11)=="StarImpress";
   }
   if (header) {
     header->reset(1, isPres ? STOFFDocument::STOFF_K_PRESENTATION : STOFFDocument::STOFF_K_DRAW);

@@ -345,7 +345,7 @@ bool Token::addToken(std::vector<std::vector<Token> > &stack, Token const &token
   }
   sep.m_instruction.m_content=")";
   if (!special)
-    child.push_back(sep);
+    child.push_back(std::move(sep));
   else if (special==2) {
     sep.m_instruction.m_content=";";
     child.push_back(sep);
@@ -353,7 +353,7 @@ bool Token::addToken(std::vector<std::vector<Token> > &stack, Token const &token
   else
     child.push_back(token);
   stack.resize(size_t(numElt-nChild+1));
-  stack[size_t(numElt-nChild)] = child;
+  stack[size_t(numElt-nChild)] = std::move(child);
 
   return true;
 }
@@ -411,7 +411,7 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCellContent &content, i
         break;
       }
       f << token;
-      tokenList.push_back(token);
+      tokenList.push_back(std::move(token));
     }
     f << ",";
   }
@@ -426,7 +426,7 @@ bool StarCellFormula::readSCFormula(StarZone &zone, STOFFCellContent &content, i
     STOFFCellContent::FormulaInstruction finalInstr;
     bool ignore;
     if (token.get(finalInstr,ignore) && !ignore)
-      content.m_formula.push_back(finalInstr);
+      content.m_formula.push_back(std::move(finalInstr));
     else if (token.m_type==StarCellFormulaInternal::Token::Index)
       hasIndex=true;
   }
@@ -551,7 +551,7 @@ bool StarCellFormula::readSCFormula3(StarZone &zone, STOFFCellContent &content, 
     STOFFCellContent::FormulaInstruction finalInstr;
     bool ignore;
     if (token.get(finalInstr,ignore) && !ignore)
-      content.m_formula.push_back(finalInstr);
+      content.m_formula.push_back(std::move(finalInstr));
     else if (token.m_type==StarCellFormulaInternal::Token::Index)
       hasIndex=true;
   }

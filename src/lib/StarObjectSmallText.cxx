@@ -337,8 +337,8 @@ bool StarObjectSmallText::read(StarZone &zone, long lastPos)
       else if (!text.empty())
         f << (j==0 ? "text" : "style") << "=" << libstoff::getString(text).cstr() << ",";
       if (j==0) {
-        para.m_text=text;
-        para.m_textSourcePosition=positions;
+        para.m_text=std::move(text);
+        para.m_textSourcePosition=std::move(positions);
       }
       else
         para.m_styleName=libstoff::getString(text);

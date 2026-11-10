@@ -144,7 +144,7 @@ void SDCParser::createDocument(librevenge::RVNGSpreadsheetInterface *documentInt
   if (!m_state->m_mainSpreadsheet || !m_state->m_mainSpreadsheet->updatePageSpans(pageList, m_state->m_numPages)) {
     STOFFPageSpan ps(getPageSpan());
     ps.m_pageSpan=1;
-    pageList.push_back(ps);
+    pageList.push_back(std::move(ps));
     m_state->m_numPages = 1;
   }
   //
@@ -162,7 +162,7 @@ bool SDCParser::sendSpreadsheet()
     STOFF_DEBUG_MSG(("SDCParser::sendSpreadsheet: can not find the main spreadsheet\n"));
     return false;
   }
-  return m_state->m_mainSpreadsheet->send(listener);
+  return m_state->m_mainSpreadsheet->send(std::move(listener));
 }
 
 ////////////////////////////////////////////////////////////

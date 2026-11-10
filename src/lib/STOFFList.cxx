@@ -316,7 +316,7 @@ std::shared_ptr<STOFFList> STOFFListManager::getNewList(std::shared_ptr<STOFFLis
     return copy;
   }
   m_listList.push_back(res);
-  return std::shared_ptr<STOFFList>(new STOFFList(res));
+  return std::shared_ptr<STOFFList>(new STOFFList(std::move(res)));
 }
 
 // vim: set filetype=cpp tabstop=2 shiftwidth=2 cindent autoindent smartindent noexpandtab:

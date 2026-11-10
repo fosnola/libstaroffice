@@ -297,7 +297,7 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
     if (listsByDir.find(dir)==listsByDir.end() || !listsByDir.find(dir)->second) {
       std::shared_ptr<STOFFOLEParser::OleDirectory> newDir(new STOFFOLEParser::OleDirectory(file, dir));
       listsByDir[dir]=newDir;
-      m_state->m_oleList.push_back(newDir);
+      m_state->m_oleList.push_back(std::move(newDir));
     }
     listsByDir.find(dir)->second->addNewBase(base);
   }
@@ -309,7 +309,7 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
         STOFF_DEBUG_MSG(("STOFFOLEParser::parse: error: can not find CompObj in directory: \"%s\"\n", dOle->m_dir.c_str()));
       }
       else
-        readCompObj(ole, *dOle);
+        readCompObj(std::move(ole), *dOle);
     }
     for (auto &content : dOle->m_contentList) {
       std::string base=content.getBaseName();
@@ -346,7 +346,7 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
       asciiFile.reset();
       if (ok) continue;
 
-      m_state->m_unknownOLEs.push_back(oleName);
+      m_state->m_unknownOLEs.push_back(std::move(oleName));
       if (base.compare(0,4,"Star")==0) {
         // times to update the
         if (base=="StarCalcDocument")
@@ -375,7 +375,7 @@ bool STOFFOLEParser::getCompObjName(STOFFInputStreamPtr file, std::string &progr
   auto ole = file->getSubStreamByName("/CompObj");
   if (!ole) return false;
   STOFFOLEParser::OleDirectory oleDir(file,"");
-  if (!readCompObj(ole, oleDir) || oleDir.m_clipName.empty()) return false;
+  if (!readCompObj(std::move(ole), oleDir) || oleDir.m_clipName.empty()) return false;
   programName=oleDir.m_clipName;
   return true;
 }

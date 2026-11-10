@@ -952,7 +952,7 @@ void StarItemPool::addSecondaryPool(std::shared_ptr<StarItemPool> secondary)
   if (m_state->m_secondaryPool)
     m_state->m_secondaryPool->addSecondaryPool(secondary);
   else
-    m_state->m_secondaryPool=secondary;
+    m_state->m_secondaryPool=std::move(secondary);
 }
 
 int StarItemPool::getVersion() const
@@ -1459,7 +1459,7 @@ bool StarItemPool::readV2(StarZone &zone, StarItemPool *master)
           ascii.addNote(f.str().c_str());
         }
         else {
-          values->m_default=attribute;
+          values->m_default=std::move(attribute);
           if (input->tell()!=mRecord.getLastContentPosition()) {
             STOFF_DEBUG_MSG(("StarItemPool::readV2: find extra attrib data\n"));
             ascii.addPos(pos);
@@ -1750,7 +1750,7 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool * /*master*/)
           ascii.addPos(pos);
           ascii.addNote(f.str().c_str());
           if (step==0)
-            values->m_idValueMap[i]=attribute;
+            values->m_idValueMap[i]=std::move(attribute);
           continue;
         }
 
