@@ -927,7 +927,6 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
       if (extraPool) {
         STOFF_DEBUG_MSG(("StarObjectText::readSfxStyleSheets: create extra pool of type %d\n", int(pool->getType())));
       }
-      if (!mainPool) mainPool=pool;
       extraPool=true;
       continue;
     }
@@ -936,7 +935,7 @@ bool StarObjectText::readSfxStyleSheets(STOFFInputStreamPtr input, std::string c
   }
   if (input->isEnd()) return true;
   long pos=input->tell();
-  if (!mainPool || !mainPool->readStyles(zone, *this)) {
+  if (!mainPool->readStyles(zone, *this)) {
     STOFF_DEBUG_MSG(("StarObjectText::readSfxStyleSheets: can not read a style pool\n"));
     input->seek(pos, librevenge::RVNG_SEEK_SET);
   }
