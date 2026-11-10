@@ -252,7 +252,7 @@ public:
       // and left right
       // and { }
     };
-    for (auto it : m_parenthesisMap)
+    for (auto const &it : m_parenthesisMap)
       m_parenthesisRightSet.insert(it.second);
     m_parenthesisToStringMap = {
       { "(", "("},
@@ -602,7 +602,7 @@ std::shared_ptr<Node> Parser::expr() const
         newTerm->m_childs.push_back(actTerm);
       actTerm=newTerm;
     }
-    auto data=m_dataList[pos++];
+    auto const &data=m_dataList[pos++];
     if (data.m_type!=LexerData::String && icmp(data.m_string, "newline")) {
       root->m_childs.push_back(actTerm);
       actTerm.reset();
@@ -630,7 +630,7 @@ std::shared_ptr<Node> Parser::sequenceExpr(size_t &pos, bool newLineIsBad, int s
     std::string spaces;
     ignoreSpaces(pos,spaces);
     if (pos>=m_dataList.size()) break;
-    auto data=m_dataList[pos];
+    auto const &data=m_dataList[pos];
     bool badString=false;
     if (data.m_type==LexerData::Unknown && icmp(data.m_string, "newline")) {
       if (newLineIsBad)
@@ -801,7 +801,7 @@ std::shared_ptr<Node> Parser::multiplicationExpr(size_t &position) const
       ++position;
       ignoreSpaces(position);
       if (position+1<=m_dataList.size() && !m_dataList[position].m_string.empty()) {
-        auto oper=m_dataList[position].m_string;
+        auto const &oper=m_dataList[position].m_string;
         try {
           ++position;
           auto newChild=positionExpr(position);
@@ -921,7 +921,7 @@ std::shared_ptr<Node> Parser::unaryOperatorExpr(size_t &pos, bool inPosition) co
   ignoreSpaces(pos, spaces);
   if (pos>=m_dataList.size())
     throw "Parser::unaryOperatorExpr: no data";
-  auto data=m_dataList[pos];
+  auto const &data=m_dataList[pos];
   if (data.m_type!=LexerData::String && m_unaryOperatorMap.find(toLower(data.m_string))!=m_unaryOperatorMap.end()) {
     ++pos;
     auto term=unaryOperatorExpr(pos, inPosition);
@@ -1015,7 +1015,7 @@ std::shared_ptr<Node> Parser::functionExpr(size_t &pos, bool inPosition) const
   }
   else if (specialAccent && ok) {
     if (icmp(data.m_string,"size")) {
-      auto actData=m_dataList[pos++];
+      auto const &actData=m_dataList[pos++];
       if (actData.m_type==LexerData::Number)
         funcNode->m_data=actData.m_string;
       else if (actData.m_type==LexerData::Special &&
@@ -1132,7 +1132,7 @@ std::shared_ptr<Node> Parser::parenthesisExpr(size_t &position) const
   ignoreSpaces(position, spaces);
   if (position>=m_dataList.size())
     throw "Parser::parenthesisExpr: no data";
-  auto data=m_dataList[position];
+  auto const &data=m_dataList[position];
   if (data.m_type!=LexerData::String &&
       (m_parenthesisMap.find(toLower(data.m_string))!=m_parenthesisMap.end() ||
        data.m_string=="{" || icmp(data.m_string,"left"))) {
@@ -1159,7 +1159,7 @@ std::shared_ptr<Node> Parser::parenthesisExpr(size_t &position) const
         ignoreSpaces(position, spaces);
         if (position>=m_dataList.size())
           throw "Parser::parenthesisExpr: can not find right parenthesis";
-        auto parData=m_dataList[position];
+        auto const &parData=m_dataList[position];
         if (parData.m_type==LexerData::String || !icmp(parData.m_string, node->m_data))
           throw "Parser::parenthesisExpr: unexpected parenthesis";
         if (!spaces.empty()) {
@@ -1662,7 +1662,7 @@ bool Parser::convertInMML(Node const &node, bool addRow)
     }
     convertInMML(*node.m_childs[0], true);
     if (m_multiplicationStringMap.find(toLower(node.m_function))!=m_multiplicationStringMap.end()) {
-      auto op=m_multiplicationStringMap.find(toLower(node.m_function))->second;
+      auto const &op=m_multiplicationStringMap.find(toLower(node.m_function))->second;
       if (!op.empty())
         m_output << "<mo stretchy=\"false\">" << m_multiplicationStringMap.find(toLower(node.m_function))->second << "</mo>";
       else if (icmp(op, "widebslah"))

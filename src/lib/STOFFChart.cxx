@@ -246,7 +246,7 @@ void STOFFChart::sendChart(STOFFSpreadsheetListenerPtr &listener, librevenge::RV
     interface->openChartTextObject(legend);
     interface->closeChartTextObject();
   }
-  for (auto textIt : m_textZoneMap) {
+  for (auto const &textIt : m_textZoneMap) {
     TextZone const &zone= textIt.second;
     if (!zone.valid()) continue;
     style=librevenge::RVNGPropertyList();

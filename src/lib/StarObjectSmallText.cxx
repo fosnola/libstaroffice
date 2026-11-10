@@ -120,7 +120,7 @@ bool Paragraph::send(STOFFListenerPtr &listener, StarState &mainState, StarState
   editState.m_paragraph=mainState.m_paragraph;
   if (level>=0) editState.m_paragraph.m_listLevelIndex=level;
   editState.m_font=mainState.m_font;
-  for (auto it : m_itemSet.m_whichToItemMap) {
+  for (auto const &it : m_itemSet.m_whichToItemMap) {
     if (!it.second || !it.second->m_attribute) continue;
     it.second->m_attribute->addTo(editState);
   }

@@ -635,7 +635,7 @@ bool StarTableInternal::Table::send(STOFFListenerPtr listener, StarState &state)
   table.m_propertyList.insert("librevenge:table-columns", columns);
   listener->openTable(table);
   int row=-1;
-  for (auto it : m_rowToBoxMap) {
+  for (auto const &it : m_rowToBoxMap) {
     while (++row<it.first) {
       listener->openTableRow(0, librevenge::RVNG_POINT);
       listener->closeTableRow();

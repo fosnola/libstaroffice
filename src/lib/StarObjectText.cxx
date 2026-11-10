@@ -373,7 +373,7 @@ void TextZone::inventoryPage(StarState &state) const
     if (state.m_global->m_pool && !m_styleName.empty()) { // checkme
       auto const *style=state.m_global->m_pool->findStyleWithFamily(m_styleName, StarItemStyle::F_Paragraph);
       if (style) {
-        for (auto it : style->m_itemSet.m_whichToItemMap) {
+        for (auto const &it : style->m_itemSet.m_whichToItemMap) {
           if (it.second && it.second->m_attribute)
             it.second->m_attribute->addTo(state);
         }
@@ -419,7 +419,7 @@ bool TextZone::send(STOFFListenerPtr &listener, StarState &state) const
           state.m_paragraph.m_outline=true;
           state.m_paragraph.m_listLevelIndex=style->m_outlineLevel+1;
         }
-        for (auto it : style->m_itemSet.m_whichToItemMap) {
+        for (auto const &it : style->m_itemSet.m_whichToItemMap) {
           if (it.second && it.second->m_attribute)
             it.second->m_attribute->addTo(state);
         }

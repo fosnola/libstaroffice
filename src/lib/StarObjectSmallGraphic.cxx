@@ -415,7 +415,7 @@ public:
         state.m_graphic.m_propertyList.insert("librevenge:parent-display-name", mStyle->m_names[0]);
       }
       else if (mStyle) {
-        for (auto it : mStyle->m_itemSet.m_whichToItemMap) {
+        for (auto const &it : mStyle->m_itemSet.m_whichToItemMap) {
           if (it.second && it.second->m_attribute)
             it.second->m_attribute->addTo(state);
         }

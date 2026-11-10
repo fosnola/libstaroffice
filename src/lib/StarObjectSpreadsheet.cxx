@@ -588,7 +588,7 @@ bool StarObjectSpreadsheet::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan
       state.m_global->m_page=STOFFPageSpan();
       state.m_global->m_page.m_pageSpan=nPages;
       if (style) {
-        for (auto it : style->m_itemSet.m_whichToItemMap) {
+        for (auto const &it : style->m_itemSet.m_whichToItemMap) {
           if (it.second && it.second->m_attribute)
             it.second->m_attribute->addTo(state);
         }
@@ -634,7 +634,7 @@ bool StarObjectSpreadsheet::send(STOFFSpreadsheetListenerPtr listener)
        the set corresponding to a position where the rows change
        excepted the last position */
     std::set<int> newRowSet;
-    for (auto it : sheet.m_rowToRowContentMap) {
+    for (auto const &it : sheet.m_rowToRowContentMap) {
       STOFFVec2i const &rows=it.first;
       newRowSet.insert(rows[0]);
       newRowSet.insert(rows[1]+1);

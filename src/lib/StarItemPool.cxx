@@ -2136,7 +2136,7 @@ void StarItemPool::updateStyles()
      from a bad encoded style name...
    */
   std::set<librevenge::RVNGString> dupplicatedSimpName;
-  for (auto it : m_state->m_styleIdToStyleMap) {
+  for (auto const &it : m_state->m_styleIdToStyleMap) {
     if (it.second.m_names[0].empty()) continue;
     auto simpName=libstoff::simplifyString(it.second.m_names[0]);
     if (it.second.m_names[0]==simpName || dupplicatedSimpName.find(simpName)!=dupplicatedSimpName.end()) continue;
@@ -2202,7 +2202,7 @@ void StarItemPool::defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVN
       state.m_graphic.m_propertyList.insert("librevenge:parent-display-name", style->m_names[1]);
     }
   }
-  for (auto it : style->m_itemSet.m_whichToItemMap) {
+  for (auto const &it : style->m_itemSet.m_whichToItemMap) {
     if (it.second && it.second->m_attribute)
       it.second->m_attribute->addTo(state);
   }
@@ -2240,7 +2240,7 @@ void StarItemPool::defineParagraphStyle(STOFFListenerPtr listener, librevenge::R
       state.m_paragraph.m_propertyList.insert("librevenge:parent-display-name", style->m_names[1]);
     }
   }
-  for (auto it : style->m_itemSet.m_whichToItemMap) {
+  for (auto const &it : style->m_itemSet.m_whichToItemMap) {
     if (it.second && it.second->m_attribute)
       it.second->m_attribute->addTo(state);
   }
@@ -2252,7 +2252,7 @@ void StarItemPool::updateUsingStyles(StarItemSet &itemSet) const
   auto const *style=findStyleWithFamily(itemSet.m_style, itemSet.m_family);
   if (!style) return;
   auto const &parentItemSet=style->m_itemSet;
-  for (auto it : parentItemSet.m_whichToItemMap) {
+  for (auto const &it : parentItemSet.m_whichToItemMap) {
     if (!it.second || itemSet.m_whichToItemMap.find(it.first)!=itemSet.m_whichToItemMap.end())
       continue;
     itemSet.m_whichToItemMap[it.first]=it.second;
