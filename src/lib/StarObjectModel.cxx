@@ -1032,7 +1032,7 @@ std::shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(Star
     f.str("");
     f << "SdrPageDef[masterPage]:";
     *input >> n;
-    if (pos+2+2*n>lastPos) {
+    if (n>(input->size()-input->tell())/2 || pos+2+2*n>lastPos) {
       STOFF_DEBUG_MSG(("StarObjectModel::readSdrPage: n is bad\n"));
       f << "###n=" << n << ",";
       ok=false;
@@ -1040,7 +1040,7 @@ std::shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(Star
     else {
       f << "pages=[";
       StarObjectModelInternal::Page::Descriptor desc;
-      for (int i=0; i<int(n); ++i) {
+      for (uint16_t i=0; i<n; ++i) {
         auto id=int(input->readULong(2));
         f << id << ",";
         desc.m_masterId=id;
