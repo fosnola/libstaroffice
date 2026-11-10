@@ -1728,8 +1728,15 @@ std::shared_ptr<SWFieldManagerInternal::Field> SWFieldManager::readField(StarZon
         iNet->m_target=libstoff::getString(name);
     }
     if (zone.isCompatibleWith(0x11,0x13)) {
-      auto nCnt=int(input->readULong(2));
-      for (int i=0; i<nCnt; ++i) {
+      auto nCnt=static_cast<uint16_t>(input->readULong(2));
+      // each entry holds two strings, of at least 2 bytes each
+      long maxPossibleEntries=(input->size()-input->tell())/4;
+      if (nCnt>maxPossibleEntries) {
+        STOFF_DEBUG_MSG(("SWFieldManager::readField: the number of libmac names seems bad\n"));
+        f << "###nCnt=" << nCnt << ",";
+        nCnt=static_cast<uint16_t>(maxPossibleEntries);
+      }
+      for (uint16_t i=0; i<nCnt; ++i) {
         if (input->tell()>lastPos) {
           STOFF_DEBUG_MSG(("SWFieldManager::readField: can not read a libmac name\n"));
           f << "###libname,";
