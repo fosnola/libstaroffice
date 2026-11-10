@@ -167,22 +167,23 @@ STOFFChart::Axis const &STOFFChart::getAxis(int coord) const
 
 STOFFChart::Serie *STOFFChart::getSerie(int id, bool create)
 {
-  if (m_serieMap.find(id)!=m_serieMap.end())
-    return &m_serieMap.find(id)->second;
+  auto it=m_serieMap.find(id);
+  if (it!=m_serieMap.end())
+    return &it->second;
   if (!create)
     return nullptr;
-  m_serieMap[id]=STOFFChart::Serie();
-  return &m_serieMap.find(id)->second;
+  return &m_serieMap[id];
 }
 
 STOFFChart::TextZone *STOFFChart::getTextZone(STOFFChart::TextZone::Type type, bool create)
 {
-  if (m_textZoneMap.find(type)!=m_textZoneMap.end())
-    return &m_textZoneMap.find(type)->second;
+  auto it=m_textZoneMap.find(type);
+  if (it!=m_textZoneMap.end())
+    return &it->second;
   if (!create)
     return nullptr;
-  m_textZoneMap.insert(std::map<TextZone::Type, TextZone>::value_type(type,STOFFChart::TextZone(type)));
-  return &m_textZoneMap.find(type)->second;
+  it=m_textZoneMap.insert(std::map<TextZone::Type, TextZone>::value_type(type,STOFFChart::TextZone(type))).first;
+  return &it->second;
 }
 
 void STOFFChart::sendTextZoneContent(STOFFChart::TextZone::Type type, STOFFListenerPtr &listener) const
