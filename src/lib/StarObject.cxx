@@ -205,7 +205,7 @@ bool StarObject::parse()
     }
     if (base=="persist elements") {
       content.setParsed(true);
-      readPersistElements(ole, name);
+      readPersistElements(std::move(ole), name);
       continue;
     }
     if (base=="SfxPreview") {
@@ -215,7 +215,7 @@ bool StarObject::parse()
     }
     if (base=="SfxDocumentInfo") {
       content.setParsed(true);
-      readSfxDocumentInformation(ole, name);
+      readSfxDocumentInformation(std::move(ole), name);
       continue;
     }
     libstoff::DebugFile asciiFile(ole);
@@ -223,9 +223,9 @@ bool StarObject::parse()
 
     bool ok=false;
     if (base=="SfxWindows")
-      ok=readSfxWindows(ole, asciiFile);
+      ok=readSfxWindows(std::move(ole), asciiFile);
     else if (base=="Star Framework Config File")
-      ok=readStarFrameworkConfigFile(ole, asciiFile);
+      ok=readStarFrameworkConfigFile(std::move(ole), asciiFile);
     content.setParsed(ok);
   }
 

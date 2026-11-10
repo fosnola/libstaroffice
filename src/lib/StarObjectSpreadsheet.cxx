@@ -780,7 +780,7 @@ bool StarObjectSpreadsheet::parse()
     else base = name.substr(pos+1);
     ole->setReadInverted(true);
     if (base=="SfxStyleSheets") {
-      readSfxStyleSheets(ole,name);
+      readSfxStyleSheets(std::move(ole),name);
       continue;
     }
     if (base=="StarCalcDocument") {
@@ -791,7 +791,7 @@ bool StarObjectSpreadsheet::parse()
     if (base!="BasicManager2") {
       STOFF_DEBUG_MSG(("StarObjectSpreadsheet::parse: find unexpected ole %s\n", name.c_str()));
     }
-    libstoff::DebugFile asciiFile(ole);
+    libstoff::DebugFile asciiFile(std::move(ole));
     asciiFile.open(name);
 
     libstoff::DebugStream f;
@@ -830,7 +830,7 @@ try
     */
     auto decodedInput=StarEncryption::decodeStream(input, StarEncryption::getMaskToDecodeStream(uint8_t(nId>>8), 0x42));
     if (decodedInput) {
-      input=decodedInput;
+      input=std::move(decodedInput);
       zone.setInput(input);
       input->seek(0, librevenge::RVNG_SEEK_SET);
       *input>>nId;

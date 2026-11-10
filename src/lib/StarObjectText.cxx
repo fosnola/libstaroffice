@@ -872,18 +872,18 @@ bool StarObjectText::parse()
       continue;
     }
     if (base=="SfxStyleSheets") {
-      readSfxStyleSheets(ole,name);
+      readSfxStyleSheets(std::move(ole),name);
       continue;
     }
     if (base=="StarWriterDocument") {
-      mainOle=ole;
+      mainOle=std::move(ole);
       mainName=name;
       continue;
     }
     if (base!="BasicManager2") {
       STOFF_DEBUG_MSG(("StarObjectText::parse: find unexpected ole %s\n", name.c_str()));
     }
-    libstoff::DebugFile asciiFile(ole);
+    libstoff::DebugFile asciiFile(std::move(ole));
     asciiFile.open(name);
 
     libstoff::DebugStream f;
@@ -1529,7 +1529,7 @@ bool StarObjectText::readSWTextZone(StarZone &zone, std::shared_ptr<StarObjectTe
       std::shared_ptr<StarFormatManagerInternal::FormatDef> format;
       done=getFormatManager()->readSWFormatDef(zone,'o', format, *this);
       if (done && format)
-        textZone->m_formatList.push_back(format);
+        textZone->m_formatList.push_back(std::move(format));
       break;
     }
     case 'v': {

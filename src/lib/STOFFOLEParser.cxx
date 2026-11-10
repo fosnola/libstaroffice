@@ -335,7 +335,7 @@ bool STOFFOLEParser::parse(STOFFInputStreamPtr file)
       try {
         if (readObjInfo(ole, base, asciiFile));
         else if (readOle(ole, base, asciiFile));
-        else if (readSummaryInformation(ole, base, asciiFile));
+        else if (readSummaryInformation(std::move(ole), base, asciiFile));
         else
           ok = false;
       }

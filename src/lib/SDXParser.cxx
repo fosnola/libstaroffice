@@ -175,19 +175,19 @@ bool SDXParser::createZones()
       else base = name.substr(pos+1);
       ole->setReadInverted(true);
       if (base=="SfxStyleSheets") {
-        object.readSfxStyleSheets(ole,name);
+        object.readSfxStyleSheets(std::move(ole),name);
         continue;
       }
 
       if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
         librevenge::RVNGBinaryData data;
-        fileManager.readImageDocument(ole,data,name);
+        fileManager.readImageDocument(std::move(ole),data,name);
         continue;
       }
       if (base.compare(0,3,"Pic")==0) {
         librevenge::RVNGBinaryData data;
         std::string type;
-        fileManager.readEmbeddedPicture(ole,data,type,name);
+        fileManager.readEmbeddedPicture(std::move(ole),data,type,name);
         continue;
       }
       // other
@@ -201,7 +201,7 @@ bool SDXParser::createZones()
 
       bool ok=false;
       if (base=="OutPlace Object")
-        ok=fileManager.readOutPlaceObject(ole, asciiFile);
+        ok=fileManager.readOutPlaceObject(std::move(ole), asciiFile);
       if (!ok) {
         libstoff::DebugStream f;
         if (base=="Standard") // can be Standard or STANDARD

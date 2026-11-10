@@ -2431,7 +2431,7 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
         }
         else {
           smallGraphic->m_object.add(data, "image/pct");
-          graphic.m_graphic=smallGraphic;
+          graphic.m_graphic=std::move(smallGraphic);
         }
         input->seek(endPictPos, librevenge::RVNG_SEEK_SET);
       }
@@ -2484,7 +2484,7 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
           input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
         }
         else
-          graphic.m_graphic=smallGraphic;
+          graphic.m_graphic=std::move(smallGraphic);
         pos=input->tell();
         f.str("");
         f << "SVDR[graph]:";
@@ -2716,7 +2716,7 @@ bool StarObjectSmallGraphic::readSVDRObjectOLE(StarZone &zone, StarObjectSmallGr
         }
         else {
           smallGraphic->m_object.add(data, "image/pct");
-          graphic.m_graphic=smallGraphic;
+          graphic.m_graphic=std::move(smallGraphic);
         }
       }
       else
@@ -3162,7 +3162,7 @@ bool StarObjectSmallGraphic::readSDROutlinerParaObject(StarZone &zone, StarObjec
       ascFile.addNote(f.str().c_str());
       return false;
     }
-    object.m_textZone=smallText;
+    object.m_textZone=std::move(smallText);
     pos=input->tell();
     f << "depth=[";
     for (long i=0; i<N; ++i) {

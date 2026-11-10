@@ -153,13 +153,13 @@ bool StarObjectDraw::parse()
         STOFF_DEBUG_MSG(("StarObjectDraw::parse: find unexpected second draw ole %s\n", name.c_str()));
       }
       else {
-        mainOle=ole;
+        mainOle=std::move(ole);
         mainName=name;
         continue;
       }
     }
     if (base=="SfxStyleSheets") {
-      readSfxStyleSheets(ole,name);
+      readSfxStyleSheets(std::move(ole),name);
       continue;
     }
     if (base!="BasicManager2") {
@@ -203,7 +203,7 @@ try
       STOFF_DEBUG_MSG(("StarObjectDraw::readDrawDocument: decryption failed\n"));
       return false;
     }
-    input=decodedInput;
+    input=std::move(decodedInput);
     zone.setInput(input);
   }
   input->seek(0, librevenge::RVNG_SEEK_SET);

@@ -370,7 +370,7 @@ bool StarObjectModel::updatePageSpans(std::vector<STOFFPageSpan> &pageSpan, int 
       return false;
     STOFFPageSpan ps;
     m_modelState->m_pageList[0]->updatePageSpan(ps, relUnit);
-    pageSpan.push_back(ps);
+    pageSpan.push_back(std::move(ps));
     return true;
   }
   auto numMasterPage=int(m_modelState->m_masterPageList.size());
@@ -730,7 +730,7 @@ bool StarObjectModel::read(StarZone &zone)
       auto page=readSdrPage(zone);
       if (page) {
         if (magic=="DrPg")
-          m_modelState->m_pageList.push_back(page);
+          m_modelState->m_pageList.push_back(std::move(page));
         else
           m_modelState->m_masterPageList.push_back(std::move(page));
         continue;
@@ -1058,7 +1058,7 @@ std::shared_ptr<StarObjectModelInternal::Page> StarObjectModel::readSdrPage(Star
       break;
     std::shared_ptr<StarObjectSmallGraphic> smallGraphic(new StarObjectSmallGraphic(*this, true));
     if (smallGraphic->readSdrObject(zone)) {
-      page->m_objectList.push_back(smallGraphic);
+      page->m_objectList.push_back(std::move(smallGraphic));
       continue;
     }
 

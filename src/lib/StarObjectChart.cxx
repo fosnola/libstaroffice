@@ -179,7 +179,7 @@ bool StarObjectChart::parse()
     else base = name.substr(pos+1);
     ole->setReadInverted(true);
     if (base=="SfxStyleSheets") {
-      readSfxStyleSheets(ole,name);
+      readSfxStyleSheets(std::move(ole),name);
       continue;
     }
     if (base=="StarChartDocument") {
@@ -189,7 +189,7 @@ bool StarObjectChart::parse()
     if (base!="BasicManager2") {
       STOFF_DEBUG_MSG(("StarObjectChart::parse: find unexpected ole %s\n", name.c_str()));
     }
-    libstoff::DebugFile asciiFile(ole);
+    libstoff::DebugFile asciiFile(std::move(ole));
     asciiFile.open(name);
 
     libstoff::DebugStream f;

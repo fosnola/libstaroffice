@@ -122,7 +122,7 @@ bool StarObjectMath::parse()
       readMathDocument(std::move(ole),name);
       continue;
     }
-    libstoff::DebugFile asciiFile(ole);
+    libstoff::DebugFile asciiFile(std::move(ole));
     asciiFile.open(name);
 
     libstoff::DebugStream f;

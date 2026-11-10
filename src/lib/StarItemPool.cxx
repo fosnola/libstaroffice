@@ -950,7 +950,7 @@ void StarItemPool::addSecondaryPool(std::shared_ptr<StarItemPool> secondary)
   }
   secondary->m_state->m_isSecondaryPool=true;
   if (m_state->m_secondaryPool)
-    m_state->m_secondaryPool->addSecondaryPool(secondary);
+    m_state->m_secondaryPool->addSecondaryPool(std::move(secondary));
   else
     m_state->m_secondaryPool=std::move(secondary);
 }
@@ -1765,9 +1765,9 @@ bool StarItemPool::readV1(StarZone &zone, StarItemPool * /*master*/)
             f << "###";
         }
         if (step==0)
-          values->m_idValueMap[i]=attribute;
+          values->m_idValueMap[i]=std::move(attribute);
         else
-          values->m_default=attribute;
+          values->m_default=std::move(attribute);
         if (input->tell()!=debAttPos+long(sizeAttr[n])) {
           STOFF_DEBUG_MSG(("StarItemPool::readV1: find extra attrib data\n"));
           f << "###extra,";

@@ -1321,7 +1321,7 @@ void STOFFGraphicListener::insertTextBox
     m_drawingInterface->startTextObject(propList);
   else
     m_presentationInterface->startTextObject(propList);
-  handleSubDocument(subDocument, libstoff::DOC_TEXT_BOX);
+  handleSubDocument(std::move(subDocument), libstoff::DOC_TEXT_BOX);
   if (m_drawingInterface)
     m_drawingInterface->endTextObject();
   else

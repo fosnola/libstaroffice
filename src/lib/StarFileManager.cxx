@@ -348,7 +348,7 @@ bool StarFileManager::readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser
       if (!spreadsheet.updatePageSpans(pageList, numPages)) {
         STOFFPageSpan ps;
         ps.m_pageSpan=1;
-        pageList.push_back(ps);
+        pageList.push_back(std::move(ps));
       }
       STOFFListManagerPtr listManager;
       STOFFSpreadsheetListenerPtr spreadsheetListener(new STOFFSpreadsheetListener(listManager, pageList, &spreadsheetEncoder));
@@ -386,20 +386,20 @@ bool StarFileManager::readOLEDirectory(std::shared_ptr<STOFFOLEParser> oleParser
         base = name.substr(pos+1);
       stream->setReadInverted(true);
       if (base=="SfxStyleSheets") {
-        object.readSfxStyleSheets(stream,name);
+        object.readSfxStyleSheets(std::move(stream),name);
         continue;
       }
 
       if (base=="StarImageDocument" || base=="StarImageDocument 4.0") {
         librevenge::RVNGBinaryData data;
-        if (readImageDocument(stream,data,name) && !data.empty())
+        if (readImageDocument(std::move(stream),data,name) && !data.empty())
           image.add(data);
         continue;
       }
       // other
       if (base=="Ole-Object") {
         librevenge::RVNGBinaryData data;
-        if (readOleObject(stream,data,name))
+        if (readOleObject(std::move(stream),data,name))
           image.add(data,"object/ole");
         continue;
       }
@@ -485,7 +485,7 @@ void StarFileManager::checkUnparsed(STOFFInputStreamPtr input, std::shared_ptr<S
       else base = name.substr(pos+1);
       ole->setReadInverted(true);
       if (base=="SfxStyleSheets") {
-        object.readSfxStyleSheets(ole,name);
+        object.readSfxStyleSheets(std::move(ole),name);
         continue;
       }
 
@@ -497,13 +497,13 @@ void StarFileManager::checkUnparsed(STOFFInputStreamPtr input, std::shared_ptr<S
       if (base.compare(0,3,"Pic")==0) {
         librevenge::RVNGBinaryData data;
         std::string type;
-        readEmbeddedPicture(ole,data,type,name);
+        readEmbeddedPicture(std::move(ole),data,type,name);
         continue;
       }
       // other
       if (base=="Ole-Object") {
         librevenge::RVNGBinaryData data;
-        readOleObject(ole,data,name);
+        readOleObject(std::move(ole),data,name);
         continue;
       }
       libstoff::DebugFile asciiFile(ole);
@@ -511,7 +511,7 @@ void StarFileManager::checkUnparsed(STOFFInputStreamPtr input, std::shared_ptr<S
 
       bool ok=false;
       if (base=="OutPlace Object")
-        ok=readOutPlaceObject(ole, asciiFile);
+        ok=readOutPlaceObject(std::move(ole), asciiFile);
       if (!ok) {
         libstoff::DebugStream f;
         if (base=="Standard") // can be Standard or STANDARD

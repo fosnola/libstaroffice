@@ -584,7 +584,7 @@ std::shared_ptr<Node> Parser::expr() const
         if (child->m_type==Node::Sequence)
           actTerm->m_childs.insert(actTerm->m_childs.end(), child->m_childs.begin(), child->m_childs.end());
         else
-          actTerm->m_childs.push_back(child);
+          actTerm->m_childs.push_back(std::move(child));
       }
     }
     catch (...) {
@@ -600,7 +600,7 @@ std::shared_ptr<Node> Parser::expr() const
       auto newTerm=std::make_shared<Node>(Node::Sequence, spaces);
       if (actTerm->m_type!=Node::Empty)
         newTerm->m_childs.push_back(actTerm);
-      actTerm=newTerm;
+      actTerm=std::move(newTerm);
     }
     auto const &data=m_dataList[pos++];
     if (data.m_type!=LexerData::String && icmp(data.m_string, "newline")) {
@@ -652,7 +652,7 @@ std::shared_ptr<Node> Parser::sequenceExpr(size_t &pos, bool newLineIsBad, int s
       ++pos;
       auto child=std::make_shared<Node>(Node::String, spaces);
       child->m_data=data.m_string;
-      seq->m_childs.push_back(child);
+      seq->m_childs.push_back(std::move(child));
       continue;
     }
     bool ok=true;
@@ -789,7 +789,7 @@ std::shared_ptr<Node> Parser::multiplicationExpr(size_t &position) const
           auto newTerm=std::make_shared<Node>(Node::Multiplication, spaces);
           newTerm->m_function=cData.m_string;
           newTerm->m_childs.push_back(term);
-          newTerm->m_childs.push_back(newChild);
+          newTerm->m_childs.push_back(std::move(newChild));
           term=std::move(newTerm);
           continue;
         }
@@ -811,7 +811,7 @@ std::shared_ptr<Node> Parser::multiplicationExpr(size_t &position) const
             newTerm->m_data=oper;
             newTerm->m_childs.push_back(term);
             newTerm->m_childs.push_back(std::move(newChild));
-            term=newTerm;
+            term=std::move(newTerm);
             continue;
           }
         }
@@ -1049,7 +1049,7 @@ std::shared_ptr<Node> Parser::functionExpr(size_t &pos, bool inPosition) const
         ++pos;
         auto newChild=relationExpr(pos);
         if (newChild) {
-          minMax[isMin ? 0 : 1]=newChild;
+          minMax[isMin ? 0 : 1]=std::move(newChild);
           continue;
         }
       }
@@ -2081,7 +2081,7 @@ bool Parser::convert(librevenge::RVNGString const &starMath, std::vector<LexerDa
          m_specialPercentMap.find(toLower(dataList[i+1].m_string))!=m_specialPercentMap.end())) { // other caracter
       LexerData newData;
       newData.m_string=actData.m_string+dataList[++i].m_string;
-      lexList.push_back(newData);
+      lexList.push_back(std::move(newData));
       continue;
     }
     if (actData.m_string=="\\" && dataList[i+1].m_type!=LexerData::String) {
