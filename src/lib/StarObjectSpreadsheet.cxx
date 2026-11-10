@@ -828,8 +828,9 @@ try
        TODO: we must also check if the user has given a password and
        if the user mask does correspond to the real mask.
     */
-    input=StarEncryption::decodeStream(input, StarEncryption::getMaskToDecodeStream(uint8_t(nId>>8), 0x42));
-    if (input) {
+    auto decodedInput=StarEncryption::decodeStream(input, StarEncryption::getMaskToDecodeStream(uint8_t(nId>>8), 0x42));
+    if (decodedInput) {
+      input=decodedInput;
       zone.setInput(input);
       input->seek(0, librevenge::RVNG_SEEK_SET);
       *input>>nId;
