@@ -1133,13 +1133,13 @@ std::shared_ptr<Node> Parser::parenthesisExpr(size_t &position) const
   if (position>=m_dataList.size())
     throw "Parser::parenthesisExpr: no data";
   auto const &data=m_dataList[position];
+  auto parenthesisIt=m_parenthesisMap.find(toLower(data.m_string));
+  bool leftRight=icmp(data.m_string,"left");
   if (data.m_type!=LexerData::String &&
-      (m_parenthesisMap.find(toLower(data.m_string))!=m_parenthesisMap.end() ||
-       data.m_string=="{" || icmp(data.m_string,"left"))) {
+      (parenthesisIt!=m_parenthesisMap.end() || data.m_string=="{" || leftRight)) {
     ++position;
     try {
       auto node=std::make_shared<Node>(Node::Parenthesis, spaces);
-      bool leftRight=icmp(data.m_string,"left");
       node->m_function=data.m_string;
       if (leftRight) {
         ignoreSpaces(position);
@@ -1151,7 +1151,7 @@ std::shared_ptr<Node> Parser::parenthesisExpr(size_t &position) const
       else if (data.m_string=="{")
         node->m_data="}";
       else
-        node->m_data=m_parenthesisMap.find(toLower(data.m_string))->second;
+        node->m_data=parenthesisIt->second;
 
       auto newChild=sequenceExpr(position);
       if (newChild) {
