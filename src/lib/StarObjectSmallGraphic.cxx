@@ -2483,7 +2483,7 @@ bool StarObjectSmallGraphic::readSVDRObjectGraph(StarZone &zone, StarObjectSmall
           ascFile.addNote("SVDR[graph]:##graphic");
           input->seek(zone.getRecordLastPosition(), librevenge::RVNG_SEEK_SET);
         }
-        else if (smallGraphic)
+        else
           graphic.m_graphic=smallGraphic;
         pos=input->tell();
         f.str("");
