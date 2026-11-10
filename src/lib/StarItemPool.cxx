@@ -1897,7 +1897,13 @@ bool StarItemPool::readStyles(StarZone &zone, StarObject &doc)
     nCount=mRecord.getNumRecords();
   }
   long lastPos=zone.getRecordLevel() ? zone.getRecordLastPosition() : input->size();
-  for (int i=0; ok && i<int(nCount); ++i) {
+  // each style holds at least three strings, of at least 2 bytes each
+  long maxPossibleStyles=(input->size()-input->tell())/6;
+  if (nCount>maxPossibleStyles) {
+    STOFF_DEBUG_MSG(("StarItemPool::readStyles: the number of styles seems bad\n"));
+    nCount=static_cast<uint16_t>(maxPossibleStyles);
+  }
+  for (uint16_t i=0; ok && i<nCount; ++i) {
     pos=input->tell();
     if (poolVersion==2) {
       int id=0;
