@@ -2179,12 +2179,12 @@ void StarItemPool::defineGraphicStyle(STOFFListenerPtr listener, librevenge::RVN
   if (styleName.empty() || done.find(styleName)!=done.end())
     return;
   done.insert(styleName);
-  if (listener->isGraphicStyleDefined(styleName))
-    return;
   if (!listener) {
     STOFF_DEBUG_MSG(("StarItemPool::defineGraphicStyle: can not find the listener"));
     return;
   }
+  if (listener->isGraphicStyleDefined(styleName))
+    return;
   auto const *style=findStyleWithFamily(styleName, StarItemStyle::F_Paragraph);
   if (!style) {
     STOFF_DEBUG_MSG(("StarItemPool::defineGraphicStyle: can not find graphic style with name %s", styleName.cstr()));
@@ -2214,12 +2214,12 @@ void StarItemPool::defineParagraphStyle(STOFFListenerPtr listener, librevenge::R
   if (styleName.empty() || done.find(styleName)!=done.end())
     return;
   done.insert(styleName);
-  if (listener->isParagraphStyleDefined(styleName))
-    return;
   if (!listener) {
     STOFF_DEBUG_MSG(("StarItemPool::defineParagraphStyle: can not find the listener"));
     return;
   }
+  if (listener->isParagraphStyleDefined(styleName))
+    return;
   auto const *style=findStyleWithFamily(styleName, StarItemStyle::F_Paragraph);
   if (!style) {
     STOFF_DEBUG_MSG(("StarItemPool::defineParagraphStyle: can not find paragraph style with name %s", styleName.cstr()));
