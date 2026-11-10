@@ -145,7 +145,7 @@ class STOFFPropertyHandlerDecoder
 {
 public:
   //! constructor given a STOFFPropertyHandler
-  explicit STOFFPropertyHandlerDecoder(STOFFPropertyHandler *hdl=nullptr):m_handler(hdl) {}
+  explicit STOFFPropertyHandlerDecoder(STOFFPropertyHandler *hdl=nullptr):m_handler(hdl), m_dataSize(0) {}
 
   //! tries to read the data
   bool readData(librevenge::RVNGBinaryData const &encoded)
@@ -153,6 +153,7 @@ public:
     try {
       auto *inp = const_cast<librevenge::RVNGInputStream *>(encoded.getDataStream());
       if (!inp) return false;
+      m_dataSize = long(encoded.size());
 
       while (!inp->isEnd()) {
         unsigned const char *c;
@@ -241,7 +242,8 @@ protected:
     long numElt;
     if (!readLong(input, numElt)) return false;
 
-    if (numElt < 0) {
+    // each property list starts with its 4 byte count
+    if (numElt < 0 || numElt > (m_dataSize-input.tell())/4) {
       STOFF_DEBUG_MSG(("STOFFPropertyHandlerDecoder::readPropertyListVector: can not read numElt=%ld\n",
                        numElt));
       return false;
@@ -264,7 +266,8 @@ protected:
     long numElt;
     if (!readLong(input, numElt)) return false;
 
-    if (numElt < 0) {
+    // each child starts with its 1 byte type
+    if (numElt < 0 || numElt > m_dataSize-input.tell()) {
       STOFF_DEBUG_MSG(("STOFFPropertyHandlerDecoder::readPropertyList: can not read numElt=%ld\n",
                        numElt));
       return false;
@@ -349,6 +352,8 @@ private:
 protected:
   //! the streamfile
   STOFFPropertyHandler *m_handler;
+  //! the size of the encoded data
+  long m_dataSize;
 };
 
 ////////////////////////////////////////////////////
